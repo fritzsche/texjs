@@ -1,5 +1,6 @@
 import createModule from './pdftex.js'
 import { ROOT_HASH  } from './objects/root.js'
+import { IndexDBCache  } from './cache.js'
 
 const FileObjects = {}
 
@@ -8,11 +9,13 @@ const Module = {
     thisProgram: '/pdflatex',
     //thisProgram: '/pdftex',    
 
-    preRun: [() => {
+    preRun: [async () => {
         console.log("Initialize the filesystem...")
         const FS = Module.FS
 
         const TEXFS = Module.TEXFS
+
+      //  await IndexDBCache.loadFileObjectsFromIndexedDB(FileObjects)
 
         FS.chdir('/')
 //        FS.mkdir("/working")
@@ -48,14 +51,14 @@ const Module = {
         ENV.TEXMFSYSCONFIG = '/texlive/texmf-config'
         ENV.TEXMFVAR = '/texlive/texmf-var'
         
-        console.log("preRun: Dateisystem ist bereit.")
+        console.log("preRun: Setup Ready.")
 
 
 
     }], 
 }
 
-
+await IndexDBCache.loadFileObjectsFromIndexedDB(FileObjects)
 // 2. Die Factory-Funktion aufrufen und das Promise verarbeiten
 createModule(Module).then((instance) => {
     console.log("Modul-Instanz ready.")
@@ -82,6 +85,7 @@ self.onmessage = function(event) {
             console.log(`TeX-Datei '${fileName}' im VFS gespeichert. Starte pdflatex...`);
             const args = [fileName];
             Module.callMain(args);
+            IndexDBCache.storeFileObjectsInIndexedDB(FileObjects)
             sendToMain(pdfFileName)            
         } catch (e) {
             console.error('Fehler während der pdflatex-Ausführung im Worker:', e);
