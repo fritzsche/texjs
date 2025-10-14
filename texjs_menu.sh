@@ -38,7 +38,7 @@ main_menu() {
       1 "Check Build Requirements" \
       2 "Download TeXLive source" \
       3 "Compile TeXLive for emscripten" \
-      4 "Run Full TeX Live Install (Step 2)" \
+      4 "Install TeXLive and generate object" \
       5 "Exit Installer" \
       2>&1 >/dev/tty)
       
@@ -60,7 +60,7 @@ main_menu() {
         perform_action action_compile 'Compile TeXLive'
         ;;
       4)
-        run_install_step "run_install"
+        perform_action action_install 'Install TeXLive'
         ;;
       5)
         dialog --msgbox "Exiting Installer. Goodbye!" 5 40
