@@ -1,7 +1,10 @@
-TEXLIVE_INST_MIRROR='https://mirror.ctan.org/'
+
 
 # Base path is the path of the build.sh script
 BASE_PATH="$(cd "$(dirname "$0")" && pwd -P)"
+
+
+TEXLIVE_INST_MIRROR='https://mirror.ctan.org/'
 
 INSTALL_SUB="install"
 INSTALL_PATH="${BASE_PATH%/}/${INSTALL_SUB#}"
@@ -105,6 +108,7 @@ cd ${INSTALL_PATH}
 
 check_command_and_exit "node"
 node ../tl_objects 
+
 
 cd ${BASE_PATH}
 
