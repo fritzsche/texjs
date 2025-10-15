@@ -23,7 +23,10 @@ execute_action() {
         ;;  
         install) 
             action_install
-        ;;                          
+        ;; 
+        objects) 
+            action_objects
+        ;;                                  
         clean) 
             action_clean
         ;;              

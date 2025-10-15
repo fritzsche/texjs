@@ -30,7 +30,7 @@ var TEXFS = {
         }
 
         // 2. CACHE MISS: Start synchronous HTTP request
-        const url = `/objects/${hash}`; 
+        const url = `objects/${hash}`; 
         if (TEXFS.debug) console.log(`[TEXFS HTTP] Starting synchronous fetch for ${type} object: ${url}`);
         
         const request = new XMLHttpRequest();
