@@ -21,16 +21,18 @@ const MAX_BLOB_SIZE_BYTES = MAX_BLOB_SIZE_MB * 1024 * 1024;
  * Writes a buffer as an uncompressed file to the target directory.
  * The file name is the SHA-1 hash of the content.
  * @param {Buffer} content - The content to be stored.
- * @returns {Promise<string>} - The 40-character SHA-1 hash of the content.
+ * @returns {Promise<string|null>} - The 40-character SHA-1 hash of the content, or null if skipped.
  */
 async function writeObject(content) {
     const contentSize = content.length;
 
-    // --- Core Size Check (New Logic) ---
+    // --- Core Size Check (Modified Logic) ---
     if (contentSize > MAX_BLOB_SIZE_BYTES) {
         const sizeMB = (contentSize / (1024 * 1024)).toFixed(2);
         const limitMB = MAX_BLOB_SIZE_MB;
-        throw new Error(`FATAL: Blob size (${sizeMB} MB) exceeds the maximum allowed limit of ${limitMB} MB. Object write aborted.`);
+        // Log a warning and return null to signal the skip
+        console.warn(`WARNING: Object size (${sizeMB} MB) exceeds the maximum allowed limit of ${limitMB} MB. Object write skipped.`);
+        return null;
     }
 
     // 1. Calculate SHA-1 Hash (Hash is based on the content)
@@ -71,15 +73,19 @@ export const ROOT_HASH = '${rootHash}';
  * Processes a single file as a "Blob."
  * Content is the raw file data (no Git header), stored uncompressed as <hash>.
  * @param {string} filePath - The full path to the file.
- * @returns {Promise<object>} - Blob metadata.
+ * @returns {Promise<object|null>} - Blob metadata, or null if the blob was skipped.
  */
 async function processBlob(filePath) {
     const data = await fs.readFile(filePath)
     const stat = await fs.stat(filePath)
 
     // 1. Write Blob data (data is the pure file content)
-    // This is where the size limit check now happens inside writeObject.
     const hash = await writeObject(data)
+
+    // NEW CHECK: If writeObject returned null, return null to signal processTree to skip this entry
+    if (!hash) {
+        return null;
+    }
 
     // ADDED: Output message for each blob generated
     console.log(`Generated Blob: ${hash} from ${path.basename(filePath)}`)
@@ -98,7 +104,7 @@ async function processBlob(filePath) {
  * Recursively processes a directory as a "Tree."
  * Content is a JSON array of metadata, stored uncompressed as <hash>.
  * @param {string} dirPath - The full path to the directory.
- * @returns {Promise<string>} - The SHA-1 hash of the generated Tree JSON.
+ * @returns {Promise<string|null>} - The SHA-1 hash of the generated Tree JSON, or null if the tree itself was skipped.
  */
 async function processTree(dirPath) {
     const entries = await fs.readdir(dirPath, { withFileTypes: true })
@@ -109,13 +115,18 @@ async function processTree(dirPath) {
         if (entry.name === '.git' || entry.name.startsWith('.') || entry.name === TARGET_DIR.replace('./', '')) continue
 
         const fullPath = path.join(dirPath, entry.name)
-        let objectInfo
+        let objectInfo = null // Initialize to null
 
         if (entry.isDirectory()) {
             // Recursive call for subdirectory
             const treeHash = await processTree(fullPath)
-            const stat = await fs.stat(fullPath)
+            
+            // NEW CHECK: Skip the subdirectory if its resulting tree object was too large
+            if (!treeHash) {
+                continue;
+            }
 
+            const stat = await fs.stat(fullPath)
             objectInfo = {
                 hash: treeHash,
                 mode: stat.mode.toString(8),
@@ -123,14 +134,17 @@ async function processTree(dirPath) {
                 name: entry.name
             }
         } else if (entry.isFile()) {
-            // Process file as Blob
+            // Process file as Blob. Returns null if oversized.
             objectInfo = await processBlob(fullPath)
         } else {
             // Ignore other types
             continue
         }
 
-        treeEntries.push(objectInfo)
+        // MODIFIED: Only push to treeEntries if objectInfo is not null (i.e., not a skipped large blob or tree)
+        if (objectInfo) {
+            treeEntries.push(objectInfo)
+        }
     }
 
     // Sort by name for consistency
@@ -142,6 +156,11 @@ async function processTree(dirPath) {
 
     // 2. Write Tree JSON and retrieve hash (as <hash>)
     const treeHash = await writeObject(contentBuffer)
+    
+    // NEW CHECK: If the Tree object itself was too large, return null to the caller.
+    if (!treeHash) {
+        return null;
+    }
 
     console.log(`Generated Tree: ${treeHash} for directory ${dirPath}`)
     return treeHash
@@ -160,17 +179,22 @@ async function main() {
         await fs.mkdir(TARGET_DIR, { recursive: true })
 
         const rootTreeHash = await processTree(SOURCE_DIR)
-        await generateRootModule(rootTreeHash)
-        console.log('\n--- PROCESSING COMPLETE ---')
-        console.log(`The SHA-1 hash of the top-level (Root) Tree object is: ${rootTreeHash}`)
-        console.log(`All objects are stored directly in: ${TARGET_DIR}`)
+        
+        // NEW CHECK: Only generate root module and success message if a hash was actually created
+        if (rootTreeHash) {
+            await generateRootModule(rootTreeHash)
+            console.log('\n--- PROCESSING COMPLETE ---')
+            console.log(`The SHA-1 hash of the top-level (Root) Tree object is: ${rootTreeHash}`)
+            console.log(`All objects are stored directly in: ${TARGET_DIR}`)
+        } else {
+            console.error('\n--- PROCESSING ABORTED ---')
+            console.error('The root tree object could not be generated, likely due to the resulting JSON being too large for the configured limit. No root module was created.')
+        }
 
     } catch (error) {
         console.error('\nERROR DURING PROCESSING:', error.message)
-        // If the error message is our custom one, it's a blob size issue, otherwise it's file access.
-        if (!error.message.includes('Blob size')) {
-            console.error('Ensure that the source directory (./texlive) exists and contains data.')
-        }
+        // Keep the general instruction for file system issues
+        console.error('Ensure that the source directory (./texlive) exists and contains data.')
     }
 }
 
