@@ -59,4 +59,4 @@ The complete file system is based on **objects**. These objects are stored as fi
 
 The filesystem is implemented in the file `library_texfs.js`, which is linked with emscripten into the WebAssembly file.
 
-To prepare the **TEXFS** filesystem, the `nodejs` program `tl_objects.js` is used to convert the source files into these object files.
+To prepare the **TEXFS** filesystem, the `nodejs` program `texfs_objects.js` is used to convert the source files into these object files.

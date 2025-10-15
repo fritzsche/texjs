@@ -287,6 +287,12 @@ download_installer() {
     fi
 }
 
+action_objects() {
+   cd ${INSTALL_PATH} 
+   # generate object files
+   node ../texfs_objects 
+}
+
 action_install() {
    output_action "Install TeXLive" 
    download_installer
@@ -321,6 +327,5 @@ action_install() {
    PERL5LIB="${INSTALLER_PATH}"/tlpkg 
   
    PERL5LIB=${PERL5LIB} TEXMFROOT=${TEXMFROOT} ${FMTUTIL} -sys -all # --dry-run
-   # generate object files
-   node ../tl_objects 
+   action_objects
 }
