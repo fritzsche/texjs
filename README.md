@@ -11,6 +11,13 @@ To achieve a suitably fast TeX execution in the browser, especially considering 
 
 The project utilizes the **TeX Live** distribution and makes it executable in the browser.
 
+## Demo
+TeXjs is hosted by github pages:
+
+https://fritzsche.github.io/texjs/
+
+All running in your browser the texlive (medium) distribution is just served as static asset.
+
 ---
 ## Building TeXjs
 TeXjs was built on a Mac computer. Any Unix-like environment *might* work as well, but these are currently completely untested.
@@ -32,22 +39,25 @@ There are two build scripts that help automate the TeX Live build process and it
 
 The installation is doing the following steps:
 
-1) Creat the `build` folder and download TeXLive source code.
+1) Create the `build` folder and download TeXLive source code.
 2) Build a native version of TeXLive to get tools like **tangle** or **tie**.
 3) Build the **WebAssembly** version of TeXLive (some files need to be copied from the native build).
-TEXFS filesystem support is build in the Javascipt glue code.
-3) Install TeXLive (medium schema)
+TEXFS filesystem support is build in the Javascript glue code.
+3) Install TeXLive: medium schema. (some unnecessary files are deleted)
 4) Run fmtutil to create the necessary format files.
-5) Creat Object files for the **TEXFS** filesystem.
+5) Create Object files for the **TEXFS** filesystem.
+(notice the object file builder will skip files larger 30MB to avoid hosting them on github pages)
 
 
 **WARNING**: Currently the scripts are doing very little checks/validations, but are kepts to the minimum that made them executable by the author. Please feel free and provide fixes for issues you find.
 
 ### `texjs_menu.sh`
 Run `texjs_menu.sh` to execute the most important installation tasks. It provides a minimal text based gui.
-## `texjs_install.sh`
+### `texjs_install.sh`
 This is doing the same steps as `texjs_menu.sh` but is more like a commandline tool without gui like environment.
 
+### Finalizing step
+The build scripts should create a folder names `objects` as subfolder in `build` you just need to move this folder to the main project folder.
 
 ## TEXFS Filesystem
 The **TEXFS** emscripten filesystem is a very minimal **read-only** file system. The key difference is that files are **not instantiated when mounted**, but only upon read access. The necessary file parts are loaded from a backend source.
@@ -59,4 +69,4 @@ The complete file system is based on **objects**. These objects are stored as fi
 
 The filesystem is implemented in the file `library_texfs.js`, which is linked with emscripten into the WebAssembly file.
 
-To prepare the **TEXFS** filesystem, the `nodejs` program `texfs_objects.js` is used to convert the source files into these object files.
+To prepare the **TEXFS** filesystem, the `nodejs` program `texfs_objects.js` is used to convert the source files into these object files. Notice to avoid hosting unnecessary large files, there is a limit (const) that files larger 30mb will not be generated as objects.
