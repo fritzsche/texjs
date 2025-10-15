@@ -1,70 +1,90 @@
+
+const appendText = (element, text) => {
+  const newDIV = document.createElement('div')
+  newDIV.textContent = text
+  element.appendChild(newDIV)
+}
 if (window.Worker) {
-  const myWorker = new Worker("./worker.js", { type: "module" });
+  const TexWorker = new Worker("./worker.js", { type: "module" })
 
-let pdfBlobUrl = null;
-const openPdfButton = document.getElementById('openPdfButton');
-const compileButton = document.getElementById('compileButton');
+  let pdfBlobUrl = null
+  const openPdfButton = document.getElementById('openPdfButton')
+  const compileButton = document.getElementById('compileButton')
 
-compileButton.onclick = function() {
-    const texSource = texInput.value;
+  compileButton.onclick = function () {
+    const texSource = texInput.value
+
+    console.log('Send TeX source code to the worker...')
+
     
-    console.log('Sende TeX-Quellcode an Worker...');
-    
-    // Sende den Befehl und den TeX-String an den Worker
-    myWorker.postMessage({
-        command: 'compile',
-        texContent: texSource,
-        fileName: 'example.tex' // Dateiname, unter dem die Datei im VFS gespeichert wird
-    });
+    // Send the compile command and the TeX-String to the Worker
+    TexWorker.postMessage({
+      command: 'compile',
+      texContent: texSource,
+      fileName: 'example.tex' // Filename this is stored in the virtual file system
+    })
+    compileButton.disabled = true
+    compileButton.textContent = 'Erstelle PDF...'
+  }
 
-    compileButton.disabled = true;
-    compileButton.textContent = 'Erstelle PDF...';
-};
+  TexWorker.onmessage = function (event) {
+    const { command, data, message, fileName } = event.data
+    switch (command) {
+      case 'print':
+        const output = document.getElementById('texOutput')
+        if (output) {
+          appendText(output, message)
+        }
 
+        break
 
-myWorker.onmessage = function(event) {
-    const { command, data, message, fileName } = event.data;
+      case 'pdfReady':
+        // Receive the data
+        const pdfArrayBuffer = data
 
-    if (command === 'pdfReady') {
-        // 1. ArrayBuffer mit dem PDF-Inhalt empfangen (dies sind Binärdaten)
-        const pdfArrayBuffer = data;
+        // Create a blob
+        const pdfBlob = new Blob([pdfArrayBuffer], { type: 'application/pdf' })
 
-        // 2. Ein Blob-Objekt aus den Binärdaten erstellen
-        const pdfBlob = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
-        
-        // **Wichtig:** Eine temporäre URL für den Blob erstellen
-        // Diese URL kann im Browser als reguläre Datei-URL behandelt werden.
+        // This URL can be used by the browser
         if (pdfBlobUrl) {
-            URL.revokeObjectURL(pdfBlobUrl); // Alte URL freigeben
+          URL.revokeObjectURL(pdfBlobUrl)
         }
-        pdfBlobUrl = URL.createObjectURL(pdfBlob);
+        pdfBlobUrl = URL.createObjectURL(pdfBlob)
 
-        console.log('PDF-Datei erfolgreich empfangen. Temporäre URL erstellt.');
+        console.log('PDF-File received. Create temporary URL.')
 
-        // 3. Option A: PDF in einem neuen Tab anzeigen
-        openPdfButton.onclick = function() {
-            window.open(pdfBlobUrl, '_blank');
-        };
-        openPdfButton.disabled = false;
-        openPdfButton.textContent = 'PDF in neuem Tab öffnen';
+        openPdfButton.onclick = function () {
 /*
-        // 4. Option B: PDF in einem Iframe anzeigen (oder nur den Link zum Download/Anzeige)
-        pdfViewer.src = pdfBlobUrl;
+          const downloadLink = document.createElement('a')
 
-        // 5. Option C: Download-Link setzen
-        downloadLink.href = pdfBlobUrl;
-        downloadLink.download = fileName.split('/').pop() || 'example.pdf'; // Download-Name
-        downloadLink.textContent = `Download: ${downloadLink.download}`;
-        downloadLink.style.display = 'block';
-        */
+          // 1. Die Blob-URL als Linkziel (href) setzen
+          downloadLink.href = pdfBlobUrl
+
+   
+          downloadLink.download = 'example.pdf' 
+
+   
+          document.body.appendChild(downloadLink)
+          downloadLink.click()
+          document.body.removeChild(downloadLink)
+*/
+
+
+                   window.open(pdfBlobUrl, '_blank')
         }
- }        
-
-/*
-  [first, second].forEach((input) => {
-    input.onchange = () => {
-      myWorker.postMessage([first.value, second.value]);
-      console.log("Message posted to worker");
-    };
-  });*/
+        openPdfButton.disabled = false
+        openPdfButton.textContent = 'PDF in neuem Tab öffnen'
+        /*
+                // Option: PDF in einem Iframe anzeigen (oder nur den Link zum Download/Anzeige)
+                pdfViewer.src = pdfBlobUrl;
+        
+                // Option: Download-Link setzen
+                downloadLink.href = pdfBlobUrl;
+                downloadLink.download = fileName.split('/').pop() || 'example.pdf'; // Download-Name
+                downloadLink.textContent = `Download: ${downloadLink.download}`;
+                downloadLink.style.display = 'block';
+                */
+        break
+    }
+  }
 }

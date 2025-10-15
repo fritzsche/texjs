@@ -9,6 +9,14 @@ const Module = {
     thisProgram: '/pdflatex',
     //thisProgram: '/pdftex',    
 
+  'print': (text) => { 
+      postMessage({
+            command: 'print',
+            message: text
+        })
+   },
+  'printErr': (text) => { console.error('stderr: ' + text) },
+
     preRun: [async () => {
         console.log("Initialize the filesystem...")
         const FS = Module.FS
