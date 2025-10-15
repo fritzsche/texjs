@@ -1,0 +1,382 @@
+%%%
+% Triominos
+%%%
+\def\filedateTriominos{2025/05/26}%
+\def\fileversionTriominos{0.1a}%
+\message{-- \filedateTriominos\space v\fileversionTriominos}%
+%
+\setKVdefault[ClesTriomino]{Longueur=5cm,Etages=3,Ecart=0.6,AffichagePiece=false,Hexagone=false,Recapitulatif=false,Colonnes=2,Piece={}}%
+\defKV[ClesTriomino]{Piece=\ifempty{#1}{}{\setKV[ClesTriomino]{AffichagePiece}}}%
+
+\def\TraceTriomino#1{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    u:=\useKV[ClesTriomino]{Longueur};
+    Rayon:=0.75*u*sqrt(3)/6;
+    Etages:=\useKV[ClesTriomino]{Etages};
+    pair A,B,C,D,E,F;
+    A=(0,0);
+    B-A=Etages*u*(1,0);
+    C=rotation(B,A,60);
+    D=(1/Etages)[C,A];
+    E=(1/Etages)[C,B];
+    F=C;
+    trace polygone(A,B,C);
+    for k=1 upto Etages-1:
+    trace (k/Etages)[C,A]--(k/Etages)[C,B];
+    trace (k/Etages)[A,C]--(k/Etages)[A,B];
+    trace (k/Etages)[B,A]--(k/Etages)[B,C];
+    endfor;
+    pair G[];color H[];%Couleur pour garder l'orientation des textes...
+    G[1]=iso(D,E,F);
+    H1=blue;
+    n=1;
+    for k=1 upto Etages-1:
+    for l=0 upto (2*k):
+    n:=n+1;
+    if (l mod 2=0):
+    G[n]=G[1] shifted(k*(D-F)+(l div 2)*(E-D));
+    H[n]=blue;
+    else:
+    G[n]=symetrie(G[1],D,E) shifted((k-1)*(D-F)+(l div 2)*(E-D));
+    H[n]=green;
+    fi;
+    endfor;
+    endfor;
+    % affichage des textes
+    nba=0;
+    for p_=#1:
+    if (nba mod 3)=1:
+    if H[(nba div 3)+1]=blue:
+    label(TEX(p_) rotated 120,pointarc(cercles(G[(nba div 3)+1],Rayon),30));
+    else:
+    label(TEX(p_) rotated 180,pointarc(cercles(G[(nba div 3)+1],Rayon),90));
+    fi;
+    elseif (nba mod 3)=2:
+    if H[(nba div 3)+1]=blue:
+    label(TEX(p_),pointarc(cercles(G[(nba div 3)+1],Rayon),270));
+    else:
+    label(TEX(p_) rotated 60,pointarc(cercles(G[(nba div 3)+1],Rayon),330));
+    fi;
+    else:
+    if H[(nba div 3)+1]=blue:
+    label(TEX(p_) rotated 240,pointarc(cercles(G[(nba div 3)+1],Rayon),150));
+    else:
+    label(TEX(p_) rotated 300,pointarc(cercles(G[(nba div 3)+1],Rayon),210));
+    fi;
+    fi;
+    nba:=nba+1;
+    endfor;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={u:=\useKV[ClesTriomino]{Longueur}; Etages:=\useKV[ClesTriomino]{Etages};}]
+    Rayon:=0.75*u*sqrt(3)/6;
+    pair A,B,C,D,E,F;
+    A=(0,0);
+    B-A=Etages*u*(1,0);
+    C=rotation(B,A,60);
+    D=(1/Etages)[C,A];
+    E=(1/Etages)[C,B];
+    F=C;
+    trace polygone(A,B,C);
+    for k=1 upto Etages-1:
+    trace (k/Etages)[C,A]--(k/Etages)[C,B];
+    trace (k/Etages)[A,C]--(k/Etages)[A,B];
+    trace (k/Etages)[B,A]--(k/Etages)[B,C];
+    endfor;
+    pair G[];color H[];%Couleur pour garder l'orientation des textes...
+    G[1]=iso(D,E,F);
+    H1=blue;
+    n=1;
+    for k=1 upto Etages-1:
+    for l=0 upto (2*k):
+    n:=n+1;
+    if (l mod 2=0):
+    G[n]=G[1] shifted(k*(D-F)+(l div 2)*(E-D));
+    H[n]=blue;
+    else:
+    G[n]=symetrie(G[1],D,E) shifted((k-1)*(D-F)+(l div 2)*(E-D));
+    H[n]=green;
+    fi;
+    endfor;
+    endfor;
+    % affichage des textes
+    nba=0;
+    for p_=#1:
+    if (nba mod 3)=1:
+    if H[(nba div 3)+1]=blue:
+    label(LATEX(p_) rotated 120,pointarc(cercles(G[(nba div 3)+1],Rayon),30));
+    else:
+    label(LATEX(p_) rotated 180,pointarc(cercles(G[(nba div 3)+1],Rayon),90));
+    fi;
+    elseif (nba mod 3)=2:
+    if H[(nba div 3)+1]=blue:
+    label(LATEX(p_),pointarc(cercles(G[(nba div 3)+1],Rayon),270));
+    else:
+    label(LATEX(p_) rotated 60,pointarc(cercles(G[(nba div 3)+1],Rayon),330));
+    fi;
+    else:
+    if H[(nba div 3)+1]=blue:
+    label(LATEX(p_) rotated 240,pointarc(cercles(G[(nba div 3)+1],Rayon),150));
+    else:
+    label(LATEX(p_) rotated 300,pointarc(cercles(G[(nba div 3)+1],Rayon),210));
+    fi;
+    fi;
+    nba:=nba+1;
+    endfor;    
+  \end{mpost}
+  \fi
+}
+
+\def\TraceTriominoHexa#1{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    u:=\useKV[ClesTriomino]{Longueur};
+    RayonCercle:=u;
+    Rayon:=\useKV[ClesTriomino]{Ecart}*0.5*u*sqrt(3)/6;
+    pair O,A,B,C,D,E,F,G,H[],I[];
+    O=(0,0);
+    path cc;
+    cc=cercles(O,RayonCercle);
+    A=pointarc(cc,0);
+    B=rotation(A,O,60);
+    C=rotation(B,O,60);
+    D=rotation(C,O,60);
+    E=rotation(D,O,60);
+    F=rotation(E,O,60);
+    G=rotation(F,O,60);
+    H1=iso(A,B);
+    H2=iso(B,C);
+    H3=iso(C,D);
+    H4=iso(D,E);
+    H5=iso(E,F);
+    H6=iso(F,A);
+    I1=iso(C,1/2[C,D],rotation(1/2[C,D],C,60));
+    I2=symetrie(I1,C,F);
+    I3=symetrie(I2,1/2[B,C],1/2[D,E]);
+    I4=symetrie(I3,1/2[B,C],1/2[F,A]);
+    I5=symetrie(I4,B,E);
+    I6-I1=0.5*(D-C);
+    I7-I2=0.5*(D-C);
+    I8-I3=0.5*(D-C);
+    I9-I4=0.5*(D-C);
+    I10-I5=0.5*(D-C);
+    I11=symetrie(I10,1/2[C,B],1/2[F,A]);
+    I12=symetrie(I11,1/2[A,B],1/2[E,F]);
+    I13=symetrie(I6,A,D);
+    I14=symetrie(I7,A,D);
+    I15=symetrie(I8,A,D);
+    I16=symetrie(I9,A,D);
+    I17=symetrie(I10,A,D);
+    I18=symetrie(I11,A,D);
+    I19=symetrie(I12,A,D);
+    I20=symetrie(I1,A,D);
+    I21=symetrie(I2,A,D);
+    I22=symetrie(I3,A,D);
+    I23=symetrie(I4,A,D);
+    I24=symetrie(I5,A,D);
+    trace polygone(A,B,C,D,E,F);
+    trace polygone(H1,H3,H5);
+    trace polygone(H2,H4,H6);
+    trace segment(A,D);
+    trace segment(B,E);
+    trace segment(C,F);
+    color N[];%Couleur pour garder l'orientation des textes...
+    N1=blue;
+    for l=2 upto 5:
+    if (l mod 2=0):
+    N[l]=green;
+    else:
+    N[l]=blue;
+    fi;
+    endfor;
+    for l=6 upto 12:
+    if (l mod 2=0):
+    N[l]=blue;
+    else:
+    N[l]=green;
+    fi;
+    endfor;
+    for l=13 upto 19:
+    if (l mod 2=0):
+    N[l]=blue;
+    else:
+    N[l]=green;
+    fi;
+    endfor;
+    for l=20 upto 24:
+    if (l mod 2=0):
+    N[l]=green;
+    else:
+    N[l]=blue;
+    fi;
+    endfor;
+    % affichage des textes
+    nba=0;
+    for p_=#1:
+    if (nba mod 3)=1:
+    if N[(nba div 3)+1]=blue:
+    label(TEX(p_) rotated 120,pointarc(cercles(I[(nba div 3)+1],Rayon),30));
+    else:
+    label(TEX(p_) rotated 180,pointarc(cercles(I[(nba div 3)+1],Rayon),90));
+    fi;
+    elseif (nba mod 3)=2:
+    if N[(nba div 3)+1]=blue:
+    label(TEX(p_),pointarc(cercles(I[(nba div 3)+1],Rayon),270));
+    else:
+    label(TEX(p_) rotated 60,pointarc(cercles(I[(nba div 3)+1],Rayon),330));
+    fi;
+    else:
+    if N[(nba div 3)+1]=blue:
+    label(TEX(p_) rotated 240,pointarc(cercles(I[(nba div 3)+1],Rayon),150));
+    else:
+    label(TEX(p_) rotated 300,pointarc(cercles(I[(nba div 3)+1],Rayon),210));
+    fi;
+    fi;
+    nba:=nba+1;
+    endfor;
+  \end{mplibcode}
+  \else
+    \begin{mpost}[mpsettings={u:=\useKV[ClesTriomino]{Longueur};RayonCercle:=u; Rayon:=\useKV[ClesTriomino]{Ecart}*0.5*u*sqrt(3)/6;}]
+    pair O,A,B,C,D,E,F,G,H[],I[];
+    O=(0,0);
+    path cc;
+    cc=cercles(O,RayonCercle);
+    A=pointarc(cc,0);
+    B=rotation(A,O,60);
+    C=rotation(B,O,60);
+    D=rotation(C,O,60);
+    E=rotation(D,O,60);
+    F=rotation(E,O,60);
+    G=rotation(F,O,60);
+    H1=iso(A,B);
+    H2=iso(B,C);
+    H3=iso(C,D);
+    H4=iso(D,E);
+    H5=iso(E,F);
+    H6=iso(F,A);
+    I1=iso(C,1/2[C,D],rotation(1/2[C,D],C,60));
+    I2=symetrie(I1,C,F);
+    I3=symetrie(I2,1/2[B,C],1/2[D,E]);
+    I4=symetrie(I3,1/2[B,C],1/2[F,A]);
+    I5=symetrie(I4,B,E);
+    I6-I1=0.5*(D-C);
+    I7-I2=0.5*(D-C);
+    I8-I3=0.5*(D-C);
+    I9-I4=0.5*(D-C);
+    I10-I5=0.5*(D-C);
+    I11=symetrie(I10,1/2[C,B],1/2[F,A]);
+    I12=symetrie(I11,1/2[A,B],1/2[E,F]);
+    I13=symetrie(I6,A,D);
+    I14=symetrie(I7,A,D);
+    I15=symetrie(I8,A,D);
+    I16=symetrie(I9,A,D);
+    I17=symetrie(I10,A,D);
+    I18=symetrie(I11,A,D);
+    I19=symetrie(I12,A,D);
+    I20=symetrie(I1,A,D);
+    I21=symetrie(I2,A,D);
+    I22=symetrie(I3,A,D);
+    I23=symetrie(I4,A,D);
+    I24=symetrie(I5,A,D);
+    trace polygone(A,B,C,D,E,F);
+    trace polygone(H1,H3,H5);
+    trace polygone(H2,H4,H6);
+    trace segment(A,D);
+    trace segment(B,E);
+    trace segment(C,F);
+    color N[];%Couleur pour garder l'orientation des textes...
+    N1=blue;
+    for l=2 upto 5:
+    if (l mod 2=0):
+    N[l]=green;
+    else:
+    N[l]=blue;
+    fi;
+    endfor;
+    for l=6 upto 12:
+    if (l mod 2=0):
+    N[l]=blue;
+    else:
+    N[l]=green;
+    fi;
+    endfor;
+    for l=13 upto 19:
+    if (l mod 2=0):
+    N[l]=blue;
+    else:
+    N[l]=green;
+    fi;
+    endfor;
+    for l=20 upto 24:
+    if (l mod 2=0):
+    N[l]=green;
+    else:
+    N[l]=blue;
+    fi;
+    endfor;
+    % affichage des textes
+    nba=0;
+    for p_=#1:
+    if (nba mod 3)=1:
+    if N[(nba div 3)+1]=blue:
+    label(LATEX(p_) rotated 120,pointarc(cercles(I[(nba div 3)+1],Rayon),30));
+    else:
+    label(LATEX(p_) rotated 180,pointarc(cercles(I[(nba div 3)+1],Rayon),90));
+    fi;
+    elseif (nba mod 3)=2:
+    if N[(nba div 3)+1]=blue:
+    label(LATEX(p_),pointarc(cercles(I[(nba div 3)+1],Rayon),270));
+    else:
+    label(LATEX(p_) rotated 60,pointarc(cercles(I[(nba div 3)+1],Rayon),330));
+    fi;
+    else:
+    if N[(nba div 3)+1]=blue:
+    label(LATEX(p_) rotated 240,pointarc(cercles(I[(nba div 3)+1],Rayon),150));
+    else:
+    label(LATEX(p_) rotated 300,pointarc(cercles(I[(nba div 3)+1],Rayon),210));
+    fi;
+    fi;
+    nba:=nba+1;
+    endfor;
+  \end{mpost}
+  \fi
+}
+
+\newtoks\toklisteTriomino%
+\def\UpdatetoksTriomino#1\nil{\addtotok\toklisteTriomino{"#1",}}%
+  
+\newcommand\Triomino[2][]{%
+  \useKVdefault[ClesTriomino]%
+  \setKV[ClesTriomino]{#1}%
+  \setsepchar{§}%\ignoreemptyitems%
+  \readlist*\ListeTriominos{#2}%
+  \toklisteTriomino{}%
+  \ifboolKV[ClesTriomino]{Recapitulatif}{%
+    %\begin{longtable}{|>{\centering}p{0.45\linewidth}|p{0.45\linewidth}|}
+    %  \hline
+    %  \xintFor* ##1 in {\xintSeq{1}{\ListeTriominoslen}}\do{
+    %    &\\
+    %    &\\
+    %    \ListeTriominos[##1]&\\
+    %    &\\
+    %    &\\
+    %    \hline
+    %  }%
+    %\end{longtable}
+  }{%
+    \ifboolKV[ClesTriomino]{AffichagePiece}{%
+      \setKV[ClesTriomino]{Etages=1}%
+      \TraceTriomino{"\ListeTriominos[\fpeval{3*\useKV[ClesTriomino]{Piece}-2}]","\ListeTriominos[\fpeval{3*\useKV[ClesTriomino]{Piece}-1}]","\ListeTriominos[\fpeval{3*\useKV[ClesTriomino]{Piece}}]"}%
+    }{%
+      \foreachitem\compteur\in\ListeTriominos{\expandafter\UpdatetoksTriomino\compteur\nil}%
+      \ifboolKV[ClesTriomino]{Hexagone}{%
+        \TraceTriominoHexa{\the\toklisteTriomino}%
+      }{%
+        \TraceTriomino{\the\toklisteTriomino}%
+      }%
+    }%
+  }%
+}%

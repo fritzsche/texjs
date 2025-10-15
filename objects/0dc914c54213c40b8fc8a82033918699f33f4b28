@@ -1,0 +1,2794 @@
+%01/08/2011
+%Ajout de l'option trait dans le tracé des surfaces.
+
+%24/01/2011
+%Gestion des couleurs dans l'objet Deplacement.
+
+%27/11/2010
+%Manque plusieurs : dans la définition de ObjetNew
+
+%07/02/2009
+color OTFc[][][];%pour mémoriser les différents sommets de chaque objet;
+color OTFc[][].iso;
+color coul[][];%pour memoriser la couleur de chacune des faces de l'objet;
+color coulfaceX,coulfaceY,coulfaceZ;%pour colorer les faces parallèles aux plans avec la même couleur.
+color Outcolor[],Incolor[];%Permet de gérer la gestion des couleurs d'un objet lors d'un déplacement de cet objet
+boolean Vue[][];
+
+boolean creux;  creux=false;%pour gérer les solides creux
+boolean transformation; transformation=false;%pour gérer les transformations
+boolean Ferme[];%pour gérer les faces : si le solide est fermé, toutes les faces non vues ne sont pas intégrées aux calculs
+boolean perso[];%pour gérer les gestions personnelles des couleurs
+for k=0 upto 1000:
+  perso[k]=false;
+endfor;
+boolean numeroteface;
+numeroteface:=false;
+
+string couleurperso;
+
+defaultfont:="cmr5";
+
+vardef Image(expr dep)=
+  if transformation:
+    Transform(dep)
+  else:
+    RotXYZ(dep)
+  fi
+  +TR
+enddef;
+
+boolean Transparence;
+Transparence:=false;
+boolean couleurz;%pour gérer l'affichage "des lignes" de niveaux
+couleurz:=false;
+
+      vardef AffichageObjetCylindre[]=
+      save _affi;
+  picture _affi;
+  color Fc[][];color cou[];
+  tapj:=0;
+  for k=0 upto apj.@:
+    cpt[tapj]:=tapj;
+    Fc[tapj].nb:=OTFc.@[k].nb;
+    for l=1 upto Fc[tapj].nb:
+      Fc[tapj][l]:=OTFc.@[k][l];
+    endfor;
+    Fc[tapj].iso:=OTFc.@[k].iso;
+    cou[tapj]:=if perso.@:scantokens(couleurperso) else: coul.@[k] fi;
+    ALT[tapj]:=ALT.@[k];
+    Vue[tapj]:=Vue.@[k];
+    tapj:=tapj+1;
+  endfor;
+  tapj:=tapj-1;
+  QS(0,tapj);
+    for k=0 step 1 until tapj:
+    if Vue[cpt[k]]=false:
+      draw Projette(Fc[cpt[k]][1])--Projette(Fc[cpt[k]][2]) dashed dashpattern(on0.5 off2) withpen pencircle scaled0.25;
+      draw Projette(Fc[cpt[k]][3])--Projette(Fc[cpt[k]][4]) dashed dashpattern(on0.5 off2) withpen pencircle scaled0.25;
+    fi;
+    endfor;
+    n:=0;
+    for k=0 step 1 until tapj:
+    if Vue[cpt[k]]:
+%    label(""&decimal(cpt[k])&"",Projette(Fc[cpt[k]].iso));
+      n:=n+1;
+      if n<3:
+      if cpt[k]>1:
+      vala[n]=cpt[k];
+%      label.top(decimal(n)&"--"&decimal(vala[n]),n*u*(1,0));
+      else:
+      n:=n-1;
+      fi;
+      fi;
+      if cpt[k]<1:
+      draw for l=1 upto Fc[cpt[k]].nb:
+        Projette(Fc[cpt[k]][l])--
+        endfor
+        cycle;% withpen pencircle scaled0.25;
+        fi;
+        if cpt[k]>1:  
+      draw Projette(Fc[cpt[k]][1])--Projette(Fc[cpt[k]][2]);% withpen pencircle scaled0.25;
+      draw Projette(Fc[cpt[k]][3])--Projette(Fc[cpt[k]][4]);% withpen pencircle scaled0.25;
+        fi;
+      fi;
+      endfor;
+      if vala[1]<vala[2]:
+      draw Projette(Fc[vala[1]][2])--Projette(Fc[vala[1]][3]);% withpen pencircle scaled0.25;
+      draw Projette(Fc[vala[2]][1])--Projette(Fc[vala[2]][4]);% withpen pencircle scaled0.25;
+      else:
+      draw Projette(Fc[vala[1]][1])--Projette(Fc[vala[1]][4]);% withpen pencircle scaled0.25;
+      draw Projette(Fc[vala[2]][2])--Projette(Fc[vala[2]][3]);% withpen pencircle scaled0.25;
+      fi;
+enddef;
+
+      vardef AffichageObjetCylindreSansBase[]=
+      save _affi;
+  picture _affi;
+  color Fc[][];color cou[];
+  tapj:=0;
+  for k=0 upto apj.@:
+    cpt[tapj]:=tapj;
+    Fc[tapj].nb:=OTFc.@[k].nb;
+    for l=1 upto Fc[tapj].nb:
+      Fc[tapj][l]:=OTFc.@[k][l];
+    endfor;
+    Fc[tapj].iso:=OTFc.@[k].iso;
+    cou[tapj]:=if perso.@:scantokens(couleurperso) else: coul.@[k] fi;
+    ALT[tapj]:=ALT.@[k];
+    Vue[tapj]:=Vue.@[k];
+    tapj:=tapj+1;
+  endfor;
+  tapj:=tapj-1;
+  QS(0,tapj);
+    for k=0 step 1 until tapj:
+    if Vue[cpt[k]]=false:
+      draw Projette(Fc[cpt[k]][1])--Projette(Fc[cpt[k]][2]) dashed dashpattern(on0.5 off2) withpen pencircle scaled0.25;
+      draw Projette(Fc[cpt[k]][3])--Projette(Fc[cpt[k]][4]) dashed dashpattern(on0.5 off2) withpen pencircle scaled0.25;
+    fi;
+    endfor;
+    n:=0;
+    for k=0 step 1 until tapj:
+    if Vue[cpt[k]]:
+%    label(""&decimal(cpt[k])&"",Projette(Fc[cpt[k]].iso));
+      n:=n+1;
+      if n<3:
+      if cpt[k]>1:
+      vala[n]=cpt[k];
+%      label.top(decimal(n)&"--"&decimal(vala[n]),n*u*(1,0));
+      else:
+      n:=n-1;
+      fi;
+      fi;
+      %if cpt[k]<1:
+      %draw for l=1 upto Fc[cpt[k]].nb:
+      %  Projette(Fc[cpt[k]][l])--
+      %  endfor
+      %  cycle withpen pencircle scaled0.25;
+      %  fi;
+        if cpt[k]>1:  
+      draw Projette(Fc[cpt[k]][1])--Projette(Fc[cpt[k]][2]);% withpen pencircle scaled0.25;
+      draw Projette(Fc[cpt[k]][3])--Projette(Fc[cpt[k]][4]);% withpen pencircle scaled0.25;
+        fi;
+      fi;
+      endfor;
+      if vala[1]<vala[2]:
+      draw Projette(Fc[vala[1]][2])--Projette(Fc[vala[1]][3]);% withpen pencircle scaled0.25;
+      draw Projette(Fc[vala[2]][1])--Projette(Fc[vala[2]][4]);% withpen pencircle scaled0.25;
+      else:
+      draw Projette(Fc[vala[1]][1])--Projette(Fc[vala[1]][4]);% withpen pencircle scaled0.25;
+      draw Projette(Fc[vala[2]][2])--Projette(Fc[vala[2]][3]);% withpen pencircle scaled0.25;
+      fi;
+enddef;
+
+vardef AffichageObjetCone[]=
+  save _affi;
+  picture _affi;
+  color Fc[][];color cou[];
+  tapj:=0;
+  for k=0 upto apj.@:
+    cpt[tapj]:=tapj;
+    Fc[tapj].nb:=OTFc.@[k].nb;
+    for l=1 upto Fc[tapj].nb:
+      Fc[tapj][l]:=OTFc.@[k][l];
+    endfor;
+    Fc[tapj].iso:=OTFc.@[k].iso;
+    cou[tapj]:=if perso.@:scantokens(couleurperso) else: coul.@[k] fi;
+    ALT[tapj]:=ALT.@[k];
+    Vue[tapj]:=Vue.@[k];
+    tapj:=tapj+1;
+  endfor;
+  tapj:=tapj-1;
+  QS(0,tapj);
+  n:=0;
+    for k=0 upto tapj:
+    if Vue[cpt[k]]:
+    %label(""&decimal(cpt[k])&"",Projette(Fc[cpt[k]].iso));
+    if cpt[k]>0:
+    n:=n+1;
+    if n<3:
+      if cpt[k]>1:
+      vala[n]:=cpt[k];
+%      label.top(decimal(n)&"--"&decimal(vala[n]),n*u*(1,0));
+      else:
+      n:=n-1;
+      fi;
+      fi;
+      draw Projette(Fc[cpt[k]][1])--Projette(Fc[cpt[k]][2]);%withpen pencircle scaled0.25bp;
+          fi;
+      fi;
+      endfor;
+      if vala[1]<vala[2]:
+      draw Projette(Fc[vala[1]][2])--Projette(Fc[vala[1]][3]);% withpen pencircle scaled0.25;
+      draw Projette(Fc[vala[2]][1])--Projette(Fc[vala[2]][4]);% withpen pencircle scaled0.25;
+      else:
+      draw Projette(Fc[vala[1]][1])--Projette(Fc[vala[1]][4]);% withpen pencircle scaled0.25;
+      draw Projette(Fc[vala[2]][2])--Projette(Fc[vala[2]][3]);% withpen pencircle scaled0.25;
+      fi;
+    enddef;
+
+    vardef AffichageObjetConeAvecBase[]=
+  save _affi;
+  picture _affi;
+  color Fc[][];color cou[];
+  tapj:=0;
+  for k=0 upto apj.@:
+    cpt[tapj]:=tapj;
+    Fc[tapj].nb:=OTFc.@[k].nb;
+    for l=1 upto Fc[tapj].nb:
+      Fc[tapj][l]:=OTFc.@[k][l];
+    endfor;
+    Fc[tapj].iso:=OTFc.@[k].iso;
+    cou[tapj]:=if perso.@:scantokens(couleurperso) else: coul.@[k] fi;
+    ALT[tapj]:=ALT.@[k];
+    Vue[tapj]:=Vue.@[k];
+    tapj:=tapj+1;
+  endfor;
+  tapj:=tapj-1;
+  QS(0,tapj);
+  for k=0 upto tapj:
+    if Vue[cpt[k]]=false:
+      draw Projette(Fc[cpt[k]][1])--Projette(Fc[cpt[k]][2])
+	dashed dashpattern(on0.5 off2) withpen pencircle scaled0.25bp;
+    fi;
+  endfor;
+  n:=0;
+    for k=0 upto tapj:
+    if Vue[cpt[k]]:
+    %label(""&decimal(cpt[k])&"",Projette(Fc[cpt[k]].iso));
+    if cpt[k]>0:
+    n:=n+1;
+    if n<3:
+      if cpt[k]>1:
+      vala[n]:=cpt[k];
+%      label.top(decimal(n)&"--"&decimal(vala[n]),n*u*(1,0));
+      else:
+      n:=n-1;
+      fi;
+      fi;
+      draw Projette(Fc[cpt[k]][1])--Projette(Fc[cpt[k]][2]);%withpen pencircle scaled0.25bp;
+          fi;
+      fi;
+      endfor;
+      if vala[1]<vala[2]:
+      draw Projette(Fc[vala[1]][2])--Projette(Fc[vala[1]][3]);% withpen pencircle scaled0.25;
+      draw Projette(Fc[vala[2]][1])--Projette(Fc[vala[2]][4]);% withpen pencircle scaled0.25;
+      else:
+      draw Projette(Fc[vala[1]][1])--Projette(Fc[vala[1]][4]);% withpen pencircle scaled0.25;
+      draw Projette(Fc[vala[2]][2])--Projette(Fc[vala[2]][3]);% withpen pencircle scaled0.25;
+      fi;
+enddef;
+
+            vardef AffichageObjetCalotte[]=
+      save _affi;
+  picture _affi;
+  color Fc[][];color cou[];
+  tapj:=0;
+  for k=0 upto apj.@:
+    cpt[tapj]:=tapj;
+    Fc[tapj].nb:=OTFc.@[k].nb;
+    for l=1 upto Fc[tapj].nb:
+      Fc[tapj][l]:=OTFc.@[k][l];
+    endfor;
+    Fc[tapj].iso:=OTFc.@[k].iso;
+    cou[tapj]:=if perso.@:scantokens(couleurperso) else: coul.@[k] fi;
+    ALT[tapj]:=ALT.@[k];
+    Vue[tapj]:=Vue.@[k];
+    tapj:=tapj+1;
+  endfor;
+  tapj:=tapj-1;
+  QS(0,tapj);
+  minvue:=4000;
+    for k=1 step 1 until tapj:
+    if cpt[k]>1:
+    if Vue[cpt[k]]:
+    if cpt[k]<minvue:
+    minvue:=cpt[k];
+    fi;
+          fi;
+          fi;
+          endfor;
+          for k=0 upto 11:
+          draw for l=1 upto 2:%Fc[minvue+k*72].nb:
+	    Projette(Fc[minvue+k*72][l])--
+	  endfor
+	  cycle;% withpen pencircle scaled0.25bp;
+          draw for l=3 upto 4:%Fc[minvue+k*72].nb:
+	    Projette(Fc[minvue+35+k*72][l])--
+	  endfor
+	  cycle;% withpen pencircle scaled0.25bp;
+          endfor;
+enddef;
+
+vardef AffichagePfC[]=
+  save _affi;
+  picture _affi;
+  color Fc[][];color cou[];
+  tapj:=0;
+  for k=0 upto apj.@:
+    cpt[tapj]:=tapj;
+    Fc[tapj].nb:=OTFc.@[k].nb;
+    for l=1 upto Fc[tapj].nb:
+      Fc[tapj][l]:=OTFc.@[k][l];
+    endfor;
+    Fc[tapj].iso:=OTFc.@[k].iso;
+    ALT[tapj]:=ALT.@[k];
+    Vue[tapj]:=Vue.@[k];
+    tapj:=tapj+1;
+  endfor;
+  tapj:=tapj-1;
+  QS(0,tapj);
+  %if Transparence :
+  for k=0 upto tapj:
+    if Vue[cpt[k]]=false:
+%	fill for l=1 upto Fc[cpt[k]].nb:
+%	    Projette(Fc[cpt[k]][l])--
+%	endfor
+%	cycle withcolor abs(lumin(cpt[k]))*cou[cpt[k]];
+%	if traits=true:
+      draw Projette(Fc[cpt[k]][1]) for l=2 upto Fc[cpt[k]].nb-1:
+	  --Projette(Fc[cpt[k]][l])
+      endfor
+       dashed evenly withpen pencircle scaled0.25 withcolor 0.7white;
+%	fi;
+    fi;
+  endfor;
+  for k=0 upto tapj:
+    if Vue[cpt[k]]:
+%	transparence for l=1 upto Fc[cpt[k]].nb:
+%	    Projette(Fc[cpt[k]][l])--
+%	endfor
+%	cycle;
+%	if traits=true:
+      draw for l=1 upto Fc[cpt[k]].nb:
+	  Projette(Fc[cpt[k]][l])--
+      endfor
+      cycle withpen pencircle scaled0.5 withcolor 0.25white;
+%	fi;
+    fi;
+  endfor;
+enddef;
+
+vardef AffichageEquateur[]=
+  save _affi;
+  picture _affi;
+  color Fc[][];color cou[];
+  tapj:=0;
+  for k=0 upto apj.@:
+    cpt[tapj]:=tapj;
+    Fc[tapj].nb:=OTFc.@[k].nb;
+    for l=1 upto Fc[tapj].nb:
+      Fc[tapj][l]:=OTFc.@[k][l];
+    endfor;
+    Fc[tapj].iso:=OTFc.@[k].iso;
+    ALT[tapj]:=ALT.@[k];
+    Vue[tapj]:=Vue.@[k];
+    tapj:=tapj+1;
+  endfor;
+  tapj:=tapj-1;
+  QS(0,tapj);
+  for k=0 upto tapj:
+ %   if Vue[cpt[k]]=false:
+      draw Projette(Fc[cpt[k]][1])--Projette(Fc[cpt[k]][4])
+      if Vue[cpt[k]]=false:
+      dashed evenly;
+    fi;
+%  endfor;
+%  for k=0 upto tapj:
+%    if Vue[cpt[k]]:
+%    else:
+%      draw Projette(Fc[cpt[k]][1])--Projette(Fc[cpt[k]][4]);
+%    fi;
+  endfor;
+  drawoptions();
+enddef;
+
+vardef AffichageGreenwich[]=
+  save _affi;
+  picture _affi;
+  color Fc[][];color cou[];
+  tapj:=0;
+  for k=0 upto apj.@:
+    cpt[tapj]:=tapj;
+    Fc[tapj].nb:=OTFc.@[k].nb;
+    for l=1 upto Fc[tapj].nb:
+      Fc[tapj][l]:=OTFc.@[k][l];
+    endfor;
+    Fc[tapj].iso:=OTFc.@[k].iso;
+    ALT[tapj]:=ALT.@[k];
+    Vue[tapj]:=Vue.@[k];
+    tapj:=tapj+1;
+  endfor;
+  tapj:=tapj-1;
+  QS(0,tapj);
+  for k=0 upto tapj:
+    draw Projette(Fc[cpt[k]][1])--Projette(Fc[cpt[k]][2])
+      if Vue[cpt[k]]=false:
+      dashed evenly;
+    fi;% withpen pencircle scaled0.75;
+  endfor;
+%  for k=0 upto tapj:
+%    if Vue[cpt[k]]:
+%      draw Projette(Fc[cpt[k]][1])--Projette(Fc[cpt[k]][2]);
+%    fi;
+%  endfor;
+enddef;
+
+vardef AffichageObjet[]=
+  save _affi;
+  picture _affi;
+  color Fc[][];color cou[];
+  tapj:=0;
+  for k=0 upto apj.@:
+    cpt[tapj]:=tapj;
+    Fc[tapj].nb:=OTFc.@[k].nb;
+    for l=1 upto Fc[tapj].nb:
+      Fc[tapj][l]:=OTFc.@[k][l];
+    endfor;
+    Fc[tapj].iso:=OTFc.@[k].iso;
+    cou[tapj]:=if perso.@:scantokens(couleurperso) else: coul.@[k] fi;
+    ALT[tapj]:=ALT.@[k];
+    Vue[tapj]:=Vue.@[k];
+    tapj:=tapj+1;
+  endfor;
+  tapj:=tapj-1;
+  QS(0,tapj);
+  if Transparence :
+    for k=0 upto tapj:
+      if Vue[cpt[k]]=false:
+	fill for l=1 upto Fc[cpt[k]].nb:
+	  Projette(Fc[cpt[k]][l])--
+	endfor
+	cycle withcolor abs(lumin(cpt[k]))*cou[cpt[k]];
+	if traits=true:
+	  draw for l=1 upto Fc[cpt[k]].nb:
+	    Projette(Fc[cpt[k]][l])--
+	  endfor
+	  cycle dashed evenly withpen pencircle scaled0.25bp;
+	fi;
+      fi;
+    endfor;
+    for k=0 upto tapj:
+      if Vue[cpt[k]]:
+	transparence for l=1 upto Fc[cpt[k]].nb:
+	  Projette(Fc[cpt[k]][l])--
+	endfor
+	cycle;
+	if traits=true:
+	  draw for l=1 upto Fc[cpt[k]].nb:
+	    Projette(Fc[cpt[k]][l])--
+	  endfor
+	  cycle withpen pencircle scaled0.25bp;
+	fi;
+      fi;
+    endfor;
+  else:
+    if Ferme.@:
+      for k=0 upto tapj:
+	if Vue[cpt[k]]=true:
+	  fill for l=1 upto Fc[cpt[k]].nb:
+	    Projette(Fc[cpt[k]][l])--
+	  endfor
+	  cycle withcolor
+	    if couleurz:
+	    if unknown cz1:Hsvtorgb((floor(((Zpart(Fc[cpt[k]].iso)-Zmin)/(Zmax-Zmin))*360),satu,lum))
+	    else:
+	      ((Zpart(Fc[cpt[k]].iso)-Zmin)/(Zmax-Zmin))[cz2,cz1]
+	    fi
+	  elseif arcenciel=true:
+	    lumin(cpt[k])*Hsvtorgb(((cpt[k]/tapj)*360,satu,lum))
+	  else:
+	    lumin(cpt[k])*cou[cpt[k]]
+	  fi;
+	  if traits:
+	    draw for l=1 upto Fc[cpt[k]].nb:
+	      Projette(Fc[cpt[k]][l])--
+	    endfor
+	    cycle withpen pencircle scaled0.25bp;
+	    %add by cp 01/08/11
+	  else:
+	    draw for l=1 upto Fc[cpt[k]].nb:
+	      Projette(Fc[cpt[k]][l])--
+	    endfor
+	    cycle withcolor
+	      if couleurz:
+	    if unknown cz1:Hsvtorgb((floor(((Zpart(Fc[cpt[k]].iso)-Zmin)/(Zmax-Zmin))*360),satu,lum))
+	    else:
+	      ((Zpart(Fc[cpt[k]].iso)-Zmin)/(Zmax-Zmin))[cz2,cz1]
+	    fi
+	  elseif arcenciel=true:
+	      lumin(cpt[k])*Hsvtorgb(((cpt[k]/tapj)*360,satu,lum))
+	    else:
+	      lumin(cpt[k])*cou[cpt[k]]
+	    fi;
+	    %fin add
+	  fi;
+	fi;
+      endfor;
+    else:
+      for k=0 upto tapj:%apj downto 1:
+	fill for l=1 upto Fc[cpt[k]].nb:
+	  Projette(Fc[cpt[k]][l])--
+	endfor
+	cycle withcolor if Vue[cpt[k]]:
+	   if couleurz:
+	    if unknown cz1:Hsvtorgb((floor(((Zpart(Fc[cpt[k]].iso)-Zmin)/(Zmax-Zmin))*360),satu,lum))
+	    else:
+	      ((Zpart(Fc[cpt[k]].iso)-Zmin)/(Zmax-Zmin))[cz2,cz1]
+	    fi
+	  elseif arcenciel: lumin(cpt[k])*Hsvtorgb(((cpt[k]/tapj)*360,satu,lum))
+	  else:lumin(cpt[k])*cou[cpt[k]] fi
+	else: abs(lumin(cpt[k]))*cou[cpt[k]] fi;
+	if traits:
+	  draw for l=1 upto Fc[cpt[k]].nb:
+	    Projette(Fc[cpt[k]][l])--
+	  endfor
+	  cycle withpen pencircle scaled0.25bp;
+	  %add by cp 01/08/2011
+	else:
+	  draw for l=1 upto Fc[cpt[k]].nb:
+	      Projette(Fc[cpt[k]][l])--
+	  endfor
+	  cycle withcolor if Vue[cpt[k]]:
+	      if arcenciel: lumin(cpt[k])*Hsvtorgb(((cpt[k]/tapj)*360,satu,lum))
+	    else:lumin(cpt[k])*cou[cpt[k]] fi
+	  else: abs(lumin(cpt[k]))*cou[cpt[k]] fi;
+	  %fin add
+	fi;
+      endfor;
+    fi;
+  fi;
+  if numeroteface=true:
+    for k=0 upto tapj:
+      if Vue[k]:
+	label(""&decimal(k)&"",Projette(Fc[k].iso));
+      fi;
+    endfor;
+  fi;
+enddef;
+
+
+vardef AffichageObjetold[]=
+  save _affi;
+  picture _affi;
+  color Fc[][];color cou[];
+  tapj:=0;
+  for k=0 upto apj.@:
+    cpt[tapj]:=tapj;
+    Fc[tapj].nb:=OTFc.@[k].nb;
+    for l=1 upto Fc[tapj].nb:
+      Fc[tapj][l]:=OTFc.@[k][l];
+    endfor;
+    Fc[tapj].iso:=OTFc.@[k].iso;
+    cou[tapj]:=if perso.@:scantokens(couleurperso) else: coul.@[k] fi;
+    ALT[tapj]:=ALT.@[k];
+    Vue[tapj]:=Vue.@[k];
+    tapj:=tapj+1;
+  endfor;
+  tapj:=tapj-1;
+  QS(0,tapj);
+  if Ferme.@:
+    for k=0 upto tapj:
+      if Vue[cpt[k]]=true:
+	fill for l=1 upto Fc[cpt[k]].nb:
+	  Projette(Fc[cpt[k]][l])--
+	endfor
+	cycle withcolor
+	if arcenciel=true:
+	  lumin(cpt[k])*Hsvtorgb(((cpt[k]/tapj)*360,satu,lum))
+	else:
+	  lumin(cpt[k])*cou[cpt[k]]
+	fi;
+	draw for l=1 upto Fc[cpt[k]].nb:
+	  Projette(Fc[cpt[k]][l])--
+	endfor
+	cycle withpen pencircle scaled0.25bp;
+      fi;
+    endfor;
+  else:
+    for k=0 upto tapj:%apj downto 1:
+      fill for l=1 upto Fc[cpt[k]].nb:
+	Projette(Fc[cpt[k]][l])--
+      endfor
+      cycle withcolor if Vue[cpt[k]]:
+	if arcenciel: lumin(cpt[k])*Hsvtorgb(((cpt[k]/tapj)*360,satu,lum))
+	else:lumin(cpt[k])*cou[cpt[k]] fi
+      else: abs(lumin(cpt[k]))*cou[cpt[k]] fi;
+      draw for l=1 upto Fc[cpt[k]].nb:
+	Projette(Fc[cpt[k]][l])--
+      endfor
+      cycle withpen pencircle scaled0.25bp;
+    endfor;
+  fi;
+  if numeroteface=true:
+    for k=0 upto tapj:
+      if Vue[k]:
+	label(""&decimal(k)&"",Projette(Fc[k].iso));
+      fi;
+    endfor;
+  fi;
+enddef;
+
+vardef DessineFusion=
+  save _fusion;
+  picture _fusion;
+  tapj:=0;
+  color Fc[][];color cou[];
+  for l=1 upto nbobj:
+    for k=0 upto apj[l]:
+      cpt[tapj]:=tapj;
+      cou[tapj]:=if perso[l]:scantokens(couleurperso) else: coul[l][k] fi;
+      Fc[tapj].nb:=OTFc[l][k].nb;
+      for p=1 upto Fc[tapj].nb:
+	Fc[tapj][p]:=OTFc[l][k][p];
+      endfor;
+      Fc[tapj].iso:=OTFc[l][k].iso;
+      ALT[tapj]:=ALT[l][k];
+      Vue[tapj]:=Vue[l][k];
+      if Ferme[l]:
+	if Vue[tapj]=false:
+	  tapj:=tapj-1;
+	fi;
+      fi;
+      tapj:=tapj+1;
+    endfor;
+  endfor;
+  tapj:=tapj-1;
+  QS(0,tapj);
+  for k=0 upto tapj:
+    fill for l=1 upto Fc[cpt[k]].nb:
+      Projette(Fc[cpt[k]][l])--
+    endfor
+    cycle withcolor if Vue[cpt[k]]:
+      if arcenciel: lumin(cpt[k])*Hsvtorgb(((cpt[k]/tapj)*360,satu,lum))
+      else:lumin(cpt[k])*cou[cpt[k]] fi
+    else: abs(lumin(cpt[k]))*cou[cpt[k]] fi;
+    if traits:
+      draw for l=1 upto Fc[cpt[k]].nb:
+	Projette(Fc[cpt[k]][l])--
+      endfor
+      cycle withpen pencircle scaled0.25bp;
+      %add by cp 22/08/2011
+	else:
+	  draw for l=1 upto Fc[cpt[k]].nb:
+	      Projette(Fc[cpt[k]][l])--
+	  endfor
+	  cycle withcolor if Vue[cpt[k]]:
+	      if arcenciel: lumin(cpt[k])*Hsvtorgb(((cpt[k]/tapj)*360,satu,lum))
+	    else:lumin(cpt[k])*cou[cpt[k]] fi
+	  else: abs(lumin(cpt[k]))*cou[cpt[k]] fi;
+	  %fin add
+    fi;
+  endfor;
+enddef;
+
+vardef DessineFusionCoul=
+  save _fusion;
+  picture _fusion;
+  tapj:=0;
+  color Fc[][];color cou[];
+  for l=1 upto nbobj:
+    for k=0 upto apj[l]:
+      cpt[tapj]:=tapj;
+      cou[tapj]:=Outcolor[l];
+      Fc[tapj].nb:=OTFc[l][k].nb;
+      for p=1 upto Fc[tapj].nb:
+	Fc[tapj][p]:=OTFc[l][k][p];
+      endfor;
+      Fc[tapj].iso:=OTFc[l][k].iso;
+      ALT[tapj]:=ALT[l][k];
+      Vue[tapj]:=Vue[l][k];
+      if Ferme[l]:
+	if Vue[tapj]=false:
+	  tapj:=tapj-1;
+	fi;
+      fi;
+      tapj:=tapj+1;
+    endfor;
+  endfor;
+  tapj:=tapj-1;
+  QS(0,tapj);
+  for k=0 upto tapj:
+    fill for l=1 upto Fc[cpt[k]].nb:
+      Projette(Fc[cpt[k]][l])--
+    endfor
+    cycle withcolor if Vue[cpt[k]]:
+      abs(lumin(cpt[k]))*cou[cpt[k]] fi;
+    if traits:
+      draw for l=1 upto Fc[cpt[k]].nb:
+	Projette(Fc[cpt[k]][l])--
+      endfor
+      cycle withpen pencircle scaled0.25bp;
+      %add by cp 22/08/2011
+	else:
+	  draw for l=1 upto Fc[cpt[k]].nb:
+	      Projette(Fc[cpt[k]][l])--
+	  endfor
+	  cycle withcolor if Vue[cpt[k]]:
+	       abs(lumin(cpt[k]))*cou[cpt[k]] fi;
+	  %fin add
+    fi;
+  endfor;
+enddef;
+
+vardef DessineFusionTroisCouleurs=
+  save _fusion;
+  picture _fusion;
+  tapj:=0;
+  color Fc[][];color cou[];
+  for l=1 upto nbobj:
+    for k=0 upto apj[l]:
+      cpt[tapj]:=tapj;
+      Fc[tapj].nb:=OTFc[l][k].nb;
+      for p=1 upto Fc[tapj].nb:
+	Fc[tapj][p]:=OTFc[l][k][p];
+      endfor;
+      Fc[tapj].iso:=OTFc[l][k].iso;
+      if ProduitScalaire((1,0,0),Normal(Fc[tapj].iso,Fc[tapj][1],Fc[tapj][2]))<>0:
+	cou[tapj]:=coulfaceX;
+      else:
+	if ProduitScalaire((0,1,0),Normal(Fc[tapj].iso,Fc[tapj][1],Fc[tapj][2]))<>0:
+	  cou[tapj]:=coulfaceY;
+	else:
+	  cou[tapj]:=coulfaceZ;
+	fi;
+      fi;
+      ALT[tapj]:=ALT[l][k];
+      Vue[tapj]:=Vue[l][k];
+      if Ferme[l]:
+	if Vue[tapj]=false:
+	  tapj:=tapj-1;
+	fi;
+      fi;
+      tapj:=tapj+1;
+    endfor;
+  endfor;
+  tapj:=tapj-1;
+  QS(0,tapj);
+  for k=0 upto tapj:
+    fill for l=1 upto Fc[cpt[k]].nb:
+	Projette(Fc[cpt[k]][l])--
+    endfor
+    cycle withcolor cou[cpt[k]];
+    if traits:
+      draw for l=1 upto Fc[cpt[k]].nb:
+	  Projette(Fc[cpt[k]][l])--
+      endfor
+      cycle withpen pencircle scaled0.25bp;
+      %add by cp 22/08/2011
+    else:
+      draw for l=1 upto Fc[cpt[k]].nb:
+	  Projette(Fc[cpt[k]][l])--
+      endfor
+      cycle withcolor cou[cpt[k]];
+%	  %fin add
+    fi;
+  endfor;
+enddef;
+
+vardef Objettore[](expr Rn,rn)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  if creux:
+    Ferme.@:=false
+  else:
+    Ferme.@:=true;
+  fi;
+  scantokens("numeric "&substring(0,1) of rn&"; "&rn&";");
+  scantokens("numeric "&substring(0,1) of Rn&"; "&Rn&";");
+  vardef Famille(expr u,v)=((R+r*cos(u))*cos(v),(R+r*cos(u))*sin(v),r*sin(u)) enddef;
+  umin:=-pi; umax:=pi; upas:=2*pi/nb;
+  vmin:=-pi; vpas:=2*pi/subh; vmax:=pi;
+  apj:=0;
+  %On crée les facettes et on calcule la profondeur en Z.
+  for k=0 upto (nb-1):
+    for l=0 upto (subh-1):
+      tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Image(Famille(umin+(k+1)*upas,vmin+l*vpas));
+      OTFc.@[apj][2]:=Image(Famille(umin+k*upas,vmin+l*vpas));
+      OTFc.@[apj][3]:=Image(Famille(umin+k*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj][4]:=Image(Famille(umin+(k+1)*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      ALT.@[apj]:=-Zpart(GCoord(OTFc.@[apj].iso));
+      if ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]))>=0:
+	Vue.@[apj]:=true;coul.@[apj]:=outcolor;
+      else:
+	Vue.@[apj]:=false;coul.@[apj]:=incolor;
+      fi;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj.@:=apj-1;
+enddef;
+
+vardef ObjetTube[](expr Fn,dp,rayon,tmin,nbp,pas)=%f,f',f'',rayon du tube,paramètre départ,nb points, pas
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  scantokens("vardef F(expr t)="&Fn&" enddef;");
+  scantokens("vardef Fp(expr t)="&dp&" enddef;");
+  color G[][];
+  NB:=nbp;%nb de pas
+  nn:=pas;
+  %pour gérer le "flip" aux points d'inflexion
+  color VNbisprec[];
+  VNbisprec[tmin-nn]=T(tmin-nn) Vectprod ((T(tmin)-T(tmin-2*nn))/2);
+  %
+  ang:=360/nb;
+  for l=0 upto NB:
+    for k=0 upto nb:
+      G[l][k]=F(tmin+l*pas)+rayon*(cosd(k*ang)*VNn(tmin+l*pas)+sind(k*ang)*VBNn(tmin+l*pas));
+    endfor;
+  endfor;
+  apj:=0;
+  if creux=false:
+    Ferme.@:=true;
+    nbsp:=nb;
+    tcpt.@[apj]:=apj;
+    OTFc.@[apj].nb:=nbsp;
+    for k=1 upto nbsp:
+      OTFc.@[apj][k]:=Image(G[0][nbsp+1-k]);
+    endfor;
+    OTFc.@[apj].iso:=(OTFc.@[apj][1] for k=2 upto nbsp:+OTFc.@[apj][k] endfor)/nbsp;
+    apj:=apj+1;
+    tcpt.@[apj]:=apj;
+    OTFc.@[apj].nb:=nbsp;
+    for k=nbsp downto 1:
+      OTFc.@[apj][k]:=Image(G[NB][k]);
+    endfor;
+    OTFc.@[apj].iso:=(OTFc.@[apj][1] for k=2 upto nbsp:+OTFc.@[apj][k] endfor)/nbsp;
+    apj:=apj+1;
+  else:
+    Ferme.@:=false;
+  fi;
+  for l=0 upto (NB-1):
+    for k=0 upto nb-1:
+      tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Image(G[l][k]);
+      OTFc.@[apj][2]:=Image(G[l][k+1]);
+      OTFc.@[apj][3]:=Image(G[l+1][k+1]);
+      OTFc.@[apj][4]:=Image(G[l+1][k]);
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj:=apj-1;
+  for k=0 upto apj:
+    ALT.@[k]:=-Zpart(GCoord(OTFc.@[k].iso));
+    if ProduitScalaire(Oeil-OTFc.@[k].iso,Normal(OTFc.@[k].iso,OTFc.@[k][1],OTFc.@[k][2]))>=0:
+      Vue.@[k]:=true;coul.@[k]:=outcolor;
+    else:
+      Vue.@[k]:=false;coul.@[k]:=incolor;
+    fi;
+  endfor;
+  apj.@:=apj;
+enddef;
+
+vardef ObjetCylindre[](expr fn,umin,umax,vmin,vmax)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  scantokens("vardef Famille(expr u,v)="&fn&" enddef;");
+  apj:=0;
+  upas:=(umax-umin)/nb;vpas:=(vmax-vmin)/subh;
+  %On crée les facettes et on calcule la profondeur en Z.
+  %for k=umin step upas until umax:
+  %  for l=vmin step vpas until vmax:
+  for k=0 upto (nb-1):
+    for l=0 upto (subh-1):
+      tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Image(Famille(umin+(k+1)*upas,vmin+l*vpas));
+      OTFc.@[apj][2]:=Image(Famille(umin+k*upas,vmin+l*vpas));
+      OTFc.@[apj][3]:=Image(Famille(umin+k*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj][4]:=Image(Famille(umin+(k+1)*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      ALT.@[apj]:=-Zpart(GCoord(OTFc.@[apj].iso));
+      if ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]))>=0:
+	Vue.@[apj]:=true;coul.@[apj]:=outcolor;
+      else:
+	Vue.@[apj]:=false;coul.@[apj]:=incolor;
+      fi;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj.@:=apj-1;
+enddef;
+
+vardef Objetcylindre[](expr rn,hn)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  scantokens("numeric "&substring(0,1) of rn&"; "&rn&";");
+  scantokens("numeric "&substring(0,1) of hn&"; "&hn&";");
+  vardef Famille(expr u,v)=(r*cos(u),r*sin(u),v) enddef;
+  umin:=pi; umax:=-pi; upas:=-2*pi/nb;
+  vmin:=0; vmax:=h; vpas:=h/subh;
+  nbsp:=nb;
+  apj:=0;
+  if creux=false:
+    Ferme.@:=true;
+    tcpt.@[apj]:=apj;
+    OTFc.@[apj].nb:=nbsp;
+    for k=1 upto nb:
+      OTFc.@[apj][k]:=Image(Famille(umin+k*upas,vmin));
+    endfor;
+    OTFc.@[apj].iso:=(OTFc.@[apj][1] for k=2 upto nbsp:+OTFc.@[apj][k] endfor)/nbsp;
+    apj:=apj+1;
+    tcpt.@[apj]:=apj;
+    OTFc.@[apj].nb:=nbsp;
+    for k=1 upto nbsp:
+      OTFc.@[apj][k]:=Image(Famille(umin+(nbsp-k)*upas,vmax));
+    endfor;
+    OTFc.@[apj].iso:=(OTFc.@[apj][1] for k=2 upto nbsp:+OTFc.@[apj][k] endfor)/nbsp;
+    apj:=apj+1;
+  else:
+    Ferme.@:=false;
+  fi;
+  %On crée les facettes et on calcule la profondeur en Z.
+  for k=0 upto (nb-1):
+    for l=0 upto (subh-1):
+      tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Image(Famille(umin+(k+1)*upas,vmin+l*vpas));
+      OTFc.@[apj][2]:=Image((Famille(umin+k*upas,vmin+l*vpas)));
+      OTFc.@[apj][3]:=Image((Famille(umin+k*upas,vmin+(l+1)*vpas)));
+      OTFc.@[apj][4]:=Image(Famille(umin+(k+1)*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj:=apj-1;
+  for k=0 upto apj:
+    ALT.@[k]:=-Zpart(GCoord(OTFc.@[k].iso));
+    if ProduitScalaire(Oeil-OTFc.@[k].iso,Normal(OTFc.@[k].iso,OTFc.@[k][1],OTFc.@[k][2]))>=0:
+      Vue.@[k]:=true;coul.@[k]:=outcolor;
+    else:
+      Vue.@[k]:=false;coul.@[k]:=incolor;
+    fi;
+  endfor;
+  apj.@:=apj;
+enddef;
+
+vardef ObjetCone[](expr fn,umin,umax,zbas,orign)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  scantokens("vardef Famille(expr u)="&fn&" enddef;");
+  scantokens("color "&substring(0,4) of orign&"; "&orign&";");
+  apj:=0;
+  upas:=(umax-umin)/nb;vpas:=2*abs(zbas)/subh;
+  %On crée les facettes et on calcule la profondeur en Z.
+  for k=0 upto (nb-1):
+    for l=0 upto (2*subh-1):
+      tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Image(Famille(umin+(k+1)*upas)+(l/subh)[Famille(umin+(k+1)*upas),orig]-Famille(umin+(k+1)*upas));
+      OTFc.@[apj][4]:=Image(Famille(umin+k*upas)+(l/subh)[Famille(umin+k*upas),orig]-Famille(umin+k*upas));
+      OTFc.@[apj][3]:=Image(Famille(umin+k*upas)+((l+1)/subh)[Famille(umin+k*upas),orig]-Famille(umin+k*upas));
+      OTFc.@[apj][2]:=Image(Famille(umin+(k+1)*upas)+((l+1)/subh)[Famille(umin+(k+1)*upas),orig]-Famille(umin+(k+1)*upas));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      ALT.@[apj]:=-Zpart(GCoord(OTFc.@[apj].iso));
+      if ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]))>=0:
+	Vue.@[apj]:=true;coul.@[apj]:=outcolor;
+      else:
+	Vue.@[apj]:=false;coul.@[apj]:=incolor;
+      fi;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj.@:=apj-1;
+enddef;
+
+subh:=12;
+
+vardef Objetcone[](expr rn,hn)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  scantokens("numeric "&substring(0,1) of rn&"; "&rn&";");
+  scantokens("numeric "&substring(0,1) of hn&"; "&hn&";");
+  vardef Famille(expr u,v)=(r*(1-(v/h))*cos(u),r*(1-(v/h))*sin(u),v) enddef;
+  umin:=pi; umax:=-pi; upas:=-2*pi/nb;
+  vmin:=0; vpas:=h/subh; vmax:=h-vpas;
+  apj:=0;
+  Zmin:=0;
+  Zmax:=h;
+  if creux=false:
+    Ferme.@:=true;
+    tcpt.@[apj]:=apj;
+    OTFc.@[apj].nb:=nb;
+    for k=0 upto nb:
+      OTFc.@[apj][k]:=Image(Famille(umin+k*upas,vmin));
+    endfor;
+    OTFc.@[apj].iso:=(OTFc.@[apj][1] for k=2 upto nb:+OTFc.@[apj][k] endfor)/nb;
+    apj:=apj+1;
+  else:
+    Ferme.@:=false;
+  fi;
+  %On crée les facettes et on calcule la profondeur en Z.
+  for k=0 upto (nb-1):
+    for l=0 upto (subh-1):
+      tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Image(Famille(umin+(k+1)*upas,vmin+l*vpas));
+      OTFc.@[apj][2]:=Image(Famille(umin+k*upas,vmin+l*vpas));
+      OTFc.@[apj][3]:=Image(Famille(umin+k*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj][4]:=Image(Famille(umin+(k+1)*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj:=apj-1;
+  for k=0 upto apj:
+    ALT.@[k]:=-Zpart(GCoord(OTFc.@[k].iso));
+    if ProduitScalaire(Oeil-OTFc.@[k].iso,Normal(OTFc.@[k].iso,OTFc.@[k][1],OTFc.@[k][2]))>=0:
+      Vue.@[k]:=true;coul.@[k]:=outcolor;
+    else:
+      Vue.@[k]:=false;coul.@[k]:=incolor;
+    fi;
+  endfor;
+  apj.@:=apj;
+enddef;
+
+vardef Objettronccone[](expr rn,hn,Hn)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  scantokens("numeric "&substring(0,1) of rn&"; "&rn&";");
+  scantokens("numeric "&substring(0,1) of hn&"; "&hn&";");
+  scantokens("numeric "&substring(0,1) of Hn&"; "&Hn&";");
+  vardef Famille(expr u,v)=(r*(1-v/H)*cos(u),r*(1-v/H)*sin(u),v) enddef;
+  umin:=pi; umax:=-pi; upas:=-2*pi/nb;
+  vmin:=0; vpas:=h/subh; vmax:=h;
+  apj:=0;
+  if creux=false:
+    Ferme.@:=true;
+    tcpt.@[apj]:=apj;
+    OTFc.@[apj].nb:=nb;
+    for k=0 upto nb:
+      OTFc.@[apj][k]:=Image(Famille(umin+k*upas,vmin));
+    endfor;
+    OTFc.@[apj].iso:=(OTFc.@[apj][1] for k=2 upto nb:+OTFc.@[apj][k] endfor)/nb;
+    apj:=apj+1;
+    tcpt.@[apj]:=apj;
+    OTFc.@[apj].nb:=nb;
+    for k=0 upto nb:
+      OTFc.@[apj][nb-k]:=Image(Famille(umin+k*upas,vmax));
+    endfor;
+    OTFc.@[apj].iso:=(OTFc.@[apj][1] for k=2 upto nb:+OTFc.@[apj][k] endfor)/nb;
+        apj:=apj+1;
+  else:
+    Ferme.@:=false;
+  fi;
+  %On crée les facettes et on calcule la profondeur en Z.
+  for k=0 upto (nb-1):%umin step upas until umax-upas:
+    for l=0 upto (subh-1):
+       tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Image(Famille(umin+(k+1)*upas,vmin+l*vpas));
+      OTFc.@[apj][2]:=Image(Famille(umin+k*upas,vmin+l*vpas));
+      OTFc.@[apj][3]:=Image(Famille(umin+k*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj][4]:=Image(Famille(umin+(k+1)*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj:=apj-1;
+  for k=0 upto apj:
+    ALT.@[k]:=-Zpart(GCoord(OTFc.@[k].iso));
+    if ProduitScalaire(Oeil-OTFc.@[k].iso,Normal(OTFc.@[k].iso,OTFc.@[k][1],OTFc.@[k][2]))>=0:
+      Vue.@[k]:=true;coul.@[k]:=outcolor;
+    else:
+      Vue.@[k]:=false;coul.@[k]:=incolor;
+    fi;
+  endfor;
+  apj.@:=apj;
+enddef;
+
+vardef Objetsphere[](expr Rn)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  if creux:Ferme.@:=false else: Ferme.@:=true fi;
+  scantokens("numeric "&substring(0,1) of Rn&"; "&Rn&";");
+  vardef Famille(expr u,v)=(R*(cos(u)*cos(v),cos(u)*sin(v),sin(u))) enddef;
+  umin:=-pi/2; umax:=pi/2; upas:=pi/nb;
+  vmin:=-pi; vpas:=2*pi/subh; vmax:=pi;
+  apj:=0;
+  %On crée les facettes et on calcule la profondeur en Z.
+  for k=0 upto (nb-1):
+    for l=0 upto (subh-1):
+      tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Image(Famille(umin+(k+1)*upas,vmin+l*vpas));
+      OTFc.@[apj][2]:=Image(Famille(umin+k*upas,vmin+l*vpas));
+      OTFc.@[apj][3]:=Image(Famille(umin+k*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj][4]:=Image(Famille(umin+(k+1)*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      ALT.@[apj]:=-Zpart(GCoord(OTFc.@[apj].iso));
+      if ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]))>=0:
+	Vue.@[apj]:=true;coul.@[apj]:=outcolor;
+      else:
+	Vue.@[apj]:=false;coul.@[apj]:=incolor;
+      fi;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj.@:=apj-1;
+enddef;
+
+vardef Objetdemispherebasse[](expr Rn)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  if creux:Ferme.@:=false else: Ferme.@:=true fi;
+  scantokens("numeric "&substring(0,1) of Rn&"; "&Rn&";");
+  vardef Famille(expr u,v)=(R*(cos(u)*cos(v),cos(u)*sin(v),sin(u))) enddef;
+  umin:=-pi/2; umax:=0; upas:=0.5*pi/nb;
+  vmin:=-pi; vpas:=2*pi/subh; vmax:=0;
+  apj:=0;
+  %On crée les facettes et on calcule la profondeur en Z.
+  for k=0 upto (nb-1):
+    for l=0 upto (subh-1):
+      tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Image(Famille(umin+(k+1)*upas,vmin+l*vpas));
+      OTFc.@[apj][2]:=Image(Famille(umin+k*upas,vmin+l*vpas));
+      OTFc.@[apj][3]:=Image(Famille(umin+k*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj][4]:=Image(Famille(umin+(k+1)*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      ALT.@[apj]:=-Zpart(GCoord(OTFc.@[apj].iso));
+      if ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]))>=0:
+	Vue.@[apj]:=true;coul.@[apj]:=outcolor;
+      else:
+	Vue.@[apj]:=false;coul.@[apj]:=incolor;
+      fi;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj.@:=apj-1;
+enddef;
+
+vardef ObjetSphereNew[](expr Rn)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  if creux:Ferme.@:=false else: Ferme.@:=true fi;
+  scantokens("numeric "&substring(0,1) of Rn&"; "&Rn&";");
+  vardef Famille(expr u,v)=(R*(cos(u)*cos(v),cos(u)*sin(v),sin(u))) enddef;
+  umin:=-pi/2; upas:=pi/nb; umax:=pi/2;
+  vmin:=-pi; vpas:=2*pi/subh; vmax:=pi;
+  apj:=0;
+  %On crée les facettes et on calcule la profondeur en Z.
+  for k=0 upto (nb-1):
+    for l=0 upto (subh-1):
+      tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Image(Famille(umin+(k+1)*upas,vmin+l*vpas));
+      OTFc.@[apj][2]:=Image(Famille(umin+k*upas,vmin+l*vpas));
+      OTFc.@[apj][3]:=Image(Famille(umin+k*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj][4]:=Image(Famille(umin+(k+1)*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      ALT.@[apj]:=-Zpart(GCoord(OTFc.@[apj].iso));
+      if ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]))>=0:
+	Vue.@[apj]:=true;coul.@[apj]:=outcolor;
+      else:
+	Vue.@[apj]:=false;coul.@[apj]:=incolor;
+      fi;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj.@:=apj-1;
+enddef;
+
+vardef ObjetSpherePfC[](expr Rn)=
+%  subh:=12;
+%  NewOeil:=(0,0,0);
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  if creux:Ferme.@:=false else: Ferme.@:=true fi;
+  scantokens("numeric "&substring(0,1) of Rn&"; "&Rn&";");
+  vardef Famille(expr u,v)=(R*(cos(u)*cos(v),cos(u)*sin(v),sin(u))) enddef;
+  umin:=-pi/2; upas:=pi/nb;% umax:=0;
+  vmin:=-pi; vpas:=2*pi/subh;% vmax:=2*pi;
+  apj:=0;
+  %On crée les facettes et on calcule la profondeur en Z.
+  for k=0 upto nb-1:
+    for l=0 upto (subh-1):
+      tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Image(Famille(umin+(k+1)*upas,vmin+l*vpas));%1
+      OTFc.@[apj][2]:=Image(Famille(umin+k*upas,vmin+l*vpas));%2
+      OTFc.@[apj][3]:=Image(Famille(umin+k*upas,vmin+(l+1)*vpas));%3
+      OTFc.@[apj][4]:=Image(Famille(umin+(k+1)*upas,vmin+(l+1)*vpas));%4
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      ALT.@[apj]:=Zpart(GCoord(OTFc.@[apj].iso));
+      if ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]))<0:%OTFc.@[apj][1]
+	Vue.@[apj]:=false;coul.@[apj]:=outcolor;
+      else:
+	Vue.@[apj]:=true;coul.@[apj]:=incolor;
+%	drawarrow Projette(OTFc.@[apj].iso)--Projette(OTFc.@[apj].iso+Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]));
+%	drawarrow Projette(OTFc.@[apj].iso)--Projette(NewOeil-OTFc.@[apj].iso);	
+      fi;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj.@:=apj-1;
+enddef;
+
+vardef ObjetSphereCabinet[](expr Rn)=
+%  Oeil:=(0,0,0);
+%  subh:=subh;
+ % nb:=8;
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  if creux:Ferme.@:=false else: Ferme.@:=true fi;
+  scantokens("numeric "&substring(0,1) of Rn&"; "&Rn&";");
+  vardef Famille(expr u,v)=(R*(cosd(u)*cosd(v),cosd(u)*sind(v),sind(u))) enddef;
+  umin:=-90; upas:=180/nb;% umax:=0;
+  vmin:=-180; vpas:=360/subh;% vmax:=2*pi;
+  apj:=0;
+  %On crée les facettes et on calcule la profondeur en Z.
+  for k=0 upto nb-1:%nb-1:
+    for l=0 upto (subh-1):
+      tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Famille(umin+(k+1)*upas,vmin+l*vpas);%1
+      OTFc.@[apj][2]:=Famille(umin+k*upas,vmin+l*vpas);%2
+      OTFc.@[apj][3]:=Famille(umin+k*upas,vmin+(l+1)*vpas);%3
+      OTFc.@[apj][4]:=Famille(umin+(k+1)*upas,vmin+(l+1)*vpas);%4
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      ALT.@[apj]:=-Zpart(GCoord(OTFc.@[apj].iso));
+      PfCPS:=ProduitScalaire(Oeil-OTFc.@[apj][1],Normal(OTFc.@[apj][1],OTFc.@[apj][2],OTFc.@[apj][3]))/1000;
+%      PfCPS:=ProduitScalaire(Oeil,-OTFc.@[apj].iso)/1000;
+      if PfCPS<0:%ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]))<0:%OTFc.@[apj][1]
+	Vue.@[apj]:=false;coul.@[apj]:=incolor;
+	%label(TEX("visible"&decimal(floor(0.01*ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj][1],OTFc.@[apj][2],OTFc.@[apj][3]))))),(0,0)+5mm*(0,-apj));
+%	dotlabel.llft(decimal(1),Projette(OTFc.@[apj][1]));
+%	dotlabel.llft(decimal(2),Projette(OTFc.@[apj][2]));
+%	dotlabel.llft(decimal(4),Projette(OTFc.@[apj][4]));
+%	drawarrow Projette(OTFc.@[apj][1])--Projette(OTFc.@[apj][1]+Normal(OTFc.@[apj][1],OTFc.@[apj][2],OTFc.@[apj][3]));
+%	drawarrow Projette(OTFc.@[apj][1])--Projette(Oeil+OTFc.@[apj][1]);
+%	label.rt(decimal(PfCPS)&"/Oeil-P1",Projette(OTFc.@[apj][1]+Normal(OTFc.@[apj][1],OTFc.@[apj][2],OTFc.@[apj][3])));
+	apj:=apj+1;
+      else:%if PfCPS>0:
+	Vue.@[apj]:=true;coul.@[apj]:=outcolor;
+%	dotlabel.llft(decimal(1),Projette(OTFc.@[apj][1]));
+%	dotlabel.llft(decimal(2),Projette(OTFc.@[apj][2]));
+%	dotlabel.llft(decimal(3),Projette(OTFc.@[apj][3]));
+%	dotlabel.llft(decimal(4),Projette(OTFc.@[apj][4]));
+%	drawarrow Projette(OTFc.@[apj][1])--Projette(OTFc.@[apj][1]+Normal(OTFc.@[apj][1],OTFc.@[apj][2],OTFc.@[apj][3]));
+%	drawarrow Projette(OTFc.@[apj][1])--Projette(Oeil+OTFc.@[apj][1]);
+%	label(TEX(decimal(floor(ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]))))),Projette(OTFc.@[apj].iso));
+%	drawarrow Projette(OTFc.@[apj].1)--Projette(OTFc.@[apj].iso+Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]));
+%	drawarrow Projette(OTFc.@[apj].iso)--Projette(NewOeil-OTFc.@[apj].iso);
+	      apj:=apj+1;
+      fi;
+    endfor;
+  endfor;
+  apj.@:=apj-1;
+enddef;
+
+vardef ObjetEquateur[](expr Rn)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  if creux:Ferme.@:=false else: Ferme.@:=true fi;
+  scantokens("numeric "&substring(0,1) of Rn&"; "&Rn&";");
+  vardef Famille(expr u,v)=(R*(cos(u)*cos(v),cos(u)*sin(v),sin(u))) enddef;
+%  umin:=-pi/2; upas:=pi/nb; umax:=pi/2;
+  umin:=-pi/nb; upas:=pi/nb; umax:=0;
+  vmin:=-pi; vpas:=2*pi/subh; vmax:=-pi+vpas;
+  apj:=0;
+  %On crée les facettes et on calcule la profondeur en Z.
+  for k=0 upto 0:%(nb-1):
+    for l=0 upto (subh-1):%(subh-1):
+      tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Image(Famille(umin+(k+1)*upas,vmin+l*vpas));
+      OTFc.@[apj][2]:=Image(Famille(umin+k*upas,vmin+l*vpas));
+      OTFc.@[apj][3]:=Image(Famille(umin+k*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj][4]:=Image(Famille(umin+(k+1)*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      ALT.@[apj]:=-Zpart(GCoord(OTFc.@[apj].iso));
+      if ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]))>=0:
+	Vue.@[apj]:=true;coul.@[apj]:=outcolor;
+      else:
+	Vue.@[apj]:=false;coul.@[apj]:=incolor;
+      fi;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj.@:=apj-1;
+enddef;
+
+vardef ObjetGreenwich[](expr Rn)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  if creux:Ferme.@:=false else: Ferme.@:=true fi;
+  scantokens("numeric "&substring(0,1) of Rn&"; "&Rn&";");
+  vardef Famille(expr u,v)=(R*(cos(u)*cos(v),cos(u)*sin(v),sin(u))) enddef;
+  umin:=-pi/2; upas:=pi/nb; umax:=pi;
+  vmin:=0; vpas:=2*pi/subh; vmax:=2*pi;
+  apj:=0;
+  %On crée les facettes et on calcule la profondeur en Z.
+  for l=0 upto 0:%(subh-1):
+  for k=0 upto nb-1:%(nb-1):
+      tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Image(Famille(umin+(k+1)*upas,vmin+l*vpas));
+      OTFc.@[apj][2]:=Image(Famille(umin+k*upas,vmin+l*vpas));
+      OTFc.@[apj][3]:=Image(Famille(umin+k*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj][4]:=Image(Famille(umin+(k+1)*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      ALT.@[apj]:=-Zpart(GCoord(OTFc.@[apj].iso));
+      if ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]))>=0:
+	Vue.@[apj]:=true;coul.@[apj]:=outcolor;
+      else:
+	Vue.@[apj]:=false;coul.@[apj]:=incolor;
+      fi;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  umin:=-pi/2; upas:=pi/nb; umax:=pi;
+  vmin:=pi; vpas:=2*pi/subh; vmax:=2*pi;
+  for l=0 upto 0:
+  for k=0 upto nb-1:%(nb-1):
+      tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Image(Famille(umin+(k+1)*upas,vmin+l*vpas));
+      OTFc.@[apj][2]:=Image(Famille(umin+k*upas,vmin+l*vpas));
+      OTFc.@[apj][3]:=Image(Famille(umin+k*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj][4]:=Image(Famille(umin+(k+1)*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      ALT.@[apj]:=-Zpart(GCoord(OTFc.@[apj].iso));
+      if ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]))>=0:
+	Vue.@[apj]:=true;coul.@[apj]:=outcolor;
+      else:
+	Vue.@[apj]:=false;coul.@[apj]:=incolor;
+      fi;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj.@:=apj-1;
+enddef;
+
+vardef Objetcalotte[](expr Rn,Phib,Phih)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  scantokens("numeric "&substring(0,1) of Rn&"; "&Rn&";");
+  scantokens("numeric "&substring(0,4) of Phib&"; "&Phib&";");
+  scantokens("numeric "&substring(0,4) of Phih&"; "&Phih&";");
+  vardef Famille(expr u,v)=(R*(cos(u)*cos(v),cos(u)*sin(v),sin(u))) enddef;
+  umin:=phib; umax:=phih; upas:=(phih-phib)/nb;
+  vmin:=-pi; vpas:=2*pi/subh; vmax:=pi;
+  apj:=0;
+  nbsp:=subh;
+  if creux=false:
+    Ferme.@:=true;
+    tcpt.@[apj]:=apj;
+    OTFc.@[apj].nb:=nbsp;
+    for l=1 upto nbsp:
+      OTFc.@[apj][l]:=Image(Famille(umin,vmax-l*vpas));
+    endfor;
+    OTFc.@[apj].iso:=(OTFc.@[apj][1] for k=2 upto nbsp:+OTFc.@[apj][k] endfor)/nbsp;
+    apj:=apj+1;
+    tcpt.@[apj]:=apj;
+    OTFc.@[apj].nb:=subh;
+    for l=1 upto nbsp:
+      OTFc.@[apj][l]:=Image(Famille(umax,vmin+l*vpas));
+     endfor;
+    OTFc.@[apj].iso:=(OTFc.@[apj][1] for k=2 upto nbsp:+OTFc.@[apj][k] endfor)/nbsp;
+    apj:=apj+1;
+  else:
+    Ferme.@:=false;
+  fi;
+  %On crée les facettes et on calcule la profondeur en Z.
+  %for k=umin step upas until umax-upas:
+  for k=0 upto (nb-1):
+    for l=0 upto (subh-1):
+      tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Image(Famille(umin+(k+1)*upas,vmin+l*vpas));
+      OTFc.@[apj][2]:=Image(Famille(umin+k*upas,vmin+l*vpas));
+      OTFc.@[apj][3]:=Image(Famille(umin+k*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj][4]:=Image(Famille(umin+(k+1)*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj:=apj-1;
+  for k=0 upto apj:
+    ALT.@[k]:=-Zpart(GCoord(OTFc.@[k].iso));
+    if ProduitScalaire(Oeil-OTFc.@[k].iso,Normal(OTFc.@[k].iso,OTFc.@[k][1],OTFc.@[k][2]))>=0:
+      Vue.@[k]:=true;coul.@[k]:=outcolor;
+    else:
+      Vue.@[k]:=false;coul.@[k]:=incolor;
+    fi;
+  endfor;
+  apj.@:=apj;
+enddef;
+
+vardef Objetanneau[](expr Rn,rn,hn)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  if creux:Ferme.@:=false else:Ferme.@:=true fi;
+  scantokens("numeric "&substring(0,1) of Rn&"; "&Rn&";");
+  scantokens("numeric "&substring(0,1) of rn&"; "&rn&";");
+  scantokens("numeric "&substring(0,1) of hn&"; "&hn&";");
+  path sectionanneau;
+  sectionanneau=(R,0)--(R,h)--(r,h)--(r,0)--cycle;
+  vardef Famille(expr u,v)=((xpart(point(u) of sectionanneau)*cos(v),xpart(point(u) of sectionanneau)*sin(v),ypart(point(u) of sectionanneau))) enddef;
+  umin:=0; umax:=4; upas:=4/nb;
+  vmin:=-pi; vpas:=2*pi/subh; vmax:=2*pi;
+  apj:=0;
+  %On crée les facettes et on calcule la profondeur en Z.
+  for k=0 upto (nb-1):
+    for l=0 upto (subh-1):
+      tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Image(Famille(umin+(k+1)*upas,vmin+l*vpas));
+      OTFc.@[apj][2]:=Image(Famille(umin+k*upas,vmin+l*vpas));
+      OTFc.@[apj][3]:=Image(Famille(umin+k*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj][4]:=Image(Famille(umin+(k+1)*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      ALT.@[apj]:=-Zpart(GCoord(OTFc.@[apj].iso));
+      if ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]))>=0:
+	Vue.@[apj]:=true;coul.@[apj]:=outcolor;
+      else:
+	Vue.@[apj]:=false;coul.@[apj]:=incolor;
+      fi;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj.@:=apj-1;
+enddef;
+
+vardef ObjetAnneau[](expr nbpn,sectionanneau)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  scantokens("numeric "&substring(0,3) of nbpn&"; "&nbpn&";");
+  vardef Famille(expr u,v)=((xpart(point(u) of sectionanneau)*cos(v),xpart(point(u) of sectionanneau)*sin(v),ypart(point(u) of sectionanneau))) enddef;
+  umin:=0; umax:=nbp; upas:=1;
+  vmin:=-pi; vpas:=2*pi/subh; vmax:=pi;
+  apj:=0;
+  %On crée les facettes et on calcule la profondeur en Z.
+  for k=0 upto (nbp-1):
+    for l=0 upto (subh-1):
+      tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Image(Famille(umin+(k+1)*upas,vmin+l*vpas));
+      OTFc.@[apj][2]:=Image(Famille(umin+k*upas,vmin+l*vpas));
+      OTFc.@[apj][3]:=Image(Famille(umin+k*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj][4]:=Image(Famille(umin+(k+1)*upas,vmin+(l+1)*vpas));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      ALT.@[apj]:=-Zpart(GCoord(OTFc.@[apj].iso));
+      if ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]))>=0:
+	Vue.@[apj]:=true;coul.@[apj]:=outcolor;
+      else:
+	Vue.@[apj]:=false;coul.@[apj]:=incolor;
+      fi;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj.@:=apj-1;
+enddef;
+
+vardef ObjetPrisme[](expr axen,hn)(text tn)=%pb avec certaines positions de l'observateur.->maillage vertical
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  scantokens("numeric "&substring(0,1) of hn&"; "&hn&";");
+  scantokens("color "&substring(0,3) of axen&"; "&axen&";");
+  nbsn:=0;%nb sommets total pour la base
+  for _p=tn:
+    Sommet[nbsn]:=_p;
+    nbsn:=nbsn+1;
+  endfor;
+  apj:=0;
+  if creux=false:
+    Ferme.@:=true;
+    tcpt.@[apj]:=apj;
+    OTFc.@[apj].nb:=nbsn;
+    for k=1 upto nbsn:
+      OTFc.@[apj][k]:=Image(Sommet[nbsn-k]);
+    endfor;
+    OTFc.@[apj].iso:=(OTFc.@[apj][1] for k=2 upto nbsn:+OTFc.@[apj][k] endfor)/nbsn;
+    apj:=apj+1;
+    tcpt.@[apj]:=apj;
+    OTFc.@[apj].nb:=nbsn;
+    for k=1 upto nbsn:
+      OTFc.@[apj][k]:=Image(Sommet[k-1]+h*axe);
+    endfor;
+    OTFc.@[apj].iso:=(OTFc.@[apj][1] for k=2 upto nbsn:+OTFc.@[apj][k] endfor)/nbsn;
+    apj:=apj+1;
+  else:
+    Ferme.@:=false;
+  fi;
+  for k=1 upto nbsn:
+    for l=0 upto (subh-1):
+      for p=0 upto (nb-1):
+	tcpt.@[apj]:=apj;
+	OTFc.@[apj].nb:=4;
+	OTFc.@[apj][1]:=Image((p/nb)[Sommet[(k-1) mod nbsn],Sommet[k mod nbsn]]+(l/subh)*(h*axe));
+	OTFc.@[apj][2]:=Image(((p+1)/nb)[Sommet[(k-1) mod nbsn],Sommet[k mod nbsn]]+(l/subh)*(h*axe));
+	OTFc.@[apj][3]:=Image(((p+1)/nb)[Sommet[(k-1) mod nbsn],Sommet[k mod nbsn]]+((l+1)/subh)*(h*axe));
+	OTFc.@[apj][4]:=Image((p/nb)[Sommet[(k-1) mod nbsn],Sommet[k mod nbsn]]+((l+1)/subh)*(h*axe));
+	OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+	apj:=apj+1;
+      endfor;
+    endfor;
+  endfor;
+  apj:=apj-1;
+  for k=0 upto apj:
+    ALT.@[k]:=-Zpart(GCoord(OTFc.@[k].iso));
+    if ProduitScalaire(Oeil-OTFc.@[k].iso,Normal(OTFc.@[k].iso,OTFc.@[k][1],OTFc.@[k][2]))>=0:
+      Vue.@[k]:=true;coul.@[k]:=outcolor;
+    else:
+      Vue.@[k]:=false;coul.@[k]:=incolor;
+    fi;
+  endfor;
+  apj.@:=apj;
+enddef;
+
+vardef Objetcube[](expr ar)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  if creux=true:Ferme.@:=false else: Ferme.@:=true fi;
+  scantokens("numeric "&substring(0,1) of ar&"; "&ar&";");
+  Sommet1:=(a/2,-a/2,-a/2);
+  Sommet2:=(a/2,a/2,-a/2);
+  Sommet3:=(-a/2,a/2,-a/2);
+  Sommet4:=(-a/2,-a/2,-a/2);
+  Sommet5:=(-a/2,-a/2,a/2);
+  Sommet6:=(a/2,-a/2,a/2);
+  Sommet7:=(a/2,a/2,a/2);
+  Sommet8:=(-a/2,a/2,a/2);
+%%Faces
+  apj:=0;
+  for p=1 upto 4:
+    for l=0 upto (subh-1):
+      for k=0 upto (subh-1):
+	OTFc.@[apj][1]:=Image((l/subh)[Sommet[p],Sommet[(p mod 4)+1]]+(k/subh)*(Sommet[(p mod 4)+5]-Sommet[p]));
+	OTFc.@[apj][2]:=Image(((l+1)/subh)[Sommet[p],Sommet[(p mod 4)+1]]+(k/subh)*(Sommet[(p mod 4)+5]-Sommet[p]));
+	OTFc.@[apj][3]:=Image(((l+1)/subh)[Sommet[p],Sommet[(p mod 4)+1]]+((k+1)/subh)*(Sommet[(p mod 4)+5]-Sommet[p]));
+	OTFc.@[apj][4]:=Image((l/subh)[Sommet[p],Sommet[(p mod 4)+1]]+((k+1)/subh)*(Sommet[(p mod 4)+5]-Sommet[p]));
+	OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+	apj:=apj+1;
+      endfor;
+    endfor;
+  endfor;
+  %face du dessous
+  for l=0 upto (subh-1):
+    for k=0 upto (subh-1):
+      OTFc.@[apj][1]:=Image((l/subh)[Sommet1,Sommet4]+(k/subh)*(Sommet2-Sommet1));
+      OTFc.@[apj][2]:=Image(((l+1)/subh)[Sommet1,Sommet4]+(k/subh)*(Sommet2-Sommet1));
+      OTFc.@[apj][3]:=Image(((l+1)/subh)[Sommet1,Sommet4]+((k+1)/subh)*(Sommet2-Sommet1));
+      OTFc.@[apj][4]:=Image((l/subh)[Sommet1,Sommet4]+((k+1)/subh)*(Sommet2-Sommet1));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  %face du dessus
+  for l=0 upto (subh-1):
+    for k=0 upto (subh-1):
+      OTFc.@[apj][1]:=Image((l/subh)[Sommet6,Sommet7]+(k/subh)*(Sommet5-Sommet6));
+      OTFc.@[apj][2]:=Image(((l+1)/subh)[Sommet6,Sommet7]+(k/subh)*(Sommet5-Sommet6));
+      OTFc.@[apj][3]:=Image(((l+1)/subh)[Sommet6,Sommet7]+((k+1)/subh)*(Sommet5-Sommet6));
+      OTFc.@[apj][4]:=Image((l/subh)[Sommet6,Sommet7]+((k+1)/subh)*(Sommet5-Sommet6));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj:=apj-1;
+  for k=0 upto apj:
+    OTFc.@[k].nb:=4;
+    ALT.@[k]:=-Zpart(GCoord(OTFc.@[k].iso));
+    if ProduitScalaire(Oeil-OTFc.@[k].iso,Normal(OTFc.@[k].iso,OTFc.@[k][1],OTFc.@[k][2]))>=0:
+      Vue.@[k]:=true;coul.@[k]:=outcolor;
+    else:
+      Vue.@[k]:=false;coul.@[k]:=incolor;
+    fi;
+  endfor;
+  apj.@:=apj;
+enddef;
+
+vardef Objetpave[](expr Lln,Hhn,Ppn)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  if creux=true: Ferme.@:=false else: Ferme.@:=true fi;
+  scantokens("numeric "&substring(0,1) of Lln&"; "&Lln&";");
+  scantokens("numeric "&substring(0,1) of Hhn&"; "&Hhn&";");
+  scantokens("numeric "&substring(0,1) of Ppn&"; "&Ppn&";");
+  NbS:=8;
+  Sommet1:=(P/2,-L/2,-H/2);
+  Sommet2:=(P/2,L/2,-H/2);
+  Sommet3:=(-P/2,L/2,-H/2);
+  Sommet4:=(-P/2,-L/2,-H/2);
+  Sommet5:=(-P/2,-L/2,H/2);
+  Sommet6:=(P/2,-L/2,H/2);
+  Sommet7:=(P/2,L/2,H/2);
+  Sommet8:=(-P/2,L/2,H/2);
+%%Faces
+  apj:=0;
+  for p=1 upto 4:
+    for l=0 upto (subh-1):
+      for k=0 upto (subh-1):
+	OTFc.@[apj][1]:=Image((l/subh)[Sommet[p],Sommet[(p mod 4)+1]]+(k/subh)*(Sommet[(p mod 4)+5]-Sommet[p]));
+	OTFc.@[apj][2]:=Image(((l+1)/subh)[Sommet[p],Sommet[(p mod 4)+1]]+(k/subh)*(Sommet[(p mod 4)+5]-Sommet[p]));
+	OTFc.@[apj][3]:=Image(((l+1)/subh)[Sommet[p],Sommet[(p mod 4)+1]]+((k+1)/subh)*(Sommet[(p mod 4)+5]-Sommet[p]));
+	OTFc.@[apj][4]:=Image((l/subh)[Sommet[p],Sommet[(p mod 4)+1]]+((k+1)/subh)*(Sommet[(p mod 4)+5]-Sommet[p]));
+	OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+	apj:=apj+1;
+      endfor;
+    endfor;
+  endfor;
+  %face du dessous
+  for l=0 upto (subh-1):
+    for k=0 upto (subh-1):
+      OTFc.@[apj][1]:=Image((l/subh)[Sommet1,Sommet4]+(k/subh)*(Sommet2-Sommet1));
+      OTFc.@[apj][2]:=Image(((l+1)/subh)[Sommet1,Sommet4]+(k/subh)*(Sommet2-Sommet1));
+      OTFc.@[apj][3]:=Image(((l+1)/subh)[Sommet1,Sommet4]+((k+1)/subh)*(Sommet2-Sommet1));
+      OTFc.@[apj][4]:=Image((l/subh)[Sommet1,Sommet4]+((k+1)/subh)*(Sommet2-Sommet1));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  %face du dessus
+  for l=0 upto (subh-1):
+    for k=0 upto (subh-1):
+      OTFc.@[apj][1]:=Image((l/subh)[Sommet6,Sommet7]+(k/subh)*(Sommet5-Sommet6));
+      OTFc.@[apj][2]:=Image(((l+1)/subh)[Sommet6,Sommet7]+(k/subh)*(Sommet5-Sommet6));
+      OTFc.@[apj][3]:=Image(((l+1)/subh)[Sommet6,Sommet7]+((k+1)/subh)*(Sommet5-Sommet6));
+      OTFc.@[apj][4]:=Image((l/subh)[Sommet6,Sommet7]+((k+1)/subh)*(Sommet5-Sommet6));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj:=apj-1;
+  for k=0 upto apj:
+    OTFc.@[k].nb:=4;
+    ALT.@[k]:=-Zpart(GCoord(OTFc.@[k].iso));
+    if ProduitScalaire(Oeil-OTFc.@[k].iso,Normal(OTFc.@[k].iso,OTFc.@[k][1],OTFc.@[k][2]))>=0:
+      Vue.@[k]:=true;coul.@[k]:=outcolor;
+    else:
+      Vue.@[k]:=false;coul.@[k]:=incolor;
+    fi;
+  endfor;
+  apj.@:=apj;
+enddef;
+
+vardef Objetgrille[](expr amn,ann,bmn,bnn)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  Ferme.@:=false;
+  scantokens("numeric "&substring(0,2) of amn&"; "&amn&";");
+  scantokens("numeric "&substring(0,2) of ann&"; "&ann&";");
+  scantokens("numeric "&substring(0,2) of bmn&"; "&bmn&";");
+  scantokens("numeric "&substring(0,2) of bnn&"; "&bnn&";");
+  apj:=0;
+  upas:=(an-am)/nb;
+  vpas:=(bn-bm)/subh;
+  for k=0 upto (nb-1):
+    for l=0 upto (subh-1):
+      tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Image((am+k*upas,bm+l*vpas,0));
+      OTFc.@[apj][2]:=Image((am+(k+1)*upas,bm+l*vpas,0));
+      OTFc.@[apj][3]:=Image((am+(k+1)*upas,bm+(l+1)*vpas,0));
+      OTFc.@[apj][4]:=Image((am+k*upas,bm+(l+1)*vpas,0));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      ALT.@[apj]:=-Zpart(GCoord(OTFc.@[apj].iso));
+      if ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]))>=0:
+	Vue.@[apj]:=true;coul.@[apj]:=outcolor;
+      else:
+	Vue.@[apj]:=false;coul.@[apj]:=incolor;
+      fi;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj.@:=apj-1;
+enddef;
+
+vardef ObjetgrilleYZ[](expr amn,ann,bmn,bnn)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  Ferme.@:=false;
+  scantokens("numeric "&substring(0,2) of amn&"; "&amn&";");
+  scantokens("numeric "&substring(0,2) of ann&"; "&ann&";");
+  scantokens("numeric "&substring(0,2) of bmn&"; "&bmn&";");
+  scantokens("numeric "&substring(0,2) of bnn&"; "&bnn&";");
+  apj:=0;
+  upas:=(an-am)/nb;
+  vpas:=(bn-bm)/subh;
+  for k=0 upto (nb-1):
+    for l=0 upto (subh-1):
+      tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Image((0,am+k*upas,bm+l*vpas));
+      OTFc.@[apj][2]:=Image((0,am+(k+1)*upas,bm+l*vpas));
+      OTFc.@[apj][3]:=Image((0,am+(k+1)*upas,bm+(l+1)*vpas));
+      OTFc.@[apj][4]:=Image((0,am+k*upas,bm+(l+1)*vpas));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      ALT.@[apj]:=-Zpart(GCoord(OTFc.@[apj].iso));
+      if ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]))>=0:
+	Vue.@[apj]:=true;coul.@[apj]:=outcolor;
+      else:
+	Vue.@[apj]:=false;coul.@[apj]:=incolor;
+      fi;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj.@:=apj-1;
+enddef;
+
+vardef ObjetRuban[](expr hn)(text tn)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  scantokens("numeric "&substring(0,1) of hn&"; "&hn&";");
+  nbsn:=0;%nb sommets total pour la base
+  for _p=tn:
+    Sommet[nbsn]:=_p;
+    nbsn:=nbsn+1;
+  endfor;
+  Ferme.@:=false;
+  apj:=0;
+  for k=1 upto (nbsn-1):
+    for l=0 upto (subh-1):
+      tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Image(Sommet[k-1]+(l/subh)*(h*(0,0,1)));
+      OTFc.@[apj][2]:=Image(Sommet[k]+(l/subh)*(h*(0,0,1)));
+      OTFc.@[apj][3]:=Image(Sommet[k]+((l+1)/subh)*(h*(0,0,1)));
+      OTFc.@[apj][4]:=Image(Sommet[k-1]+((l+1)/subh)*(h*(0,0,1)));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj:=apj-1;
+  for k=0 upto apj:
+    ALT.@[k]:=-Zpart(GCoord(OTFc.@[k].iso));
+    if ProduitScalaire(Oeil-OTFc.@[k].iso,Normal(OTFc.@[k].iso,OTFc.@[k][1],OTFc.@[k][2]))>=0:
+      Vue.@[k]:=true;coul.@[k]:=outcolor;
+    else:
+      Vue.@[k]:=false;coul.@[k]:=incolor;
+    fi;
+  endfor;
+  apj.@:=apj;
+enddef;
+
+vardef ObjetBiface[](text tn)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  nbsn:=0;%nb sommets total pour la base
+  for _p=tn:
+    nbsn:=nbsn+1;
+    Sommet[nbsn]:=_p;
+  endfor;
+  %Ferme.@:=true;
+  apj:=0;
+  tcpt.@[apj]:=apj;
+  OTFc.@[apj].nb:=nbsn;
+  for k=1 upto nbsn:
+    OTFc.@[apj][k]:=Image(Sommet[nbsn+1-k]);
+  endfor;
+  OTFc.@[apj].iso:=(OTFc.@[apj][1] for k=2 upto nbsn:+OTFc.@[apj][k] endfor)/nbsn;
+  apj:=apj+1;
+  tcpt.@[apj]:=apj;
+  OTFc.@[apj].nb:=nbsn;
+  for k=1 upto nbsn:
+    OTFc.@[apj][k]:=Image(Sommet[k]);
+  endfor;
+  OTFc.@[apj].iso:=(OTFc.@[apj][1] for k=2 upto nbsn:+OTFc.@[apj][k] endfor)/nbsn;
+  for k=0 upto apj:
+    ALT.@[k]:=-Zpart(GCoord(OTFc.@[k].iso));
+    if ProduitScalaire(Oeil-OTFc.@[k].iso,Normal(OTFc.@[k].iso,OTFc.@[k][1],OTFc.@[k][2]))>=0:
+      Vue.@[k]:=true;coul.@[k]:=outcolor;
+    else:
+      Vue.@[k]:=false;coul.@[k]:=incolor;
+    fi;
+  endfor;
+  apj.@:=apj;
+enddef;
+
+lambda:=3;
+mu:=2;
+
+vardef Objetplan[](expr Ann,Bnn,Cnn)=%à modifier mais pour l'instant ça marche pour les intersections;
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  Ferme.@:=false;
+  color PPP[];
+  scantokens("color "&substring(0,2) of Ann&"; "&Ann&";");
+  scantokens("color "&substring(0,2) of Bnn&"; "&Bnn&";");
+  scantokens("color "&substring(0,2) of Cnn&"; "&Cnn&";");
+  apj:=0;
+  PPP[0]=Image(An-lambda*(Bn-An)-mu*(Cn-An));
+  PPP[1]=Image(An+lambda*(Bn-An)-mu*(Cn-An));
+  PPP[2]=Image(An+lambda*(Bn-An)+mu*(Cn-An));
+  PPP[3]=Image(An-lambda*(Bn-An)+mu*(Cn-An));
+  for k=0 upto (nb-1):
+    for l=0 upto (subh-1):
+      tcpt.@[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Image((k/subh)[PPP0,PPP1]+(l/subh)*(PPP3-PPP0));
+      OTFc.@[apj][2]:=Image(((k+1)/subh)[PPP0,PPP1]+(l/subh)*(PPP3-PPP0));
+      OTFc.@[apj][3]:=Image(((k+1)/subh)[PPP0,PPP1]+((l+1)/subh)*(PPP3-PPP0));
+      OTFc.@[apj][4]:=Image((k/subh)[PPP0,PPP1]+((l+1)/subh)*(PPP3-PPP0));
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      ALT.@[apj]:=-Zpart(GCoord(OTFc.@[apj].iso));
+      if ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]))>=0:
+	Vue.@[apj]:=true;coul.@[apj]:=outcolor;
+      else:
+	Vue.@[apj]:=false;coul.@[apj]:=incolor;
+      fi;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj.@:=apj-1;
+enddef;
+
+vardef Objettetraedre[](expr ar)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  if creux=true:Ferme.@:=false else: Ferme.@:=true fi;
+  scantokens("numeric "&substring(0,1) of ar&"; "&ar&";");
+  Sommet0:=a*(-0.81650,-0.47140,-1/3);
+  Sommet1:=a*(0.81650,-0.471402,-1/3);
+  Sommet2:=a*(0,0.94281,-1/3);
+  Sommet3:=a*(0,0,1);
+  tcpt.@[0]:=0;
+  OTFc.@[0].nb:=3;
+  OTFc.@[0][1]:=Image(Sommet0);
+  OTFc.@[0][2]:=Image(Sommet1);
+  OTFc.@[0][3]:=Image(Sommet2);
+  OTFc.@[0].iso:=(OTFc.@[0][1]+OTFc.@[0][2]+OTFc.@[0][3])/3;
+  tcpt.@[1]:=1;
+  OTFc.@[1].nb:=3;
+  OTFc.@[1][1]:=Image(Sommet0);
+  OTFc.@[1][2]:=Image(Sommet1);
+  OTFc.@[1][3]:=Image(Sommet3);
+  OTFc.@[1].iso:=(OTFc.@[1][1]+OTFc.@[1][2]+OTFc.@[1][3])/3;
+  tcpt.@[2]:=2;
+  OTFc.@[2].nb:=3;
+  OTFc.@[2][1]:=Image(Sommet1);
+  OTFc.@[2][2]:=Image(Sommet2);
+  OTFc.@[2][3]:=Image(Sommet3);
+  OTFc.@[2].iso:=(OTFc.@[2][1]+OTFc.@[2][2]+OTFc.@[2][3])/3;
+  tcpt.@[3]:=3;
+  OTFc.@[3].nb:=3;
+  OTFc.@[3][1]:=Image(Sommet2);
+  OTFc.@[3][2]:=Image(Sommet0);
+  OTFc.@[3][3]:=Image(Sommet3);
+  OTFc.@[3].iso:=(OTFc.@[3][1]+OTFc.@[3][2]+OTFc.@[3][3])/3;
+  for k=0 upto 3:
+    ALT.@[k]:=-Zpart(GCoord(OTFc.@[k].iso));
+    if ProduitScalaire(Oeil-OTFc.@[k].iso,Normal(OTFc.@[k].iso,OTFc.@[k][1],OTFc.@[k][2]))>=0:
+      Vue.@[k]:=true;coul.@[k]:=outcolor;
+    else:
+      Vue.@[k]:=false;coul.@[k]:=incolor;
+    fi;
+  endfor;
+  apj.@:=3;
+enddef;
+
+vardef Objetoctaedre[](expr ar)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  if creux=true:Ferme.@:=false else: Ferme.@:=true fi;
+  scantokens("numeric "&substring(0,1) of ar&"; "&ar&";");
+  AA=a*sqrt(2)/2;
+  ObjetNew.@((0,0,-a),(-AA,-AA,0),(AA,-AA,0),(AA,AA,0),(-AA,AA,0),(0,0,a))(%
+    3,0,2,1,%
+    3,0,3,2,%
+    3,0,4,3,%
+    3,0,1,4,%
+    3,5,1,2,%
+    3,5,2,3,%
+    3,5,3,4,%
+    3,5,4,1%
+    );
+enddef;
+
+vardef Objeticosaedre[](expr ar)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  if creux=true:Ferme.@:=false else: Ferme.@:=true fi;
+  scantokens("numeric "&substring(0,1) of ar&"; "&ar&";");
+  aplus=sqrt((5+sqrt(5))/10);
+  amoins=sqrt((5-sqrt(5))/10);
+  bplus=(5+sqrt(5))/10;
+  bmoins=(5-sqrt(5))/10;
+  Cmp=sqrt(5)/5;
+  ObjetNew.@(a*(0,1,0),a*(amoins,Cmp,-bplus),a*(-amoins,Cmp,-bplus),a*(-aplus,Cmp,bmoins),a*(0,Cmp,2*Cmp),a*(aplus,Cmp,bmoins),a*(amoins,-Cmp,bplus),a*(-amoins,-Cmp,bplus),a*(-aplus,-Cmp,-bmoins),a*(0,-Cmp,-2*Cmp),a*(aplus,-Cmp,-bmoins),a*(0,-1,0))(%
+    3,1,5,6,%
+    3,1,4,5,%
+    3,1,3,4,%
+    3,1,2,3,%
+    3,1,6,2,%
+    3,7,6,5,%
+    3,8,5,4,%
+    3,9,4,3,%
+    3,10,3,2,%
+    3,11,2,6,%
+    3,6,7,11,%
+    3,5,8,7,%
+    3,4,9,8,%
+    3,3,10,9,%
+    3,2,11,10,%
+    3,12,10,11,%
+    3,12,9,10,%
+    3,12,8,9,%
+    3,12,7,8,%
+    3,12,11,7);
+enddef;
+
+vardef Objetdodecaedre[](expr ar)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  if creux=true:Ferme.@:=false else: Ferme.@:=true fi;
+  scantokens("numeric "&substring(0,1) of ar&"; "&ar&";");
+  Ap=a*sqrt((5+2*sqrt(5))/15);
+  Bp=a*sqrt((10+2*sqrt(5))/15);
+  Cp=a*sqrt((5+sqrt(5))/30);
+  Dp=a*(sqrt(15)+sqrt(3))/6;
+  Am=a*sqrt((5-2*sqrt(5))/15);
+  Bm=a*sqrt((10-2*sqrt(5))/15);
+  Cm=a*sqrt((5-sqrt(5))/30);
+  Dm=a*(sqrt(15)-sqrt(3))/6;
+  Ee:=a*sqrt(3)/3;
+  ObjetNew.@((0,Ap,-Bm),(-Ee,Ap,-Am),(-Dm,Ap,Cp),(Dm,Ap,Cp),(Ee,Ap,-Am),(0,Am,-Bp),(-Dp,Am,-Cm),(-Ee,Am,Ap),(Ee,Am,Ap),(Dp,Am,-Cm),(0,-Am,Bp),(Dp,-Am,Cm),(Ee,-Am,-Ap),(-Ee,-Am,-Ap),(-Dp,-Am,Cm),(0,-Ap,Bm),(Ee,-Ap,Am),(Dm,-Ap,-Cp),(-Dm,-Ap,-Cp),(-Ee,-Ap,Am))(%
+    5,5,1,2,3,4,%
+    5,1,5,10,13,6,%
+    5,2,1,6,14,7,%
+    5,3,2,7,15,8,%
+    5,4,3,8,11,9,%
+    5,5,4,9,12,10,%
+    5,6,13,18,19,14,%
+    5,7,14,19,20,15,%
+    5,8,15,20,16,11,%
+    5,9,11,16,17,12,%
+    5,10,12,17,18,13,%
+    5,16,20,19,18,17%
+    );
+enddef;
+
+vardef ObjetNew[](text listesommets)(text listefaces)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  color Sommet[];
+  nbs:=0;
+  mini:=min(listefaces);
+  if mini=0:
+    for _p=listesommets:
+      Sommet[nbs]:=_p;
+      nbs:=nbs+1;
+    endfor;
+  elseif mini=1:
+    for _p=listesommets:
+      nbs:=nbs+1;
+      Sommet[nbs]:=_p;
+    endfor;
+  fi;
+  apj:=0;
+  j:=0;%pour compter le nombre de sommets à conserver
+  for p_=listefaces:
+    if j=0:
+      OTFc.@[apj].nb:=p_;
+      j:=1;
+      k:=0;
+    else:
+      k:=k+1;
+      if k<>OTFc.@[apj].nb:
+	OTFc.@[apj][k]:=Image(Sommet[p_]);
+      else:
+	OTFc.@[apj][k]:=Image(Sommet[p_]);
+	j:=0;
+	apj:=apj+1;
+      fi;
+    fi;
+  endfor;
+  apj:=apj-1;
+  for k=0 upto apj:
+    OTFc.@[k].iso:=(OTFc.@[k][1] for l=2 upto OTFc.@[k].nb:+OTFc.@[k][l] endfor)/OTFc.@[k].nb;
+    ALT.@[k]:=-Zpart(GCoord(OTFc.@[k].iso));
+    if ProduitScalaire(Oeil-OTFc.@[k].iso,Normal(OTFc.@[k].iso,OTFc.@[k][1],OTFc.@[k][2]))>=0:
+      Vue.@[k]:=true;coul.@[k]:=outcolor;
+    else:
+      Vue.@[k]:=false;coul.@[k]:=incolor;
+    fi;
+  endfor;
+  apj.@:=apj;
+enddef;
+
+%Objet lecture externe
+
+vardef ObjetOFF[](expr nomfichier)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  OFF:=true;
+  string s_;
+  s_=readfrom nomfichier;
+  string ss[];
+  if s_<>EOF:
+    ss1 := loptok s_;
+    t_ := if ss1="%": 0 else: 1 fi;
+    forever:
+      ss[incr t_] := loptok s_;
+      exitif ss[t_]="";
+    endfor;
+  %else: false
+    show ss1;
+  fi;
+%  NbS:=round(Mexp Mlog_str ss1);
+%  NF:=round(Mexp Mlog_str ss2);
+%  s_:=readfrom nomfichier;
+%  if debut=0:
+%    for k=0 upto NbS-1:
+%      s_:=readfrom nomfichier;
+%      if s_<>EOF:
+%	ss1 := loptok s_;
+%	n_ := if ss1="%": 0 else: 1 fi;
+%	forever:
+%	  ss[incr n_] := loptok s_;
+%	  exitif ss[n_]="";
+%	endfor
+%      else: false
+%      fi;
+%      Sommet[k]:=(Mexp ((Mlog_str ss1) Mdiv (Mlog echelle)),Mexp ((Mlog_str ss3) Mdiv (Mlog echelle)),Mexp ((Mlog_str ss2) Mdiv (Mlog echelle)));
+%     endfor;
+%  else:
+%    for k=1 upto NbS:
+%      s_:=readfrom nomfichier;
+%      if s_<>EOF:
+%	ss1 := loptok s_;
+%	n_ := if ss1="%": 0 else: 1 fi;
+%	forever:
+%	  ss[incr n_] := loptok s_;
+%	  exitif ss[n_]="";
+%	endfor
+%      else: false
+%      fi;
+%      Sommet[k]:=(Mexp ((Mlog_str ss1) Mdiv (Mlog echelle)),Mexp ((Mlog_str ss3) Mdiv (Mlog echelle)),Mexp ((Mlog_str ss2) Mdiv (Mlog echelle)));
+%    endfor;
+%  fi;
+%  apj:=0;
+%  for nf=-4000 upto (-4000+NF)-1:
+%    s_:=readfrom nomfichier;
+%     if s_<>EOF:
+%      ss1 := loptok s_;
+%      n_ := if ss1="%": 0 else: 1 fi;
+%      forever:
+%	ss[incr n_] := loptok s_;
+%	exitif ss[n_]="";
+%      endfor
+%    else: false
+%    fi;
+%    OTFc.@[apj].nb:=Mexp Mlog_str ss1;%pour savoir le nb de sommets par face
+%    for nl=1 upto OTFc.@[apj].nb:
+%      if invnormale=1:
+%	OTFc.@[apj][nl]:=Image(Sommet[round(Mexp Mlog_str ss[nl+1])]);
+%      else:
+%	OTFc.@[apj][OTFc.@[apj].nb+1-nl]:=Image(Sommet[round(Mexp Mlog_str ss[nl+1])]);
+  %    fi;
+  %  endfor;
+  %  OTFc.@[apj].iso:=(OTFc.@[apj][1] for l=2 upto OTFc.@[apj].nb:+OTFc.@[apj][l] endfor)/OTFc.@[apj].nb;
+  %  ALT.@[apj]:=-Zpart(GCoord(OTFc.@[apj].iso));
+  %  if ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]))>=0:
+  %    Vue.@[apj]:=true;coul.@[apj]:=outcolor;
+  %  else:
+  %    Vue.@[apj]:=false;coul.@[apj]:=incolor;
+  %  fi;
+  %  apj:=apj+1;
+  %endfor;
+  %apj.@:=apj-1;
+  closefrom nomfichier;
+enddef;
+
+vardef ObjetOBJ[](expr nomfichier)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  string s_;
+  string ss[];
+  nbss:=1;
+  apj:=0;
+  forever:
+    s_:=readfrom nomfichier;
+    if s_<>EOF:
+      ss0 := loptok s_;
+      if ss0="v":
+	n_:=0;
+	forever:
+	  ss[incr n_] := loptok s_;
+	  exitif ss[n_]="";
+	endfor
+	Sommet[nbss]:=(Mexp((Mlog_str ss1) Mdiv (Mlog echelle)),Mexp ((Mlog_str ss3) Mdiv (Mlog echelle)),Mexp ((Mlog_str ss2) Mdiv (Mlog echelle)));
+	nbss:=incr nbss;
+      elseif ss0="f":
+	n_:=0;
+	forever:
+	  ss[incr n_] := loptok s_;
+	  exitif ss[n_]="";
+	endfor;
+	OTFc.@[apj].nb:=n_-1;
+	for k=1 upto OTFc.@[apj].nb:
+	  if invnormale=1:
+	    OTFc.@[apj][OTFc.@[apj].nb-k+1] := Image(Sommet[round(Mexp(Mlog_str ss[k]))])
+	    %if unknown OTFc.@[apj][OTFc.@[apj].nb-k+1]:
+	  %  show OTFc.@[apj][OTFc.@[apj].nb-k+1];
+	  %fi;
+	  else:
+	    OTFc.@[apj][k] := Image(Sommet[round(Mexp(Mlog_str ss[k]))])
+	    %if unknown OTFc.@[apj][k]:
+	  %  show OTFc.@[apj][k];
+	  %fi;
+	  fi;
+	  
+	endfor;
+	apj:=apj+1;
+      fi;
+    fi;
+    exitif s_=EOF;
+  endfor;
+  apj:=apj-1;
+  for k=0 upto apj:
+    OTFc.@[k].iso:=(OTFc.@[k][1] for l=2 upto OTFc.@[k].nb:+OTFc.@[k][l] endfor)/OTFc.@[k].nb;
+    ALT.@[k]:=-Zpart(GCoord(OTFc.@[k].iso));
+    if ProduitScalaire(Oeil-OTFc.@[k].iso,Normal(OTFc.@[k].iso,OTFc.@[k][1],OTFc.@[k][2]))>=0:
+      Vue.@[k]:=true;coul.@[k]:=outcolor;
+    else:
+      Vue.@[k]:=false;coul.@[k]:=incolor;
+    fi;
+  endfor;
+  apj.@:=apj;
+  closefrom nomfichier;
+enddef;
+
+
+%%%%%%%Objets travaillés
+
+vardef ObjetEnleve[](text t)=%les numéros des faces sont données par ordre croissant.
+  numeric numface[];
+  nface:=0;
+  numface[0]:=0;
+  %récupérer les numéros des faces.
+  forsuffixes _p=t:
+    nface:=nface+1;
+    numface[nface]=_p-(nface-1);%marchait :)
+  endfor;
+  numface[nface+1]:=apj.@-nface+1;
+  %Mettre dans l'ordre ces numéros.<-déjà fait par l'utilisateur
+  %enlever les numéros des faces
+  apj:=0;
+  for k=0 upto nface:
+    for l=numface[k] upto (numface[k+1]-1):
+      tcpt.@[apj]:=tcpt.@[apj+k];
+      OTFc.@[apj].nb:=OTFc.@[apj+k].nb;
+      for p=1 upto OTFc.@[apj].nb:
+	OTFc.@[apj][p]:=OTFc.@[apj+k][p];
+      endfor;
+      OTFc.@[apj].iso:=OTFc.@[apj+k].iso;
+      ALT.@[apj]:=ALT.@[apj+k];
+      if ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]))>=0:
+	Vue.@[apj]:=true;coul.@[apj]:=outcolor;
+      else:
+	Vue.@[apj]:=false;coul.@[apj]:=incolor;
+      fi;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj.@:=apj-1;
+enddef;
+
+vardef ObjetDeplacement[](text t)=
+  %permet de déplacer un objet en donnant au préalable les angles de rotations et la translation. On peut également appliquer une transformation.
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  apj:=0;
+  forsuffixes p_=t:
+    Ferme.@:=Ferme[p_];
+    for k=0 upto apj[p_]:
+      cpt.@[apj]:=cpt[p_][k];
+      OTFc.@[apj].nb:=OTFc[p_][k].nb;
+      for l=1 upto OTFc.@[apj].nb:
+	OTFc.@[apj][l]:=Image(OTFc[p_][k][l]);
+      endfor;
+      OTFc.@[apj].iso:=Image(OTFc[p_][k].iso);
+      ALT.@[apj]:=-Zpart(GCoord(OTFc.@[apj].iso));
+      if ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]))>=0:
+	Vue.@[apj]:=true;coul.@[apj]:=Outcolor[p_];
+      else:
+	%if Ferme.@=false:
+	  Vue.@[apj]:=false;coul.@[apj]:=Incolor[p_];
+	%else:
+	%  apj:=apj-1;
+	%fi;
+      fi;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj.@:=apj-1;
+enddef;
+
+vardef ObjetFusion[](text t)=
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  tapj:=0;
+  Nbobj:=0;
+  forsuffixes p_=t:
+    for k=0 upto apj[p_]:
+      cpt.@[tapj]:=tapj;
+      OTFc.@[tapj].nb:=OTFc[p_][k].nb;
+      for p=1 upto OTFc.@[tapj].nb:
+	OTFc.@[tapj][p]:=Image(OTFc[p_][k][p]);
+      endfor;
+      OTFc.@[tapj].iso:=Image(OTFc[p_][k].iso);
+      ALT.@[tapj]:=-Zpart(GCoord(OTFc.@[tapj].iso));
+      Vue.@[tapj]:=Vue[p_][k];
+      coul.@[tapj]:=coul[p_][k];
+      tapj:=tapj+1;
+    endfor;
+  endfor;
+  apj.@:=tapj-1;
+enddef;
+
+%les intersections d'objets
+
+vardef ProjectionsurPlan(expr aa,bb,cc,dd)=%Projection du point aa sur le plan (bbccdd)
+  save di,vc;
+  color va,vb,vc,vd;
+  vd=Normal(bb,cc,dd);
+  va=vd/Norm(vd);
+  vb=aa-bb;
+  di=-ProduitScalaire(vb,va);
+  va:=di*va;
+  vb:=vb+va;
+  vc=bb+vb;
+  vc
+enddef;
+
+%%denis Roegel----------
+vardef IntersectionPlandroite(expr aa,bb,cc,dd,ee)=%pour les aretes :)
+  save Int;
+  boolean Int;
+  color gg,caaa[],Caaa[];
+  caaa3=Normal(aa,bb,cc)/Norm(Normal(aa,bb,cc));
+  caaa1=aa-dd;if Norm(caaa1)<>0:Caaa1=caaa1/Norm(caaa1) else:Caaa1=caaa1 fi;
+  caaa2=ee-dd;if Norm(caaa2)<>0:Caaa2=caaa2/Norm(caaa2) else:Caaa2=caaa2 fi;
+  ww:=ProduitScalaire(caaa2,caaa3);
+  if ww<>0:
+    %if (ProduitScalaire(caaa1,caaa3)*ww>0) and (ProduitScalaire(caaa1,caaa3)/ww<1):
+      caaa4=caaa2*(ProduitScalaire(caaa1,caaa3)/ww);
+      Int:=true;
+    %else:
+    %  Int:=false;
+    %fi;
+  else: % the line is parallel to the plane
+    Int:=false;
+  fi;
+  Int
+enddef;
+
+vardef Intersectionplandroite(expr aa,bb,cc,dd,ee)=%pour les aretes :)
+  save Int;
+  boolean Int;
+  color gg,caaa[],Caaa[];
+  caaa3=Normal(aa,bb,cc)/Norm(Normal(aa,bb,cc));
+  caaa1=aa-dd;if Norm(caaa1)<>0:Caaa1=caaa1/Norm(caaa1) else:Caaa1=caaa1 fi;
+  caaa2=ee-dd;if Norm(caaa2)<>0:Caaa2=caaa2/Norm(caaa2) else:Caaa2=caaa2 fi;
+  ww:=ProduitScalaire(caaa2,caaa3);
+  if ww<>0:
+    if (ProduitScalaire(caaa1,caaa3)*ww>0) and (ProduitScalaire(caaa1,caaa3)/ww<1):
+      %message("ww"&decimal(ww)&" PS"&decimal(ProduitScalaire(caaa1,caaa3))&"");      
+      caaa4=caaa2*(ProduitScalaire(caaa1,caaa3)/ww);
+      Int:=true;
+    else:
+      Int:=false;
+    fi;
+  else: % the line is parallel to the plane
+    Int:=false;
+  fi;
+  Int
+enddef;
+
+vardef IntersectionPlanDroite(expr aa,bb,cc,dd,ee)=%plan (aa,bb,cc) droite(dd,ee)
+  if Intersectionplandroite(aa,bb,cc,dd,ee):
+    gg=dd+caaa4;
+  fi;
+  gg
+enddef;
+
+vardef IPP(expr aa,bb,cc,dd,ee,ff)=
+  %a vérifier
+  %save da,db,dc;
+  boolean int;
+  da:=Norm(aa-ProjectionsurPlan(aa,dd,ee,ff));
+  db:=Norm(bb-ProjectionsurPlan(bb,dd,ee,ff));
+  dc:=Norm(cc-ProjectionsurPlan(cc,dd,ee,ff));
+  if (da=db) and (db=dc): % the two planes are parallel
+    int:=false;
+  else:
+    int:=true;
+    nbi:=nbi+1;
+  fi;
+enddef;
+%%---------------------
+
+vardef ObjetIntersection[](text t)=%plan n°1 solide n°2
+  color INTER[][][];%pour avoir les points d'intersection
+  nbsol:=1;
+  forsuffixes p_=t:
+    pp_[nbsol]:=p_;
+    nbsol:=nbsol+1;
+  endfor;
+  nbi:=0;
+  for k=0 upto apj[pp_[2]]:
+      IPP(OTFc[pp_[2]][k][1],OTFc[pp_[2]][k][2],OTFc[pp_[2]][k][3],PPP0,PPP1,PPP2);
+      if int=true:
+	nbint:=0;
+	OTFc[pp_[2]][k][OTFc[pp_[2]][k].nb+1]=OTFc[pp_[2]][k][1];
+      	for l=1 upto (OTFc[pp_[2]][k].nb):
+	  if Intersectionplandroite(PPP0,PPP1,PPP2,OTFc[pp_[2]][k][l],OTFc[pp_[2]][k][l+1]):
+	    nbint:=nbint+1;
+	    INTER[pp_2][k][nbint]=IntersectionPlanDroite(PPP0,PPP1,PPP2,OTFc[pp_[2]][k][l],OTFc[pp_[2]][k][l+1]);
+	  fi;
+	endfor;
+	%%%Pas satisfaisant -> à travailler
+	%show nbint;
+	if nbint=2:
+	  draw Projette(INTER[pp_2][k][1])--Projette(INTER[pp_2][k][2]) withpen pencircle scaled2bp withcolor violet;
+	fi;
+      fi;
+  endfor;
+enddef;
+  
+vardef ObjetSepare[](expr nbd,nbD)=%nbd pour l'objet du dessous, nbD pour l'objet du dessus.
+  Ferme[nbd]:=Ferme.@;
+  Ferme[nbD]:=Ferme.@;
+  Outcolor[nbd]:=outcolor;
+  Incolor[nbd]:=incolor;
+  Outcolor[nbD]:=outcolor;
+  Incolor[nbD]:=incolor;
+  color INTER[][][];
+  color Nn;color PPP.iso;
+  Nn=Normal(PPP0,PPP1,PPP3);
+  PPP.iso=(PPP0+PPP1+PPP2)/3;
+  apj:=0;bpj:=0;%bpj pour le 2eme solide
+  for k=0 upto apj.@:
+    if ProduitScalaire(Nn,OTFc.@[k].iso-PPP.iso)<=0:
+      nbint:=0;
+      OTFc.@[k][OTFc.@[k].nb+1]:=OTFc.@[k][1];
+      for l=1 upto OTFc.@[k].nb:
+	if Intersectionplandroite(PPP0,PPP1,PPP3,OTFc.@[k][l],OTFc.@[k][l+1]):
+	  nbint:=nbint+1;
+	  INTER.@[k][nbint]=IntersectionPlanDroite(PPP0,PPP1,PPP3,OTFc.@[k][l],OTFc.@[k][l+1]);
+	  prec.@[k][nbint]:=l;
+	  suiv.@[k][nbint]:=l+1;
+	fi;
+      endfor;
+      if nbint=0:
+	tcpt[nbd][apj]:=apj; OTFc[nbd][apj].nb:=OTFc.@[k].nb;
+	for l=1 upto OTFc[nbd][apj].nb:
+	  OTFc[nbd][apj][l]:=Image(OTFc.@[k][l]);
+	endfor;
+	OTFc[nbd][apj].iso:=(OTFc[nbd][apj][1]+for l=2 upto OTFc[nbd][apj].nb:+OTFc[nbd][apj][l] endfor)/OTFc[nbd][apj].nb;
+	ALT[nbd][apj]:=-Zpart(GCoord(OTFc[nbd][apj].iso));
+	if ProduitScalaire(Oeil-OTFc[nbd][apj].iso,Normal(OTFc[nbd][apj].iso,OTFc[nbd][apj][1],OTFc[nbd][apj][2]))>=0:
+	  Vue[nbd][apj]:=true;coul[nbd][apj]:=outcolor;
+	else:
+	  Vue[nbd][apj]:=false;coul[nbd][apj]:=incolor;
+	fi;
+	apj:=apj+1;
+      fi;
+      if nbint=2:
+	tcpt[nbd][apj]:=apj;
+	if ProduitScalaire(Nn,OTFc.@[k][prec.@[k][1]]-PPP.iso)<=0:
+	  compt:=0;
+	  for l=1 upto prec.@[k][1]:
+	    compt:=compt+1;
+	    OTFc[nbd][apj][compt]:=Image(OTFc.@[k][l]);
+	  endfor;
+	  OTFc[nbd][apj][compt+1]:=Image(INTER.@[k][1]);
+	  OTFc[nbd][apj][compt+2]:=Image(INTER.@[k][2]);
+	  compt:=compt+2;
+	  for l=suiv.@[k][2] upto OTFc.@[k].nb:
+	    compt:=compt+1;
+	    OTFc[nbd][apj][compt]:=Image(OTFc.@[k][l]);
+	  endfor;
+	  OTFc[nbd][apj].nb:=compt;
+	  OTFc[nbd][apj].iso:=(OTFc[nbd][apj][1]+for l=2 upto OTFc[nbd][apj].nb:+OTFc[nbd][apj][l] endfor)/OTFc[nbd][apj].nb;
+	  ALT[nbd][apj]:=-Zpart(GCoord(OTFc[nbd][apj].iso));
+	  if ProduitScalaire(Oeil-OTFc[nbd][apj].iso,Normal(OTFc[nbd][apj].iso,OTFc[nbd][apj][1],OTFc[nbd][apj][2]))>=0:
+	    Vue[nbd][apj]:=true;coul[nbd][apj]:=outcolor;
+	  else:
+	    Vue[nbd][apj]:=false;coul[nbd][apj]:=incolor;
+	  fi;
+	  apj:=apj+1;
+	  %2eme solide
+	  compt:=1;
+	  OTFc[nbD][bpj][1]:=Image(INTER.@[k][1]);
+	  for l=suiv.@[k][1] upto prec.@[k][2]:
+	    compt:=compt+1;
+	    OTFc[nbD][bpj][compt]:=Image(OTFc.@[k][l]);
+	  endfor;
+	  compt:=compt+1;
+	  OTFc[nbD][bpj][compt]:=Image(INTER.@[k][2]);
+	  OTFc[nbD][bpj].nb:=compt;
+	  OTFc[nbD][bpj].iso:=(OTFc[nbD][bpj][1]+for l=2 upto OTFc[nbD][bpj].nb:+OTFc[nbD][bpj][l] endfor)/OTFc[nbD][bpj].nb;
+	  ALT[nbD][bpj]:=-Zpart(GCoord(OTFc[nbD][bpj].iso));
+	  if ProduitScalaire(Oeil-OTFc[nbD][bpj].iso,Normal(OTFc[nbD][bpj].iso,OTFc[nbD][bpj][1],OTFc[nbD][bpj][2]))>=0:
+	    Vue[nbD][bpj]:=true;coul[nbD][bpj]:=outcolor;
+	  else:
+	    Vue[nbD][bpj]:=false;coul[nbD][bpj]:=incolor;
+	  fi;
+	  bpj:=bpj+1;
+	  %fin 2eme solide
+	else:
+	  compt:=1;
+	  OTFc[nbd][apj][1]:=Image(INTER.@[k][1]);
+	  for l=suiv.@[k][1] upto prec.@[k][2]:
+	    compt:=compt+1;
+	    OTFc[nbd][apj][compt]:=Image(OTFc.@[k][l]);
+	  endfor;
+	  compt:=compt+1;
+	  OTFc[nbd][apj][compt]:=Image(INTER.@[k][2]);
+	  OTFc[nbd][apj].nb:=compt;
+	  OTFc[nbd][apj].iso:=(OTFc[nbd][apj][1]+for l=2 upto OTFc[nbd][apj].nb:+OTFc[nbd][apj][l] endfor)/OTFc[nbd][apj].nb;
+	  ALT[nbd][apj]:=-Zpart(GCoord(OTFc[nbd][apj].iso));
+	  if ProduitScalaire(Oeil-OTFc[nbd][apj].iso,Normal(OTFc[nbd][apj].iso,OTFc[nbd][apj][1],OTFc[nbd][apj][2]))>=0:
+	    Vue[nbd][apj]:=true;coul[nbd][apj]:=outcolor;
+	  else:
+	    Vue[nbd][apj]:=false;coul[nbd][apj]:=incolor;
+	  fi;
+	  apj:=apj+1;
+	  %2eme solide
+	  compt:=0;
+	  for l=1 upto prec.@[k][1]:
+	    compt:=compt+1;
+	    OTFc[nbD][bpj][compt]:=Image(OTFc.@[k][l]);
+	  endfor;
+	  OTFc[nbD][bpj][compt+1]:=Image(INTER.@[k][1]);
+	  OTFc[nbD][bpj][compt+2]:=Image(INTER.@[k][2]);
+	  compt:=compt+2;
+	  for l=suiv.@[k][2] upto OTFc.@[k].nb:
+	    compt:=compt+1;
+	    OTFc[nbD][bpj][compt]:=Image(OTFc.@[k][l]);
+	  endfor;
+	  OTFc[nbD][bpj].nb:=compt;
+	  OTFc[nbD][bpj].iso:=(OTFc[nbD][bpj][1]+for l=2 upto OTFc[nbD][bpj].nb:+OTFc[nbD][bpj][l] endfor)/OTFc[nbD][bpj].nb;
+	  ALT[nbD][bpj]:=-Zpart(GCoord(OTFc[nbD][bpj].iso));
+	  if ProduitScalaire(Oeil-OTFc[nbD][bpj].iso,Normal(OTFc[nbD][bpj].iso,OTFc[nbD][bpj][1],OTFc[nbD][bpj][2]))>=0:
+	    Vue[nbD][bpj]:=true;coul[nbD][bpj]:=outcolor;
+	  else:
+	    Vue[nbD][bpj]:=false;coul[nbD][bpj]:=incolor;
+	  fi;
+	  bpj:=bpj+1;
+	  %fin 2eme solide
+	fi;
+      fi;
+      if nbint=1:
+	compt:=0;%compteur pour le nb de sommets
+	comp:=0;%pour savoir où se situe le point à enlever
+	for l=1 upto OTFc.@[k].nb:
+	  if ProduitScalaire(Nn,OTFc.@[k][l]-PPP.iso)>0:
+	    comp:=comp+1;
+	  fi;
+	endfor;
+	if comp=1:
+	  tcpt[nbd][apj]:=apj;
+	  for l=1 upto prec.@[k][1]-1:
+	    compt:=compt+1;
+	    OTFc[nbd][apj][compt]:=Image(OTFc.@[k][l]);
+	  endfor;
+	  compt:=compt+1;
+	  OTFc[nbd][apj][compt]:=Image(INTER.@[k][1]);
+	  for l=suiv.@[k][1] upto OTFc.@[k].nb:
+	    compt:=compt+1;
+	    OTFc[nbd][apj][compt]:=Image(OTFc.@[k][l]);
+	  endfor;
+	  OTFc[nbd][apj].nb:=compt;
+	  OTFc[nbd][apj].iso:=(OTFc[nbd][apj][1]+for l=2 upto OTFc[nbd][apj].nb:+OTFc[nbd][apj][l] endfor)/OTFc[nbd][apj].nb;
+	  ALT[nbd][apj]:=-Zpart(GCoord(OTFc[nbd][apj].iso));
+	  if ProduitScalaire(Oeil-OTFc[nbd][apj].iso,Normal(OTFc[nbd][apj].iso,OTFc[nbd][apj][1],OTFc[nbd][apj][2]))>=0:
+	    Vue[nbd][apj]:=true;coul[nbd][apj]:=outcolor;
+	  else:
+	    Vue[nbd][apj]:=false;coul[nbd][apj]:=incolor;
+	  fi;
+	  apj:=apj+1;
+	else:
+	  tcpt[nbd][apj]:=apj; OTFc[nbd][apj].nb:=OTFc.@[k].nb;
+	  for l=1 upto OTFc[nbd][apj].nb:
+	    OTFc[nbd][apj][l]:=Image(OTFc.@[k][l]);
+	  endfor;
+	  OTFc[nbd][apj].iso:=(OTFc[nbd][apj][1]+for l=2 upto OTFc[nbd][apj].nb:+OTFc[nbd][apj][l] endfor)/OTFc[nbd][apj].nb;
+	  ALT[nbd][apj]:=-Zpart(GCoord(OTFc[nbd][apj].iso));
+	  if ProduitScalaire(Oeil-OTFc[nbd][apj].iso,Normal(OTFc[nbd][apj].iso,OTFc[nbd][apj][1],OTFc[nbd][apj][2]))>=0:
+	    Vue[nbd][apj]:=true;coul[nbd][apj]:=outcolor;
+	  else:
+	    Vue[nbd][apj]:=false;coul[nbd][apj]:=incolor;
+	  fi;
+	  apj:=apj+1;
+	fi;
+      fi;
+    fi;
+    if ProduitScalaire(Nn,OTFc.@[k].iso-PPP.iso)>0:
+      nbint:=0;
+      OTFc.@[k][OTFc.@[k].nb+1]:=OTFc.@[k][1];
+      for l=1 upto OTFc.@[k].nb:
+	if Intersectionplandroite(PPP0,PPP1,PPP3,OTFc.@[k][l],OTFc.@[k][l+1]):
+	  nbint:=nbint+1;
+	  INTER.@[k][nbint]=IntersectionPlanDroite(PPP0,PPP1,PPP3,OTFc.@[k][l],OTFc.@[k][l+1]);
+	  prec.@[k][nbint]:=l;
+	  suiv.@[k][nbint]:=l+1;
+	fi;
+      endfor;
+      %2eme solide sans intersection
+      if nbint=0:
+	tcpt[nbD][bpj]:=bpj; OTFc[nbD][bpj].nb:=OTFc.@[k].nb;
+	for l=1 upto OTFc[nbD][bpj].nb:
+	  OTFc[nbD][bpj][l]:=Image(OTFc.@[k][l]);
+	endfor;
+	OTFc[nbD][bpj].iso:=(OTFc[nbD][bpj][1]+for l=2 upto OTFc[nbD][bpj].nb:+OTFc[nbD][bpj][l] endfor)/OTFc[nbD][bpj].nb;
+	ALT[nbD][bpj]:=-Zpart(GCoord(OTFc[nbD][bpj].iso));
+	if ProduitScalaire(Oeil-OTFc[nbD][bpj].iso,Normal(OTFc[nbD][bpj].iso,OTFc[nbD][bpj][1],OTFc[nbD][bpj][2]))>=0:
+	  Vue[nbD][bpj]:=true;coul[nbD][bpj]:=outcolor;
+	else:
+	  Vue[nbD][bpj]:=false;coul[nbD][bpj]:=incolor;
+	fi;
+	bpj:=bpj+1;
+      fi;
+      %fin 2eme solide
+      if nbint=2:
+	tcpt[nbd][apj]:=apj;
+	if ProduitScalaire(Nn,OTFc.@[k][prec.@[k][1]]-PPP.iso)<=0:
+	  compt:=0;
+	  for l=1 upto prec.@[k][1]:
+	    compt:=compt+1;
+	    OTFc[nbd][apj][compt]:=Image(OTFc.@[k][l]);
+	  endfor;
+	  OTFc[nbd][apj][compt+1]:=Image(INTER.@[k][1]);
+	  OTFc[nbd][apj][compt+2]:=Image(INTER.@[k][2]);
+	  compt:=compt+2;
+	  for l=suiv.@[k][2] upto OTFc.@[k].nb:
+	    compt:=compt+1;
+	    OTFc[nbd][apj][compt]:=Image(OTFc.@[k][l]);
+	  endfor;
+	  OTFc[nbd][apj].nb:=compt;
+	  OTFc[nbd][apj].iso:=(OTFc[nbd][apj][1]+for l=2 upto OTFc[nbd][apj].nb:+OTFc[nbd][apj][l] endfor)/OTFc[nbd][apj].nb;
+	  ALT[nbd][apj]:=-Zpart(GCoord(OTFc[nbd][apj].iso));
+	  if ProduitScalaire(Oeil-OTFc[nbd][apj].iso,Normal(OTFc[nbd][apj].iso,OTFc[nbd][apj][1],OTFc[nbd][apj][2]))>=0:
+	    Vue[nbd][apj]:=true;coul[nbd][apj]:=outcolor;
+	  else:
+	    Vue[nbd][apj]:=false;coul[nbd][apj]:=incolor;
+	  fi;
+	  apj:=apj+1;
+	  %2eme solide
+	  compt:=1;
+	  OTFc[nbD][bpj][1]:=Image(INTER.@[k][1]);
+	  for l=suiv.@[k][1] upto prec.@[k][2]:
+	    compt:=compt+1;
+	    OTFc[nbD][bpj][compt]:=Image(OTFc.@[k][l]);
+	  endfor;
+	  compt:=compt+1;
+	  OTFc[nbD][bpj][compt]:=Image(INTER.@[k][2]);
+	  OTFc[nbD][bpj].nb:=compt;
+	  OTFc[nbD][bpj].iso:=(OTFc[nbD][bpj][1]+for l=2 upto OTFc[nbD][bpj].nb:+OTFc[nbD][bpj][l] endfor)/OTFc[nbD][bpj].nb;
+	  ALT[nbD][bpj]:=-Zpart(GCoord(OTFc[nbD][bpj].iso));
+	  if ProduitScalaire(Oeil-OTFc[nbD][bpj].iso,Normal(OTFc[nbD][bpj].iso,OTFc[nbD][bpj][1],OTFc[nbD][bpj][2]))>=0:
+	    Vue[nbD][bpj]:=true;coul[nbD][bpj]:=outcolor;
+	  else:
+	    Vue[nbD][bpj]:=false;coul[nbD][bpj]:=incolor;
+	  fi;
+	  bpj:=bpj+1;
+	  %fin 2eme solide
+	else:
+	  compt:=1;
+	  OTFc[nbd][apj][1]:=Image(INTER.@[k][1]);
+	  for l=suiv.@[k][1] upto prec.@[k][2]:
+	    compt:=compt+1;
+	    OTFc[nbd][apj][compt]:=Image(OTFc.@[k][l]);
+	  endfor;
+	  compt:=compt+1;
+	  OTFc[nbd][apj][compt]:=Image(INTER.@[k][2]);
+	  OTFc[nbd][apj].nb:=compt;
+	  OTFc[nbd][apj].iso:=(OTFc[nbd][apj][1]+for l=2 upto OTFc[nbd][apj].nb:+OTFc[nbd][apj][l] endfor)/OTFc[nbd][apj].nb;
+	  ALT[nbd][apj]:=-Zpart(GCoord(OTFc[nbd][apj].iso));
+	  if ProduitScalaire(Oeil-OTFc[nbd][apj].iso,Normal(OTFc[nbd][apj].iso,OTFc[nbd][apj][1],OTFc[nbd][apj][2]))>=0:
+	    Vue[nbd][apj]:=true;coul[nbd][apj]:=outcolor;
+	  else:
+	    Vue[nbd][apj]:=false;coul[nbd][apj]:=incolor;
+	  fi;
+	  apj:=apj+1;
+	  %2eme solide
+	  compt:=0;
+	  for l=1 upto prec.@[k][1]:
+	    compt:=compt+1;
+	    OTFc[nbD][bpj][compt]:=Image(OTFc.@[k][l]);
+	  endfor;
+	  OTFc[nbD][bpj][compt+1]:=Image(INTER.@[k][1]);
+	  OTFc[nbD][bpj][compt+2]:=Image(INTER.@[k][2]);
+	  compt:=compt+2;
+	  for l=suiv.@[k][2] upto OTFc.@[k].nb:
+	    compt:=compt+1;
+	    OTFc[nbD][bpj][compt]:=Image(OTFc.@[k][l]);
+	  endfor;
+	  OTFc[nbD][bpj].nb:=compt;
+	  OTFc[nbD][bpj].iso:=(OTFc[nbD][bpj][1]+for l=2 upto OTFc[nbD][bpj].nb:+OTFc[nbD][bpj][l] endfor)/OTFc[nbD][bpj].nb;
+	  ALT[nbD][bpj]:=-Zpart(GCoord(OTFc[nbD][bpj].iso));
+	  if ProduitScalaire(Oeil-OTFc[nbD][bpj].iso,Normal(OTFc[nbD][bpj].iso,OTFc[nbD][bpj][1],OTFc[nbD][bpj][2]))>=0:
+	    Vue[nbD][bpj]:=true;coul[nbD][bpj]:=outcolor;
+	  else:
+	    Vue[nbD][bpj]:=false;coul[nbD][bpj]:=incolor;
+	  fi;
+	  bpj:=bpj+1;
+	  %fin 2eme solide
+	fi;
+      fi;
+    fi;
+  endfor;
+  apj[nbd]:=apj-1;
+  apj[nbD]:=bpj-1;
+enddef;
+
+%pour les lignes de niveaux.
+vardef ObjetSurfaceZ[](expr fn,xmin,xmax,ymin,ymax,nblignes,nbpoints)=
+  surfz:=true;
+  Outcolor.@:=outcolor;
+  Incolor.@:=incolor;
+  scantokens("vardef Fz(expr X,Y)="&fn&" enddef;");
+  apj:=0;
+  IncX:=(xmax-xmin)/nbpoints;
+  IncY:=(ymax-ymin)/nblignes;
+  color Yc[][],Xc[][],Fc[][];
+  for ligne=0 upto nblignes:
+    y:=ymax-ligne*IncY;
+    x:=xmin;
+    Yc[ligne][0]=(x,y,Fz(x,y));
+    for k=1 upto nbpoints:
+      Yc[ligne][k]=((xmin+k*IncX,y,Fz(xmin+k*IncX,y)));
+    endfor;
+  endfor;
+  for k=(nblignes-1) downto 0:
+    for l=(nbpoints-3) step -3 until 0: 
+      cpt[apj]:=apj;
+      OTFc.@[apj].nb:=4;
+      OTFc.@[apj][1]:=Yc[k][l];
+      OTFc.@[apj][2]:=Yc[k+1][l];
+      OTFc.@[apj][3]:=Yc[k+1][l+3];
+      OTFc.@[apj][4]:=Yc[k][l+3];
+      OTFc.@[apj].iso:=(OTFc.@[apj][1]+OTFc.@[apj][2]+OTFc.@[apj][3]+OTFc.@[apj][4])/4;
+      ALT.@[apj]:=-Zpart(GCoord(OTFc.@[apj].iso));
+      if ProduitScalaire(Oeil-OTFc.@[apj].iso,Normal(OTFc.@[apj].iso,OTFc.@[apj][1],OTFc.@[apj][2]))>=0:
+	Vue.@[apj]:=true;coul.@[apj]:=outcolor;
+      else:
+	Vue.@[apj]:=false;coul.@[apj]:=incolor;
+      fi;
+      apj:=apj+1;
+    endfor;
+  endfor;
+  apj.@:=apj-1;
+enddef;
+
+vardef GrilleSurfZ(expr xmin,xmax,xpas,ymin,ymax,ypas,zmin,zmax,zpas,zechelle)=
+  drawoptions(withcolor gris);
+  for k=zmin upto zmax:
+    draw Projette((-xmin,ymin,k))--Projette((-xmax,ymin,k))--Projette((-xmax,ymax,k));
+  endfor;
+  for k=ymin upto ymax:
+    draw Projette((-xmin,k,zmin))--Projette((-xmax,k,zmin))--Projette((-xmax,k,zmax));
+  endfor;
+  for k=xmin upto xmax:
+    draw Projette((-k,ymax,zmin))--Projette((-k,ymin,zmin))--Projette((-k,ymin,zmax));
+  endfor;
+  drawoptions();
+  if Phi<>90:
+    for k=zmin step zpas until zmax:
+      label.lft(""&decimal(zechelle*k)&"",Projette((-xmin,ymin,k)));
+    endfor;
+    for k=ymin step ypas until ymax:
+      label.bot(""&decimal(k)&"",Projette((-xmin,k,zmin)));
+    endfor;
+    for k=xmin step xpas until xmax:
+      label.rt(""&decimal(k)&"",Projette((-k,ymax,zmin)));
+    endfor;
+    labeloffset:=8*labeloffset;
+    label.bot(btex $y$ etex,Projette((-xmin,(ymin+ymax)/2,zmin)));
+    label.lft(btex $z$ etex,Projette((-xmin,ymin,(zmin+zmax)/2)));
+    label.rt(btex $x$ etex,Projette((-(xmin+xmax)/2,ymax,zmin)));
+    labeloffset:=labeloffset/8;
+  else:
+    for k=ymin step ypas until ymax:
+      label.bot(""&decimal(k)&"",Projette((-xmin,k,zmin)));
+    endfor;
+    for k=xmin step xpas until xmax:
+      label.rt(""&decimal(k)&"",Projette((-k,ymax,zmin)));
+    endfor;
+    labeloffset:=8*labeloffset;
+    label.bot(btex $y$ etex,Projette((-xmin,(ymin+ymax)/2,zmin)));
+    label.rt(btex $x$ etex,Projette((-(xmin+xmax)/2,ymax,zmin)));
+    labeloffset:=labeloffset/8;
+  fi;
+enddef;
+
+vardef GrilleSurfZZ(expr xmin,xmax,xpas,ymin,ymax,ypas,zmin,zmax,zpas,zechelle)=
+  drawoptions(withcolor gris);
+  for k=zmin upto zmax:
+    draw Projette((xmin,ymin,k))--Projette((xmin,ymax,k))--Projette((xmax,ymax,k));
+  endfor;
+  for k=ymin upto ymax:
+    draw Projette((xmax,k,zmin))--Projette((xmin,k,zmin))--Projette((xmin,k,zmax));
+  endfor;
+  for k=xmin upto xmax:
+    draw Projette((k,ymin,zmin))--Projette((k,ymax,zmin))--Projette((k,ymax,zmax));
+  endfor;
+  drawoptions();
+  if Phi<>90:
+    for k=zmin step zpas until zmax:
+      label.lft(""&decimal(zechelle*k)&"",Projette((xmin,ymin,k)));
+    endfor;
+    for k=ymin step ypas until ymax:
+      label.rt(""&decimal(k)&"",Projette((xmax,k,zmin)));
+    endfor;
+    for k=xmin step xpas until xmax:
+      label.bot(""&decimal(k)&"",Projette((k,ymin,zmin)));
+    endfor;
+    labeloffset:=8*labeloffset;
+    label.rt(btex $y$ etex,Projette((xmax,(ymin+ymax)/2,zmin)));
+    label.lft(btex $z$ etex,Projette((xmin,ymin,(zmin+zmax)/2)));
+    label.bot(btex $x$ etex,Projette(((xmin+xmax)/2,ymin,zmin)));
+    labeloffset:=labeloffset/8;
+  else:
+    for k=ymin step ypas until ymax:
+      label.bot(""&decimal(k)&"",Projette((xmin,k,zmin)));
+    endfor;
+    for k=xmin step xpas until xmax:
+      label.rt(""&decimal(k)&"",Projette((k,ymax,zmin)));
+    endfor;
+    labeloffset:=8*labeloffset;
+    label.bot(btex $y$ etex,Projette((xmin,(ymin+ymax)/2,zmin)));
+    label.rt(btex $x$ etex,Projette(((xmin+xmax)/2,ymax,zmin)));
+    labeloffset:=labeloffset/8;
+  fi;
+enddef;
+
+vardef Legende(expr xmax,ymax,nbplan,zechelle)=
+  path legende[];
+  for k=1 upto nbplan+1:
+    legende[k]=Projette((-xmax,ymax+1,k-0.5))--Projette((-xmax,ymax+1,k))--Projette((-xmax,ymax+2,k))--Projette((-xmax,ymax+2,k-0.5))--cycle;
+  endfor;
+  for k=1 upto nbplan+1:
+    fill legende[k] withcolor Outcolor[k];
+    draw legende[k];
+    label.rt(""&decimal(zechelle*(k-1))&" - "&decimal(zechelle*k)&"",Projette((-xmax,ymax+2,k-0.25)));
+  endfor;
+enddef;
+
+vardef MaillageZ(expr fn,xmin,xmax,ymin,ymax,nblignes,nbpoints)=
+  traits:=true;
+  scantokens("vardef Fz(expr X,Y)="&fn&" enddef;");
+  IncX:=(xmax-xmin)/nbpoints;
+  IncY:=(ymax-ymin)/nblignes;
+  color Yc[][],Xc[][];
+  for ligne=0 upto nblignes:
+    y:=ymax-ligne*IncY;
+    x:=xmin;
+    Yc[ligne][0]=(x,y,Fz(x,y));
+    for k=1 upto nbpoints:
+      Yc[ligne][k]=((xmin+k*IncX,y,Fz(xmin+k*IncX,y)));
+    endfor;
+  endfor;
+  for l=0 upto nbpoints:
+    x:=xmax-l*IncX;
+    y:=ymin;
+    Xc[l][0]:=(x,y,Fz(x,y));
+    for k=1 upto nblignes:
+      Xc[l][k]=(x,ymin+k*IncY,Fz(x,ymin+k*IncY));
+    endfor;
+  endfor;
+  for k=nblignes downto 0:
+    draw Projette(Yc[k][nbpoints])
+    for l=(nbpoints-1) downto 0:
+      ..Projette(Yc[k][l])
+    endfor;
+  endfor;
+  for l=nbpoints downto 0:
+    draw Projette(Xc[l][nblignes])
+    for k=nblignes-1 downto 0:
+      ..Projette(Xc[l][k])
+    endfor;
+  endfor;
+enddef;
+
+endinput;

@@ -1,0 +1,383 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2018 - 2021 by ChairX
+%
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either
+% version 1.3 of this license or (at your option) any later
+% version.  The latest version of this license is in:
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of
+% LaTeX version 2005/12/01 or later.
+%
+% This file contains the implementation of all algebra related macros.
+%
+% Macros have to be described by (delete the first %)
+% %\begin{macro}{\macro}
+% % Description of the implementation.
+% %    \begin{macrocode}
+%\newcommand{\macro}[]         {}
+% %    \end{macrocode}
+% %\end{macro}
+%
+% The implementation and description will appear in the implementation
+% part of the documentation. Use \subsubsection{} etc. for structuring.
+%
+% The documentation of the macros defined here has to be written in
+% chairxmathAlgebraDoc.dtx
+%\fi
+%
+% First we check of macros should be included:
+%    \begin{macrocode}
+\if@loadmath
+%    \end{macrocode}
+%
+%\subsubsection{Fonts for Rings and Things}
+%
+%\begin{macro}{\field}
+%    \begin{macrocode}
+\newcommand{\field}[1]{\ch@irxfieldfont{#1}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\ring}
+%    \begin{macrocode}
+\newcommand{\ring}[1]{\ch@irxringfont{#1}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\group}
+%    \begin{macrocode}
+\newcommand{\group}[1]{\ch@irxgroupfont{#1}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\algebra}
+%    \begin{macrocode}
+\newcommand{\algebra}[1]{\ch@irxalgebrafont{#1}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\module}
+%    \begin{macrocode}
+\newcommand{\module}[1]{\ch@irxmodulefont{#1}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\liealg}
+%    \begin{macrocode}
+\newcommand{\liealg}[1]{\ch@irxliealgfont{#1}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\MC}
+%    \begin{macrocode}
+\newcommand{\MC}{{\scriptscriptstyle\ch@irxscriptfont{MC}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\gerstenhaber}
+%    \begin{macrocode}
+\newcommand{\gerstenhaber}[1] {\ch@irxgerstenhaberfont{#1}}
+%    \end{macrocode}
+%\end{macro}
+%
+% \subsubsection{Some Symbols needed in Algebra}
+%
+%\begin{macro}{\Pol}
+%    \begin{macrocode}
+\newcommand{\Pol}{\ch@irxoperatorfont{Pol}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\lmult}
+%    \begin{macrocode}
+\newcommand{\lmult}{\operatorname{\ch@irxoperatorfont{\ell}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\rmult}
+%    \begin{macrocode}
+\newcommand{\rmult}{\operatorname{\ch@irxoperatorfont{r}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Lmult}
+%    \begin{macrocode}
+\newcommand{\Lmult}{\operatorname{\ch@irxoperatorfont{L}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Rmult}
+%    \begin{macrocode}
+\newcommand{\Rmult}{\operatorname{\ch@irxoperatorfont{R}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Center}
+% Needs |mathrsfs| package.
+%    \begin{macrocode}
+\newcommand{\Center}{\mathscr{Z}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\ad}
+%    \begin{macrocode}
+\newcommand{\ad}{\operatorname{\ch@irxoperatorfont{ad}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Ad}
+%    \begin{macrocode}
+\newcommand{\Ad}{\operatorname{\ch@irxoperatorfont{Ad}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Conj}
+%    \begin{macrocode}
+\newcommand{\Conj}{\operatorname{\ch@irxoperatorfont{Conj}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\acts}
+%    \begin{macrocode}
+\newcommand{\acts}{\mathbin{\triangleright}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\racts}
+%    \begin{macrocode}
+\newcommand{\racts}{\mathbin{\triangleleft}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Char}
+%    \begin{macrocode}
+\newcommand{\Char}{\ch@irxoperatorfont{char}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\modulo}
+%    \begin{macrocode}
+\newcommand{\modulo}{\operatorname{\ch@irxoperatorfont{mod}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Clifford}
+%    \begin{macrocode}
+\newcommand{\Clifford}{\operatorname{\ch@irxoperatorfont{Cl}}}
+%    \end{macrocode}
+%
+%\end{macro}
+%\begin{macro}{\cClifford}
+%    \begin{macrocode}
+\newcommand{\cClifford}{\operatorname{\mathbb{C}\ch@irxoperatorfont{l}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Der}
+%    \begin{macrocode}
+\newcommand{\Der}{\operatorname{\ch@irxoperatorfont{Der}}}
+\WithSuffix\newcommand\Der*{\decorate[^*]{\textrm{-}\Der}{}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\InnDer}
+%    \begin{macrocode}
+\newcommand{\InnDer}{\operatorname{\ch@irxoperatorfont{InnDer}}}
+\WithSuffix\newcommand\InnDer*{\decorate[^*]{\textrm{-}\InnDer}{}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\OutDer}
+%    \begin{macrocode}
+\newcommand{\OutDer}{\operatorname{\ch@irxoperatorfont{OutDer}}}
+\WithSuffix\newcommand\OutDer*{\decorate[^*]{\textrm{-}\OutDer}{}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\InnAut}
+%    \begin{macrocode}
+\newcommand{\InnAut}{\operatorname{\ch@irxoperatorfont{InnAut}}}
+\WithSuffix\newcommand\InnAut*{\decorate[^*]{\textrm{-}\InnAut}{}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\OutAut}
+%    \begin{macrocode}
+\newcommand{\OutAut}{\operatorname{\ch@irxoperatorfont{OutAut}}}
+\WithSuffix\newcommand\OutAut*{\decorate[^*]{\textrm{-}\OutAut}{}}
+%    \end{macrocode}
+%\end{macro}
+%
+% \begin{macro}{\formal}
+%    \begin{macrocode}
+\newcommand{\formal}[1]{\ch@irxllbbracket #1\ch@irxrrbbracket}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\laurent}
+%    \begin{macrocode}
+\newcommand{\laurent}[1]{(\!(#1)\!)}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\sweedler}
+%    \begin{macrocode}
+\newcommand{\sweedler}[1]{{\scriptscriptstyle(#1)}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection{Categories from Algebra}
+%
+%\begin{macro}{\algebras}
+%    \begin{macrocode}
+\newcommand{\algebras}{\categoryname{alg}}
+\WithSuffix\newcommand\algebras*{\decorate[^*]{\textrm{-}\algebras}{}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Algebras}
+%    \begin{macrocode}
+\newcommand{\Algebras}{\categoryname{Alg}}
+\WithSuffix\newcommand\Algebras*{\decorate[^*]{\textrm{-}\Algebras}{}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\reps}
+%    \begin{macrocode}
+\newcommand{\reps}{\categoryname{rep}}
+\WithSuffix\newcommand\reps*{\decorate[^*]{\textrm{-}\reps}{}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Reps}
+%    \begin{macrocode}
+\newcommand{\Reps}{\categoryname{Rep}}
+\WithSuffix\newcommand\Reps*{\decorate[^*]{\textrm{-}\Reps}{}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\PoissonAlg}
+%    \begin{macrocode}
+\newcommand{\PoissonAlg}{\categoryname{PoissonAlg}}
+\WithSuffix\newcommand\PoissonAlg*{\decorate[^*]{\textrm{-}\PoissonAlg}{}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\modules}
+%    \begin{macrocode}
+\newcommand{\modules}{\categoryname{mod}}
+\WithSuffix\newcommand\modules*{\decorate[^*]{\textrm{-}\modules}{}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Leftmodules}
+%    \begin{macrocode}
+\newcommand{\Leftmodules}[1]{{#1}\textsf{-}\categoryname{mod}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Rightmodules}
+%    \begin{macrocode}
+\newcommand{\Rightmodules}[2][]{\categoryname{mod}_{#1}\textsf{-}{#2}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Modules}
+%    \begin{macrocode}
+\newcommand{\Modules}{\categoryname{Mod}}
+\WithSuffix\newcommand\Modules*{\decorate[^*]{\textrm{-}\Modules}{}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\LeftModules}
+%    \begin{macrocode}
+\newcommand{\LeftModules}[1]{{#1}\textsf{-}\categoryname{Mod}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\RightModules}
+%    \begin{macrocode}
+\newcommand{\RightModules}[2][]{\categoryname{Mod}_{#1}\textsf{-}{#2}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Bimodules}
+%    \begin{macrocode}
+\newcommand{\Bimodules}{\categoryname{Bimod}}
+\WithSuffix\newcommand\Bimodules*{\decorate[^*]{\textrm{-}\Bimodules}{}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Rings}
+%    \begin{macrocode}
+\newcommand{\Rings}{\categoryname{Ring}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Groups}
+%    \begin{macrocode}
+\newcommand{\Groups}{\categoryname{Group}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Ab}
+%    \begin{macrocode}
+\newcommand{\Ab}{\categoryname{Ab}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Lattices}
+%    \begin{macrocode}
+\newcommand{\Lattices}{\categoryname{Lattice}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Sets}
+%    \begin{macrocode}
+\newcommand{\Sets}{\categoryname{Set}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Vect}
+%    \begin{macrocode}
+\newcommand{\Vect}{\categoryname{Vect}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\LieAlgs}
+%    \begin{macrocode}
+\newcommand{\LieAlgs}{\categoryname{LieAlg}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Posets}
+%    \begin{macrocode}
+\newcommand{\Posets}{\categoryname{Poset}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Directed}
+%    \begin{macrocode}
+\newcommand{\Directed}{\categoryname{Directed}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\GSets}
+%    \begin{macrocode}
+\newcommand{\GSets}[1][{G}]{{#1}\textrm{-}\Sets}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Groupoids}
+%    \begin{macrocode}
+\newcommand{\Groupoids}{\categoryname{Groupoid}}
+%    \end{macrocode}
+%\end{macro}
+%
+%    \begin{macrocode}
+\fi
+%    \end{macrocode}

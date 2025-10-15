@@ -1,0 +1,2714 @@
+%%%
+% Reperage
+%%%
+\def\filedateReperage{2025/05/27}%
+\def\fileversionReperage{0.1e}%
+\message{-- \filedateReperage\space v\fileversionReperage}%
+%
+\setKVdefault[ClesReperage]{Unitex=1,Pasx=1,Unitey=1,Pasy=1,Unitez=1,Pasz=1,DemiDroite=false,Droite=false,Plan=false,Trace=false,ListeSegment={},Espace=false,Sphere=false,AnglePhi=30,CouleurLa=white,CouleurLon=Tomato,AffichageUnites=true,MarquePrimaire=true,AffichageNom=false,AffichageGrad=false,PasGradX=1,AffichageAbs=0,CouleurAbs=black,AffichageCoord=false,LectureCoord=false,ValeurUnitex=1,ValeurUnitey=1,ValeurOrigine=0,NomOrigine=O,EchelleEspace=50,CouleurCoord=black,Thermometre=false,Mercure=false,CouleurMercure=black,Celsius,Kelvin=false,Farenheit=false,ValeurMin=-4000,ValeurMax=4000,ValeurMiny=-4000,ValeurMaxy=4000,Etages=4,Code=false,Globe=false,Rho=1500,Phi=22,Theta=10,CouleurE=orange,CouleurG=green,Axes=false,TypeProj="persp",Niveaux=false,Decale=false,Tiret=false,Cadre=false,ModeleCouleur=5,EchelleCroix=1,CouleurCroix=black,AvecMillimetre=false,AvecSeyes=false,AvecCinqCinq=false,PasFleches=false,TexteFleche={},Simplification=false,CouleurX=black,CouleurY=black,CouleurZ=black,CouleurGrille=false,Elementaire=false,ValeurPas=1,Coupure=1,Traces={},PasFleche={},PapierMilli={},PapierSeyes={},PapierCinqCinq={},Niveau={}}%
+\defKV[ClesReperage]{%
+  Traces=\ifempty{#1}{}{\setKV[ClesReperage]{Code}},%
+  PasFleche=\ifempty{#1}{}{\setKV[ClesReperage]{PasFleches}},%
+  PapierMilli=\ifempty{#1}{}{\setKV[ClesReperage]{AvecMillimetre}},%
+  PapierSeyes=\ifempty{#1}{}{\setKV[ClesReperage]{AvecSeyes}},%
+  PapierCinqCinq=\ifempty{#1}{}{\setKV[ClesReperage]{AvecCinqCinq}},%
+  Niveau=\ifempty{#1}{}{\setKV[ClesReperage]{Etages=#1}\setKV[ClesReperage]{Niveaux}}%
+}%
+% ValeurOrigine permet de faire des morceaux de demi-droite gradu\'ee en passant par droite :)
+
+\def\Updatetoksdroite#1/#2\nil{\addtotok\toklistepointdroite{#1,"#2",}}%
+\def\Updatetoksdemidroite#1/#2\nil{\addtotok\toklistenompointdemidroite{"#2",}}%
+\def\Updatetoksrepere#1/#2/#3\nil{\addtotok\toklistepointrepere{#1,#2,"#3",}}%
+\def\Updatetoksespace#1/#2/#3/#4\nil{\addtotok\toklistepointespace{#1,#2,#3,"#4",}}%
+
+\newtoks\toklistepointrepere%
+\newtoks\toklistepointdroite%
+\newtoks\toklistepointdemidroite%
+\newtoks\toklistenompointdemidroite%
+\newtoks\toklistepointespace%
+
+% Pour construire le rep\`ere de l'espace
+\def\buildespace{%
+  \toklistepointespace{}%
+  \toklistepointrepere{}%
+  \ifboolKV[ClesReperage]{Globe}{%
+    \foreachitem\compteur\in\ListePointEspace{\expandafter\Updatetoksrepere\compteur\nil}%
+    \MPGlobe{\the\toklistepointrepere}{\useKV[ClesReperage]{EchelleEspace}}%
+  }{%
+    \ifboolKV[ClesReperage]{Sphere}{%
+      \foreachitem\compteur\in\ListePointEspace{\expandafter\Updatetoksrepere\compteur\nil}%
+      \MPEspaceSphere{\the\toklistepointrepere}{\useKV[ClesReperage]{EchelleEspace}}%
+    }{%
+      \edef\RetiensListePoints{}%
+      \foreachitem\compteur\in\ListePointEspace{%
+        \edef\RetiensListePoints{\RetiensListePoints\ListePointEspace[\compteurcnt,1],}%
+        \edef\RetiensListePoints{\RetiensListePoints\ListePointEspace[\compteurcnt,2],}%
+        \edef\RetiensListePoints{\RetiensListePoints\ListePointEspace[\compteurcnt,3],}%
+        \IfStrEq{\ListePointEspace[\compteurcnt,4]}{ }{%
+          \edef\RetiensListePoints{\RetiensListePoints"",}%
+        }{%
+          \edef\RetiensListePoints{\RetiensListePoints"\ListePointEspace[\compteurcnt,4]",}%
+        }%
+      }%
+      \ifboolKV[ClesReperage]{AffichageNom}{%
+        \ifboolKV[ClesReperage]{AffichageCoord}{%
+          \MPEspacePave{\useKV[ClesReperage]{Unitex}}{\useKV[ClesReperage]{Pasx}}{\useKV[ClesReperage]{Unitey}}{\useKV[ClesReperage]{Pasy}}{\useKV[ClesReperage]{Unitez}}{\useKV[ClesReperage]{Pasz}}{\RetiensListePoints}{3}{\useKV[ClesReperage]{EchelleEspace}}%
+        }{%
+          \MPEspacePave{\useKV[ClesReperage]{Unitex}}{\useKV[ClesReperage]{Pasx}}{\useKV[ClesReperage]{Unitey}}{\useKV[ClesReperage]{Pasy}}{\useKV[ClesReperage]{Unitez}}{\useKV[ClesReperage]{Pasz}}{\RetiensListePoints}{2}{\useKV[ClesReperage]{EchelleEspace}}%
+        }%
+      }{%
+        \ifboolKV[ClesReperage]{AffichageCoord}{%
+          \MPEspacePave{\useKV[ClesReperage]{Unitex}}{\useKV[ClesReperage]{Pasx}}{\useKV[ClesReperage]{Unitey}}{\useKV[ClesReperage]{Pasy}}{\useKV[ClesReperage]{Unitez}}{\useKV[ClesReperage]{Pasz}}{\RetiensListePoints}{1}{\useKV[ClesReperage]{EchelleEspace}}%
+        }{%
+          \MPEspacePave{\useKV[ClesReperage]{Unitex}}{\useKV[ClesReperage]{Pasx}}{\useKV[ClesReperage]{Unitey}}{\useKV[ClesReperage]{Pasy}}{\useKV[ClesReperage]{Unitez}}{\useKV[ClesReperage]{Pasz}}{\RetiensListePoints}{0}{\useKV[ClesReperage]{EchelleEspace}}%
+        }%
+      }%
+    }%
+  }%
+}%
+
+\def\MPGlobe#1#2{%
+  \ifluatex
+    \mplibnumbersystem{double}%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    defaultcolormodel := \useKV[ClesReperage]{ModeleCouleur};
+
+    if defaultcolormodel=7:
+    cmykcolor black;
+    black=(0,0,0,1);
+    fi;
+    
+    input PfCSolid;
+    % Pour convertir les (Long,lat) données en degrés en (Long,lat) données en radians
+    vardef ConvDeg(expr fa,fl)=
+    Famille((fa*pi/180),(fl*pi/180))
+    enddef;
+    %Initialisation
+    PfCRho=\useKV[ClesReperage]{Rho};
+    PfCPhi=\useKV[ClesReperage]{Phi};
+    PfCTheta=\useKV[ClesReperage]{Theta};
+    color CouleurE,CouleurG;
+    CouleurE=\useKV[ClesReperage]{CouleurE};
+    CouleurG=\useKV[ClesReperage]{CouleurG};
+    boolean AffichageNom,Axes;
+    AffichageNom=\useKV[ClesReperage]{AffichageNom};
+    Axes=\useKV[ClesReperage]{Axes};
+    Initialisation(PfCRho,PfCTheta,PfCPhi,#2);
+    eclairage:=false;
+    nb:=18;%
+    subh:=36;%
+    %angx:=-23.5;%anglerotationx;
+    TR:=(0,0,0);
+    Ferme2:=true;
+    typerepre:=\useKV[ClesReperage]{TypeProj};
+    if typerepre="persp":
+    ObjetSphereNew2("R=2");
+    ObjetEquateur3("R=2");
+    ObjetGreenwich4("R=2");
+    elseif typerepre="proj":
+    ObjetSpherePfC2("R=20");
+    ObjetEquateur3("R=20");
+    ObjetGreenwich4("R=20");
+    else:
+    ObjetSphereCabinet2("R=5");
+    ObjetEquateur3("R=5");
+    ObjetGreenwich4("R=5");
+    fi;
+    AffichagePfC2;
+%    AffichageObjet2;
+    if \useKV[ClesReperage]{Axes}:
+    drawoptions(withpen pencircle scaled 1.05 withcolor CouleurE);
+    AffichageEquateur3;
+    drawoptions(withpen pencircle scaled 1 withcolor CouleurG);
+    AffichageGreenwich4;
+    drawoptions();
+    fi;
+    % Label
+%    labeloffset:=labeloffset*2;
+%    label.urt(btex Nord etex,Projette(Image(ConvDeg(90,0))));%(0,0,2))));
+%    label.llft(btex Sud etex,Projette(Image(ConvDeg(-90,0))));%(0,0,-2))));
+%    label.lft(btex Ouest etex,Projette(Image(ConvDeg(0,-90))));%(0,-2,0))));
+%    label.rt(btex Est etex,Projette(Image(ConvDeg(0,90))));%(0,2,0))));
+%    labeloffset:=labeloffset/2;
+    dotlabel.llft(btex \tiny\ang{0} etex,Projette(Image(ConvDeg(0,0))));
+    dotlabel.llft(btex \tiny\ang{10} etex,Projette(Image(ConvDeg(10,0))));
+    dotlabel.llft(btex \tiny\ang{10} etex,Projette(Image(ConvDeg(0,10))));
+    color M[],N[];
+    vardef toto(text t)=
+    n:=1;
+    for p_=t:
+    if (n mod 3)=1:
+    k:=p_;
+    fi;
+    if (n mod 3)=2:
+    l:=p_;
+    fi;
+    if (n mod 3)=0:
+      M[n]=Image(ConvDeg(l,k));
+      if l>0:
+      if k>0:
+      N[n]=Image(ConvDeg(l+3,k+3));
+      else:
+      N[n]=Image(ConvDeg(l+3,k-3));
+      fi;
+      else:
+      if k>0:
+      N[n]=Image(ConvDeg(l-3,k+3));
+      else:
+      N[n]=Image(ConvDeg(l-3,k-3));
+      fi;
+      fi;
+      label(TEX(p_),Projette(N[n]));
+      dotlabel.urt("",Projette(M[n]));
+      fi;
+      n:=n+1;
+      endfor;
+      enddef;
+      if AffichageNom:
+      toto(#1);
+      fi;
+%      label.top(TEX(decimal(redpart(Oeil))&","&decimal(greenpart(Oeil))&","&decimal(bluepart(Oeil))),Projette(Image(ConvDeg(90,0)))+(0,3cm));%&),(0,1cm));
+%      TraceAxes;
+%      label.top(btex Oeil etex,Projette(Image(Oeil)));
+%     label.top(TEX("Oeil="&decimal(greenpart(Oeil))),(0,2cm));
+%      label.top(TEX("Oeil="&decimal(bluepart(Oeil))),(0,3cm));
+    \end{mplibcode}
+      \mplibnumbersystem{scaled}
+    \else
+    \begin{mpost}[mpsettings={PfCRho=\useKV[ClesReperage]{Rho};PfCPhi=\useKV[ClesReperage]{Phi};PfCTheta=\useKV[ClesReperage]{Theta};color CouleurE,CouleurG;CouleurE=\useKV[ClesReperage]{CouleurE};CouleurG=\useKV[ClesReperage]{CouleurG};boolean AffichageNom,Axes;AffichageNom=\useKV[ClesReperage]{AffichageNom};Axes=\useKV[ClesReperage]{Axes};}]
+      input PfCSolid;
+      % 
+    % Pour convertir les (Long,lat) données en degrés en (Long,lat) données en radians
+    vardef ConvDeg(expr fa,fl)=
+    Famille((fa*pi/180),(fl*pi/180))
+    enddef;
+    %Initialisation
+    Initialisation(PfCRho,PfCTheta,PfCPhi,#2);
+    nb:=18;%
+    subh:=36;%
+    %angx:=-23.5;%anglerotationx;
+    TR:=(0,0,0);
+    Ferme2:=true;
+    typerepre:=\useKV[ClesReperage]{TypeProj};
+    if typerepre="proj":
+    ObjetSphereNew2("R=10");
+    ObjetEquateur3("R=10");
+    ObjetGreenwich4("R=10");
+    else:
+    ObjetSphereNew2("R=2");
+    ObjetEquateur3("R=2");
+    ObjetGreenwich4("R=2");
+    fi;
+    AffichagePfC2;
+    if Axes:
+    drawoptions(withpen pencircle scaled 1.05 withcolor CouleurE);
+    ObjetEquateur3("R=2");
+    AffichageEquateur3;
+    drawoptions(withpen pencircle scaled 1 withcolor CouleurG);
+    ObjetGreenwich4("R=2");
+    AffichageGreenwich4;
+    drawoptions();
+    fi;
+    % Label
+%    labeloffset:=labeloffset*2;
+%    label.urt(btex Nord etex,Projette(Image(ConvDeg(90,0))));%(0,0,2))));
+%    label.llft(btex Sud etex,Projette(Image(ConvDeg(-90,0))));%(0,0,-2))));
+%    label.lft(btex Ouest etex,Projette(Image(ConvDeg(0,-90))));%(0,-2,0))));
+%    label.rt(btex Est etex,Projette(Image(ConvDeg(0,90))));%(0,2,0))));
+%    labeloffset:=labeloffset/2;
+    dotlabel.llft(btex \tiny\ang{0} etex,Projette(Image(ConvDeg(0,0))));
+    dotlabel.llft(btex \tiny\ang{10} etex,Projette(Image(ConvDeg(10,0))));
+    dotlabel.llft(btex \tiny\ang{10} etex,Projette(Image(ConvDeg(0,10))));
+    color M[],N[];
+    vardef toto(text t)=
+    n:=1;
+    for p_=t:
+    if (n mod 3)=1:
+    k:=p_;
+    fi;
+    if (n mod 3)=2:
+    l:=p_;
+    fi;
+    if (n mod 3)=0:
+      M[n]=Image(ConvDeg(l,k));
+      if l>0:
+      if k>0:
+      N[n]=Image(ConvDeg(l+3,k+3));
+      else:
+      N[n]=Image(ConvDeg(l+3,k-3));
+      fi;
+      else:
+      if k>0:
+      N[n]=Image(ConvDeg(l-3,k+3));
+      else:
+      N[n]=Image(ConvDeg(l-3,k-3));
+      fi;
+      fi;
+      label(TEX(p_),Projette(N[n]));
+      dotlabel.urt("",Projette(M[n]));
+      fi;
+      n:=n+1;
+      endfor;
+      enddef;
+      if AffichageNom:
+      toto(#1);
+      fi;
+    \end{mpost}
+    \fi
+}%
+
+\def\MPEspaceSphere#1#2{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      defaultcolormodel := \useKV[ClesReperage]{ModeleCouleur};
+      if defaultcolormodel=7:
+      cmykcolor white,blanc;
+      white=(0,0,0,1);
+      blanc=(0,0,0,0);
+      fi;
+    typetrace:="3D";
+    typerepre:="persp";
+    anglephi:=\useKV[ClesReperage]{AnglePhi};
+    Initialisation(1500,anglephi,10,#2);
+    color O,A,B,C,D,Z,M[];
+    O=(0,0,0);
+    A=(cosd(anglephi+90),sind(anglephi+90),0);
+    B=(cosd(anglephi+180),sind(anglephi+180),0);
+    C=(1,0,0);
+    D=(0,1,0);
+    Z=(0,0,1);
+    trace cercles(O,A,O,A,Z) withcolor 0.7white;
+    path Equateur;
+    Equateur=cercles(O,C,O,C,D);
+    trace (subpath((0.25+anglephi/360)*length Equateur,(0.75+anglephi/360)*length Equateur) of Equateur) dashed evenly withcolor 0.7white;
+    trace (subpath((0.75+anglephi/360)*length Equateur,(1.25+anglephi/360)*length Equateur) of Equateur) withcolor 0.7white;
+    path greenwich;
+    greenwich=cercles(O,C,O,C,Z);
+    trace subpath(3*length greenwich/4,5*length greenwich/4) of greenwich  withcolor 0.2white;
+    clip currentpicture to cercles(O,A,O,A,Z);
+    trace chemin(C,O,Z) dashed evenly withcolor 0.85white;
+    trace chemin(O,2[Z,O])  dashed evenly withcolor 0.85white;
+
+    vardef toto(text t)=
+    n:=1;
+    for p_=t:
+    if (n mod 3)=1:
+    k:=p_;
+    fi;
+    if (n mod 3)=2:
+    l:=p_;
+    fi;
+    if (n mod 3)=0:
+      M[n]=(cosd(k)*cosd(l),sind(k)*cosd(l),sind(l));
+      path Codageun,Codagedeux;
+      if k>0:
+        Codageun=cercles(O,1[O,C],O,1[O,C],D) cutafter chemin(O,(cosd(k),sind(k),0));
+      elseif k<0:
+        Codageun=cercles(O,1[O,C],O,1[O,C],D) cutbefore chemin(O,(cosd(k),sind(k),0));
+      fi;
+      if l>0:
+        Codagedeux=cercles(O,(cosd(k),sind(k),0),O,(cosd(k),sind(k),0),Z) cutafter chemin(O,M[n]);
+      elseif l<0:
+        Codagedeux=cercles(O,(cosd(k),sind(k),0),O,(cosd(k),sind(k),0),Z) cutbefore chemin(O,M[n]);
+      fi;
+    %%%% if l>0:
+    %%%fill Projette(O)--Projette((cosd(k),sind(k),0))--Codagedeux--cycle withcolor \useKV[ClesReperage]{CouleurLa};
+    %%%fill Projette(O)--Projette(C)--Codageun--cycle withcolor \useKV[ClesReperage]{CouleurLon};
+    %%%else:
+    %%%fill Projette(O)--Codagedeux--Projette((cosd(k),sind(k),0))--cycle withcolor \useKV[ClesReperage]{CouleurLa};
+    %%%fill Projette(O)--Codageun--Projette(C)--cycle withcolor \useKV[ClesReperage]{CouleurLon};
+    %%%fi;
+      if unknown Codageun: else: trace Codageun; fi;
+      if unknown Codagedeux: else: trace Codagedeux; fi;
+      if \useKV[ClesReperage]{AffichageCoord}:
+        picture CodageUn,CodageDeux;
+        CodageUn=image(
+          if k>0:
+            label.bot(TEX("\scriptsize\ang{"&decimal(k)&"} E"),(0,0));
+          else:
+            label.bot(TEX("\scriptsize\ang{"&decimal(abs(k))&"} O"),(0,0));
+          fi;
+        );
+        CodageDeux=image(
+        if l>0:
+          label.rt(TEX("\scriptsize\ang{"&decimal(l)&"} N"),(0,0));
+        else:
+          label.lft(TEX("\scriptsize\ang{"&decimal(abs(l))&"} S"),(0,0));
+        fi;
+        );
+        fill (polygone(llcorner CodageUn,lrcorner CodageUn,urcorner CodageUn,ulcorner CodageUn) shifted(point(0.5*length Codageun) of Codageun)) withcolor blanc;
+        trace CodageUn shifted (point(0.5*length Codageun) of Codageun);
+        fill (polygone(llcorner CodageDeux,lrcorner CodageDeux,urcorner CodageDeux,ulcorner CodageDeux) shifted(point(0.5*length Codagedeux) of Codagedeux)) withcolor blanc;
+        trace CodageDeux shifted (point(0.5*length Codagedeux) of Codagedeux);
+      fi;
+    trace chemin(O,(cosd(k),sind(k),0)) dashed withdots scaled 0.5;
+    trace chemin(O,M[n]) dashed withdots scaled 0.5;
+    trace chemin(O,C) dashed withdots scaled 0.5;
+    if \useKV[ClesReperage]{AffichageNom}:
+    if l>0:dotlabel.top(p_,Projette(M[n]));
+    else:
+    dotlabel.bot(p_,Projette(M[n]));
+    fi;
+    fi;
+    fi;
+    n:=n+1;
+    endfor;
+    enddef;
+    toto(#1);
+    label.llft(btex \tiny \ang{0} etex,Projette(C));
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={boolean AffichageCoord; AffichageCoord=\useKV[ClesReperage]{AffichageCoord}; boolean AffichageNom; AffichageNom=\useKV[ClesReperage]{AffichageNom};anglephi:=\useKV[ClesReperage]{AnglePhi};}]
+    typetrace:="3D";
+    typerepre:="persp";
+    Initialisation(1500,anglephi,10,#2);
+    color O,A,B,C,D,Z,M[];
+    O=(0,0,0);
+    A=(cosd(anglephi+90),sind(anglephi+90),0);
+    B=(cosd(anglephi+180),sind(anglephi+180),0);
+    C=(1,0,0);
+    D=(0,1,0);
+    Z=(0,0,1);
+    trace cercles(O,A,O,A,Z) withcolor 0.7white;
+    path Equateur;
+    Equateur=cercles(O,C,O,C,D);
+    trace (subpath((0.25+anglephi/360)*length Equateur,(0.75+anglephi/360)*length Equateur) of Equateur) dashed evenly withcolor 0.7white;
+    trace (subpath((0.75+anglephi/360)*length Equateur,(1.25+anglephi/360)*length Equateur) of Equateur) withcolor 0.7white;
+    path greenwich;
+    greenwich=cercles(O,C,O,C,Z);
+    trace subpath(3*length greenwich/4,5*length greenwich/4) of greenwich  withcolor 0.7white;
+    clip currentpicture to cercles(O,A,O,A,Z);
+    trace chemin(C,O,Z) dashed evenly withcolor 0.85white;
+    trace chemin(O,2[Z,O])  dashed evenly withcolor 0.85white;
+
+    vardef toto(text t)=
+    n:=1;
+    for p_=t:
+     if (n mod 3)=1:
+     k:=p_;
+    fi;
+    if (n mod 3)=2:
+    l:=p_;
+    fi;
+    if (n mod 3)=0:
+    M[n]=(cosd(k)*cosd(l),sind(k)*cosd(l),sind(l));
+    path Codageun,Codagedeux;
+    if k>0:
+    Codageun=cercles(O,1[O,C],O,1[O,C],D) cutafter chemin(O,(cosd(k),sind(k),0));
+    elseif k<0:
+    Codageun=cercles(O,1[O,C],O,1[O,C],D) cutbefore chemin(O,(cosd(k),sind(k),0));
+    fi;
+    if l>0:
+    Codagedeux=cercles(O,(cosd(k),sind(k),0),O,(cosd(k),sind(k),0),Z) cutafter chemin(O,M[n]);
+    elseif k<0:
+    Codagedeux=cercles(O,(cosd(k),sind(k),0),O,(cosd(k),sind(k),0),Z) cutbefore chemin(O,M[n]);
+    fi;
+    %if l>0:
+    %fill Projette(O)--Projette((cosd(k),sind(k),0))--Codagedeux--cycle withcolor \useKV[ClesReperage]{CouleurLa};
+    %fill Projette(O)--Projette(C)--Codageun--cycle withcolor \useKV[ClesReperage]{CouleurLon};
+    %else:
+    %fill Projette(O)--Codagedeux--Projette((cosd(k),sind(k),0))--cycle withcolor \useKV[ClesReperage]{CouleurLa};
+    %fill Projette(O)--Codageun--Projette(C)--cycle withcolor \useKV[ClesReperage]{CouleurLon};
+    %fi;
+    if unknown Codageun: else: trace Codageun; fi;
+    if unknown Codagedeux: else: trace Codagedeux; fi;
+    if AffichageCoord:
+    picture CodageUn,CodageDeux;
+    CodageUn=image(
+    if k>0:
+    label.bot(LATEX("\noexpand\scriptsize\noexpand\ang{"&decimal(k)&"} E"),(0,0));
+    else:
+    label.bot(LATEX("\noexpand\scriptsize\noexpand\ang{"&decimal(abs(k))&"} O"),(0,0));
+    fi;
+    );
+    CodageDeux=image(
+    if l>0:
+    label.rt(LATEX("\noexpand\scriptsize\noexpand\ang{"&decimal(l)&"} N"),(0,0));
+    else:
+    label.lft(LATEX("\noexpand\scriptsize\noexpand\ang{"&decimal(abs(l))&"} S"),(0,0));
+    fi;
+    );
+    fill (polygone(llcorner CodageUn,lrcorner CodageUn,urcorner CodageUn,ulcorner CodageUn) shifted(point(0.5*length Codageun) of Codageun)) withcolor blanc;
+    trace CodageUn shifted (point(0.5*length Codageun) of Codageun);
+    fill (polygone(llcorner CodageDeux,lrcorner CodageDeux,urcorner CodageDeux,ulcorner CodageDeux) shifted(point(0.5*length Codagedeux) of Codagedeux)) withcolor blanc;
+    trace CodageDeux shifted (point(0.5*length Codagedeux) of Codagedeux);
+    fi;
+    trace chemin(O,(cosd(k),sind(k),0)) dashed withdots scaled 0.5;
+    trace chemin(O,M[n]) dashed withdots scaled 0.5;
+    trace chemin(O,C) dashed withdots scaled 0.5;
+    if AffichageNom:
+    if l>0:dotlabel.top(p_,Projette(M[n]));
+    else:
+    dotlabel.bot(p_,Projette(M[n]));
+    fi;
+    fi;
+    fi;
+    n:=n+1;
+    endfor;
+    enddef;
+    toto(#1);
+    label.llft(LATEX("\noexpand\tiny\noexpand\ang{0}"),Projette(C));
+  \end{mpost}
+  \fi
+}
+
+\def\MPEspacePave#1#2#3#4#5#6#7#8#9{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      defaultcolormodel := \useKV[ClesReperage]{ModeleCouleur};
+      if defaultcolormodel=7:
+      cmykcolor CoulTrace,gris;
+      CoulTrace=(0,0,0,1);
+      gris=0.1(0,0,0,1);
+      fi;
+      boolean Tiret;
+      Tiret=\useKV[ClesReperage]{Tiret};
+      color CouleurX,CouleurY,CouleurZ;
+      CouleurX=\useKV[ClesReperage]{CouleurX};
+      CouleurY=\useKV[ClesReperage]{CouleurY};
+      CouleurZ=\useKV[ClesReperage]{CouleurZ};
+      typetrace:="3D";
+      typerepre:="persp";
+%      Figure(-20u,-20u,20u,20u);
+      Initialisation(1500,30,20,abs(#9));
+      % marque_r:=marque_r/2;
+      marque_p:="plein";
+      color A,B,C,D,E,F,G,H,M[],N[];
+      draw Pave(A,B,C,D,E,F,G,H)(#1,#3,#5);
+      if #9>0:
+      drawarrow Projette(A)--Projette(1.5[D,A]);
+      drawarrow Projette(C)--Projette(1.5[D,C]);
+      drawarrow Projette(E)--Projette(1.5[D,E]);
+      label.top(TEX("$x$"),Projette(1.5[D,A]));
+      label.top(TEX("$y$"),Projette(1.5[D,C]));
+      label.top(TEX("$z$"),Projette(1.5[D,E]));
+      dotlabel.ulft(TEX("1"),Projette((1/#2)[D,A]));
+      dotlabel.bot(TEX("1"),Projette((1/#4)[D,C]));
+      dotlabel.lft(TEX("1"),Projette((1/#6)[D,E]));
+      drawoptions(withcolor CouleurX);
+      for k=1 upto (#2):
+      if Tiret:
+      trace chemin(D+0.02*(E-D),D,D+0.02*(C-D)) shifted Projette((k/#2)[D,A]);
+      else:
+      pointe((k/#2)[D,A]);
+      fi;
+      endfor;
+      drawoptions(withcolor CouleurY);
+      for k=1 upto (#4):
+      if Tiret:
+      trace chemin(D+0.02*(E-D),D,D+0.02*(A-D)) shifted Projette((k/#4)[D,C]);
+      else:
+      pointe((k/#4)[D,C]);
+      fi;
+      endfor;
+      drawoptions(withcolor CouleurZ);
+      for k=1 upto (#6):
+      if Tiret:
+      trace chemin(D+0.02*(A-D),D,D+0.02*(C-D)) shifted Projette((k/#6)[D,E]);
+      else:
+      pointe((k/#6)[D,E]);
+      fi;
+      endfor;
+      drawoptions();
+      else:
+      drawarrow Projette(D)--Projette(1.5[A,D]) dashed evenly;
+      drawarrow Projette(B)--Projette(1.5[A,B]);
+      drawarrow Projette(F)--Projette(1.5[A,F]);
+      label.lrt(TEX("$x$"),Projette(1.5[A,D]));
+      label.top(TEX("$y$"),Projette(1.5[A,B]));
+      label.top(TEX("$z$"),Projette(1.5[A,F]));
+      dotlabel.ulft(TEX("1"),Projette((1/#2)[A,D]));
+      dotlabel.bot(TEX("1"),Projette((1/#4)[A,B]));
+      dotlabel.lft(TEX("1"),Projette((1/#6)[A,F]));
+      drawoptions(withcolor CouleurX);
+      for k=1 upto (#2):
+      pointe((k/#2)[A,D]);
+      endfor;
+      drawoptions(withcolor CouleurY);
+      for k=1 upto (#4):
+      pointe((k/#4)[A,B]);
+      endfor;
+      drawoptions(withcolor CouleurZ);
+      for k=1 upto (#6):
+      pointe((k/#6)[A,F]);
+      endfor;
+      drawoptions();
+      fi;
+      vardef tata(text t)=
+      n:=1;%pour compter combien de points
+      k:=0;%pour garder l'abscisse
+      l:=0;%pour garder l'ordonn\'ee
+      m:=0;%pour garder l'altitude
+      if #8>0:
+      for p_=t:
+      if (n mod 4)=1:
+      k:=p_;
+      fi;
+      if (n mod 4)=2:
+      l:=p_;
+      fi;
+      if (n mod 4)=3:
+      m:=p_;
+      fi;
+      if (n mod 4)=0:
+      M[n]=(k/#2)[D,A]+(l/#4)*(C-D)+(m/#6)*(E-D);
+      N[n]=(k/#2)[D,A]+(l/#4)*(C-D);
+      if (#8>1):
+      label.top(TEX(p_),Projette(M[n]));
+      pointe(M[n]);
+      fi;
+      if (#8=1) or (#8=3) :
+      drawoptions(dashed evenly);
+      draw segment(M[n],(0,0,bluepart(M[n]))) withcolor if CouleurZ=black:gris else:CouleurZ fi;
+      draw segment(M[n],N[n]) withcolor gris;
+      draw segment(N[n],(redpart(M[n]),0,0)) withcolor if CouleurX=black:gris else:CouleurX fi;
+      draw segment(N[n],(0,greenpart(M[n]),0)) withcolor if CouleurY=black:gris else:CouleurY fi;
+      drawoptions();
+      fi;
+      fi;
+      n:=n+1;
+      endfor;
+      fi;
+      enddef;
+      vardef toto(text t)=
+      n:=1;%pour compter combien de points
+      k:=0;%pour garder l'abscisse
+      l:=0;%pour garder l'ordonn\'ee
+      m:=0;%pour garder l'altitude
+      if #8>0:
+      for p_=t:
+      if (n mod 4)=1:
+      k:=p_;
+      fi;
+      if (n mod 4)=2:
+      l:=p_;
+      fi;
+      if (n mod 4)=3:
+      m:=p_;
+      fi;
+      if (n mod 4)=0:
+      % message("je suis ici : "&p_);
+      M[n]=(k/#2)[A,D]+(l/#4)*(B-A)+(m/#6)*(F-A);
+      N[n]=(k/#2)[A,D]+(l/#4)*(B-A);
+      if (#8>1):
+      label.top(TEX(p_),Projette(M[n]));
+      pointe(M[n]);
+      fi;
+      if (#8=1) or (#8=3) :
+      drawoptions(dashed evenly);
+      draw segment(M[n],A+(0,0,bluepart(M[n]))) withcolor if CouleurZ=black:gris else:CouleurZ fi;
+      draw segment(M[n],N[n]) withcolor gris;
+      draw segment(N[n],A+(l/#4)*(B-A)) withcolor if CouleurY=black:gris else:CouleurY fi;
+      draw segment(N[n],A+(k/#2)*(D-A)) withcolor if CouleurX=black:gris else:CouleurX fi;
+      drawoptions();
+      fi;
+      fi;
+      n:=n+1;
+      endfor;
+      fi;
+      enddef;
+      if #9>0:
+      tata(#7);
+%      else:
+%      toto(#7);
+      fi;
+      draw Pave(A,B,C,D,E,F,G,H)(#1,#3,#5);
+      if \useKV[ClesReperage]{Code}:
+      \useKV[ClesReperage]{Traces}
+      fi;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={input PfCGeometrie;}]
+    typetrace:="3D";
+    typerepre:="persp";
+    Figure(-20u,-20u,20u,20u);
+    Initialisation(1500,30,20,abs(#9));
+    %marque_r:=marque_r/2;
+    marque_p:="plein";
+    color A,B,C,D,E,F,G,H,M[],N[];
+    draw Pave(A,B,C,D,E,F,G,H)(#1,#3,#5);
+    if #9>0:
+    drawarrow Projette(A)--Projette(1.5[D,A]);
+    drawarrow Projette(C)--Projette(1.5[D,C]);
+    drawarrow Projette(E)--Projette(1.5[D,E]);
+    label.ulft(btex 1 etex,Projette((1/#2)[D,A]));
+    label.bot(btex 1 etex,Projette((1/#4)[D,C]));
+    label.lft(btex 1 etex,Projette((1/#6)[D,E]));
+    for k=1 upto (#2):
+    pointe((k/#2)[D,A]);
+    endfor;
+    for k=1 upto (#4):
+    pointe((k/#4)[D,C]);
+    endfor;
+    for k=1 upto (#6):
+    pointe((k/#6)[D,E]);
+    endfor;
+    else:
+    drawarrow Projette(D)--Projette(1.5[A,D]) dashed evenly;
+    drawarrow Projette(B)--Projette(1.5[A,B]);
+    drawarrow Projette(F)--Projette(1.5[A,F]);
+    label.ulft(btex 1 etex,Projette((1/#2)[A,D]));
+    label.bot(btex 1 etex,Projette((1/#4)[A,B]));
+    label.lft(btex 1 etex,Projette((1/#6)[A,F]));
+    for k=1 upto (#2):
+    pointe((k/#2)[A,D]);
+    endfor;
+    for k=1 upto (#4):
+    pointe((k/#4)[A,B]);
+    endfor;
+    for k=1 upto (#6):
+    pointe((k/#6)[A,F]);
+    endfor;
+    fi;
+    vardef tata(text t)=
+    n:=1;%pour compter combien de points
+    k:=0;%pour garder l'abscisse
+    l:=0;%pour garder l'ordonn\'ee
+    m:=0;%pour garder l'altitude
+    if #8>0:
+    for p_=t:
+    if (n mod 4)=1:
+    k:=p_;
+    fi;
+    if (n mod 4)=2:
+    l:=p_;
+    fi;
+    if (n mod 4)=3:
+    m:=p_;
+    fi;
+    if (n mod 4)=0:
+    M[n]=(k/#2)[D,A]+(l/#4)*(C-D)+(m/#6)*(E-D);
+    N[n]=(k/#2)[D,A]+(l/#4)*(C-D);
+    if (#8>1):
+    label.top(LATEX(p_),Projette(M[n]));
+    pointe(M[n]);
+    fi;
+    if (#8=1) or (#8=3) :
+    drawoptions(dashed evenly withcolor gris);
+    draw segment(M[n],(0,0,bluepart(M[n])));
+    draw segment(M[n],N[n]);
+    draw segment(N[n],(redpart(M[n]),0,0));
+    draw segment(N[n],(0,greenpart(M[n]),0));
+    drawoptions();
+    fi;
+    fi;
+    n:=n+1;
+    endfor;
+    fi;
+    enddef;
+    vardef toto(text t)=
+    n:=1;%pour compter combien de points
+    k:=0;%pour garder l'abscisse
+    l:=0;%pour garder l'ordonn\'ee
+    m:=0;%pour garder l'altitude
+    if #8>0:
+    for p_=t:
+    if (n mod 4)=1:
+    k:=p_;
+    fi;
+    if (n mod 4)=2:
+    l:=p_;
+    fi;
+    if (n mod 4)=3:
+    m:=p_;
+    fi;
+    if (n mod 4)=0:
+    % message("je suis ici : "&p_);
+    M[n]=(k/#2)[A,D]+(l/#4)*(B-A)+(m/#6)*(F-A);
+    N[n]=(k/#2)[A,D]+(l/#4)*(B-A);
+    if (#8>1):
+    label.top(LATEX(p_),Projette(M[n]));
+    pointe(M[n]);
+    fi;
+    if (#8=1) or (#8=3) :
+    drawoptions(dashed evenly withcolor gris);
+    draw segment(M[n],A+(0,0,bluepart(M[n])));
+    draw segment(M[n],N[n]);
+    draw segment(N[n],A+(l/#4)*(B-A));
+    draw segment(N[n],A+(k/#2)*(D-A));
+    drawoptions();
+    fi;
+    fi;
+    n:=n+1;
+    endfor;
+    fi;
+    enddef;
+    if #9>0:
+    tata(#7);
+    else:
+    toto(#7);
+    fi;
+    draw Pave(A,B,C,D,E,F,G,H)(#1,#3,#5);
+  \end{mpost}
+  \fi
+}%
+
+% Pour construire le rep\`ere du plan
+\def\buildreperenew{%
+  \xdef\RetiensListePoints{}%
+  \xdef\RetiensListePointsA{}%
+  \xdef\RetiensListePointsCourte{}%
+  \foreachitem\compteur\in\ListePointRepere{%
+    \xdef\RetiensListePoints{\RetiensListePoints\ListePointRepere[\compteurcnt,1],}%
+    \xdef\RetiensListePoints{\RetiensListePoints\ListePointRepere[\compteurcnt,2],}%
+    \xdef\RetiensListePointsA{\RetiensListePointsA\ListePointRepere[\compteurcnt,1],}%
+    \xdef\RetiensListePointsA{\RetiensListePointsA\ListePointRepere[\compteurcnt,2],}%
+    \IfStrEq{\ListePointRepere[\compteurcnt,3]}{ }{%
+      \xdef\RetiensListePoints{\RetiensListePoints PfC,}%
+      \xdef\RetiensListePointsA{\RetiensListePointsA"",}%
+    }{%
+      \xdef\RetiensListePoints{\RetiensListePoints\ListePointRepere[\compteurcnt,3],}%
+      \xdef\RetiensListePointsA{\RetiensListePointsA"\ListePointRepere[\compteurcnt,3]",}%
+      \ifx\bla\RetiensListePointsCourte\bla%
+        \xdef\RetiensListePointsCourte{\ListePointRepere[\compteurcnt,3]}%
+      \else
+        \xdef\RetiensListePointsCourte{\RetiensListePointsCourte,\ListePointRepere[\compteurcnt,3]}%
+      \fi
+    }%
+  }%
+  \xdef\AfficheNom{0}\ifboolKV[ClesReperage]{AffichageNom}{\ifboolKV[ClesReperage]{LectureCoord}{\xdef\AfficheNom{3}}{\xdef\AfficheNom{2}}}{\ifboolKV[ClesReperage]{LectureCoord}{\xdef\AfficheNom{1}}{}}%
+ \xdef\AfficheGrad{0}\ifboolKV[ClesReperage]{AffichageGrad}{\xdef\AfficheGrad{1}}{}%
+ \xdef\AfficheCoord{\useKV[ClesReperage]{AffichageAbs}}%
+ \MPPlannew{\RetiensListePoints}{\AfficheNom}{\AfficheCoord}{\RetiensListePointsCourte}{\RetiensListePointsA}%
+}%
+
+\def\MPPlannew#1#2#3#4#5{%
+  % #1 : liste de points
+  % #2 : Affichage nom + lecture graphique
+  % #3 : Affichage des (abscisses/ordonn\'ees)
+  % #4 : la liste courte des noms des points.
+  % #5 : liste des points pour les string
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      defaultcolormodel := \useKV[ClesReperage]{ModeleCouleur};
+      boolean Tiret,Code,AffichageGrad,Cadre,CouleurGrille;
+      Tiret=\useKV[ClesReperage]{Tiret};
+      Code=\useKV[ClesReperage]{Code};
+      AffichageGrad=\useKV[ClesReperage]{AffichageGrad};
+      Cadre=\useKV[ClesReperage]{Cadre};
+      CouleurGrille=\useKV[ClesReperage]{CouleurGrille};
+      %
+      Unitex=\useKV[ClesReperage]{Unitex};
+      Pasx=\useKV[ClesReperage]{Pasx};
+      Unitey=\useKV[ClesReperage]{Unitey};
+      Pasy=\useKV[ClesReperage]{Pasy};
+      ValeurUnitex=\useKV[ClesReperage]{ValeurUnitex};
+      ValeurUnitey=\useKV[ClesReperage]{ValeurUnitey};
+      %
+      color CouleurX,CouleurY;
+      CouleurX=\useKV[ClesReperage]{CouleurX};
+      CouleurY=\useKV[ClesReperage]{CouleurY};
+      %
+      vardef AvantDefinirSommets(text tu)=
+      pair tu;
+      enddef;
+      %
+      vardef DefinirLesSommets(text t)=
+      nbretiens=1;
+      k:=0;
+      l:=0;
+      for g_=t:
+      if (nbretiens mod 3)=1:
+      if numeric g_:
+      k:=g_;
+      fi;
+      fi;
+      if (nbretiens mod 3)=2:
+      if numeric g_:
+      l:=g_;
+      fi;
+      fi;
+      if (nbretiens mod 3)=0:
+      if pair g_:
+      g_=(k*unitpx,l*unitpy);
+      fi;
+      fi;
+      nbretiens:=nbretiens+1;
+      endfor;
+      enddef;
+      %
+    maxx:=-4000;
+    minx=4000;
+    unitex:=(Unitex)*cm;
+    pasx=Pasx;
+    unitpx:=unitex/pasx;
+    maxy:=-4000;
+    miny:=4000;
+    unitey:=(Unitey)*cm;
+    pasy:=Pasy;
+    unitpy:=unitey/pasy;
+    %
+    n:=1;
+    vardef toto(text t)=
+    for p_=t:
+    if (n mod 3)=1:
+    if p_>maxx:
+        maxx:=p_;
+      fi;
+      if p_<minx:
+        minx:=p_;
+      fi;
+    fi;
+    if (n mod 3)=2:
+      if p_>maxy:
+        maxy:=p_;
+      fi;
+      if p_<miny:
+        miny:=p_;
+      fi;
+      fi;
+      n:=n+1;
+    endfor;
+    maxx:=maxx+1;
+    minx:=minx-1;
+    if maxx<(Pasx+1):
+    maxx:=Pasx+1;
+    fi;
+    if minx>(-Pasx-1):
+    minx:=-Pasx-1;
+    fi;
+    maxy:=maxy+1;
+    miny:=miny-1;
+    if maxy<(Pasy+1):
+    maxy:=Pasy+1;
+    fi;
+    if miny>(-Pasy-1):
+    miny:=-Pasy-1;
+    fi;
+    if minx<\useKV[ClesReperage]{ValeurMin}:
+    minx:=\useKV[ClesReperage]{ValeurMin};
+    fi;
+    if maxx>\useKV[ClesReperage]{ValeurMax}:
+    maxx:=\useKV[ClesReperage]{ValeurMax};
+    fi;
+    if miny<\useKV[ClesReperage]{ValeurMiny}:
+    miny:=\useKV[ClesReperage]{ValeurMiny};
+    fi;
+    if maxy>\useKV[ClesReperage]{ValeurMaxy}:
+    maxy:=\useKV[ClesReperage]{ValeurMaxy};
+    fi;
+    enddef;
+    toto(#1);
+    Figure((minx-1)*unitpx,(miny-1)*unitpy,(maxx+1)*unitpx,(maxy+1)*unitpy);
+    %Figure(minx*unitpx,miny*unitpy,maxx*unitpx,maxy*unitpy);
+    pair A,B,C,D,E;
+    A=(0,0);
+    B=(minx*unitpx,0);
+    C=(maxx*unitpx,0);
+    D=(0,miny*unitpy);
+    E=(0,maxy*unitpy);
+    for k=0 upto (maxx-minx):
+    draw ((xpart(B),ypart(D)-0.75*unitpy)--(xpart(B),ypart(E)+0.75*unitpy)) shifted (k*unitpx,0) withcolor if CouleurGrille:CouleurX else:gris fi;
+    endfor;
+    for k=0 upto (maxy-miny):
+    draw ((xpart(B)-0.75*unitpx,ypart(D))--(xpart(C)+0.75*unitpx,ypart(D))) shifted (0,k*unitpy) withcolor if CouleurGrille:CouleurY else:gris fi;
+    endfor;
+    if CouleurGrille:drawoptions(withpen pencircle scaled 1.05);fi;
+    drawarrow (B+(-0.75*unitpx,0))--(C+(0.75*unitpx,0));
+    drawarrow (D+(0,-0.75*unitpy))--(E+(0,0.75*unitpy));
+    drawoptions();
+    % graduation compl\`ete ou pas ?
+    label.llft(TEX("\footnotesize 0"),A);
+    if AffichageGrad:
+    for k=minx upto maxx:
+    if (xpart((k*unitex,0))>xpart(B+(-0.75*unitpx,0))) and (xpart((k*unitex,0))<xpart(C+(0.75*unitpx,0))):
+    if k<>0:
+    if Tiret:
+    draw (k*unitex,-1mm)--(k*unitex,1mm);
+    label.lrt(TEX("\footnotesize\num{"&decimal(k)&"}"),(k*unitex,0));
+    else:
+    dotlabel.lrt(TEX("\footnotesize\num{"&decimal(k)&"}"),(k*unitex,0));
+    fi;
+    fi;
+    fi;
+    endfor;
+    for k=miny upto maxy:
+    if (ypart((0,k*unitey))>ypart(D+(0,-0.75*unitpy))) and (ypart((0,k*unitey))<ypart(E+(0,0.75*unitpy))):
+    if k<>0:
+    if Tiret:
+    draw (-1mm,k*unitey)--(1mm,k*unitey);
+    label.ulft(TEX("\footnotesize\num{"&decimal(k)&"}"),(0,k*unitey));
+    else:
+    dotlabel.ulft(TEX("\footnotesize\num{"&decimal(k)&"}"),(0,k*unitey));
+    fi;
+    fi;
+    fi;
+    endfor;
+    else:
+    dotlabel.lrt(TEX("\footnotesize\num{"&decimal(ValeurUnitex)&"}"),(unitex,0));
+    dotlabel.ulft(TEX("\footnotesize\num{"&decimal(ValeurUnitey)&"}"),(0,unitey));
+    fi;
+    % apparition du nom des points ou pas
+    m_c:=m_c*3;
+    marque_p:="croix";
+    vardef tata(text t)=%on place les points
+    % {
+    if #2>0:
+    n:=1;
+    k:=0;%pour retenir la coordonn\'ee en x
+    l:=0;%pour retenir la coordonn\'ee en y
+    for p_=t:
+        if (n mod 3)=1:
+    if numeric p_:
+    k:=p_;
+    fi;
+    fi;
+    if (n mod 3)=2:
+    if numeric p_:
+    l:=p_;
+    fi;
+    fi;
+    if (n mod 3)=0:
+    if #2>1:
+    if p_<>"":
+    if (k>0) and (l>0):
+    label.urt(TEX(p_),(k*unitpx,l*unitpy));
+    fi;
+    if (k=0) and (l>0):
+    label.urt(TEX(p_),(k*unitpx,l*unitpy));
+    fi;
+    if (k>0) and (l=0):
+    label.urt(TEX(p_),(k*unitpx,l*unitpy));
+    fi;
+    if (k<0) and (l>0):
+    label.ulft(TEX(p_),(k*unitpx,l*unitpy));
+    fi;
+    if (k=0) and (l<0):
+    label.llft(TEX(p_),(k*unitpx,l*unitpy));
+    fi;
+    if (k<0) and (l<0):
+    label.llft(TEX(p_),(k*unitpx,l*unitpy));
+    fi;
+    if (k<0) and (l=0):
+    label.llft(TEX(p_),(k*unitpx,l*unitpy));
+    fi;
+    if (k>0) and (l<0):
+    label.lrt(TEX(p_),(k*unitpx,l*unitpy));
+    fi;
+    pointe((k*unitpx,l*unitpy));
+    fi;
+    fi;
+    if (#2=1) or (#2=3):
+    % draw (0,l*unitpy)--(k*unitpx,l*unitpy)--(k*unitpx,0) dashed evenly;
+    draw (0,l*unitpy)--(k*unitpx,l*unitpy) dashed evenly withcolor CouleurY;
+    draw (k*unitpx,l*unitpy)--(k*unitpx,0) dashed evenly withcolor CouleurX;
+    fi;
+    fi;
+    n:=n+1;
+    endfor;
+    fi;
+    % }
+    n:=1;
+    k:=0;%pour retenir la coordonn\'ee en x
+    l:=0;%pour retenir la coordonn\'ee en y
+    for p_=t:
+      if (n mod 3)=1:
+        if numeric p_:
+        k:=p_;
+        fi;
+      fi;
+      if (n mod 3)=2:
+        if numeric p_:
+        l:=p_;
+        fi;
+      fi;
+      if (n mod 3)=0:
+        if #3=2:
+          if p_<>"":
+            if (k mod pasx)<>0:
+            label.lrt(TEX("\footnotesize$\frac{\num{"&decimal(k)&"}}{\num{"&decimal(pasx)&"}}$"),(k*unitpx,0));
+            else:
+            label.lrt(TEX("\footnotesize\num{\fpeval{"&decimal(k)&"/"&decimal(pasx)&"}}"),(k*unitpx,0));
+            fi;
+            if (l mod pasy)<>0:
+            label.ulft(TEX("\footnotesize$\frac{\num{"&decimal(l)&"}}{\num{"&decimal(pasy)&"}}$"),(0,l*unitpy));
+            else:
+            label.ulft(TEX("\footnotesize\num{\fpeval{"&decimal(l)&"/"&decimal(pasy)&"}}"),(0,l*unitpy));
+            fi;
+            pointe((k*unitpx,0),(0,l*unitpy));
+          fi;
+        elseif #3=1:
+          if p_<>"":
+          label.lrt(TEX("\footnotesize\num{\fpeval{"&decimal(k)&"/"&decimal(pasx)&"}}"),(k*unitpx,0));
+          label.ulft(TEX("\footnotesize\num{\fpeval{"&decimal(l)&"/"&decimal(pasy)&"}}"),(0,l*unitpy));
+          pointe((k*unitpx,0),(0,l*unitpy));
+          fi;
+          fi;
+    fi;
+    n:=n+1;
+    endfor;
+    enddef;
+    tata(#5);
+    AvantDefinirSommets(#4);
+    DefinirLesSommets(#1);
+    if Code:
+    \useKV[ClesReperage]{Traces};
+    fi;
+    if Cadre:
+    trace polygone(%
+    ((minx-1)*unitpx,(miny-1)*unitpy),
+    ((maxx+1)*unitpx,(miny-1)*unitpy),
+    ((maxx+1)*unitpx,(maxy+1)*unitpy),
+    ((minx-1)*unitpx,(maxy+1)*unitpy)
+    );
+    fi;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={
+      vardef EffectuerTraces=
+      \useKV[ClesFonction]{Traces};
+      enddef;
+      boolean Tiret,Code,AffichageGrad;
+      Tiret=\useKV[ClesReperage]{Tiret};
+      Code=\useKV[ClesReperage]{Code};
+      AffichageGrad=\useKV[ClesReperage]{AffichageGrad};
+      %
+      Unitex=\useKV[ClesReperage]{Unitex};
+      Pasx=\useKV[ClesReperage]{Pasx};
+      Unitey=\useKV[ClesReperage]{Unitey};
+      Pasy=\useKV[ClesReperage]{Pasy};
+      ValeurUnitex=\useKV[ClesReperage]{ValeurUnitex};
+      ValeurUnitey=\useKV[ClesReperage]{ValeurUnitey};
+      };]
+      %
+      vardef AvantDefinirSommets(text tu)=
+      pair tu;
+      enddef;
+      %
+      vardef DefinirLesSommets(text t)=
+      nbretiens=1;
+      k:=0;
+      l:=0;
+      for g_=t:
+      if (nbretiens mod 3)=1:
+      if numeric g_:
+      k:=g_;
+      fi;
+      fi;
+      if (nbretiens mod 3)=2:
+      if numeric g_:
+      l:=g_;
+      fi;
+      fi;
+      if (nbretiens mod 3)=0:
+      g_=(k*unitpx,l*unitpy);
+      fi;
+      nbretiens:=nbretiens+1;
+      endfor;
+      enddef;
+      %
+    maxx:=-4000;
+    minx=4000;
+    unitex:=(Unitex)*cm;
+    pasx=Pasx;
+    unitpx:=unitex/pasx;
+    maxy:=-4000;
+    miny:=4000;
+    unitey:=(Unitey)*cm;
+    pasy:=Pasy;
+    unitpy:=unitey/pasy;
+    %
+    n:=1;
+    vardef toto(text t)=
+    for p_=t:
+    if (n mod 3)=1:
+    if p_>maxx:
+        maxx:=p_;
+      fi;
+      if p_<minx:
+        minx:=p_;
+      fi;
+    fi;
+    if (n mod 3)=2:
+      if p_>maxy:
+        maxy:=p_;
+      fi;
+      if p_<miny:
+        miny:=p_;
+      fi;
+      fi;
+      n:=n+1;
+    endfor;
+    maxx:=maxx+1;
+    minx:=minx-1;
+    if maxx<(Pasx+1):
+    maxx:=Pasx+1;
+    fi;
+    if minx>(-Pasx-1):
+    minx:=-Pasx-1;
+    fi;
+    maxy:=maxy+1;
+    miny:=miny-1;
+    if maxy<(Pasy+1):
+    maxy:=Pasy+1;
+    fi;
+    if miny>(-Pasy-1):
+    miny:=-Pasy-1;
+    fi;
+    enddef;
+    toto(#1);
+    Figure((minx-1)*unitpx,(miny-1)*unitpy,(maxx+1)*unitpx,(maxy+1)*unitpy);
+    pair A,B,C,D,E;
+    A=(0,0);
+    B=(minx*unitpx,0);
+    C=(maxx*unitpx,0);
+    D=(0,miny*unitpy);
+    E=(0,maxy*unitpy);
+    for k=0 upto (maxx-minx):
+    draw ((xpart(B),ypart(D)-0.75*unitpy)--(xpart(B),ypart(E)+0.75*unitpy)) shifted (k*unitpx,0) withcolor gris;
+    endfor;
+    for k=0 upto (maxy-miny):
+    draw ((xpart(B)-0.75*unitpx,ypart(D))--(xpart(C)+0.75*unitpx,ypart(D))) shifted (0,k*unitpy) withcolor gris;
+    endfor;
+    drawarrow (B+(-0.75*unitpx,0))--(C+(0.75*unitpx,0));
+    drawarrow (D+(0,-0.75*unitpy))--(E+(0,0.75*unitpy));
+    % graduation compl\`ete ou pas ?
+    label.llft(LATEX("\noexpand\footnotesize 0"),A);
+    if AffichageGrad:
+    for k=minx upto maxx:
+    if (xpart((k*unitex,0))>xpart(B+(-0.75*unitpx,0))) and (xpart((k*unitex,0))<xpart(C+(0.75*unitpx,0))):
+    if k<>0:
+    if Tiret:
+    draw (k*unitex,-1mm)--(k*unitex,1mm);
+    label.lrt(LATEX("\noexpand\footnotesize\noexpand\num{"&decimal(k)&"}"),(k*unitex,0));
+    else:
+    dotlabel.lrt(LATEX("\noexpand\footnotesize\noexpand\num{"&decimal(k)&"}"),(k*unitex,0));
+    fi;
+    fi;
+    fi;
+    endfor;
+    for k=miny upto maxy:
+    if (ypart((0,k*unitey))>ypart(D+(0,-0.75*unitpy))) and (ypart((0,k*unitey))<ypart(E+(0,0.75*unitpy))):
+    if k<>0:
+    if Tiret:
+    draw (-1mm,k*unitey)--(1mm,k*unitey);
+    label.ulft(LATEX("\noexpand\footnotesize\noexpand\num{"&decimal(k)&"}"),(0,k*unitey));
+    else:
+    dotlabel.ulft(LATEX("\noexpand\footnotesize\noexpand\num{"&decimal(k)&"}"),(0,k*unitey));
+    fi;
+    fi;
+    fi;
+    endfor;
+    else:
+    dotlabel.lrt(LATEX("\noexpand\footnotesize\noexpand\num{"&decimal(ValeurUnitex)&"}"),(unitex,0));
+    dotlabel.ulft(LATEX("\noexpand\footnotesize\noexpand\num{"&decimal(ValeurUnitey)&"}"),(0,unitey));
+    fi;
+    % apparition du nom des points ou pas
+    m_c:=m_c*3;
+    marque_p:="croix";
+    vardef tata(text t)=%on place les points
+    % {
+    if #2>0:
+    n:=1;
+    k:=0;%pour retenir la coordonn\'ee en x
+    l:=0;%pour retenir la coordonn\'ee en y
+    for p_=t:
+        if (n mod 3)=1:
+    if numeric p_:
+    k:=p_;
+    fi;
+    fi;
+    if (n mod 3)=2:
+    if numeric p_:
+    l:=p_;
+    fi;
+    fi;
+    if (n mod 3)=0:
+    if #2>1:
+    if p_<>"":
+    if (k>0) and (l>0):
+    label.urt(LATEX(p_),(k*unitpx,l*unitpy));
+    fi;
+    if (k=0) and (l>0):
+    label.urt(LATEX(p_),(k*unitpx,l*unitpy));
+    fi;
+    if (k>0) and (l=0):
+    label.urt(LATEX(p_),(k*unitpx,l*unitpy));
+    fi;
+    if (k<0) and (l>0):
+    label.ulft(LATEX(p_),(k*unitpx,l*unitpy));
+    fi;
+    if (k=0) and (l<0):
+    label.llft(LATEX(p_),(k*unitpx,l*unitpy));
+    fi;
+    if (k<0) and (l<0):
+    label.llft(LATEX(p_),(k*unitpx,l*unitpy));
+    fi;
+    if (k<0) and (l=0):
+    label.llft(LATEX(p_),(k*unitpx,l*unitpy));
+    fi;
+    if (k>0) and (l<0):
+    label.lrt(LATEX(p_),(k*unitpx,l*unitpy));
+    fi;
+    pointe((k*unitpx,l*unitpy));
+    fi;
+    fi;
+    if (#2=1) or (#2=3):
+    draw (0,l*unitpy)--(k*unitpx,l*unitpy)--(k*unitpx,0) dashed evenly;
+    fi;
+    fi;
+    n:=n+1;
+    endfor;
+    fi;
+    % }
+    n:=1;
+    k:=0;%pour retenir la coordonn\'ee en x
+    l:=0;%pour retenir la coordonn\'ee en y
+    for p_=t:
+      if (n mod 3)=1:
+        if numeric p_:
+        k:=p_;
+        fi;
+      fi;
+      if (n mod 3)=2:
+        if numeric p_:
+        l:=p_;
+        fi;
+      fi;
+      if (n mod 3)=0:
+        if #3=2:
+          if p_<>"":
+            if (k mod pasx)<>0:
+            label.lrt(LATEX("\noexpand\footnotesize$\noexpand\frac{\noexpand\num{"&decimal(k)&"}}{\noexpand\num{"&decimal(pasx)&"}}$"),(k*unitpx,0));
+            else:
+            label.lrt(LATEX("\noexpand\footnotesize\noexpand\num{\noexpand\fpeval{"&decimal(k)&"/"&decimal(pasx)&"}}"),(k*unitpx,0));
+            fi;
+            if (l mod pasy)<>0:
+            label.ulft(LATEX("\noexpand\footnotesize$\noexpand\frac{\noexpand\num{"&decimal(l)&"}}{\noexpand\num{"&decimal(pasy)&"}}$"),(0,l*unitpy));
+            else:
+            label.ulft(LATEX("\noexpand\footnotesize\noexpand\num{\noexpand\fpeval{"&decimal(l)&"/"&decimal(pasy)&"}}"),(0,l*unitpy));
+            fi;
+            pointe((k*unitpx,0),(0,l*unitpy));
+          fi;
+        elseif #3=1:
+          if p_<>"":
+          label.lrt(LATEX("\noexpand\footnotesize\noexpand\num{\noexpand\fpeval{"&decimal(k)&"/"&decimal(pasx)&"}}"),(k*unitpx,0));
+          label.ulft(LATEX("\noexpand\footnotesize\noexpand\num{\noexpand\fpeval{"&decimal(l)&"/"&decimal(pasy)&"}}"),(0,l*unitpy));
+          pointe((k*unitpx,0),(0,l*unitpy));
+          fi;
+          fi;
+    fi;
+    n:=n+1;
+    endfor;
+    enddef;
+    tata(#5);
+    AvantDefinirSommets(#4);
+    DefinirLesSommets(#1);
+    if Code:
+    EffectuerTraces;
+    fi;
+  \end{mpost}
+  \fi
+}%
+
+\def\MPTouteDROITEGraduee#1#2{%
+  % #1 : liste des points \`a placer en pas. pour g\'erer le cas des rep\'erages fractionnaires
+  % #2 : liste des noms des points
+  \ifluatex
+    \mplibforcehmode
+  \begin{mplibcode}
+    defaultcolormodel := \useKV[ClesReperage]{ModeleCouleur};
+    maxx:=0;
+    minx:=4000;
+    unitex:=\useKV[ClesReperage]{Unitex}*cm;
+    pasx:=\useKV[ClesReperage]{Pasx};
+    pasgradx:=\useKV[ClesReperage]{PasGradX};
+    unitp:=unitex/pasx;%unit\'e de d\'eplacement
+    ValeurUnitex:=\useKV[ClesReperage]{ValeurUnitex};
+    ValeurOrigine:=\useKV[ClesReperage]{ValeurOrigine};
+    AffichageGrad:=\AffichageGrad;
+    AffichageCoord:=\useKV[ClesReperage]{AffichageAbs};
+    if AffichageCoord=5:
+      color CoulAbs;
+      CoulAbs=\useKV[ClesReperage]{CouleurAbs};
+    fi;
+    AffichageNom:=\AffichageNom;
+    boolean DemiDroite,AffichageUnites,MarquePrimaire,Decale,Millimetre,Seyes,CinqCinq,PasFleches,Simplification,Elementaire,Penta,Deca;
+    Elementaire=\useKV[ClesReperage]{Elementaire};
+    if Elementaire:
+     Penta=true;
+     Deca=true;
+    fi;
+    ValeurPas=\useKV[ClesReperage]{ValeurPas};
+    Simplification=\useKV[ClesReperage]{Simplification};
+    DemiDroite=\useKV[ClesReperage]{DemiDroite};
+    AffichageUnites=\useKV[ClesReperage]{AffichageUnites};
+    MarquePrimaire=\useKV[ClesReperage]{MarquePrimaire};
+    Decale=\useKV[ClesReperage]{Decale};
+    Millimetre=\useKV[ClesReperage]{AvecMillimetre};
+    Seyes=\useKV[ClesReperage]{AvecSeyes};
+    CinqCinq=\useKV[ClesReperage]{AvecCinqCinq};
+    PasFleches=\useKV[ClesReperage]{PasFleches};
+    if Millimetre:
+    color CouleurPM;
+    CouleurPM=\useKV[ClesReperage]{PapierMilli};
+    fi;
+    if Seyes:
+    color CouleurPS;
+    CouleurPS=\useKV[ClesReperage]{PapierSeyes};
+    fi;
+    if CinqCinq:
+    color CouleurPC;
+    CouleurPC=\useKV[ClesReperage]{PapierCinqCinq};
+    fi;
+    if defaultcolormodel=7:
+    cmykcolor CouleurCroix;
+    else:
+    color CouleurCroix;
+    fi;
+    CouleurCroix=\useKV[ClesReperage]{CouleurCroix};
+    EchelleCroix=\useKV[ClesReperage]{EchelleCroix};
+    if PasFleches:
+    PasFleche=\useKV[ClesReperage]{PasFleche};
+    string TexteFleche;
+    TexteFleche="\useKV[ClesReperage]{TexteFleche}";
+    fi;
+    numeric valeur[];
+    vardef titi(text t)=
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    valeur[n]=p_;
+    endfor;
+    enddef;
+    titi(#1);
+    % Détermination des abscisses maximale et minimale
+    for k=1 upto n:
+    if valeur[k]>maxx:
+    maxx:=valeur[k];
+    fi;
+    if valeur[k]<minx:
+    minx:=valeur[k];
+    fi;
+    endfor;
+    maxx:=maxx+(pasx div 2);
+    minx:=minx-(pasx div 2);
+    if maxx<(pasx+1):
+    maxx:=2*pasx-1;
+    fi;
+    if minx>(-pasx-1):
+    minx:=-2*pasx-1;
+    fi;
+    if minx<\useKV[ClesReperage]{ValeurMin}:
+    minx:=\useKV[ClesReperage]{ValeurMin};
+    fi;
+    if maxx>\useKV[ClesReperage]{ValeurMax}:
+    maxx:=\useKV[ClesReperage]{ValeurMax};
+    fi;
+    % Pour gérer les cas des droites où toutes les valeurs sont soit positives soit négatives
+    if DemiDroite:
+    minx:=0;
+    fi;
+    % -----
+    pair A,B,C;
+    A=(0,0);
+    B=unitp*(maxx,0);
+    C=unitp*(minx,0);
+    % On trace la droite
+    if DemiDroite:
+      if Elementaire:
+        draw C--B;
+      else:
+        drawarrow C--(B+unitp*(0.75,0));
+      fi;
+    else:
+      if Elementaire:
+       draw C--B;
+      else:
+        drawarrow (C+unitp*(-0.75,0))--(B+unitp*(0.75,0));
+      fi;
+    fi;
+    % marquage secondaire
+    marque_s:=marque_s/3;
+    if pasx>1:
+      pair uu;
+      uu=(0,0);
+      if Elementaire:
+        uu:=(0,2*marque_s);
+      fi;
+      if ((maxx-minx) mod 2)=0:
+        draw marquedemidroite(C,B) shifted uu;
+        for k=(minx+1) step 2 until (maxx-1):
+          draw marquesegment((k/maxx)[A,B],((k+1)/maxx)[A,B]) shifted uu;
+        endfor;
+      else:
+        for k=(minx) step 2 until (maxx-1):
+          draw marquesegment((k/maxx)[A,B],((k+1)/maxx)[A,B]) shifted uu;
+        endfor;
+      fi;
+    fi;
+    % marquage primaire
+    marque_s:=marque_s*3;
+    if MarquePrimaire:
+      if Elementaire:
+        marque_s:=marque_s*0.5;
+        if ((maxx-minx) mod 2)=0:
+          draw marquedemidroite(C,B) shifted(0,marque_s);
+          for k=(minx) step ValeurPas until (maxx):
+            if k<maxx:
+              draw marquesegment((k/maxx)[A,B],((k+ValeurPas)/maxx)[A,B]) shifted(0,marque_s);
+            fi;
+            if Penta:
+              if (abs(k) mod 5)=0:
+                draw (k/maxx)[A,B]--((k/maxx)[A,B]+(0,2*marque_s+2)) withpen pencircle scaled 1.025;
+              fi;
+            fi;
+            if Deca:
+              if (abs(k) mod 10)=0:
+                draw (k/maxx)[A,B]--((k/maxx)[A,B]+(0,3*marque_s+2)) withpen pencircle scaled 1.05;
+              fi;
+            fi;
+          endfor;        
+        else:
+          for k=(minx) step ValeurPas until (maxx-ValeurPas):
+            draw marquesegment((k/maxx)[A,B],((k+ValeurPas)/maxx)[A,B]) shifted(0,marque_s);
+            if Penta:
+              if (abs(k) mod 5)=0:
+                draw (k/maxx)[A,B]--((k/maxx)[A,B]+(0,2*marque_s+2)) withpen pencircle scaled 1.025;
+              fi;
+            fi;
+            if Deca:
+              if (abs(k) mod 10)=0:
+                draw (k/maxx)[A,B]--((k/maxx)[A,B]+(0,3*marque_s+2)) withpen pencircle scaled 1.05;
+              fi;
+            fi;
+          endfor;
+        fi;
+      else:
+        for k=0 step pasx until (maxx-pasx):
+          draw marquesegment((k/maxx)[A,B],((k+pasx)/maxx)[A,B]);
+        endfor;
+        for k=0 step -pasx until (minx+pasx):
+          draw marquesegment((k/maxx)[A,B],((k-pasx)/maxx)[A,B]);
+        endfor;
+      fi;
+    fi;
+    % marquage des points
+    m_c:=m_c*3/EchelleCroix;
+    marque_p:="croix";
+    labeloffset:=labeloffset*3;
+    if AffichageUnites:
+      if Elementaire=false:
+        label.bot(TEX("\footnotesize\num{"&decimal(ValeurUnitex)&"}"),unitex*(1,0));
+      fi;
+      label.bot(TEX("\footnotesize\num{"&decimal(ValeurOrigine)&"}"),A);
+    fi;
+    if AffichageGrad>0:
+      if Elementaire:
+        if minx=0:
+          k:=0;
+          if \useKV[ClesReperage]{Coupure}>1:
+          label.bot(TEX("\footnotesize\textcolor{white}{0}\num{\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-ValeurOrigine)&"*"&decimal(k)&"}}"),unitex*(k,0));%%%
+          else:
+            label.bot(TEX("\footnotesize\num{\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-ValeurOrigine)&"*"&decimal(k)&"}}"),unitex*(k,0));%%%
+          fi;
+        fi;
+      else:
+        for k=((minx+(abs(minx) mod pasx)) div pasx) step pasgradx until (maxx div pasx):
+          if (k<0) or (k>0):
+            label.bot(TEX("\footnotesize\num{\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-ValeurOrigine)&"*"&decimal(k)&"}}"),unitex*(k,0));%%%
+          fi;
+        endfor;
+      fi;
+    fi;  
+    vardef tata(text t)=%on place les points
+    if AffichageNom>0:
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    if substring(1,2) of p_="*":
+    label.top(TEX(substring(2,length p_) of p_),unitp*(valeur[n],0));
+    else:
+    label.top(TEX(p_),unitp*(valeur[n],0));
+    fi;
+    if p_<>"":
+    drawoptions(withcolor CouleurCroix);
+    pointe(unitp*(valeur[n],0));
+    drawoptions();
+    fi;
+    endfor;
+    fi;
+    % On ajoute une paramétrisation possible à chaque point.
+    if AffichageCoord>0:
+      n:=0;
+      for p_=t:
+        n:=n+1;
+        if substring(1,2) of p_="*":
+          ACoord:=scantokens(substring(0,1) of p_);
+          if ACoord=5:
+            if ((ValeurUnitex*valeur[n]) mod pasx)<>0:
+            if AffichageCoord=1:
+            label.bot(TEX("\footnotesize\textcolor{\useKV[ClesReperage]{CouleurAbs}}{\num{\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-(ValeurOrigine))&"*"&decimal(valeur[n])&"/"&decimal(pasx)&"}}}"),unitp*(valeur[n],0));
+            else:
+            if Simplification:
+            label.bot(TEX("\footnotesize$\mathcolor{\useKV[ClesReperage]{CouleurAbs}}{\Simplification{\fpeval{"&decimal(ValeurOrigine*pasx)&"+"&decimal(ValeurUnitex-ValeurOrigine)&"*"&decimal(valeur[n])&"}}{"&decimal(pasx)&"}}$"),unitp*(valeur[n],0));
+            else:
+            label.bot(TEX("\footnotesize$\mathcolor{\useKV[ClesReperage]{CouleurAbs}}{\frac{\num{\fpeval{"&decimal(ValeurOrigine*pasx)&"+"&decimal(ValeurUnitex-ValeurOrigine)&"*"&decimal(valeur[n])&"}}}{\num{"&decimal(pasx)&"}}}$"),unitp*(valeur[n],0));
+            fi;
+            fi;
+            else:
+              label.bot(TEX("\footnotesize\textcolor{\useKV[ClesReperage]{CouleurAbs}}{\num{\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-(ValeurOrigine))&"*"&decimal(valeur[n])&"/"&decimal(pasx)&"}}}"),unitp*(valeur[n],0));
+            fi;
+            drawoptions(withcolor CouleurCroix);
+            pointe(unitp*(valeur[n],0));
+            drawoptions();
+          elseif ACoord=4:
+            drawoptions(withcolor CouleurCroix);
+            pointe(unitp*(valeur[n],0));
+            drawoptions();
+          elseif ACoord=3:
+            if Decale:
+              drawarrow (unitp*valeur[n],-7mm if (n mod 2)=0:-5mm fi)--(unitp*valeur[n],-3mm);
+            else:
+              drawarrow (unitp*valeur[n],-7mm)--(unitp*valeur[n],-3mm);
+              label.bot(TEX("\pointilles[1cm]"),(unitp*valeur[n],-7mm));
+            fi;
+            numeric LongPoint;
+            Labeloffset:=labeloffset;
+            labeloffset:=0pt;
+            if Decale:
+              if DemiDroite:
+                LongPoint=abs(C-(B+unitp*(0.75,0)));
+                label.rt(TEX("\pointilles[\fpeval{"&decimal(LongPoint)&"}pt]"),C+(0,-1.6cm));
+              else:
+                LongPoint=abs((C+unitp*(-0.75,0))-(B+unitp*(0.75,0)));
+                label.rt(TEX("\pointilles[\fpeval{"&decimal(LongPoint)&"}pt]"),C+unitp*(-0.75,0)+(0,-1.6cm));
+              fi;
+            fi;
+            labeloffset:=Labeloffset;
+            drawoptions(withcolor CouleurCroix);
+            pointe(unitp*(valeur[n],0));
+            drawoptions();
+          elseif ACoord=2:
+            if ((ValeurUnitex*valeur[n]) mod pasx)<>0:
+              if Simplification:
+                label.bot(TEX("\footnotesize$\Simplification{\fpeval{"&decimal(ValeurOrigine*pasx)&"+"&decimal(ValeurUnitex-ValeurOrigine)&"*"&decimal(valeur[n])&"}}{"&decimal(pasx)&"}$"),unitp*(valeur[n],0));
+              else:
+                label.bot(TEX("\footnotesize$\frac{\num{\fpeval{"&decimal(ValeurOrigine*pasx)&"+"&decimal(ValeurUnitex-ValeurOrigine)&"*"&decimal(valeur[n])&"}}}{\num{"&decimal(pasx)&"}}$"),unitp*(valeur[n],0));
+              fi;
+            else:
+              label.bot(TEX("\footnotesize\num{\fpeval{"&decimal(ValeurUnitex)&"*"&decimal(valeur[n])&"/"&decimal(pasx)&"}}"),unitp*(valeur[n],0));
+            fi;
+            drawoptions(withcolor CouleurCroix);
+            pointe(unitp*(valeur[n],0));
+            drawoptions();
+          elseif ACoord=1:
+            if Decale:
+              drawarrow (unitp*valeur[n],-7mm if (n mod 2)=0:-5mm fi)--(unitp*valeur[n],-3mm);
+              label.bot(TEX("\footnotesize\num{\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-(ValeurOrigine))&"*"&decimal(valeur[n])&"/"&decimal(pasx)&"}}"),unitp*(valeur[n],-7mm if (n mod 2)=0:-5mm fi));
+            else:
+              %drawarrow (unitp*valeur[n],-7mm)--(unitp*valeur[n],-3mm);
+              %label.bot(TEX("\pointilles[1cm]"),(unitp*valeur[n],-7mm));
+              label.bot(TEX("\footnotesize\num{\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-(ValeurOrigine))&"*"&decimal(valeur[n])&"/"&decimal(pasx)&"}}"),unitp*(valeur[n],0));
+            fi;
+          drawoptions(withcolor CouleurCroix);
+          pointe(unitp*(valeur[n],0));
+          drawoptions();
+          fi;
+        else:
+        if AffichageCoord=5:
+        if p_<>"":
+        if ((ValeurUnitex*valeur[n]) mod pasx)<>0:
+        if Simplification:
+        label.bot(TEX("\footnotesize$\mathcolor{\useKV[ClesReperage]{CouleurAbs}}{\Simplification{\fpeval{"&decimal(ValeurOrigine*pasx)&"+"&decimal(ValeurUnitex-ValeurOrigine)&"*"&decimal(valeur[n])&"}}{"&decimal(pasx)&"}}$"),unitp*(valeur[n],0));
+        else:
+        label.bot(TEX("\footnotesize$\mathcolor{\useKV[ClesReperage]{CouleurAbs}}{\frac{\num{\fpeval{"&decimal(ValeurOrigine*pasx)&"+"&decimal(ValeurUnitex-ValeurOrigine)&"*"&decimal(valeur[n])&"}}}{\num{"&decimal(pasx)&"}}}$"),unitp*(valeur[n],0));
+        fi;
+    else:
+    label.bot(TEX("\footnotesize\textcolor{\useKV[ClesReperage]{CouleurAbs}}{\num{\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-ValeurOrigine)&"*"&decimal(valeur[n])&"/"&decimal(pasx)&"}}}"),unitp*(valeur[n],0));
+    fi;
+    drawoptions(withcolor CouleurCroix);
+    pointe(unitp*(valeur[n],0));
+    drawoptions();
+    fi;
+    elseif AffichageCoord=4:
+    pointe(unitp*(valeur[n],0));
+    elseif AffichageCoord=3:
+    if p_<>"":
+    if Decale:
+    drawarrow (unitp*valeur[n],-7mm if (n mod 2)=0:-5mm fi)--(unitp*valeur[n],-3mm);
+    else:
+    drawarrow (unitp*valeur[n],-7mm)--(unitp*valeur[n],-3mm);
+    label.bot(TEX("\pointilles[1cm]"),(unitp*valeur[n],-7mm));
+    fi;
+    numeric LongPoint;
+    Labeloffset:=labeloffset;
+    labeloffset:=0pt;
+    if Decale:
+    if DemiDroite:
+    LongPoint=abs(C-(B+unitp*(0.75,0)));
+    label.rt(TEX("\pointilles[\fpeval{"&decimal(LongPoint)&"}pt]"),C+(0,-1.6cm));
+    else:
+    LongPoint=abs((C+unitp*(-0.75,0))-(B+unitp*(0.75,0)));
+    label.rt(TEX("\pointilles[\fpeval{"&decimal(LongPoint)&"}pt]"),C+unitp*(-0.75,0)+(0,-1.6cm));
+    fi;
+    fi;
+    labeloffset:=Labeloffset;
+    drawoptions(withcolor CouleurCroix);
+    pointe(unitp*(valeur[n],0));
+    drawoptions();
+    fi;
+    elseif AffichageCoord=2:
+    if p_<>"":
+    if ((ValeurUnitex*valeur[n]) mod pasx)<>0:
+    if Simplification:
+    label.bot(TEX("\footnotesize$\Simplification{\fpeval{"&decimal(ValeurOrigine*pasx)&"+"&decimal(ValeurUnitex-ValeurOrigine)&"*"&decimal(valeur[n])&"}}{"&decimal(pasx)&"}$"),unitp*(valeur[n],0));
+    else:
+    label.bot(TEX("\footnotesize$\frac{\num{\fpeval{"&decimal(ValeurOrigine*pasx)&"+"&decimal(ValeurUnitex-ValeurOrigine)&"*"&decimal(valeur[n])&"}}}{\num{"&decimal(pasx)&"}}$"),unitp*(valeur[n],0));
+    fi;
+    else:
+    label.bot(TEX("\footnotesize\num{\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-ValeurOrigine)&"*"&decimal(valeur[n])&"/"&decimal(pasx)&"}}"),unitp*(valeur[n],0));
+    fi;
+    drawoptions(withcolor CouleurCroix);
+    pointe(unitp*(valeur[n],0));
+    drawoptions();
+    fi;
+    elseif AffichageCoord=1:
+    if p_<>"":
+    if Decale:
+    Labeloffset:=labeloffset;
+    labeloffset:=2pt;
+    if (valeur[n]<>0) and (valeur[n]<>pasx):
+    drawarrow (unitp*valeur[n],-7mm if (n mod 2)=0:-5mm fi)--(unitp*valeur[n],-3mm);
+    label.bot(TEX("\footnotesize\num{\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-(ValeurOrigine))&"*"&decimal(valeur[n])&"/"&decimal(pasx)&"}}"),(unitp*valeur[n],-7mm if (n mod 2)=0:-5mm fi));
+    fi;
+    labeloffset:=Labeloffset;
+    else:
+    label.bot(TEX("\footnotesize\num{\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-(ValeurOrigine))&"*"&decimal(valeur[n])&"/"&decimal(pasx)&"}}"),unitp*(valeur[n],0));
+    fi;
+    drawoptions(withcolor CouleurCroix);
+    pointe(unitp*(valeur[n],0));
+    drawoptions();
+    fi;
+    fi;
+        fi;
+      endfor;
+    fi;
+  enddef;
+    %%%
+  tata(#2);
+  if PasFleches:
+    nbecriture=0;
+    path PfMFleche;
+    if (minx mod PasFleche)=0:
+      MinPasx:=minx;
+    else:
+      MinPasx:=(((minx div pasx)+1)*pasx);
+    fi;
+    for k=MinPasx step PasFleche until maxx-PasFleche:
+      PfMFleche:=(unitp*(k,0)){dir60}..{dir-60}(unitp*(k+PasFleche,0));
+      drawarrow PfMFleche;
+      if nbecriture=0:
+        if TexteFleche<>"":
+          label.top(TEX(TexteFleche),point(0.5) of PfMFleche);
+          nbecriture:=1;
+        fi;
+      fi;
+    endfor;
+  fi;
+  if \useKV[ClesReperage]{Code}:
+    \useKV[ClesReperage]{Traces}
+  fi;
+    % PM
+    if Millimetre:
+    picture Retiens;
+    Retiens=currentpicture;
+    currentpicture:=nullpicture;
+    maxhaut=ceiling(abs((0,ypart(urcorner bbox Retiens))-(0,0))/1mm);
+    minhaut=-ceiling(abs((0,ypart(lrcorner bbox Retiens))-(0,0))/1mm);
+    maxlarg=ceiling(abs((xpart(lrcorner bbox Retiens),0)-(0,0))/1mm);
+    minlarg=-ceiling(abs((xpart(llcorner bbox Retiens),0)-(0,0))/1mm);
+    path barrehps,barrevps;
+    barrevps=(xpart((0,0)),minhaut*1mm)--(xpart((0,0)),maxhaut*1mm);
+    barrehps=(minlarg*1mm,ypart((0,0)))--(maxlarg*1mm,ypart((0,0)));
+    % Grille 1mm
+    drawoptions(withpen pensquare scaled 0.375 withcolor CouleurPM);
+    %v
+    for k=minlarg upto maxlarg:
+    draw barrevps shifted(k*1mm,0);
+    endfor;
+    % h
+    for k=minhaut upto maxhaut:
+    draw barrehps shifted(0,k*1mm);
+    endfor;
+    %grille 5mm
+    drawoptions(withpen pensquare scaled 0.625 withcolor CouleurPM);
+    % v
+    for k=5 step 10 until maxlarg:
+    draw barrevps shifted(k*1mm,0);
+    endfor;
+    for k=-5 step -10 until minlarg:
+    draw barrevps shifted(k*1mm,0);
+    endfor;
+    % h
+    for k=5 step 10 until maxhaut:
+    draw barrehps shifted(0,k*1mm);
+    endfor;
+    for k=-5 step -10 until minhaut:
+    draw barrehps shifted(0,k*1mm);
+    endfor;
+    %grille 1cm
+    drawoptions(withpen pensquare withcolor CouleurPM);
+    % v
+    for k=0 step 10 until maxlarg:
+    draw barrevps shifted(k*1mm,0);
+    endfor;
+    for k=-10 step -10 until minlarg:
+    draw barrevps shifted(k*1mm,0);
+    endfor;
+    % h
+    for k=0 step 10 until maxhaut:
+    draw barrehps shifted(0,k*1mm);
+    endfor;
+    for k=-10 step -10 until minhaut:
+    draw barrehps shifted(0,k*1mm);
+    endfor;
+    drawoptions();
+    draw Retiens;
+    fi;
+    % Seyes
+    if Seyes:
+    picture Retiens;
+    Retiens=currentpicture;
+    currentpicture:=nullpicture;
+    % grille 2mm
+    maxhaut=ceiling(abs((0,ypart(urcorner bbox Retiens))-(0,0))/2mm);
+    minhaut=-ceiling(abs((0,ypart(lrcorner bbox Retiens))-(0,0))/2mm);
+    maxlarg=ceiling(abs((xpart(lrcorner bbox Retiens),0)-(0,0))/8mm);
+    minlarg=-ceiling(abs((xpart(llcorner bbox Retiens),0)-(0,0))/8mm);
+    path barrehps,barrevps;
+    barrevps=(xpart((0,0)),minhaut*2mm)--(xpart((0,0)),maxhaut*2mm);
+    barrehps=(minlarg*8mm,ypart((0,0)))--(maxlarg*8mm,ypart((0,0)));
+    drawoptions(withpen pensquare scaled 0.625 withcolor CouleurPS);
+    % h
+    for k=minhaut upto maxhaut:
+    draw barrehps shifted(k*(0,2mm));
+    endfor;
+    % grille 8mm
+    drawoptions(withpen pensquare scaled 0.625 withcolor CouleurPS);
+    %v
+    for k=minlarg upto maxlarg:
+    draw barrevps shifted(k*8mm,0);
+    endfor;
+    drawoptions(withpen pensquare withcolor CouleurPS);
+    % h
+    for k=0 step 4 until maxhaut:
+    draw barrehps shifted(k*(0,2mm));
+    endfor;
+    for k=-4 step -4 until minhaut:
+    draw barrehps shifted(k*(0,2mm));
+    endfor;
+    drawoptions();
+    draw Retiens;
+    fi;
+    %%CinqCinq
+    if CinqCinq:
+    picture Retiens;
+    Retiens=currentpicture;
+    currentpicture:=nullpicture;
+    maxhaut=ceiling(abs((0,ypart(urcorner bbox Retiens))-(0,0))/5mm);
+    minhaut=-ceiling(abs((0,ypart(lrcorner bbox Retiens))-(0,0))/5mm);
+    maxlarg=ceiling(abs((xpart(lrcorner bbox Retiens),0)-(0,0))/5mm);
+    minlarg=-ceiling(abs((xpart(llcorner bbox Retiens),0)-(0,0))/5mm);
+    path barrehps,barrevps;
+    barrevps=(xpart((0,0)),minhaut*5mm)--(xpart((0,0)),maxhaut*5mm);
+    barrehps=(minlarg*5mm,ypart((0,0)))--(maxlarg*5mm,ypart((0,0)));
+    %grille 5mm
+    drawoptions(withpen pensquare scaled 0.625 withcolor CouleurPC);
+    %h
+    for k=minhaut upto maxhaut :
+    draw barrehps shifted(0,k*5mm);
+    endfor;
+    % v
+    for k=minlarg upto maxlarg :
+    draw barrevps shifted(k*5mm,0);
+    endfor;
+    drawoptions();
+    draw Retiens;
+    fi;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={unitex:=\useKV[ClesReperage]{Unitex}*cm; pasx:=\useKV[ClesReperage]{Pasx}; unitp:=unitex/pasx; ValeurUnitex:=\useKV[ClesReperage]{ValeurUnitex}; ValeurOrigine:=\useKV[ClesReperage]{ValeurOrigine}; AffichageGrad:=\AffichageGrad; AffichageCoord:=\useKV[ClesReperage]{AffichageAbs}; AffichageNom:=\AffichageNom; ValeurMin=\useKV[ClesReperage]{ValeurMin}; ValeurMax=\useKV[ClesReperage]{ValeurMax};boolean DemiDroite;DemiDroite=\useKV[ClesReperage]{DemiDroite};}]
+    maxx:=0;
+    minx:=4000;
+    numeric valeur[];
+    vardef titi(text t)=
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    valeur[n]=p_;
+    endfor;
+    enddef;
+    titi(#1);
+    % Détermination des abscisses maximale et minimale
+    for k=1 upto n:
+    if valeur[k]>maxx:
+    maxx:=valeur[k];
+    fi;
+    if valeur[k]<minx:
+    minx:=valeur[k];
+    fi;
+    endfor;
+    maxx:=maxx+(pasx div 2);
+    minx:=minx-(pasx div 2);
+    if maxx<(pasx+1):
+    maxx:=2*pasx-1;
+    fi;
+    if minx>(-pasx-1):
+    minx:=-2*pasx-1;
+    fi;
+    if minx<ValeurMin:
+    minx:=ValeurMin;
+    fi;
+    if maxx>ValeurMax:
+    maxx:=ValeurMax;
+    fi;
+    if DemiDroite:
+    minx:=0;
+    fi;
+    % -----
+    pair A,B,C;
+    A=(0,0);
+    B=unitp*(maxx,0);
+    C=unitp*(minx,0);
+    % On trace la demi-droite
+    if DemiDroite:
+    drawarrow C--(B+unitp*(0.75,0));
+    else:
+    drawarrow (C+unitp*(-0.75,0))--(B+unitp*(0.75,0));
+    fi;
+    % marquage secondaire
+    marque_s:=marque_s/3;
+    %labeloffset:=labeloffset*2;
+    if ((maxx-minx) mod 2)=0:
+      for k=(minx+1) step 2 until (maxx-1):
+      draw marquedemidroite(C,B);
+      draw marquesegment((k/maxx)[A,B],((k+1)/maxx)[A,B]);
+      endfor;
+      else:
+      for k=(minx) step 2 until (maxx-1):
+        draw marquesegment((k/maxx)[A,B],((k+1)/maxx)[A,B]);
+     endfor;
+     fi;
+    % marquage primaire
+    marque_s:=marque_s*3;
+    for k=0 step pasx until (maxx-pasx):
+    draw marquesegment((k/maxx)[A,B],((k+pasx)/maxx)[A,B]);
+    endfor;
+    for k=0 step -pasx until (minx+pasx):
+    draw marquesegment((k/maxx)[A,B],((k-pasx)/maxx)[A,B]);
+    endfor;
+    % marquage des points
+    m_c:=m_c*3;
+    marque_p:="croix";
+    labeloffset:=labeloffset*3;
+    label.bot(LATEX("\noexpand\footnotesize\noexpand\num{"&decimal(ValeurUnitex)&"}"),unitex*(1,0));
+    label.bot(LATEX("\noexpand\footnotesize\noexpand\num{"&decimal(ValeurOrigine)&"}"),A);
+    if AffichageGrad>0:
+    for k=((minx+(minx mod pasx)) div pasx) upto (maxx div pasx):
+    if (k<0) or (k>1):
+    label.bot(LATEX("\noexpand\footnotesize\noexpand\num{\noexpand\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-ValeurOrigine)&"*"&decimal(k)&"}}"),unitex*(k,0));%%%
+    fi;
+    endfor;
+    fi;
+    vardef tata(text t)=%on place les points
+    if AffichageNom>0:
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    if substring(1,2) of p_="*":
+    label.top(LATEX(substring(2,length p_) of p_),unitp*(valeur[n],0));
+    else:
+    label.top(LATEX(p_),unitp*(valeur[n],0));
+    fi;
+    if p_<>"":
+    pointe(unitp*(valeur[n],0));
+    fi;
+    endfor;
+    fi;
+    if AffichageCoord>0:
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    if substring(1,2) of p_="*":
+    ACoord:=scantokens(substring(0,1) of p_);
+    if ACoord=4:
+    pointe(unitp*(valeur[n],0));
+    elseif ACoord=3:
+    drawarrow (unitp*(valeur[n],-1))--(unitp*(valeur[n],-0.3));
+    label.bot(btex \noexpand\hbox to2em{\noexpand\dotfill} etex,(unitp*(valeur[n],-1)));
+    pointe(unitp*(valeur[n]-ValeurOrigine,0));
+    elseif ACoord=2:
+    if ((ValeurUnitex*valeur[n]) mod pasx)<>0:
+    label.bot(LATEX("\noexpand\footnotesize$\noexpand\frac{\noexpand\num{\noexpand\fpeval{"&decimal(ValeurUnitex)&"*"&decimal(valeur[n])&"}}}{\noexpand\num{"&decimal(pasx)&"}}$"),unitp*(valeur[n],0));
+    else:
+    label.bot(LATEX("\noexpand\footnotesize\noexpand\num{\noexpand\fpeval{"&decimal(ValeurUnitex)&"*"&decimal(valeur[n])&"/"&decimal(pasx)&"}}"),unitp*(valeur[n],0));
+    fi;
+    pointe(unitp*(valeur[n],0));
+    elseif ACoord=1:
+    label.bot(LATEX("\noexpand\footnotesize\noexpand\num{\noexpand\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-(ValeurOrigine))&"*"&decimal(valeur[n])&"/"&decimal(pasx)&"}}"),unitp*(valeur[n],0));
+    pointe(unitp*(valeur[n],0));
+    fi;
+    else:
+    if AffichageCoord=3:
+    if p_<>"":
+    drawarrow (unitp*(valeur[n],-1))--(unitp*(valeur[n],-0.3));
+    label.bot(btex \noexpand\hbox to2em{\noexpand\dotfill} etex,(unitp*(valeur[n],-1)));
+    pointe(unitp*(valeur[n],0));
+    fi;
+    elseif AffichageCoord=2:
+    if p_<>"":
+    if ((ValeurUnitex*valeur[n]) mod pasx)<>0:
+    label.bot(LATEX("\noexpand\footnotesize$\noexpand\frac{\noexpand\num{\noexpand\fpeval{"&decimal(ValeurUnitex)&"*"&decimal(valeur[n])&"}}}{\noexpand\num{"&decimal(pasx)&"}}$"),unitp*(valeur[n],0));
+    else:
+    label.bot(LATEX("\noexpand\footnotesize\noexpand\num{\noexpand\fpeval{"&decimal(ValeurUnitex)&"*"&decimal(valeur[n])&"/"&decimal(pasx)&"}}"),unitp*(valeur[n],0));
+    fi;
+    pointe(unitp*(valeur[n],0));
+    fi;
+    elseif AffichageCoord=1:
+    if p_<>"":
+    label.bot(LATEX("\noexpand\footnotesize\noexpand\num{\noexpand\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-(ValeurOrigine))&"*"&decimal(valeur[n])&"/"&decimal(pasx)&"}}"),unitp*(valeur[n],0));
+    pointe(unitp*(valeur[n],0));
+    fi;
+    fi;
+    fi;
+    endfor;
+    fi;    
+    enddef;
+    %%%
+    tata(#2);
+  \end{mpost}
+  \fi
+}%
+
+\def\MPThermo#1#2{%
+  % #1 : liste des points \`a placer en pas. pour g\'erer le cas des rep\'erages fractionnaires
+  % #2 : liste des noms des points
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    defaultcolormodel := \useKV[ClesReperage]{ModeleCouleur};
+    maxx:=0;
+    minx:=4000;
+    unitex:=\useKV[ClesReperage]{Unitex}*cm;
+    pasx:=\useKV[ClesReperage]{Pasx};
+    unitp:=unitex/pasx;%unit\'e de d\'eplacement
+    ValeurUnitex:=\useKV[ClesReperage]{ValeurUnitex};
+    ValeurOrigine:=\useKV[ClesReperage]{ValeurOrigine};
+    AffichageGrad:=\AffichageGrad;
+    AffichageCoord:=\useKV[ClesReperage]{AffichageAbs};
+    AffichageNom:=\AffichageNom;
+    boolean Kelvin,Farenheit;
+    Kelvin=\useKV[ClesReperage]{Kelvin};
+    Farenheit=\useKV[ClesReperage]{Farenheit};
+    color ColMercure;
+    ColMercure:=\useKV[ClesReperage]{CouleurMercure};
+    boolean Mercure;
+    Mercure=\useKV[ClesReperage]{Mercure};
+    numeric valeur[];
+    vardef titi(text t)=
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    valeur[n]=p_;
+    endfor;
+    enddef;
+    titi(#1);
+    % Détermination des abscisses maximale et minimale
+    for k=1 upto n:
+    if valeur[k]>maxx:
+    maxx:=valeur[k];
+    fi;
+    if valeur[k]<minx:
+    minx:=valeur[k];
+    fi;
+    endfor;
+    maxx:=maxx+(pasx div 2);
+    minx:=minx-(pasx div 2);
+    if maxx<(pasx+1):
+    maxx:=2*pasx-1;
+    fi;
+    if minx>(-pasx-1):
+    minx:=-2*pasx-1;
+    fi;
+    if Kelvin:
+    minx:=0;
+    fi;
+    % -----
+    pair A,B,C;
+    A=(0,0);
+    B=unitp*(0,maxx);
+    C=unitp*(0,minx);
+    % On trace la demi-droite
+    draw ((C+unitp*(0,-0.75))--(B+unitp*(0,0.75)));
+    % marquage secondaire
+    marque_s:=marque_s/3;
+    if pasx<11:
+    labeloffset:=labeloffset*2;
+    if ((maxx-minx) mod 2)=0:
+      for k=(minx+1) step 2 until (maxx-1):
+      draw marquedemidroite(C,B);
+      draw marquesegment((k/maxx)[A,B],((k+1)/maxx)[A,B]);
+      endfor;
+      else:
+      for k=(minx) step 2 until (maxx-1):
+        draw marquesegment((k/maxx)[A,B],((k+1)/maxx)[A,B]);
+     endfor;
+     fi;
+     fi;
+    % marquage primaire
+    marque_s:=marque_s*3;
+    for k=0 step pasx until (maxx-pasx):
+    draw marquesegment((k/maxx)[A,B],((k+pasx)/maxx)[A,B]);
+    endfor;
+    for k=0 step -pasx until (minx+pasx):
+    draw marquesegment((k/maxx)[A,B],((k-pasx)/maxx)[A,B]);
+    endfor;
+    % marquage des points
+    m_c:=m_c*3;
+    marque_p:="croix";
+    labeloffset:=labeloffset*2;
+    if Kelvin:
+    label.lft(TEX("\footnotesize\Temp[K]{"&decimal(ValeurUnitex)&"}"),unitex*(0,1));
+    label.lft(TEX("\footnotesize\Temp[K]{"&decimal(ValeurOrigine)&"}"),A);
+    elseif Farenheit:
+    label.lft(TEX("\footnotesize\Temp[F]{"&decimal(ValeurUnitex)&"}"),unitex*(0,1));
+    label.lft(TEX("\footnotesize\Temp[F]{"&decimal(ValeurOrigine)&"}"),A);
+    else:
+    label.lft(TEX("\footnotesize\Temp{"&decimal(ValeurUnitex)&"}"),unitex*(0,1));
+    label.lft(TEX("\footnotesize\Temp{"&decimal(ValeurOrigine)&"}"),A);
+    fi;
+    if AffichageGrad>0:
+    for k=((minx+(minx mod pasx)) div pasx) upto (maxx div pasx):
+    if (k<0) or (k>1):
+    if Kelvin:
+    label.lft(TEX("\footnotesize\Temp[K]{\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-ValeurOrigine)&"*"&decimal(k)&"}}"),unitex*(0,k));%%%
+    elseif Farenheit:
+    label.lft(TEX("\footnotesize\Temp[F]{\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-ValeurOrigine)&"*"&decimal(k)&"}}"),unitex*(0,k));%%%
+    else:
+    label.lft(TEX("\footnotesize\Temp{\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-ValeurOrigine)&"*"&decimal(k)&"}}"),unitex*(0,k));%%%
+    fi;
+    fi;
+    endfor;
+    fi;
+
+    vardef Thermo(expr nbt)=
+    pair Tc[];
+    Tc[0]=(5mm,unitp*(minx-1));
+    path cc[];
+    cc1=cercles(Tc[0],2.5mm);
+    Tc1=pointarc(cc1,75);
+    Tc4=pointarc(cc1,105);
+    Tc2=(xpart(Tc1),ypart(B+unitp*(0,0.75)));
+    Tc3=(xpart(Tc4),ypart(B+unitp*(0,0.75)));
+    Tc5=(xpart(Tc1),ypart(unitp*(0,valeur[1])));
+    Tc6=(xpart(Tc4),ypart(unitp*(0,valeur[1])));
+    path temp;
+    temp=Tc1--Tc5--Tc6--Tc4--arccercle(Tc4,Tc1,Tc0)--cycle;
+    if nbt>0:
+    fill temp withcolor ColMercure;
+    trace Tc5--Tc6;
+    fi;
+    trace arccercle(Tc4,Tc1,Tc0);
+    trace Tc1--Tc2--arccercle(Tc2,Tc3,iso(Tc2,Tc3))--Tc4;
+    enddef;
+
+    if Mercure:Thermo(1) else : Thermo(0) fi;
+    
+    vardef tata(text t)=%on place les points
+    if AffichageNom>0:
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    label.rt(TEX(p_),unitp*(0,valeur[n]));
+    if p_<>"":
+    pointe(unitp*(0,valeur[n]));
+    fi;
+    endfor;
+    fi;
+    if AffichageCoord=3:
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    if p_<>"":
+    drawarrow (unitp*(-1,valeur[n]))--(unitp*(-0.3,valeur[n]));
+    label.rt(btex \hbox to2em{\dotfill} etex,(unitp*(-1,valeur[n])));
+    pointe(unitp*(0,valeur[n]-ValeurOrigine));
+    fi;
+    endfor;
+    elseif AffichageCoord=2:
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    if p_<>"":
+    if ((ValeurUnitex*valeur[n]) mod pasx)<>0:
+    label.rt(TEX("\footnotesize$\frac{\num{\fpeval{"&decimal(ValeurUnitex)&"*"&decimal(valeur[n])&"}}}{\num{"&decimal(pasx)&"}}$"),unitp*(0,valeur[n]));
+    else:
+    label.rt(TEX("\footnotesize\num{\fpeval{"&decimal(ValeurUnitex)&"*"&decimal(valeur[n])&"/"&decimal(pasx)&"}}"),unitp*(0,valeur[n]));
+    fi;
+    pointe(unitp*(0,valeur[n]-ValeurOrigine));
+    fi;
+    endfor;
+    elseif AffichageCoord=1:
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    if p_<>"":
+    if Kelvin:
+    label.rt(TEX("\footnotesize\Temp[K]{\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-(ValeurOrigine))&"*"&decimal(valeur[n])&"/"&decimal(pasx)&"}}"),(5mm,unitp*valeur[n]));
+    elseif Farenheit:
+    label.rt(TEX("\footnotesize\Temp[F]{\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-(ValeurOrigine))&"*"&decimal(valeur[n])&"/"&decimal(pasx)&"}}"),(5mm,unitp*valeur[n]));
+    else:
+    label.rt(TEX("\footnotesize\Temp{\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-(ValeurOrigine))&"*"&decimal(valeur[n])&"/"&decimal(pasx)&"}}"),(5mm,unitp*valeur[n]));
+    fi;
+    pointe(unitp*(0,valeur[n]));
+    draw (unitp*(0,valeur[n]))--(7.5mm,unitp*valeur[n]) dashed evenly;
+    fi;
+    endfor;
+    fi;
+    enddef;
+    %%%
+    tata(#2);
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={unitex:=\useKV[ClesReperage]{Unitex}*cm;
+    pasx:=\useKV[ClesReperage]{Pasx};
+    unitp:=unitex/pasx;%unit\'e de d\'eplacement
+    ValeurUnitex:=\useKV[ClesReperage]{ValeurUnitex};
+    ValeurOrigine:=\useKV[ClesReperage]{ValeurOrigine};
+    AffichageGrad:=\AffichageGrad;
+    AffichageCoord:=\useKV[ClesReperage]{AffichageAbs};
+    AffichageNom:=\AffichageNom;
+    boolean Kelvin,Farenheit;
+    Kelvin=\useKV[ClesReperage]{Kelvin};
+    Farenheit=\useKV[ClesReperage]{Farenheit};
+    color ColMercure;
+    ColMercure:=\useKV[ClesReperage]{CouleurMercure};
+    boolean Mercure;
+    Mercure=\useKV[ClesReperage]{Mercure};}]
+    maxx:=0;
+    minx:=4000;
+    numeric valeur[];
+    vardef titi(text t)=
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    valeur[n]=p_;
+    endfor;
+    enddef;
+    titi(#1);
+    % Détermination des abscisses maximale et minimale
+    for k=1 upto n:
+    if valeur[k]>maxx:
+    maxx:=valeur[k];
+    fi;
+    if valeur[k]<minx:
+    minx:=valeur[k];
+    fi;
+    endfor;
+    maxx:=maxx+(pasx div 2);
+    minx:=minx-(pasx div 2);
+    if maxx<(pasx+1):
+    maxx:=2*pasx-1;
+    fi;
+    if minx>(-pasx-1):
+    minx:=-2*pasx-1;
+    fi;
+    if Kelvin:
+    minx:=0;
+    fi;
+    % -----
+    pair A,B,C;
+    A=(0,0);
+    B=unitp*(0,maxx);
+    C=unitp*(0,minx);
+    % On trace la demi-droite
+    draw (C+unitp*(0,-0.75))--(B+unitp*(0,0.75));
+    % marquage secondaire
+    marque_s:=marque_s/3;
+    if pasx<11:
+    labeloffset:=labeloffset*2;
+    if ((maxx-minx) mod 2)=0:
+      for k=(minx+1) step 2 until (maxx-1):
+      draw marquedemidroite(C,B);
+      draw marquesegment((k/maxx)[A,B],((k+1)/maxx)[A,B]);
+      endfor;
+      else:
+      for k=(minx) step 2 until (maxx-1):
+        draw marquesegment((k/maxx)[A,B],((k+1)/maxx)[A,B]);
+     endfor;
+    fi;
+    fi;
+    % marquage primaire
+    marque_s:=marque_s*3;
+    for k=0 step pasx until (maxx-pasx):
+    draw marquesegment((k/maxx)[A,B],((k+pasx)/maxx)[A,B]);
+    endfor;
+    for k=0 step -pasx until (minx+pasx):
+    draw marquesegment((k/maxx)[A,B],((k-pasx)/maxx)[A,B]);
+    endfor;
+    % marquage des points
+    m_c:=m_c*3;
+    marque_p:="croix";
+    labeloffset:=labeloffset*2;
+    if Kelvin:
+    label.lft(LATEX("\noexpand\footnotesize\noexpand\SI{"&decimal(ValeurUnitex)&"}{\kelvin}"),unitex*(0,1));
+    label.lft(LATEX("\noexpand\footnotesize\noexpand\SI{"&decimal(ValeurOrigine)&"}{\kelvin}"),A);
+    elseif Farenheit:
+    label.lft(LATEX("\noexpand\footnotesize\noexpand\SI{"&decimal(ValeurUnitex)&"}{\farenheit}"),unitex*(0,1));
+    label.lft(LATEX("\noexpand\footnotesize\noexpand\SI{"&decimal(ValeurOrigine)&"}{\farenheit}"),A);
+    else:
+    label.lft(LATEX("\noexpand\footnotesize\noexpand\SI{"&decimal(ValeurUnitex)&"}{\celsius}"),unitex*(0,1));
+    label.lft(LATEX("\noexpand\footnotesize\noexpand\SI{"&decimal(ValeurOrigine)&"}{\celsius}"),A);
+    fi;
+    if AffichageGrad>0:
+    for k=((minx+(minx mod pasx)) div pasx) upto (maxx div pasx):
+    if (k<0) or (k>1):
+    if Kelvin:
+    label.lft(LATEX("\noexpand\footnotesize\noexpand\SI{\noexpand\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-ValeurOrigine)&"*"&decimal(k)&"}}{\kelvin}"),unitex*(0,k));%%%
+    elseif Farenheit:
+label.lft(LATEX("\noexpand\footnotesize\noexpand\SI{\noexpand\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-ValeurOrigine)&"*"&decimal(k)&"}}{\farenheit}"),unitex*(0,k));%%%
+    else:
+label.lft(LATEX("\noexpand\footnotesize\noexpand\SI{\noexpand\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-ValeurOrigine)&"*"&decimal(k)&"}}{\celsius}"),unitex*(0,k));%%%
+    fi;
+    fi;
+    endfor;
+    fi;
+
+    vardef Thermo(expr nbt)=
+    pair Tc[];
+    Tc[0]=(5mm,unitp*(minx-1));
+    path cc[];
+    cc1=cercles(Tc[0],2.5mm);
+    Tc1=pointarc(cc1,75);
+    Tc4=pointarc(cc1,105);
+    Tc2=(xpart(Tc1),ypart(B+unitp*(0,0.75)));
+    Tc3=(xpart(Tc4),ypart(B+unitp*(0,0.75)));
+    Tc5=(xpart(Tc1),ypart(unitp*(0,valeur[1])));
+    Tc6=(xpart(Tc4),ypart(unitp*(0,valeur[1])));
+    path temp;
+    temp=Tc1--Tc5--Tc6--Tc4--arccercle(Tc4,Tc1,Tc0)--cycle;
+    if nbt>0:
+    fill temp withcolor ColMercure;
+    trace Tc5--Tc6;
+    fi;
+    trace arccercle(Tc4,Tc1,Tc0);
+    trace Tc1--Tc2--arccercle(Tc2,Tc3,iso(Tc2,Tc3))--Tc4;
+    enddef;
+
+    if Mercure:Thermo(1) else : Thermo(0) fi;
+    
+    vardef tata(text t)=%on place les points
+    if AffichageNom>0:
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    label.rt(LATEX(p_),unitp*(0,valeur[n]));
+    if p_<>"":
+    pointe(unitp*(0,valeur[n]));
+    fi;
+    endfor;
+    fi;
+    if AffichageCoord=3:
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    if p_<>"":
+    drawarrow (unitp*(-1,valeur[n]))--(unitp*(-0.3,valeur[n]));
+    label.rt(\btex \hbox to2em{\dotfill} etex,(unitp*(-1,valeur[n])));
+    pointe(unitp*(0,valeur[n]-ValeurOrigine));
+    fi;
+    endfor;
+    elseif AffichageCoord=2:
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    if p_<>"":
+    if ((ValeurUnitex*valeur[n]) mod pasx)<>0:
+    label.rt(LATEX("\noexpand\footnotesize$\noexpand\frac{\noexpand\num{\noexpand\fpeval{"&decimal(ValeurUnitex)&"*"&decimal(valeur[n])&"}}}{\num{"&decimal(pasx)&"}}$"),unitp*(0,valeur[n]));
+    else:
+    label.rt(LATEX("\noexpand\footnotesize\noexpand\num{\noexpand\fpeval{"&decimal(ValeurUnitex)&"*"&decimal(valeur[n])&"/"&decimal(pasx)&"}}"),unitp*(0,valeur[n]));
+    fi;
+    pointe(unitp*(0,valeur[n]-ValeurOrigine));
+    fi;
+    endfor;
+    elseif AffichageCoord=1:
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    if p_<>"":
+    if Kelvin:
+    label.rt(LATEX("\noexpand\footnotesize\noexpand\SI{\noexpand\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-(ValeurOrigine))&"*"&decimal(valeur[n])&"/"&decimal(pasx)&"}}{\kelvin}"),(5mm,unitp*valeur[n]));
+    elseif Farenheit:
+    label.rt(LATEX("\noexpand\footnotesize\noexpand\SI{\noexpand\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-(ValeurOrigine))&"*"&decimal(valeur[n])&"/"&decimal(pasx)&"}}{\farenheit}"),(5mm,unitp*valeur[n]));
+    else:
+    label.rt(LATEX("\noexpand\footnotesize\noexpand\SI{\noexpand\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-(ValeurOrigine))&"*"&decimal(valeur[n])&"/"&decimal(pasx)&"}}{\celsius}"),(5mm,unitp*valeur[n]));
+    fi;
+    pointe(unitp*(0,valeur[n]));
+    draw (unitp*(0,valeur[n]))--(7.5mm,unitp*valeur[n]) dashed evenly;
+    fi;
+    endfor;
+    fi;
+    enddef;
+    %%%
+    tata(#2);
+  \end{mpost}
+  \fi
+}
+
+\def\MPNewDROITEGradueeMulti#1#2{%
+  % #1 : liste des points \`a placer en pas. pour g\'erer le cas des rep\'erages fractionnaires
+  % #2 : liste des noms des points
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    defaultcolormodel := \useKV[ClesReperage]{ModeleCouleur};
+    maxx:=0;
+    minx:=4000;
+    unitex:=\useKV[ClesReperage]{Unitex}*cm;
+    pasx:=\useKV[ClesReperage]{Pasx};
+    unitp:=unitex/pasx;%unit\'e de d\'eplacement
+    ValeurUnitex:=\useKV[ClesReperage]{ValeurUnitex};
+    ValeurOrigine:=\useKV[ClesReperage]{ValeurOrigine};
+    AffichageGrad:=\AffichageGrad;
+    AffichageCoord:=\useKV[ClesReperage]{AffichageAbs};
+    AffichageNom:=\AffichageNom;
+    numeric valeur[];
+    vardef titi(text t)=
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    valeur[n]=p_;
+    endfor;
+    enddef;
+    titi(#1);
+    % Détermination des abscisses maximale et minimale
+    for k=1 upto n:
+    if valeur[k]>maxx:
+    maxx:=valeur[k];
+    fi;
+    if valeur[k]<minx:
+    minx:=valeur[k];
+    fi;
+    endfor;
+    maxx:=maxx+(pasx div 2);
+    minx:=minx-(pasx div 2);
+    if maxx<(pasx+1):
+    maxx:=2*pasx-1;
+    fi;
+    if minx>(-pasx-1):
+    minx:=-2*pasx-1;
+    fi;
+    if minx<\useKV[ClesReperage]{ValeurMin}:
+    minx:=\useKV[ClesReperage]{ValeurMin};
+    fi;
+    if maxx>\useKV[ClesReperage]{ValeurMax}:
+    maxx:=\useKV[ClesReperage]{ValeurMax};
+    fi;
+%    % -----
+    pair A[],B[],C[];
+    for l=0 upto (\useKV[ClesReperage]{Etages}-1):
+    A[l]=(0,-l*cm);
+    B[l]=unitp*(maxx,0)+(0,-l*cm);
+    C[l]=unitp*(minx,0)+(0,-l*cm);
+    % On trace la demi-droite
+    drawarrow (C[l]+unitp*(-0.75,0))--(B[l]+unitp*(0.75,0));
+    % marquage secondaire
+    marque_s:=marque_s/3;
+    if ((maxx-minx) mod 2)=0:
+      for k=(minx+1) step 2 until (maxx-1):
+      draw marquedemidroite(C[l],B[l]);
+      draw marquesegment((k/maxx)[A[l],B[l]],((k+1)/maxx)[A[l],B[l]]);
+      endfor;
+      else:
+      for k=(minx) step 2 until (maxx-1):
+        draw marquesegment((k/maxx)[A[l],B[l]],((k+1)/maxx)[A[l],B[l]]);
+     endfor;
+     fi;
+    % marquage primaire
+    marque_s:=marque_s*3;
+    for k=0 step pasx until (maxx-pasx):
+    draw marquesegment((k/maxx)[A[l],B[l]],((k+pasx)/maxx)[A[l],B[l]]);
+    endfor;
+    for k=0 step -pasx until (minx+pasx):
+    draw marquesegment((k/maxx)[A[l],B[l]],((k-pasx)/maxx)[A[l],B[l]]);
+    endfor;
+    endfor;
+    % On trace les zoom
+    for k=0 upto (\useKV[ClesReperage]{Etages}-2):
+    lp:=floor(1+uniformdeviate(8));
+    draw (lp/10)[A[k],B[k]]--A[k+1] dashed evenly scaled 0.5 withcolor 0.5white;
+    draw ((lp+1)/10)[A[k],B[k]]--B[k+1] dashed evenly scaled 0.5 withcolor 0.5white;
+    endfor;
+    % Labelisation
+    m_c:=m_c*3;
+    marque_p:="croix";
+    labeloffset:=labeloffset*2;
+    label.top(TEX("\footnotesize\num{"&decimal(ValeurUnitex)&"}"),unitex*(1,0));
+    label.top(TEX("\footnotesize\num{"&decimal(ValeurOrigine)&"}"),A[0]);
+    if AffichageGrad>0:
+    for k=((minx+(minx mod pasx)) div pasx) upto (maxx div pasx):
+    if (k<0) or (k>1):
+    label.bot(TEX("\footnotesize\num{\fpeval{"&decimal(ValeurOrigine)&"+"&decimal(ValeurUnitex-ValeurOrigine)&"*"&decimal(k)&"}}"),unitex*(k,0));%%%
+    fi;
+    endfor;
+    fi;
+    labeloffset:=labeloffset/2;
+    vardef tata(text t)=%on place les points
+    if AffichageNom>0:
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    label.top(TEX(p_),unitp*(valeur[n],0)+(0,(-\useKV[ClesReperage]{Etages}+1)*cm));
+    pointe(unitp*(valeur[n],0));
+    endfor;
+    fi;
+    if AffichageCoord=3:
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    if p_<>"":
+    drawarrow (unitp*(valeur[n],-1)+(0,(-\useKV[ClesReperage]{Etages}+1)*cm))--(unitp*(valeur[n],-0.3)+(0,(-\useKV[ClesReperage]{Etages}+1)*cm));
+    label.bot(btex \hbox to4em{\dotfill} etex,(unitp*(valeur[n],-1))+(0,(-\useKV[ClesReperage]{Etages}+0.5)*cm));
+    %pointe(unitp*(valeur[n],0));
+    fi;
+    endfor;
+    fi;
+    enddef;
+    %%%
+    tata(#2);
+  \end{mplibcode}
+  \fi
+}
+
+% Pour construire les droite/demi-droite gradu\'ee
+\def\builddemidroitenew{%
+  \toklistepointdroite{}%
+  \toklistenompointdemidroite{}%
+  \xdef\AffichageNom{0}\ifboolKV[ClesReperage]{AffichageNom}{\xdef\AffichageNom{1}}{}%
+  \xdef\AffichageCoord{\useKV[ClesReperage]{AffichageAbs}}%
+  \xdef\AffichageGrad{0}\ifboolKV[ClesReperage]{AffichageGrad}{\xdef\AffichageGrad{1}}{}%
+  \ifboolKV[ClesReperage]{Thermometre}{%
+    \foreachitem\compteur\in\ListePointDroite{\expandafter\Updatetoksdemidroite\compteur\nil}%
+    \xdef\Listedesvaleursaplacersurlademidroite{}%
+    \foreachitem\compteur\in\ListePointDroite{\xdef\Listedesvaleursaplacersurlademidroite{\Listedesvaleursaplacersurlademidroite,\ListePointDroite[\compteurcnt,1]}}%
+    % \Listedesvaleursaplacersurlademidroite%
+    \MPThermo{\Listedesvaleursaplacersurlademidroite}{\the\toklistenompointdemidroite}%
+  }{%
+    \xdef\Listedesvaleursaplacersurlademidroite{}%
+    \foreachitem\compteur\in\ListePointDroite{\expandafter\Updatetoksdemidroite\compteur\nil}%
+    \foreachitem\compteur\in\ListePointDroite{\xdef\Listedesvaleursaplacersurlademidroite{\Listedesvaleursaplacersurlademidroite,\ListePointDroite[\compteurcnt,1]}}%
+    \MPTouteDROITEGraduee{\Listedesvaleursaplacersurlademidroite}{\the\toklistenompointdemidroite}%
+  }%
+}%
+
+\NewDocumentCommand\Reperage{o m}{%
+  \useKVdefault[ClesReperage]%
+  \setKV[ClesReperage]{#1}%
+  \ifboolKV[ClesReperage]{Espace}{%
+    \setKV[ClesReperage]{Unitex=2,Unitey=2.5,Unitez=1.5}%
+    \ifboolKV[ClesReperage]{Sphere}{\setKV[ClesReperage]{EchelleEspace=75}}{}%
+    \setKV[ClesReperage]{#1}%
+    \setsepchar[*]{,*/}\reademptyitems%
+    \readlist*\ListePointEspace{#2}%
+    \reademptyitems%
+    \buildespace%
+  }{\ifboolKV[ClesReperage]{Plan}{%
+      \setsepchar[*]{,*/}%\ignoreemptyitems%
+      \readlist\ListePointRepere{#2}%
+      \ignoreemptyitems
+      \buildreperenew%
+    }{%
+      \setsepchar[*]{,*/}\ignoreemptyitems%
+      \readlist*\ListePointDroite{#2}%
+      \ifnum\fpeval{\useKV[ClesReperage]{Coupure}}>1\relax%
+        \modulo{\fpeval{\useKV[ClesReperage]{ValeurMax}-\useKV[ClesReperage]{ValeurMin}}}{\useKV[ClesReperage]{Coupure}}%
+        \ifnum\remainder=0\relax%
+          \quotient{\fpeval{\useKV[ClesReperage]{ValeurMax}-\useKV[ClesReperage]{ValeurMin}}}{\useKV[ClesReperage]{Coupure}}%
+          \xdef\PfCRetiensValeurMin{\useKV[ClesReperage]{ValeurMin}}%
+          \xdef\PfCRetiensValeurMax{\useKV[ClesReperage]{ValeurMax}}%
+          \begin{center}
+          \xintFor* ##1 in{\xintSeq{1}{\fpeval{\useKV[ClesReperage]{Coupure}}}}\do{%
+            \setKV[ClesReperage]{ValeurMin=\fpeval{\PfCRetiensValeurMin+(##1-1)*\intquotient}}%
+            \setKV[ClesReperage]{ValeurMax=\fpeval{\PfCRetiensValeurMin+##1*\intquotient}}%
+            \setKV[ClesReperage]{Unitex={\mpdim{0.9\linewidth/\fpeval{\useKV[ClesReperage]{ValeurMax}-\useKV[ClesReperage]{ValeurMin}}}/1cm}}%
+            \xintifForFirst{\PfCTstrut}{}%
+            \raisebox{-0.5\height}{\builddemidroitenew}%
+            \xintifForLast{}{\par\vspace*{1em}\par}%
+          }%
+          \end{center}
+        \fi%
+      \else%
+        \builddemidroitenew%
+      \fi
+    }%
+  }%
+}%
+
+\NewDocumentCommand\ReperageMulti{o m}{%
+  \useKVdefault[ClesReperage]%
+  \setKV[ClesReperage]{#1}%
+  \setsepchar[*]{,*/}\ignoreemptyitems%
+  \readlist*\ListePointDroite{#2}%
+  \toklistepointdroite{}%
+  \toklistenompointdemidroite{}%
+  \xdef\AffichageNom{0}\ifboolKV[ClesReperage]{AffichageNom}{\xdef\AffichageNom{1}}{}
+  \xdef\AffichageCoord{\useKV[ClesReperage]{AffichageAbs}}
+  \xdef\AffichageGrad{0}\ifboolKV[ClesReperage]{AffichageGrad}{\xdef\AffichageGrad{1}}{}
+  \foreachitem\compteur\in\ListePointDroite{\expandafter\Updatetoksdemidroite\compteur\nil}%
+  \xdef\Listedesvaleursaplacersurlademidroite{}%
+  \foreachitem\compteur\in\ListePointDroite{\xdef\Listedesvaleursaplacersurlademidroite{\Listedesvaleursaplacersurlademidroite,\ListePointDroite[\compteurcnt,1]}}%
+  \MPNewDROITEGradueeMulti{\Listedesvaleursaplacersurlademidroite}{\the\toklistenompointdemidroite}%
+  \setsepchar{,}%
+}%
+
+\def\MPMultiZoom#1#2#3{%
+  % #1 : liste des points \`a placer en pas. pour g\'erer le cas des rep\'erages fractionnaires
+  % #2 : liste des noms des points
+  % #3 : la décomposition du nombre à placer
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    defaultcolormodel := \useKV[ClesReperage]{ModeleCouleur};
+    if defaultcolormodel=7:
+    cmykcolor white;
+    white=(0,0,0,1);
+    fi;
+    unitex:=\useKV[ClesReperage]{Unitex}*cm;
+    pasx:=10;
+    unitp:=unitex/pasx;
+    ValeurUnitex:=\useKV[ClesReperage]{ValeurUnitex};
+    ValeurOrigine:=\useKV[ClesReperage]{ValeurOrigine};
+    AffichageGrad:=\AffichageGrad;
+    AffichageCoord:=\useKV[ClesReperage]{AffichageAbs};
+    AffichageNom:=\AffichageNom;
+    NbEtages:=\useKV[ClesReperage]{Etages};
+    EtagesMax=\LongueurPartieDecimale;
+    numeric valeur[];
+    vardef titi(text t)=
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    valeur[n]=p_;
+    endfor;
+    enddef;
+    titi(#1);
+    vardef toto(text t)=
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    decomp[n]=p_;
+    endfor;
+    enddef;
+    toto(#3);
+    % Détermination des abscisses maximale et minimale
+    minx=floor(0);
+    maxx=ceiling(10);
+%    % -----
+    pair A[],B[],C[];
+    for l=0 upto (NbEtages-1):
+    A[l]=(0,-l*cm);
+    B[l]=unitp*(maxx,0)+(0,-l*cm);
+    C[l]=unitp*(minx,0)+(0,-l*cm);
+    % On trace la demi-droite
+    if floor(valeur[1]*(10**l))>0:
+    drawarrow (C[l]+unitp*(-0.75,0))--(B[l]+unitp*(0.75,0));
+    else:
+    drawarrow A[l]--(B[l]+unitp*(0.75,0));
+    fi;
+    % marquage secondaire
+    marque_s:=marque_s/3;
+    if ((maxx-minx) mod 2)=0:
+      for k=(minx+1) step 2 until (maxx-1):
+      draw marquedemidroite(C[l],B[l]);
+      draw marquesegment((k/maxx)[A[l],B[l]],((k+1)/maxx)[A[l],B[l]]);
+      endfor;
+      else:
+      for k=(minx) step 2 until (maxx-1):
+        draw marquesegment((k/maxx)[A[l],B[l]],((k+1)/maxx)[A[l],B[l]]);
+     endfor;
+     fi;
+    % marquage primaire
+    marque_s:=marque_s*3;
+    for k=0 step pasx until (maxx-pasx):
+    draw marquesegment((k/maxx)[A[l],B[l]],((k+pasx)/maxx)[A[l],B[l]]);
+    endfor;
+    for k=0 step -pasx until (minx+pasx):
+    draw marquesegment((k/maxx)[A[l],B[l]],((k-pasx)/maxx)[A[l],B[l]]);
+    endfor;
+    endfor;
+    for k=0 upto (\useKV[ClesReperage]{Etages}-2):
+    lp:=decomp[k+2];
+    draw ((lp/10)[A[k],B[k]]--((lp+1)/10)[A[k],B[k]]) withpen pencircle scaled 1.5;
+    draw (lp/10)[A[k],B[k]]--A[k+1] dashed evenly scaled 0.5 withcolor 0.5white;
+    draw ((lp+1)/10)[A[k],B[k]]--B[k+1] dashed evenly scaled 0.5 withcolor 0.5white;
+    if lp>0:
+      label.bot(TEX("\footnotesize\num{\fpeval{floor("&decimal(valeur[1])&","&decimal(k+1)&")}}"),(lp/10)[A[k],B[k]]+(0,6mm));
+    fi;
+    if lp<9:
+    label.bot(TEX("\footnotesize\num{\fpeval{ceil("&decimal(valeur[1])&","&decimal(k+1)&")}}"),((lp+1)/10)[A[k],B[k]]+(0,6mm));
+    fi;
+    endfor;
+    Decomp=0;
+    for k=0 upto (NbEtages-1):
+    label.bot(TEX("\footnotesize\num{\fpeval{floor("&decimal(valeur[1])&","&decimal(k)&")}}"),A[k]+(0,6mm));
+    label.bot(TEX("\footnotesize\num{\fpeval{ceil("&decimal(valeur[1])&","&decimal(k)&")}}"),B[k]+(0,6mm));
+    endfor;
+    vardef tata(text t)=%on place les points
+    labeloffset:=labeloffset*2;
+    if AffichageNom>0:
+    for p_=t:
+    label.top(TEX("\footnotesize"&p_),unitp*(decomp[NbEtages+1],0)+(0,(-\useKV[ClesReperage]{Etages}+1)*cm));
+    endfor;
+    fi;
+    if AffichageCoord=3:
+    for p_=t:
+    drawarrow (unitp*(decomp[NbEtages+1],-1)+(0,(-\useKV[ClesReperage]{Etages}+1)*cm))--(unitp*(decomp[NbEtages+1],-0.3)+(0,(-\useKV[ClesReperage]{Etages}+1)*cm));
+    label.bot(TEX("\hbox to4em{\dotfill}"),(unitp*(decomp[NbEtages+1],-1))+(0,(-NbEtages+0.8)*cm));
+    endfor;
+    else:    
+    label.bot(TEX("\footnotesize\num{\fpeval{"&decimal(valeur[1])&"}}"),unitp*(decomp[NbEtages+1],0)+(0,(-\useKV[ClesReperage]{Etages}+1)*cm));
+    fi;
+    labeloffset:=labeloffset/2;
+    enddef;
+    %%%
+    if NbEtages=EtagesMax:
+    tata(#2);
+    fi;
+  \end{mplibcode}
+  \fi
+}
+
+\NewDocumentCommand\ReperageZoom{o m}{%
+  \useKVdefault[ClesReperage]%
+  \setKV[ClesReperage]{#1}%
+  \setsepchar[*]{,*/}\ignoreemptyitems%
+  \readlist*\ListePointDroite{#2}%
+  \StrBefore{\ListePointDroite[1,1]}{.}[\PartieEntiere]%
+  \StrBehind{\ListePointDroite[1,1]}{.}[\PartieDecimale]%
+  \StrLen{\PartieDecimale}[\LongueurPartieDecimale]%
+  \ifboolKV[ClesReperage]{Niveaux}{}{%
+    \setKV[ClesReperage]{Etages=\LongueurPartieDecimale}%
+  }%
+  \xdef\Foo{\PartieEntiere}%
+  \xintFor* ##1 in {\xintSeq{1}{\LongueurPartieDecimale}}\do{%
+    \StrChar{\PartieDecimale}{##1}[\LettreActuelle]%
+    \xdef\Foo{\Foo,\LettreActuelle}%
+  }%
+  \toklistepointdroite{}%
+  \toklistenompointdemidroite{}%
+  \xdef\AffichageNom{0}\ifboolKV[ClesReperage]{AffichageNom}{\xdef\AffichageNom{1}}{}%
+  \xdef\AffichageCoord{\useKV[ClesReperage]{AffichageAbs}}%
+  \xdef\AffichageGrad{0}\ifboolKV[ClesReperage]{AffichageGrad}{\xdef\AffichageGrad{1}}{}%
+  \foreachitem\compteur\in\ListePointDroite{\expandafter\Updatetoksdemidroite\compteur\nil}%
+  \xdef\Listedesvaleursaplacersurlademidroite{}%
+  \foreachitem\compteur\in\ListePointDroite{\xdef\Listedesvaleursaplacersurlademidroite{\Listedesvaleursaplacersurlademidroite,\ListePointDroite[\compteurcnt,1]}}%
+  \MPMultiZoom{\Listedesvaleursaplacersurlademidroite}{\the\toklistenompointdemidroite}{\Foo}%
+  \setsepchar{,}%
+}%
+
+\endinput

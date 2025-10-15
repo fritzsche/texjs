@@ -1,0 +1,258 @@
+%%%
+% Rullo
+%%%
+\def\filedateRullo{2025/05/26}%
+\def\fileversionRullo{0.1a}%
+\message{-- \filedateRullo\space v\fileversionRullo}%
+%
+\setKVdefault[Rullo]{ValeurMin=2,ValeurMax=9,Taille=5,Solution=false,Hauteur=20pt,Graine={},CouleurSolution={}}%
+\defKV[Rullo]{%
+  CouleurSolution=\ifempty{#1}{}{\setKV[Rullo]{Solution}\colorlet{PfCRulloCoulSol}{#1}},%
+  Graine=\ifempty{#1}{}{\PfCGraineAlea{#1}}%
+}%
+%
+\NewDocumentCommand\Rullo{o}{%
+  \useKVdefault[Rullo]%
+  \setKV[Rullo]{#1}%
+  \xdef\RulloTaille{\useKV[Rullo]{Taille}}%
+  \PfCChoixAleaMultiMixRep{\fpeval{\RulloTaille*\RulloTaille}}{\useKV[Rullo]{ValeurMin}}{\useKV[Rullo]{ValeurMax}}{0,1}{\ListeAav}%
+  \readlist*\ListeFacteurA{\ListeAav}%
+  \ifnum\fpeval{\RulloTaille}=3\relax%
+    \ChoixAlea{1}{\fpeval{\RulloTaille}}{\LaFa}%
+    \PfCChoixAleaMultiMix{1}{1}{\fpeval{\RulloTaille}}{\LaFa}{\LaFb}%
+    \PfCChoixAleaMultiMix{1}{1}{\fpeval{\RulloTaille}}{\LaFa,\LaFb}{\LaFc}%
+    \xdef\PfMFooRullo{\LaFa,\LaFb,\LaFc}%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeTrouee{\PfMFooRullo}%
+    \xdef\PfMFooProduitsH{}%
+    \xintFor* ##1 in {\xintSeq{1}{\RulloTaille}}\do{%
+      \xdef\PfMFooFacteurs{1}%
+      \xintFor* ##2 in {\xintSeq{1}{\RulloTaille}}\do{%
+        \itemtomacro\ListeTrouee[##1]\PfMTiti%
+        \xintifboolexpr{##2==\PfMTiti}{}{\xdef\PfMFooFacteurs{\fpeval{\PfMFooFacteurs*\ListeFacteurA[\fpeval{\RulloTaille*(##1-1)+##2}]}}%
+        }%
+      }%
+      \xdef\PfMFooProduitsH{\PfMFooProduitsH,\PfMFooFacteurs}%
+    }%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeFacteursH{\PfMFooProduitsH}%
+    \xdef\PfMFooProduitsV{}%
+    \xintFor* ##1 in {\xintSeq{1}{\RulloTaille}}\do{%
+      \xdef\PfMFooFacteurs{1}%
+      \xintFor* ##2 in {\xintSeq{1}{\RulloTaille}}\do{%
+        \xdef\PfMFooFacteurs{\fpeval{\PfMFooFacteurs*\ListeFacteurA[\fpeval{##1+\RulloTaille*(##2-1)}]}}%
+      }%
+      \foreachitem\compteur\in\ListeTrouee{%
+        \itemtomacro\ListeTrouee[\compteurcnt]\PfMTiti%
+        \xintifboolexpr{##1==\PfMTiti}{\xdef\PfMFooFacteurs{\fpeval{\PfMFooFacteurs/\ListeFacteurA[\fpeval{##1+\RulloTaille*(\compteurcnt-1)}]}}}{}%
+      }%
+      \xdef\PfMFooProduitsV{\PfMFooProduitsV,\PfMFooFacteurs}%
+    }%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeFacteursV{\PfMFooProduitsV}%
+    %
+    \PfCChoixAleaMultiMix{\RulloTaille}{1}{\RulloTaille}{0}{\ListeChgtAv}%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeChgt{\ListeChgtAv}%
+    \begin{tabular}{|*{\fpeval{\RulloTaille+1}}{c|}}%
+      \hhline{~---}%
+      \multicolumn{1}{c|}{}\xintFor* ##1 in{\xintSeq{1}{\RulloTaille}}\do{%
+      &\cellcolor{gray!15}\num{\ListeFacteursV[##1]}}\\
+      \hhline{----}%
+      \xintFor*##2 in{\xintSeq{1}{\fpeval{\RulloTaille}}}\do{%
+      \cellcolor{gray!15}\num{\ListeFacteursH[##2]}\xintFor* ##1 in{\xintSeq{1}{\RulloTaille}}\do{%
+      &\xintifboolexpr{##1==\ListeTrouee[##2]}{\ifboolKV[Rullo]{Solution}{\cellcolor{PfCRulloCoulSol}}{}}{}\num{\ListeFacteurA[\fpeval{\RulloTaille*(##2-1)+##1}]}%
+        }\\
+      \hhline{----}%
+      }%
+    \end{tabular}
+  \else
+    \xdef\PfMFooRullo{}%
+    \xdef\PfCRetiensSomme{0}%
+    \xintFor* ##1 in {\xintSeq{2}{\RulloTaille}}\do{%
+      \xdef\PfCRetiensSomme{\PfCRetiensSomme,0}%
+    }%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeSomme{\PfCRetiensSomme}%
+    %      % L1
+    \ChoixAlea{1}{\fpeval{\RulloTaille}}{\LaFaun}%
+    \xdef\PfCRetiensSomme{}%
+    \foreachitem\compteur\in\ListeSomme{%
+      \ifnum\fpeval{\compteurcnt}=\fpeval{\LaFaun}\relax%
+        \xdef\PfCRetiensSomme{\PfCRetiensSomme,\fpeval{\compteur+1}}%
+      \else%
+        \xdef\PfCRetiensSomme{\PfCRetiensSomme,\compteur}%
+      \fi%
+    }%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeSomme{\PfCRetiensSomme}%
+    \PfCChoixAleaMultiMix{1}{1}{\fpeval{\RulloTaille}}{\LaFaun}{\LaFaDeux}%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeNombreTester{\LaFaDeux}%
+    \xdef\PfCRetiensSomme{}%
+    \foreachitem\compteur\in\ListeSomme{%
+      \ifnum\fpeval{\compteurcnt}=\fpeval{\ListeNombreTester[1]}\relax%
+        \xdef\PfCRetiensSomme{\PfCRetiensSomme,\fpeval{\compteur+1}}%
+      \else%
+        \xdef\PfCRetiensSomme{\PfCRetiensSomme,\compteur}%
+      \fi%
+    }%
+    \xdef\PfMFooRullo{\LaFaun,\LaFaDeux}%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeSomme{\PfCRetiensSomme}%
+    %      % L2
+    \ChoixAlea{1}{\fpeval{\RulloTaille}}{\LaFaun}%
+    \xdef\PfCRetiensSomme{}%
+    \foreachitem\compteur\in\ListeSomme{%
+      \ifnum\fpeval{\compteurcnt}=\fpeval{\LaFaun}\relax%
+        \xdef\PfCRetiensSomme{\PfCRetiensSomme,\fpeval{\compteur+1}}%
+      \else%
+        \xdef\PfCRetiensSomme{\PfCRetiensSomme,\compteur}%
+      \fi%
+    }%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeSomme{\PfCRetiensSomme}%
+    \PfCChoixAleaMultiMix{1}{1}{\fpeval{\RulloTaille}}{\LaFaun}{\LaFaDeux}%
+    \xdef\PfCRetiensSomme{}%
+    \readlist*\ListeNombreTester{\LaFaDeux}%
+    \xdef\PfCRetiensSomme{}%
+    \foreachitem\compteur\in\ListeSomme{%
+      \ifnum\fpeval{\compteurcnt}=\fpeval{\ListeNombreTester[1]}\relax%
+        \xdef\PfCRetiensSomme{\PfCRetiensSomme,\fpeval{\compteur+1}}%
+      \else%
+        \xdef\PfCRetiensSomme{\PfCRetiensSomme,\compteur}%
+      \fi%
+    }%
+    \xdef\PfMFooRullo{\PfMFooRullo,\LaFaun,\LaFaDeux}%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeSomme{\PfCRetiensSomme}%
+    %      % Lignes suivantes
+    \xintFor* ##1 in{\xintSeq{3}{\fpeval{\RulloTaille-1}}}\do{%
+      \xdef\PfMColonnesExclues{0}%
+      \foreachitem\compteur\in\ListeSomme{%
+        \ifnum\fpeval{\compteur}=2\relax%
+          \xdef\PfMColonnesExclues{\PfMColonnesExclues,\compteurcnt}%
+        \fi%
+      }%
+      \PfCChoixAleaMultiMix{1}{1}{\fpeval{\RulloTaille}}{\PfMColonnesExclues}{\LaFaun}%
+      \xdef\PfCRetiensSomme{}%
+      \readlist*\ListeNombreTester{\LaFaun}%
+      \foreachitem\compteur\in\ListeSomme{%
+        \ifnum\fpeval{\compteurcnt}=\fpeval{\ListeNombreTester[1]}\relax%
+          \xdef\PfCRetiensSomme{\PfCRetiensSomme,\fpeval{\compteur+1}}%
+        \else%
+          \xdef\PfCRetiensSomme{\PfCRetiensSomme,\compteur}%
+        \fi%
+      }%
+      \setsepchar{,}\ignoreemptyitems%
+      \readlist*\ListeSomme{\PfCRetiensSomme}%
+      % 
+      \PfCChoixAleaMultiMix{1}{1}{\fpeval{\RulloTaille}}{\PfMColonnesExclues,\LaFaun}{\LaFaDeux}%
+      \xdef\PfCRetiensSomme{}%
+      \readlist*\ListeNombreTester{\LaFaDeux}%
+      \xdef\PfCRetiensSomme{}%
+      \foreachitem\compteur\in\ListeSomme{%
+        \ifnum\fpeval{\compteurcnt}=\fpeval{\ListeNombreTester[1]}\relax%
+          \xdef\PfCRetiensSomme{\PfCRetiensSomme,\fpeval{\compteur+1}}%
+        \else%
+          \xdef\PfCRetiensSomme{\PfCRetiensSomme,\compteur}%
+        \fi%
+      }%
+      \xdef\PfMFooRullo{\PfMFooRullo,\LaFaun,\LaFaDeux}%
+      \setsepchar{,}\ignoreemptyitems%
+      \readlist*\ListeSomme{\PfCRetiensSomme}%
+    }%
+    % 
+    \xdef\PfMColonnesExclues{0}%
+    \foreachitem\compteur\in\ListeSomme{%
+      \ifnum\fpeval{\compteur}=2\relax%
+        \xdef\PfMColonnesExclues{\PfMColonnesExclues,\compteurcnt}%
+      \fi%
+    }%
+    \PfCChoixAleaMultiMix{1}{1}{\fpeval{\RulloTaille}}{\PfMColonnesExclues}{\LaFaun}%
+    \xdef\PfCRetiensSomme{}%
+    \readlist*\ListeNombreTester{\LaFaun}%
+    \foreachitem\compteur\in\ListeSomme{%
+      \ifnum\fpeval{\compteurcnt}=\fpeval{\ListeNombreTester[1]}\relax%
+        \xdef\PfCRetiensSomme{\PfCRetiensSomme,\fpeval{\compteur+1}}%
+      \else%
+        \xdef\PfCRetiensSomme{\PfCRetiensSomme,\compteur}%
+      \fi%
+    }%
+    \xdef\PfMFooRullo{\PfMFooRullo,\LaFaun}%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeSomme{\PfCRetiensSomme}%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeTrouee{\PfMFooRullo}%
+    \xdef\PfMFooProduitsH{}%
+    \xintFor* ##1 in {\xintSeq{1}{\RulloTaille}}\do{%
+      \xdef\PfMFooFacteurs{1}%
+      \xintFor* ##2 in {\xintSeq{1}{\RulloTaille}}\do{%
+        \xdef\PfMFooFacteurs{\fpeval{\PfMFooFacteurs*\ListeFacteurA[\fpeval{\RulloTaille*(##1-1)+##2}]}}%
+      }%
+      \itemtomacro\ListeTrouee[\fpeval{2*##1-1}]\PfMTiti%
+      \xintFor* ##2 in {\xintSeq{1}{\RulloTaille}}\do{%
+        \xintifboolexpr{##2==\PfMTiti}{%
+          \xdef\PfMFooFacteurs{\fpeval{\PfMFooFacteurs/\ListeFacteurA[\fpeval{\RulloTaille*(##1-1)+##2}]}}%
+        }{}%
+      }%
+      \ifnum##1<\RulloTaille\relax%
+        \xintFor* ##2 in {\xintSeq{1}{\RulloTaille}}\do{%
+          \itemtomacro\ListeTrouee[\fpeval{2*##1}]\PfMTiti%
+          \xintifboolexpr{##2==\PfMTiti}{%
+            \xdef\PfMFooFacteurs{\fpeval{\PfMFooFacteurs/\ListeFacteurA[\fpeval{\RulloTaille*(##1-1)+##2}]}}%
+          }{}%
+        }%
+      \fi%
+      \xdef\PfMFooProduitsH{\PfMFooProduitsH,\PfMFooFacteurs}%
+    }%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeFacteursH{\PfMFooProduitsH}%
+    %      % Les verticaux
+    \xdef\PfMFooProduitsV{}%
+    \xintFor* ##1 in {\xintSeq{1}{\RulloTaille}}\do{%
+      \xdef\PfMFooFacteurs{1}%
+      \xintFor* ##2 in {\xintSeq{1}{\RulloTaille}}\do{%
+        \xdef\PfMFooFacteurs{\fpeval{\PfMFooFacteurs*\ListeFacteurA[\fpeval{##1+\RulloTaille*(##2-1)}]}}%
+      }%
+      \foreachitem\compteur\in\ListeTrouee{%
+        \itemtomacro\ListeTrouee[\compteurcnt]\PfMTiti%
+        \xintifboolexpr{##1==\PfMTiti}{%
+          \quotient{\fpeval{\compteurcnt-1}}{2}%
+          \xdef\PfMFooFacteurs{\fpeval{\PfMFooFacteurs/\ListeFacteurA[\fpeval{##1+\RulloTaille*\the\intquotient}]}}%
+        }{}%
+      }%
+      \xdef\PfMFooProduitsV{\PfMFooProduitsV,\PfMFooFacteurs}%
+    }%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeFacteursV{\PfMFooProduitsV}%
+    % 
+    \PfCChoixAleaMultiMix{\RulloTaille}{1}{\RulloTaille}{0}{\ListeChgtAv}%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeChgt{\ListeChgtAv}%
+    \begin{tabular}{|*{\fpeval{\RulloTaille+1}}{c|}}%
+      \hhline{~*{\RulloTaille}{-}}
+      \multicolumn{1}{c|}{}\xintFor* ##1 in{\xintSeq{1}{\RulloTaille}}\do{%
+      &\cellcolor{gray!15}\num{\ListeFacteursV[##1]}
+        }\\
+      \hhline{*{\fpeval{\RulloTaille+1}}{-}}
+      \xintFor*##2 in{\xintSeq{1}{\fpeval{\RulloTaille}}}\do{%
+      \itemtomacro\ListeChgt[##2]\Toto
+      \ifnum\fpeval{\Toto}=\fpeval{\RulloTaille}\relax
+      \cellcolor{gray!15}\num{\ListeFacteursH[\RulloTaille]}\xintFor* ##1 in{\xintSeq{1}{\RulloTaille}}\do{%
+      \uppercase{&}\xintifboolexpr{##1==\ListeTrouee[\fpeval{2*\RulloTaille-1}]}{\ifboolKV[Rullo]{Solution}{\cellcolor{PfCRulloCoulSol}}{}}{}
+                   \num{\ListeFacteurA[\fpeval{\RulloTaille*(\RulloTaille-1)+##1}]}
+                   }
+                   \else
+                   \cellcolor{gray!15}\num{\ListeFacteursH[\Toto]}\xintFor* ##1 in{\xintSeq{1}{\RulloTaille}}\do{%
+                   \uppercase{&}\itemtomacro\ListeChgt[##2]\Toto%
+                                \xintifboolexpr{##1==\ListeTrouee[\fpeval{2*\Toto-1}] || ##1==\ListeTrouee[\fpeval{2*\Toto}]}{\ifboolKV[Rullo]{Solution}{\cellcolor{PfCRulloCoulSol}}{}}{}\num{\ListeFacteurA[\fpeval{\RulloTaille*(\Toto-1)+##1}]}
+                                }
+                                \fi
+      \\
+      \hhline{*{\fpeval{\RulloTaille+1}}{-}}
+      }
+    \end{tabular}%
+  \fi%
+  \reademptyitems%
+}%

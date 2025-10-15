@@ -1,0 +1,147 @@
+%%%
+% Calculs détaillés
+%%%
+\def\filedateCDetailles{2024/08/24}%
+\def\fileversionCDetailles{0.1}%
+\message{-- \filedateCDetailles\space v\fileversionCDetailles}
+%
+\setKVdefault[CalculAuto]{Under=false,OverB=false,OverC=false,UnderB=false,UnderC=false,Cadre=false,Fluo=false,Evidence=false,Lettres={A,B,C,D,E},Couleur=Purple}
+
+\newcounter{PfCNbCalculs}
+\newcounter{PfCNbSousCalculs}
+\newcounter{PfCNbMarque}
+
+\NewDocumentCommand\PfCMarquePriorite{m}{%
+  \ifboolKV[CalculAuto]{OverB}{%
+    \Overbrace{#1}%
+  }{%
+    \ifboolKV[CalculAuto]{OverC}{%
+      \Overcrochet{#1}%
+    }{%
+      \ifboolKV[CalculAuto]{UnderC}{%
+        \Undercrochet{#1}%
+      }{%
+        \ifboolKV[CalculAuto]{UnderB}{%
+          \Underbrace{#1}%
+        }{%
+          \ifboolKV[CalculAuto]{Cadre}{%
+            \PfCFbox{CCalculAuto}{#1}
+          }{%
+            \ifboolKV[CalculAuto]{Fluo}{%
+              \Surligner[CCalculAuto]{#1}
+            }{%
+              \ifboolKV[CalculAuto]{Under}{%
+                \mathunderline{CCalculAuto}{#1}%
+              }{%
+                \ifboolKV[CalculAuto]{Evidence}{%
+                  \mathcolor{CCalculAuto}{#1}%
+                }{%
+                  #1%
+                }%
+              }%
+            }%
+          }%
+        }%
+      }%
+    }%
+  }%
+}%
+          
+\NewDocumentCommand\CalculDetaille{om}{%
+  \useKVdefault[CalculAuto]%
+  \setKV[CalculAuto]{#1}%
+  \colorlet{CCalculAuto}{\useKV[CalculAuto]{Couleur}}%
+  \setcounter{PfCNbCalculs}{0}%
+  \setsepchar{§}\ignoreemptyitems%
+  \readlist*\ListeNombresCalculs{#2}%
+  \reademptyitems%
+  \xdef\PfCFooListeLettres{\useKV[CalculAuto]{Lettres}}%
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\ListeLettres{\PfCFooListeLettres}%
+  \reademptyitems%
+  \xdef\PfCNbMaxLignesCalculs{0}%
+  \foreachitem\compteur\in\ListeNombresCalculs{%
+    \stepcounter{PfCNbCalculs}%
+    \itemtomacro\ListeNombresCalculs[\compteurcnt]\Titi%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeNombresCalculsDetails{\Titi}%
+    \reademptyitems%
+    \expandafter\xdef\csname NbLignesCalculs\Alph{PfCNbCalculs}\endcsname{\ListeNombresCalculsDetailslen}%
+    \xdef\PfCNbMaxLignesCalculs{\fpeval{max(\PfCNbMaxLignesCalculs,\ListeNombresCalculsDetailslen)}}%
+    \setcounter{PfCNbSousCalculs}{0}%
+    \foreachitem\compteura\in\ListeNombresCalculsDetails{%
+      \stepcounter{PfCNbSousCalculs}%
+      \StrSubstitute{\compteura}{*}{\times}[\PfCCalculAutoUn]%
+      \StrSubstitute{\PfCCalculAutoUn}{:}{\div}[\PfCCalculAutoDeux]%
+      \StrCount{\PfCCalculAutoDeux}{<}[\NbInf]%
+      \ifnum\fpeval{\NbInf}=0\relax%
+        \expandafter\xdef\csname NbMarqueLigneCalcul\Alph{PfCNbCalculs}\Alph{PfCNbSousCalculs}\endcsname{1}%
+        \expandafter\xdef\csname LigneCalcul\Alph{PfCNbCalculs}\Alph{PfCNbSousCalculs}A\endcsname{\PfCCalculAutoDeux}%
+      \else%
+        \xdef\PfCExpressionDepart{\PfCCalculAutoDeux}%
+        \setcounter{PfCNbMarque}{0}%
+        \foreach\xx in{1,...,\NbInf}{%
+          \StrBefore{\PfCExpressionDepart}{<}[\PfCDevant]%
+          \StrBetween{\PfCExpressionDepart}{<}{>}[\PfCAEncadrer]%
+          \stepcounter{PfCNbMarque}%
+          \expandafter\xdef\csname LigneCalcul\Alph{PfCNbCalculs}\Alph{PfCNbSousCalculs}\Alph{PfCNbMarque}\endcsname{\PfCDevant}%
+          \stepcounter{PfCNbMarque}%
+          \expandafter\xdef\csname LigneCalcul\Alph{PfCNbCalculs}\Alph{PfCNbSousCalculs}\Alph{PfCNbMarque}\endcsname{<\PfCAEncadrer}%
+           \StrBehind{\PfCExpressionDepart}{>}[\PfCExpressionDepartA]%
+           \xdef\PfCExpressionDepart{\PfCExpressionDepartA}%
+         }%
+         \stepcounter{PfCNbMarque}%
+         \expandafter\xdef\csname LigneCalcul\Alph{PfCNbCalculs}\Alph{PfCNbSousCalculs}\Alph{PfCNbMarque}\endcsname{\PfCExpressionDepart}%
+         \expandafter\xdef\csname NbMarqueLigneCalcul\Alph{PfCNbCalculs}\Alph{PfCNbSousCalculs}\endcsname{\thePfCNbMarque}%
+      \fi
+    }%
+  }%
+  %%%%%%%%%
+  \setcounter{PfCNbSousCalculs}{0}%
+  \[%
+    \begin{aligned}
+      \xintFor* ##2 in{\xintSeq{1}{\PfCNbMaxLignesCalculs}}\do{%
+      \stepcounter{PfCNbSousCalculs}%
+      \setcounter{PfCNbCalculs}{0}%
+      \xintFor* ##1 in{\xintSeq{1}{\ListeNombresCalculslen}}\do{%
+      \stepcounter{PfCNbCalculs}%
+      \ifnum##2>\fpeval{\csname NbLignesCalculs\Alph{PfCNbCalculs}\endcsname}\relax%
+      \uppercase{&}
+      \else
+                   \ListeLettres[\thePfCNbCalculs]\uppercase{&}=\xdef\Tata{\csname NbMarqueLigneCalcul\Alph{PfCNbCalculs}\Alph{PfCNbSousCalculs}\endcsname}\setcounter{PfCNbMarque}{0}\xintFor*##3 in{\xintSeq{1}{\Tata}}\do{%
+                                                               \stepcounter{PfCNbMarque}
+                                                               \xdef\Toto{\csname LigneCalcul\Alph{PfCNbCalculs}\Alph{PfCNbSousCalculs}\Alph{PfCNbMarque}\endcsname}\StrChar{\Toto}{1}[\PfCATester]
+                                                               \IfStrEq{\PfCATester}{<}{\StrBehind{\Toto}{<}[\PfCAEncadrer]\PfCMarquePriorite{\PfCAEncadrer}}{\Toto}
+                                                               }
+      \fi\xintifForLast{&}{}
+      }\\
+      }
+    \end{aligned}
+  \]
+}%
+
+\def\Underbrace#1{%
+  \ifx#1\bla\bla\else\color{CCalculAuto}\underbrace{{\color{black}#1}}\color{black}\fi%
+}%
+\def\Undercrochet#1{%
+  \ifx#1\bla\bla\else\color{CCalculAuto}\underbracket{{\color{black}#1}}\color{black}\fi%
+}%
+\def\Overbrace#1{%
+  \ifx#1\bla\bla\else\color{CCalculAuto}\overbrace{{\color{black}#1}}\color{black}\fi%
+}%
+\def\Overcrochet#1{%
+  \ifx#1\bla\bla\else\color{CCalculAuto}\overbracket{{\color{black}#1}}\color{black}\fi%
+}%
+\def\PfCFbox#1#2{%
+  \ifx#2\bla\bla\else\setlength{\fboxrule}{1pt}\fcolorbox{#1}{white}{$\displaystyle#2$}\fi%
+}%
+
+\NewDocumentCommand{\Surligner}{O{yellow}m}{%
+  \ifx#2\bla\bla\else
+    \ifmmode%
+      \colorbox{#1}{$\displaystyle#2$}%
+    \else%
+      \colorbox{#1}{#2}%
+    \fi%
+  \fi
+}%

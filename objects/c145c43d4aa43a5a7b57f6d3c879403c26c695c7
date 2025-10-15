@@ -1,0 +1,1061 @@
+% author: Jean-François Burnol
+% License: LPPL 1.3c (author-maintained)
+% Usage: \input polexpr.sty   (Plain or other macro formats)
+%    or  \usepackage{polexpr} (LaTeX macro format)
+% Release 0.8.7a (2022/05/19) of polexpr.sty. This file inputs
+%   polexprcore.tex
+%   polexprexpr.tex
+%   polexprsturm.tex
+\begingroup\catcode61\catcode48\catcode32=10\relax%
+  \catcode13=5    % ^^M
+  \endlinechar=13 %
+  \catcode123=1   % {
+  \catcode125=2   % }
+  \catcode64=11   % @
+  \catcode35=6    % #
+  \catcode44=12   % ,
+  \catcode45=12   % -
+  \catcode46=12   % .
+  \catcode58=12   % :
+  \def\z {\endgroup}%
+  \expandafter\let\expandafter\x\csname ver@polexpr.sty\endcsname
+  \expandafter\let\expandafter\w\csname ver@xintexpr.sty\endcsname
+  \expandafter
+    \ifx\csname PackageInfo\endcsname\relax
+      \def\y#1#2{\immediate\write-1{Package #1 Info: #2.}}%
+    \else
+      \def\y#1#2{\PackageInfo{#1}{#2}}%
+    \fi
+  \expandafter
+  % I don't think engine exists providing \expanded but not \numexpr
+  \ifx\csname expanded\endcsname\relax
+     \y{polexpr}{\expanded not available, aborting input}%
+     \aftergroup\endinput
+  \else
+    \ifx\x\relax   % plain-TeX, first loading of polexpr.sty
+      \ifx\w\relax % but xintexpr.sty not yet loaded.
+         \expandafter\def\expandafter\z\expandafter
+                    {\z\input xintexpr.sty\relax}%
+      \fi
+    \else
+      \def\empty {}%
+      \ifx\x\empty % LaTeX, first loading,
+      % variable is initialized, but \ProvidesPackage not yet seen
+          \ifx\w\relax % xintexpr.sty not yet loaded.
+            \expandafter\def\expandafter\z\expandafter
+                           {\z\RequirePackage{xintexpr}[2021/03/29]}%
+          \fi
+      \else
+        \aftergroup\endinput % polexpr already loaded.
+      \fi
+    \fi
+  \fi
+\z%
+\XINTsetupcatcodes% (does \endlinechar13 in particular)
+\XINT_providespackage
+\ProvidesPackage{polexpr}%
+  [2022/05/19 v0.8.7a Polynomial expressions with rational coefficients (JFB)]%
+\begingroup
+ \def\x#1/#2/#3 #4\xint:{#1#2#3}%
+ \ifnum\expandafter\x\expanded{\csname ver@xintexpr.sty\endcsname}\xint:
+       <20210527 % xint 1.4h
+ \errmessage{Package polexpr error: xintexpr too old, aborting input}%
+ \else\expandafter\xint_gobble_i
+ \fi
+\endinput\endgroup
+\let\PolDecToString\xintDecToString
+\long\def\POL@ifstar#1#2%
+{%
+    \begingroup\def\@tempa{#1}\def\@tempb{#2}%
+    \futurelet\@let@token\POL@@ifstar
+}%
+\def\POL@@ifstar
+{%
+    \xint_firstofone{\ifx} \@let@token\def\next{\POL@@again\POL@@ifstar}\else
+    \ifx*\@let@token\def\next##1{\expandafter\endgroup\@tempa}\else
+                    \def\next{\expandafter\endgroup\@tempb}\fi\fi\next
+}%
+\xint_firstofone{\def\POL@@again#1} {\futurelet\@let@token#1}%
+\long\def\POL@chkopt#1[#2]%
+{%
+    \begingroup\def\@tempa{#1}\def\@tempb{#1[#2]}%
+    \futurelet\@let@token\POL@@ifopt
+}%
+\def\POL@@ifopt
+{%
+    \xint_firstofone{\ifx} \@let@token\def\next{\POL@@again\POL@@ifopt}\else
+    \ifx[\@let@token\def\next{\expandafter\endgroup\@tempa}\else %]
+                    \def\next{\expandafter\endgroup\@tempb}\fi\fi\next
+}%
+% \polexprsetup added at 0.7
+\catcode`! 3 %
+\def\polexprsetup#1{\POL@setup_parsekeys #1,=!,\xint_bye}%
+\def\POL@setup_parsekeys #1=#2#3,{%
+    \ifx!#2\expandafter\xint_bye\fi
+    \csname POL@setup_setkey_\xint_zapspaces #1 \xint_gobble_i\endcsname
+    \xint_firstoftwo
+    {\PackageWarning{polexpr}{The \detokenize{#1} key is unknown! ignoring}}%
+    {\xintZapLastSpaces{#2#3}}%
+    \POL@setup_parsekeys
+}%
+\def\POL@setup_setkey_norr     #1#2{\edef\POL@norr}%
+\def\POL@setup_setkey_sqfnorr  #1#2{\edef\POL@sqfnorr}%
+\polexprsetup{norr=_norr, sqfnorr=_sqf_norr}%
+\catcode`! 11 % special catcode for ! as used in xintexpr.sty
+%
+\newif\ifxintveryverbose
+\newif\ifpolnewpolverbose
+\newif\ifpoltypesetall
+\newif\ifpoltoexprall
+%%
+%% Main data format for non-expandable manipulations
+%%
+%% The main exchange structure is:
+%%     N.\empty{coeff0}{coeff1}....{coeffN}
+%% It is stored in macros \POLuserpol@<name of polynomial>
+%% The \empty is basically there to avoid brace-stripping
+%% in some grabbing contexts (maybe I should revisit this)
+%%
+%% The zero polynomial is stored as -1.\empty{0/1[0]}
+%% Degree zero polynomials are 0.\empty{numeric value}
+%%
+%% Depending on input path the numeric values coeff0, coeff1, ...., coeffN
+%% may have been or not already converted into A/B[n] format.
+%% As a rule, computations are not followed with reducing the fractions
+%% to smallest terms; the innocent may be unaware that computing
+%% with fractions quickly give gigantic numbers. There is \PolReduceCoeffs
+%% to do that.
+%%
+%% This base structure is maintained at 0.8 for legacy reasons but perhaps I
+%% need to revisit this. A characteristic of the package so far is that it
+%% thus stores and manipulate polynomials basically as the complete sequence
+%% of coefficients, (using the xintfrac "zero" for missing coefficients) which
+%% means that it will handle poorly polynomials of high degrees such as X^500.
+%%
+%% Test if zero
+\def\POL@ifZero#1{\expandafter\POL@ifZero@aux#1;}%
+\def\POL@ifZero@aux #1#2;{\if-#1\expandafter\xint_firstoftwo
+                             \else\expandafter\xint_secondoftwo
+                          \fi}%
+%% Split into degree and coefficients
+% The \expandafter chain removes the \empty token
+\def\POL@split#1.#2;#3#4%
+   {\def#3{#1}\expandafter\def\expandafter#4\expandafter{#2}}%
+%% Define from values stored in a "macros-array"
+\def\POL@resultfromarray #1{%
+    \edef\POL@result{\ifnum\count@>\z@
+      \the\numexpr\count@-\@ne.\noexpand\empty
+      \xintiloop [1+1]%
+      \expandafter\POL@braceit\csname POL@array#1\xintiloopindex\endcsname
+      \ifnum\xintiloopindex<\count@
+      \repeat
+      \else-1.\noexpand\empty{0/1[0]}\fi}%
+}%
+\def\POL@braceit#1{{#1}}% needed as \xintiloopindex can not "see" through braces
+%%
+%% Conversion between legacy data storage and the one used for the
+%% the novel polexpr 0.8 notion of \xintexpr polynomial variables
+%%
+%% The 0.8 expandable implementation of core algebra is also manipulating
+%% the complete list of coefficients. The internal data structure is
+%% (this is the numeric leaf in xintexpr ople terminology) currently:
+%%     PN.{coeff0}{coeff1}....{coeffN}
+%% where the P letter identifies the polynomial type.
+%% Here the degree N is *always* at least 1: if some evaluation ends
+%% up in a constant polynomial it will always be output as a genuine
+%% scalar numeric variable, as a rule in in A/B[n] format
+%% 
+%% This is not definitive and I need to think about it more (in particular
+%% in the distant perspective of supporting multi-variable polynomials).
+%% However modifying this will be costly labor at this stage.
+%%
+\input polexprcore.tex\relax % load expandable algebra
+\def\POL@vartolegacy #1% \romannumeral\POL@vartolegacy ... \xint:
+{%
+    \if 0#1\xint_dothis\POL@vartolegacy@zero\fi
+    \if P#1\xint_dothis\POL@vartolegacy@pol\fi
+    \xint_orthat\POL@vartolegacy@scalar #1%
+}%
+\def\POL@vartolegacy@zero     #1\xint:{\xint_c_ -1.\empty{0/1[0]}}%
+\def\POL@vartolegacy@scalar   #1\xint:{\xint_c_  0.\empty{#1}}%
+\def\POL@vartolegacy@pol  P#1.#2\xint:{\xint_c_ #1.\empty#2}%
+%
+\def\POL@tovar#1{\romannumeral\expandafter\expandafter\expandafter
+                 \POL@legacytovar\csname POLuserpol@#1\endcsname}%
+\def\POL@legacytovar #1.% \romannumeral\POL@legacytovar N.\empty{c0}...
+{%
+    \ifnum #1<\xint_c_i\xint_dothis\POL@legacytovar@scalar\fi
+    \xint_orthat\POL@legacytovar@pol #1.%
+}%
+\def\POL@legacytovar@scalar #1.\empty#2{\xint_c_ #2}%
+\def\POL@legacytovar@pol    #1.\empty{\xint_c_ P#1.}%
+%%
+%% Extend \xintexpr (\xintdefvar, \xintdeffunc) to recognize the new
+%% polynomial type
+%%
+%% **** It does NOT apply to \xintfloatexpr context
+%%
+\input polexprexpr.tex\relax
+%%
+%% \poldef
+%%
+%% Ever since 1.0, catcode sanitisation was minimal and only handled
+%% the semicolon.  At last 0.8.7 uses \xintexprSafeCatcodes to enhance
+%% compatibility with hostile contexts such as babel+french.  This
+%% adds overhead but at least is coherent with \xintdefvar/\xintdeffunc
+\def\PolDef{\xintexprSafeCatcodes\POL@chkopt\POL@oPolDef[x]}%
+\def\POL@oPolDef[#1]#2#3{\POL@defpol #2(#1):={#3};}%
+\def\poldef{\xintexprSafeCatcodes\POL@defpol}%
+\def\POL@defpol #1(#2)#3=#4;{%
+   \xintexprRestoreCatcodes
+   \edef\POL@polname{\xint_zapspaces #1 \xint_gobble_i}%
+\begingroup
+   \unless\ifxintveryverbose\xintverbosefalse\fi
+   %% RADICAL CHANGE AT 0.8:
+   %% we define a **variable** not a **function**
+   %% ever since polexpr initial version, a function was defined and
+   %% the associated macros was then deconstructed in further analysis
+   %% via non-expandable approach. At 0.8 the polynomial algebra has
+   %% been implemented expandably allowing direct plug-in into \xintexpr
+   \xintdefvar_a __pol = subs(#4,#2=qraw({{P1.{0/1[0]}{1/1[0]}}}));%
+   \expandafter
+\endgroup
+   \expandafter\def\expandafter\POL@result\expandafter
+       {\romannumeral0\expandafter\xint_stop_atfirstofone
+        \romannumeral0\csname XINT_expr_varvalue___pol\endcsname}%
+   \XINT_global\expandafter\def\csname POLuserpol@\POL@polname\expandafter\endcsname
+        \expandafter{\romannumeral\expandafter\POL@vartolegacy\POL@result\xint:}%
+   \expandafter\POL@newpol\expandafter{\POL@polname}%
+}%
+\def\POL@newpol#1{%
+   % 0.7.5 had some complicated special handling of constant
+   % polynomials, but these are complications of the past
+   % First a variable usable in \poldef but not in \xintexpr for arithmetic
+   % only for special dedicated functions such as coeff(), deg() 
+   % (when they will be implemented). In \poldef, composition of polynomials
+   % in P(Q) syntax will be more efficient than P(Q(x)).
+   % This will use \XINT_global and obey \xintverbose... setting
+   \XINT_expr_defvar_one{#1}{{\POL@tovar{#1}}}%
+   % Second a function usable not only in \poldef but also in \xintexpr
+   % Will use \XINT_global
+   \POL@newpolhorner{#1}%
+   \POL@defpolfunc{#1}{expr}%
+   \XINT_global\expandafter\let\csname XINT_flexpr_func_#1\endcsname\@undefined
+   \ifpolnewpolverbose\POL@info{#1}\fi
+}%
+\def\POL@newfloatpol#1{%
+   \POL@newfloatpolhorner{#1}%
+   \POL@defpolfunc{#1}{flexpr}%
+   \ifpolnewpolverbose\POL@floatinfo{#1}%
+   \else
+     \ifxintverbose\POL@floatinfo{#1}\fi
+   \fi
+}%
+\def\POL@info #1{%
+   \xintMessage {polexpr}{Info}%
+        {Function #1 for the \string\xintexpr\space parser is
+         \ifxintglobaldefs(globally) \fi
+         associated to \string\XINT_expr_polfunc_#1\space
+         with meaning:
+         \expandafter\meaning
+         \csname XINT_expr_polfunc_#1\endcsname}%
+}%
+\def\POL@floatinfo #1{%
+   \xintMessage {polexpr}{Info}%
+        {Function #1 for the \string\xintfloatexpr\space parser is
+         \ifxintglobaldefs(globally) \fi
+         associated to \string\XINT_flexpr_polfunc_#1\space
+         with meaning:
+         \expandafter\meaning
+         \csname XINT_flexpr_polfunc_#1\endcsname}%
+}%
+%
+\def\POL@newpolhorner#1{%
+   \expandafter\expandafter\expandafter\POL@split
+      \csname POLuserpol@#1\endcsname;\POL@var@deg\POL@var@coeffs
+   \edef\POL@var@coeffs{\xintRevWithBraces{\POL@var@coeffs}}%
+   \begingroup
+      \expandafter\POL@newpol@horner\POL@var@coeffs\relax
+   \expandafter
+   \endgroup
+   \expandafter\XINT_global
+   \expandafter\def\csname XINT_expr_polfunc_#1\expandafter\endcsname
+      \expandafter##\expandafter1\expandafter{\POL@tmp{##1}}%
+}%
+\def\POL@newfloatpolhorner#1{%
+   %% redefine function to expand by Horner scheme. Is this useful?
+   %% perhaps bad idea for numerical evaluation of thing such as (1+x)^10?
+% note: I added {0/1[0]} item to zero polynomial also to facilitate this
+   \expandafter\expandafter\expandafter\POL@split
+      \csname POLuserpol@#1\endcsname;\POL@var@deg\POL@var@coeffs
+   \edef\POL@var@coeffs{\xintRevWithBraces{\POL@var@coeffs}}%
+   \begingroup
+      \expandafter\POL@newpol@floathorner\POL@var@coeffs\relax
+   \expandafter
+   \endgroup
+   \expandafter\def\csname XINT_flexpr_polfunc_#1\expandafter\endcsname
+      \expandafter##\expandafter1\expandafter{\POL@tmp{##1}}%
+}%
+\def\POL@newpol@horner#1{\let\xintPolAdd\relax\let\xintPolMul\relax
+                  \def\POL@tmp##1{#1}\POL@newpol@horner@loop.}%
+\def\POL@newpol@horner@loop.#1{%
+  \if\relax#1\expandafter\xint_gob_til_dot\fi
+  \edef\POL@tmp##1{\xintiiifZero{#1}
+                    {\xint_firstofone}{\xintPolAdd{#1}}%
+                    {\xintPolMul{##1}{\POL@tmp{##1}}}}%
+  \POL@newpol@horner@loop.%
+}%
+\def\POL@newpol@floathorner#1{\let\XINTinFloatAdd\relax\let\XINTinFloatMul\relax
+                  \edef\POL@tmp##1{\XINTinFloatdigits{#1}}%
+                  \POL@newpol@floathorner@loop.}%
+\def\POL@newpol@floathorner@loop.#1{%
+  \if\relax#1\expandafter\xint_gob_til_dot\fi
+  \edef\POL@tmp##1{\xintiiifZero{#1}
+                    {\xint_firstofone}{\XINTinFloatAdd{\XINTinFloatdigits{#1}}}%
+                    {\XINTinFloatMul{##1}{\POL@tmp{##1}}}}%
+  \POL@newpol@floathorner@loop.%
+}%
+%%
+%% Non-expandable polynomial manipulations
+%%
+\def\PolGenFloatVariant#1{\POL@newfloatpol{#1}}%
+%
+\def\PolLet#1#2{\if=\noexpand#2\expandafter\xint_firstoftwo
+                      \else\expandafter\xint_secondoftwo\fi
+                      \POL@@let\POL@let{#1}{#2}}%
+\def\POL@@let#1#2#3{\POL@let{#1}{#3}}%
+\def\POL@let#1#2{%
+    \XINT_global
+    \expandafter\let\csname POLuserpol@#1\expandafter\endcsname
+                    \csname POLuserpol@#2\endcsname
+    \XINT_expr_defvar_one{#1}{{\POL@tovar{#1}}}%
+    \XINT_global
+    \expandafter\let\csname XINT_expr_polfunc_#1\expandafter\endcsname
+                    \csname XINT_expr_polfunc_#2\endcsname
+    \POL@defpolfunc{#1}{expr}%
+    \ifpolnewpolverbose\POL@info{#1}\fi
+}%
+\def\PolGlobalLet#1#2{\begingroup\xintglobaldefstrue\PolLet{#1}{#2}\endgroup}%
+%
+\def\PolAssign#1{\def\POL@polname{#1}\POL@assign}% zap spaces in #1?
+\def\POL@assign#1\toarray#2{%
+    \expandafter\expandafter\expandafter\POL@split
+    \csname POLuserpol@\POL@polname\endcsname;\POL@var@deg\POL@var@coeffs
+    \xintAssignArray\POL@var@coeffs\to#2%
+    % modify \#200 macro to return 0/1[0] for out of range indices
+    \@namedef{\xint_arrayname00}##1##2##3{%
+    \@namedef{\xint_arrayname00}####1{%
+        \ifnum####1>##1 \xint_dothis{ 0/1[0]}\fi
+        \ifnum####1>\m@ne \xint_dothis
+                {\expandafter\expandafter\expandafter##3%
+                 \csname##2####1\endcsname}\fi
+        \unless\ifnum-####1>##1 \xint_dothis
+                {\expandafter\expandafter\expandafter##3%
+                 \csname##2\the\numexpr##1+####1+\@ne\endcsname}\fi
+        \xint_orthat{ 0/1[0]}}% space stops a \romannumeral0
+    }%
+    \csname\xint_arrayname00\expandafter\expandafter\expandafter\endcsname
+      \expandafter\expandafter\expandafter
+      {\csname\xint_arrayname0\expandafter\endcsname\expandafter}\expandafter
+      {\xint_arrayname}{ }%
+}%
+\def\PolGet{}%
+\def\PolGet#1#2\fromarray#3{%
+    \begingroup % closed in \POL@getfromarray
+    \POL@getfromarray{#1}{#3}%
+    \POL@newpol{#1}%
+}%
+\def\POL@getfromarray#1#2{%
+        \count@=#2{0} %<- intentional space
+  \ifnum\count@=\z@
+     \def\POL@result{-1.\empty{0/1[0]}}% 0.5 fix for empty array
+  \else
+        \xintloop
+          \edef\POL@tmp{#2{\count@}}%
+          \edef\POL@tmp{\xintRaw{\POL@tmp}}%
+% sadly xinttools (current 1.3a) arrays have no setters for individual items... 
+          \expandafter\let\csname POL@tmparray\the\count@\endcsname\POL@tmp
+        \if0\xintiiSgn{\POL@tmp}%
+            \advance\count@\m@ne
+        \repeat
+        \count\tw@\count@
+        \xintloop
+        \ifnum\count@>\@ne
+          \advance\count@\m@ne
+          \edef\POL@tmp{#2{\count@}}%
+          \edef\POL@tmp{\xintRaw{\POL@tmp}}%
+          \expandafter\let\csname POL@tmparray\the\count@\endcsname\POL@tmp
+        \repeat
+        \count@\count\tw@          
+        \def\POL@tmp##1.{{\csname POL@tmparray##1\endcsname}}%
+        \edef\POL@result{\the\numexpr\count@-\@ne.\noexpand\empty
+                         \xintiloop[1+1]%
+                         \expandafter\POL@tmp\xintiloopindex.%
+                         \ifnum\xintiloopindex<\count@
+                         \repeat}%
+  \fi
+    \expandafter
+    \endgroup
+    \expandafter
+    \XINT_global
+    \expandafter
+    \def\csname POLuserpol@#1\expandafter\endcsname
+        \expandafter{\POL@result}%
+}%
+%
+\def\PolFromCSV#1#2{%
+    \begingroup % closed in \POL@getfromarray
+    \xintAssignArray\xintCSVtoList{#2}\to\POL@arrayA
+    \POL@getfromarray{#1}\POL@arrayA
+    \POL@newpol{#1}%
+}%
+%
+\def\PolMapCoeffs#1#2{% #1 = macro, #2 = name
+    \POL@mapcoeffs{#1}{#2}%
+    \POL@newpol{#2}%
+}%
+\def\POL@mapcoeffs#1#2{%
+    \begingroup
+       \def\POL@mapcoeffs@macro{#1}%
+       \expandafter\expandafter\expandafter\POL@split
+         \csname POLuserpol@#2\endcsname;\POL@mapcoeffs@deg\POL@mapcoeffs@coeffs
+% ATTENTION à ne pas faire un \expandafter ici, car brace removal si 1 item
+       \xintAssignArray\POL@mapcoeffs@coeffs\to\POL@arrayA
+       \def\index{0}%
+       \count@\z@
+       \expandafter\POL@map@loop\expandafter.\POL@mapcoeffs@coeffs\relax
+       \xintloop
+% this abuses that \POL@arrayA0 is never 0.
+       \xintiiifZero{\csname POL@arrayA\the\count@\endcsname}%
+         {\iftrue}%
+         {\iffalse}%
+       \advance\count@\m@ne
+       \repeat
+% donc en sortie \count@ est 0 ssi pol nul.
+       \POL@resultfromarray A%
+     \expandafter
+    \endgroup
+    \expandafter
+    \XINT_global
+    \expandafter
+    \def\csname POLuserpol@#2\expandafter\endcsname\expandafter{\POL@result}%
+}%
+\def\POL@map@loop.#1{\if\relax#1\expandafter\xint_gob_til_dot\fi
+    \advance\count@\@ne
+    \edef\POL@map@coeff{\POL@mapcoeffs@macro{#1}}%
+    \expandafter
+    \let\csname POL@arrayA\the\count@\endcsname\POL@map@coeff
+    \edef\index{\the\numexpr\index+\@ne}%
+    \POL@map@loop.}%
+%
+\def\POL@xintIrr#1{\xintIrr{#1}[0]}%
+\def\PolReduceCoeffs{\POL@ifstar\POL@sreducecoeffs\POL@reducecoeffs}%
+\def\POL@reducecoeffs#1{\PolMapCoeffs{\POL@xintIrr}{#1}}%
+\def\POL@sreducecoeffs#1{\PolMapCoeffs{\xintPIrr}{#1}}%
+%
+\def\PolMakeMonic#1{%
+    \edef\POL@leadingcoeff{\PolLeadingCoeff{#1}}%
+    \edef\POL@leadingcoeff@inverse{\xintDiv{1/1[0]}{\POL@leadingcoeff}}%
+    \PolMapCoeffs{\xintMul{\POL@leadingcoeff@inverse}}{#1}%
+}%
+%
+%% \PolMakePrimitive (0.5)
+%  This uses expandable \PolIContent
+%  Note: the integer coefficients stored in A/1[n] form with
+%  A not having trailing zeroes, due to usage of \xintREZ here. 
+\def\POL@makeprim@macro#1%
+   {\xintREZ{\xintNum{\xintDiv{#1}{\POL@makeprim@icontent}}}}%
+\def\PolMakePrimitive#1{%
+    % This does not need a full user declared polynomial on input, only
+    % a \POLuserpol@name macro, but on output it is fully declared
+    \edef\POL@makeprim@icontent{\PolIContent{#1}}%
+    \PolMapCoeffs\POL@makeprim@macro{#1}%
+}%
+\def\POL@makeprimitive#1{%
+    % Avoids declaring the polynomial, internal usage in \PolToSturm
+    \edef\POL@makeprim@icontent{\PolIContent{#1}}%
+    \POL@mapcoeffs\POL@makeprim@macro{#1}%
+}%
+%
+%% Euclidean division
+%  since 0.8 based on the expandable routine from polexprcore.tex
+%
+\def\PolDivide#1#2#3#4{% #3=quotient, #4=remainder of #1 by #2
+    \POL@divide{#1}{#2}%
+    \XINT_global\expandafter\let\csname POLuserpol@#3\endcsname\POL@Q
+    \POL@newpol{#3}%
+    \XINT_global\expandafter\let\csname POLuserpol@#4\endcsname\POL@R
+    \POL@newpol{#4}%
+}%
+\def\PolQuo#1#2#3{% #3=quotient of #1 by #2
+    \POL@divide{#1}{#2}%
+    \XINT_global\expandafter\let\csname POLuserpol@#3\endcsname\POL@Q
+    \POL@newpol{#3}%
+}%
+\def\PolRem#1#2#3{% #3=remainder of #1 by #2
+    \POL@divide{#1}{#2}%
+    \XINT_global\expandafter\let\csname POLuserpol@#3\endcsname\POL@R
+    \POL@newpol{#3}%
+}%
+\def\POL@divide#1#2{%
+  % much simpler at 0.8 thanks to our expandable macros
+  \xintAssign\xintPolQuoRem{\POL@tovar{#1}}{\POL@tovar{#2}}\to\POL@Q\POL@R
+  \odef\POL@Q{\romannumeral\expandafter\POL@vartolegacy\POL@Q\xint:}%
+  \odef\POL@R{\romannumeral\expandafter\POL@vartolegacy\POL@R\xint:}%
+}%
+%% Euclidean special pseudo-remainder
+\def\POL@getprem#1#2{%
+   \let\POL@Q\undefined % trap errors in Sturm code update to use \POL@prem
+   % this was simpler before I converted \xintPolPRem into returning a tuple...
+   \odef\POL@R{\romannumeral\expandafter\POL@vartolegacy
+               \romannumeral0\expandafter\xint_stop_atsecondoftwo
+               \romannumeral`&&@\xintPolPRem{\POL@tovar{#1}}{\POL@tovar{#2}}%
+               \xint:}%
+}%
+%
+%%%%%%%%%%%%
+%%
+%% Things are currenly implemented twice : here the legacy macros
+%% such as GCD or Diff, and in polexprcore.tex the expandable
+%% support macros for the \xinteval interface.
+%%
+%% Soon, I will probably remove all legacy code (like I did already
+%% for division) and make the user macros simple wrappers to the
+%% expandable code.
+%%
+%% But for 0.8 release, I preferred not to yet, as I did not have
+%% really the time to compare speed.  Usage of the "special
+%% pseudo euclidean remainder" (expandable) code in Sturm chain
+%% construction proved very beneficial as it divided by 3 the
+%% \PolToSturm execution time on the Wilkinson perturbed type 1
+%% example in the documentation.
+%%
+%%%%%%%%%%%%
+%
+%% GCD
+%
+% It seems I didn't even use here the (now deleted) macros implementing
+% division, and I redid here what was needed: this code, which I leave
+% standing as I have other priorities, does not use the \POL@divide !
+%
+\def\PolGCD#1#2#3{% sets #3 to the (unitary) G.C.D. of #1 and #2
+    \POL@GCD{#1}{#2}{#3}%
+    \POL@newpol{#3}%
+}%
+\def\POL@GCD #1#2#3{%
+    \begingroup
+      \expandafter\let\expandafter\POL@A\csname POLuserpol@#1\endcsname
+      \expandafter\let\expandafter\POL@B\csname POLuserpol@#2\endcsname
+      \expandafter\POL@split\POL@A;\POL@degA\POL@polA
+      \expandafter\POL@split\POL@B;\POL@degB\POL@polB
+      \ifnum\POL@degA<\z@
+        \expandafter\xint_firstoftwo\else\expandafter\xint_secondoftwo
+      \fi
+        {\ifnum\POL@degB<\z@
+          \expandafter\xint_firstoftwo\else\expandafter\xint_secondoftwo
+        \fi
+          {\def\POL@result{-1.\empty{0/1[0]}}}%
+          {\xintAssignArray\POL@polB\to\POL@arrayB
+           \POL@normalize{B}%
+           \POL@gcd@exit BA}}%
+        {\ifnum\POL@degB<\z@
+          \expandafter\xint_firstoftwo\else\expandafter\xint_secondoftwo
+        \fi
+          {\xintAssignArray\POL@polA\to\POL@arrayA
+           \POL@normalize{A}%
+           \POL@gcd@exit AB}%
+          {\ifnum\POL@degA<\POL@degB\space
+             \let\POL@tmp\POL@B\let\POL@B\POL@A\let\POL@A\POL@tmp
+             \let\POL@tmp\POL@degB\let\POL@degB\POL@degA\let\POL@degA\POL@tmp
+             \let\POL@tmp\POL@polB\let\POL@polB\POL@polA\let\POL@polA\POL@tmp
+           \fi
+           \xintAssignArray\POL@polA\to\POL@arrayA
+           \xintAssignArray\POL@polB\to\POL@arrayB
+           \POL@gcd AB%
+           }}%
+    \expandafter
+    \endgroup
+    \expandafter
+    \XINT_global
+    \expandafter\def\csname POLuserpol@#3\expandafter\endcsname
+        \expandafter{\POL@result}%
+}%
+\def\POL@normalize#1{%
+    \expandafter\def\expandafter\POL@tmp\expandafter
+        {\csname POL@array#1\csname POL@array#10\endcsname\endcsname}%
+    \edef\POL@normalize@leading{\POL@tmp}%
+    \expandafter\def\POL@tmp{1/1[0]}%
+    \count@\csname POL@deg#1\endcsname\space
+    \xintloop
+    \ifnum\count@>\z@
+      \expandafter\edef\csname POL@array#1\the\count@\endcsname
+      {\xintIrr{\xintDiv
+                   {\csname POL@array#1\the\count@\endcsname}%
+                   {\POL@normalize@leading}}[0]}%
+    \advance\count@\m@ne
+    \repeat
+}%
+\def\POL@gcd#1#2{%
+    \POL@normalize{#2}%
+    \edef\POL@degQ{\the\numexpr\csname POL@deg#1\endcsname
+                              -\csname POL@deg#2\endcsname}%
+    \count@\numexpr\csname POL@deg#1\endcsname+\@ne\relax
+    \count\tw@\numexpr\POL@degQ+\@ne\relax
+    \xintloop
+      \POL@gcd@getremainder@loopbody#1#2%
+    \ifnum\count\tw@>\z@
+    \repeat
+    \expandafter\def\csname POL@array#10\endcsname{1}%
+    \xintloop
+    \xintiiifZero{\csname POL@array#1\the\count@\endcsname}%
+      {\iftrue}%
+      {\iffalse}%
+    \advance\count@\m@ne
+    \repeat
+    \expandafter\edef\csname POL@deg#1\endcsname{\the\numexpr\count@-\@ne}%
+    \ifnum\count@<\@ne
+      \expandafter\POL@gcd@exit
+    \else
+      \expandafter\edef\csname POL@array#10\endcsname{\the\count@}%
+      \expandafter\POL@gcd
+    \fi{#2}{#1}%
+}%
+\def\POL@gcd@getremainder@loopbody#1#2{%
+  \edef\POL@gcd@ratio{\csname POL@array#1\the\count@\endcsname}%
+  \advance\count@\m@ne
+  \advance\count\tw@\m@ne
+  \count4 \count@
+  \count6 \csname POL@deg#2\endcsname\space
+  \xintloop
+  \ifnum\count6>\z@
+    \expandafter\edef\csname POL@array#1\the\count4\endcsname
+      {\xintSub
+          {\csname POL@array#1\the\count4\endcsname}%
+          {\xintMul
+            {\POL@gcd@ratio}%
+            {\csname POL@array#2\the\count6\endcsname}}}%
+    \advance\count4 \m@ne
+    \advance\count6 \m@ne
+  \repeat
+}%
+\def\POL@gcd@exit#1#2{%
+    \count@\numexpr\csname POL@deg#1\endcsname+\@ne\relax
+    \POL@resultfromarray #1%
+}%
+%
+%% DIFFERENTIATION
+%
+\def\POL@diff@loop@one #1/#2[#3]#4%
+  {\xintIrr{\xintiiMul{#4}{#1}/#2[0]}[#3]}%
+\def\POL@diff#1{\POL@diff@loop1.}%
+\def\POL@diff@loop#1.#2{%
+  \if\relax#2\expandafter\xint_gob_til_dot\fi
+  {\expandafter\POL@diff@loop@one\romannumeral0\xintraw{#2}{#1}}%
+  \expandafter\POL@diff@loop\the\numexpr#1+\@ne.%
+}%
+\def\PolDiff{\POL@chkopt\POL@oPolDiff[1]}%
+\def\POL@oPolDiff[#1]{%
+   % optional parameter is how many times to derivate
+   % first mandatory arg is name of polynomial function to derivate,
+   % same name as in \NewPolExpr
+   % second mandatory arg name of derivative
+   \edef\POL@iterindex{\the\numexpr#1\relax}%
+   \ifnum\POL@iterindex<\z@
+       \expandafter\xint_firstoftwo
+   \else
+       \expandafter\xint_secondoftwo
+   \fi
+   {\PolAntiDiff[-\POL@iterindex]}{\POL@Diff}%
+}%
+\def\POL@Diff{%
+   \ifcase\POL@iterindex\space
+      \expandafter\POL@Diff@no
+   \or\expandafter\POL@Diff@one
+   \else\xint_afterfi{\POL@Iterate\POL@Diff@one}%
+   \fi
+}%
+\def\POL@Diff@no #1#2{\POL@let{#2}{#1}}%
+\def\POL@Diff@one #1#2{\POL@Diff@@one {#1}{#2}\POL@newpol{#2}}%
+\def\POL@Diff@@one#1#2{%
+   \expandafter\expandafter\expandafter\POL@split
+      \csname POLuserpol@#1\endcsname;\POL@var@deg\POL@var@coeffs
+   \ifnum\POL@var@deg<\@ne
+      \XINT_global\@namedef{POLuserpol@#2}{-1.\empty{0/1[0]}}%
+   \else
+     \edef\POL@var@coeffs{\expandafter\POL@diff\POL@var@coeffs\relax}%
+     \XINT_global\expandafter\edef\csname POLuserpol@#2\endcsname
+        {\the\numexpr\POL@var@deg-\@ne.\noexpand\empty\POL@var@coeffs}%
+   \fi
+}%
+% lazy way but allows to share with AntiDiff
+\def\POL@Iterate#1#2#3{%
+    \begingroup
+    \xintverbosefalse
+        #1{#2}{#3}%
+        \xintloop
+        \ifnum\POL@iterindex>\tw@
+          #1{#3}{#3}%
+          \edef\POL@iterindex{\the\numexpr\POL@iterindex-\@ne}%
+        \repeat
+   \expandafter
+   \endgroup\expandafter
+   \XINT_global
+   \expandafter
+   \def\csname POLuserpol@#3\expandafter\endcsname
+       \expandafter{\romannumeral`&&@\csname POLuserpol@#3\endcsname}%
+   #1{#3}{#3}%
+}%
+%
+%% ANTI-DIFFERENTIATION
+%
+\def\POL@antidiff@loop@one #1/#2[#3]#4%
+  {\xintIrr{#1/\xintiiMul{#4}{#2}[0]}[#3]}%
+\def\POL@antidiff{\POL@antidiff@loop1.}%
+\def\POL@antidiff@loop#1.#2{%
+  \if\relax#2\expandafter\xint_gob_til_dot\fi
+  {\expandafter\POL@antidiff@loop@one\romannumeral0\xintraw{#2}{#1}}%
+  \expandafter\POL@antidiff@loop\the\numexpr#1+\@ne.%
+}%
+\def\PolAntiDiff{\POL@chkopt\POL@oPolAntiDiff[1]}%
+\def\POL@oPolAntiDiff[#1]{%
+   % optional parameter is how many times to derivate
+   % first mandatory arg is name of polynomial function to derivate,
+   % same name as in \NewPolExpr
+   % second mandatory arg name of derivative
+   \edef\POL@iterindex{\the\numexpr#1\relax}%
+   \ifnum\POL@iterindex<\z@
+       \expandafter\xint_firstoftwo
+   \else
+       \expandafter\xint_secondoftwo
+   \fi
+   {\PolDiff[-\POL@iterindex]}{\POL@AntiDiff}%
+}%
+\def\POL@AntiDiff{%
+   \ifcase\POL@iterindex\space
+      \expandafter\POL@AntiDiff@no
+   \or\expandafter\POL@AntiDiff@one
+   \else\xint_afterfi{\POL@Iterate\POL@AntiDiff@one}%
+   \fi
+}%
+\let\POL@AntiDiff@no\POL@Diff@no
+\def\POL@AntiDiff@one #1#2{\POL@AntiDiff@@one{#1}{#2}\POL@newpol{#2}}%
+\def\POL@AntiDiff@@one#1#2{%
+   \expandafter\expandafter\expandafter\POL@split
+      \csname POLuserpol@#1\endcsname;\POL@var@deg\POL@var@coeffs
+   \ifnum\POL@var@deg<\z@
+      \XINT_global\@namedef{POLuserpol@#2}{-1.\empty{0/1[0]}}%
+   \else
+     \edef\POL@var@coeffs{\expandafter\POL@antidiff\POL@var@coeffs\relax}%
+     \XINT_global\expandafter\edef\csname POLuserpol@#2\endcsname
+         {\the\numexpr\POL@var@deg+\@ne.\noexpand\empty{0/1[0]}\POL@var@coeffs}%
+   \fi
+}%
+%
+%%
+%% Localization of roots
+%%
+% this is big. It provides also output macros, of both expandable and
+% non-expandable type
+\input polexprsturm.tex\relax
+%
+%
+%% Non-expandable output macros
+%
+\def\PolTypesetCmdPrefix#1{\xintiiifSgn{#1}{}{+}{+}}%
+\def\PolTypesetCmd#1{\xintifOne{\xintiiAbs{#1}}%
+                               {\ifnum\PolIndex=\z@\xintiiSgn{#1}\else
+                                \xintiiifSgn{#1}{-}{}{}\fi
+                                \let\PolIfCoeffIsPlusOrMinusOne\xint_firstoftwo}%
+                               {\PolTypesetOne{#1}%
+                                \let\PolIfCoeffIsPlusOrMinusOne\xint_secondoftwo}%
+                             }%
+\ifdefined\frac
+\def\PolTypesetOne{\xintTeXsignedFrac}%
+\else
+\def\PolTypesetOne{\xintTeXsignedOver}%
+\fi
+\catcode`^ 7 %
+\def\PolTypesetMonomialCmd{%
+  \ifcase\PolIndex\space
+  %
+  \or\PolVar
+  \else\PolVar^{\PolIndex}%
+  \fi
+}%
+\catcode`^ 11 % normal xint catcode
+\def\PolTypeset{\POL@ifstar
+  {\def\POL@ts@ascending{1}\POL@Typeset}%
+  {\def\POL@ts@ascending{0}\POL@Typeset}%
+}%
+%%
+%% \PolTypeset
+%%
+%% extended at 0.8 to handle arbitrary expressions on input
+%%
+\def\POL@Typeset{\POL@chkopt\POL@oPOL@Typeset[x]}%
+\def\POL@oPOL@Typeset[#1]#2{%
+   \ifmmode\let\POL@endtypeset\empty\else$\def\POL@endtypeset{$}\fi
+   \ifcsname POLuserpol@#2\endcsname
+        \expandafter\expandafter\expandafter\POL@split
+        \csname POLuserpol@#2\endcsname;\POL@var@deg\POL@var@coeffs
+   \else
+    \xintAssign\expandafter\xint_firstofone\romannumeral0\xintbareeval
+        subs((deg(x),coeffs(x)),x=subs(#2,\PolToExprInVar=pol([0,1])))\relax
+    \to\POL@var@deg\POL@var@coeffs
+   \fi
+        \if\POL@ts@ascending1%
+           \def\PolIndex{0}%
+           \let\POL@ts@reverse\xint_firstofone
+           \let\POL@@ne@or@m@ne\@ne
+        \else
+           \let\PolIndex\POL@var@deg
+           \ifnum\PolIndex<\z@\def\PolIndex{0}\fi
+           \let\POL@ts@reverse\xintRevWithBraces
+           \let\POL@@ne@or@m@ne\m@ne
+        \fi
+        \def\PolVar{#1}%
+        \ifnum\POL@var@deg<\z@
+            \PolTypesetCmd{0/1[0]}\PolTypesetMonomialCmd
+        \else
+         \ifnum\POL@var@deg=\z@
+           \expandafter\PolTypesetCmd\POL@var@coeffs\PolTypesetMonomialCmd
+         \else
+           \def\POL@ts@prefix##1{\let\POL@ts@prefix\PolTypesetCmdPrefix}%
+           \expandafter\POL@ts@loop
+              \romannumeral-`0\POL@ts@reverse{\POL@var@coeffs}\relax
+         \fi
+        \fi
+   \POL@endtypeset
+}%
+\def\POL@ts@loop{\ifpoltypesetall\expandafter\xint_firstoftwo
+                 \else\expandafter\xint_secondoftwo\fi
+    {\POL@ts@nocheck}{\POL@ts@check}.%
+}%
+\def\POL@ts@check.#1{%
+  \if\relax#1\expandafter\xint_gob_til_dot\fi
+  \xintiiifZero{#1}%
+      {}%
+      {\POL@ts@prefix{#1}\PolTypesetCmd{#1}\PolTypesetMonomialCmd}%
+  \edef\PolIndex{\the\numexpr\PolIndex+\POL@@ne@or@m@ne}\POL@ts@check.%
+}%
+\def\POL@ts@nocheck.#1{%
+  \if\relax#1\expandafter\xint_gob_til_dot\fi
+  \POL@ts@prefix{#1}\PolTypesetCmd{#1}\PolTypesetMonomialCmd
+  \edef\PolIndex{\the\numexpr\PolIndex+\POL@@ne@or@m@ne}\POL@ts@nocheck.%
+}%
+%
+%%
+%% Expandable output macros (legacy)
+%%
+\def\POL@eval@fork#1\At#2#3\krof{#2}%
+\def\PolEval#1#2#3{\romannumeral`&&@\POL@eval@fork
+     #2\PolEvalAt
+     \At\PolEvalAtExpr\krof {#1}{#3}%
+}%
+\def\PolEvalAt#1#2{%
+    \xintpraw{\csname XINT_expr_polfunc_#1\endcsname{#2}}%
+}%
+\def\POL@eval#1#2{%
+    \csname XINT_expr_polfunc_#1\endcsname{#2}%
+}%
+\def\PolEvalAtExpr#1#2{\xinttheexpr #1(#2)\relax}%
+%
+\def\PolEvalReduced#1#2#3{\romannumeral`&&@\POL@eval@fork
+     #2\PolEvalReducedAt
+     \At\PolEvalReducedAtExpr\krof {#1}{#3}%
+}%
+\def\PolEvalReducedAt#1#2{%
+    \xintpraw % in order not to print denominator if the latter equals 1
+    {\xintIrr{\csname XINT_expr_polfunc_#1\endcsname{#2}}[0]}%
+}%
+\def\PolEvalReducedAtExpr#1#2{%
+    \xintpraw
+    {\expandafter\xintIrr\romannumeral`&&@\xintthebareeval#1(#2)\relax[0]}%
+}%
+%
+\def\PolFloatEval#1#2#3{\romannumeral`&&@\POL@eval@fork
+     #2\PolFloatEvalAt
+     \At\PolFloatEvalAtExpr\krof {#1}{#3}%
+}%
+\def\PolFloatEvalAt#1#2{%
+    \xintpfloat{\csname XINT_flexpr_polfunc_#1\endcsname{#2}}%
+}%
+\def\PolFloatEvalAtExpr#1#2{\xintthefloatexpr #1(#2)\relax}%
+\def\PolLeadingCoeff#1{%
+    \romannumeral`&&@\expandafter\expandafter\expandafter\xintlastitem
+                     \expandafter\expandafter\expandafter
+                     {\csname POLuserpol@#1\endcsname}%
+}%
+%
+\def\PolNthCoeff#1#2{\romannumeral`&&@%
+    \expandafter\POL@nthcoeff
+    \romannumeral0\xintnthelt{\ifnum\numexpr#2<\z@#2\else(#2)+1\fi}%
+                  {\expandafter\expandafter\expandafter
+                        \xint_gob_til_dot\csname POLuserpol@#1\endcsname}@%
+}%
+\def\POL@nthcoeff#1@{\if @#1@\expandafter\xint_firstoftwo
+                  \else\expandafter\xint_secondoftwo\fi
+                  {0/1[0]}{#1}}%
+%
+% returns -1 for zero polynomial for context of numerical expression
+% should it return -\infty?
+\def\PolDegree#1{\romannumeral`&&@\expandafter\expandafter\expandafter
+                         \POL@degree\csname POLuserpol@#1\endcsname;}%
+\def\POL@degree #1.#2;{#1}%
+%
+\def\PolToList#1{\romannumeral`&&@\expandafter\expandafter\expandafter
+                         \xint_gob_til_dot\csname POLuserpol@#1\endcsname}%
+%
+\def\PolToCSV#1{\romannumeral0\xintlistwithsep{, }{\PolToList{#1}}}%
+%
+% \PolIContent (0.5)
+% Why did I call this IContent and not Content? Ah, I see, Maple terminology!
+% But I realize now I misread in 2018 the Maple doc, its icontent() is the gcd
+% of all coeffs of a multivariate polynomial. Whereas content(,) second argument
+% specifies which variable to consider expression as being univariate in it.
+% Refactored at 0.8 as xint 1.4 has a backported fractional gcd
+% (itself refactored at 1.4d)
+\def\POL@icontent#1{\romannumeral0\expandafter\XINT_fgcd_out
+                    \romannumeral0\expandafter\XINT_fgcdof\romannumeral`&&@#1^}%
+% Since xintexpr 1.4d, \xintGCDof always outputs an irreducible fraction A/B.
+% (with B=1 if A/B integer).
+\def\PolIContent#1{\xintGCDof{\PolToList{#1}}}%
+%
+\def\PolToExprCmd#1{\xintPRaw{\xintRawWithZeros{#1}}}%
+\def\PolToFloatExprCmd#1{\xintPFloat{#1}}% CHANGED AT 0.8.2! was \xintFloat
+% \def\PolTypesetCmdPrefix#1{\xintiiifSgn{#1}{}{+}{+}}%
+\let\PolToExprTermPrefix\PolTypesetCmdPrefix
+\def\PolToExprOneTermStyleA#1#2{%
+    \ifnum#2=\z@
+      \PolToExprCmd{#1}%
+    \else
+      \xintifOne{\xintiiAbs{#1}}
+        {\xintiiifSgn{#1}{-}{}{}}% + from \PolToExprTermPrefix
+        {\PolToExprCmd{#1}\PolToExprTimes}%
+    \fi
+    \ifcase\xintiiAbs{#2} %<-- space here mandatory
+         \or\PolToExprVar
+       \else\PolToExprVar\PolToExprCaret\xintiiAbs{#2}%
+    \fi
+}%
+\let\PolToExprOneTerm\PolToExprOneTermStyleA
+\def\PolToExprOneTermStyleB#1#2{%
+    \ifnum#2=\z@
+      \xintNumerator{#1}%
+    \else
+      \xintifOne{\xintiiAbs{\xintNumerator{#1}}}
+        {\xintiiifSgn{#1}{-}{}{}}% + from \PolToExprTermPrefix
+        {\xintNumerator{#1}\PolToExprTimes}%
+    \fi
+    \ifcase\xintiiAbs{#2} %<-- space here mandatory
+         \or\PolToExprVar
+       \else\PolToExprVar\PolToExprCaret\xintiiAbs{#2}%
+    \fi
+    \xintiiifOne{\xintDenominator{#1}}{}{/\xintDenominator{#1}}%
+}%
+\def\PolToFloatExprOneTerm#1#2{%
+    \ifnum#2=\z@
+      \PolToFloatExprCmd{#1}%
+    \else
+      \PolToFloatExprCmd{#1}\PolToExprTimes
+    \fi
+    \ifcase\xintiiAbs{#2} %<-- space here mandatory
+         \or\PolToExprVar
+       \else\PolToExprVar\PolToExprCaret\xintiiAbs{#2}%
+    \fi
+}%
+\def\PolToExprTimes{*}%
+\def\PolToExprVar{x}%
+\def\PolToExprInVar{x}%
+\edef\PolToExprCaret{\string ^}%
+%%
+%% \PolToExpr
+%%
+%% extended at 0.8 to handle arbitrary expressions on input
+%%
+\def\PolToExpr#1{%
+    \if*\noexpand#1\expandafter\xint_firstoftwo\else
+    \expandafter\xint_secondoftwo\fi
+    \PolToExprAscending\PolToExprDescending{#1}}%
+\def\PolToFloatExpr#1{%
+    \if*\noexpand#1\expandafter\xint_firstoftwo\else
+    \expandafter\xint_secondoftwo\fi
+    \PolToFloatExprAscending\PolToFloatExprDescending{#1}}%
+\def\PolToExpr@getit#1%
+{%
+   \ifcsname XINT_expr_varvalue_#1\endcsname
+     \csname XINT_expr_varvalue_#1\expandafter\endcsname
+   \else
+     \expandafter\xint_firstofone\romannumeral0%
+     \xintbareeval subs(#1,\PolToExprInVar=pol([0,1]))\expandafter\relax
+   \fi
+}%
+\def\PolToExprAscending#1#2{%
+   \expandafter\POL@toexpr\romannumeral0\PolToExpr@getit{#2}%
+   \PolToExprOneTerm\POL@toexprA
+}%
+\def\PolToFloatExprAscending#1#2{%
+   \expandafter\POL@toexpr\romannumeral0\PolToExpr@getit{#2}%
+   \PolToFloatExprOneTerm\POL@toexprA
+}%
+\def\PolToExprDescending#1{%
+   \expandafter\POL@toexpr\romannumeral0\PolToExpr@getit{#1}%
+   \PolToExprOneTerm\POL@toexprD
+}%
+\def\PolToFloatExprDescending#1{%
+   \expandafter\POL@toexpr\romannumeral0\PolToExpr@getit{#1}%
+   \PolToFloatExprOneTerm\POL@toexprD
+}%
+\def\POL@toexpr#1#2#3{\POL@toexpr@fork#3#2#1\relax}%
+\def\POL@toexpr@fork #1#2#3{%
+    \POL_Pfork
+        #3\POL@toexpr@pol
+         P\POL@toexpr@cst
+    \krof #1#2#3%
+}%
+\def\POL@toexpr@cst#1#2#3\relax{#2{#3}{0}}%
+\def\POL@toexpr@pol#1#2P#3.{#1{#3}#2\empty}%
+% now back to legacy pre 0.8 code
+\def\POL@toexprA #1#2\empty#3{%
+    \ifpoltoexprall\expandafter\POL@toexprall@b
+              \else\expandafter\POL@toexpr@b
+    \fi {#3}#2{0}1.%
+}%
+\def\POL@toexprD #1#2#3\relax{% #3 has \empty to prevent brace removal
+    \expandafter\POL@toexprD@a\expandafter#2%
+    \the\numexpr #1\expandafter.\romannumeral0\xintrevwithbraces{#3}\relax
+}%
+\def\POL@toexprD@a #1#2.#3{%
+    \ifpoltoexprall\expandafter\POL@toexprall@b
+              \else\expandafter\POL@toexpr@b
+    \fi{#3}#1{-#2}\the\numexpr\@ne+-#2.%
+}%
+\def\POL@toexpr@b #1#2#3{%
+    \xintiiifZero{#1}%
+      {\expandafter\POL@toexpr@loop\expandafter\POL@toexpr@b}%
+      {#2{#1}{#3}%
+      \expandafter\POL@toexpr@loop\expandafter\POL@toexpr@c}%
+   \expandafter#2%
+}%
+\def\POL@toexpr@c #1#2#3{%
+    \xintiiifZero{#1}%
+      {}%
+      {\PolToExprTermPrefix{#1}#2{#1}{#3}}%
+    \expandafter\POL@toexpr@loop\expandafter\POL@toexpr@c
+    \expandafter#2%
+}%
+\def\POL@toexprall@b #1#2#3{%
+    #2{#1}{#3}%
+    \expandafter\POL@toexpr@loop\expandafter\POL@toexprall@c
+    \expandafter#2%
+}%
+\def\POL@toexprall@c #1#2#3{%
+    \PolToExprTermPrefix{#1}#2{#1}{#3}%
+    \expandafter\POL@toexpr@loop\expandafter\POL@toexprall@c
+    \expandafter#2%
+}%
+\def\POL@toexpr@loop#1#2#3.#4{%
+  \if\relax#4\expandafter\xint_gob_til_dot\fi
+  #1{#4}#2{#3}\the\numexpr\@ne+#3.%
+}%
+\XINTrestorecatcodesendinput%

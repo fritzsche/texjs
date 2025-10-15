@@ -1,0 +1,63 @@
+%%% Configuration file for lua-typo.sty
+%%% These settings can also be overruled in the preamble.
+
+%% Minimum gap between end of paragraphs’ last lines and the right margin
+\luatypoBackPI=1em\relax
+\luatypoBackFuzz=2pt\relax
+
+%% Minimum length of paragraphs’ last lines
+\ifdim\parindent=0pt \luatypoLLminWD=20pt\relax
+\else \luatypoLLminWD=2\parindent\relax
+\fi
+
+%% Maximum number of consecutive hyphenated lines
+\luatypoHyphMax=2\relax
+
+%% Nearly empty pages: minimum number of lines
+\luatypoPageMin=5\relax
+
+%% Maximum acceptable stretch before a line is tagged as Underfull
+\luatypoStretchMax=200\relax
+
+%% Minimum number of matching characters for words at begin/end of line
+\luatypoMinFull=3\relax
+\luatypoMinPart=4\relax
+
+%% Minimum number of characters for the first word on a page if it ends
+%% a sentence (version >= 0.65).
+\ifdefined\luatypoMinLen \luatypoMinLen=4\relax\fi
+
+%% Acceptable marginpars must end at |\luatypoMarginparTol| under
+%% the page’s last line or above (version >= 0.85).
+\ifdefined\luatypoMarginparTol \luatypoMarginparTol=\baselineskip \fi
+
+%% Default colours = red, cyan, blue, LTgrey, LTred, LTline.
+\definecolor{LTgrey}{gray}{0.6}
+\definecolor{LTred}{rgb}{1,0.55,0}
+\definecolor{LTline}{rgb}{0.7,0,0.3}
+\luatypoSetColor1{red}%       Paragraph last full line hyphenated
+\luatypoSetColor2{red}%       Page last word hyphenated
+\luatypoSetColor3{red}%       Hyphens on to many consecutive lines
+\luatypoSetColor4{red}%       Short word at end of line
+\luatypoSetColor5{cyan}%      Widow
+\luatypoSetColor6{cyan}%      Orphan
+\luatypoSetColor7{cyan}%      Paragraph ending on a short line
+\luatypoSetColor8{blue}%      Overfull lines
+\luatypoSetColor9{blue}%      Underfull lines
+\luatypoSetColor{10}{red}%    Nearly empty page
+\luatypoSetColor{11}{LTred}%  First word matches
+\luatypoSetColor{12}{LTred}%  Last word matches
+\luatypoSetColor{13}{LTgrey}% Paragraph ending on a nearly full line
+\luatypoSetColor{14}{cyan}%   Footnote split
+\luatypoSetColor{15}{red}%    Too short first (final) word on the page
+\luatypoSetColor{16}{LTline}% Line color for multiple flaws
+\luatypoSetColor{17}{red}%    Margin note ending too low
+
+%% Language specific settings (example for French):
+%% short words (two letters max) to be avoided at end of lines.
+%%\luatypoOneChar{french}{"A À Ô Y"}
+%%\luatypoTwoChars{french}{"Ah Au Ça Çà Ce De Il Je La Là Le Ma Me Ne Ni
+%%                          Oh On Or Ou Où Sa Se Si Ta Tu Va Vu"}
+%% 
+%%
+%% End of file `lua-typo.cfg'.

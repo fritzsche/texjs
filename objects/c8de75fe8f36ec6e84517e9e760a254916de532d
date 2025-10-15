@@ -1,0 +1,1039 @@
+% \iffalse meta-comment
+%
+%% Copyright (C) 2020-2025 by Marcel Krueger
+%%
+%% This file may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either
+%% version 1.3c of this license or (at your option) any later
+%% version. The latest version of this license is in:
+%%
+%% http://www.latex-project.org/lppl.txt
+%%
+%% and version 1.3 or later is part of all distributions of
+%% LaTeX version 2005/12/01 or later.
+%
+%<*batch>
+%<*gobble>
+\ifx\jobname\relax\let\documentclass\undefined\fi
+\ifx\documentclass\undefined
+\csname fi\endcsname
+%</gobble>
+\input docstrip.tex
+\keepsilent
+\generate{
+  \file{luamml.sty}{\from{luamml.dtx}{package,luatex}}
+  \file{luamml-pdf.sty}{\from{luamml.dtx}{package,pdftex}}
+}
+\endbatchfile
+%</batch>
+%<*gobble>
+\fi
+\expandafter\ifx\csname @currname\endcsname\empty
+\csname fi\endcsname
+%</gobble>
+%<*driver>
+\documentclass{l3doc}
+\usepackage{luamml}
+\usepackage{csquotes,luacolor}
+\MakeShortVerb{\|}
+\RecordChanges
+\ProvideDocElement[printtype=\textit{socket},idxtype=socket,idxgroup=Sockets]{Socket}{socketdecl}
+\ProvideDocElement[printtype=\textit{plug},idxtype=plug,idxgroup=Plugs]{Plug}{plugdecl}
+
+\begin{document}
+\tracingmathml2
+\DocInput{luamml.dtx}
+\PrintIndex
+\PrintChanges
+\end{document}
+%</driver>
+%<*gobble>
+\fi
+%</gobble>
+% \fi
+%
+% \GetFileInfo{luamml.sty}
+% \title{The \pkg{luamml} package%
+%   \thanks{This document corresponds to \pkg{luamml}~\fileversion, dated~\filedate.}%
+% }
+% \author{Marcel Krüger}
+%
+% \maketitle
+%
+% \begin{documentation}
+% \section{Use case}
+% When generating output for the web or tagged output, mathematical content should often be represented as MathML.
+% This uses Lua\TeX~callbacks to automatically attempt to convert Lua\TeX~math mode output into MathML.
+%
+% \section{Usage}
+% The \pkg{luamml} package is designed to be used in automated ways by other packages and usually should not be invoked directly by the end user.
+%
+% Typically you will use it through \pkg{latex-lab-math}. See the \pkg{latex-lab-math} documentation for user instructions.
+%
+% If you want to use \pkg{luamml} in another context, the \pkg{luamml} package can be included directly, followed by enclosing blocks which should generate files with \cmd{luamml_begin_single_file:} and \cmd{luamml_end_single_file:}.
+% The filename can be set with \cmd{luamml_set_filename:n}.
+%
+% \section{Improving MathML conversion}
+% When using constructs which do not automatically get converted in acceptable form, conversion hints can be provided with \cmd{luamml_annotate:en}.
+% This allows to provide a replacement MathML structure in Lua table form, for example
+% \begin{verbatim}
+% \luamml_annotate:en {
+%   nucleus = true,
+%   core = {[0] = 'mi', 'TeX'},
+% }{
+%   \hbox{\TeX}
+% }
+% \end{verbatim}
+% produces a |<mi>TeX</mi>| element in the output instead of trying to import \TeX~as a mathematical expression.
+%
+% It it possible to add a structure around the construct, stash that structure
+% and then to tell \cmd{luamml_annotate:en} to insert it later inside the math.
+% For this the keys \texttt{struct} (which takes a label as argument) or \texttt{structnum}
+% (which takes a structure number) can be used. For example
+% \begin{verbatim}
+% $a = b \quad
+%  \tagstructbegin{tag=mtext,stash}\tagmcbegin{}
+%  \luamml_annotate:en{nucleus=true,structnum=\tag_get:n{struct_num}}
+%  {\mbox{some~text~with~\emph{structure}}}
+%  \tagmcend\tagstructend
+% $
+% \end{verbatim}
+% Such a construction should check that the flag for structure elements has actually
+% been set to avoid orphaned structures if the stashed structure is ignored.
+%
+% More about the table structure is explained in an appendix.
+%
+% \section{Features \& Limitations}
+% Currently all mathematical expressions which purely contain Unicode encoded math mode material without embedded non-math should get converted successfully.
+% Usage with non-Unicode math (\TeX's 8-bit math fonts) is highly experimental and undocumented.
+% Any attempt to build complicated structures by embedding arbitrary \TeX\ code in the middle of math mode needs to have a MathML replacement specified.
+% We try to automate more cases in the future.
+%
+% \appendix
+% \input{luamml-algorithm}
+% \end{documentation}
+%
+% \begin{implementation}
+% \section{Package Implementation}
+% \subsection{Initialization}
+% \iffalse
+%<*package>
+% \fi
+%    \begin{macrocode}
+%<@@=luamml>
+%<*luatex>
+\ProvidesExplPackage {luamml} {2025-06-25} {0.6.0}
+  {Automatically generate presentational MathML from LuaTeX math expressions}
+%</luatex>
+%<*pdftex>
+\ProvidesExplPackage {luamml-pdf} {2025-06-25} {0.6.0}
+  {MathML generation for L̶u̶a̶pdfLaTeX}
+%</pdftex>
+%    \end{macrocode}
+%
+% \subsection{Initialization}
+% These variable have to appear before the Lua module is loaded and will be used to
+% communicate information to the callback.
+%
+% Here \cs{tracingmathml} does not use a expl3 name since it is not intended for
+% programming use but only as a debugging helper for the user.
+% The other variables are internal, but we provide public interfaces for setting
+% them later.
+%    \begin{macrocode}
+\int_new:N \l__luamml_flag_int
+%    \end{macrocode}
+% This integer decides if the xml uses pretty indentation if output to a file
+% or to the terminal. It is used in luamml-tex.lua with a bitwise operation. 
+% Indentation in files is activated if bit 0 is set.
+% Indentation in the log is activated if bit 1 is set.
+% Bit 2 sets indentation for code added with the \cs{luamml_register_output_hook:N}.
+% Bit 3 sets indentation for MathML written as stream to the PDF with 
+% \cs{luamml_get_last_mathml_stream:e}.
+%    \begin{macrocode}
+\int_new:N \l__luamml_pretty_int
+%<luatex>\tl_new:N \l__luamml_filename_tl
+\tl_new:N \l__luamml_root_tl
+\tl_set:Nn \l__luamml_root_tl { mrow }
+\tl_new:N \l__luamml_label_tl
+%<pdftex>\int_new:N \g__luamml_formula_id_int
+%<luatex>\int_new:N \tracingmathml
+
+\int_set:Nn \l__luamml_pretty_int { 1 }
+%    \end{macrocode}
+%
+% Currently we disable flattening in Lua\TeX{} to avoid annotations getting lost.
+% We will consider later if flattening needs to be reenabled depending, but then
+% with a different implementation.
+%    \begin{macrocode}
+%<luatex>\tex_mathflattenmode:D = 0 \scan_stop:
+%    \end{macrocode}
+%
+% Now we can load the Lua module which defines the callback.
+% Of course until pdf\TeX starts implementing \cs{directlua} this is only
+% done in Lua\TeX.
+%    \begin{macrocode}
+%<luatex>\lua_now:n { require'luamml-tex' }
+%    \end{macrocode}
+%
+% \subsection{Hook}
+% We also call a hook with arguments at the end of every MathML conversion with the result.
+% Currently only implemented in Lua\TeX{} since it immediately provides the output.
+% TODO: the latex-lab-math code registers its own function and so effectly kills the
+% hook here. This should be sorted \ldots.
+%    \begin{macrocode}
+%<*luatex>
+\hook_new_with_args:nn { luamml / converted } { 1 }
+
+\cs_new_protected:Npn \__luamml_output_hook:n {
+  \hook_use:nnw { luamml / converted } { 1 }
+}
+\__luamml_register_output_hook:N \__luamml_output_hook:n
+%</luatex>
+%    \end{macrocode}
+
+%
+% \subsection{Flags}
+% The most important interface is for setting the flag which controls how the
+% formulas should be converted.
+%
+% \begin{macro}{\luamml_process:}
+%   Consider the current formula to be a complete, free-standing mathematical
+%   expression which should be converted to MathML. Additionally, the formula
+%   is also saved in the \texttt{start\_math} node as with
+%   \cs{luamml_save:}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \luamml_process: {
+  \tl_set:Nn \l__luamml_label_tl {}
+  \int_set:Nn \l__luamml_flag_int { 3 }
+}
+%    \end{macrocode}
+% Temporarly for compatibility
+%    \begin{macrocode}
+\cs_set_eq:NN \luamml_flag_process: \luamml_process:
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\__luamml_maybe_structelem:}
+% A internal helper which can be added to a tag to preserve the external state
+% of the structelem flag.
+%    \begin{macrocode}
+\cs_new:Npn \__luamml_maybe_structelem: {
+  (
+    8 * \int_mod:nn {
+      \int_div_truncate:nn { \l__luamml_flag_int } {8}
+    } {2}
+  ) +
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\__luamml_style_to_num:N}
+%    \begin{macrocode}
+\cs_new:Npn \__luamml_style_to_num:N #1 {
+%<luatex>  32 * #1
+%<*pdftex>
+  \token_case_meaning:NnF #1 {
+    \displaystyle {0}
+    \textstyle {32}
+    \scriptstyle {64}
+    \scriptscriptstyle {96}
+  } {
+    \Invalid_mathstyle
+  }
+%</pdftex>
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \begin{macro}{\luamml_save:n,
+%               \luamml_save:nN,
+%               \luamml_save:nn,
+%               \luamml_save:nNn}
+%   Convert the current formula but only save it's representation in the math
+%   node without emitting it as a complete formula. This is useful when the
+%   expression forms part of a bigger formula and will be integrated into it's
+%   MathML tables later by special code.
+%   It optionally accepts three parameters: A label, one math style command
+%   (\cs{displaystyle}, \cs{textstyle}, etc.) which is the implicit math style
+%   (so the style which the surrounding code expects this style to have) and a
+%   name for the root element (defaults to \texttt{mrow}).
+%   If the root element name is \texttt{mrow}, it will get suppressed in some
+%   cases.
+%    \begin{macrocode}
+\cs_new_protected:Npn \luamml_save:n #1 {
+  \tl_set:Nn \l__luamml_label_tl {#1}
+  \int_set:Nn \l__luamml_flag_int { \__luamml_maybe_structelem: 1 }
+}
+\cs_new_protected:Npn \luamml_save:nN #1#2 {
+  \tl_set:Nn \l__luamml_label_tl {#1}
+  \int_set:Nn \l__luamml_flag_int { \__luamml_maybe_structelem: 17 + \__luamml_style_to_num:N #2 }
+}
+\cs_new_protected:Npn \luamml_save:nn #1 {
+  \tl_set:Nn \l__luamml_label_tl {#1}
+  \int_set:Nn \l__luamml_flag_int { \__luamml_maybe_structelem: 5 }
+  \tl_set:Nn \l__luamml_root_tl
+}
+\cs_new_protected:Npn \luamml_save:nNn #1#2 {
+  \tl_set:Nn \l__luamml_label_tl {#1}
+  \int_set:Nn \l__luamml_flag_int { \__luamml_maybe_structelem: 21 + \__luamml_style_to_num:N #2 }
+  \tl_set:Nn \l__luamml_root_tl
+}
+%    \end{macrocode}
+% Temporarly for compatibility
+%    \begin{macrocode}
+\cs_set_eq:NN \luamml_flag_save:n \luamml_save:n
+\cs_set_eq:NN \luamml_flag_save:nN \luamml_save:nN
+\cs_set_eq:NN \luamml_flag_save:nn \luamml_save:nn
+\cs_set_eq:NN \luamml_flag_save:nNn \luamml_save:nNn
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\luamml_ignore:}
+%   Completely ignore the math mode material.
+%    \begin{macrocode}
+\cs_new_protected:Npn \luamml_ignore: {
+  \int_set:Nn \l__luamml_flag_int { 0 }
+}
+%    \end{macrocode}
+% Temporarly for compatibility
+%    \begin{macrocode}
+\cs_set_eq:NN \luamml_flag_ignore: \luamml_ignore:
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\luamml_structelem:}
+%   Like \cs{luamml_process:}, but additionally adds PDF structure
+%   elements. This only works in Lua\TeX\ and requires that the \pkg{tagpdf} package
+%   has been loaded \emph{before} \texttt{luamml}.
+%    \begin{macrocode}
+%<*luatex>
+\cs_new_protected:Npn \luamml_structelem: {
+  \tl_set:Nn \l__luamml_label_tl {}
+  \int_set:Nn \l__luamml_flag_int { 11 }
+}
+%    \end{macrocode}
+% Temporarly for compatibility
+%    \begin{macrocode}
+\cs_set_eq:NN \luamml_flag_structelem: \luamml_structelem:
+%</luatex>
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\luamml_set_filename:n}
+%   Allows to set a filename to which the generated MathML gets written.
+%   Previous content from the file will get overwritten. This includes results
+%   written by a previous formula. Therefore this has to be called separately
+%   for every formula or it must expand to different values to be useful.
+%   The value is fully expanded when the file is written.
+%
+%   Only complete formulas get written into files (so formulas where
+%   \cs{luamml_process:} or \cs{luamml_structelem:} are in effect).
+%
+%   Only implemented in Lua\TeX, in pdf\TeX\ the arguments for \texttt{pdfmml}
+%   determine the output location.
+%    \begin{macrocode}
+%<*luatex>
+\cs_new_protected:Npn \luamml_set_filename:n {
+  \tl_set:Nn \l__luamml_filename_tl
+}
+%</luatex>
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\luamml_begin_single_file:, \luamml_end_single_file:}
+%   Everything between these two commands gets written into the same XML file.
+%   The filename is expanded when \cs{luamml_begin_single_file:} gets executed.
+%
+%   (Implemented in Lua)
+% \end{macro}
+%
+% By default, the flag is set to assume complete formulas.
+%    \begin{macrocode}
+\luamml_process:
+%    \end{macrocode}
+%
+% \subsection{Annotations}
+% These are implemented very differently depending on the engine, but the interface
+% should be the same.
+% \subsubsection{Lua\TeX}
+%    \begin{macrocode}
+%<*luatex>
+%    \end{macrocode}
+% \begin{macro}{\luamml_annotate:nen, \luamml_annotate:en}
+% A simple annotation scheme: The first argument is the number of top level
+% noads to be annotated, the second parameter the annotation and the third
+% parameter the actual list of math tokens. The first argument can be omitted to
+% let Lua\TeX determine the number itself.
+%
+% Passing the first parameter explicitly is useful for any annotations which
+% should be compatible with future pdf\TeX versions of this functionality.
+%    \begin{macrocode}
+\cs_new_protected:Npn \luamml_annotate:nen #1#2#3 {
+  \__luamml_annotate_begin:
+    #3
+  \__luamml_annotate_end:we \tex_numexpr:D #1 \scan_stop: {#2}
+}
+
+\cs_new_protected:Npn \luamml_annotate:en #1#2 {
+  \__luamml_annotate_begin:
+    #2
+  \__luamml_annotate_end:e {#1}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\luamml_attribute:nnn, \luamml_attribute_core:nnn}
+% Set a MathML attribute on a MathML node.
+%    \begin{macrocode}
+\cs_new_protected:Npn \luamml_attribute:een #1#2#3 {
+  \__luamml_annotate_begin:
+    #3
+    \__luamml_annotate_attribute_end:wee {#1} {#2}
+}
+
+\cs_new_protected:Npn \luamml_attribute_core:een #1#2#3 {
+  \__luamml_annotate_begin:
+    #3
+    \__luamml_annotate_attribute_end:wee core {#1} {#2}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</luatex>
+%    \end{macrocode}
+
+% \subsubsection{pdf\TeX}
+%    \begin{macrocode}
+%<*pdftex>
+%    \end{macrocode}
+% \begin{macro}{\__luamml_pdf_showlists:}
+% Here and in many other locations the \pdfTeX{} implementation is based on \cs{showlists},
+% so we define a internal wrapper which sets all relevant parameters.
+%    \begin{macrocode}
+\cs_if_exist:NTF \showstream {
+  \iow_new:N \l__luamml_pdf_stream
+  \iow_open:Nn \l__luamml_pdf_stream { \jobname .tml }
+  \cs_new_protected:Npn \__luamml_pdf_showlists: {
+    \group_begin:
+      \int_set:Nn \tex_showboxdepth:D { \c_max_int }
+      \int_set:Nn \tex_showboxbreadth:D { \c_max_int }
+      \showstream = \l__luamml_pdf_stream
+      \tex_showlists:D
+    \group_end:
+  }
+} {
+  \cs_set_eq:NN \l__luamml_pdf_stream \c_log_iow
+  \cs_set_eq:NN \__luamml_pdf_set_showstream: \scan_stop:
+  \cs_new_protected:Npn \__luamml_pdf_showlists: {
+    \group_begin:
+      \int_set:Nn \l_tmpa_int { \tex_interactionmode:D }
+      \int_set:Nn \tex_interactionmode:D { 0 }
+      \int_set:Nn \tex_showboxdepth:D { \c_max_int }
+      \int_set:Nn \tex_showboxbreadth:D { \c_max_int }
+      \tex_showlists:D
+      \int_set:Nn \tex_interactionmode:D { \l_tmpa_int }
+    \group_end:
+  }
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \begin{macro}{\luamml_annotate:nen, \luamml_annotate:en}
+% Now we can define the annotation commands for pdf\TeX.
+%    \begin{macrocode}
+\cs_generate_variant:Nn \tl_to_str:n { e }
+\int_new:N \g__luamml_annotation_id_int
+\cs_new_protected:Npn \luamml_annotate:nen #1#2#3 {
+  \int_gincr:N \g__luamml_annotation_id_int
+  \iow_shipout_x:Nx \l__luamml_pdf_stream {
+    LUAMML_MARK_REF:
+    \int_use:N \g__luamml_annotation_id_int
+    :
+  }
+  \iow_now:Nx \l__luamml_pdf_stream {
+    LUAMML_MARK:
+    \int_use:N \g__luamml_annotation_id_int
+    :
+    count = \int_eval:n {#1},
+    #2
+    \iow_newline:
+    LUAMML_MARK_END
+  }
+  #3
+}
+\cs_new_protected:Npn \luamml_annotate:en #1#2 {
+  \int_gincr:N \g__luamml_annotation_id_int
+  \iow_shipout_x:Nx \l__luamml_pdf_stream {
+    LUAMML_MARK_REF:
+    \int_use:N \g__luamml_annotation_id_int
+    :
+  }
+  \iow_now:Nx \l__luamml_pdf_stream {
+    LUAMML_MARK:
+    \int_use:N \g__luamml_annotation_id_int
+    :
+    count = data.count[\int_use:N \g__luamml_annotation_id_int],
+    #1
+    \iow_newline:
+    LUAMML_MARK_END
+  }
+  \use:x {
+    \iow_now:Nn \l__luamml_pdf_stream {
+      LUAMML_COUNT:
+      \int_use:N \g__luamml_annotation_id_int
+    }
+    \__luamml_pdf_showlists:
+    \exp_not:n {#2}
+    \iow_now:Nn \l__luamml_pdf_stream {
+      LUAMML_COUNT_END:
+      \int_use:N \g__luamml_annotation_id_int
+    }
+    \__luamml_pdf_showlists:
+  }
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</pdftex>
+%    \end{macrocode}
+%
+% \subsection{Trigger for specific formula}
+% This only applies for pdf\TeX\ since in Lua\TeX\ everything is controlled by the callback,
+% but for compatibility the function is defined anyway.
+%
+% \begin{macro}{\luamml_pdf_write:}
+% We could accept parameters for the flag and tag here, but for compatibility
+% with Lua\TeX they are passed in macros instead.
+%    \begin{macrocode}
+%<*pdftex>
+\cs_new_protected:Npn \luamml_pdf_write: {
+  \int_gincr:N \g__luamml_formula_id_int
+  \iow_now:Nx \l__luamml_pdf_stream {
+    LUAMML_FORMULA_BEGIN:
+    \int_use:N \g__luamml_formula_id_int
+    :
+    \int_use:N \l__luamml_flag_int
+    :
+    \l__luamml_root_tl
+    :
+    \l__luamml_label_tl
+  }
+  \__luamml_pdf_showlists:
+  \iow_now:Nx \l__luamml_pdf_stream {
+    LUAMML_FORMULA_END
+  }
+}
+%</pdftex>
+%<luatex>\cs_new_eq:NN \luamml_pdf_write: \scan_stop:
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%    \end{macrocode}
+%
+% \subsection{Further helpers}
+%
+% \begin{macro}{\RegisterFamilyMapping}
+% The Lua version of this is defined in the Lua module.
+%    \begin{macrocode}
+%<*pdftex>
+\NewDocumentCommand \RegisterFamilyMapping {m m} {
+  \iow_now:Nx \l__luamml_pdf_stream {
+    LUAMML_INSTRUCTION:REGISTER_MAPPING: \int_use:N #1 : #2
+  }
+}
+%</pdftex>
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Sockets}
+% In various places luamml has to add code to kernel commands. This is done through
+% sockets which are predeclared in lttagging.
+%
+% \subsubsection{Save sockets}
+% These sockets are wrappers around the \cs{luamml_save:...} commands
+% They should be provided until 2025-06-01
+%    \begin{macrocode}
+\str_if_exist:cF { l__socket_tagsupport/math/luamml/save/nn_plug_str }
+ {
+   \NewSocket{tagsupport/math/luamml/save/nn}{1}
+   \AssignSocketPlug{tagsupport/math/luamml/save/nn}{noop}
+   \NewSocket{tagsupport/math/luamml/save/nNn}{1}
+   \AssignSocketPlug{tagsupport/math/luamml/save/nNn}{noop}
+ }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\NewSocketPlug{tagsupport/math/luamml/save/nNn}{luamml}
+ {
+   \luamml_save:nNn #1
+ }
+\AssignSocketPlug{tagsupport/math/luamml/save/nNn}{luamml}
+\NewSocketPlug{tagsupport/math/luamml/save/nn}{luamml}
+ {
+   \luamml_save:nn #1
+ }
+\AssignSocketPlug{tagsupport/math/luamml/save/nn}{luamml}
+%    \end{macrocode}
+%
+% \subsubsection{sockets to annotate content}
+%
+%    \begin{macrocode}
+\str_if_exist:cF { l__socket_tagsupport/math/luamml/annotate/false_plug_str }
+ {
+   \NewSocket{tagsupport/math/luamml/annotate/false}{2}
+   \NewSocketPlug{tagsupport/math/luamml/annotate/false}{default}{#2}
+   \AssignSocketPlug{tagsupport/math/luamml/annotate/false}{default}
+ }
+%<*luatex>
+\NewSocketPlug{tagsupport/math/luamml/annotate/false}{luamml}
+ {
+   \luamml_annotate:en { core = false } 
+    {
+      #2
+    }
+ }
+\AssignSocketPlug{tagsupport/math/luamml/annotate/false}{luamml} 
+%</luatex>   
+%    \end{macrocode}
+% \subsubsection{socket plugs for the array package}
+%
+% The socket declaration can go with the 2025-06-01 release
+%    \begin{macrocode}
+\str_if_exist:cF { l__socket_tagsupport/math/luamml/array/finalize_plug_str }
+  {
+     \NewSocket{tagsupport/math/luamml/array/save}{0}
+     \NewSocket{tagsupport/math/luamml/array/finalize}{0}
+     \NewSocket{tagsupport/math/luamml/array/initcol}{0}
+     \NewSocket{tagsupport/math/luamml/array/finalizecol}{1}
+     \AssignSocketPlug{tagsupport/math/luamml/array/finalizecol}{noop}
+  }
+%    \end{macrocode}
+%
+% The luamml support makes only sense with luatex.
+%    \begin{macrocode}
+%<*luatex>
+\AddToHook{package/array/after}{\lua_now:n { require'luamml-array' }}
+%    \end{macrocode}
+% \begin{plugdecl}{tagsupport/math/luamml/array/save}
+%  The socket of this plug is used in \cs{endarray}.
+%    \begin{macrocode}
+\NewSocketPlug{tagsupport/math/luamml/array/save}{luamml}
+ {
+   \__luamml_array_save_array:
+ }
+%    \end{macrocode}
+% \end{plugdecl}
+%
+% \begin{plugdecl}{tagsupport/math/luamml/array/finalize}
+%  This socket of this plug is used in \cs{endarray}.
+%    \begin{macrocode}
+\NewSocketPlug{tagsupport/math/luamml/array/finalize}{luamml}
+ {
+   \mode_if_math:T { \__luamml_array_finalize_array: }
+ }
+%    \end{macrocode}
+% \end{plugdecl}
+%
+% \begin{plugdecl}{tagsupport/math/luamml/array/initcol}
+%  The socket of this plug is used in \cs{@classz}.
+%    \begin{macrocode}
+\NewSocketPlug{tagsupport/math/luamml/array/initcol}{luamml}
+ {
+   \__luamml_array_init_col:
+ }
+%    \end{macrocode}
+% \end{plugdecl}
+%
+%
+% \begin{plugdecl}{tagsupport/math/luamml/array/finalizecol}
+%  The socket of this plug is used in \cs{@classz}.
+%    \begin{macrocode}
+\NewSocketPlug{tagsupport/math/luamml/array/finalizecol}{luamml}
+ {
+   \__luamml_array_finalize_col:w #1~
+ }
+%    \end{macrocode}
+% \end{plugdecl}
+%    \begin{macrocode}
+\AssignSocketPlug{tagsupport/math/luamml/array/save}{luamml}
+\AssignSocketPlug{tagsupport/math/luamml/array/finalize}{luamml}
+\AssignSocketPlug{tagsupport/math/luamml/array/initcol}{luamml}
+\AssignSocketPlug{tagsupport/math/luamml/array/finalizecol}{luamml}
+%</luatex>
+%    \end{macrocode}
+% \subsubsection{amsmath alignments}
+%
+% This socket is used at the end of alignment cells and adds the content to
+% the current row.
+%
+%    \begin{macrocode}
+\str_if_exist:cF { l__socket_tagsupport/math/luamml/mtable/finalizecol_plug_str }
+ {
+   \NewSocket{tagsupport/math/luamml/mtable/finalizecol}{1}
+ }
+%    \end{macrocode}
+%    \begin{macrocode}
+%<*luatex>
+\NewSocketPlug{tagsupport/math/luamml/mtable/finalizecol}{luamml}
+ {
+   \use:c{__luamml_amsmath_add_#1_to_row:}
+ }
+\AssignSocketPlug{tagsupport/math/luamml/mtable/finalizecol}{luamml}
+
+%</luatex>
+%    \end{macrocode}
+%
+% These sockets save an inner table
+%    \begin{macrocode}
+\str_if_exist:cF { l__socket_tagsupport/math/luamml/mtable/innertable/save_plug_str }
+ {
+   \NewSocket{tagsupport/math/luamml/mtable/innertable/save}{0}
+   \NewSocket{tagsupport/math/luamml/mtable/smallmatrix/save}{0}
+   \NewSocket{tagsupport/math/luamml/mtable/innertable/finalize}{0}
+ }
+%    \end{macrocode}
+%    \begin{macrocode}
+%<*luatex>
+\NewSocketPlug{tagsupport/math/luamml/mtable/innertable/save}{luamml}
+ {
+   \__luamml_amsmath_save_inner_table:n \@currenvir
+ }
+\AssignSocketPlug{tagsupport/math/luamml/mtable/innertable/save}{luamml}
+\NewSocketPlug{tagsupport/math/luamml/mtable/smallmatrix/save}{luamml}
+ {
+   \__luamml_amsmath_save_smallmatrix:
+ }
+\AssignSocketPlug{tagsupport/math/luamml/mtable/smallmatrix/save}{luamml}
+\NewSocketPlug{tagsupport/math/luamml/mtable/innertable/finalize}{luamml}
+ {
+   \__luamml_amsmath_finalize_inner_table:
+ }
+\AssignSocketPlug{tagsupport/math/luamml/mtable/innertable/finalize}{luamml}
+%</luatex>
+%    \end{macrocode}
+%
+%
+% This socket finalize the \texttt{mtable} in alignments like align or gather.
+% It takes an argument, the environment.
+% It should be used normally with \cs{UseExpandableTaggingSocket}.
+%    \begin{macrocode}
+\str_if_exist:cF { l__socket_tagsupport/math/luamml/mtable/finalize_plug_str }
+ {
+   \NewSocket{tagsupport/math/luamml/mtable/finalize}{1}
+   \AssignSocketPlug{tagsupport/math/luamml/mtable/finalize}{noop}
+ }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<*luatex>
+\NewSocketPlug{tagsupport/math/luamml/mtable/finalize}{luamml}
+ {
+   \__luamml_amsmath_finalize_table:n {#1}
+ }
+\AssignSocketPlug{tagsupport/math/luamml/mtable/finalize}{luamml}
+%</luatex>
+%    \end{macrocode}
+%
+% This socket adds attributes for the alignment in \texttt{multline}.
+% It takes an argument, the alignment.
+%    \begin{macrocode}
+\str_if_exist:cF { l__socket_tagsupport/math/luamml/mtable/aligncol_plug_str }
+ {
+   \NewSocket{tagsupport/math/luamml/mtable/aligncol}{1}
+   \AssignSocketPlug{tagsupport/math/luamml/mtable/aligncol}{noop}
+ }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<*luatex>
+\NewSocketPlug{tagsupport/math/luamml/mtable/aligncol}{luamml}
+ {
+   \__luamml_amsmath_set_row_columnalign:n {#1}
+ }
+\AssignSocketPlug{tagsupport/math/luamml/mtable/aligncol}{luamml}
+%</luatex>
+%    \end{macrocode}
+
+%
+% \subsubsection{Tags and labels}
+% These sockets save and set tags and labels in alignments.
+%    \begin{macrocode}
+\str_if_exist:cF { l__socket_tagsupport/math/luamml/mtable/tag/save_plug_str }
+ {
+   \NewSocket{tagsupport/math/luamml/mtable/tag/save}{0}
+   \NewSocket{tagsupport/math/luamml/mtable/tag/set}{0}
+ }
+%    \end{macrocode}
+%    \begin{macrocode}
+%<*luatex>
+\int_new:N \l__luamml_amsmath_tag_struct_num_int
+\NewSocketPlug{tagsupport/math/luamml/mtable/tag/save}{luamml}
+ {
+   \__luamml_amsmath_save_tag_with_struct_elem:N \l__luamml_amsmath_tag_struct_num_int
+ }
+\AssignSocketPlug{tagsupport/math/luamml/mtable/tag/save}{luamml}
+\NewSocketPlug{tagsupport/math/luamml/mtable/tag/set}{luamml}
+ {
+   \__luamml_amsmath_set_tag:
+ }
+\AssignSocketPlug{tagsupport/math/luamml/mtable/tag/set}{luamml}
+
+%</luatex>
+%    \end{macrocode}
+%
+% If math structure elements are created the Lbl-structure of a tag
+% must be moved inside the math structure, typically as an additional column in an
+% \texttt{mtable} with an intent \texttt{:equation-label} or \texttt{:no-equation-label}.
+% 
+% The luamml-code handles this by stashing the Lbl-structure, storing the
+% structure number in an array and reusing it once it creates the math structure elements.
+% 
+% This should only be done for specific environments, we define
+% a constant to test: 
+%    \begin{macrocode}
+\str_if_exist:cF { l__socket_tagsupport/math/display/tag/begin_plug_str }
+ {
+   \NewSocket{tagsupport/math/display/tag/begin}{0}
+   \NewSocket{tagsupport/math/display/tag/end}{0}
+ }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<*luatex>
+\clist_map_inline:nn 
+  {
+    align,
+    align*,
+    alignat,
+    alignat*,
+    xalignat,
+    xalignat*,
+%    \end{macrocode}
+%  there is never a tag/label in xxalignat, so does it make sense to add a label column? 
+%  Left out for now.
+%    \begin{macrocode}
+    %xxalignat, 
+    flalign,
+    flalign*,
+    gather,
+    gather*,
+%    \end{macrocode}
+% equation and multline have at most one tag, so we do not use a label column
+% but rely on the external Lbl for now.
+%    \begin{macrocode}
+    %multline, % NO
+    %multline*, % NO
+    %equation, % NO
+    %equation*, % NO
+%    \end{macrocode}
+%   split has never a numbering so is ignored
+%    \begin{macrocode}
+    %split, % NO
+  }
+  {\tl_const:cn { c__luamml_label_#1_tl}{}}
+%    \end{macrocode}
+% 
+% 
+%    \begin{macrocode}
+\NewSocketPlug{tagsupport/math/display/tag/begin}{luamml}
+ { 
+   \tag_mc_end: 
+   \bool_lazy_and:nnT
+    { \tl_if_exist_p:c { c__luamml_label_ \@currenvir _tl } }
+    { \int_if_odd_p:n { \int_div_truncate:nn { \l__luamml_flag_int } { 8 } } }
+    {   
+      \tag_struct_begin:n {tag=mtext,stash}
+      \int_set:Nn \l__luamml_amsmath_tag_struct_num_int { \tag_get:n {struct_num} }
+    }
+   \tag_struct_begin:n {tag=Lbl}
+   \tag_mc_begin:n {}
+ }
+\AssignSocketPlug{tagsupport/math/display/tag/begin}{luamml} 
+\NewSocketPlug{tagsupport/math/display/tag/end}{luamml}
+ {
+   \tag_mc_end:
+   \tag_struct_end:
+   \bool_lazy_and:nnT
+    { \tl_if_exist_p:c { c__luamml_label_ \@currenvir _tl } }
+    { \int_if_odd_p:n { \int_div_truncate:nn { \l__luamml_flag_int } { 8 } } }
+    {
+      \tag_struct_end:
+    }
+   \tag_mc_begin:n {}
+ }
+\AssignSocketPlug{tagsupport/math/display/tag/end}{luamml}
+%</luatex>
+%    \end{macrocode}
+%
+%
+% \subsubsection{Horizontal boxes}
+% This socket annotates an \cs{hbox} inside box commands used in math.
+% We test for the socket until the release 2025-06-01.
+%    \begin{macrocode}
+\str_if_exist:cF { l__socket_tagsupport/math/luamml/hbox_plug_str }
+ {
+   \NewSocket{tagsupport/math/luamml/hbox}{2}
+   \NewSocketPlug{tagsupport/math/luamml/hbox}{default}{#2}
+   \AssignSocketPlug{tagsupport/math/luamml/hbox}{default}
+ }
+%<*luatex>
+\NewSocketPlug{tagsupport/math/luamml/hbox}{luamml}
+ {
+   \bool_lazy_and:nnTF
+    { \mode_if_math_p: }
+    { \int_if_odd_p:n { \int_div_truncate:nn { \l__luamml_flag_int } { 8 } } }
+    {
+      \tag_struct_begin:n
+       {
+         tag=mtext,
+         stash,
+       }
+      \tag_mc_begin:n {}
+      \luamml_annotate:en
+       {
+         nucleus = true,
+         structnum=\tag_get:n{struct_num}
+       }
+       { #2 }
+      \tag_mc_end:
+      \tag_struct_end:
+    }
+    { #2 }
+  }
+\AssignSocketPlug{tagsupport/math/luamml/hbox}{luamml}
+%</luatex>
+%    \end{macrocode}
+%
+% \subsubsection{Artifact characters}
+% Unicode characters like a root sign should be marked as artifacts
+% to avoid duplication e.g. in derivation if mathml
+% structure elements are used that imply the meaning.
+% We test for the socket until the release 2025-06-01.
+%    \begin{macrocode}
+\str_if_exist:cF { l__socket_tagsupport/math/luamml/artifact_plug_str }
+ {
+   \NewSocket{tagsupport/math/luamml/artifact}{0}
+ }
+%<*luatex>
+\NewSocketPlug{tagsupport/math/luamml/artifact}{luamml}
+ {
+   \int_if_odd:nT { \int_div_truncate:nn { \l__luamml_flag_int } { 8 } }
+    {
+      \tag_mc_begin:n{artifact}
+    }
+ }
+\AssignSocketPlug{tagsupport/math/luamml/artifact}{luamml}
+%</luatex>
+%    \end{macrocode}
+%
+% \subsubsection{Math phantom socket}
+% This socket is used around \cs{finph@nt}.
+% It should provided until 2025-06-01
+%    \begin{macrocode}
+\str_if_exist:cF { l__socket_tagsupport/math/luamml/finph@nt_plug_str }
+ {
+   \NewSocket{tagsupport/math/luamml/finph@nt}{2}
+   \NewSocketPlug{tagsupport/math/luamml/finph@nt}{default}{#2}
+   \AssignSocketPlug{tagsupport/math/luamml/finph@nt}{default}
+ }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<*luatex>
+\NewSocketPlug{tagsupport/math/luamml/finph@nt}{luamml}
+ {
+   \luamml_annotate:nen {1}
+    {
+     nucleus = true,
+     mathml =
+      {
+        [0] = 'mpadded',
+        \ifh@\else
+         width = 0,
+        \fi
+        \ifv@\else
+         height = 0, depth = 0,
+        \fi
+        consume_label'mathphant',
+      },
+    }
+    { #2 }
+ }
+\AssignSocketPlug{tagsupport/math/luamml/finph@nt}{luamml}
+%</luatex>
+%    \end{macrocode}
+
+% \subsubsection{Math smash socket}
+% This socket is used around \cs{finsm@sh}.
+% It should provided until 2025-06-01
+%    \begin{macrocode}
+\str_if_exist:cF { l__socket_tagsupport/math/luamml/finsm@sh_plug_str }
+ {
+   \NewSocket{tagsupport/math/luamml/finsm@sh}{2}
+   \NewSocketPlug{tagsupport/math/luamml/finsm@sh}{default}{#2}
+   \AssignSocketPlug{tagsupport/math/luamml/finsm@sh}{default}
+ }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<*luatex>
+\NewSocketPlug{tagsupport/math/luamml/finsm@sh}{luamml}
+ {
+   \luamml_annotate:nen {2}
+    {
+     nucleus = true,
+     mathml = consume_label('mathsmash',
+           function(padded, core)
+             padded.height, padded.depth = 0, 0~
+             return~padded, core~
+           end),
+    }
+    { #2 }
+ }
+\AssignSocketPlug{tagsupport/math/luamml/finsm@sh}{luamml}
+%</luatex>
+%    \end{macrocode}
+% \subsection{Patching}
+% For some packages, we ship with patches to make them more compatible and to
+% demonstrate how other code can be patched to work with \texttt{luamml}.
+%
+% These are either loaded directly if the packages are loaded or delayed using
+% \LaTeX's hook system otherwise.
+% \begin{macro}{\__luamml_patch_package:nn, \__luamml_patch_package:n}
+% For this, we use two helpers: First a wrapper which runs arbitrary code either
+% now (if the package is already loaded) or as soon as the package loads, second
+% an application of the first one to load packages following \texttt{luamml}'s
+% naming scheme for these patch packages.
+%    \begin{macrocode}
+\cs_new_protected:Npn \__luamml_patch_package:nn #1 #2 {
+  \@ifpackageloaded {#1} {#2} {
+    \hook_gput_code:nnn {package/#1/after} {luamml} {#2}
+  }
+}
+\cs_new_protected:Npn \__luamml_patch_package:n #1 {
+  \__luamml_patch_package:nn {#1} {
+    \RequirePackage { luamml-patches-#1 }
+  }
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% We currently provide minimal patching for the kernel, \pkg{amsmath}.
+% Currently only the kernel code supports pdf\TeX, but it's planned to extend this.
+%    \begin{macrocode}
+\RequirePackage { luamml-patches-kernel }
+%<*luatex>
+\__luamml_patch_package:n {amsmath}
+%</luatex>
+%    \end{macrocode}
+
+% \iffalse
+%</package>
+% \fi
+% \end{implementation}
+% \Finale

@@ -1,0 +1,64 @@
+%%%
+% Mots Cod\'es
+%%%
+\def\filedateMotsCodes{2024/08/04}%
+\def\fileversionMotsCodes{0.1}%
+\message{-- \filedateMotsCodes\space v\fileversionMotsCodes}%
+%
+\setKVdefault[MotsCodes]{LargeurT=1cm,Colonnes=5,Largeur=3cm,Solution=false,Math=false}%
+
+\newcommand\MotsCodes[2][]{%
+  \useKVdefault[MotsCodes]%
+  \setKV[MotsCodes]{#1}%
+  \setsepchar[*]{§*/}%
+  \readlist*\ListeMotsCodes{#2}%
+  \xdef\ListeMotsCodesPas{\fpeval{\ListeMotsCodeslen/\useKV[MotsCodes]{Colonnes}}}%
+  % \begin{NiceTabular}{*{\fpeval{\useKV[MotsCodes]{Colonnes}}}{>{\centering\arraybackslash}m{\useKV[MotsCodes]{Largeur}}}}[color-inside]
+    \begin{NiceTabular}{*{\fpeval{\useKV[MotsCodes]{Colonnes}}}{m{\useKV[MotsCodes]{Largeur}}}}%[color-inside]
+    \xintFor* ##1 in {\xintSeq {1}{\ListeMotsCodesPas}}\do{%
+      \xintFor* ##2 in {\xintSeq {1}{\fpeval{\useKV[MotsCodes]{Colonnes}}}}\do{%
+        \xintifForFirst{}{&}\Block[draw=black]{4-1}{}%
+      }\\
+      \xintFor* ##2 in {\xintSeq {1}{\fpeval{\useKV[MotsCodes]{Colonnes}}}}\do{%
+        \xintifForFirst{}{&}\Block{}{\ListeMotsCodes[\fpeval{(##1-1)*\useKV[MotsCodes]{Colonnes}+##2},1]}
+      }\\
+      \xintFor* ##2 in {\xintSeq {1}{\fpeval{\useKV[MotsCodes]{Colonnes}}}}\do{%
+        \xintifForFirst{}{&}%
+      }\\
+      \xintFor* ##2 in {\xintSeq {1}{\fpeval{\useKV[MotsCodes]{Colonnes}}}}\do{%
+        \xintifForFirst{}{&}\Block{}{\textbf{\Large\ListeMotsCodes[\fpeval{(##1-1)*\useKV[MotsCodes]{Colonnes}+##2},2]}}
+      }\\
+    }%
+  \end{NiceTabular}%
+}%
+
+\newcommand\MotsCodesTableau[3][]{%
+  \useKVdefault[MotsCodes]%
+  \setKV[MotsCodes]{#1}%
+  \setsepchar[*]{,*/}%
+  \readlist*\ListeMotsCodesTableau{#2}%
+  \xdef\ListeMotsCodesMax{0}%
+  \setsepchar{,}%
+  \readlist*\ListeMotsCodesPhrase{#3}%
+  \foreachitem\compteur\in\ListeMotsCodesTableau{%
+    \xintifboolexpr{\ListeMotsCodesMax<\listlen\ListeMotsCodesTableau[\compteurcnt]}{\xdef\ListeMotsCodesMax{\fpeval{\listlen\ListeMotsCodesTableau[\compteurcnt]}}}{}%
+  }%
+  \begin{NiceTabular}{*{\fpeval{\ListeMotsCodesMax}}{>{\centering\arraybackslash}m{\useKV[MotsCodes]{LargeurT}}}}%[color-inside]
+    \xintFor* ##1 in {\xintSeq {1}{\fpeval{\ListeMotsCodesTableaulen}}}\do{%
+      \xintFor* ##2 in {\xintSeq {1}{\listlen\ListeMotsCodesTableau[##1]}}\do{%
+        \xintifForFirst{}{&}\ifboolKV[MotsCodes]{Solution}{%
+          \StrMid{\ListeMotsCodesPhrase[##1]}{##2}{##2}[\MotsCodesMaLettre]%
+          \IfStrEq{\MotsCodesMaLettre}{*}{\Block[draw=black,fill=black]{3-1}{}}{\Block[draw=black]{3-1}{\StrMid{\ListeMotsCodesPhrase[##1]}{##2}{##2}}}%
+        }{%
+          \IfStrEq{\ListeMotsCodesTableau[##1,##2]}{*}{\Block[draw=black,fill=black]{3-1}{}}{\Block[draw=black]{3-1}{}}%
+        }%%
+      }\\
+      \xintFor* ##2 in {\xintSeq {1}{\listlen\ListeMotsCodesTableau[##1]}}\do{%
+        \xintifForFirst{}{&}
+      }\\
+      \xintFor* ##2 in {\xintSeq {1}{\listlen\ListeMotsCodesTableau[##1]}}\do{%
+        \xintifForFirst{}{&}\IfStrEq{\ListeMotsCodesTableau[##1,##2]}{*}{}{\footnotesize\ifboolKV[MotsCodes]{Math}{\ListeMotsCodesTableau[##1,##2]}{\num{\ListeMotsCodesTableau[##1,##2]}}}%
+      }\\
+    }%
+  \end{NiceTabular}%
+}%

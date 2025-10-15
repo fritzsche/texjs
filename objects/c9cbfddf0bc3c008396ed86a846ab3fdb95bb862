@@ -1,0 +1,148 @@
+% The luaplot package.
+% Version 1.5.
+% Licensed under LaTeX Project Public License v1.3c or later. The complete license text is available at http://www.latex-project.org/lppl.txt.
+%Authors: Chetan Shirore and Ajit Kumar
+
+\ProvidesPackage{luaplot}[1.5]
+\RequirePackage{xkeyval}
+\RequirePackage{luacode}
+\RequirePackage{tikz}
+\RequirePackage{luamplib}
+\begin{luacode}
+-- compatibility of number formats with the MetaPost system.
+function checknumber(x)
+   if string.find(x, "e") then
+      return string.format("%.12f",x)
+   else
+      return x
+   end
+end
+-- Determining plot points with Lua for the MetaPost system.
+function luapath (f,a,b,n,myclr)
+   local mytbl ={}
+   local s = ""
+   local finalstr = ""
+   local y = f(a)
+   local mycnt = 1
+   if y == y and not (y==math.huge or y==-math.huge ) then
+      s = s.."(" .. a .."," .. f(a) ..")"
+   end
+   for i = 1, n do
+      local y = f((b - a) / n * i + a)
+      if y == y and not (y==math.huge or y==-math.huge ) then
+         if s~='' then
+            s= s .. "-- (" ..checknumber(((b - a) / n * i + a)) ..",".. checknumber(y)..")"
+         else
+            s= s .. "(" ..checknumber(((b - a) / n * i + a)) ..",".. checknumber(y)..")"
+         end
+         mytbl[mycnt] = s
+      else
+         if s~='' then
+            mytbl[mycnt] = s
+            mycnt = mycnt + 1
+            s = ''
+         end
+      end
+
+   end
+   for j=1, #mytbl do
+      finalstr = finalstr .."gdraw " ..tostring(mytbl[j]).."withcolor " .. myclr..";"
+   end
+   return finalstr
+end
+-- Determining plot points with Lua for the tikz package.
+function luatikzpath (f,a,b,n)
+   local s = ""
+   s = s.."(" .. a .."," .. f(a) ..")"
+   for i = 1, n do
+      s= s .. " -- (" ..((b - a) / n * i + a) ..",".. f((b - a) / n * i + a)..")"
+   end
+   return s
+end
+\end{luacode}
+
+% ========= KEY DEFINITIONS =========
+\define@key{someop}{xmin}{\def\mop@one{#1}}%
+\define@key{someop}{xmax}{\def\mop@two{#1}}%
+\define@key{someop}{ymin}{\def\mop@three{#1}}%
+\define@key{someop}{ymax}{\def\mop@four{#1}}%
+\define@key{someop}{plotpts}{\def\mop@five{#1}}%
+\define@key{someop}{hor}{\def\mop@six{#1}}%
+\define@key{someop}{ver}{\def\mop@seven{#1}}%
+\define@key{someop}{clr}{\def\mop@eight{#1}}%
+\define@key{someop}{plotsty}{\def\mop@nine{#1}}%
+\define@key{someop}{plotoptions}{\def\mop@ten{#1}}%
+% ========= KEY DEFAULTS =========
+\setkeys{someop}{xmin=0}%
+\setkeys{someop}{xmax=5}%
+\setkeys{someop}{ymin='whatever'}%
+\setkeys{someop}{ymax='whatever'}%
+\setkeys{someop}{plotpts=100}%
+\setkeys{someop}{hor='5cm'}%
+\setkeys{someop}{ver='3cm'}%
+\setkeys{someop}{clr='black'}%
+\setkeys{someop}{plotsty=''}%
+\setkeys{someop}{plotoptions=';'}%
+% ========= Defining Command =========
+\newcommand{\luaplot}[2][]{{%
+\setkeys{someop}{#1}%
+\directlua{%
+local begincode = [[
+\string\begin{mplibcode}
+input graph ;
+beginfig(0)
+draw begingraph(runscript("mp.print(\mop@six)"),runscript("mp.print(\mop@seven)"));
+setrange(runscript("mp.print(\mop@one)"), runscript("mp.print(\mop@three)"),runscript("mp.print(\mop@two)"),runscript("mp.print(\mop@four)"));
+color clr;
+]]
+local endcode = [[
+endgraph;
+endfig;
+\string\end{mplibcode}
+]]
+local expr={}
+local countexp = 1
+for subexp in string.gmatch(\luastring{#2}, '([^,]+)') do
+   tempsubexp = "("..subexp..")"
+   local f = load("return function(x) return "  ..tempsubexp.. "end",nil,"t",math)()
+   expr[countexp] = f
+   countexp = countexp + 1
+end
+local colortbl={}
+local countclr = 1
+for funcolor in string.gmatch(\mop@eight, '[^;]*') do
+   if funcolor == nil or funcolor=='' then funcolor='black' end
+   colortbl[countclr] = funcolor
+   countclr = countclr + 1
+end
+local plotstytbl={}
+local countplotsty = 1
+for funplotsty in string.gmatch(\mop@nine, '[^,]*') do
+   plotstytbl[countplotsty] = funplotsty
+   countplotsty = countplotsty + 1
+end
+tex.print(begincode)
+for k=1, countexp-1 do
+   local clr = colortbl[k] or 'black';
+   local w =  plotstytbl[k] or '';
+   mainstr="drawoptions("..w..");"..luapath(expr[k],\mop@one,\mop@two,\mop@five, clr)..'drawoptions();'
+   tex.print(mainstr)
+end
+tex.print(tostring(\mop@ten))%
+tex.print(endcode)%
+}%
+}%
+}%
+
+\def\luatikzpath#1#2#3#4{%
+\directlua{%
+local expr={}
+local countexp = 1
+tempsubexp = "("..\luastring{#1}..")"
+local f = load("return function(x) return "  ..tempsubexp.. "end",nil,"t",math)()
+mainstr = luatikzpath(f,#2,#3,#4)
+tex.print(mainstr)
+}
+}
+
+\endinput

@@ -1,0 +1,253 @@
+%%%
+% Horloges
+%%%
+\def\filedateHorloge{2025/05/27}%
+\def\fileversionHorloge{0.1c}%
+\message{-- \filedateHorloge\space v\fileversionHorloge}%
+%
+\setKVdefault[ClesHorloge]{Aiguilles,Numerique=false,Secondes,Cadre,Rayon=1,Impression=false,Sombre=false,Codes=false,Dys=false,Traces={}}
+\defKV[ClesHorloge]{Traces=\ifempty{#1}{}{\setKV[ClesHorloge]{Codes}}}%
+
+\NewDocumentCommand\Horloge{ }{%On désactive les :
+  \begingroup
+  \catcode`\:12
+  \Horlogeaux
+}%
+
+\NewDocumentCommand\Horlogeaux{om}{%
+  \endgroup
+  \useKVdefault[ClesHorloge]%
+  \setKV[ClesHorloge]{#1}%
+  \ifPfCPfMScratchDys\relax\setKV[ClesHorloge]{Dys}\fi%
+  \ifx\bla#2\bla%
+    \timenow%
+    \ifboolKV[ClesHorloge]{Numerique}{%
+      \MPAfficheurNew{\PfCTimeHeure}{\PfCTimeMinute}{0}%
+    }{%
+      \MPHorlogeNew{\PfCTimeHeure}{\PfCTimeMinute}{0}%
+    }%
+  \else%
+    \setsepchar{:}%
+    \readlist*\PfCTime{#2}%
+    \ifboolKV[ClesHorloge]{Numerique}{%
+      \ifnum\PfCTimelen=1\relax%
+        \MPAfficheurNew{\PfCTime[1]}{0}{0}%
+      \else%
+        \ifnum\PfCTimelen=2\relax%
+          \MPAfficheurNew{\PfCTime[1]}{\PfCTime[2]}{0}%
+        \else%
+          \MPAfficheurNew{\PfCTime[1]}{\PfCTime[2]}{\PfCTime[3]}%
+        \fi%
+      \fi%
+    }{%
+      \ifnum\PfCTimelen=1\relax%
+        \MPHorlogeNew{\PfCTime[1]}{0}{0}%
+      \else%
+        \ifnum\PfCTimelen=2\relax%
+          \MPHorlogeNew{\PfCTime[1]}{\PfCTime[2]}{0}%
+        \else%
+          \MPHorlogeNew{\PfCTime[1]}{\PfCTime[2]}{\PfCTime[3]}%
+        \fi%
+      \fi%
+    }%
+  \fi%
+}%
+
+\makeatletter
+\def\timenow{\@tempcnta\time\relax
+  \@tempcntb\@tempcnta\relax
+  \divide\@tempcntb60\relax
+  \edef\PfCTimeHeure{\fpeval{\@tempcntb}}%
+  \multiply\@tempcntb60\relax
+  \advance\@tempcnta-\@tempcntb\relax
+  \edef\PfCTimeMinute{\fpeval{\@tempcnta}}%
+}\relax
+\makeatother
+
+\def\MPAfficheurNew#1#2#3{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    boolean Secondes,Impression,Sombre,Dys;
+    Secondes=\useKV[ClesHorloge]{Secondes};
+    Impression=\useKV[ClesHorloge]{Impression};
+    Sombre=\useKV[ClesHorloge]{Sombre};
+    Dys=\useKV[ClesHorloge]{Dys};
+    if Impression:
+    if Sombre:
+    LightSteelBlue:=0.8*white;
+    Crimson:=black;
+    else:
+    LightSteelBlue:=0.9*white;
+    Crimson:=0.5*white;
+    fi;
+    fi;
+    if Dys=false:
+    u:=0.5u;
+    fi;
+    draw Afficheur(#1 div10,0);
+    draw Afficheur(#1 mod10,0) shifted(u*(1,0));
+    draw Afficheur(10,0) shifted(u*(2,0));
+    draw Afficheur(#2 div10,0) shifted(u*(3,0));
+    draw Afficheur(#2 mod10,0) shifted(u*(4,0));
+    if Secondes:
+    draw Afficheur(10,0) shifted(u*(5,0));
+    draw Afficheur(#3 div10,0) shifted(u*(6,0));
+    draw Afficheur(#3 mod10,0) shifted(u*(7,0));
+    fi;
+    if Sombre:
+    draw bbox currentpicture;
+    fi;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={boolean Secondes,Impression,Sombre;Secondes=\useKV[ClesHorloge]{Secondes};Impression=\useKV[ClesHorloge]{Impression};Sombre=\useKV[ClesHorloge]{Sombre};}]
+    if Impression:
+    if Sombre:
+    LightSteelBlue:=0.8*white;
+    Crimson:=black;
+    else:
+    LightSteelBlue:=0.9*white;
+    Crimson:=0.5*white;
+    fi;
+    fi;
+    u:=0.5u;
+    draw Afficheur(#1 div10,0);
+    draw Afficheur(#1 mod10,0) shifted(u*(1,0));
+    draw Afficheur(10,0) shifted(u*(2,0));
+    draw Afficheur(#2 div10,0) shifted(u*(3,0));
+    draw Afficheur(#2 mod10,0) shifted(u*(4,0));
+    if Secondes:
+    draw Afficheur(10,0) shifted(u*(5,0));
+    draw Afficheur(#3 div10,0) shifted(u*(6,0));
+    draw Afficheur(#3 mod10,0) shifted(u*(7,0));
+    fi;
+    if Sombre:
+    draw bbox currentpicture;
+    fi;
+  \end{mpost}
+  \fi
+}
+
+\def\MPHorlogeNew#1#2#3{
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    boolean Secondes,Aiguilles,Cadre,Codes,Dys;
+    Secondes=\useKV[ClesHorloge]{Secondes};
+    Aiguilles=\useKV[ClesHorloge]{Aiguilles};
+    Cadre=\useKV[ClesHorloge]{Cadre};
+    Codes=\useKV[ClesHorloge]{Codes};
+    marque_horloge=\useKV[ClesHorloge]{Rayon};
+    Dys=\useKV[ClesHorloge]{Dys};
+    if Dys:
+    u:=1.5cm;
+    fi;
+  save Hor;
+  picture Hor;
+  path gdeaig,pteaig,trot;
+  pair centrehorloge;
+  centrehorloge=(0,0);
+  path tourhorloge,toura;
+  tourhorloge=cercles(centrehorloge,marque_horloge*u);
+  toura=cercles(centrehorloge,(marque_horloge+0.25)*u);
+  Hor=image(
+  %% dessin du cadre
+  if Cadre:
+  pair A[];
+  draw cercles(centrehorloge,(marque_horloge+0.5)*u) withpen pencircle scaled 1.5;
+  for k=1 upto 12:
+  A[k]=pointarc(toura,90-30*k);
+  label(TEX(decimal(k)),A[k]);
+  endfor;
+  fi;
+  %% dessin de l'horloge
+  draw tourhorloge;
+  for i=0 upto 59:
+  if (i mod 5)=0:
+  if (i mod 15)=0:
+  draw pointarc(tourhorloge,6*i)--(pointarc(tourhorloge,6*i) shifted (7*unitvector(centrehorloge-pointarc(tourhorloge,6*i)))) withpen pencircle scaled 2bp;
+  else:
+  draw pointarc(tourhorloge,6*i)--(pointarc(tourhorloge,6*i) shifted (5*unitvector(centrehorloge-pointarc(tourhorloge,6*i)))) withpen pencircle scaled 1.5bp;
+  fi;
+  else:
+  draw pointarc(tourhorloge,6*i)--(pointarc(tourhorloge,6*i) shifted (3*unitvector(centrehorloge-pointarc(tourhorloge,6*i))));
+  fi;
+  endfor;
+  path graduhorloge;
+  graduhorloge=cercles(centrehorloge,marque_horloge*u+5*abs(unitvector(centrehorloge-pointarc(tourhorloge,0))));
+  % 
+  marque_p:="plein";
+  pointe(centrehorloge);
+  marque_p:="rien";
+  %% placement des aiguilles
+  if Aiguilles:
+  gdeaig=centrehorloge--(pointarc(tourhorloge,0) shifted (7*unitvector(centrehorloge-pointarc(tourhorloge,0))));
+  pteaig=centrehorloge--(pointarc(tourhorloge,0) shifted (18*unitvector(centrehorloge-pointarc(tourhorloge,0))));
+  if Secondes:
+  trot=centrehorloge--(pointarc(tourhorloge,0) shifted (10*unitvector(centrehorloge-pointarc(tourhorloge,0))));
+  draw rotation(trot,centrehorloge,90-6*#3) withpen pencircle scaled0.4;
+  fi;
+  draw rotation(gdeaig,centrehorloge,90-6*#2) withpen pencircle scaled1.25;
+  draw rotation(pteaig,centrehorloge,90-30*(#1+#2/60)) withpen pencircle scaled 2bp;
+  fi;
+  );
+  if Codes:
+  \useKV[ClesHorloge]{Traces};
+  fi;
+  draw Hor;
+\end{mplibcode}
+\else
+  \begin{mpost}[mpsettings={boolean Secondes,Aiguilles,Cadre;Secondes=\useKV[ClesHorloge]{Secondes};Aiguilles=\useKV[ClesHorloge]{Aiguilles};Cadre=\useKV[ClesHorloge]{Cadre};marque_horloge=\useKV[ClesHorloge]{Rayon};}]
+  save Hor;
+  picture Hor;
+  path gdeaig,pteaig,trot;
+  pair centrehorloge;
+  centrehorloge=(0,0);
+  path tourhorloge,toura;
+  tourhorloge=cercles(centrehorloge,marque_horloge*u);
+  toura=cercles(centrehorloge,(marque_horloge+0.25)*u);
+  Hor=image(
+  %% dessin du cadre
+  if Cadre:
+  pair A[];
+  draw cercles(centrehorloge,(marque_horloge+0.5)*u) withpen pencircle scaled 1.5;
+  for k=1 upto 12:
+  A[k]=pointarc(toura,90-30*k);
+  label(LATEX(decimal(k)),A[k]);
+  endfor;
+  fi;
+  %% dessin de l'horloge
+  draw tourhorloge;
+  for i=0 upto 59:
+  if (i mod 5)=0:
+  if (i mod 15)=0:
+  draw pointarc(tourhorloge,6*i)--(pointarc(tourhorloge,6*i) shifted (7*unitvector(centrehorloge-pointarc(tourhorloge,6*i)))) withpen pencircle scaled 2bp;
+  else:
+  draw pointarc(tourhorloge,6*i)--(pointarc(tourhorloge,6*i) shifted (5*unitvector(centrehorloge-pointarc(tourhorloge,6*i)))) withpen pencircle scaled 1.5bp;
+  fi;
+  else:
+  draw pointarc(tourhorloge,6*i)--(pointarc(tourhorloge,6*i) shifted (3*unitvector(centrehorloge-pointarc(tourhorloge,6*i))));
+  fi;
+  endfor;
+  path graduhorloge;
+  graduhorloge=cercles(centrehorloge,marque_horloge*u+5*abs(unitvector(centrehorloge-pointarc(tourhorloge,0))));
+  % 
+  marque_p:="plein";
+  pointe(centrehorloge);
+  marque_p:="rien";
+  %% placement des aiguilles
+  if Aiguilles:
+  gdeaig=centrehorloge--(pointarc(tourhorloge,0) shifted (7*unitvector(centrehorloge-pointarc(tourhorloge,0))));
+  pteaig=centrehorloge--(pointarc(tourhorloge,0) shifted (18*unitvector(centrehorloge-pointarc(tourhorloge,0))));
+  if Secondes:
+  trot=centrehorloge--(pointarc(tourhorloge,0) shifted (10*unitvector(centrehorloge-pointarc(tourhorloge,0))));
+  draw rotation(trot,centrehorloge,90-6*#3) withpen pencircle scaled0.4;
+  fi;
+  draw rotation(gdeaig,centrehorloge,90-6*#2) withpen pencircle scaled1.25;
+  draw rotation(pteaig,centrehorloge,90-30*(#1+#2/60)) withpen pencircle scaled 2bp;
+  fi;
+  );
+  draw Hor;    
+  \end{mpost}
+\fi
+}

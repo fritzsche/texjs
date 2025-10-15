@@ -1,0 +1,131 @@
+%%%
+% Domino
+%%%
+\def\filedateDomino{2024/08/04}%
+\def\fileversionDomino{0.1}%
+\message{-- \filedateDomino\space v\fileversionDomino}%
+%
+\newtcolorbox{MyDominoMini}[1][]{%
+  enhanced,
+  nobeforeafter,
+  left skip=0pt,
+  right skip=0pt,
+  left=0pt,right=0pt,top=0pt,bottom=0pt,
+  width=\textwidth/\ColonneDomino,
+  height=\textheight/\LigneDomino,
+  segmentation style={solid, line width=1.5pt},
+  colback=\CouleurDomino,
+  center upper,
+  valign upper=center,
+  center lower,
+  valign lower=center,
+  arc=2pt,
+  #1
+}%
+
+\newtcolorbox{MyDominoLogo}[1][]{%
+  enhanced,
+  nobeforeafter,
+  left skip=0pt,
+  right skip=0pt,
+  left=0pt,right=0pt,top=0pt,bottom=0pt,
+  width=\textwidth/\ColonneDomino,
+  height=\textheight/\LigneDomino,
+  valign=center,
+  halign=center,
+  arc=2pt,
+  colback=white,
+  #1
+}%
+
+\NewDocumentEnvironment{TrameDomino}{+b}{%
+  \setlength{\margev}{1cm}%
+  \setlength{\margeh}{1cm}%
+  \begin{tikzpicture}[remember picture,overlay]%
+    % quadrillages horizontal et vertical
+    \coordinate[yshift=-\margev] (A0) at (current page.north west);
+    \coordinate[yshift=-\margev] (B0) at (current page.north east);
+    \foreach \i in {1,...,\useKV[Domino]{Lignes}}{%
+      \coordinate[yshift=-\i*\textheight/\LigneDomino] (A\i) at (A0);
+      \coordinate[yshift=-\i*\textheight/\LigneDomino] (B\i) at (B0);
+    }%
+    \coordinate[xshift=\margeh] (C0) at (current page.north west);
+    \coordinate[xshift=\margeh] (D0) at (current page.south west);
+    \foreach \i in {1,...,\useKV[Domino]{Colonnes}}{
+      \coordinate[xshift=\i*\textwidth/\ColonneDomino] (C\i) at (C0);
+      \coordinate[xshift=\i*\textwidth/\ColonneDomino] (D\i) at (D0);
+    }%
+    \foreach \i in {0,...,\LigneDomino}{%
+      \draw (A\i) -- (B\i);
+    }%
+    \foreach \i in {0,...,\ColonneDomino}{%
+      \draw (C\i) -- (D\i);
+    }%
+    \draw[blue, line width=3pt] (A0)--(B0);%
+    \draw[blue, line width=3pt] (A\LigneDomino)--(B\LigneDomino);%
+    \draw[blue, line width=3pt] (C0)--(D0);%
+    \draw[blue, line width=3pt] (C\ColonneDomino)--(D\ColonneDomino);%
+    % point pour placer les cartes
+    \foreach \i in {0,...,\fpeval{\ColonneDomino-1}}{%
+      \foreach \j in {0,...,\fpeval{\LigneDomino-1}}{%
+        \coordinate[xshift=\margeh+(0.5\textwidth/\ColonneDomino)+\i*\textwidth/\ColonneDomino,yshift=-0.5\textheight/\LigneDomino-\j*\textheight/\LigneDomino]%
+        (Domino\fpeval{\i+\ColonneDomino*\j+1}) at (A0);%
+      }%
+    }%
+    #1
+  \end{tikzpicture}
+}{}%
+
+\setKVdefault[Domino]{Couleur=white,Trame,Ratio=0.5,Lignes=7,Colonnes=5,Superieur=false,Logo=false,Image=tiger.pdf}%
+
+\newcommand\Dominos[2][]{%
+  \useKVdefault[Domino]%
+  \setKV[Domino]{#1}%
+  \setsepchar[*]{§*/}\reademptyitems%
+  \readlist*\ListeDominos{#2}%
+  \xdef\CouleurDomino{\useKV[Domino]{Couleur}}%
+  \xdef\ratiodomino{\useKV[Domino]{Ratio}}%
+  \xdef\LigneDomino{\useKV[Domino]{Lignes}}%
+  \xdef\ColonneDomino{\useKV[Domino]{Colonnes}}%
+  \ifboolKV[Domino]{Trame}{%
+    \clearpage
+    \begin{TrameDomino}%
+      \foreach\i in {1,...,\fpeval{\LigneDomino*\ColonneDomino}}{%
+        \node[] at (Domino\i){%
+          \ifboolKV[Domino]{Superieur}{%
+            \begin{MyDominoMini}[space=\ratiodomino]%
+              \ListeDominos[\i,1]\tcblower\ListeDominos[\i,2]%
+            \end{MyDominoMini}%
+          }{%
+            \begin{MyDominoMini}[sidebyside,sidebyside gap=4mm,righthand ratio=\ratiodomino]%
+              \ListeDominos[\i,1]\tcblower\ListeDominos[\i,2]%        
+            \end{MyDominoMini}%
+          }%
+        };%
+      }%
+    \end{TrameDomino}%
+    \ifboolKV[Domino]{Logo}{%
+      \clearpage
+      \begin{TrameDomino}%
+        \foreach\i in {1,...,\fpeval{\LigneDomino*\ColonneDomino}}{%
+          \node at (Domino\i){%
+            \begin{MyDominoLogo}%
+              \includegraphics[height=\tcbtextheight]{\useKV[Domino]{Image}}
+            \end{MyDominoLogo}%
+          };%
+        }%
+      \end{TrameDomino}%
+    }{}%
+  }{%
+    \ifboolKV[Domino]{Superieur}{%
+      \begin{MyDominoMini}[space=\ratiodomino]%
+        \ListeDominos[1,1]\tcblower\ListeDominos[1,2]%
+      \end{MyDominoMini}%
+    }{%
+      \begin{MyDominoMini}[sidebyside,sidebyside gap=4mm,righthand ratio=\ratiodomino]%
+        \ListeDominos[1,1]\tcblower%
+        \ListeDominos[1,2]%        
+      \end{MyDominoMini}%
+    }%
+  }%
+}%

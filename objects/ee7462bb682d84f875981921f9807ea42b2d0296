@@ -1,0 +1,250 @@
+%%
+%% This is file `innerscript.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% innerscript-code.dtx  (with options: `package')
+%% 
+%% This file is from version 1.4a of the free and open-source
+%% LaTeX package "innerscript," released May 2025, to be
+%% used with the LuaTeX engine.
+%% 
+%% Copyright 2021, 2023-2025 Conrad Kosowsky
+%% 
+%% This file may be distributed and modified under the terms
+%% of the LaTeX Public Project License, version 1.3c or any
+%% later version. The most recent version of this license is
+%% available online at
+%% 
+%%           https://www.latex-project.org/lppl/
+%% 
+%% This work has the LPPL status "maintained," and the current
+%% maintainer is the package author, Conrad Kosowsky. He can
+%% be reached at kosowsky.latex@gmail.com.
+%% 
+%% PLEASE KNOW THAT THIS FREE SOFTWARE IS PROVIDED WITHOUT
+%% ANY WARRANTY. SPECIFICALLY, THE "NO WARRANTY" SECTION OF
+%% THE LATEX PROJECT PUBLIC LICENSE STATES THE FOLLOWING:
+%% 
+%% THERE IS NO WARRANTY FOR THE WORK. EXCEPT WHEN OTHERWISE
+%% STATED IN WRITING, THE COPYRIGHT HOLDER PROVIDES THE WORK
+%% `AS IS’, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
+%% OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+%% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+%% PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE
+%% OF THE WORK IS WITH YOU. SHOULD THE WORK PROVE DEFECTIVE,
+%% YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR, OR
+%% CORRECTION.
+%% 
+%% IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED
+%% TO IN WRITING WILL THE COPYRIGHT HOLDER, OR ANY AUTHOR
+%% NAMED IN THE COMPONENTS OF THE WORK, OR ANY OTHER PARTY
+%% WHO MAY DISTRIBUTE AND/OR MODIFY THE WORK AS PERMITTED
+%% ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL,
+%% SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT
+%% OF ANY USE OF THE WORK OR OUT OF INABILITY TO USE THE WORK
+%% (INCLUDING, BUT NOT LIMITED TO, LOSS OF DATA, DATA BEING
+%% RENDERED INACCURATE, OR LOSSES SUSTAINED BY ANYONE AS A
+%% RESULT OF ANY FAILURE OF THE WORK TO OPERATE WITH ANY
+%% OTHER PROGRAMS), EVEN IF THE COPYRIGHT HOLDER OR SAID
+%% AUTHOR OR SAID OTHER PARTY HAS BEEN ADVISED OF THE
+%% POSSIBILITY OF SUCH DAMAGES.
+%% 
+%% For more information, see the LaTeX Project Public License.
+%% Derivative works based on this software may come with their
+%% own license or terms of use, and the package author is not
+%% responsible for any third-party software.
+%% 
+%% Happy TeXing!
+%% 
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{innerscript}[2025/05/08 v. 1.4a]
+\def\IS@info#1{\wlog{Package innerscript Info: #1}}
+\ifx\Umathordordspacing\@undefined
+\bgroup
+\catcode`\ =12\relax
+\def\NoLuaTeXError{\GenericError{}%
+{\MessageBreak\MessageBreak
+Package innerscript error:%
+\MessageBreak\MessageBreak
+*******************\MessageBreak
+*                 *\MessageBreak
+*   CANNOT LOAD   *\MessageBreak
+*   INNERSCRIPT   *\MessageBreak
+*  LuaTeX Needed  *\MessageBreak
+*                 *\MessageBreak
+*******************\MessageBreak\@gobbletwo}%
+{See the innerscript package documentation for explanation.}%
+{I need LuaTeX to make the innerscript package work. It\MessageBreak
+looks like the current engine is something else, so I\MessageBreak
+can't load the package file. To use innerscript, please\MessageBreak
+typeset with LuaLaTeX. To continue without innerscript,\MessageBreak
+press return.}}%
+\expandafter\egroup
+\NoLuaTeXError
+  \AtEndOfPackage{\IS@info{Failed to load \on@line!}}
+  \expandafter\endinput % we \endinput with a balanced conditional
+\fi
+\newif\ifIS@script
+\newif\ifIS@scriptscript
+\newif\ifIS@legacyscript
+\newif\ifIS@legacyscriptscript
+\newif\ifIS@inner
+\newif\ifIS@close
+\newif\ifIS@cover
+\IS@scripttrue
+\IS@scriptscripttrue
+\IS@legacyscriptfalse
+\IS@legacyscriptscriptfalse
+\IS@innertrue
+\IS@closetrue
+\IS@covertrue
+\DeclareOption{script}             {\IS@scripttrue
+  \IS@legacyscriptfalse}
+\DeclareOption{scriptscript}       {\IS@scriptscripttrue
+  \IS@legacyscriptscriptfalse}
+\DeclareOption{legacy-script}      {\IS@scripttrue
+  \IS@legacyscripttrue}
+\DeclareOption{legacy-scriptscript}{\IS@scriptscripttrue
+  \IS@legacyscriptscripttrue}
+\DeclareOption{inner}              {\IS@innertrue}
+\DeclareOption{close}              {\IS@closetrue}
+\DeclareOption{cover}              {\IS@covertrue}
+\DeclareOption{no-script}          {\IS@scriptfalse
+  \IS@legacyscriptfalse}
+\DeclareOption{no-scriptscript}    {\IS@scriptscriptfalse
+  \IS@legacyscriptscriptfalse}
+\DeclareOption{no-inner}           {\IS@innerfalse}
+\DeclareOption{no-close}           {\IS@closefalse}
+\DeclareOption{no-cover}           {\IS@coverfalse}
+\ProcessOptions*
+\def\@tempa{%
+  \AtEndOfPackage{\PackageWarning{innerscript}
+  {I'm ignoring your request for\MessageBreak
+  legacy spacing\on@line\MessageBreak
+  and using the default space\MessageBreak
+  adjustments instead. (The\MessageBreak
+  package options for legacy\MessageBreak
+  spacing are deprecated.)\@gobbletwo}}}
+\ifIS@legacyscript
+\else
+  \ifIS@legacyscriptscript
+  \else
+    \let\@tempa\relax
+  \fi
+\fi
+\@tempa
+\ifIS@script         % change \scriptstyle
+  \IS@info{Adjusting space for \string\scriptstyle.}
+  \IS@info{Adjusting space for \string\crampedscriptstyle.}
+  \ifIS@scriptscript % change \scriptscriptstyle
+    \IS@info{Adjusting space for \string\scriptscriptstyle.}
+    \IS@info{Adjusting space for \string\crampedscriptscriptstyle.}
+    \def\@tempa#1#2{%
+      #1\scriptstyle             \muexpr #2 * 6 / 10\relax
+      #1\crampedscriptstyle      \muexpr #2 * 6 / 10\relax
+      #1\scriptscriptstyle       \muexpr #2 * 4 / 10\relax
+      #1\crampedscriptscriptstyle\muexpr #2 * 4 / 10\relax}
+  \else              % do not change \scriptscriptstyle
+    \IS@info{No space changes for \string\scriptscriptstyle.}
+    \IS@info{No space changes for \string\crampedscriptscriptstyle.}
+    \def\@tempa#1#2{%
+      #1\scriptstyle             \muexpr #2 * 6 / 10\relax
+      #1\crampedscriptstyle      \muexpr #2 * 6 / 10\relax}
+  \fi
+\else                  % do not change \scriptstyle
+  \IS@info{No space changes for \string\scriptstyle.}
+  \IS@info{No space changes for \string\crampedscriptstyle.}
+  \ifIS@scriptscript % change \scriptscriptstyle
+    \IS@info{Adjusting space for \string\scriptscriptstyle.}
+    \IS@info{Adjusting space for \string\crampedscriptscriptstyle.}
+    \def\@tempa#1#2{%
+      #1\scriptscriptstyle       \muexpr #2 * 4 / 10\relax
+      #1\crampedscriptscriptstyle\muexpr #2 * 4 / 10\relax}
+  \else              % do not change \scriptscriptstyle
+    \IS@info{No space changes for \string\scriptscriptstyle.}
+    \IS@info{No space changes for \string\crampedscriptscriptstyle.}
+    \let\@tempa\@gobbletwo
+  \fi
+\fi
+  \@tempa{\Umathordopspacing}     {\thinmuskip}
+  \@tempa{\Umathordbinspacing}    {\medmuskip}
+  \@tempa{\Umathordrelspacing}    {\thickmuskip}
+  \@tempa{\Umathordinnerspacing}  {\thinmuskip}
+  \@tempa{\Umathopordspacing}     {\thinmuskip}
+  \@tempa{\Umathopopspacing}      {\thinmuskip}
+  \@tempa{\Umathoprelspacing}     {\thickmuskip}
+  \@tempa{\Umathopinnerspacing}   {\thickmuskip}
+  \@tempa{\Umathbinordspacing}    {\medmuskip}
+  \@tempa{\Umathbinopspacing}     {\medmuskip}
+  \@tempa{\Umathbinopenspacing}   {\medmuskip}
+  \@tempa{\Umathbininnerspacing}  {\medmuskip}
+  \@tempa{\Umathrelordspacing}    {\thickmuskip}
+  \@tempa{\Umathrelopspacing}     {\thickmuskip}
+  \@tempa{\Umathrelopenspacing}   {\thickmuskip}
+  \@tempa{\Umathrelinnerspacing}  {\thickmuskip}
+  \@tempa{\Umathcloseopspacing}   {\thinmuskip}
+  \@tempa{\Umathclosebinspacing}  {\medmuskip}
+  \@tempa{\Umathcloserelspacing}  {\thickmuskip}
+  \@tempa{\Umathcloseinnerspacing}{\thinmuskip}
+  \@tempa{\Umathpunctordspacing}  {\thinmuskip}
+  \@tempa{\Umathpunctopspacing}   {\thinmuskip}
+  \@tempa{\Umathpunctrelspacing}  {\thinmuskip}
+  \@tempa{\Umathpunctopenspacing} {\thinmuskip}
+  \@tempa{\Umathpunctclosespacing}{\thinmuskip}
+  \@tempa{\Umathpunctpunctspacing}{\thinmuskip}
+  \@tempa{\Umathpunctinnerspacing}{\thinmuskip}
+  \@tempa{\Umathinnerordspacing}  {\thinmuskip}
+  \@tempa{\Umathinneropspacing}   {\thinmuskip}
+  \@tempa{\Umathinnerbinspacing}  {\medmuskip}
+  \@tempa{\Umathinnerrelspacing}  {\thickmuskip}
+  \@tempa{\Umathinneropenspacing} {\thinmuskip}
+  \@tempa{\Umathinnerpunctspacing}{\thinmuskip}
+  \@tempa{\Umathinnerinnerspacing}{\thinmuskip}
+\ifIS@close
+  \IS@info{Adding space after closing grouping symbols.}
+  \Umathcloseordspacing\displaystyle        \muexpr\thinmuskip / 2\relax
+  \Umathcloseordspacing\textstyle           \muexpr\thinmuskip / 2\relax
+  \Umathcloseordspacing\crampeddisplaystyle \muexpr\thinmuskip / 2\relax
+  \Umathcloseordspacing\crampedtextstyle    \muexpr\thinmuskip / 2\relax
+  \ifIS@script
+    \Umathcloseordspacing\scriptstyle       \muexpr\thinmuskip * 3 / 10\relax
+    \Umathcloseordspacing\crampedscriptstyle\muexpr\thinmuskip * 3 / 10\relax
+  \fi
+  \ifIS@scriptscript
+    \Umathcloseordspacing\scriptscriptstyle \muexpr\thinmuskip / 5\relax
+    \Umathcloseordspacing\crampedscriptscriptstyle
+      \muexpr\thinmuskip / 5\relax
+  \fi
+\else
+  \IS@info{No changes to space after delimiters.}
+\fi
+\ifIS@inner
+  \IS@info{Adjusting space around \string\mathinner\space subformulas.}
+  \@tfor\@i:=\displaystyle\crampeddisplaystyle
+    \textstyle\crampedtextstyle
+    \scriptstyle\crampedscriptstyle
+    \scriptscriptstyle\crampedscriptscriptstyle
+    \do{%
+      \expanded{\Umathinnerinnerspacing\@i=\the\expandafter
+        \Umathcloseopenspacing\@i\relax}
+      \@for\@j:=ord,op,bin,rel,open,close,punct\do{%
+        \expanded{%
+          \csname Umath\@j innerspacing\endcsname\@i=\the
+            \csname Umath\@j openspacing\expandafter\endcsname\@i\relax
+          \csname Umathinner\@j spacing\endcsname\@i=\the
+            \csname Umathclose\@j spacing\expandafter\endcsname\@i\relax}}}
+\else
+  \IS@info{No changes to space for \string\mathinner\space subformulas.}
+\fi
+\ifIS@cover
+  \IS@info{Setting delimiters to full height.}
+  \delimiterfactor\@m
+\else
+  \IS@info{No changes to delimiter heights.}
+\fi
+\wlog{}
+\endinput
+%%
+%% End of file `innerscript.sty'.

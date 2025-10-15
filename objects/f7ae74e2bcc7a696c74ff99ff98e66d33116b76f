@@ -1,0 +1,1876 @@
+% \iffalse meta-comment
+% !TEX program  = pdfLaTeX
+%<*internal> 
+\iffalse
+%</internal> 
+%<*readme> 
+-----------------------------------------------------------------
+##### ccool --- (Custom) COntext Oriented LaTeX
+- Source repository: https://github.com/rogard/ccool
+- Released under the LaTeX Project Public License v1.3c or later
+- See http://www.latex-project.org/lppl.txt
+-----------------------------------------------------------------
+%</readme> 
+%<*internal> 
+\fi
+\def\nameofplainTeX{plain}
+\ifx\fmtname\nameofplainTeX\else
+\expandafter\begingroup
+\fi
+%</internal> 
+%<*install> 
+\input l3docstrip.tex
+\keepsilent
+\askforoverwritefalse
+\preamble
+-----------------------------------------------------------------------------
+ccool ---  (Custom) COntext Oriented LaTeX 
+Released under the LaTeX Project Public License v1.3c or later
+See http://www.latex-project.org/lppl.txt
+----------------------------------------------------------------------------
+
+\endpreamble
+\postamble
+
+Copyright (C) 2020-2021 by Erwann Rogard
+
+This work may be distributed and/or modified under the
+conditions of the LaTeX Project Public License (LPPL), either
+version 1.3c of this license or (at your option) any later
+version.  The latest version of this license is in the file:
+
+http://www.latex-project.org/lppl.txt
+
+This work is "maintained" (as per LPPL maintenance status) by
+Erwann Rogard.
+
+This work consists of the file ccool.dtx and the derived files:
+ccool.sty, and ccool.pdf.
+
+\endpostamble
+\generate{
+  \file{\jobname.sty}{\from{\jobname.dtx}{package}}
+}
+%</install> 
+%<install> \endbatchfile
+%<*internal> 
+\generate{
+  \file{\jobname.ins}{\from{\jobname.dtx}{install}}
+}
+\nopreamble\nopostamble
+\generate{
+  \file{README.md}{\from{\jobname.dtx}{readme}}
+}
+\ifx\fmtname\nameofplainTeX
+\expandafter\endbatchfile
+\else
+\expandafter\endgroup
+\fi
+%</internal> 
+%<package> \NeedsTeXFormat{LaTeX2e}[2021-06-01]
+%<package> \RequirePackage{expl3, xparse, l3keys2e}[2021-06-01]
+%<package> \RequirePackage{lambdax}[2021-06-01]
+%<package> \ProvidesExplPackage
+%<package> {ccool}                                             % Package name
+%<package> {2021-09-20}                                        % Release date
+%<package> {3.2}                                               % Release version
+%<package> {ccool --- (Custom) COntext Oriented LaTeX  }       % Description
+%<*driver>
+\documentclass[show-notes]{l3doc}
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+%^^A\documentclass[full, show-notes]{l3doc}
+%^^A \listfiles
+\usepackage{amsmath, bookmark, enumitem, mathtools, microtype, tcolorbox, xparse}
+\usepackage[french, german, english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[bibencoding=auto, backend=biber, sorting=ynt]{biblatex}
+\begin{filecontents*}{\jobname.bib}
+@phdthesis{oh-2005,
+        author = {Olympia Hadjiliadis},
+        title = {Change--point detection of two--sided alternatives in the Brownian motion model and its connection to the gambler's ruin problem with relative wealth perception},
+        year = {2005},
+        school = {Columbia University}
+}
+@misc{a-547018,
+  author       = {@{}Javier Bezos},
+  title        = {When loading babel with spanish, spurious document command parser},
+  note         = {\url{https://tex.stackexchange.com/a/547018/112708}},
+  year         = {2020}}
+@misc{a-536597,
+  author       = {@{}frougon},
+  title        = {``Journaling calls to a function \textdel{taking inline code as argument}''},
+  year         = {2020},
+  note         = {\url{https://tex.stackexchange.com/a/536620}}}
+@manual{interface3,
+  title        = {The \LaTeX3 interfaces},
+  author       = {The \LaTeX3 Project Team},
+  year         = {2019},
+  note         = {\url{https://ctan.math.washington.edu/tex-archive/macros/latex/contrib/l3kernel/expl3.pdf}},
+  annote       = {} }
+@manual{xparse,
+  title        = {The \pkg{xparse} package},
+  author       = {The \LaTeX3 Project Team},
+  year         = {2019},
+  note         = {\url{https://ctan.math.illinois.edu/macros/latex/contrib/l3packages/xparse.pdf}},
+  annote       = {} }
+@manual{2005-cool,
+  title        = {The \pkg{cool} package},
+  author       = {Nick Setzer},
+  year         = {2005},
+  note         = {\url{https://www.ctan.org/pkg/cool}},
+  annote       = {} }
+@manual{l3build,
+  title        = {The \pkg{l3build} package},
+  author       = {The \LaTeX3 Project Team},
+  year         = {2019},
+  note         = {\url{https://ctan.math.washington.edu/tex-archive/macros/latex/contrib/l3build/l3build.pdf}},
+  annote       = {} }
+@manual{tcolorbox,
+  title        = {The \pkg{tcolorbox} package},
+  author       = {Sturm, Thomas F.},
+  year         = {2019},
+  note         = {\url{http://www.texdoc.net/texmf-dist/doc/latex/tcolorbox/tcolorbox.pdf}},
+  annote       = {} }
+@misc{p158966,
+  title        = {\cs{Ccool}, extension à \LaTeX~à vocation mathématique},
+  note         = {\url{http://forum.mathematex.net/latex-f6/ccool-extension-latex-a-vocation-mathematique-t17314.html}},
+  year         = {2020}}
+\end{filecontents*}
+\addbibresource{\jobname.bib}
+\ExplSyntaxOn
+%^^A *** Sectioning
+\tl_gset:Nn \partname {Part}%^^A allows to test w/o babel
+\makeatletter
+\newcommand*{\docsetnameref}
+{\def\@currentlabelname}%https://tex.stackexchange.com/questions/537751
+\makeatother
+\newcounter{cscounter}
+\ProvideDocumentCommand
+\DocPhantomSection{sO{subsection}D<>{}mo}
+{\leavevmode
+  \refstepcounter{cscounter}
+  \IfBooleanF{#1}{\addcontentsline{toc}{#2}{#4}}
+  \IfValueT{#5}
+  {\docsetnameref{#3#4}\label{#5}}}
+% ^^A *** Msg
+\msg_new:nnn{__ccool_doc}{unknown}{~#1:#2~unknown}
+% ^^A *** Expressions
+\ProvideDocumentCommand{\pkgpattpair}{mm}{\texttt{>\{#1\}\{#2\}}}
+\ProvideDocumentCommand{\pkgrule}{}{\texttt{$\rightarrow$}}
+% ^^A *** L3 package
+\ProvideDocumentCommand{\docplaceh}{mO{1}}{\texttt{\prg_replicate:nn{#2}{\#}#1}}
+% ^^A *** Lists
+\newlist{arab-inl}{enumerate*}{1}
+\setlist[arab-inl]{label=\arabic*)}
+\newlist{colon-inl}{itemize*}{1}
+\setlist[colon-inl]
+{ %^^Abefore=\noindent,
+  label={},
+  itemjoin={{; }},
+  after={{.}}}
+\newlist{descr}{description}{1}
+\setlist[descr]{nosep, align=right, itemindent=0pt, font=\sffamily\tiny}
+% ^^A Sort--->
+\providecommand\docarg[1]{\texttt{#1}} % fun[param] (macro) vs fun[arg] (eval)
+\providecommand\docargnoval{\c_novalue_tl}
+\providecommand\docassign[2]{#1~$\leftarrow$~#2}
+\providecommand\docccept[1]{\textit{#1}}
+\providecommand\doccceptargspec{arg~spec}
+\providecommand\doccceptbool{boolean}
+\providecommand\doccceptclist{clist}
+\providecommand\doccceptcode{code}
+\providecommand\doccceptcsname{cs name}
+\providecommand\doccceptcsorcode{cs~or~code}
+\providecommand\doccceptcs{cs}
+\providecommand\doccceptempty{empty}
+\providecommand\doccceptgopt{global~option}
+\providecommand\doccceptgroup{local~group}
+\providecommand\doccceptint{integer}
+\providecommand\doccceptitems{items}
+\providecommand\doccceptkey{key}
+\providecommand\doccceptkvl{keyval~list}
+\providecommand\doccceptopt{option}
+\providecommand\doccceptpath{path}
+\providecommand\doccceptplaceh{placeholder}
+\providecommand\doccceptpre{preamble}
+\providecommand\doccceptprop{prop}
+\providecommand\doccceptsep{separators}
+\providecommand\doccceptseq{seq}
+\providecommand\docccepttlvar{tl~var}
+\providecommand\docccepttl{token~list}
+\providecommand\docccepttok{token}
+\providecommand\doccceptval{val}
+\providecommand\docconv[1]{convention~\autoref{conv:#1}}
+\providecommand\docdefaultfor{default~for~}
+\providecommand\docenvdoc{\env{document}}
+\providecommand\docparm[1]{\texttt{\char`\{}#1\texttt{\char`\}}}
+\providecommand\docexpand[2]{#1~$\rightarrow$~#2}
+\providecommand\docfillblank{\begin{minipage}[t]{\linewidth}\end{minipage}}
+\providecommand\docissuedont{Don't: }
+\providecommand\docissuedo{Do: }
+\providecommand\docissuesymp{Symptom: }
+\providecommand\doclist[1]{Listing~\ref{listing:#1}}
+\providecommand\docmetakeyorkeyval[1][i]{\meta{key_{#1}}|\meta{key_{#1}}=\meta{val_{#1}}}
+\providecommand\docnb{\noindent\textbf{NB}:~}
+\providecommand\docpard[1]{\texttt{\textless}#1\texttt{\textgreater}}
+\providecommand\docpare[2]{\texttt{#1}\docparm{#2}}
+\providecommand\docparo[1]{\texttt{[}#1\texttt{]}}
+\providecommand\docpipe{\textbar}
+\providecommand\docreflist[1]{Listing~\ref{listing:#1}}
+\providecommand\docsee{See:~}
+\providecommand\docstep[1]{step~\ref{step:#1}}
+\providecommand\doctip{\noindent\textbf{Tip}:~}
+\providecommand\docvers[2]{v#1.#2}
+\providecommand\docwarn{\noindent\textbf{Warning}:~}
+\providecommand\docxparsed[1][~argument]{`d'-type~#1}
+\providecommand\docxparsee[1][~argument]{`e'-type~#1}
+\providecommand\docxparsem[1][~argument]{`m'-type~#1}
+\providecommand\docxparseo[1][~argument]{`o'-type~#1}
+\providecommand\pkgkey{key$_{i}$}
+\providecommand\pkgobj[1]{object identified by #1}
+\providecommand\pkgoptan{\docarg{And}}
+\providecommand\pkgoptex{\docarg{Expans}}
+\providecommand\pkgoptfi{\docarg{File}}
+\providecommand\pkgoptin{\docarg{Inner}}
+%^^A\providecommand\pkgoptions{kvl0}
+\providecommand\pkgoptions{\doccceptkvl$_0$}
+\providecommand\pkgoptou{\docarg{Outer}}
+\providecommand\pkgoptpad{\docarg{Default}}%default
+\providecommand\pkgoptpa{\docarg{Param}}
+\providecommand\pkgoptse{\docarg{Separ}}
+\providecommand\pkgoptwr{\docarg{Write}}
+\providecommand\pkgparap{\texttt{+}}%append
+\providecommand\pkgparex{\texttt{*}}%expand
+\providecommand\pkgparhe{tl$_{1}$}%head
+\providecommand\pkgparin{code$_{1}$}%inner
+\providecommand\pkgparkvl{\doccceptkvl$_1$}
+\providecommand\pkgparkvlnxt{\doccceptkvl$_2$}
+\providecommand\pkgparou{code$_{2}$}%outer
+\providecommand\pkgparpa{tl$_{2}$}%param
+\providecommand\pkgparsiii{tl$_{5}$}
+\providecommand\pkgparsii{tl$_{4}$}
+\providecommand\pkgparsi{tl$_{3}$}
+\providecommand\pkgpars{\Arg{\pkgparsi}\docpipe\Arg{\pkgparsi}\Arg{\pkgparsii}\docpipe\Arg{\pkgparsi}\Arg{\pkgparsii}\Arg{\pkgparsiii}}%separ
+\providecommand\pkgparta{tl$_{6}$}%tail
+\providecommand\pkgsep[1]{\Arg{#1}}
+\providecommand\pkgval{val$_{i}$}
+\providecommand\pkgwrite{\cs{Ccool}\docarg{\meta{\pkgparpa}}\docpare{i}{\meta{\pkgparin}}\Arg{\pkgparkvl}}
+% ^^A Sort<---
+\ExplSyntaxOff
+%^^A *** listing
+\tcbuselibrary{listings, breakable}
+\newtcblisting[auto counter]
+{listing}[2][]{
+  noparskip,
+  breakable,
+  colback=white,
+  colframe=black,
+  opacitybacktitle=.8,%
+  fonttitle=\bfseries,
+  title={Listing~\thetcbcounter. #1},
+  arc=0pt,
+  outer arc=0pt,
+  boxrule=1pt,
+  listing and text,
+  #2}
+\newtcblisting
+{internal}
+{text only,
+  breakable,
+  colback=white,
+  fontupper=\sffamily,
+  arc=1pt,
+  outer arc=1pt,
+  boxrule=0pt,
+  halign=left,
+  fontupper=\small\sffamily,
+  left=0pt,
+  top=0pt,
+  bottom=0pt}
+\usepackage{ccool}
+\usepackage{hyperref} %^^A comes last
+\begin{document}
+\DocInput{\jobname.dtx}
+\end{document}
+%</driver> 
+% \fi
+% 
+% \GetFileInfo{\jobname.sty}
+% \title{The \pkg{ccool} package\thanks{^^A
+% This file describes version \fileversion, last revised \filedate.^^A
+% }^^A
+% }
+%   \author{Erwann Rogard\thanks{first.lastname at gmail.com}}
+%   
+%   \date{Released \filedate}
+%   \begin{documentation}
+%     
+%     \maketitle
+%     
+%     \begin{abstract} 
+%       This \LaTeX package provides an interface to define and evaluate key-based replacement rules\cite{interface3}.
+%     It can be used to parse the argument specification of a document command\cite{xparse}.
+%     \end{abstract}
+%     
+%     \tableofcontents 
+%     
+%     \part{Usage}\label{part:usage}
+%
+%   \DocPhantomSection*{section}{\cs{Ccool}}[usage:cs:ccool]
+%   \begin{function}{\Ccool}
+%     \begin{syntax}
+%       \cs{Ccool}\docparo{\meta{\pkgparhe}}\docpard{\meta{\pkgparpa}}\docpare{c}{\meta{\pkgparin}}\Arg{\pkgparkvl}\pkgparap\pkgparex\docpare{s}{\meta{\doccceptsep}}\docpare{c}{\meta{\pkgparou}}\docparo{\meta{\pkgparta}}
+%     \end{syntax}where \meta{\doccceptsep} is either of: \Arg{\pkgparsi}, \Arg{\pkgparsi}\Arg{\pkgparsii}, and \Arg{\pkgparsi}\Arg{\pkgparsii}\Arg{\pkgparsiii}.
+%     \begin{description}
+%     \item[Semantics] See \autoref{ccool:core}-\ref{ccool:wr}.
+%     \end{description}
+%   \end{function}
+%   
+%   \subsection{Core feature}
+%   \label{ccool:core} 
+%   \cs{Ccool}\Arg{\pkgparkvl} executes for each \meta{\pkgkey}|=|\meta{\pkgval},
+%   \begin{enumerate}[label=\emph{\arabic*)}]
+%   \item \docassign{\meta{\pkgval} }
+%     { \cs{function}\Arg{\pkgval} }\label{step:val}
+%   \item define \cs{\meta{\pkgkey}} such that \docexpand{ \cs{\meta{\pkgkey} } }{\meta{\pkgval}},
+%     \label{step:key}
+%   \end{enumerate}where \cs{function} is encoded in \docccept{\doccceptgopt}~\pkgoptin.
+%   For instance, the side effect of |\Ccool{ Real = \mathbb{R} }| is \docexpand{\cs{Real}}{\docarg{\textbackslash{}mathbb\{R\}}}.
+%   To be sparingly used, \docccept{\doccceptgopt}~\pkgoptex controls the type of expansion of \meta{\pkgkey}~and \meta{\pkgval}.
+%   
+%   if \cs{\meta{\pkgkey}} needs arguments, use \cs{lambdax} from \pkg{lambdax} on the rhs.
+%   
+%   \subsection{Process the \texorpdfstring{\docccept{\pkgval}}{val_i}'s}
+%   \label{ccool:in} 
+%   \cs{Ccool}\ \docpare{c}{\meta{\pkgparin}}\Arg{\pkgparkvl} is identical to the \nameref{ccool:core},
+%   except it overrides \pkgoptin.
+%   
+%   In our example, if multiple number systems are defined with \cs{Ccool} (natural, reals, \dots),
+%   it is more efficient to omit |\mathbb{.}| inside \meta{\pkgval}, and instead
+%   use |c{\mathbb{#1}}|, where |#1| means ``parameter to be replaced''.
+%   
+%   \subsection{Append to a hook}
+%   \label{ccool:ap} 
+%   \cs{Ccool}\Arg{\pkgparkvl}\pkgparap~is identical to the \nameref{ccool:core}, except it
+%   repeats after \cs{CcoolHook}.
+%   This is useful to make the side effect persist after a \docccept{\doccceptgroup} (such as \env{theorem}).
+%   
+%   \subsection{Expand the \texorpdfstring{\docccept{\pkgval}}{val_i}'s}
+%   \label{ccool:ex} 
+%   \cs{Ccool}\Arg{\pkgparkvl}\pkgparex~supplements the \nameref{ccool:core} with 
+%   the expansion of the \meta{\pkgval}'s using typesetting rules encoded in \docccept{\doccceptgopt}~\pkgoptse 
+%   and~\pkgoptou. The first are \docccept{\doccceptsep} applied to the \meta{\pkgval}'s to form a \docccept{\docccepttl},
+%   and the second a function applied to the latter. 
+%   
+%   They can be overriden inline by appending further \docpare{s}{\meta{\doccceptsep}}~and~\docpare{c}{\meta{\pkgparou}}, respectively,
+%   to the list of arguments.
+%   
+%   \subsection{Head}
+%   \label{ccool:he}
+%   \cs{Ccool}\docparo{\meta{\pkgparhe}}\Arg{\pkgparkvl}~expands \meta{\pkgparhe} and executes the \nameref{ccool:core}.
+%   
+%   There may be situations where it is convenient to pass \meta{\pkgparhe}~as \doccceptempty.
+%   
+%   \subsection{Tail}
+%   \label{ccool:ta}
+%   \cs{Ccool}\Arg{\pkgparkvl}\docparo{\meta{\pkgparta}}\Arg{\pkgparkvlnxt}~is identical to
+%   \cs{Ccool}\Arg{\pkgparkvl} followed by \cs{Ccool}\docparo{\meta{\pkgparta}}\Arg{\pkgparkvlnxt}.
+%   
+%   The combination of \nameref{ccool:core}, \nameref{ccool:he}, and \nameref{ccool:ta} allows to integrate typesetting and
+%   the creation of commands.
+%   
+%   \subsection{Parameterize the \texorpdfstring{\docccept{\pkgkey}}{key_i}'s}
+%   \label{ccool:pa}
+%   \cs{Ccool}\docpard{\meta{\pkgparpa}}\Arg{\pkgparkvl} is identical to the  \nameref{ccool:core},
+%   except \meta{\pkgkey} is replaced by \meta{\pkgkey\docpard{\pkgparpa}}.
+%   The default value of \meta{\pkgparpa} is encoded in \pkgoptpa.
+%   In our example, \meta{\pkgparpa} could be \docarg{Style}.
+%   
+%   \subsection{Write}
+%   \label{ccool:wr} 
+%   \docccept{\doccceptgopt}~\pkgoptwr~is identical to the  \nameref{ccool:core},
+%   except that if \pkgoptwr is set to \cs{BooleanTrue},
+%   the code is written to a file whose \doccceptpath~is encoded in \docccept{\doccceptgopt}~\pkgoptfi.
+%   
+%   \DocPhantomSection*{section}{\cs{CcoolClear}}{usage:cs:clear}
+%   \begin{function}{\CcoolClear}
+%     \begin{syntax}
+%       \cs{CcoolClear}\docpard{\meta{\pkgparpa}}\docparm{\dots\meta{\doccceptkey_i},\dots}
+%     \end{syntax}
+%     \begin{description}
+%     \item[Semantics] Clears all \cs{\meta{\pkgkey\docpard{\pkgparpa}}}'s
+%     \end{description}
+%   \end{function}
+%   
+%   \DocPhantomSection*{section}{\cs{CcoolHook}}{usage:cs:hook}
+%   \begin{function}{\CcoolHook}
+%     \begin{syntax}
+%       \cs{CcoolHook}
+%     \end{syntax}
+%     \begin{description}
+%     \item[Semantics] No side effect or expansion
+%     \end{description}
+%   \end{function}
+%   
+%   \changes{v3.2}
+%   {2021/09/20}
+%   {Removed~usage~for\cs[no-index]{CcoolLambda}~as~superseded~by~\cs[no-index]{LambdaX}.}
+%   
+%   \DocPhantomSection*{section}{\cs{CcoolOption}}{usage:cs:option}
+%   \begin{function}{\CcoolOption}
+%     \begin{syntax}
+%       \cs{CcoolOption}\docparo{\dots{}\docmetakeyorkeyval[i],\dots}
+%     \end{syntax}where \meta{\doccceptkey_i} is either of
+%     \pkgoptan,
+%     \pkgoptex,
+%     \pkgoptfi,
+%     \pkgoptin,
+%     \pkgoptpa,
+%     \pkgoptou,
+%     \pkgoptse,
+%     and \pkgoptwr.
+%     \begin{description}
+%     \item[Semantics] Modify the default behavior of \cs{Ccool}
+%     \end{description}
+%   \end{function}
+%   
+%   \DocPhantomSection*{subsection}{\pkgoptan}{usage:opt:an}
+%   \DescribeOption{\pkgoptan}
+%   \begin{description}
+%   \item[Semantics] Sets the translation of \textit{and} in language \meta{\doccceptkey} to \meta{\doccceptval}
+%   \item[Syntax] \meta{\doccceptkvl}
+%   \end{description}
+%   
+%   \DocPhantomSection*{subsection}{\pkgoptex}{usage:opt:ex}
+%   \DescribeOption{\pkgoptex}
+%   \begin{description}
+%   \item[Syntax] \texttt{eo\docpipe{}ee\docpipe{}ex\docpipe{}xo\docpipe{}xe\docpipe{}xx}
+%   \end{description}
+%   
+%   \DocPhantomSection*{subsection}{\pkgoptfi}{usage:opt:fi}
+%   \DescribeOption{\pkgoptfi}
+%   \begin{description}
+%   \item[Syntax] \meta{\doccceptpath}
+%   \end{description}
+%   
+%   \DocPhantomSection*{subsection}{\pkgoptin}{usage:opt:in}
+%   \DescribeOption{\pkgoptin}
+%   \begin{description}
+%   \item[Syntax] \meta{\doccceptcode}, with |####1| as the \docccept{\doccceptplaceh}
+%   \end{description}
+%   
+%   \DocPhantomSection*{subsection}{\pkgoptpa}{usage:opt:pa}
+%   \DescribeOption{\pkgoptpa}
+%   \begin{description}
+%   \item[Syntax] \meta{\docccepttl}
+%   \end{description}
+%   
+%   \DocPhantomSection*{subsection}{\pkgoptou}{usage:opt:ou}
+%   \DescribeOption{\pkgoptou}
+%   \begin{description}
+%   \item[Default] |\ensuremath{####1}|
+%   \item[Syntax] \meta{\doccceptcode}, with |####1| as the \docccept{\doccceptplaceh}
+%   \end{description}
+%   
+%   \DocPhantomSection*{subsection}{\pkgoptse}{usage:opt:se}
+%   \DescribeOption{\pkgoptse}
+%   \begin{description}
+%   \item[Other] Default behavior depends on whether \pkg{babel} and \pkg{amsmath} are loaded
+%   \item[Syntax] That of \docccept{\doccceptsep} in \cite[Section 8 of \pkg{l3seq}]{interface3}
+%   \end{description}
+%   
+%   \DocPhantomSection*{subsection}{\pkgoptwr}{usage:opt:wr}
+%   \DescribeOption{\pkgoptwr}
+%   \begin{description}
+%   \item[Syntax] \cs{BooleanFalse}\docpipe\cs{BooleanTrue}
+%   \end{description}
+%   
+%   \DocPhantomSection*{section}{\cs{CcoolRead}}{usage:cs:read}
+%   \begin{function}{\CcoolRead}
+%     \begin{syntax}
+%       \cs{CcoolRead}\docparo{\meta{\doccceptpath}}
+%     \end{syntax}
+%     \begin{description}
+%     \item[Semantics]\docfillblank
+%       \begin{enumerate}
+%       \item Reads the definitions in \meta{\doccceptpath}.
+%       \item Writes to \file{ccool.log}: `read from \meta{\doccceptpath}'
+%       \end{enumerate}
+%     \end{description}  
+%   \end{function}
+%   
+%   \DocPhantomSection*{section}{\cs{CcoolVers}}{usage:cs:vers}
+%   \begin{function}{\CcoolVers}
+%     \begin{syntax}
+%       \cs{CcoolVers}
+%     \end{syntax}
+%     \begin{description}
+%     \item[Semantics] \docexpand{}{the package's version}
+%     \end{description}  
+%   \end{function}
+%   \part{Other}
+%   
+%   \section{Bibliograhy}
+%   \printbibliography[heading=none]
+%   
+%   \section{Do's and dont's}
+%   \label{usage:dosdont}
+%   
+%   \begin{enumerate}
+%   \item \docfillblank
+%     \begin{itemize}
+%     \item[\docissuedont] |Inner=\{####1\}|
+%     \item[\docissuesymp] \cs{CcoolRead} fails
+%     \item[\docissuedo] |Inner={\char`{####1\char`}}|
+%     \end{itemize}
+%   \item \docfillblank
+%     \begin{itemize}
+%     \item[\docissuedont] |$|\meta{\pkgkey}|<x$|.
+%     \item[\docissuedo] |$|\cs{\meta{\pkgkey}}|{<}x$|
+%     \end{itemize}
+%   \item\docfillblank
+%     \begin{itemize}
+%     \item[\docissuedont] |[a, b)|
+%     \item[\docissuedo] |{[}a, b{)}|
+%     \end{itemize}
+%   \item \docfillblank
+%     \begin{itemize}
+%     \item[\docissuedont] |\cal F|.
+%     \item[\docissuedo] |\cal{F}| or |\mathcal{F}|
+%     \end{itemize}
+%   \item \docfillblank
+%     \begin{itemize}
+%     \item[\docissuedont] |\[x_0,x\]|
+%     \item[\docissuedo] |\left[x_0,x\right]|
+%     \end{itemize}
+%^^A   \item \docfillblank
+%^^A     \begin{itemize}
+%^^A     \item[\docissuedont] Use \docccept{\docxparsed[]} or \docccept{\docxparsee[]}~arguments\cite{xparse} for \nameref{usage:cs:lambda}
+%^^A     \item[\docissuedo] Use only \docccept{\docxparsem[]} and \docccept{\docxparseo[]}~arguments
+%^^A     \end{itemize}
+%   \item \docfillblank
+%     \begin{itemize}
+%     \item[\docissuedont] |\usepackage[spanish]{babel}|
+%     \item[\docissuedo] |\usepackage[spanish.noquoting]{babel}|\cite{a-547018}
+%     \end{itemize}
+%   \end{enumerate}
+%
+%   \section{To do}
+%   \begin{enumerate}
+%   \item Create an environment for \cs{CoolHook}.
+%   \end{enumerate}
+%
+% \section{Support}\label{other:support}
+% 
+% This package is available from \url{https://github.com/rogard/ccool}.
+%
+% 
+% \changes{v1.0}
+% {2020/03/08}
+% {Initial version}
+% \changes{v1.1}
+% {2020/04/04}
+% {Rearrange: much of the implementation}
+% \changes{v1.1}
+% {2020/04/04}
+% {Replace: \Arg{kvl_{2}}~by~\docpard{\meta{kvl_{2}}}~given that option type \texttt{G} not recommended\cite{xparse}}
+% \changes{v1.1}
+% {2020/04/04}
+% {Replace: \cs[no-index]{OopsOptions}~by~\cs[no-index]{OopsOption}}
+% \changes{v1.1}
+% {2020/04/04}
+% {Replace: \docarg{GenericObject}~by~\docarg{Name}}
+% \changes{v1.1}
+% {2020/04/04}
+% {Replace: \docarg{Separators}~by~\docarg{Separ}}
+% \changes{v1.1}
+% {2020/04/04}
+% {Add:\cs[no-index]{OopsTest}}
+% \changes{v1.1}
+% {2020/04/04}
+% {Add:\cs[no-index]{OopsRestore}}
+% \changes{v1.1}
+% {2020/04/04}
+% {Add: \docarg{Save}}
+% \changes{v1.2}
+% {2020/04/06}
+% {Add: optional \pkgparex to \cs[no-index]{OopsNew} as instruction to expand \pkgparkvl}
+% \changes{v1.2}
+% {2020/04/06}
+% {Replace: \cs[no-index]{OopsClear}\Arg{\pkgparpa} by \cs[no-index]{OopsClear}\docparo{\meta{\doccceptkvl}}}
+% \changes{v1.2}
+% {2020/04/06}
+% {Delete: \meta{kvl_{2}}~and~\meta{code_{2}}}
+% \changes{v1.2}
+% {2020/04/06}
+% {Delete: \cs[no-index]{OopsTest}}
+% \changes{v1.2}
+% {2020/04/06}
+% {Replace: \cs[no-index]{Save} by \cs[no-index]{Write}}
+% \changes{v1.2}
+% {2020/04/06}
+% {Replace: \cs[no-index]{Restore} by \cs[no-index]{Read}}
+% \changes{v1.3}
+% {2020/04/06}
+% {Replace: \cs[no-index]{OopsNew} by \cs[no-index]{Oops}}
+% \changes{v1.3}
+% {2020/04/06}
+% {Replace: \Arg{\pkgparpa} and \docparo{\meta{\pkgparpa}} by \docpard{\meta{\pkgparpa}} }
+% \changes{v1.4}
+% {2020/04/10}
+% {Replace: \docpare{s}{\Arg{\pkgparsi}\Arg{\pkgparsii}\Arg{\pkgparsiii}}
+% by \docpare{s}{\Arg{\pkgparsi}\docpipe\Arg{\pkgparsi}\Arg{\pkgparsii}\docpipe\Arg{\pkgparsi}\Arg{\pkgparsii}\Arg{\pkgparsiii}}}
+% \changes{v1.4}
+% {2020/04/10}
+% {Add:optional \pkgparap to \cs[no-index]{OopsNew} to make side effects presist beyond local group}
+% \changes{v1.4}
+% {2020/04/10}
+% {Add: \cs[no-index]{OopsHook}}
+% \changes{v1.4}
+% {2020/04/10}
+% {Add: \docarg{Expans} (for debugging' sake, but...) }
+% \changes{v1.4}
+% {2020/04/10}
+% {Add: \autoref{usage:dosdont} }
+% \changes{v1.4}
+% {2020/04/10}
+% {Add: \cs[no-index]{OopsDebug} }
+% \changes{v1.5}
+% {2020/04/10}
+% {Delete: dependence on \pkg{datetime} }
+% \changes{v1.5}
+% {2020/04/10}
+% {Add: \pkgoptfi }
+% \changes{v1.6}
+% {2020/04/10}
+% {Rename: \pkg{oops} to \pkg{ccool} (better describes the purpose) }
+% \changes{v1.6}
+% {2020/04/10}
+% {Rename: \cs[no-index]{Oops} to \cs[no-index]{Ccool}}
+% \changes{v1.6}
+% {2020/04/10}
+% {Rename: \cs[no-index]{OopsClear} to \cs[no-index]{CcoolClear}}
+% \changes{v1.6}
+% {2020/04/10}
+% {Rename: \cs[no-index]{OopsDebug} to \cs[no-index]{CcoolDebug}}
+% \changes{v1.6}
+% {2020/04/10}
+% {Rename: \cs[no-index]{OopsHook} to \cs[no-index]{CcoolHook}}
+% \changes{v1.6}
+% {2020/04/10}
+% {Rename: \cs[no-index]{OopsOption} to \cs[no-index]{CcoolOption}}
+% \changes{v1.6}
+% {2020/04/10}
+% {Rename: \cs[no-index]{OopsRead} to \cs[no-index]{CcoolRead}}
+% \changes{v1.7}
+% {2020/04/11}
+% {Delete: \cs[no-index]{CcoolDebug} }
+% \changes{v1.8}
+% {2020/04/12}
+% {Add: \hyperref[usage:cs:lambda]{\cs[no-index]{CcoolLambda}} }
+% \changes{v1.8}
+% {2020/04/12}
+% {Add: \cs[no-index]{CcoolVers} }
+% \changes{v1.9}
+% {2020/04/14}
+% {Add: support for \LuaTeX }
+% \changes{v1.9}
+% {2020/04/14}
+% {Move: from \autoref{part:usage} to \autoref{part:impl}, what is now that part's \autoref{impl:frontend}}
+% \changes{v2.0}
+% {2020/04/15}
+% {Delete: \pkgoptfi's dependency on \pkg{texosquery} and \cs[no-index]{pdfcreationdate}}
+% \changes{v2.0}
+% {2020/04/15}
+% {Add: support for \XeTeX}
+% \changes{v2.0}
+% {2020/04/15}
+% {Update: \cs[no-index]{RequirePackage}, \cs[no-index]{NeedsTeXFormat}'s second argument / TeX Live 2020}
+% \changes{v2.1}
+% {2020/04/17}
+% {Replace: \hyperref[usage:cs:lambda]{\cs[no-index]{CcoolLambda}}'s optional integer argument (number of \texttt{m}'s)
+% by a standard argument list}
+% \changes{v2.1}
+% {2020/04/17}
+% {Replace: \hyperref[ccool:pa]{\meta{\pkgparpa}}'s position within \cs[no-index]{Ccool}'s argument list, from first to second. Greater versatility }
+% \changes{v2.1}
+% {2020/04/17}
+% {Replace: as~the~default~of~\pkgoptpa,~\docarg{Math}~by~\pkgoptpad}
+% \changes{v2.1}
+% {2020/04/17}
+% {Replace: \docccept{\doccceptgopt}~\docarg{Name} by \pkgoptpa }
+% \changes{v2.2}
+% {2020/04/20}
+% {Replace: part of the abstract's with more straighforward descriptions based on input from forum participtants}
+% \changes{v2.3}
+% {2020/05/16}
+% {Replace: for \cs[no-index]{Ccool}, \docpare{i}{} by \docpare{c}{}}
+% \changes{v2.3}
+% {2020/05/16}
+% {Rearranged: \cs{Ccool}'s subsections. Previously, by argument. Now, by feature. }
+% \changes{v2.3}
+% {2020/05/16}
+% {Replace: In \docstep{key}, the created command's implementation, from \cs[no-index]{ProvideDocumentCommand} to \cs[no-index]{DeclareDocumentCommand}}
+% \changes{v2.5}
+% {2020/05/21}
+% {Modify: behavior of \autoref{part:usage}~\nameref{ccool:ex}, rely on \pkg{erw-l3}'s \cs[no-index]{erw_seq_use:Nn} }
+% \changes{v2.5}
+% {2020/05/21}
+% {Modify: Rely on \pkg{erw-l3}'s \cs[no-index]{erw_jobnametimestamp:} }
+% \changes{v2.6}
+% {2020/05/22}
+% {Modify: Rely on \pkg{erw-l3}'s \cs[no-index]{erw_lambda:nnn} }
+% \changes{v2.7}
+% {2020/05/28}
+% {Add: \docccept{\doccceptgopt}~\pkgoptan }
+% \changes{v2.7}
+% {2020/05/28}
+% {Modify: \pkgoptse's default rely on \pkg{babel} and \pkg{amsmath}, if applicable}
+% \changes{v2.7}
+% {2020/05/28}
+% {Modify: Replace \docxparsem by \docxparseo}
+% \changes{v2.8}
+% {2020/05/28}
+% {Fix: conflict between \cs[no-index]{usepackage}\docparo{spanish}\docparm{babel} and \nameref{ccool:pa} }
+% \changes{v2.9}
+% {2020/06/03}
+% {Miscellaneous }
+% \changes{v3.0}
+% {2020/06/04}
+% {Miscellaneous }
+% \changes{v3.1}
+% {2020/10/10}
+% {Replaced: \doclist{thisdeps}'s content, from exhaustive dependencies to those explicit with \cs[no-index]{usepackage}}
+% \changes{v3.2}
+% {2021/09/20}
+% {Removed~listing~changes~(little~information,~difficult~to~keep~track)}
+%
+%   \clearpage
+%   \part{Listing}\label{part:listing}
+%
+%\phantomsection\addcontentsline{toc}{section}{Tutorial\textgreater}
+%\phantomsection\addcontentsline{toc}{section}{\ref{listing:numbrsys:base}. Let~\texorpdfstring{$\mathbb{N}$}{N} and \texorpdfstring{$\mathbb{R}$}{R} denote\dots}
+% \iffalse
+%<*guardlisting> 
+% \fi
+\begin{listing}[``Let~$\mathbb{N}$ and $\mathbb{R}$ denote\dots'']
+  {label=listing:numbrsys:base, listing and text}
+  Let~$\mathbb{N}$ and $\mathbb{R}$ denote the natural and real numbers.
+\end{listing}
+% \iffalse
+%</guardlisting> 
+% \fi
+% 
+% \phantomsection\addcontentsline{toc}{section}
+% {\ref{listing:numbrsys:cmd}. Same as \ref{listing:numbrsys:base}, with \cs{NewDocumentCommand}}
+% \iffalse
+%<*guardlisting> 
+% \fi
+\begin{listing}[ Same as \ref{listing:numbrsys:base}, with \cs{NewDocumentCommand}]
+  {label=listing:numbrsys:cmd, listing and text}
+  \DeclareDocumentCommand\Nat{}{\mathbb{N}}
+  \DeclareDocumentCommand\Real{}{\mathbb{R}}
+  Let~$\Nat$ and $\Real$ denote the natural and real numbers.
+\end{listing}
+% \iffalse
+%</guardlisting> 
+% \fi
+% 
+% \phantomsection\addcontentsline{toc}{section}
+% {\ref{listing:numbrsys:in}.  Same as \ref{listing:numbrsys:cmd}, with \cs{Ccool}}
+% \iffalse
+%<*guardlisting> 
+% \fi
+\begin{listing}[ Same as \ref{listing:numbrsys:cmd}, with \cs{Ccool} ]
+  {label=listing:numbrsys:in, listing and text}
+  \begingroup
+  \Ccool c{\mathbb{#1}}{ Nat = {N}, Real = {R} }
+  Let~$\Nat$ and $\Real$~denote the natural and real numbers.
+  \endgroup
+\end{listing}
+% \iffalse
+%</guardlisting> 
+% \fi
+% 
+% \phantomsection\addcontentsline{toc}{section}
+% {\ref{listing:numbrsys:ex}.  Same as \ref{listing:numbrsys:in}, with expansion}
+% \iffalse
+%<*guardlisting> 
+\fi
+\begin{listing}[ Same as \ref{listing:numbrsys:in}, with expansion]
+  {label=listing:numbrsys:ex, listing and text}
+\begingroup
+  \Ccool[Let~]
+  c{\mathbb{#1}}{ Nat = {N}, Real = {R} }*
+  [~denote the natural and real numbers.]{}
+\endgroup
+\end{listing}
+% \iffalse
+%</guardlisting> 
+% \fi
+%
+% \changes{v3.2}
+% {2021/09/20}
+% {\cs[no-index]{begingroup}~and~\cs[no-index]{endgroup}~inside~listings.}
+%
+% \phantomsection\addcontentsline{toc}{section}
+% {\ref{listing:numbrsys:pa}.  Same as \ref{listing:numbrsys:in}, parameterized}
+% \iffalse
+%<*guardlisting> 
+% \fi
+\begin{listing}[ Same as \ref{listing:numbrsys:in}, parameterized]
+  {label=listing:numbrsys:pa, listing and text}
+\begingroup
+  \Ccool<foo>c{\mathbb{#1}}{ Nat = {N}, Real = {R} }
+  [Let $\Nat<foo>$ and $\Real<foo>$ denote the natural and real numbers.]{}
+\endgroup
+\end{listing}
+% \iffalse
+%</guardlisting> 
+% \fi
+% \phantomsection\addcontentsline{toc}{section}{\textless}
+%
+% \changes{v3.2}
+% {2021/09/20}
+% {\cs[no-index]{texorpdfstring}~was~used~with~one~argument~instead~of~two~in~listing~titles,~so~removed~it.}
+%
+% \phantomsection\addcontentsline{toc}{section}{\ref{listing:mvt:i}. Mittelwertsatz f\"ur \texorpdfstring{$n$}{n} Variable. }
+% \iffalse
+%<*guardlisting> 
+% \fi
+\begin{listing}[{Mittelwertsatz f\"ur $n$ Variable\cite[17.3]{tcolorbox}}]
+  {label=listing:mvt:i}
+  \begingroup
+  \CcoolOption[ Write = \BooleanTrue ]
+  \selectlanguage{german}
+  \newtheorem{theorem}{Theorem}
+  \AfterEndEnvironment{theorem}{\CcoolHook}
+  \Ccool c{\mathbb{#1}}
+  { N = { N } , R = { R } }+[]
+  { Grad = { \operatorname{grad} } }+
+  [\begin{theorem}
+    [Mittelwertsatz f\"ur $n$ Variable]Es~sei~]
+    { OffMenge = {D}, Ci = {C^{1}}, Strecke = { \left[x_0,x\right] } }+
+    [$n\in\N$,~$\OffMenge\subseteq\N^n$ eine offene Menge und $f\in\Ci(\OffMenge,\R)$.
+    Dann gibt es auf jeder Strecke $\Strecke\subset\OffMenge$ einen Punkt $\xi\in\Strecke$,~]
+    { Steig = { \frac{ f(x)-f(x_0) }{ x-x_0 } }, Punkt = { \xi } }+
+    [so dass gilt
+    \begin{equation*}
+      \Steig = \Grad f(\Punkt)^{\top}
+    \end{equation*}
+  \end{theorem}]
+  {}
+  (Check: $\N$, $\Punkt$)
+    \endgroup
+\CcoolOption
+\end{listing}
+% \iffalse
+%</guardlisting> 
+% \fi
+% 
+% \phantomsection\addcontentsline{toc}{section}{\ref{listing:mvt:ii}. Listing~\ref{listing:mvt:i} read from file}
+% \iffalse
+%<*guardlisting> 
+% \fi
+\begin{listing}[Listing~\ref{listing:mvt:i} read from file]
+  {label=listing:mvt:ii}
+  \CcoolRead ~$\N$ $\R$ $\OffMenge$ $\Ci$ $\Strecke$ 
+  \CcoolClear
+\end{listing}
+% \iffalse
+%</guardlisting> 
+% \fi
+%
+% \changes{v3.2}
+% {2021/09/20}
+% {Removed~listing~`Hello, world! (for testing's sake)'.~That~should~be~for~l3build}
+%
+% \phantomsection\addcontentsline{toc}{section}{\ref{listing:proba:i}. Probability space}
+% \iffalse
+%<*guardlisting> 
+% \fi
+\begin{listing}[Probability space]
+  {label=listing:proba:i}
+  \begingroup
+  \Ccool[Let~]
+  { Space = \Omega, Field = \mathcal{F}, Meas = \mathcal{P} }
+  *s{{,}}c{$\{#1\}$}
+  [~denote the probability space, where~]{ PowerSet = { 2^{\Space} } }
+  [$\Field\subset \PowerSet$.]
+  {}
+  \endgroup
+\end{listing}
+% \iffalse
+%</guardlisting> 
+% \fi
+%
+% \changes{v3.2}
+% {2021/09/20}
+% {Updated~listings~with~\cs{LambdaX}~in~place~of~\cs{CcoolLambda}}
+%
+% \phantomsection\addcontentsline{toc}{section}{\ref{listing:poly:real:i}. Families of polynomial functions}
+% \iffalse
+%<*guardlisting> 
+% \fi
+\begin{listing}[Families of polynomial functions]
+  {label=listing:poly:real:i}
+  \CcoolOption[ Write = \BooleanTrue ]
+  \Ccool c{\mathbb{#1}}{ Nat = {N}, Real = {R} }
+  [Let~]
+  { PolyR = \LambdaX[o]{\Real\IfValueT{#1}{_#1}[X] } }
+  [$\PolyR[n]$ and $\PolyR$, denote the families of polynomial functions on $\Real$, of order $n$ et and their union over $n \in \Nat$, respectively. ]
+  {}
+  \CcoolClear
+  \CcoolOption
+\end{listing}
+% \iffalse
+%</guardlisting> 
+% \fi
+% 
+% \phantomsection\addcontentsline{toc}{section}{\ref{listing:poly:real:ii}. Listing~\ref{listing:poly:real:i} read from file}
+% \iffalse
+%<*guardlisting> 
+% \fi
+\begin{listing}[\ref{listing:poly:real:i} read from file]
+  {label=listing:poly:real:ii}
+  \begingroup
+  \CcoolRead $\PolyR[n]$ et $\PolyR$
+  \endgroup
+\end{listing}
+% \iffalse
+%</guardlisting> 
+% \fi
+%
+% \changes{v3.2}
+% {2021/09/20}
+% {Updated~listing~`Fonction~et~fonctionelle',~with~use~of~parameter}
+% \iffalse
+%<*guardlisting> 
+% \fi
+\begin{listing}[Fonction et fonctionelle]
+  {label=listing:fonc:i}
+  \CcoolOption[ Write = \BooleanTrue ]
+  \selectlanguage{french}
+  \Ccool<eval>{ fun = \LambdaX{(#1)} }[]<op>{ fun = \LambdaX[mm]{#1[#2]} }
+  [Supposons une fonction $f\fun<eval>{t}$, et \'etudions le probl\`eme o\`u la fonctionnelle $\fun<op>{S}{f}$ est donn\'ee par\dots]{}
+  \CcoolClear
+  \CcoolOption
+\end{listing}
+% \iffalse
+%</guardlisting> 
+% \fi
+% 
+% \phantomsection\addcontentsline{toc}{section}{\ref{listing:fonc:ii}. Listing~\ref{listing:fonc:i} read from file}
+% \iffalse
+%<*guardlisting> 
+% \fi
+\begin{listing}[\ref{listing:fonc:i} read from file]
+  {label=listing:fonc:ii}
+  \CcoolRead $\fun<eval>{t}$, $\fun<op>{S}{f}$
+  \CcoolClear
+\end{listing}
+% \iffalse
+%</guardlisting> 
+% \fi
+%
+% \phantomsection\addcontentsline{toc}{section}{\ref{listing:cusum:i}. CUSUM statistic.}
+% \iffalse
+%<*guardlisting> 
+% \fi
+\begin{listing}[CUSUM statistic\cite{oh-2005}]
+  {label=listing:cusum:i}
+  \begingroup
+  \CcoolOption[ Write = \BooleanTrue ]
+  \newtheorem{definition}{Definition}
+  \AfterEndEnvironment{definition}{\CcoolHook}  
+  \Ccool{
+    SuchThat = { ;~ },
+    Time = { t },
+    Process = { \xi },
+    StopT = { T },
+    EvalAt = \LambdaX{(#1)}
+  }
+  [The CUSUM statistic process and the corresponding one-sided CUSUM stopping time are defined as follows:
+  \begin{definition}\label{the CUSUM statistic}. Let~]
+    {
+      Scale = { \lambda },
+      Real = {\mathcal{R}}
+    }+*s{{~\in~}}
+    [~and~]
+    { CUSUMthresh = { \nu } }+*c{$#1\in\Real^{+}$.}
+    [~Define the following processes:]
+    {
+      LogWald = { u },
+      CUSUMst = { \StopT_{c} },
+      CUSUM = { y },
+      LogWaldInf = { m }
+    }+
+    [\begin{enumerate}
+    \item{
+        $\LogWald_{\Time}\EvalAt{ \Scale } = \Scale\Process_{\Time} - \frac{1}{2}\Scale^2\Time$;
+        $\LogWaldInf_{\Time}\EvalAt{ \Scale } = \inf_{ 0\le s \le \Time }\CUSUM_{s} \EvalAt{ \Scale }$.
+      }
+    \item{
+        $\CUSUM_{\Time}\EvalAt{ \Scale } = \LogWaldInf_{\Time}\EvalAt{ \Scale } - \LogWald_{\Time}\EvalAt{ \Scale }\ge0$,
+        which is the CUSUM statistic process.
+      }
+    \item{
+        $\CUSUMst \EvalAt{ \Scale, \LogWaldInf } = \inf\left[ \Time \ge 0 \SuchThat \CUSUM_{\Time}\EvalAt{\Scale} \ge \LogWaldInf \right]$,
+        which is the CUSUM stopping time.
+      }
+    \end{enumerate}
+  \end{definition}\par]{}
+  
+  (Check: $\Scale$, $\CUSUM$)
+  \endgroup
+  \CcoolOption
+% \end{listing}
+% \iffalse
+%</guardlisting> 
+% \fi
+% 
+% \phantomsection\addcontentsline{toc}{section}{\ref{listing:cusum:ii}. Listing~\ref{listing:cusum:i} read from file}
+% \iffalse
+%<*guardlisting> 
+% \fi
+\begin{listing}[Listing~\ref{listing:cusum:i} read from file]
+  {label=listing:cusum:ii}
+  \begingroup
+  \CcoolRead $\Time$ $\Process$ $\Scale$ $\Real$ $\CUSUMthresh$ $\LogWald$  $\CUSUMst$ $\CUSUM$ $\LogWaldInf$ 
+  \endgroup
+\end{listing}
+% \iffalse
+%</guardlisting> 
+% \fi
+%
+%   \StopEventually{
+%    \clearpage
+%     \PrintChanges
+%     \PrintIndex %^^A https://tex.stackexchange.com/q/610349/112708
+% }
+%
+%\end{documentation}
+% \begin{implementation}
+%   \part{Implementation}\label{part:impl}
+%   \section{Opening}
+%    \begin{macrocode}
+%<*package>      
+%<@@=ccool>      
+\ExplSyntaxOn
+%    \end{macrocode}
+% \changes{v3.2}
+% {2021/09/20}
+% {Removed~dependence~on~\pkg{erw-l3}.}
+% \changes{v3.2}
+% {2021/09/20}
+% {Added~dependence~on~\pkg{lambdax}.}
+%
+% \section{\textsf{aux}}
+% \begin{macro}{\@@_aux_inner_set:n}
+%   \begin{arguments}
+%   \item \meta{code}
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new_protected:Nn \@@_aux_inner_set:n
+{
+  \cs_gset:Npn \@@_aux_inner:n ##1 {#1}
+  \cs_generate_variant:Nn \@@_aux_inner:n { e }
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_aux_key:w }
+%   \begin{arguments}
+%   \item \meta{ key }
+%   \item \meta{ value }
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_aux_key:w #1 = #2 \q_stop
+{
+  \seq_gput_right:Nx \g@@_aux_key_seq { \tl_trim_spaces:n{#1} }
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_aux_key:n }
+%   \begin{arguments}
+%   \item \meta{ key = value }
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new_protected:Nn \@@_aux_key:n
+{
+  \@@_aux_key:w #1 \q_stop
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_aux_key:N }
+%   \begin{arguments}
+%   \item \meta{ seq }
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new_protected:Nn \@@_aux_key:N 
+{
+  \seq_gclear_new:N \g@@_aux_key_seq
+  \seq_map_function:NN #1 \@@_aux_key:n
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_aux_outer_set:n}
+%   \begin{arguments}
+%   \item \meta{ inline code }
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new_protected:Nn \@@_aux_outer_set:n
+{
+  \cs_gset:Npn \@@_aux_outer:n ##1 {#1}
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_aux_prop:nn}
+%    \begin{macrocode}
+\prop_new:N \g@@_aux_prop
+\cs_new_protected:Nn \@@_aux_prop:nn 
+{
+  \prop_gput:Nnn \g@@_aux_prop{#1}{#2}
+}
+\cs_generate_variant:Nn \@@_aux_prop:nn { eo, ee, ex, xo, xe, xx }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_aux_prop:w}
+%   \begin{arguments}
+%   \item \meta{ key }
+%   \item \meta{ value }
+%   \end{arguments}
+%    \begin{macrocode}
+\tl_new:N \g@@_option_expans_tl
+\cs_new_protected:Npn \@@_aux_prop:w #1 = #2 \q_stop
+{
+  \exp_args:Nx
+  \use:c{@@_aux_prop:\g@@_option_expans_tl}
+  { \tl_trim_spaces:n{#1} }
+  { \@@_aux_inner:n{ \tl_trim_spaces:n{#2} } }
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_aux_prop:n}
+%   \begin{arguments}
+%   \item \meta{ key = value }
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new_protected:Nn \@@_aux_prop:n
+{
+  \@@_aux_prop:w #1 \q_stop 
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_aux_prop:N}
+%   \begin{arguments}
+%   \item \meta{keyval list}
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new_protected:Nn \@@_aux_prop:N
+{
+  \prop_gclear_new:N \g@@_aux_prop
+  \seq_if_empty:NTF #1
+  { \c_empty_tl }
+  {
+    \seq_map_function:NN #1 \@@_aux_prop:n
+  }
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_aux_val:Nn}
+%   \begin{arguments}
+%   \item \meta{ seq }
+%   \item \meta{ tl var name }
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new_protected:Nn \@@_aux_val:Nn
+{
+  \seq_gclear_new:N \g@@_aux_val_seq
+  \@@_seq_from_prop:NNn \g@@_aux_val_seq #1 { \@@_prop_name:n{#2} } 
+}
+%    \end{macrocode}
+% \end{macro}
+%    \begin{macrocode}
+\cs_new:Nn\@@_aux_merge:nn{#1#2}
+%    \end{macrocode}
+% \section{\textsf{lang}}
+%    \begin{macrocode}
+\prop_new:N \g@@_lang_and_prop
+%    \end{macrocode}
+% \begin{macro}{\@@_lang_and_update:n}
+%    \begin{macrocode}
+%      \changes{v3.2}
+%      {2021/09/20}
+%      {Replace~\cs[no-index]{erw_prop_keyval:Nn}~by~\cs[no-index]{prop_set_from_keyval:Nn}} 
+\cs_new_protected:Nn \@@_lang_and_update:n
+{
+  \prop_set_from_keyval:Nn
+  \g@@_lang_and_prop
+  { #1 }
+}
+\cs_generate_variant:Nn \@@_lang_and_update:n { e }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_lang_and:n, \@@_lang_and:}
+%    \begin{macrocode}
+\cs_new:Nn \@@_lang_and:n
+{
+  \prop_if_in:NnTF
+  \g@@_lang_and_prop
+  {#1}
+  {\prop_item:Nn\g@@_lang_and_prop{#1}}
+  {
+    \msg_warning:nnn{@@}{lang_and}{#1}
+    \@@_lang_and:n{english}
+  }
+}
+\ifcsdef{languagename}
+{
+  \cs_new:Nn \@@_lang_and:{\exp_args:No\@@_lang_and:n{\languagename}}
+}
+{
+  \cs_new:Nn \@@_lang_and:{english}
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{variable}{\c@@_lang_and_tl}
+%\NB{todo}{Non latin-alphabet languages}
+%    \begin{macrocode}
+\tl_const:Nn \c@@_lang_and_tl
+{
+%^^A https://www.overleaf.com/learn/latex/International_language_support  
+  afrikaans=en,
+  basque=eta,
+  catalan=i,
+  croatian=i,
+  czech=a,
+  danish=og,
+  dutch=en,
+  english=and,
+  esperanto=kaj,
+  estonian=ja,
+  finnish=ja,
+  french=et,
+  galician=e,
+  german=und,
+  hungarian=\'es,
+  icelandic=og,
+  indonesian=dan,
+  irish=agus,
+  italian=e,
+  kurmanji=\^u,
+  latin=et,
+  latvian=un,
+  lithuanian=ir,
+  ngerman=und,
+  polish=i,
+  portuguese=e,
+  romanian=\c{s}i,
+  slovak=a,
+  spanish=y,
+  swedish=och,
+  swissgerman=und,
+  turkish=ve,
+  turkmen=we,
+  welsh=a
+}
+%    \end{macrocode}
+% \end{variable}
+% \section{\textsf{log}}
+% \begin{macro}{\@@_log_close:}
+%    \begin{macrocode}
+\iow_new:N \g@@_log_iow
+\AtEndDocument{\iow_close:N \g@@_log_iow}
+\bool_set_false:N \g@@_log_open_bool
+\cs_new_protected:Nn \@@_log_close:
+{
+  \iow_close:N \g@@_log_iow
+  \bool_gset_false:N \g@@_log_open_bool
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_log_open:}
+%    \begin{macrocode}
+\tl_new:N \g@@_log_file_tl
+\cs_new_protected:Nn \@@_log_open:
+{
+  \tl_gset:Nx \g@@_log_to_tl{\g@@_log_file_tl}
+  \iow_open:Nn \g@@_log_iow {\g@@_log_to_tl}
+  \bool_gset_true:N \g@@_log_open_bool
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_log_read:n}
+%   \begin{arguments}
+%   \item \meta{path}
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new_protected:Nn \@@_log_read:n
+{
+  \file_input:n{#1}
+  \tl_log:n{read~from~#1}
+}
+\cs_generate_variant:Nn \@@_log_read:n { e }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_log_read:}
+%    \begin{macrocode}
+\cs_new_protected:Nn \@@_log_read:
+{
+  \@@_log_read:e{\g@@_log_to_tl}
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_log_write:n}
+%    \begin{macrocode}
+\tl_new:N \g@@_log_to_tl
+\cs_new_protected:Nn \@@_log_write:n
+{
+  \bool_if:nTF{ \g@@_log_open_bool }
+  {
+    \iow_now:Nn \g@@_log_iow {#1}
+    \tl_log:n{ write~to~#1 }
+  }
+  { \msg_error:nnn{ @@ }{ iow }{ \g@@_log_iow }  }
+}
+\cs_generate_variant:Nn \@@_log_write:n { e }
+%    \end{macrocode}
+% \end{macro}
+% \section{\textsf{make_key}}
+% \begin{macro}{\@@_make_key:Nn}
+%   \begin{arguments}
+%   \item \meta{ token }
+%   \item \meta{ key }
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new_protected:Nn \@@_make_key:Nn 
+{
+  \exp_args:NNx
+  \DeclareDocumentCommand{#1} 
+  { D<>{\g@@_option_param_tl} }
+  {
+    \@@_prop_item:nn{##1}{#2}
+  }
+}
+\cs_generate_variant:Nn \@@_make_key:Nn {c}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_make_key:n}
+%   \begin{arguments}
+%   \item \meta{ key }
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new_protected:Nn \@@_make_key:n
+{
+  \@@_make_key:cn{#1}{#1}
+}
+\cs_generate_variant:Nn \@@_make_key:n { e }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_make_key:N}
+%   \begin{arguments}
+%   \item \meta{ seq }
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new_protected:Nn \@@_make_key:N
+{
+  \seq_map_function:NN #1 \@@_make_key:e
+}
+%    \end{macrocode}
+% \end{macro}
+% \section{\textsf{make_ccool}}
+% \begin{macro}{\@@_make_ccool_exp:nnn}
+%    \begin{macrocode}
+%      ^^A    \erw_seq_use:Nn
+\cs_new_protected:Nn \@@_make_ccool_exp:nnn
+{
+  \@@_aux_val:Nn \g@@_aux_key_seq {#1}
+  \@@_aux_outer_set:n{#3}
+  \@@_aux_outer:n
+  {
+    \exp_args:NNf
+    \@@_seq_use:Nn
+    \g@@_aux_val_seq
+    {#2}
+  }
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_make_ccool_key:nnn}
+%    \begin{macrocode}
+\cs_new_protected:Nn \@@_make_ccool_key:nnn
+{
+  \@@_prop_if_exist:nTF{#1}
+  { \c_empty_tl }
+  { \@@_prop_new:n{#1} }
+  \exp_args:No \@@_aux_inner_set:n{#2}
+  \seq_set_from_clist:Nn \g@@_aux_keyval_seq {#3}
+  \@@_aux_prop:N \g@@_aux_keyval_seq
+  \@@_prop_append:Nn \g@@_aux_prop {#1}
+  \@@_aux_key:N \g@@_aux_keyval_seq
+  \@@_make_key:N \g@@_aux_key_seq
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_make_ccool_sideeffect:nnn}\cite{a-536597}
+%    \begin{macrocode}
+\cs_new_protected:Nn \@@_make_ccool_sideeffect:nnn
+{
+  \@@_make_ccool_key:nnn{#1}{#2}{#3}
+  \bool_if:nTF{ \g@@_log_open_bool }
+  {
+    \@@_log_write:n
+    {
+      \begingroup
+      \def \@@_log_entry { \Ccool<#1>c{#2}{#3} } \expandafter
+      \endgroup \@@_log_entry      
+    }
+  }{\c_empty_tl}
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_make_ccool:nnnn}
+%   \begin{arguments}
+%   \item \meta{ token list }
+%   \item \meta{ seq_{1} }
+%   \item \meta{ seq_{2} } 
+%   \item \meta{ prop }
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_make_ccool:nnnn #1 #2 #3 #4
+{ 
+  \exp_args:NNx \DeclareDocumentCommand \Ccool
+  {%^^A      2         3    4 5  6           7   8    9
+    +o D<>{#1} E{ c }{{#2}} m t+ s E{ s c }{{#3}{#4}} +o
+  }
+  {
+    \IfValueT{##1}{##1}    
+    \@@_make_ccool_sideeffect:nnn{##2}{##3}{##4}    
+    \IfBooleanT{##6}
+    {
+      \@@_make_ccool_exp:nnn{##2}{##7}{##8}
+    }
+    \bool_if:nTF{##5}
+    {
+      \gappto{\CcoolHook}
+      {
+        \@@_make_ccool_sideeffect:nnn{##2}{##3}{##4}
+      }
+    }
+    {\c_empty_tl}
+    \IfValueT{##9}
+    {
+      \exp_not:n{ \Ccool[##9] }
+    }
+  }
+}
+%    \end{macrocode}
+% \end{macro}
+% \section{\textsf{msg}}
+%    \begin{macrocode}
+\msg_new:nnn {@@}
+{ iow }
+{#1~is~closed~can't~write}
+\msg_new:nnn {@@}
+{lang_and}
+{~key~#1~missing~for~global~option~'And';~falling~back~on~'english'}
+%    \end{macrocode}
+% \section{\textsf{option}}
+% \begin{macro}{\@@_option_inner:n}
+%   \begin{arguments}
+%   \item \meta{code}
+%   \end{arguments}
+%    \begin{macrocode}
+\tl_new:N \g@@_option_inner_tl
+\cs_new_protected:Nn \@@_option_inner:n
+{
+  \tl_gset:Nn \g@@_option_inner_tl {#1}
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_option_param:n}
+%   \begin{arguments}
+%   \item \meta{token list}
+%   \end{arguments}
+%    \begin{macrocode}
+\tl_new:N \g@@_option_param_tl
+\cs_new_protected:Nn \@@_option_param:n
+{
+  \tl_gset:Nn \g@@_option_param_tl{#1}
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_option_outer:n}
+%   \begin{arguments}
+%   \item \meta{ inline code }
+%   \end{arguments}
+%    \begin{macrocode}
+\tl_new:N \g@@_option_outer_tl
+\cs_new_protected:Nn \@@_option_outer:n
+{
+  \tl_gset:Nn \g@@_option_outer_tl {#1}
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_option_separ:n}
+%   \begin{arguments}
+%   \item \Arg{ tl_{1} }\Arg{ tl_{2} }\Arg{ tl_{3} }
+%   \end{arguments}
+%    \begin{macrocode}
+\tl_new:N \g@@_option_separ_tl
+\cs_new_protected:Nn \@@_option_separ:n
+{
+  \cs_gset:Npn \g@@_option_separ_tl {#1}
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{variable}{\g@@_option_separ_tl}
+%    \begin{macrocode}
+\ifcsdef{text}
+{
+  \tl_const:Nn \c@@_option_separ_default_tl
+  {
+    { \text{{\ }\@@_lang_and:{\ }} }
+    { \text{,{\ }} }
+    { \text{,{\ }\@@_lang_and:{\ }} }
+  }
+}
+{
+  \tl_const:Nn \c@@_option_separ_default_tl
+  {
+    { {\ }\@@_lang_and:{\ } }
+    { ,{\ } }
+    { ,{\ }\@@_lang_and:{\ } }
+  }
+}
+%    \end{macrocode}
+% \end{variable}
+% \section{\textsf{prop}}
+% \begin{macro}{\@@_prop_append:NN}
+%   \begin{arguments}
+%   \item \meta{ prop_{1} }
+%   \item \meta{ prop_{2} }
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_prop_append:NN #1 #2
+{
+  \cs_set:Nn \@@_prop_append:nn
+  {
+    \prop_gput:Nnx #1 {##1}{ \prop_item:Nn #2{##1} }
+  }
+  \prop_map_function:NN #2 \@@_prop_append:nn
+}
+\cs_generate_variant:Nn \@@_prop_append:NN { cN }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_prop_append:Nn}
+%   \begin{arguments}
+%   \item \meta{ prop }
+%   \item \meta{ tl var name }
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new_protected:Nn \@@_prop_append:Nn 
+{
+  \@@_prop_append:cN{ \@@_prop_name:n {#2} } #1
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_prop_clear_new:n}
+%   \begin{arguments}
+%   \item \meta{ tl var name }
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new_protected:Nn \@@_prop_clear_new:n
+{
+  \exp_args:No \prop_clear_new:c{ \@@_prop_name:n {#1} }
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_prop_clear_new_map:n}
+%   \begin{arguments}
+%   \item \meta{ keyval list }
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new_protected:Nn \@@_prop_clear_new_map:n
+{
+  \seq_set_from_clist:Nn \g@@_aux_key_seq {#1}
+  \seq_map_function:NN \g@@_aux_key_seq \@@_prop_clear_new:n
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_prop_if_exist:nTF}
+%   \begin{arguments}
+%   \item \meta{tl_{1}}
+%   \item \meta{tl_{2}}
+%   \item \meta{tl_{3}}
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new:Nn \@@_prop_if_exist:nTF 
+{
+  \prop_if_exist:cTF{ \@@_prop_name:n {#1} }{#2}{#3}
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_prop_item:nn}
+%   \begin{arguments}
+%   \item \meta{ tl var name }
+%   \item \meta{ key }
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new:Nn \@@_prop_item:nn
+{
+  \prop_item:cn { \@@_prop_name:n {#1} } {#2}
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_prop_name:n}
+%   \begin{arguments}
+%   \item \meta{ tl var name }
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new:Npn \@@_prop_name:n #1{ @@_#1 }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_prop_new:n}
+%   \begin{arguments}
+%   \item \meta{ tl var name }
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new_protected:Nn \@@_prop_new:n 
+{
+  \prop_new:c{ \@@_prop_name:n {#1} }
+}
+%    \end{macrocode}
+% \end{macro}
+% \section{\textsf{seq}}
+% \begin{macro}{\@@_seq_from_prop:NNn}
+%   \begin{arguments}
+%   \item \meta{ seq_{1} }
+%   \item \meta{ seq_{2} } (keys)
+%   \item \meta{ prop }
+%   \end{arguments}
+%    \begin{macrocode}
+\cs_new_protected:Nn \@@_seq_from_prop:NNn
+{
+  \cs_set_protected:Nn \@@_seq_from_prop:n
+  {
+    \seq_gput_right:No #1 { \prop_item:cn{#3}{##1} }
+  }
+  \seq_map_function:NN #2 \@@_seq_from_prop:n
+}
+%    \end{macrocode}
+% \end{macro}
+% \section{\textsf{seq_use}}
+% \begin{macro}{\@@_seq_from_prop:NNn}
+%    \begin{macrocode}
+%      \changes{v3.2}
+%      {2021/09/20}
+%      {Added~\cs[no-index]{__ccool_seq_use:Nn}~in~replacement~of~\cs[no-index][erw_seq_use:Nn]}
+\msg_new:nnn{@@}{separ}{#1~expects~1~to~3~items,~#2}
+\cs_new:Nn \@@_seq_use:Nn
+{
+  \exp_last_unbraced:NNf
+  \seq_use:Nnnn #1
+  \@@_tl_separators:n{#2}
+}
+\cs_new:Nn \@@_tl_separators:n
+{ \@@_tl_separators:en{ \tl_count:n{#1} }{#1} }
+\cs_new:Nn \@@_tl_separators:nn
+{ \int_case:nnTF {#1}
+  { {1}
+    { \prg_replicate:nn{ 3 }{#2} }
+    {2}
+    {
+      { \use_ii:nn #2 }
+      { \use_i:nn #2 }
+      { \use_i:nn #2 \use_ii:nn #2 }
+    }
+    {3}{#2}
+  }
+  { \c_empty_tl }
+  {
+    \msg_error:nnnn { @@ }
+    { separ }
+    { \@@_tl_separators:nn }
+    {#2}
+  }
+}
+\cs_generate_variant:Nn \@@_tl_separators:nn { e }
+%    \end{macrocode}
+% \end{macro}
+% \section{Front-end}\label{impl:frontend}
+% \DocPhantomSection*{subsection}{\cs{CcoolClear}}{impl:cs:clear}
+% \begin{macro}{\CcoolClear}
+%    \begin{macrocode}
+\NewDocumentCommand{ \CcoolClear }
+{ D<>{\g@@_option_param_tl} }
+{ 
+  \@@_prop_clear_new_map:n{#1} 
+}
+%    \end{macrocode}
+% \end{macro}
+% \DocPhantomSection*{subsection}{\cs{CcoolHook}}{impl:cs:hook}
+% \begin{macro}{\CcoolHook}
+%    \begin{macrocode}
+\NewDocumentCommand{\CcoolHook}{}{\c_empty_tl}
+%    \end{macrocode}
+% \end{macro}
+% \DocPhantomSection*{subsection}{\cs{CcoolLambda}}{impl:cs:lambda}
+% \begin{macro}{\CcoolLambda}
+%   \NB{todo}{allow only m- or o-type arguments}
+%    \begin{macrocode}
+%      \changes{v3.2}
+%      {2021/09/20}{\cs[CcoolLambda]'s~implementation~switched~from~\pkg{erw-l3}~to~\pkg{lambdax};~kept~only~for~backward~compat.}
+\ProvideDocumentCommand \CcoolLambda { O{m} m }
+{ \lambdax:nn{#1}{#2} }
+%    \end{macrocode}
+% \end{macro}
+% \DocPhantomSection*{subsection}{\cs{CcoolOption}}{impl:cs:option}
+% \begin{macro}{\CcoolOption}
+%   \NB{todo}{Fix placeholders passed to options requiring code (only one pound sign)}
+%   \NB{abandon}{Requirement: write to file if Write; Update: redundant with \cs{Ccool}+Write}
+%    \begin{macrocode}
+\NewDocumentCommand{ \CcoolOption }
+{ O{ And, Expans, File, Inner, Param, Outer, Separ, Write } }
+{ 
+  \keys_set:nn{ @@ }{#1}
+}
+%    \end{macrocode}
+% \end{macro}
+%    \begin{macrocode}
+\keys_define:nn { @@ }
+{
+%    \end{macrocode}
+%    \begin{macrocode}
+And .code:n = { \@@_lang_and_update:e{ #1 } },
+And .default:n = { \c@@_lang_and_tl },
+And .initial:n = { \c@@_lang_and_tl },
+%    \end{macrocode}
+%    \begin{macrocode}
+Expans .multichoices:nn = { eo, ee, ex, xo, xe, xx }
+{ \tl_gset_eq:NN \g@@_option_expans_tl \l_keys_choice_tl },
+Expans .default:n = { xo },
+Expans .initial:n = { xo },
+%    \end{macrocode}
+%    \begin{macrocode}
+%      \changes{v3.2}
+%      {2021/09/20}
+%      {Removed~module~key~File's~relianced~on~a~timestamp~(clumsy)}
+File .code:n = { \tl_gset:Nx \g@@_log_file_tl{#1} } }
+\cs_new_protected:Nn
+\@@_keys_define_file:n
+{\keys_define:nn { @@ }
+  {File .code:n = { \tl_gset:Nx \g@@_log_file_tl{#1} },
+    File .default:n = { #1 },
+    File .initial:n = { #1 } } }
+\cs_generate_variant:Nn\@@_keys_define_file:n{e}
+\@@_keys_define_file:e
+{\exp_args:Ne\@@_aux_merge:nn{\c_sys_jobname_str}{_ccool_log}}
+%    \end{macrocode}
+%    \begin{macrocode}
+\keys_define:nn { @@ }
+{
+  Inner .code:n={
+    \@@_option_inner:n{#1}
+    \exp_last_unbraced:Nf 
+    \@@_make_ccool:nnnn
+    {
+      { \g@@_option_param_tl }
+      { \g@@_option_inner_tl }
+      { \g@@_option_separ_tl }
+      { \g@@_option_outer_tl }
+    }
+  },
+Inner .value_required:n = false,
+Inner .default:n = {####1},
+Inner .initial:n = {####1},
+%    \end{macrocode}
+%    \begin{macrocode}
+Param .code:n={
+  \@@_option_param:n{#1}
+  \exp_last_unbraced:Nf 
+  \@@_make_ccool:nnnn
+  {
+    { \g@@_option_param_tl }
+    { \g@@_option_inner_tl }
+    { \g@@_option_separ_tl }
+    { \g@@_option_outer_tl }
+  }
+},
+Param .value_required:n = false,
+Param .default:n = { Default },
+Param .initial:n = { Default },
+%    \end{macrocode}
+%    \begin{macrocode}
+Outer .code:n={
+  \@@_option_outer:n{#1}
+  \exp_last_unbraced:Nf 
+  \@@_make_ccool:nnnn
+  {
+    { \g@@_option_param_tl }
+    { \g@@_option_inner_tl }
+    { \g@@_option_separ_tl }
+    { \g@@_option_outer_tl }
+  }
+},
+Outer .value_required:n = false,
+Outer .default:n = { \ensuremath{####1} },
+Outer .initial:n = { \ensuremath{####1} },
+%    \end{macrocode}
+%    \begin{macrocode}
+Separ .code:n={
+  \@@_option_separ:n{#1}
+  \exp_last_unbraced:Nf 
+  \@@_make_ccool:nnnn
+  {
+    { \g@@_option_param_tl }
+    { \g@@_option_inner_tl }
+    { \g@@_option_separ_tl }
+    { \g@@_option_outer_tl }
+  }
+},
+Separ .value_required:n = false,
+Separ .default:n = { \c@@_option_separ_default_tl },
+Separ .initial:n = { \c@@_option_separ_default_tl },
+%    \end{macrocode}
+%    \begin{macrocode}
+Write .code:n = {
+  \bool_if:nTF{#1}
+  {\@@_log_open:}
+  {\@@_log_close:}
+},
+Write .value_required:n = false,
+Write .default:n = \BooleanFalse,
+Write .initial:n = \BooleanFalse
+%    \end{macrocode}
+%    \begin{macrocode}
+}
+%    \end{macrocode}
+% \begin{macro}{\CcoolRead}
+%    \begin{macrocode}
+\NewDocumentCommand{\CcoolRead}
+{o}
+{
+  \IfValueTF{#1}
+  {\@@_log_read:e{#1}}
+  {\@@_log_read:}
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\CcoolVers}
+%    \begin{macrocode}
+\NewDocumentCommand{\CcoolVers}
+{}
+{\use:c{ver@ccool.sty}}
+%    \end{macrocode}
+% \end{macro} 
+% \section{Closing}
+%    \begin{macrocode}
+\ExplSyntaxOff
+%</package> 
+%    \end{macrocode}
+% \end{implementation}
+% \Finale
+\endinput

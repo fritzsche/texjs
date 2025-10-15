@@ -1,0 +1,137 @@
+%%
+%% This is file `zeckendorf.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% zeckendorf.dtx  (with options: `interactive')
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from zeckendorf.tex.
+%% 
+%% For distribution of the original source see the terms
+%% for copying and modification in the file zeckendorf.dtx.
+%% 
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+%% ---------------------------------------------------------------
+%% The zeckendorf package: Zeckendorf representation of big integers
+%% Copyright (C) 2025 Jean-Francois Burnol
+%%
+\input zeckendorfcore.tex
+\xintexprSafeCatcodes
+\let\ZeckShouldISayOrShouldIGo\iftrue
+\def\ZeckCmdQ{\let\ZeckShouldISayOrShouldIGo\iffalse}
+\let\ZeckCmdX\ZeckCmdQ
+\let\ZeckCmdx\ZeckCmdQ
+\let\ZeckCmdq\ZeckCmdQ
+
+\newif\ifzeckindices
+\def\ZeckCmdL{\zeckindicestrue
+              \def\ZeckFromN{\ZeckIndices}\def\ZeckToN{\ZeckNFromIndices}}
+\let\ZeckCmdl\ZeckCmdL
+
+\def\ZeckCmdB{\zeckindicesfalse
+              \def\ZeckFromN{\ZeckWord}\def\ZeckToN{\ZeckNFromWord}}
+\let\ZeckCmdW\ZeckCmdB
+\let\ZeckCmdb\ZeckCmdB
+\let\ZeckCmdw\ZeckCmdB
+
+\newif\ifzeckfromN
+\zeckfromNtrue
+\def\ZeckConvert{\csname Zeck\ifzeckfromN From\else To\fi N\endcsname}
+\def\ZeckCmdT{\ifzeckfromN\zeckfromNfalse\else\zeckfromNtrue\fi}
+\let\ZeckCmdt\ZeckCmdT
+
+\newif\ifzeckmeasuretimes
+\expandafter\def\csname ZeckCmd@\endcsname{%
+  \ifdefined\xinttheseconds
+      \ifzeckmeasuretimes\zeckmeasuretimesfalse\else\zeckmeasuretimestrue\fi
+  \else
+      \immediate\write128{Sorry, this requires xintexpr 1.4n or later.}%
+  \fi
+}
+
+\newif\ifzeckevalonly
+\def\ZeckCmdE{\ifzeckevalonly\zeckevalonlyfalse\else\zeckevalonlytrue\fi}
+\let\ZeckCmde\ZeckCmdE
+
+\ZeckCmdL
+
+\def\ZeckInviteA{Commands are Q(uit), L(ist), W(ord), T(oggle), E(val-only) or @.}
+
+\newlinechar10
+\immediate\write128{}
+\immediate\write128{Welcome to Zeckendorf 0.9b (2025/10/07, JFB).}
+
+\immediate\write128{Command summary (lowercase also):^^J
+ Q to quit. Also X.^^J
+ L for Zeckendorf representations as lists of indices.^^J
+ W for Zeckendorf representations as binary words. Also B.^^J
+ T to toggle the direction of conversions.^^J
+ E to toggle to and from  \string\xintiieval-only mode.^^J
+ @ to toggle measurement of execution times.}
+\immediate\write128{}
+\immediate\write128{%
+The input, except for "Word -> Integer", is parsed in \string\xintiieval.^^J%
+So for example 2^100, 100!, or binomial(100,50) are legitimate.^^J%
+\space\space The fib() function computes Fibonacci numbers.^^J%
+\space\space The character $ serves as symbol for Knuth multiplication.^^J%$
+List input can use negative integers, and order does not matter.^^J%
+Binary word can be arbitrary, except empty.^^J}
+\immediate\write128{**** empty input is not supported! no linebreaks in input! ****}
+
+\def\zeckpar{\par}
+\long\def\xintbye#1\xintbye{}
+\long\def\zeckgobbleii#1#2{}
+\long\def\zeckfirstoftwo#1#2{#1}
+\def\zeckonlyonehelper #1#2#3\zeckonlyonehelper{\xintbye#2\zeckgobbleii\xintbye0}
+
+\xintloop
+\immediate\write128{\ZeckInviteA}
+\message{\ifzeckevalonly (eval only mode, hit E to exit it)\else
+         \ifzeckfromN Integer -> \ifzeckindices indices\else binary word\fi
+         \else
+           \ifzeckindices Indices \else Binary word \fi
+         -> integer\fi\fi
+         : }
+\read-1to\zeckbuf
+\ifx\zeckbuf\zeckpar
+  \immediate\write128{**** empty input is not supported, please try again.}
+\else
+  \edef\zeckbuf{\zeckbuf}
+  \if 1\expandafter\zeckonlyonehelper\zeckbuf\xintbye\zeckonlyonehelper1%
+   \ifcsname ZeckCmd\expandafter\zeckfirstoftwo\zeckbuf\relax\endcsname
+     \csname ZeckCmd\expandafter\zeckfirstoftwo\zeckbuf\relax\endcsname
+   \else
+     \immediate\write128{%
+     **** Unrecognized command letter
+          \expandafter\zeckfirstoftwo\zeckbuf\relax. Try again.^^J}
+   \fi
+  \else
+   \ifzeckfromN\edef\ZeckIn{\xintiieval{\zeckbuf}}\else
+      \ifzeckindices\edef\ZeckIn{\xintiieval{\zeckbuf}}\else
+         \def\ZeckIn{\zeckbuf}%
+      \fi
+   \fi
+   \ifzeckmeasuretimes\xintresettimer\fi
+   \immediate\write128{\ifzeckevalonly\ZeckIn\else\ZeckConvert{\ZeckIn}\fi}%
+   \immediate\write128{\ifzeckmeasuretimes
+                       \ifzeckevalonly Evaluation \else Conversion \fi
+                        took \xinttheseconds s^^J\fi}
+  \fi
+\fi
+\ZeckShouldISayOrShouldIGo
+\repeat
+
+\immediate\write128{Bye. Results are also in log file (hard-wrapped too, alas).}
+\bye
+\endinput
+%%
+%% End of file `zeckendorf.tex'.

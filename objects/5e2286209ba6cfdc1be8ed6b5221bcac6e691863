@@ -1,0 +1,189 @@
+%%%
+% Calculs Croises
+%%%
+\def\filedateCalculsCroises{2024/08/04}%
+\def\fileversionCalculsCroises{0.1}%
+\message{-- \filedateCalculsCroises\space v\fileversionCalculsCroises}%
+%
+\setKVdefault[CalculsCroises]{Largeur=20pt,Solution=false,Inverse=false,Creation=false,Graines=false,Vide=false,Couleur=LightGray,Negatifs=false,Aide=false,CouleurS=blue,Graine={},ListeNombres={},Style=\normalsize}
+\defKV[CalculsCroises]{%
+  Graine=\ifempty{#1}{}{\setKV[CalculsCroises]{Graines}},%
+  ListeNombres=\ifempty{#1}{}{\setKV[CalculsCroises]{Aide}}%
+}%
+%  
+\newlength\PfCCalculsCroises%
+\newcounter{CCRetiensAide}%
+
+\NewDocumentCommand\CalculsCroises{o m}{%
+  \useKVdefault[CalculsCroises]%
+  \savecomparemode%
+  \comparestrict%
+  \setKV[CalculsCroises]{#1}%
+  \colorlet{PfCCouleurCC}{\useKV[CalculsCroises]{Couleur}}%
+  \colorlet{PfCCouleurCCS}{\useKV[CalculsCroises]{CouleurS}}%
+  \setlength{\PfCCalculsCroises}{\useKV[CalculsCroises]{Largeur}+\tabcolsep}%
+  \ifboolKV[CalculsCroises]{Inverse}{\setKV[CalculsCroises]{Solution}\colorlet{PfCCouleurCCS}{black}}{}%
+  \ifboolKV[CalculsCroises]{Creation}{%
+    \ifboolKV[CalculsCroises]{Graines}{\PfCGraineAlea{\useKV[CalculsCroises]{Graine}}}{}%
+    \ifboolKV[CalculsCroises]{Negatifs}{%
+      \xdef\PfCCCFoo{-1,-2,-3,-4,-5,-6,-7,-8,-9}%
+    }{%
+      \xdef\PfCCCFoo{1,2,3,4,5,6,7,8,9}%
+    }%
+    \MelangeListe{\PfCCCFoo}{9}%
+    \setsepchar{,}%
+    \readlist*\PfCListeCCNb{\faa}%
+    \readlist*\PfCListeCCOpRetiens{#2}%
+    \xdef\PfCFoo{}%
+    \xintFor* ##1 in{\xintSeq{1}{3}}\do{%
+      \xintifForLast{\xdef\PfCFoo{\PfCFoo,\PfCListeCCNb[##1],\PfCListeCCOpRetiens[##1],\PfCListeCCOpRetiens[\fpeval{##1+1}],\PfCListeCCOpRetiens[\fpeval{##1+2}]}}{\xdef\PfCFoo{\PfCFoo,\PfCListeCCNb[##1],\PfCListeCCOpRetiens[##1]}}%
+    }%
+    \xintFor* ##1 in{\xintSeq{4}{6}}\do{%
+      \xintifForLast{\xdef\PfCFoo{\PfCFoo,\PfCListeCCNb[##1],\PfCListeCCOpRetiens[\fpeval{##1+2}],\PfCListeCCOpRetiens[\fpeval{##1+3}],\PfCListeCCOpRetiens[\fpeval{##1+4}]}}{\xdef\PfCFoo{\PfCFoo,\PfCListeCCNb[##1],\PfCListeCCOpRetiens[\fpeval{##1+2}]}}%
+    }%
+    \xintFor* ##1 in{\xintSeq{7}{9}}\do{%
+      \xintifForLast{\xdef\PfCFoo{\PfCFoo,\PfCListeCCNb[##1]}}{\xdef\PfCFoo{\PfCFoo, \PfCListeCCNb[##1],\PfCListeCCOpRetiens[\fpeval{##1+4}]}}%
+    }%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\PfCListeCCOp{\PfCFoo}%
+    \reademptyitems
+    \ifboolKV[CalculsCroises]{Aide}{%
+    \xdef\PfCCCfoo{\useKV[CalculsCroises]{ListeNombres}}%
+    \readlist*\PfCListeCCAide{\PfCCCfoo}%
+    }{}%
+  }{%
+    \ifboolKV[CalculsCroises]{Vide}{}{%
+      \readlist*\PfCListeCCOp{#2}%
+      \ifboolKV[CalculsCroises]{Aide}{%
+      \xdef\PfCCCfoo{\useKV[CalculsCroises]{ListeNombres}}%
+      \readlist*\PfCListeCCAide{\PfCCCfoo}%
+      }{}%
+    }%
+  }%
+  % On affiche
+  \begin{NiceTabular}{*{6}{m{\useKV[CalculsCroises]{Largeur}}}}
+    \ifboolKV[CalculsCroises]{Vide}{%
+      \rule{0pt}{\PfCCalculsCroises}\Block{}{}&\Block{}{}&\Block{}{}&\Block{}{}&\Block{}{}&\Block[borders={bottom,right,top},fill=PfCCouleurCC]{}{}\\
+      \rule{0pt}{\PfCCalculsCroises}\Block{}{}&\Block[fill=black]{}{}&\Block{}{}&\Block[fill=black]{}{}&\Block{}{}\\
+      \rule{0pt}{\PfCCalculsCroises}\Block{}{}&\Block{}{}&\Block{}{}&\Block{}{}&\Block{}{}&\Block[borders={bottom,right,top},fill=PfCCouleurCC]{}{}\\
+      \rule{0pt}{\PfCCalculsCroises}\Block{}{}&\Block[fill=black]{}{}&\Block{}{}&\Block[fill=black]{}{}&\Block{}{}\\
+      \rule{0pt}{\PfCCalculsCroises}\Block{}{}&\Block{}{}&\Block{}{}&\Block{}{}&\Block{}{}&\Block[borders={bottom,right,top},fill=PfCCouleurCC]{}{}\\
+      \rule{0pt}{\PfCCalculsCroises}\Block[borders={left,bottom,right},fill=PfCCouleurCC]{}{}&&\Block[borders={left,bottom,right},fill=PfCCouleurCC]{}{}&&\Block[borders={left,bottom,right},fill=PfCCouleurCC]{}{}\\
+    }{%
+      \rule{0pt}{\PfCCalculsCroises}\Block{}{%
+        \ifboolKV[CalculsCroises]{Aide}{%
+          \setcounter{CCRetiensAide}{0}%
+          \xintFor* ##1 in{\xintSeq{1}{\PfCListeCCAidelen}}\do{%
+            \xintifboolexpr{\PfCListeCCOp[1]==\PfCListeCCAide[##1]}{\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[1]}}{\stepcounter{CCRetiensAide}}%
+          }%
+          \xintifboolexpr{\theCCRetiensAide==\PfCListeCCAidelen}{\ifboolKV[CalculsCroises]{Solution}{\color{PfCCouleurCCS}\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[1]}}{}}{}%
+        }{\ifboolKV[CalculsCroises]{Solution}{%
+            \color{PfCCouleurCCS}\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[1]}%
+          }{}%
+        }%
+      }&\StrCompare{\PfCListeCCOp[2]}{*}[\PfCTestEtoile]\Block{}{\xintifboolexpr{\PfCTestEtoile==0}{\PfCSymbolTimes}{$\PfCListeCCOp[2]$}}&\Block{}{%
+        \ifboolKV[CalculsCroises]{Aide}{%
+          \setcounter{CCRetiensAide}{0}%
+          \xintFor* ##1 in{\xintSeq{1}{\PfCListeCCAidelen}}\do{%
+            \xintifboolexpr{\PfCListeCCOp[3]==\PfCListeCCAide[##1]}{\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[3]}}{\stepcounter{CCRetiensAide}}%
+          }%
+          \xintifboolexpr{\theCCRetiensAide==\PfCListeCCAidelen}{\ifboolKV[CalculsCroises]{Solution}{\color{PfCCouleurCCS}\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[3]}}{}}{}%
+        }{\ifboolKV[CalculsCroises]{Solution}{%
+            \color{PfCCouleurCCS}\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[3]}%
+          }{}%
+        }%
+      }&\StrCompare{\PfCListeCCOp[4]}{*}[\PfCTestEtoile]\Block{}{\xintifboolexpr{\PfCTestEtoile==0}{\PfCSymbolTimes}{$\PfCListeCCOp[4]$}}&\Block{}{%
+        \ifboolKV[CalculsCroises]{Aide}{%
+          \setcounter{CCRetiensAide}{0}
+          \xintFor* ##1 in{\xintSeq{1}{\PfCListeCCAidelen}}\do{%
+            \xintifboolexpr{\PfCListeCCOp[5]==\PfCListeCCAide[##1]}{\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[5]}}{\stepcounter{CCRetiensAide}}%
+          }%
+          \xintifboolexpr{\theCCRetiensAide==\PfCListeCCAidelen}{\ifboolKV[CalculsCroises]{Solution}{\color{PfCCouleurCCS}\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[5]}}{}}{}%
+        }{\ifboolKV[CalculsCroises]{Solution}{%
+            \color{PfCCouleurCCS}\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[5]}%
+          }{}%
+        }%
+      }&\Block[borders={bottom,right,top},fill=PfCCouleurCC]{}{\ifboolKV[CalculsCroises]{Inverse}{}{\useKV[CalculsCroises]{Style}\num{\fpeval{\PfCListeCCOp[1]\PfCListeCCOp[2]\PfCListeCCOp[3]\PfCListeCCOp[4]\PfCListeCCOp[5]}}}}\\
+        \rule{0pt}{\PfCCalculsCroises}\StrCompare{\PfCListeCCOp[6]}{*}[\PfCTestEtoile]\Block{}{\xintifboolexpr{\PfCTestEtoile==0}{\PfCSymbolTimes}{$\PfCListeCCOp[6]$}}&\Block[fill=black]{}{~}&\StrCompare{\PfCListeCCOp[7]}{*}[\PfCTestEtoile]\Block{}{\xintifboolexpr{\PfCTestEtoile==0}{\PfCSymbolTimes}{$\PfCListeCCOp[7]$}}&\Block[fill=black]{}{~}&\StrCompare{\PfCListeCCOp[8]}{*}[\PfCTestEtoile]\Block{}{\xintifboolexpr{\PfCTestEtoile==0}{\PfCSymbolTimes}{$\PfCListeCCOp[8]$}}\\
+        \rule{0pt}{\PfCCalculsCroises}\Block{}{%
+          \setcounter{CCRetiensAide}{0}%
+          \ifboolKV[CalculsCroises]{Aide}{%
+          \xintFor* ##1 in{\xintSeq{1}{\PfCListeCCAidelen}}\do{%
+            \xintifboolexpr{\PfCListeCCOp[9]==\PfCListeCCAide[##1]}{\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[9]}}{\stepcounter{CCRetiensAide}}%
+          }%
+          \xintifboolexpr{\theCCRetiensAide==\PfCListeCCAidelen}{\ifboolKV[CalculsCroises]{Solution}{\color{PfCCouleurCCS}\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[9]}}{}}{}%
+        }{\ifboolKV[CalculsCroises]{Solution}{%
+            \color{PfCCouleurCCS}\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[9]}%
+          }{}%
+        }%
+      }&\StrCompare{\PfCListeCCOp[10]}{*}[\PfCTestEtoile]\Block{}{\xintifboolexpr{\PfCTestEtoile==0}{\PfCSymbolTimes}{$\PfCListeCCOp[10]$}}&\Block{}{%
+        \ifboolKV[CalculsCroises]{Aide}{%
+          \setcounter{CCRetiensAide}{0}%
+          \xintFor* ##1 in{\xintSeq{1}{\PfCListeCCAidelen}}\do{%
+            \xintifboolexpr{\PfCListeCCOp[11]==\PfCListeCCAide[##1]}{\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[11]}}{\stepcounter{CCRetiensAide}}%
+          }%
+          \xintifboolexpr{\theCCRetiensAide==\PfCListeCCAidelen}{\ifboolKV[CalculsCroises]{Solution}{\color{PfCCouleurCCS}\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[11]}}{}}{}%
+        }{\ifboolKV[CalculsCroises]{Solution}{%
+            \color{PfCCouleurCCS}\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[11]}%
+          }{}%
+        }%
+      }&\StrCompare{\PfCListeCCOp[12]}{*}[\PfCTestEtoile]\Block{}{\xintifboolexpr{\PfCTestEtoile==0}{\PfCSymbolTimes}{$\PfCListeCCOp[12]$}}&\Block{}{%
+        \ifboolKV[CalculsCroises]{Aide}{%
+          \setcounter{CCRetiensAide}{0}%
+          \xintFor* ##1 in{\xintSeq{1}{\PfCListeCCAidelen}}\do{%
+            \xintifboolexpr{\PfCListeCCOp[13]==\PfCListeCCAide[##1]}{\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[13]}}{\stepcounter{CCRetiensAide}}%
+          }%
+          \xintifboolexpr{\theCCRetiensAide==\PfCListeCCAidelen}{\ifboolKV[CalculsCroises]{Solution}{\color{PfCCouleurCCS}\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[13]}}{}}{}%
+        }{\ifboolKV[CalculsCroises]{Solution}{%
+            \color{PfCCouleurCCS}\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[13]}%
+          }{}%
+        }%
+        }&\Block[borders={bottom,right,top},fill=PfCCouleurCC]{}{\ifboolKV[CalculsCroises]{Inverse}{}{\useKV[CalculsCroises]{Style}\num{\fpeval{\PfCListeCCOp[9]\PfCListeCCOp[10]\PfCListeCCOp[11]\PfCListeCCOp[12]\PfCListeCCOp[13]}}}}\\
+        \rule{0pt}{\PfCCalculsCroises}\StrCompare{\PfCListeCCOp[14]}{*}[\PfCTestEtoile]\Block{}{\xintifboolexpr{\PfCTestEtoile==0}{\PfCSymbolTimes}{$\PfCListeCCOp[14]$}}&\Block[fill=black]{}{~}&\StrCompare{\PfCListeCCOp[15]}{*}[\PfCTestEtoile]\Block{}{\xintifboolexpr{\PfCTestEtoile==0}{\PfCSymbolTimes}{$\PfCListeCCOp[15]$}}&\Block[fill=black]{}{~}&\StrCompare{\PfCListeCCOp[16]}{*}[\PfCTestEtoile]\Block{}{\xintifboolexpr{\PfCTestEtoile==0}{\PfCSymbolTimes}{$\PfCListeCCOp[16]$}}\\
+        \rule{0pt}{\PfCCalculsCroises}\Block{}{%
+          \ifboolKV[CalculsCroises]{Aide}{%
+            \setcounter{CCRetiensAide}{0}%
+            \xintFor* ##1 in{\xintSeq{1}{\PfCListeCCAidelen}}\do{%
+              \xintifboolexpr{\PfCListeCCOp[17]==\PfCListeCCAide[##1]}{\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[17]}}{\stepcounter{CCRetiensAide}}%
+            }%
+            \xintifboolexpr{\theCCRetiensAide==\PfCListeCCAidelen}{\ifboolKV[CalculsCroises]{Solution}{\color{PfCCouleurCCS}\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[17]}}{}}{}%
+          }{\ifboolKV[CalculsCroises]{Solution}{%
+              \color{PfCCouleurCCS}\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[17]}%
+            }{}%
+          }%
+        }&\StrCompare{\PfCListeCCOp[18]}{*}[\PfCTestEtoile]\Block{}{\xintifboolexpr{\PfCTestEtoile==0}{\PfCSymbolTimes}{$\PfCListeCCOp[18]$}}&\Block{}{%
+          \ifboolKV[CalculsCroises]{Aide}{%
+            \setcounter{CCRetiensAide}{0}%
+          \xintFor* ##1 in{\xintSeq{1}{\PfCListeCCAidelen}}\do{%
+            \xintifboolexpr{\PfCListeCCOp[19]==\PfCListeCCAide[##1]}{\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[19]}}{\stepcounter{CCRetiensAide}}%
+          }%
+          \xintifboolexpr{\theCCRetiensAide==\PfCListeCCAidelen}{\ifboolKV[CalculsCroises]{Solution}{\color{PfCCouleurCCS}\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[19]}}{}}{}%
+        }{\ifboolKV[CalculsCroises]{Solution}{%
+            \color{PfCCouleurCCS}\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[19]}%
+          }{}%
+        }%
+      }&\StrCompare{\PfCListeCCOp[20]}{*}[\PfCTestEtoile]\Block{}{\xintifboolexpr{\PfCTestEtoile==0}{\PfCSymbolTimes}{$\PfCListeCCOp[20]$}}&\Block{}{%
+        \ifboolKV[CalculsCroises]{Aide}{%
+            \setcounter{CCRetiensAide}{0}%
+          \xintFor* ##1 in{\xintSeq{1}{\PfCListeCCAidelen}}\do{%
+            \xintifboolexpr{\PfCListeCCOp[21]==\PfCListeCCAide[##1]}{\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[21]}}{\stepcounter{CCRetiensAide}}%
+          }%
+          \xintifboolexpr{\theCCRetiensAide==\PfCListeCCAidelen}{\ifboolKV[CalculsCroises]{Solution}{\color{PfCCouleurCCS}\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[21]}}{}}{}%
+        }{\ifboolKV[CalculsCroises]{Solution}{%
+            \color{PfCCouleurCCS}\useKV[CalculsCroises]{Style}\num{\PfCListeCCOp[21]}%
+          }{}%
+        }%
+      }&\Block[borders={bottom,right,top},fill=PfCCouleurCC]{}{\ifboolKV[CalculsCroises]{Inverse}{}{\useKV[CalculsCroises]{Style}\num{\fpeval{\PfCListeCCOp[17]\PfCListeCCOp[18]\PfCListeCCOp[19]\PfCListeCCOp[20]\PfCListeCCOp[21]}}}}\\
+        \rule{0pt}{\PfCCalculsCroises}\Block[borders={left,bottom,right},fill=PfCCouleurCC]{}{\ifboolKV[CalculsCroises]{Inverse}{}{\useKV[CalculsCroises]{Style}\num{\fpeval{\PfCListeCCOp[1]\PfCListeCCOp[6]\PfCListeCCOp[9]\PfCListeCCOp[14]\PfCListeCCOp[17]}}}}&&\Block[borders={left,bottom,right},fill=PfCCouleurCC]{}{\ifboolKV[CalculsCroises]{Inverse}{}{\useKV[CalculsCroises]{Style}\num{\fpeval{\PfCListeCCOp[3]\PfCListeCCOp[7]\PfCListeCCOp[11]\PfCListeCCOp[15]\PfCListeCCOp[19]}}}}&&\Block[borders={left,bottom,right},fill=PfCCouleurCC]{}{\ifboolKV[CalculsCroises]{Inverse}{}{\useKV[CalculsCroises]{Style}\num{\fpeval{\PfCListeCCOp[5]\PfCListeCCOp[8]\PfCListeCCOp[13]\PfCListeCCOp[16]\PfCListeCCOp[21]}}}}\\
+      }%
+      \CodeAfter
+      \tikz\draw (1-|1) rectangle (6-|6);
+      \xintFor* ##1 in{\xintSeq{2}{5}}\do{%
+        \tikz\draw (1-|##1) -- (6-|##1);
+      }%
+      \xintFor* ##1 in{\xintSeq{2}{5}}\do{%
+        \tikz\draw (##1-|1) -- (##1-|6);
+      }%
+    \end{NiceTabular}        
+    \restorecomparemode%
+}%

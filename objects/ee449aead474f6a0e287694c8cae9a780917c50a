@@ -1,0 +1,39 @@
+%%%
+% Allumettes
+%%%
+\def\filedateAllu{2024/08/04}%
+\def\fileversionAllu{0.1}%
+\message{-- \filedateAllu\space v\fileversionAllu}
+%
+\setKVdefault[Allumettes]{Impression=false,Echelles=false,Echelle={}}%
+\defKV[Allumettes]{Echelle=\ifempty{#1}{}{\setKV[Allumettes]{Echelles}}}%
+
+\ifluatex
+  \NewDocumentEnvironment{Allumettes}{o +b}{%
+    \useKVdefault[Allumettes]%
+    \setKV[Allumettes]{#1}%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      input PfCAllumettes;
+      %
+      boolean print,Echelles;
+      print=\useKV[Allumettes]{Impression};
+      Echelles=\useKV[Allumettes]{Echelles};
+      if Echelles:
+      Echelle=\useKV[Allumettes]{Echelle};
+      DefinirUnite(Echelle);
+      else:
+      Echelle=1;
+      fi;
+      %
+      #2%
+    \end{mplibcode}%
+  }{}
+\else%
+  \NewDocumentEnvironment{Allumettes}{o +b}{%
+    \setKV[Allumettes]{#1}%
+    \begin{mpost}[mpsettings={input PfCAllumettes;boolean print,Echelles;print=\useKV[Allumettes]{Impression};Echelles=\useKV[Allumettes]{Echelles};if Echelles:Echelle=\useKV[Allumettes]{Echelle};DefinirUnite(Echelle);else:Echelle=1;fi;}]%
+      #2%
+    \end{mpost}
+  }{}%
+\fi%

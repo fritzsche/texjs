@@ -1,0 +1,345 @@
+%%%
+% Simplification
+%%%
+\def\filedateSimpFraction{2025/05/26}%
+\def\fileversionSimpFraction{0.1b}%
+\message{-- \filedateSimpFraction\space v\fileversionSimpFraction}%
+%
+\makeatletter%by christian Tellechea
+% Calcul du PGCD de #1 et #2
+\newcount\cnt@a\newcount\cnt@b\newcount\pgcd
+\def\PGCD#1#2{%
+  \ifnum#1>#2\cnt@a#1\cnt@b#2\else\cnt@a#2\cnt@b#1\relax\fi
+  \PGCD@i
+}
+\def\PGCD@i{\edef\PGCD@ii##1{##1{\number\cnt@a}{\number\cnt@b}}\PGCD@ii\PGCD@iii}
+\def\PGCD@iii#1#2{%
+  \cnt@b#1\relax\global\divide\cnt@b#2%
+  \global\cnt@b\numexpr#1-#2*\cnt@b%
+  \global\cnt@a#2\global\pgcd\cnt@a%
+  \ifnum\cnt@b>\z@\expandafter\PGCD@i%
+  \fi}%
+\makeatother
+
+\def\PfCSimplifiable#1#2{%
+  \ensuremath{%
+    \PGCD{#1}{#2}%
+    \ifnum\pgcd>1\relax
+      \text{ ou }\Simplification{#1}{#2}%
+    \fi
+  }%
+}%
+
+\def\SSimplifie#1#2{%
+  % Simplification d'une \'ecriture #1/#2
+  \ensuremath{
+    \newcount\numerateur\newcount\denominateur\newcount\valabsnum\newcount\valabsdeno
+    \numerateur=\number#1
+    \denominateur=\number#2
+    \ifnum\number#1<0\relax
+      \valabsnum=\numexpr0-\number#1
+    \else
+      \valabsnum=\number#1
+    \fi
+    \ifnum\number#2<0\relax
+      \valabsdeno=\numexpr0-\number#2
+    \else
+      \valabsdeno=\number#2
+    \fi
+    \ifnum\the\numerateur<0\relax
+      \ifnum\the\denominateur<0\relax
+        \numerateur=\valabsnum
+        \denominateur=\valabsdeno
+      \fi
+    \else
+      \ifnum\the\denominateur<0\relax
+        \numerateur=-\valabsnum
+        \denominateur=\valabsdeno
+      \fi
+    \fi
+    \ifnum\number#2=0\relax
+      \text{\bfseries(???)}
+    \else
+      \ifnum\number#1=0\relax
+        0
+      \else
+        \PGCD{\the\valabsnum}{\the\valabsdeno}%
+        \ifnum\pgcd>1\relax
+          \ifthenelse{\pgcd=\number#2 \OR \pgcd=\the\valabsdeno}{%
+            \divide\numerateur by \denominateur\num{\the\numerateur}
+          }{\divide\numerateur by\pgcd%
+            \divide\denominateur by\pgcd%
+            \frac{\num{\the\numerateur}}{\num{\the\denominateur}}
+          }
+        \else%%%comme on est avec les n\'egatifs, on doit regarder si la valeur absolue est \'egale \`a 1
+          \ifnum\valabsdeno=1\relax
+            \divide\numerateur by \denominateur\num{\the\numerateur}
+          \else
+            \frac{\num{\the\numerateur}}{\num{\the\denominateur}}
+          \fi
+        \fi%
+      \fi%
+    \fi%
+  }%
+}
+
+
+\newcommand\SSimpli[2]{%
+  % D\'ecomposition d'une simplification de #1/#2
+  \newcount\numerateur\newcount\denominateur\newcount\valabsnum\newcount\valabsdeno%
+  \numerateur=\number#1
+  \denominateur=\number#2
+  \ifnum\number#1<0
+  \valabsnum=\numexpr0-\number#1
+  \else
+  \valabsnum=\number#1
+  \fi
+  \ifnum\number#2<0
+  \valabsdeno=\numexpr0-\number#2
+  \else
+  \valabsdeno=\number#2
+  \fi
+  \ifnum\the\numerateur<0\relax
+    \ifnum\the\denominateur<0\relax
+      \numerateur=\valabsnum
+      \denominateur=\valabsdeno
+    \fi
+  \else
+    \ifnum\the\denominateur<0\relax
+      \numerateur=-\valabsnum
+      \denominateur=\valabsdeno
+    \fi
+  \fi
+  \ifnum\number#2=0\relax
+    \ensuremath{\text{\bfseries(???)}}
+  \else
+      \ifnum\number#1=0\relax
+        0
+      \else
+        \PGCD{\the\valabsnum}{\the\valabsdeno}%
+        \ifnum\pgcd>1\relax
+          \ifthenelse{\pgcd=\number#2 \OR \pgcd=\the\valabsdeno}{%
+            \divide\numerateur by \denominateur\num{\the\numerateur}
+          }{%\divide\numerateur by\pgcd%
+            % \divide\denominateur by\pgcd%
+            \ensuremath{\frac{\num{\the\numerateur}_{\mbox{\tiny$\div\num{\number\pgcd}$}}}{\num{\the\denominateur}_{\mbox{\tiny$\div\num{\number\pgcd}$}}}}%
+          }
+        \else
+          \ifnum\denominateur=1\relax
+            \ensuremath{\frac{\num{\the\numerateur}_{\mbox{\tiny$\div\num{\number\pgcd}$}}}{\num{\the\denominateur}_{\mbox{\tiny$\div\num{\number\pgcd}$}}}}
+          \else
+            \ensuremath{\frac{\num{\the\numerateur}}{\num{\the\denominateur}}}
+          \fi
+        \fi
+      \fi
+    \fi
+}
+
+\newcount\anpdc\newcount\bnpdc\newcount\cnpdc\newcount\dnpdc%
+\newcount\PfCDivCom%
+\newcommand\DiviseurCommun[2]{%
+  % #1 : le premier nombre entier
+  % #2 : le deuxi\`eme nombre entier
+  \anpdc=#1%
+  \cnpdc=#2%
+  \bnpdc=2\relax%
+  \dnpdc=\numexpr#1+1\relax%
+  \PfCDivCom=1\relax%
+  \whiledo{\bnpdc<\dnpdc}{%
+    \modulo{\the\anpdc}{\the\bnpdc}\relax
+    \ifnum\remainder=0%
+    \modulo{\the\cnpdc}{\the\bnpdc}
+    \ifnum\remainder=0%
+    \PfCDivCom=\bnpdc%
+    \bnpdc=\anpdc%
+    \else%
+    \PfCDivCom=1%
+    \fi
+    \else%
+    \PfCDivCom=1%
+    \fi
+    \bnpdc=\numexpr\bnpdc+1\relax%
+  }%
+}
+
+\NewDocumentCommand\LongueSimplification{mm}{%
+  \xdef\PfCNumerateurDiv{#1}%
+  \xdef\PfCDenominateurDiv{#2}%
+  \ifboolKV[ClesSimplification]{Impose}{%
+    \PfCDivCom=\useKV[ClesSimplification]{Nombre}%
+  }{%
+    \DiviseurCommun{#1}{#2}%
+  }%
+  \ifboolKV[ClesSimplification]{Debut}{%
+    \ensuremath{%
+      \whiledo{\PfCDivCom>1}{%
+        \frac{\mathcolor{PfCSimpliCol}{\num{\the\PfCDivCom}}\times\ifboolKV[ClesSimplification]{ACompleter}{\pointilles[20pt]}{\num{\fpeval{\PfCNumerateurDiv/\the\PfCDivCom}}}}{\mathcolor{PfCSimpliCol}{\num{\the\PfCDivCom}}\times\ifboolKV[ClesSimplification]{ACompleter}{\pointilles[20pt]}{\num{\fpeval{\PfCDenominateurDiv/\the\PfCDivCom}}}}=\frac{\ifboolKV[ClesSimplification]{ACompleter}{\pointilles[20pt]}{\num{\fpeval{\PfCNumerateurDiv/\PfCDivCom}}}}{\ifboolKV[ClesSimplification]{ACompleter}{\pointilles[20pt]}{\num{\fpeval{\PfCDenominateurDiv/\PfCDivCom}}}}%
+        \xdef\PfCNumerateurDiv{\fpeval{\PfCNumerateurDiv/\PfCDivCom}}%
+        \xdef\PfCDenominateurDiv{\fpeval{\PfCDenominateurDiv/\PfCDivCom}}%
+        \DiviseurCommun{\PfCNumerateurDiv}{\PfCDenominateurDiv}%
+        \xintifboolexpr{\PfCDivCom>1}{=}{}%
+      }%
+    }%
+  }{%
+    \ensuremath{%
+      \whiledo{\PfCDivCom>1}{%
+        \frac{\ifboolKV[ClesSimplification]{ACompleter}{\pointilles[20pt]}{\num{\fpeval{\PfCNumerateurDiv/\the\PfCDivCom}}}\times\mathcolor{PfCSimpliCol}{\num{\the\PfCDivCom}}}{\ifboolKV[ClesSimplification]{ACompleter}{\pointilles[20pt]}{\num{\fpeval{\PfCDenominateurDiv/\the\PfCDivCom}}}\times\mathcolor{PfCSimpliCol}{\num{\the\PfCDivCom}}}=\frac{\ifboolKV[ClesSimplification]{ACompleter}{\pointilles[20pt]}{\num{\fpeval{\PfCNumerateurDiv/\PfCDivCom}}}}{\ifboolKV[ClesSimplification]{ACompleter}{\pointilles[20pt]}{\num{\fpeval{\PfCDenominateurDiv/\PfCDivCom}}}}%
+        \xdef\PfCNumerateurDiv{\fpeval{\PfCNumerateurDiv/\PfCDivCom}}%
+        \xdef\PfCDenominateurDiv{\fpeval{\PfCDenominateurDiv/\PfCDivCom}}%
+        \DiviseurCommun{\PfCNumerateurDiv}{\PfCDenominateurDiv}%
+        \xintifboolexpr{\PfCDivCom>1}{=}{}%
+      }%
+    }%
+  }%
+}%
+
+\setKVdefault[ClesSimplification]{Details=false,All=false,Longue=false,Fleches=false,Contraire=0,Couleur=black,Debut=false,Impose=false,Decomposition=false,DecompositionSeule=false,ACompleter=false,Nombre={}}%
+\defKV[ClesSimplification]{Nombre=\ifempty{#1}{}{\setKV[ClesSimplification]{Impose}}}%
+
+\newcounter{NbFrac}%
+\setcounter{NbFrac}{0}%
+
+\NewDocumentCommand\Simplification{omm}{%
+  \stepcounter{NbFrac}%
+  \useKVdefault[ClesSimplification]%
+  \setKV[ClesSimplification]{#1}%
+  \ifboolKV[ClesSimplification]{Fleches}{%
+    \setsepchar[*]{,*/}%\ignoreemptyitems
+    \readlist*\Listea{#2}%
+    \readlist*\Listeb{#3}%
+    \ensuremath{%
+      \frac{\tikzmarknode[anchor=north]{A-\theNbFrac}{\num{\Listea[1,1]}}{}}{\tikzmarknode[anchor=south]{B-\theNbFrac}{\num{\Listeb[1,1]}}{}}=\frac{\tikzmarknode[anchor=north]{C-\theNbFrac}{\Listea[1,3]}{}}{\tikzmarknode[anchor=south]{D-\theNbFrac}{\Listeb[1,3]}{}}%
+    }%
+    \begin{tikzpicture}[remember picture,overlay]%
+      \draw[out=45,in=135,-stealth,transform canvas={yshift=0.25em}]
+      let
+      \p1=(pic cs:A-\theNbFrac),
+      \p2=(pic cs:C-\theNbFrac)
+      in (pic cs:A-\theNbFrac) to node[midway,above]{\Listea[1,2]}(\x2,\y1);
+      \draw[out=-45,in=-135,-stealth,transform canvas={yshift=-0.25em}] (pic cs:B-\theNbFrac) to node[midway,below]{\Listeb[1,2]}(pic cs:D-\theNbFrac);%
+    \end{tikzpicture}%
+  }{%
+    \xintifboolexpr{\useKV[ClesSimplification]{Contraire}>1}{%
+      \ensuremath{%
+        \frac{\num{#2}}{\num{#3}}=\frac{\num{#2}\times\num{\useKV[ClesSimplification]{Contraire}}}{\num{#3}\times\num{\useKV[ClesSimplification]{Contraire}}}=\frac{\num{\fpeval{\useKV[ClesSimplification]{Contraire}*#2}}}{\num{\fpeval{\useKV[ClesSimplification]{Contraire}*#3}}}%
+      }%
+    }{%
+      \ifboolKV[ClesSimplification]{DecompositionSeule}{%
+        \DecompositionSimplificationSeule{#2}{#3}%
+      }{%
+        \ifboolKV[ClesSimplification]{Decomposition}{%
+          \DecompositionSimplification{#2}{#3}%
+        }{%
+          \ifboolKV[ClesSimplification]{Longue}{%
+            \colorlet{PfCSimpliCol}{\useKV[ClesSimplification]{Couleur}}%
+            \LongueSimplification{#2}{#3}%
+          }{%
+            \ifboolKV[ClesSimplification]{Details}{\SSimpli{#2}{#3}}{\ifboolKV[ClesSimplification]{All}{\ensuremath{\SSimpli{#2}{#3}=\SSimplifie{#2}{#3}}}{\SSimplifie{#2}{#3}}}%
+          }%
+        }%
+      }%
+    }%
+  }%
+}%
+
+\NewDocumentCommand\DecompositionSimplification{mm}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \RecupListeTousFacteursPremier{#1}%
+  \readlist*\DiviseurHaut{\PfCPileFacteurs}%
+  \RecupListeTousFacteursPremier{#2}%
+  \readlist*\DiviseurBas{\PfCPileFacteurs}%
+  \xdef\LongueurH{\DiviseurHautlen}%
+  \xdef\LongueurB{\DiviseurBaslen}%
+  \xdef\PfCPremierFacteur{#1}%
+  \xdef\PfCDeuxiemeFacteur{#2}%
+  \DiviseurCommun{#1}{#2}%
+  \ensuremath{%
+    \ifnum\PfCDivCom>1%
+      \frac{%
+        \xintFor* ##2 in{\xintSeq{1}{\LongueurH}}\do{%
+          \DiviseurCommun{\DiviseurHaut[##2]}{\PfCDeuxiemeFacteur}
+          \ifnum\PfCDivCom>1%
+            \mathcolor{\useKV[ClesSimplification]{Couleur}}{\num{\DiviseurHaut[##2]}}
+            \xdef\PfCDeuxiemeFacteur{\fpeval{\PfCDeuxiemeFacteur/\DiviseurHaut[##2]}}
+          \else
+            \num{\DiviseurHaut[##2]}
+          \fi
+          \xintifForLast{}{\times}
+        }
+      }{%
+        \xintFor* ##2 in{\xintSeq{1}{\LongueurB}}\do{%
+          \DiviseurCommun{\DiviseurBas[##2]}{\PfCPremierFacteur}
+          \ifnum\PfCDivCom>1%
+            \mathcolor{\useKV[ClesSimplification]{Couleur}}{\num{\DiviseurBas[##2]}}
+            \xdef\PfCPremierFacteur{\fpeval{\PfCPremierFacteur/\DiviseurBas[##2]}}
+          \else
+            \num{\DiviseurBas[##2]}
+          \fi
+          \xintifForLast{}{\times}
+        }
+      }=\frac{\num{\PfCPremierFacteur}}{\num{\PfCDeuxiemeFacteur}}
+    \else
+      \tofrac{#1/#2}
+    \fi
+  }%
+}%
+
+\NewDocumentCommand\DecompositionSimplificationSeule{mm}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \RecupListeTousFacteursPremier{\fpeval{abs(#1)}}%
+  \readlist*\DiviseurHaut{\PfCPileFacteurs}%
+  \RecupListeTousFacteursPremier{\fpeval{abs(#2)}}%
+  \readlist*\DiviseurBas{\PfCPileFacteurs}%
+  \xdef\LongueurH{\DiviseurHautlen}%
+  \xdef\LongueurB{\DiviseurBaslen}%
+  \xintifboolexpr{\fpeval{#1*#2}<0}{%
+    \xdef\PfCPremierFacteur{#1}%
+    \xdef\PfCDeuxiemeFacteur{#2}%
+  }{%
+    \xdef\PfCPremierFacteur{\fpeval{abs(#1)}}%
+    \xdef\PfCDeuxiemeFacteur{\fpeval{abs(#2)}}%
+  }%
+  \DiviseurCommun{\fpeval{abs(#1)}}{\fpeval{abs(#2)}}%
+  \ensuremath{%
+    \ifnum\PfCDivCom>1%
+      \frac{%
+        \xintifboolexpr{\fpeval{#1*#2}<0}{\xintifboolexpr{#1<0}{-}{}}{}\xintFor* ##2 in{\xintSeq{1}{\LongueurH}}\do{%
+          \DiviseurCommun{\DiviseurHaut[##2]}{\PfCDeuxiemeFacteur}
+          \ifnum\PfCDivCom>1%
+            \mathcolor{\useKV[ClesSimplification]{Couleur}}{\num{\DiviseurHaut[##2]}}
+            \xdef\PfCDeuxiemeFacteur{\fpeval{\PfCDeuxiemeFacteur/\DiviseurHaut[##2]}}
+          \else
+            \num{\DiviseurHaut[##2]}
+          \fi
+          \xintifForLast{}{\times}
+        }
+      }{%
+        \xintifboolexpr{\fpeval{#1*#2}<0}{\xintifboolexpr{#1<0}{}{-}}{}\xintFor* ##2 in{\xintSeq{1}{\LongueurB}}\do{%
+          \DiviseurCommun{\DiviseurBas[##2]}{\PfCPremierFacteur}
+          \ifnum\PfCDivCom>1%
+            \mathcolor{\useKV[ClesSimplification]{Couleur}}{\num{\DiviseurBas[##2]}}
+            \xdef\PfCPremierFacteur{\fpeval{\PfCPremierFacteur/\DiviseurBas[##2]}}
+          \else
+            \num{\DiviseurBas[##2]}
+          \fi
+          \xintifForLast{}{\times}
+        }
+      }%=\frac{\PfCPremierFacteur}{\PfCDeuxiemeFacteur}
+    \else
+      \tofrac{#1/#2}
+    \fi
+  }%
+}%
+
+\NewDocumentCommand\LesDiviseursCommuns{mm}{%
+  \xdef\PfCListeDivComAvant{1}%
+  \xintFor* ##2 in {\xintSeq{2}{#1}}\do{%
+    \modulo{#1}{##2}\relax
+    \ifnum\remainder=0\relax%
+      \modulo{#2}{##2}\relax
+      \ifnum\remainder=0\relax%
+        \xdef\PfCListeDivComAvant{\PfCListeDivComAvant,##2}%
+      \fi%
+    \fi%
+  }%
+}%

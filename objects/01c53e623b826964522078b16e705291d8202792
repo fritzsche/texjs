@@ -1,0 +1,93 @@
+%%
+%% This is file `phy-ab.braket.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% physics2-code.dtx  (with options: `ab.braket')
+%% 
+%%   Copyright (C) 2023 by Zhang Tingxuan <alphaztx@163.com>
+%% 
+%%   This work may be distributed and/or modified under the
+%%   conditions of the LaTeX Project Public License, either
+%%   version 1.3c of this license or (at your option) any later
+%%   version. The latest version of this license is in:
+%% 
+%%     http://www.latex-project.org/lppl.txt
+%% 
+%%   and version 1.3 or later is part of all distributions of
+%%   LaTeX version 2005/12/01 or later.
+%% 
+%%   This work has the LPPL maintenance status `maintained'.
+%% 
+%%   The Current Maintainer of this work is Zhang Tingxuan.
+%% 
+%%   This work consists of the files physics2-code.dtx,
+%%             and the derived files physics2.ins,
+%%                                   physics2.sty,
+%%                                   phy-<module>.sty,
+%%                                   physics2-code.pdf,
+%%                               and README.md.
+%% 
+\ProvidesFile{phy-ab.braket.sty}
+  [2023/10/24 `ab.braket' module of physics2]
+\phy@requiremodule{ab}
+\ifdefined\phy@bra@@
+  \PackageWarning{physics2}{You cannot load `ab.braket' and `braket'
+    modules together.\MessageBreak Only `ab.braket' module works now.}
+\fi
+\phy@AB@gen{br.m}<{mr<|}{\mathopen#1\langle#2\mathclose#1\vert\endgroup}
+\phy@AB@gen{br.a}<{r<|}{\phy@abopen\langle#1\phy@abclose\vert}
+\phy@d@l@genxm{br.m}
+\phy@d@l@genxa{br.a}
+\DeclareRobustCommand\bra{\phy@d@lx{br.m}{br.a}}
+\phy@AB@gen{kt.m}|{mr|>}{\mathopen#1\vert#2\mathclose#1\rangle\endgroup}
+\phy@AB@gen{kt.a}|{r|>}{\phy@abopen\vert#1\phy@abclose\rangle}
+\phy@d@l@genxm{kt.m}
+\phy@d@l@genxa{kt.a}
+\DeclareRobustCommand\ket{\phy@d@lx{kt.m}{kt.a}}
+\begingroup
+\catcode`\|=\active
+\gdef\phy@@mb@bk#1#2{\begingroup
+  \mathcode`\|="8000\def|{\egroup#1\vert\bgroup}%
+  \def\<{\mathrel{<}}\def\>{\mathrel{>}}%
+  \mathopen#1\langle\bgroup#2\egroup\mathclose#1\rangle\endgroup}
+\gdef\phy@@ab@bk#1{\begingroup
+  \mathcode`\|="8000\def|{\egroup\phy@abb@bkv\bgroup}%
+  \def\<{\mathrel{<}}\def\>{\mathrel{>}}%
+  \phy@abopen\langle\bgroup#1\egroup\phy@abclose\rangle\endgroup}
+\endgroup
+\def\phy@abb@bkv{\middle\vert}
+\phy@AB@gen{bk.m}<{mr<>}{\phy@@mb@bk#1{#2}\endgroup}
+\phy@AB@gen{bk.a}<{r<>}{\phy@@ab@bk{#1}}
+\phy@d@l@genxm{bk.m}
+\phy@d@l@genxa{bk.a}
+\DeclareRobustCommand\braket{\phy@d@lx{bk.m}{bk.a}}
+\begingroup
+\catcode`\<=\active
+\catcode`\>=\active
+\gdef\phy@@mb@kb#1#2{\begingroup
+  \mathcode`\<="8000 \mathcode`\>="8000%
+  \def<{#1\langle}\def>{#1\rangle}%
+  \def\<{\phy@abb@l}\def\>{\phy@abb@r}%
+  \mathopen#1\vert#2\mathclose#1\vert\endgroup}
+\endgroup
+\gdef\phy@@ab@kb#1>#2<#3\phy@@end{\begingroup
+  \def\<{\phy@abb@l}\def\>{\phy@abb@r}%
+  \phy@abopen\vert\mathopen{\phy@mathvphantom{#3}}#1\phy@abclose\rangle#2%
+  \phy@abopen\langle#3\mathclose{\phy@mathvphantom{#1}}\phy@abclose\vert
+\endgroup}
+\AtBeginDocument{\ifcsname symbf\endcsname
+  \def\phy@abb@l{\Umathchar 3 \symoperators "003C }%
+  \def\phy@abb@r{\Umathchar 3 \symoperators "003E }%
+\fi}
+\def\phy@abb@l{\mathchar"313C }
+\def\phy@abb@r{\mathchar"313E }
+\phy@AB@gen{kb.m}|{mr||}{\phy@@mb@kb#1{#2}\endgroup}
+\phy@AB@gen{kb.a}|{r||}{\phy@@ab@kb#1\phy@@end}
+\phy@d@l@genxm{kb.m}
+\phy@d@l@genxa{kb.a}
+\DeclareRobustCommand\ketbra{\phy@d@lx{kb.m}{kb.a}}
+\endinput
+%%
+%% End of file `phy-ab.braket.sty'.

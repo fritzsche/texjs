@@ -1,0 +1,393 @@
+%%%
+% Somme des angles
+%%%
+\def\filedateSommeAngles{2024/08/04}%
+\def\fileversionSommeAngles{0.1}%
+\message{-- \filedateSommeAngles\space v\fileversionSommeAngles}%
+%
+\setKVdefault[ClesSommeAngle]{Detail=true,Isocele=false,Rectangle=false,Figure=false,FigureSeule=false,Angle=0,Perso=false,Echelle=1cm,SansNom=false}%
+
+\def\MPFigureSommeAngle#1#2#3#4#5{%
+    % #1 Premier sommet
+    % #2 Deuxi\`eme sommet
+    % #3 Troisi\`eme sommet
+    % #4 1er angle
+    % #5 2eme angle
+  \ifluatex
+  %\mplibcodeinherit{enable}
+  \mplibforcehmode
+  \begin{mplibcode}
+    pair A,B,C,O,I;%
+    u:=\useKV[ClesSommeAngle]{Echelle};
+    Angle:=\useKV[ClesSommeAngle]{Angle};
+    boolean Rectangle,Isocele;
+    Rectangle=\useKV[ClesSommeAngle]{Rectangle};%
+    Isocele=\useKV[ClesSommeAngle]{Isocele};
+    A=u*(1,1);
+    B-A=u*(4,0);
+    if Rectangle:
+    C=3/5[B,rotation(A,B,-90)];
+    else:
+    C=(A--2[A,B rotatedabout(A,45)]) intersectionpoint (B--2[B,A rotatedabout(B,-60)]);
+    fi;
+    O=CentreCercleC(A,B,C);
+    % On tourne pour \'eventuellement moins de lassitude :)
+    A:=rotation(A,O,Angle);
+    B:=rotation(B,O,Angle);
+    C:=rotation(C,O,Angle);
+    % On d\'efinit le centre du cercle inscrit
+    I=CentreCercleI(A,B,C);
+    % on dessine \`a main lev\'ee :)
+    path triangle;
+    triangle=A{dir(angle(B-A)+5)}..B{dir(angle(B-A)+5)}--B{dir(angle(C-B)+5)}..C{dir(angle(C-B)+5)}--C{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)}--cycle;
+    % pour marquer les angles
+    path cc;
+    cc=fullcircle scaled 1u;
+    picture MAngle;
+    path cd; pair M[];
+    MAngle=image(%
+    if Isocele:%
+    if Rectangle:
+    trace codeperp(A,B,C,5);
+    cd=A--(A+B+C)/3;
+    M1=cd intersectionpoint (cc shifted A);
+    trace 9/10[A,M1]--11/10[A,M1];
+    cd:=C--(A+B+C)/3;
+    M1:=cd intersectionpoint (cc shifted C);
+    trace 9/10[C,M1]--11/10[C,M1];
+    else:
+    cd=B--(A+B+C)/3;
+    M1=cd intersectionpoint (cc shifted B);
+    trace 9/10[B,M1]--11/10[B,M1];
+    cd:=C--(A+B+C)/3;
+    M1:=cd intersectionpoint (cc shifted C);
+    trace 9/10[C,M1]--11/10[C,M1];
+    fi;
+    fi;
+    if Rectangle:
+    trace codeperp(A,B,C,5);
+    else:
+    draw (cc shifted B);
+    fi;
+    draw (cc shifted A);
+    draw (cc shifted C);
+    );
+    draw MAngle;
+    clip currentpicture to triangle;
+    draw A{dir(angle(B-A)+5)}..B{dir(angle(B-A)+5)};
+    draw B{dir(angle(C-B)+5)}..C{dir(angle(C-B)+5)};
+    draw C{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)};
+    % on labelise
+    label(btex #1 etex,1.2[O,A]);
+    label(btex #2 etex,1.2[O,B]);
+    label(btex #3 etex,1.2[O,C]);
+    % Codage
+    if Isocele:
+    marque_s:=marque_s/2;
+    if Rectangle:
+    draw Codelongueur(A,B,B,C,2);
+    else:
+    draw Codelongueur(A,B,A,C,2);
+    fi;
+    marque_s:=marque_s*2;
+    fi;
+    % Affichage des angles:
+    if Isocele:
+    if Rectangle:
+    label(btex ? etex,A+0.95u*unitvector(I-A));
+    else:
+    if #4>#5:%Cas où b est vide donc on affiche la mesure commune
+    label(btex $\ang{#4}$ etex,A+0.95u*unitvector(I-A));
+    label(btex ? etex,B+0.95u*unitvector(I-B));
+    else:
+    label(btex $\ang{#5}$ etex,B+0.95u*unitvector(I-B));
+    label(btex ? etex,A+0.95u*unitvector(I-A));
+    fi;
+    fi;
+    else:
+    if Rectangle:
+    if #4>#5:
+    label(btex $\ang{#4}$ etex,C+0.95u*unitvector(I-C));
+    else:
+    label(btex $\ang{#5}$ etex,C+0.95u*unitvector(I-C));
+    fi;
+    else:
+    label(btex $\ang{#4}$ etex,B+0.95u*unitvector(I-B));
+    label(btex $\ang{#5}$ etex,C+0.95u*unitvector(I-C));
+    fi;
+    label(btex ? etex,A+0.95u*unitvector(I-A));
+    fi;
+  \end{mplibcode}
+  %\mplibcodeinherit{disable}
+  \else
+  \begin{mpost}[mpsettings={u:=\useKV[ClesSommeAngle]{Echelle};boolean Rectangle,Isocele;
+      Rectangle=\useKV[ClesSommeAngle]{Rectangle};Isocele=\useKV[ClesSommeAngle]{Isocele};Angle:=\useKV[ClesSommeAngle]{Angle};}]
+    pair A,B,C,O,I;%
+    A=u*(1,1);
+    B-A=u*(4,0);
+    if Rectangle:
+    C=3/5[B,rotation(A,B,-90)];
+    else:
+    C=(A--2[A,B rotatedabout(A,45)]) intersectionpoint (B--2[B,A rotatedabout(B,-60)]);
+    fi;
+    O=CentreCercleC(A,B,C);
+    % On tourne pour \'eventuellement moins de lassitude :)
+    A:=rotation(A,O,Angle);
+    B:=rotation(B,O,Angle);
+    C:=rotation(C,O,Angle);
+    % On d\'efinit le centre du cercle inscrit
+    I=CentreCercleI(A,B,C);
+    % on dessine \`a main lev\'ee :)
+    path triangle;
+    triangle=A{dir(angle(B-A)+5)}..B{dir(angle(B-A)+5)}--B{dir(angle(C-B)+5)}..C{dir(angle(C-B)+5)}--C{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)}--cycle;
+    % pour marquer les angles
+    path cc;
+    cc=fullcircle scaled 1u;
+    picture MAngle;
+    path cd; pair M[];
+    MAngle=image(%
+    if Isocele:%
+    if Rectangle:
+    trace codeperp(A,B,C,5);
+    cd=A--(A+B+C)/3;
+    M1=cd intersectionpoint (cc shifted A);
+    trace 9/10[A,M1]--11/10[A,M1];
+    cd:=C--(A+B+C)/3;
+    M1:=cd intersectionpoint (cc shifted C);
+    trace 9/10[C,M1]--11/10[C,M1];
+    else:
+    cd=B--(A+B+C)/3;
+    M1=cd intersectionpoint (cc shifted B);
+    trace 9/10[B,M1]--11/10[B,M1];
+    cd:=C--(A+B+C)/3;
+    M1:=cd intersectionpoint (cc shifted C);
+    trace 9/10[C,M1]--11/10[C,M1];
+    fi;
+    fi;
+    if Rectangle:
+    trace codeperp(A,B,C,5);
+    else:
+    draw (cc shifted B);
+    fi;
+    draw (cc shifted A);
+    draw (cc shifted C);
+    );
+    draw MAngle;
+    clip currentpicture to triangle;
+    draw A{dir(angle(B-A)+5)}..B{dir(angle(B-A)+5)};
+    draw B{dir(angle(C-B)+5)}..C{dir(angle(C-B)+5)};
+    draw C{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)};
+    % on labelise
+    label(btex #1 etex,1.2[O,A]);
+    label(btex #2 etex,1.2[O,B]);
+    label(btex #3 etex,1.2[O,C]);
+    % Codage
+    if Isocele:
+    marque_s:=marque_s/2;
+    if Rectangle:
+    draw Codelongueur(A,B,B,C,2);
+    else:
+    draw Codelongueur(A,B,A,C,2);
+    fi;
+    marque_s:=marque_s*2;
+    fi;
+    % Affichage des angles:
+    if Isocele:
+    if Rectangle:
+    label(btex ? etex,A+0.95u*unitvector(I-A));
+    else:
+    if #4>#5:%Cas où b est vide donc on affiche la mesure commune
+    label(btex $\ang{#4}$ etex,A+0.95u*unitvector(I-A));
+    label(btex ? etex,B+0.95u*unitvector(I-B));
+    else:
+    label(btex $\ang{#5}$ etex,B+0.95u*unitvector(I-B));
+    label(btex ? etex,A+0.95u*unitvector(I-A));
+    fi;
+    fi;
+    else:
+    if Rectangle:
+    if #4>#5:
+    label(btex $\ang{#4}$ etex,C+0.95u*unitvector(I-C));
+    else:
+    label(btex $\ang{#5}$ etex,C+0.95u*unitvector(I-C));
+    fi;
+    else:
+    label(btex $\ang{#4}$ etex,B+0.95u*unitvector(I-B));
+    label(btex $\ang{#5}$ etex,C+0.95u*unitvector(I-C));
+    fi;
+    label(btex ? etex,A+0.95u*unitvector(I-A));
+    fi;
+  \end{mpost}
+  \fi
+}
+
+\xdef\RedactionSomme{}
+
+% \newcommand\RedactionSom[4][]{%
+\NewDocumentCommand\RedactionSom{ommm}{%
+  % #1 : nom du triangle pA pB pC
+  % #2 : mesure de l'angle pApBpC
+  % #3 : mesure de l'angle pBpCpA
+  \useKVdefault[ClesSommeAngle]%
+  \setKV[ClesSommeAngle]{#1}%
+  \ifboolKV[ClesSommeAngle]{SansNom}{%
+    \ifboolKV[ClesSommeAngle]{Rectangle}{%
+      \ifboolKV[ClesSommeAngle]{Isocele}{%
+        \ifx\bla#3\bla%
+          \begin{align*}
+            2\times?&=\ang{90}\\%
+            \ifboolKV[ClesSommeAngle]{Detail}{?&=\frac{\ang{90}}{2}\\}{?&=\ang{45}}%\\
+            \ifboolKV[ClesSommeAngle]{Detail}{?&=\ang{45}}{}%
+          \end{align*}
+        \fi%
+      }{%
+        \ifx\bla#3\bla%
+          \begin{align*}
+            ?+\ang{#4}&=\ang{90}\\%
+            \xdef\totalangle{\fpeval{90-#4}}\ifboolKV[ClesSommeAngle]{Detail}{?&=\ang{90}-\ang{#4}\\}{?&=\ang{\totalangle}}%\\
+            \ifboolKV[ClesSommeAngle]{Detail}{\widehat{\NomB\NomA\NomC}&=\ang{\totalangle}}{}%
+          \end{align*}
+        \fi%
+      }%
+    }{%
+      \ifboolKV[ClesSommeAngle]{Isocele}{%
+        \ifx\bla#4\bla%
+          \begin{align*}%
+            2\times\ang{#3}+?&=\ang{180}\\%
+            \xdef\sommeangle{\fpeval{2*#3}}\xdef\totalangle{\fpeval{180-\sommeangle}}\ang{\sommeangle}+?&=\ang{180}\\%
+            \ifboolKV[ClesSommeAngle]{Detail}{?&=\ang{180}-\ang{\sommeangle}\\}{?&=\ang{\totalangle}}%\\
+            \ifboolKV[ClesSommeAngle]{Detail}{?&=\ang{\totalangle}}{}%
+          \end{align*}%
+          \xdef\ResultatAngle{\totalangle}%
+        \else%
+          \begin{align*}%
+            2\times?+\ang{#4}&=\ang{180}\\%
+            \xdef\totalangle{\fpeval{180-#4}}%
+            \ifboolKV[ClesSommeAngle]{Detail}{2\times?&=\ang{180}-\ang{#4}\\}{2\times?=\ang{\totalangle}\\}%
+            \ifboolKV[ClesSommeAngle]{Detail}{2\times?&=\ang{\totalangle}\\}{?&=\frac{\ang{\totalangle}}{2}\\}%
+            \ifboolKV[ClesSommeAngle]{Detail}{?&=\frac{\ang{\totalangle}}{2}\\}{?&=\ang{\fpeval{0.5*(180-#4)}}}%\\
+            \ifboolKV[ClesSommeAngle]{Detail}{?&=\ang{\fpeval{0.5*(180-#4)}}}{}%
+          \end{align*}%
+          \xdef\ResultatAngle{\fpeval{0.5*(180-#4)}}%
+        \fi%
+      }{%
+        \begin{align*}%
+          \ang{#3}+\ang{#4}+?&=\ang{180}\\%
+          \xdef\sommeangle{\fpeval{#3+#4}}\xdef\totalangle{\fpeval{180-\sommeangle}}\ang{\sommeangle}+?&=\ang{180}\\%
+          \ifboolKV[ClesSommeAngle]{Detail}{?&=\ang{180}-\ang{\sommeangle}\\}{?&=\ang{\totalangle}}%\\
+          \ifboolKV[ClesSommeAngle]{Detail}{?&=\ang{\totalangle}}{}%
+        \end{align*}%
+        \xdef\ResultatAngle{\totalangle}%
+      }%
+    }%
+  }{%
+    % On r\'ecup\`ere les noms des sommets.
+    \StrMid{#2}{1}{1}[\NomA]%
+    \StrMid{#2}{2}{2}[\NomB]%
+    \StrMid{#2}{3}{3}[\NomC]%
+    \xdef\NomTriangle{\NomA\NomB\NomC}%
+    \xdef\NomSommetB{\NomB}%
+    \xdef\NomSommetA{\NomA}%
+    \xdef\NomSommetC{\NomC}%
+    % On r\'edige
+    \ifboolKV[ClesSommeAngle]{Perso}{\RedactionSomme}{Dans le triangle $\NomA\NomB\NomC$, \ifboolKV[ClesSommeAngle]{Rectangle}{ rectangle \ifboolKV[ClesSommeAngle]{Isocele}{isocèle }{}en $\NomB$, }{\ifboolKV[ClesSommeAngle]{Isocele}{ isoc\`ele en $\NomA$, }{}}
+              on a :}%
+    \ifboolKV[ClesSommeAngle]{Rectangle}{%
+    \ifboolKV[ClesSommeAngle]{Isocele}{%
+      \ifx\bla#3\bla%
+      \begin{align*}
+        2\times\widehat{\NomB\NomA\NomC}&=\ang{90}\\%
+        \ifboolKV[ClesSommeAngle]{Detail}{\widehat{\NomB\NomA\NomC}&=\frac{\ang{90}}{2}\\}{\widehat{\NomA\NomB\NomC}&=\ang{45}}%
+      \ifboolKV[ClesSommeAngle]{Detail}{\widehat{\NomB\NomA\NomC}&=\ang{45}}{}%
+      \end{align*}
+      \fi
+    }{%
+      \ifx\bla#3\bla%
+      \begin{align*}
+        \widehat{\NomB\NomA\NomC}+\widehat{\NomB\NomC\NomA}&=\ang{90}\\%
+        \widehat{\NomB\NomA\NomC}+\ang{#4}&=\ang{90}\\%
+        \xdef\totalangle{\fpeval{90-#4}}\ifboolKV[ClesSommeAngle]{Detail}{\widehat{\NomB\NomA\NomC}&=\ang{90}-\ang{#4}\\}{\widehat{\NomB\NomA\NomC}&=\ang{\totalangle}}%
+      \ifboolKV[ClesSommeAngle]{Detail}{\widehat{\NomB\NomA\NomC}&=\ang{\totalangle}}{}%
+      \end{align*}
+      \fi
+    }%
+  }{%
+    \ifboolKV[ClesSommeAngle]{Isocele}{%
+      \ifx\bla#4\bla%
+      \begin{align*}%
+        \widehat{\NomA\NomB\NomC}+\widehat{\NomB\NomC\NomA}+\widehat{\NomC\NomA\NomB}&=\ang{180}\\%
+        2\times\ang{#3}+\widehat{\NomC\NomA\NomB}&=\ang{180}\\%
+        \xdef\sommeangle{\fpeval{2*#3}}\xdef\totalangle{\fpeval{180-\sommeangle}}\ang{\sommeangle}+\widehat{\NomC\NomA\NomB}&=\ang{180}\\%
+        \ifboolKV[ClesSommeAngle]{Detail}{\widehat{\NomC\NomA\NomB}&=\ang{180}-\ang{\sommeangle}\\}{\widehat{\NomC\NomA\NomB}&=\ang{\totalangle}}%\\
+    \ifboolKV[ClesSommeAngle]{Detail}{\widehat{\NomC\NomA\NomB}&=\ang{\totalangle}}{}%
+      \end{align*}%
+      \xdef\ResultatAngle{\totalangle}%
+      \else%
+      \begin{align*}%
+        \widehat{\NomA\NomB\NomC}+\widehat{\NomB\NomC\NomA}+\widehat{\NomC\NomA\NomB}&=\ang{180}\\%
+        2\times\widehat{\NomA\NomB\NomC}+\ang{#4}&=\ang{180}\\%
+        \xdef\totalangle{\fpeval{180-#4}}%
+        \ifboolKV[ClesSommeAngle]{Detail}{2\times\widehat{\NomA\NomB\NomC}&=\ang{180}-\ang{#4}\\}{2\times\widehat{\NomA\NomB\NomC}&=\ang{\totalangle}\\}%
+        \ifboolKV[ClesSommeAngle]{Detail}{2\times\widehat{\NomA\NomB\NomC}&=\ang{\totalangle}\\}{\widehat{\NomA\NomB\NomC}&=\frac{\ang{\totalangle}}{2}\\}%
+        \ifboolKV[ClesSommeAngle]{Detail}{\widehat{\NomA\NomB\NomC}&=\frac{\ang{\totalangle}}{2}\\}{\widehat{\NomA\NomB\NomC}&=\ang{\fpeval{0.5*(180-#4)}}}%\\
+        \ifboolKV[ClesSommeAngle]{Detail}{\widehat{\NomA\NomB\NomC}&=\ang{\fpeval{0.5*(180-#4)}}}{}%
+      \end{align*}%
+      \xdef\ResultatAngle{\fpeval{0.5*(180-#4)}}%
+      \fi%
+    }{%
+      \begin{align*}%
+        \widehat{\NomA\NomB\NomC}+\widehat{\NomB\NomC\NomA}+\widehat{\NomC\NomA\NomB}&=\ang{180}\\%
+        \ang{#3}+\ang{#4}+\widehat{\NomC\NomA\NomB}&=\ang{180}\\%
+        \xdef\sommeangle{\fpeval{#3+#4}}\xdef\totalangle{\fpeval{180-\sommeangle}}\ang{\sommeangle}+\widehat{\NomC\NomA\NomB}&=\ang{180}\\%
+        \ifboolKV[ClesSommeAngle]{Detail}{\widehat{\NomC\NomA\NomB}&=\ang{180}-\ang{\sommeangle}\\}{\widehat{\NomC\NomA\NomB}&=\ang{\totalangle}}%\\
+        \ifboolKV[ClesSommeAngle]{Detail}{\widehat{\NomC\NomA\NomB}&=\ang{\totalangle}}{}%
+      \end{align*}%
+      \xdef\ResultatAngle{\totalangle}%
+    }%
+  }%
+  }
+}%
+
+% \newcommand\SommeAngles[4][]{% Macro calculant la mesure de l'angle pCpApB
+\NewDocumentCommand\SommeAngles{ommm}{% Macro calculant la mesure de l'angle pCpApB
+  % #1 : nom du triangle pA pB pC
+  % #2 : mesure de l'angle pApBpC
+  % #3 : mesure de l'angle pBpCpA
+  \useKVdefault[ClesSommeAngle]%obligatoire car la macro n'est pas dans un groupe.
+  \setKV[ClesSommeAngle]{#1}%lit les arguments optionnels
+  % On r\'ecup\`ere les noms des sommets.
+  \StrMid{#2}{1}{1}[\NomA]%
+  \StrMid{#2}{2}{2}[\NomB]%
+  \StrMid{#2}{3}{3}[\NomC]%
+  % Figure ou pas ?
+  \ifboolKV[ClesSommeAngle]{FigureSeule}{%
+    \ifx\bla#3\bla%
+    \MPFigureSommeAngle{\NomA}{\NomB}{\NomC}{#4}{0}%
+    \else%
+    \ifx\bla#4\bla%
+    \MPFigureSommeAngle{\NomA}{\NomB}{\NomC}{0}{#3}%
+    \else%
+    \MPFigureSommeAngle{\NomA}{\NomB}{\NomC}{#3}{#4}%
+    \fi%
+    \fi%
+  }{%
+    \ifboolKV[ClesSommeAngle]{Figure}{%
+      \begin{multicols}{2}%
+        {\em La figure est donn\'ee \`a titre indicatif.}%
+        \ifx\bla#3\bla%
+        \[\MPFigureSommeAngle{\NomA}{\NomB}{\NomC}{#4}{0}\]%
+        \else%
+        \ifx\bla#4\bla%
+        \[\MPFigureSommeAngle{\NomA}{\NomB}{\NomC}{0}{#3}\]%
+        \else%
+        \[\MPFigureSommeAngle{\NomA}{\NomB}{\NomC}{#3}{#4}\]%
+        \fi%
+        \fi%
+        \par\columnbreak\par%
+        \RedactionSom[#1]{#2}{#3}{#4}%
+      \end{multicols}%
+    }{% on r\'edige
+      \RedactionSom[#1]{#2}{#3}{#4}%
+    }%
+  }%
+}%

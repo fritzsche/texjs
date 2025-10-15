@@ -1,0 +1,49 @@
+%%%
+% Defi Calculatrice
+%%%
+\def\filedateDefiCalc{2025/05/27}%
+\def\fileversionDefiCalc{0.1a}%
+\message{-- \filedateDefiCalc\space v\fileversionDefiCalc}%
+%
+\setKVdefault[DefiCalculatrice]{NbCasesNoires=6,ListeTouches={!},Impression=false}%
+%\defKV[DefiCalculatrice]{Impression=\setKV[ClesCalculatrice]{Impression}}%
+
+\newtoks\toktexteecran{}%
+\newtoks\tokcibleecran{}%
+\def\UpdatetoksTexteEcran#1\nil{\addtotok\toktexteecran{_}}%
+\def\UpdatetoksCibleEcran#1\nil{\addtotok\tokcibleecran{"#1"}}%
+
+\newlength\Adaptation
+\newlength\Adaptationbis
+
+\NewDocumentCommand\DefiCalculatrice{om}{%
+  \useKVdefault[DefiCalculatrice]%
+  \setKV[DefiCalculatrice]{#1}%
+  \toktexteecran{"}%
+  \tokcibleecran{}%
+  \xdef\PfCFooDCListe{\useKV[DefiCalculatrice]{ListeTouches}}%
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\PfCDCListeEffacer{\PfCFooDCListe}%
+  \reademptyitems%
+  \xintFor* ##1 in{\xintSeq{1}{\useKV[DefiCalculatrice]{NbCasesNoires}}}\do{%
+    \expandafter\UpdatetoksTexteEcran##1\nil%
+  }%
+  \addtotok\toktexteecran{"}%
+  \expandafter\UpdatetoksCibleEcran#2\nil%
+  % Dessin de la calculatrice
+  \setlength{\Adaptation}{7em+0.07\tabcolsep}%
+  \setlength{\Adaptationbis}{6em}%
+  \begin{tcolorbox}[nobeforeafter,left=0pt,right=0pt,top=0pt,bottom=0pt,width=\Adaptation]
+    \begin{center}
+  \setlength{\tabcolsep}{0.01\tabcolsep}
+  \begin{tabular}{*{4}{c}}%m{20pt}}}
+    \ifboolKV[DefiCalculatrice]{Impression}{\multicolumn{4}{c}{\Calculatrice[Ecran,Largeur=\mpdim{\Adaptationbis}/0.5mm,Impression]{\the\toktexteecran/\the\tokcibleecran}}}{\multicolumn{4}{c}{\Calculatrice[Ecran,Largeur=\mpdim{\Adaptationbis}/0.5mm]{\the\toktexteecran/\the\tokcibleecran}}}\\
+    \multicolumn{1}{c}{\IfSubStr{\useKV[DefiCalculatrice]{ListeTouches}}{7}{\Calculatrice{/\faScrewdriver}}{\Calculatrice{/7}}}&\multicolumn{1}{c}{\IfSubStr{\useKV[DefiCalculatrice]{ListeTouches}}{8}{\Calculatrice{/\faScrewdriver}}{\Calculatrice{/8}}}&\multicolumn{1}{c}{\IfSubStr{\useKV[DefiCalculatrice]{ListeTouches}}{9}{\Calculatrice{/\faScrewdriver}}{\Calculatrice{/9}}}&\multicolumn{1}{c}{\IfSubStr{\useKV[DefiCalculatrice]{ListeTouches}}{/}{\Calculatrice{/\faScrewdriver}}{\Calculatrice{/$\PfCSymbolDiv$}}}\\
+    \multicolumn{1}{c}{\IfSubStr{\useKV[DefiCalculatrice]{ListeTouches}}{4}{\Calculatrice{/\faScrewdriver}}{\Calculatrice{/4}}}&\multicolumn{1}{c}{\IfSubStr{\useKV[DefiCalculatrice]{ListeTouches}}{5}{\Calculatrice{/\faScrewdriver}}{\Calculatrice{/5}}}&\multicolumn{1}{c}{\IfSubStr{\useKV[DefiCalculatrice]{ListeTouches}}{6}{\Calculatrice{/\faScrewdriver}}{\Calculatrice{/6}}}&\multicolumn{1}{c}{\IfSubStr{\useKV[DefiCalculatrice]{ListeTouches}}{*}{\Calculatrice{/\faScrewdriver}}{\Calculatrice{/$\PfCSymbolTimes$}}}\\
+    \multicolumn{1}{c}{\IfSubStr{\useKV[DefiCalculatrice]{ListeTouches}}{1}{\Calculatrice{/\faScrewdriver}}{\Calculatrice{/1}}}&\multicolumn{1}{c}{\IfSubStr{\useKV[DefiCalculatrice]{ListeTouches}}{2}{\Calculatrice{/\faScrewdriver}}{\Calculatrice{/2}}}&\multicolumn{1}{c}{\IfSubStr{\useKV[DefiCalculatrice]{ListeTouches}}{3}{\Calculatrice{/\faScrewdriver}}{\Calculatrice{/3}}}&\multicolumn{1}{c}{\IfSubStr{\useKV[DefiCalculatrice]{ListeTouches}}{-}{\Calculatrice{/\faScrewdriver}}{\Calculatrice{/$-$}}}\\
+    \multicolumn{1}{c}{\IfSubStr{\useKV[DefiCalculatrice]{ListeTouches}}{0}{\Calculatrice{/\faScrewdriver}}{\Calculatrice{/0}}}&\multicolumn{1}{c}{\IfSubStr{\useKV[DefiCalculatrice]{ListeTouches}}{.}{\Calculatrice{/\faScrewdriver}}{\Calculatrice{/.}}}&\multicolumn{1}{c}{\IfSubStr{\useKV[DefiCalculatrice]{ListeTouches}}{=}{\Calculatrice{/\faScrewdriver}}{\Calculatrice{/$=$}}}&\multicolumn{1}{c}{\IfSubStr{\useKV[DefiCalculatrice]{ListeTouches}}{+}{\Calculatrice{/\faScrewdriver}}{\Calculatrice{/$+$}}}\\
+  \end{tabular}
+  \setlength{\tabcolsep}{100\tabcolsep}
+  \end{center}
+  \end{tcolorbox}
+}%

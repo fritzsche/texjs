@@ -1,0 +1,80 @@
+%%%
+% Fubuki
+%%%
+\def\filedateFubuki{2025/05/27}%
+\def\fileversionFubuki{0.1a}%
+\message{-- \filedateFubuki\space v\fileversionFubuki}%
+%
+\setKVdefault[Fubuki]{Largeur=20pt,Solution=false,Indice=false,Sommes=false,Couleur=LightSteelBlue,Perso=false,Vierge=false,Graine={},Indices={},CouleurSolution={}}%
+\defKV[Fubuki]{%
+  Graine=\ifempty{#1}{}{\PfCGraineAlea{#1}},%
+  Indices=\ifempty{#1}{}{\setKV[Fubuki]{Indice}\xdef\PfCFooListeIndices{#1}},%
+  CouleurSolution=\ifempty{#1}{}{\setKV[Fubuki]{Solution}\colorlet{PfCFubukiCouleurSolution}{#1}}%
+}%
+%
+\newlength\PfCFubuki%
+
+\NewDocumentCommand\PfCFubukiTestIndice{m}{%
+  \ifboolKV[Fubuki]{Indice}{%
+    \xdef\PfCRetiensIndice{0}%
+    \xintFor* ##1 in {\xintSeq{1}{\PfCFubukiListeIndiceslen}}\do{%
+      \xintifboolexpr{#1==\PfCFubukiListeIndices[##1]}{\xdef\PfCRetiensIndice{\fpeval{\PfCRetiensIndice+1}}}{}%
+    }%
+    \xintifboolexpr{\PfCRetiensIndice>0}{#1}{\ifboolKV[Fubuki]{Solution}{\color{PfCFubukiCouleurSolution}#1}{}}%
+  }{%
+    \ifboolKV[Fubuki]{Solution}{\color{PfCFubukiCouleurSolution}#1}{}%
+  }%
+}%
+
+\NewDocumentCommand\PfCFubukiAffichageNombre{m}{%
+  \ifboolKV[Fubuki]{Vierge}{}{\ifboolKV[Fubuki]{Sommes}{\PfCFubukiNombre[#1]}{\PfCFubukiTestIndice{\PfCFubukiNombre[#1]}}}%
+}%
+
+\NewDocumentCommand\PfCFubukiAffichageSommeH{m}{%
+  \ifboolKV[Fubuki]{Vierge}{}{%
+    \ifboolKV[Fubuki]{Sommes}{%
+      \ifboolKV[Fubuki]{Solution}{%
+        \color{PfCFubukiCouleurSolution}\fpeval{\PfCFubukiNombre[#1]+\PfCFubukiNombre[\fpeval{#1+1}]+\PfCFubukiNombre[\fpeval{#1+2}]}%
+      }{}%
+    }{\fpeval{\PfCFubukiNombre[#1]+\PfCFubukiNombre[\fpeval{#1+1}]+\PfCFubukiNombre[\fpeval{#1+2}]}}%
+  }%
+}%
+
+\NewDocumentCommand\PfCFubukiAffichageSommeV{m}{%
+  \ifboolKV[Fubuki]{Vierge}{}{%
+    \ifboolKV[Fubuki]{Sommes}{%
+      \ifboolKV[Fubuki]{Solution}{%
+        \color{PfCFubukiCouleurSolution}\fpeval{\PfCFubukiNombre[#1]+\PfCFubukiNombre[\fpeval{#1+3}]+\PfCFubukiNombre[\fpeval{#1+6}]}%
+      }{}%
+    }{\fpeval{\PfCFubukiNombre[#1]+\PfCFubukiNombre[\fpeval{#1+3}]+\PfCFubukiNombre[\fpeval{#1+6}]}}%
+  }%
+}%
+
+\NewDocumentCommand\Fubuki{om}{%
+  \useKVdefault[Fubuki]%
+  \setKV[Fubuki]{#1}%
+  \colorlet{PfCFubukiCouleur}{\useKV[Fubuki]{Couleur}}%
+  \ifboolKV[Fubuki]{Indice}{%
+    \setsepchar{,}%
+    \readlist*\PfCFubukiListeIndices{\PfCFooListeIndices}%
+%   \showitems\PfCFubukiListeIndices[]
+  }{}%
+  \ifboolKV[Fubuki]{Perso}{%
+    \xdef\PfCFooListeNombres{#2}%
+    \setsepchar{,}%
+    \readlist*\PfCFubukiNombre{\PfCFooListeNombres}%
+  }{%
+    \xdef\PfCFooListeNombres{1,2,3,4,5,6,7,8,9}%
+    \MelangeListe{\PfCFooListeNombres}{9}%
+    \setsepchar{,}%
+    \readlist*\PfCFubukiNombre{\faa}%
+  }%
+%  \showitems\PfCFubukiNombre[]%
+  \setlength{\PfCFubuki}{\useKV[Fubuki]{Largeur}+\tabcolsep}%
+  \begin{NiceTabular}{*{4}{m{\useKV[Fubuki]{Largeur}}}}[corners=SE,hvlines]
+      \rule{0pt}{\PfCFubuki}\Block{}{\PfCFubukiAffichageNombre{1}}&\Block{}{\PfCFubukiAffichageNombre{2}}&\Block{}{\PfCFubukiAffichageNombre{3}}&\Block[fill=PfCFubukiCouleur]{}{\PfCFubukiAffichageSommeH{1}}\\
+    \rule{0pt}{\PfCFubuki}\Block{}{\PfCFubukiAffichageNombre{4}}&\Block{}{\PfCFubukiAffichageNombre{5}}&\Block{}{\PfCFubukiAffichageNombre{6}}&\Block[fill=PfCFubukiCouleur]{}{\PfCFubukiAffichageSommeH{4}}\\
+    \rule{0pt}{\PfCFubuki}\Block{}{\PfCFubukiAffichageNombre{7}}&\Block{}{\PfCFubukiAffichageNombre{8}}&\Block{}{\PfCFubukiAffichageNombre{9}}&\Block[fill=PfCFubukiCouleur]{}{\PfCFubukiAffichageSommeH{7}}\\
+    \rule{0pt}{\PfCFubuki}\Block[fill=PfCFubukiCouleur]{}{\PfCFubukiAffichageSommeV{1}}&\Block[fill=PfCFubukiCouleur]{}{\PfCFubukiAffichageSommeV{2}}&\Block[fill=PfCFubukiCouleur]{}{\PfCFubukiAffichageSommeV{3}}\\
+  \end{NiceTabular}
+}%

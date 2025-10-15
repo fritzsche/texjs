@@ -1,0 +1,166 @@
+%%%
+% Lego
+%%%
+\def\filedateLego{2025/05/27}%
+\def\fileversionLego{0.1b}%
+\message{-- \filedateLego\space v\fileversionLego}%
+%
+\setKVdefault[Lego]{Echelle=1,Couleur=LightSteelBlue,Unite=8,Diviseur=2,Perso=false,Plaque=false,Largeura=2,Largeurb=2,Unique=false,ListePerso={}}%
+\defKV[Lego]{ListePerso=\ifempty{#1}{}{\setKV[Lego]{Perso}\xdef\PfCFooLegoListePerso{#1}}}%
+
+\NewDocumentCommand\ChoixCouleur{m}{%
+  \xdef\ListeCouleurs{Maroon,PeachPuff,Yellow,red,Gray,Crimson,Cornsilk,Purple,Cornsilk,Salmon}%
+  \readlist*\PfCListeCouleurs{\ListeCouleurs}%
+  \xintifboolexpr{\fpeval{#1+1}>\PfCListeCouleurslen}{\textbf{! Vous demandez trop de couleurs !}}{%
+    \MelangeListe{1,2,3,4,5,6,7,8,9,10}{\fpeval{#1+1}}%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeRotation{\faa}%
+    \reademptyitems%
+    \xintFor* ##2 in{\xintSeq{1}{#1}}\do{%
+      \xdef\RetiensCouleur{\ListeRotation[##2]}%
+      \xintifForFirst{\xdef\FooCouleur{\PfCListeCouleurs[\RetiensCouleur]}}{\xdef\FooCouleur{\FooCouleur,\PfCListeCouleurs[\RetiensCouleur]}}%
+    }%
+  }%
+}%
+
+\NewDocumentCommand\Lego{o}{%
+  \useKVdefault[Lego]%
+  \setKV[Lego]{#1}%
+  \xintifboolexpr{\useKV[Lego]{Unite}==1 || \useKV[Lego]{Unique}}{%
+    \xdef\PfCNbCouleurs{1}%
+  }{%
+    \xdef\PfCNbCouleurs{\fpeval{floor(\useKV[Lego]{Unite}/\useKV[Lego]{Diviseur})}}%
+  }%
+  \ifboolKV[Lego]{Perso}{%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeAvantChoixCouleurs{\PfCFooLegoListePerso}%
+    \ChoixCouleur{\ListeAvantChoixCouleurslen}%
+    \reademptyitems%
+    \BuildBarreLego{\FooCouleur}{\PfCFooLegoListePerso}%
+  }{%
+    \ChoixCouleur{\PfCNbCouleurs}%
+    \BuildBarreLego{\FooCouleur}{}%
+  }%
+}%
+
+\NewDocumentCommand\BuildBarreLego{mm}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      boolean Plaque,Unique;
+      Plaque=\useKV[Lego]{Plaque};
+      Unique=\useKV[Lego]{Unique};
+
+      Echelle=\useKV[Lego]{Echelle};
+      
+      input PfCLego;
+      %
+      vardef ChoixCouleur(text t)=
+      color Brique[];
+      nbc:=0;
+      for p_=t:
+      Brique[nbc]=p_;
+      nbc:=nbc+1;
+      endfor;
+      enddef;
+      %
+      vardef ListePerso(text t)=
+      nbperso=0;
+      for p_=t:
+      Diviseurs[nbperso]=p_;
+      nbperso:=nbperso+1;
+      endfor;
+      enddef;
+      %
+      ChoixCouleur(#1);
+      %
+      Longueur=\useKV[Lego]{Unite};
+      Largeura=\useKV[Lego]{Largeura};
+      Largeurb=\useKV[Lego]{Largeurb};
+      Diviseur=\useKV[Lego]{Diviseur};
+      color BriqueUnite;
+      BriqueUnite=\useKV[Lego]{Couleur};
+      boolean Perso;
+      Perso=\useKV[Lego]{Perso};
+      %
+      euler(-45,0,0);
+      if Plaque:
+      lego_height_old:=lego_height;
+      lego_height:=lego_thickness;
+      TR:=(0,1,0);
+      Lego_box(2*Longueur,4*Largeura,Gold);
+      TR:=(0,0,0);
+      lego_height:=lego_height_old;
+      fi;      
+      Lego_box(Longueur,Largeura,BriqueUnite);
+      if Unique=false:
+      if Perso:
+      Somme=0;
+      ListePerso(#2);
+      for k=0 upto (nbperso-1):
+      TR:=(0.5*(Longueur-Diviseurs[k]-Somme),Largeura+0.5*(Largeurb-Largeura),0);
+      Lego_box(Diviseurs[k],Largeurb,Brique[k]);
+      Somme:=Somme+2*Diviseurs[k];
+      endfor;
+      else:
+      for k=0 upto ((Longueur div Diviseur)-1):
+      TR:=(0.5*(Longueur-Diviseur)-k*Diviseur,Largeura+0.5*(Largeurb-Largeura),0);
+      Lego_box(Diviseur,Largeurb,Brique[k]);
+      endfor;
+      fi;
+      fi;
+      picture RetiensLego;
+      RetiensLego=currentpicture;
+      currentpicture:=nullpicture;
+      draw RetiensLego scaled Echelle;
+    \end{mplibcode}%
+  \else%
+    \begin{mpost}%
+      input PfCLego;
+      %
+      vardef ChoixCouleur(text t)=
+      color Brique[];
+      nbc:=0;
+      for p_=t:
+      Brique[nbc]=p_;
+      nbc:=nbc+1;
+      endfor;
+      enddef;
+      %
+      vardef ListePerso(text t)=
+      nbperso=0;
+      for p_=t:
+      Diviseurs[nbperso]=p_;
+      nbperso:=nbperso+1;
+      endfor;
+      enddef;
+      %
+      ChoixCouleur(#1);
+      %
+      Longueur=\useKV[Lego]{Unite};
+      Largeur=2;
+      Diviseur=\useKV[Lego]{Diviseur};
+      color BriqueUnite;
+      BriqueUnite=\useKV[Lego]{Couleur};
+      boolean Perso;
+      Perso=\useKV[Lego]{Perso};
+      %
+      euler(-45,0,0);
+      Lego_box(Longueur,Largeur,BriqueUnite);
+      if Perso:
+      Somme=0;
+      ListePerso(#2);
+      for k=0 upto (nbperso-1):
+      TR:=(0.5*(Longueur-Diviseurs[k]-Somme),2,0);
+      Lego_box(Diviseurs[k],2,Brique[k]);
+      Somme:=Somme+2*Diviseurs[k];
+      endfor;
+      else:
+      for k=0 upto ((Longueur div Diviseur)-1):
+      TR:=(0.5*(Longueur-Diviseur)-k*Diviseur,2,0);
+      Lego_box(Diviseur,2,Brique[k]);
+      endfor;
+      fi;
+    \end{mpost}%
+  \fi%
+}%

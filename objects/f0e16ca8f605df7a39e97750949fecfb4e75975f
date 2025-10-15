@@ -1,0 +1,194 @@
+%%%
+% Balance
+%%%
+\def\filedateBalance{2025/05/28}%
+\def\fileversionBalance{0.1c}%
+\message{-- \filedateBalance\space v\fileversionBalance}%
+%
+\newtoks\tokPlateauGauche%
+\newtoks\tokPlateauDroit%
+\def\UpdatetoksPlateauGauche#1\nil{\addtotok\tokPlateauGauche{#1,}}%
+\def\UpdatetoksPlateauDroit#1\nil{\addtotok\tokPlateauDroit{#1,}}%
+%
+\setKVdefault[Balance]{Inf=false,Sup=false,Masse=false,Codes=false,Traces={},Ecarth=0}%
+%
+\NewDocumentCommand\Balance{omm}{%
+  \tokPlateauGauche{}%
+  \tokPlateauDroit{}%
+  \useKVdefault[Balance]%
+  \setKV[Balance]{#1}%
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\ListePlateauGauche{#2}%
+  \readlist*\ListePlateauDroit{#3}%
+  \reademptyitems%
+  \foreachitem\compteur\in\ListePlateauGauche{%
+    \expandafter\UpdatetoksPlateauGauche\compteur\nil
+  }%
+  \foreachitem\compteur\in\ListePlateauDroit{%
+    \expandafter\UpdatetoksPlateauDroit\compteur\nil
+  }%
+  \BuildBalance{\the\tokPlateauGauche}{\the\tokPlateauDroit}%
+}%
+
+\NewDocumentCommand\BuildBalance{mm}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      ecarth=\useKV[Balance]{Ecarth};
+      \ifemptyKV[Balance]{Traces}{}{\useKV[Balance]{Traces};}
+      %
+      vardef Poids=
+      save poids;
+      picture poids;
+      poids=image(
+      path poidsext;
+      poidsext=(0,0)--u*(0.4,0){dir90}..{dir180}(u*(0.2,0.4))..{dir-90}cycle;
+      fill poidsext withcolor NavyBlue;
+      trace cercles(u*(0.2,0.425),0.1u) withcolor NavyBlue;
+      );
+      poids
+      enddef;
+
+      vardef PoidsM(expr nb)=
+      save poids;
+      picture poids;
+      poids=image(
+      path poidsext;
+      simili:=1+0.5*(nb div 5);
+      poidsext=((0,0)--u*(0.4,0){dir90}..{dir180}(u*(0.2,0.4))..{dir-90}cycle) xscaled simili yscaled simili;
+      fill poidsext withcolor NavyBlue;
+      trace cercles(simili*u*(0.2,0.425),0.1u) withcolor NavyBlue;
+      drawoptions(withcolor white);
+      label.top(TEX("\tiny\Masse{"&decimal(nb)&"}"),iso((0,0),u*(simili*0.4,0)));
+      drawoptions();
+      );
+      poids
+      enddef;
+
+      boolean Sup,Inf,Masse;
+      Sup=\useKV[Balance]{Sup};
+      Inf=\useKV[Balance]{Inf};
+      Masse=\useKV[Balance]{Masse};
+      pair O,A,B,M[],N[];
+      O=(0,0);
+      A=u*(-0.5,0);
+      B=u*(0.5,0);
+
+      path pathgauche,pathdroite,plateau;
+
+      if Inf:
+        M1=A+u*(0,0.25);
+        N1=B+u*(0,0.75);
+      elseif Sup:
+        M1=A+u*(0,0.75);
+        N1=B+u*(0,0.25);
+      else:
+        M1=A+u*(0,0.5);
+        N1=B+u*(0,0.5);
+      fi;
+
+      longgauche=0;
+      longdroit=0;
+      nbimggauche=0;
+      nbimgdroit=0;
+      picture Imgg[],Imgd[];
+      
+      for p_=#1:
+        if numeric p_:
+          if Masse:
+            longgauche:=longgauche+u*((1+0.5*(p_ div 5))*0.4+0.2);
+          else:
+            longgauche:=longgauche+p_*0.6u;
+          fi;
+        elseif string p_:
+          nbimggauche:=nbimggauche+1;
+          Imgg[nbimggauche]=image(%
+          label(TEX(p_),(0,0));
+          );
+          longgauche:=longgauche+abs(lrcorner Imgg[nbimggauche]-llcorner Imgg[nbimggauche])+0.2u;
+        else:
+          longgauche:=longgauche+abs(lrcorner p_-llcorner p_)+0.2u;
+        fi;
+      endfor;
+      for p_=#2:
+        if numeric p_:
+          if Masse:
+            longdroit:=longdroit+u*((1+0.5*(p_ div 5))*0.4+0.2);
+          else:
+            longdroit:=longdroit+p_*0.6u;
+          fi;
+        elseif string p_:
+          nbimgdroit:=nbimgdroit+1;
+          Imgd[nbimgdroit]=image(%
+          label(TEX(p_),(0,0));
+          );
+          longdroit:=longdroit+abs(lrcorner Imgd[nbimgdroit]-llcorner Imgd[nbimgdroit])+0.2u;
+        else:
+          longdroit:=longdroit+abs(lrcorner p_-llcorner p_)+0.2u;
+        fi;
+      endfor;
+      pair decalageg,decalaged;
+      if longgauche>longdroit:
+        M2=M1+(-longgauche,0);
+        N2=N1+(longgauche,0);
+        decalageg=u*(0.1,0);
+        decalaged=u*(0.1,0)+(0.5*abs(longdroit-longgauche),0);
+      else:
+        M2=M1+(-longdroit,0);
+        N2=N1+(longdroit,0);
+        decalaged=u*(0.1,0);
+        decalageg=u*(0.1,0)+(0.5*abs(longdroit-longgauche),0);%
+      fi;
+      M0=iso(M1,M2)+u*(0,-0.5);
+      M3=iso(M1,M2);
+      N0=symetrie(M0,O);
+      N3=iso(N1,N2);
+      trace N2--N1--N3--N0--O--M0--M3--M1--M2 withpen pencircle scaled 1.1;
+      fill cercles(O,1.5mm);
+      % Affichage des "masses"
+      nbimggauche:=0;
+      for p_=#1:
+        if numeric p_:
+          if Masse:
+            trace PoidsM(p_) shifted(M1-lrcorner PoidsM(p_)-decalageg);
+            decalageg:=decalageg+u*((1+0.5*(p_ div 5))*0.4+0.2,0);
+          else:
+            for k=1 upto p_:
+              trace Poids shifted(M1-lrcorner Poids-decalageg);
+              decalageg:=decalageg+u*(0.6,0);
+            endfor;
+          fi;
+        elseif string p_:
+          nbimggauche:=nbimggauche+1;
+          trace Imgg[nbimggauche] shifted(M1-decalageg-lrcorner Imgg[nbimggauche]);
+          decalageg:=decalageg+(abs(llcorner Imgg[nbimggauche]-lrcorner Imgg[nbimggauche]),0)+u*(0.2,0);
+        else:
+          draw p_ shifted(M1-decalageg-lrcorner p_);
+          decalageg:=decalageg+(abs(llcorner p_-lrcorner p_),0)+u*(0.2,0);
+        fi;
+      endfor;
+      %
+      nbimgdroit:=0;
+      for p_=#2:
+        if numeric p_:
+          if Masse:
+            trace PoidsM(p_) shifted(N1-llcorner PoidsM(p_)+decalaged);
+            decalaged:=decalaged+u*((1+0.5*(p_ div 5))*0.4+0.2,0);
+          else:
+            for k=1 upto p_:
+              trace Poids shifted(N1-llcorner Poids+decalaged);
+              decalaged:=decalaged+u*(0.6,0);
+            endfor;
+          fi;
+        elseif string p_:
+          nbimgdroit:=nbimgdroit+1;
+          trace Imgd[nbimgdroit] shifted(N1+decalaged-llcorner Imgd[nbimgdroit]);
+          decalaged:=decalaged+(abs(llcorner Imgd[nbimgdroit]-lrcorner Imgd[nbimgdroit]),0)+u*(0.2,0);
+        else:
+          draw p_ shifted(N1+decalaged-llcorner p_);
+          decalaged:=decalaged+(abs(llcorner p_-lrcorner p_),0)+u*(0.2,0);
+        fi;
+      endfor;  
+    \end{mplibcode}
+  \fi%
+}%

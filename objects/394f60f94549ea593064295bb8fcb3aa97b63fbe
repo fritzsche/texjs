@@ -1,0 +1,235 @@
+%%
+%% This is file `euclidean-lattice.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% euclidean-lattice.dtx  (with options: `package')
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from euclidean-lattice.sty.
+%% 
+%% For distribution of the original source see the terms
+%% for copying and modification in the file euclidean-lattice.dtx.
+%% 
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+%% \iffalse
+%% Copyright (C) 2024 Jerome Plut
+%%
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either version 1.3
+%% of this license or (at your option) any later version.
+%% The latest version of this license is in
+%%   https://www.latex-project.org/lppl.txt
+%% and version 1.3c or later is part of all distributions of LaTeX
+%% version 2008-05-04 or later.
+%%
+%% This work has the LPPL maintenance status "maintained".
+%%
+%% The Current Maintainer of this work is Jerome Plut.
+%%
+%% This work consists of the files `euclidean-lattice.ins`
+%% and `euclidean-lattice.dtx`,
+%% as well as the derived file `euclidean-lattice.sty`.
+%% \fi
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{euclidean-lattice}[2024-07-26 Euclidean~lattices 1.0]
+\RequirePackage{tikz}
+\newdimen\la@unit \la@unit=256sp
+\def\lattice@mul#1#2{% writes #1*#2 in #1
+  \@tempdimc=#2 \divide\@tempdimc\la@unit
+  \divide #1\la@unit
+  \multiply #1\@tempdimc}%
+\def\lattice@div#1#2{%
+  \@tempdimc=#2\divide\@tempdimc\la@unit
+  \multiply #1\la@unit \divide#1\@tempdimc}%
+\def\lattice@invert#1{% writes 1/#1 in #1
+  \@tempdimc=#1 \divide\@tempdimc\la@unit
+  #1=256\p@ \divide #1\@tempdimc}%
+\newdimen\la@a \newdimen\la@b \newdimen\la@c \newdimen\la@d
+\newdimen\la@Ax\newdimen\la@Bx\newdimen\la@Ay\newdimen\la@By
+\newdimen\la@D
+\newdimen\la@Ux\newdimen\la@Uy \newdimen\la@Vx\newdimen\la@Vy
+\newdimen\la@Cx\newdimen\la@Cy
+
+\newdimen\la@sL \newdimen\la@sM
+\newdimen\la@zA \newdimen\la@zB \newdimen\la@zC
+\newdimen\la@wA \newdimen\la@wB
+\newcount\la@wM
+\def\lattice@enumerate#1#2#3#4{%
+  \la@a=#1\p@ \la@b=#2\p@ \la@c=#3\p@ \la@d=#4\p@
+  \la@D=\la@a \lattice@mul\la@D\la@d
+  \@tempdima=\la@b \lattice@mul\@tempdima\la@c
+  \advance\la@D -\@tempdima
+  \lattice@invert\la@D
+  \la@Ux=\la@Ax \advance\la@Ux-\la@Bx
+  \lattice@mul\la@Ux \la@D
+  \la@Uy=-\la@Ux
+  \lattice@mul\la@Ux \la@d \ifdim\la@Ux <\z@
+    \multiply\la@Ux -1 \multiply\la@Uy -1 \fi
+  \lattice@mul\la@Uy\la@b
+  \la@Vx=\la@By \advance\la@Vx-\la@Ay \lattice@mul\la@Vx\la@D
+  \la@Vy=-\la@Vx
+  \lattice@mul\la@Vx\la@c \ifdim\la@Vx<\z@
+    \multiply\la@Vx -1 \multiply\la@Vy -1\fi
+  \lattice@mul\la@Vy \la@a
+  \@tempdima \la@Ux
+  \@tempdimb \la@Vx
+  \ifdim\@tempdima<100\p@\else
+    \ifdim\@tempdimb<100\p@\else
+    \divide\@tempdima 1024
+    \divide\@tempdimb 1024\fi\fi
+  \lattice@mul\@tempdima\la@Vy
+  \lattice@mul\@tempdimb\la@Uy
+  \ifdim \@tempdimb>\@tempdima
+    \@tempdimc=\la@Ux \la@Ux=\la@Vx \la@Vx=\@tempdimc
+    \@tempdimc=\la@Uy \la@Uy=\la@Vy \la@Vy=\@tempdimc
+  \fi
+  \la@sL=\la@Ax \advance\la@sL\la@Bx \divide\la@sL 2
+  \la@sM=\la@Ay \advance\la@sM\la@By \divide\la@sM 2
+  \la@Cx=\la@sL \lattice@mul\la@Cx\la@d
+  \@tempdima=\la@sM \lattice@mul\@tempdima\la@c
+  \advance\la@Cx -\@tempdima
+  \la@Cy=\la@sM \lattice@mul\la@Cy\la@a
+  \@tempdima=\la@sL \lattice@mul\@tempdima\la@b
+  \advance\la@Cy -\@tempdima
+  \lattice@mul \la@Cx\la@D
+  \lattice@mul \la@Cy\la@D
+  \@tempdima\la@Ux \advance\@tempdima\la@Vx
+  \la@wA=\la@Cx \advance\la@wA -.5\@tempdima
+  \la@wB=\la@wA \advance\la@wB \@tempdima
+  \@tempdima\la@Uy \ifdim\@tempdima<\z@ \multiply\@tempdima -1\fi
+  \ifdim\la@Vy<\z@ \advance\@tempdima -\la@Vy
+  \else\advance\@tempdima\la@Vy\fi
+  \la@zA=\la@Cy \advance\la@zA -.5\@tempdima
+  \la@zB=\la@zA \advance\la@zB \@tempdima
+  \ifx\lattice@grid\@empty\else \begin{scope}%
+    \clip (\strip@pt\la@Ax,\strip@pt\la@Ay)
+      rectangle (\strip@pt\la@Bx,\strip@pt\la@By);
+    \pgftransformcm{\strip@pt\la@a}{\strip@pt\la@b}%
+      {\strip@pt\la@c}{\strip@pt\la@d}{\pgfpointorigin}%
+    \expandafter\draw\expandafter[\lattice@grid]
+      (\strip@pt\la@wA,\strip@pt\la@zA) grid (\strip@pt\la@wB,\strip@pt\la@zB);
+  \end{scope}\fi
+  \@tempdima=\la@Uy \advance\@tempdima\la@Vy
+  \@tempdimb=\la@Cy \advance\@tempdimb .5\@tempdima % z2
+  \@tempdima=\la@Ux \advance\@tempdima\la@Vx % w_2-w_1 = w(U+V)
+  \ifdim\la@Ux=\z@
+    \la@sL=\z@ \la@zC=\maxdimen \la@zA=-\maxdimen
+  \else
+    \la@sL=\la@Uy \lattice@div\la@sL\la@Ux
+    \la@zC=-\@tempdima \lattice@mul\la@zC\la@sL \advance\la@zC \@tempdimb
+    \la@zA=\@tempdimb \advance\la@zA -\la@Uy \advance\la@zA -\la@Vy
+  \fi
+  \ifdim\la@Vx=\z@
+    \la@sM=\z@ \la@zB=-\maxdimen \la@D=\maxdimen
+  \else
+    \la@sM=\la@Vy \lattice@div\la@sM\la@Vx
+    \la@zB=-\@tempdima \lattice@mul\la@zB\la@sM \advance\la@zB \@tempdimb
+    \la@D=\@tempdimb \advance\la@D -\la@Uy \advance\la@D -\la@Vy
+  \fi
+  \la@Vx=\la@wA \advance\la@Vx\expandafter\ifdim\la@Vx>\z@ -1sp\else-\p@\fi
+  \divide\la@Vx \p@
+  \ifdim\la@wB<\z@ \advance\la@wB 1sp\else\advance\la@wB\p@\fi
+  \divide\la@wB\p@
+  \@tempdima=\la@Vx \multiply\@tempdima\p@
+  \advance\@tempdima -\la@wA
+  \@tempdimb=\@tempdima \lattice@mul\@tempdimb\la@sL
+  \advance\la@zA\@tempdimb \advance\la@zC\@tempdimb
+  \@tempdimb=\@tempdima \lattice@mul\@tempdimb\la@sM
+  \advance\la@zB\@tempdimb \advance\la@D\@tempdimb
+  \la@Cx=\la@a \multiply\la@Cx\la@Vx
+  \la@Cy=\la@b \multiply\la@Cy\la@Vx
+  \loop
+    \la@Vy=\la@zA \ifdim\la@Vy<\la@zB \la@Vy=\la@zB\fi
+    \advance\la@Vy\expandafter\ifdim\la@Vy>\z@ -1sp\else-\p@\fi
+    \divide\la@Vy\p@
+    \la@wM=\la@zC \ifnum\la@wM>\la@D \la@wM=\la@D\fi
+    \advance\la@wM\expandafter\ifnum\la@wM<\z@\@ne\else\p@\fi
+    \divide\la@wM\p@
+    \la@Ux=\la@c \multiply\la@Ux\la@Vy \advance\la@Ux\la@Cx
+    \la@Uy=\la@d \multiply\la@Uy\la@Vy \advance\la@Uy\la@Cy
+    {\loop
+      \ifdim\la@Ux<\la@Ax\else\ifdim\la@Ux>\la@Bx\else
+      \ifdim\la@Uy<\la@Ay\else\ifdim\la@Uy>\la@By\else
+        \expandafter\lattice@donode\expandafter{\lattice@node}%
+      \fi\fi\fi\fi
+     \ifnum\la@Vy<\la@wM
+        \advance\la@Vy 1sp
+        \advance\la@Ux\la@c \advance\la@Uy\la@d
+      \repeat}
+    \ifnum\la@Vx<\la@wB
+    \advance\la@Vx 1sp
+    \advance\la@Cx\la@a \advance\la@Cy\la@b
+    \advance\la@zA \la@sL \advance\la@zC \la@sL
+    \advance\la@zB \la@sM \advance\la@D \la@sM
+  \repeat
+}
+\def\lattice@donode#1{%
+  \pgfkeys{/lattice/arg/each point={#1}{\strip@pt\la@Ux}{\strip@pt\la@Uy}%
+    {\number\la@Vx}{\number\la@Vy}}}
+
+\pgfqkeys{/lattice/arg}{
+  x/.store in=\lattice@x,
+  y/.store in=\lattice@y,
+  grid/.store in=\lattice@grid,
+  each point/.code n args={5}{\pgfkeys{/lattice/each point={#1}{#2}{#3}{#4}{#5}}},
+  bounding box/.store in=\lattice@bbox,
+  .unknown/.code={%
+    \expandafter\lattice@setnode\pgfkeyscurrentkey=#1\lattice@eov
+  }}
+\pgfqkeys{/lattice}{
+  x/.initial=-2:2,y/.initial=-2:2,
+  node/.initial={circle,inner sep=1pt,draw=none,fill=black},
+  grid/.style={/lattice/arg/grid/.default={#1}},
+  grid={gray,very thin},
+  bounding box/.style={/lattice/arg/bounding box/.default={#1}},
+  bounding box={cyan,thin},
+  each point/.code n args={5}{\node[#1] at (#2,#3){};},
+}
+\def\lattice@setnode/lattice/arg/#1\lattice@eov{%
+  \edef\lattice@node{\expandafter\noexpand\lattice@node,#1}}
+\def\lattice@getxy#1#2#3{%
+  \def\m@gic##1:##2:##3\end{\ifx ##3: #2=##1\p@ #3=##2\p@\else
+    #2=-##1\p@ #3=##1\p@\fi}%
+  \expandafter\m@gic\detokenize{#1:}:\end
+}
+\def\lattice{\@ifnextchar<\lattice@I{\@ifnextchar[\lattice@II{\lattice@@[]}}}
+\def\lattice@I{\ifnum\the\catcode`\;=\active\relax
+  \let\lattice@next\lattice@Iactive\else
+  \let\lattice@next\lattice@Inormal\fi
+  \lattice@next}
+\long\def\lattice@Inormal<#1>#2;{\alt<#1>{\lattice@I@#2;}{}}
+{\catcode`\;=\active
+  \long\gdef\lattice@Iactive<#1>#2;{\alt<#1>{\lattice@I@#2;}{}}
+}
+\def\lattice@I@{\@ifnextchar[\lattice@@{\lattice@@[]}}
+\def\lattice@II[#1]{\@ifnextchar<{\lattice@IIi[#1]}{\lattice@@[#1]}}
+\def\lattice@IIi[#1]<#2>{\lattice@I<#2>[#1]}
+\def\lattice@@[#1](#2,#3)#4(#5,#6)#7{
+  \let\lattice@grid\@empty%
+  \let\lattice@bbox\@empty%
+  \edef\lattice@x{\pgfkeysvalueof{/lattice/x}}%
+  \edef\lattice@y{\pgfkeysvalueof{/lattice/y}}%
+  \edef\lattice@node{\pgfkeysvalueof{/lattice/node}}%
+  \pgfqkeys{/lattice/arg}{#1}%
+  \expandafter\lattice@getxy\expandafter{\lattice@x}\la@Ax\la@Bx
+  \expandafter\lattice@getxy\expandafter{\lattice@y}\la@Ay\la@By
+  \ifx\lattice@bbox\@empty\else
+    \expandafter\draw\expandafter[\lattice@bbox]
+    (\strip@pt\la@Ax,\strip@pt\la@Ay)
+    rectangle (\strip@pt\la@Bx,\strip@pt\la@By);
+  \fi
+  \lattice@enumerate{#2}{#3}{#5}{#6}%
+}
+\endinput
+%%
+%% End of file `euclidean-lattice.sty'.

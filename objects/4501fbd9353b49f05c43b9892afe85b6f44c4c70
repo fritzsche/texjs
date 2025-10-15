@@ -1,0 +1,720 @@
+% \iffalse meta-comment
+%
+%% File: documentmetadata-support.dtx
+% Copyright (C) 2021-2025 The LaTeX Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+%
+% The development version of the bundle can be found below
+%
+%    https://github.com/latex3/latex2e
+%
+% for those people who are interested or want to report an issue.
+%
+%    \begin{macrocode}
+\def\documentmetadatasupportversion{1.0q}
+\def\documentmetadatasupportdate{2025-05-10}
+%    \end{macrocode}
+%
+%
+%<*driver>
+\DocumentMetadata{tagging=on,pdfstandard=ua-2}
+\documentclass[kernel]{l3doc}
+\usepackage{latex-lab-testphase-l3doc}
+\EnableCrossrefs
+\CodelineIndex
+\begin{document}
+  \DocInput{documentmetadata-support.dtx}
+\end{document}
+%</driver>
+%
+% \fi
+%
+%
+%\NewDocElement[macrolike = false ,
+%		 toplevel  = true,
+%                idxtype   =  key  ,
+%                noprint   = true  ,
+%                idxgroup  = metadata keys ,
+%                printtype = \textit{key}
+%               ]{Mkey}{mkey}
+%
+%
+% \title{The \texttt{documentmetadata-support} code\thanks{This file
+%      has version \documentmetadatasupportversion\ dated
+%      \documentmetadatasupportdate,  \copyright\ \LaTeX\
+%    Project.}}
+% \author{Frank Mittelbach, Ulrike Fischer, \LaTeX{} Project}
+%
+% \maketitle
+%
+%
+% \section{Introduction}
+%
+%    The kernel command \cs{DocumentMetadata}, which can be used as
+%    the very first declaration in a document (i.e., before
+%    \cs{documentclass}), defines metadata and other configuration
+%    data that applies to the document as a whole (using a key/value
+%    syntax).
+%
+%    While the underlying functionality is still under
+%    development (e.g., further keys will be added over time and keys
+%    marked temporary may vanish again) the code for
+%    \cs{DocumentMetadata} is placed in a separate bundle, so that it
+%    is easier to update it without the need to build a full \LaTeX{}
+%    release. Over time the functionality will move fully into the
+%    kernel.
+%
+%    \cs{DocumentMetadata} also loads and activates
+%    the new PDF management code from \pkg{pdfmanagement-testphase}.
+%    As this forces the loading of the \pkg{l3backend} files, a backend
+%    that can't be detected automatically like |dvipdfmx|,
+%    must be set in the first \cs{DocumentMetadata}.
+%
+%    From a process perspective \cs{DocumentMetadata} loads the
+%    \pkg{pdfmanagement-testphase} code the first time it is called and then
+%    redefines itself to only manage key/value pairs in case it is
+%    called more than once. In particular, this means that a document
+%    without a \cs{DocumentMetadata} declaration has no code available
+%    for extended management of PDF output as needed for various
+%    features developed as part of the multi-year ``Tagged PDF''
+%    project~\cite{blueprint}.
+%
+% \section{The \cs{DocumentMetadata} command}
+%
+% \begin{function}{\DocumentMetadata}
+% \begin{syntax}
+% \cs{DocumentMetadata}\Arg{key-value list}
+% \end{syntax}
+%
+% The command should be used as the first command in a document, before
+% \cs{documentclass}. It takes a key-value argument.
+% \end{function}
+
+% \section{Currently supported key/values}
+%
+%
+% Currently the following keys are implemented for \cs{DocumentMetadata}:
+% \DescribeMkey{backend}
+% \DescribeMkey{colorprofiles}
+% \DescribeMkey{debug}
+% \DescribeMkey{lang}
+% \DescribeMkey{pdfstandard}
+% \DescribeMkey{xmp}
+% \DescribeMkey{pdfversion}
+% \DescribeMkey{testphase}
+% \DescribeMkey{uncompress}
+%
+% \begin{description}
+%    \item[\texttt{backend}] Passes the backend name to expl3. This is
+%      needed only if the needed backend can't be automatically
+%      determined or if the workflow used requires a special backend.
+%
+%^^A    This will probably be extended to  pass the value also to
+%^^A      packages.
+%
+%    \item[\texttt{pdfversion}] Sets the PDF version explicitly, e.g., \texttt{pdfversion=1.7}
+%    \item[\texttt{uncompress}] (no value) Forces an uncompressed pdf
+%      --- mainly for debugging purposes.
+%
+%    \item[\texttt{lang}] Explicitly sets the Lang entry in the Catalog,
+%     e.g., \texttt{lang=de-DE}. If not given the default value used is |en-US|.
+%
+%    \item[\texttt{pdfstandard}] Choice key to set the pdf standard.
+%      Currently |A-1b|, |A-2a|, |A-2b|, |A-2u|, |A-3a|, |A-3b|, |A-3u|, |A-4|, |A-4E|
+%      and |A-4F| are accepted as A-standard.
+%      values. The casing is irrelevant, |a-1b| works too. 
+%      Note that using this
+%      key doesn't mean that the document actually follows the standard. \LaTeX{}
+%      can neither ensure nor check all requirements of a standard, and not everything
+%      it can do theoretically has already been implemented.
+%      When setting an A-standard a color profile is included and the
+%      \texttt{/OutputIntent} is set and any javascript action in hyperref are suppressed.
+%      The |u| variants do not enforce unicode,
+%      but they will pass the information to hyperref. The |a| variants
+%      do \emph{not} enforce (or even test) a tagged pdf yet.
+%
+%      Beside the A-standards it is also possible to use the values
+%      |X-4|, |X-4p|, |X-5g|, |X-5n|, |X-5pg|, |X-6|, |X-6n|, |X-6p| for
+%      a PDF/X and |UA-1|  and |UA-2| for PDF/UA standard.
+%      |UA-2| should only be used together with PDF 2.0.
+%      Currently these keys set \emph{only} the relevant XMP-metadata.
+%      They do not validate or enforce special requirements
+%      (e.g., the |UA| standards do not automatically activate tagging).
+%
+%      |pdfstandard| can be used more than once to set overlapping standards, e.g:\\
+%      |pdfstandard=A-2b,pdfstandard=X-4,pdfstandard=UA-1|. It is also possible
+%      to pass a list like |pdfstandard={UA-2,A-4F}|.
+%
+%      If XMP-metadata are added (see the following key \texttt{xmp})
+%      the necessary conformance markers for the standards are set.
+%
+%      More information can be found in the documentation
+%      of \pkg{l3pdfmeta}.
+%
+%    \item[\texttt{xmp}] A boolean, if set to false no XMP metadata are added to the PDF.
+%    The initial value is true. Details are described in the documentation of \pkg{l3pdfmeta}.
+%
+%    \item[\texttt{colorprofiles}] This allows to load icc-colorprofiles. Details
+%       are described in the documentation of \pkg{l3pdfmeta}.
+%       
+%    \item[\texttt{tagging}] This key allows to activate, deactivate or partially deactive the tagging support.
+%    It accepts the three values \texttt{on}, \texttt{off} and \texttt{draft}. 
+%    When used, the key loads the tagpdf package and all modules that are loaded with \texttt{testphase=latest}. 
+%    |tagging=off| deactivates then in the \texttt{class/before} hook the tagging commands. 
+%    |tagging=draft| leaves the
+%    tagging commands active  but it deactivates the writing of the structure tree 
+%    at the end of the compilation. This can save
+%    time when drafting a longer document but preserves, e.g., MC-content marker 
+%    in the PDF stream and warnings and errors from \pkg{tagpdf} if the structure is faulty.
+%    
+%    \item[\texttt{tagging-setup}] This key allows to configure the tagging. It accepts all
+%    keys that can also be used in \cs{tagpdfsetup}; see the \pkg{tagpdf} documentation. 
+%    Additionally,
+%    it accepts two keys to change the list of testphase modules loaded:
+%     \begin{description}
+%        \item[\texttt{modules}] With this key it is possible to overwrite the list of
+%        modules loaded with by the \texttt{tagging} key. 
+%        It will always load the |phase-II| module, so |modules={block,title}| does the 
+%        same as |testphase={phase-II,block,title}|. Using this key is generally not needed, but
+%        if used the \texttt{tagging} key should only be used before the \texttt{tagging-setup}
+%        key to avoid that it resets the list of modules to the \texttt{latest set} again.
+%        
+%        \item[\texttt{extra-modules}] This key allows to load modules that 
+%        haven't been added to the \texttt{latest} set yet.        
+%      \end{description} 
+%    
+%    \item[\texttt{testphase}] This key is used to load testphase
+%    code.
+%    With the introduction of the \texttt{tagging} and
+%    \texttt{tagging-setup} keys it is no longer necessary for a user
+%    to specify the \texttt{testphase} key; it is only retained for
+%    internal testing and to support documents written during the
+%    early days of the tagging project. 
+%
+%    The |testphase| key can only be used in the first \cs{DocumentMetadata}.
+%    The values it accepts and their effect will change over time, when testphase packages are added or
+%    removed or when the code is moved into the kernel. The key accepts a list of values
+%    and it can be used more than once.
+%
+%    The value \texttt{latest} loads all modules that we recommend
+%    so that it is not necessary to specify individual modules.
+%
+%
+%    The \texttt{phase} keys bundle testphase modules. They also all activate tagging.
+%     \begin{description}
+%    \item[\texttt{phase-I}]
+%       This value loads code implementing the first phase of the project~\cite{blueprint}, i.e., it
+%       will load the tagpdf package. It will also activate tagging by issuing
+%       |\tagpdfsetup{activate,activate/spaces}|. This phase
+%       is frozen.
+%    \item[\texttt{phase-II}]
+%       It differs from \texttt{phase-I} only in one point: It will
+%       additionally activate tagging of paragraphs with
+%       |\tagpdfsetup{para/tagging}|. In the upcoming months it will
+%       also enable automatic tagging of other basic document elements.
+%    \item[\texttt{phase-III}]
+%       This is the current development phase.
+%       It differs from \texttt{phase-II} \emph{a lot}: It will
+%       load new code for the tagging of lists, sectioning commands,
+%       table of contents and similar lists, graphics, minipages and floats.
+%       As it redefines many internals it is currently restricted to the use of
+%       standard classes (article, report, and book)
+%       and it supports only a limited number of add-on packages.
+%   \end{description}
+%
+%   The various testphase modules can also be loaded individually (at least in theory,
+%   there can be hidden dependencies). If loaded like this, the tagpdf package is not
+%   loaded and tagging is not activated! The list of modules will change over time.
+%   \begin{description}
+%    \item[\texttt{new-or-1}] This patches a few commands related
+%    to the output routine. The patches are needed for the tagging
+%    of paragraphs, for the tagging of header and footer and
+%    to allow the PDF management to insert code which avoids that
+%    links happening at page breaks spills into the header and footer.
+%    This code is automatically loaded if the \texttt{testphase} values
+%    \texttt{phase-I}, \texttt{phase-II} or \texttt{new-or} are used.%
+%    \item[\texttt{new-or}] This loads more changes to the output routine required for the
+%    tagging. It is not compatible with every class! The code is also loaded by the
+%    \texttt{phase-II} value.
+%    \item[\texttt{sec}] This adapts commands related to sectioning to make them tagging aware.
+%     The \texttt{sec} module is loaded by \texttt{phase-III}.
+%    \item[\texttt{toc}] This adapts commands related to the table of contents and
+%    similar list to make them tagging aware. The \texttt{toc} module is loaded by \texttt{phase-III}.
+%    \item[\texttt{graphic}] This enables tagging support for
+%    the \cs{includegraphics} command and the \texttt{picture} environment.
+%    This code is also loaded by the \texttt{phase-III} key.
+%    \item[\texttt{block}] This reimplements lists and blocks environments and
+%    add tagging support.
+%    This code is also loaded by the \texttt{phase-III} key.
+%    \item[\texttt{minipage}] This adds tagging support to \texttt{minipage}
+%    and \cs{parbox}.
+%    This code is also loaded by the \texttt{phase-III} key.
+%    \item[\texttt{float}] This adds tagging support to floats.
+%    This code is also loaded by the \texttt{phase-III} key.
+%    \item[\texttt{bib}] This adds tagging support to citations and bibliographies.
+%    This code is also loaded by the \texttt{phase-III} key.
+%    \item[\texttt{text}] This module adds tagging support to the \LaTeX{} logo and
+%    to the \cs{emph} command.
+%    This code is also loaded by the \texttt{phase-III} key.
+%    \item[\texttt{marginpar}] This module adds tagging support to the \cs{marginpar}
+%    command. This code is also loaded by the \texttt{phase-III} key.
+%    \item[\texttt{title}] This module add tagging support to the \cs{maketitle}
+%    command if a standard class is used. It also enhances the \cs{title}
+%    and \cs{author} commands to fill the XMP-metadata and set the window title.
+%    It is not compatible with packages and classes which redefine these commands
+%    too. The module is currently not loaded by any \texttt{phase} key.
+%    \item[\texttt{math}] This adapts math for tagging. This is only a prototype.
+%    The module is currently not loaded by any \texttt{phase} key.
+%    \item[\texttt{table}] This provides basic tagging for
+%    \texttt{tabular}, \texttt{longtable} and similar table environments.
+%    The module is currently not loaded by any \texttt{phase} key. Its use and
+%    restrictions is documented in \texttt{latex-lab-table.pdf}.%
+%    \item[\texttt{firstaid}] This contains small adjustments to external packages.
+%    The module is currently not loaded by any \texttt{phase} key.
+%    \end{description}
+%
+%
+%    \item[\texttt{debug}] This key activates some debug options. It takes a list of key-values
+%    as value. Currently the following keys are known:
+%     \begin{description}
+%     \item[\texttt{para}] with the default and only value |show|. It will activate the |paratagging-show|
+%       option of \pkg{tagpdf},
+%     \item[\texttt{log}]  with the values as described in the documentation \pkg{tagpdf},
+%     \item[\texttt{uncompress}] which does the same as |uncompress| as main key
+%     \item[\texttt{pdfmanagement}] a boolean which allows to deactivate the pdfmanagement.
+%     \item[\texttt{firstaidoff}] This accepts a comma lists of keywords and disables the patches
+%       related to them. More information can be found in the documentation of
+%       \pkg{pdfmanagement-firstaid}.
+%     \item[\texttt{xmp-export}] This will export the XMP-metadata to a file \verb+\jobname.xmpi+.
+%     with \texttt{debug=\{xmp-export=filename\}} the file name can be changed.
+%     More information can be found in the documentation of \pkg{l3pdfmeta} of the \pkg{pdfmanagement-testphase}
+%     bundle.
+%     \item[\texttt{tagpdf}] This loads the package tagpdf-debug which enhances
+%     various commands from tagpdf with additional debugging options. This can slow down
+%     the compilation!
+%     \item[\texttt{BBox}] This helps to debug BBox values of graphics, see the documentation
+%     of latex-lab-graphic. It does nothing if  the graphic testphase module is not loaded.
+%    \end{description}
+% \end{description}
+%
+% \bibliographystyle{plain}
+%
+% \begin{thebibliography}{9}
+%
+% \bibitem{blueprint} Frank Mittelbach and Chris Rowley:
+%   \emph{\LaTeX{} Tagged PDF\,---\,A blueprint for a large project}.
+%   \url{https://latex-project.org/publications/indexbyyear/2020/}
+%
+% \end{thebibliography}
+%
+%
+%
+% \MaybeStop{\setlength\IndexMin{200pt}  \PrintIndex  }
+%
+% \begin{implementation}
+%
+% \section{The Implementation}
+%
+%
+%    \begin{macrocode}
+%<@@=pdfmanagement>
+%<*code>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+
+\RequirePackage{pdfmanagement-testphase}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\ExplSyntaxOn\makeatletter
+%    \end{macrocode}
+
+% \subsection{Variables}
+% These variable definitions are currently also done in ltdocinit.
+% They can be removed from there once latex-lab has been updated to
+% provide them too.
+%  \begin{variable}{\g_@@_firstaidoff_clist}
+%  A list to store the firstaid code which should be disabled
+%    \begin{macrocode}
+\clist_if_exist:NF \g_@@_firstaidoff_clist
+  { \clist_new:N \g_@@_firstaidoff_clist }
+%    \end{macrocode}
+%  \end{variable}
+%  \begin{variable}{\g_@@_testphase_tl}
+%  a tl to store the testphase loading code so that we can load them at
+%  the end of the command.
+%    \begin{macrocode}
+\tl_if_exist:NF \g_@@_testphase_tl
+ { \tl_new:N \g_@@_testphase_tl }
+%    \end{macrocode}
+% \end{variable}
+%
+% \subsection{Kernel changes with \cs{DocumentMetadata}}
+% \begin{macro}{\@kernel@before@DocumentMetadata}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@kernel@before@DocumentMetadata
+  {
+    \ifx\Umathcode\@undefined
+    \fontencoding{T1}
+    \renewcommand\encodingdefault{T1}
+    \fi
+  }
+%    \end{macrocode}
+% \end{macro}
+
+% \subsection{\cs{DocumentMetadata}}
+%
+%  \begin{macro}{\DocumentMetadata}
+%
+%    \cs{DocumentMetadata} should not be used after
+%    \cs{documentclass} so we error in this case.
+%    It can be used more than once
+%     but follow-up calls should not do the initialization code.
+%    \begin{macrocode}
+\cs_set_protected:Npn \DocumentMetadata #1
+  {
+    \cs_if_eq:NNTF \documentclass \@twoclasseserror
+      { \msg_error:nn { meta } { after-class } }
+      {
+%    \end{macrocode}
+% Load general format changes
+%    \begin{macrocode}
+        \@kernel@before@DocumentMetadata
+%    \end{macrocode}
+%
+%    The wanted backend must be detected first, we read the init
+%    key and then force the loading of the backend.
+%    The backend can contain management commands, so the boolean should
+%    be set to true first.
+%    \begin{macrocode}
+        \bool_gset_true:N \g_@@_active_bool
+        \keys_set_groups:nnn { document / metadata} {init}{ #1 }
+        %if no backend has been loaded force it now:
+        \str_if_exist:NF \c_sys_backend_str
+          {
+            \sys_load_backend:n {}
+          }
+%    \end{macrocode}
+%    Now we load the extra backend code:
+%    \begin{macrocode}
+        \ExplSyntaxOn\makeatletter
+          \file_input:n {l3backend-testphase-\c_sys_backend_str.def}
+        \ExplSyntaxOff\makeatother
+%    \end{macrocode}
+% \changes{v1.0m}{2025/02/17}{Set PDF 2.0 as default}
+%    \begin{macrocode}
+          \pdf_version_gset:n { 2.0 }
+%    \end{macrocode}
+%    Process the non-init keys and setup the generic driver.
+%    \begin{macrocode}
+        \keys_set_exclude_groups:nnn  { document / metadata } { init } { #1 }
+        \bool_if:NT \g_@@_active_bool
+          {
+            \PassOptionsToPackage{customdriver=hgeneric-testphase}{hyperref}
+%    \end{macrocode}
+% Finally we setup the language default.
+% This is done after the begindocument hook so that it can pick up settings
+% from babel. If the Catalog dictionary already contains a lang value we do nothing,
+% otherwise we use the value stored in \cs{BCPdata}, either the main language
+% (if its exists) or the fall back language.
+% Note: if babel is loaded without a language this gives the language \texttt{und}.
+%    \begin{macrocode}
+            \g@addto@macro\@kernel@after@begindocument
+             {
+               \pdfdict_get:nnN {g__pdf_Core/Catalog}{Lang}\l_@@_tmpa_tl
+               \quark_if_no_value:NT\l_@@_tmpa_tl
+                {
+                  \tl_if_empty:eTF { \BCPdata{main.language} }
+                   { \tl_set:Ne \l_@@_tmpb_tl { \BCPdata{language} } }
+                   { \tl_set:Ne \l_@@_tmpb_tl { \BCPdata{main.language} } }
+                  \msg_warning:nne { meta } { lang-missing }{ \l_@@_tmpb_tl }
+                  \exp_last_unbraced:Ne
+                   \AddToDocumentProperties{[document]{lang}{\l_@@_tmpb_tl}}
+                  \pdfmanagement_add:nne {Catalog} {Lang}{(\l_@@_tmpb_tl)}
+                }
+             }
+          }
+%    \end{macrocode}
+%    \cs{pdfmanagement_add:nnn} has collected values in this hook.
+%    \begin{macrocode}
+        \hook_use_once:n {pdfmanagement/add}
+%    \end{macrocode}
+%    Now we redefine \cs{DocumentMetadata} so that it only process the
+%    keys on any further calls.
+%
+%     We need to update the hyperref option if the active status changes.
+%    \begin{macrocode}
+        \cs_set_protected:Npn \DocumentMetadata ##1
+          {
+            \keys_set_exclude_groups:nnn  { document / metadata } { init } { ##1 }
+            \str_remove_all:cn {opt@hyperref.sty}{customdriver=hgeneric-testphase}
+            \bool_if:NT \g__pdfmanagement_active_bool
+             {
+               \PassOptionsToPackage{customdriver=hgeneric-testphase}{hyperref}
+             }
+          }
+%    \end{macrocode}
+% Load more modules, the testphase code and the firstaid code. The code is only
+% loaded in the first \cs{DocumentMetadata} call!
+%    \begin{macrocode}
+        \g_@@_testphase_tl
+        \RequirePackage{pdfmanagement-firstaid}
+      }
+  }
+%    \end{macrocode}
+%  \end{macro}
+
+%\subsection{\cs{DocumentMetadata} keys}
+%\changes{1.0k}{2024-12-17}{added latest value for testphase key.}
+%\changes{1.0n}{2025/03/25}{Allow a list as pdfstandard value.}
+%\changes{1.0n}{2025/03/25}{Add tagging key}
+%\changes{1.0n}{2025/03/25}{Add tagging-setup}
+%\changes{1.0o}{2025/04/03}{Add debug=BBox}
+%\changes{1.0p}{2025/04/28}{Add tikz module to latest key}
+%    \begin{macrocode}
+\keys_define:nn { document / metadata }
+  {
+    backend .choices:nn =
+      { dvipdfmx , dvips , dvisvgm , luatex , pdftex , pdfmode , xdvipdfmx , xetex }
+      {
+        \sys_load_backend:n {#1}
+      },
+    backend .groups:n = { init } ,
+  }
+
+\keys_define:nn { document / metadata }
+  {
+    ,pdfversion .code:n =
+      {
+        \pdf_version_gset:n { #1 }
+        \AddToDocumentProperties[document]{pdfversion}{#1}
+      }
+    ,uncompress .code:n =
+      {
+        \pdf_uncompress:
+      }
+    ,uncompress .value_forbidden:n = true
+    ,lang .code:n =
+      {
+        \pdfmanagement_add:nnn {Catalog} {Lang}{(#1)}
+        \AddToDocumentProperties[document]{lang}{#1}
+      }
+    %,xmpmeta .bool_gset:N = \g_pdfmeta_xmp_bool %see pdfmeta unused and undefined for now!
+    % this uses internal command from pdfmeta, it should probably move there ...
+    ,pdfstandard .code:n =
+      {
+        \clist_map_inline:nn{#1}
+         {           
+           \keys_set:ne {document / metadata} {_pdfstandard=\str_uppercase:n{##1}}
+         }  
+      }
+    ,_pdfstandard .choices:nn =
+      {A-1B,A-2A,A-2B,A-2U,A-3A,A-3B,A-3U,A-4}
+      {
+        \prop_gset_eq:Nc \g__pdfmeta_standard_prop { g__pdfmeta_standard_pdf/#1 _prop }
+        \AddToDocumentProperties [document]{pdfstandard}{#1}
+      }
+    ,_pdfstandard / A-4F .code:n =
+      {
+        \prop_gset_eq:Nc \g__pdfmeta_standard_prop { g__pdfmeta_standard_pdf/A-4F_prop }
+        \AddToDocumentProperties [document]{pdfstandard}{A-4F}
+      }
+    ,_pdfstandard / A-4E .code:n =
+      {
+        \prop_gset_eq:Nc \g__pdfmeta_standard_prop { g__pdfmeta_standard_pdf/A-4E_prop }
+        \AddToDocumentProperties [document]{pdfstandard}{A-4E}
+      }
+    ,_pdfstandard / unknown .code:n =
+      {
+        \msg_error:nnn{pdf}{unknown-standard}{#1}
+      }
+    ,testphase .multichoice:
+    ,testphase / latest .code:n =
+      {
+       \keys_set:nn
+        {document / metadata}
+        {testphase={phase-III,title,table,math,firstaid,tikz}}
+       \tl_gput_right:Nn\g_@@_testphase_tl 
+        {
+         \msg_note:nnn { meta } { testphase-latest-loading }
+          { phase-III,~title,~table,~math,~firstaid,~tikz }
+        }  
+      }
+    ,testphase / tagpdf .code:n =
+      {
+        \tl_gput_right:Nn\g_@@_testphase_tl
+          {
+            \file_if_exist_input:nF {tagpdf-latex-lab-testphase.ltx}
+              {
+                \RequirePackage{tagpdf}
+                \AddToDocumentProperties [document]{testphase/tagpdf}{loaded}
+                \tagpdfsetup{activate,para/tagging,activate/spaces}
+                \AddToDocumentProperties [document]{tagging}{active}
+                \AddToDocumentProperties [document]{tagging/para}{active}
+                \AddToDocumentProperties [document]{tagging/interwordspace}{active}
+              }
+          }
+      }
+    ,testphase / unknown .code:n =
+      {
+        \tl_gput_right:Nn\g_@@_testphase_tl
+           {
+             \tl_if_empty:eT{\GetDocumentProperties{document/testphase/#1}}
+              {
+                \AddToDocumentProperties [document]{testphase/#1}{loaded}
+                \file_if_exist_input:nF {#1-latex-lab-testphase.ltx}
+                 {
+                  \msg_warning:nnn{meta}{latex-lab-pkg-missing}{#1}
+                  \AddToDocumentProperties [document]{testphase/#1}{missing}
+                 }
+              }   
+           }
+      }
+    ,tagging .choice:,
+    ,tagging / on .code:n = 
+      {
+        \keys_set:nn { document / metadata }{ testphase=latest }
+      }  
+    ,tagging / off .code:n = 
+      {
+        \keys_set:nn { document / metadata }{ testphase=latest }
+        \AddToHook{class/before}
+         {
+           \tagpdfsetup{activate/mc=false,activate/tree=false,
+                        activate/struct=false,activate/socket=false,
+                        para/tagging=false,math/setup=}
+           \AddToDocumentProperties [document]{tagging}{inactive}
+           \AddToDocumentProperties [document]{tagging/para}{inactive}
+           % perhaps, need to test
+           %\tag_suspend:n {global}
+           %\cs_set_eq:NN\tag_suspend:n\use_none:n
+           %\cs_set_eq:NN\tag_resume:n \use_none:n
+           %\cs_new_protected:Npn \tag_mc_begin:n #1 { \__tag_whatsits: \int_gincr:N \c@g__tag_MCID_abs_int }
+           %\cs_new_protected:Nn \tag_mc_end:{ \__tag_whatsits: }
+           %\cs_new_protected:Npn \tag_struct_begin:n #1 {\int_gincr:N \c@g__tag_struct_abs_int}
+           %\cs_new_protected:Npn \tag_struct_end:{}
+         }
+      }  
+    ,tagging / draft .code:n = 
+      {
+        \keys_set:nn { document / metadata }{ testphase=latest }
+        \AddToHook{shipout/lastpage}[tagging-setup]{\tagpdfsetup{activate/tree=false}}
+        \DeclareHookRule{shipout/lastpage}{tagging-setup}{before}{tagpdf} 
+      }   
+    ,tagging-setup .code:n = 
+      {
+        \tl_gclear:N\g_@@_testphase_tl
+        \keys_set:nn { document / metadata }{ testphase=latest }  
+        \keys_set_groups:nnn{__tag/setup}{load}{#1}
+        \AddToHook{class/before}
+         {\keys_set_exclude_groups:nnn {__tag/setup}{load}{#1}}
+      }   
+    ,debug .code:n =
+      {
+        \keys_set:nn { document / metadata / debug } {#1}
+      }
+    ,debug / para .code:n =
+      {
+        \AddToHook
+          {
+            package/tagpdf/after
+          }
+          {
+             \tagpdfsetup{debug/show=para}
+          }
+      }
+    ,debug / log .code:n =
+      {
+        \AddToHook
+          {
+           package/tagpdf/after
+          }
+          {
+             \tagpdfsetup{debug/log=#1}
+          }
+      }
+    ,debug / tagpdf .code:n =
+      {
+        \AddToHook
+          {
+           package/tagpdf/after
+          }
+          {
+             \RequirePackage{tagpdf-debug}
+          }
+      }
+    ,debug / uncompress .code:n =
+      {
+        \pdf_uncompress:
+      }
+    ,debug / pdfmanagement .bool_gset:N = \g_@@_active_bool
+    ,debug / firstaidoff .clist_gset:N = \g_@@_firstaidoff_clist
+    ,debug / BBox .code:n = 
+      { 
+        \AddToHook{package/latex-lab-testphase-graphic/after}
+         { \bool_set_true:N \l__tag_graphic_debug_bool} 
+      }    
+  }
+\keys_define:nn{__tag/setup}
+ {
+   ,modules .code:n =  
+     {
+      \tl_gclear:N\g_@@_testphase_tl 
+      \keys_set:nn { document / metadata }{testphase={phase-II,#1}} 
+     }
+   ,modules .groups:n = { load }    
+   ,extra-modules .code:n = 
+     {
+       \keys_set:nn { document / metadata }{testphase={#1}}    
+     }
+   ,extra-modules .groups:n = { load }  
+ }                 
+%    \end{macrocode}
+% \subsection{Messages}
+%    \begin{macrocode}
+%UFi is meta the right module name here?
+\prop_gput:Nnn \g_msg_module_type_prop { meta } { LaTeX }
+\prop_gput:Nnn \g_msg_module_name_prop { meta } { DocumentMetadata }
+
+\msg_new:nnn { meta } { after-class }
+             {
+                \token_to_str:N \DocumentMetadata \c_space_tl
+                should~be~used~only~before~\token_to_str:N\documentclass
+             }
+\msg_new:nnn { meta } { latex-lab-pkg-missing }
+             {
+               LaTeX-lab~package~'#1'~not~found.
+              }
+\msg_new:nnn { meta } { lang-missing }
+             {
+               The~language~has~not~been~set~in~\token_to_str:N
+               \DocumentMetadata.\\Setting~it~to~'#1'~as~fallback.
+             }
+\msg_new:nnn { meta } { testphase-latest-loading }
+             {
+               Loading~testphase~modules\\
+               #1
+             }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\ExplSyntaxOff\makeatother
+%    \end{macrocode}
+%
+%
+%    \begin{macrocode}
+%</code>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \Finale
+%

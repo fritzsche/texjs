@@ -1,0 +1,397 @@
+%%%
+% Defi Table
+%%%
+\def\filedateDefiTables{2024/12/15}%
+\def\fileversionDefiTables{0.1c}%
+\message{-- \filedateDefiTables\space v\fileversionDefiTables}%
+%
+\newcounter{PfCNbDefiTable}%
+\newcounter{PfCNbDefiTableRestore}%
+\setcounter{PfCNbDefiTable}{0}%
+
+\newlength{\PfCDefiTableLargTab}
+
+\setKVdefault[DefiTable]{Solution=false,Math=false,Largeur=1em,LargeurT=5mm,Graines=false,Creation=false,ValeurMin=1,ValeurMax=10,Restreint=false,Stretch=1,Restores=false,Graine={},Restore={}}%
+\defKV[DefiTable]{%
+  Graine=\ifempty{#1}{}{\setKV[DefiTable]{Graines}},%
+  Restore=\ifempty{#1}{}{\setKV[DefiTable]{Restores}}%
+}%
+%
+\NewDocumentCommand\MelangeListeNew{mm}{%
+  % #1 Liste à mélanger
+  % #2 Nombre d'éléments à conserver
+  \setsepchar[*]{/}\ignoreemptyitems%
+  \readlist*\ListeInter{#1}%
+  \xdef\faa{}% Liste construite
+  \xdef\fii{}% Liste détruite
+  % on crée les #2 premieres solutions.
+  \xintFor* ##1 in {\xintSeq{1}{#2}}\do{%
+    \xintifboolexpr{\ListeInterlen>1}{%
+      \xdef\Alea{\fpeval{randint(\ListeInterlen)}}%
+      \xdef\faa{\faa \ListeInter[\Alea]/}%
+      \xdef\fii{}%
+      \xintFor* ##2 in {\xintSeq{1}{\ListeInterlen}}\do{%
+        \xintifboolexpr{##2 == \Alea}{%
+        }{%
+          \xdef\fii{\fii \ListeInter[##2]/}%
+        }%
+      }%
+    }{%
+      \xdef\faa{\faa \ListeInter[1]}%
+    }%
+    \readlist*\ListeInter{\fii}%
+  }%
+  \reademptyitems%
+}%
+
+\makeatletter
+\NewDocumentCommand\JeConstruisLesProduits{mm}{%
+  \xintFor* ##1 in{\xintSeq{#1}{#2}}\do{%
+    \xintifForFirst{%
+      \xdef\ListeDesProduitsFoo{\fpeval{##1}}%
+      \xintFor* ##2 in{\xintSeq{2}{10}}\do{%
+        \xdef\ListeDesProduitsFoo{\ListeDesProduitsFoo/\fpeval{##1*##2}}%
+      }%
+    }{%
+      \xintFor* ##2 in{\xintSeq{1}{10}}\do{%
+        \xdef\JeCoupe{0}%
+        \xintFor* ##3 in{\xintSeq{#1}{\fpeval{##1-1}}}\do{%
+          \xintifboolexpr{\fpeval{##1*##2}>\fpeval{##3*10}}{}{%
+            \modulo{\fpeval{##1*##2}}{##3}\relax%
+            \xintifboolexpr{\remainder==0}{\xdef\JeCoupe{1}\xintBreakFor}{}%
+          }%
+        }%
+        \xintifboolexpr{\JeCoupe==1}{}{\xdef\ListeDesProduitsFoo{\ListeDesProduitsFoo/\fpeval{##1*##2}}}%
+      }%
+    }%
+  }%
+  \setsepchar[*]{/}%
+  \readlist*\ListeDesProduits{\ListeDesProduitsFoo}%
+  \xdef\NombreDeProduitATester{\ListeDesProduitslen}%
+}%
+
+\NewDocumentCommand\DefiTableNombreLettreduCode{m}{%
+  \JeConstruisLesProduits{\useKV[DefiTable]{ValeurMin}}{\useKV[DefiTable]{ValeurMax}}%
+  \MelangeListeNew{\ListeDesProduitsFoo}{\NombreDeProduitATester}%
+  % On sauvegarde la liste des produits mélangés dans le fichier aux.
+  \immediate\write\@auxout{\noexpand\expandafter\gdef\noexpand\csname ListeDesProduitsMelangesFoo\Roman{PfCNbDefiTable}\endcsname{\faa}}%
+  \immediate\write\@auxout{\noexpand\expandafter\gdef\noexpand\csname NombreDeProduitATester\Roman{PfCNbDefiTable}\endcsname{\NombreDeProduitATester}}%
+%  Les produits mélangés sont :\par
+  \readlist*\ListeDesProduits{\faa}%
+  \xdef\ListeDesCaracteresFoo{a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/x/y/z/à/é/è/ê/ï/î/ô/ö/ù/ç/A/B/C/D/E/F/G/H/I/J/K/L/M/N/O/P/Q/R/S/T/U/V/W/X/Y/Z/À/É/È/,/$?$/$;$/./$!$/$:$/-}%
+  \savecomparemode%
+  \comparestrict%
+  \xdef\PfCFooDepart{}%
+  \StrLen{#1}[\LongueurMot]%
+  \xintFor* ##1 in{\xintSeq{1}{\LongueurMot}}\do{%
+    \StrChar{#1}{##1}[\LettreMot]%
+    \xdef\PfCFooDepart{\PfCFooDepart \LettreMot/}%
+  }%
+  \setsepchar[*]{/}\reademptyitems%
+  \readlist*\ListeDesLettres{\PfCFooDepart}%
+  \xdef\PfCFooArrivee{\ListeDesLettres[1]}%
+  \xintFor* ##1 in{\xintSeq{2}{\LongueurMot}}\do{%
+    \StrCompare{\ListeDesLettres[##1]}{\\}[\PfCRetiensEtoile]%
+    \StrCompare{\ListeDesLettres[##1]}{ }[\PfCRetiensPara]%
+    \xintifboolexpr{\PfCRetiensEtoile==0 || \PfCRetiensPara==0}{}{%
+      \xdef\PfCTotal{0}%
+      \xintFor* ##2 in{\xintSeq{1}{\fpeval{##1-1}}}\do{%
+        \StrCompare{\ListeDesLettres[##1]}{\ListeDesLettres[##2]}[\PfCRetiens]%
+        \xdef\PfCTotal{\fpeval{\PfCTotal+\PfCRetiens}}%
+      }%
+      \xintifboolexpr{\PfCTotal==\fpeval{##1-1}}{\xdef\PfCFooArrivee{\PfCFooArrivee/\ListeDesLettres[##1]}}{}%
+    }%
+  }%
+  %Arrivee = \PfCFooArrivee\par
+  \setsepchar[*]{/}\ignoreemptyitems%
+  \readlist*\ListeDesLettresUniques{\PfCFooArrivee}%
+  %La liste des lettres uniques ainsi créée :\par
+  %\showitems\ListeDesLettresUniques[]%
+  % Il faut retirer les lettres uniques de la liste des caracteres
+  \readlist*\ListeTotaleDesCaracteres{\ListeDesCaracteresFoo}%
+  %\par
+  %La liste totale des caractères est :\par
+  %\showitems\ListeTotaleDesCaracteres[]
+  %\par
+  \xdef\ListeCaracteresUniques{}%
+  \xintFor* ##1 in{\xintSeq{1}{\ListeTotaleDesCaractereslen}}\do{%
+    %Le caractère testé est \ListeTotaleDesCaracteres[##1]. On le compare à :%
+    \xdef\PfCTotal{0}%
+    \xintFor* ##2 in{\xintSeq{1}{\ListeDesLettresUniqueslen}}\do{%
+      \StrCompare{\ListeTotaleDesCaracteres[##1]}{\ListeDesLettresUniques[##2]}[\PfCRetiens]%
+      \xdef\PfCTotal{\fpeval{\PfCTotal+\PfCRetiens}}%
+    }%
+    \xintifboolexpr{\PfCTotal==\ListeDesLettresUniqueslen}{\xdef\ListeCaracteresUniques{\ListeCaracteresUniques\ListeTotaleDesCaracteres[##1]/}}{}%
+  }%
+  %La liste des caractères uniques à ajouter
+  \MelangeListeNew{\ListeCaracteresUniques}{\fpeval{\NombreDeProduitATester-\ListeDesLettresUniqueslen}}%
+  %\par La liste des éléments à mélanger est :\par
+  \xdef\ListeDesCaracteresAUtiliser{}%
+  \xintFor* ##1 in{\xintSeq{1}{\ListeDesLettresUniqueslen}}\do{%
+    \xdef\ListeDesCaracteresAUtiliser{\ListeDesCaracteresAUtiliser \ListeDesLettresUniques[##1]/}%
+  }%
+  \xdef\ListeDesCaracteresAUtiliser{\ListeDesCaracteresAUtiliser \faa}%
+  \MelangeListeNew{\ListeDesCaracteresAUtiliser}{\NombreDeProduitATester}%
+  %Finalement, on utilise ces caractères :\par
+  \ignoreemptyitems%
+  \readlist*\ListeFinaleDesCaracteres{\faa}%
+  \restorecomparemode%
+  \reademptyitems%
+  %On sauvegarde la liste finales des caracteres dans le fichier aux : non, car sinon effacement toutes les deux compilations.
+  % \immediate\write\@auxout{\noexpand\expandafter\gdef\noexpand\csname ListeFinaleDesCaracteresRetenus\Roman{PfCNbDefiTable}\endcsname{\faa}}%
+  %On sauvegarde uniquement pour la restauration dans un même document.
+  %\expandafter\gdef\csname ListeFinaleDesCaracteresRetenus\Roman{PfCNbDefiTable}\endcsname{\faa}%
+%  \expandafter\gdef\csname JeRetiensLaListeFinaleDesCaracteres\Roman{PfCNbDefiTable}\endcsname{\faa}%
+%  J'ai crée la commande : \csname JeRetiensLaListeFinaleDesCaracteres\Roman{PfCNbDefiTable}\endcsname
+}%
+
+\NewDocumentCommand\BuildTabDefiTable{m}{%
+  \setlength{\PfCDefiTableLargTab}{\useKV[DefiTable]{Largeur}}%
+  \setcounter{PfCNbDefiTableRestore}{#1}%
+  \ifcsname ListeFinaleDesCaracteresRetenusDansOrdre\Roman{PfCNbDefiTableRestore}\endcsname
+    \xdef\PfCFooRetiens{\csname ListeFinaleDesCaracteresRetenusDansOrdre\Roman{PfCNbDefiTableRestore}\endcsname}%
+    \setsepchar[*]{/}\ignoreemptyitems%
+    \readlist*\ListeAAfficherOrdre{\PfCFooRetiens}%
+    \reademptyitems%
+    \begin{tabular}{|>{\columncolor{gray!15}\rule[-1.375\tabcolsep]{0pt}{\PfCDefiTableLargTab+2.125\tabcolsep}\centering\arraybackslash}m{\PfCDefiTableLargTab}|*{10}{>{\rule[-1.375\tabcolsep]{0pt}{\PfCDefiTableLargTab+2.125\tabcolsep}\centering\arraybackslash}m{\PfCDefiTableLargTab}|}}
+      \hline
+      \rowcolor{gray!15}$\times$&\xintFor* ##1 in {\xintSeq {1}{10}}\do{%
+                                  \xintifForFirst{}{&}##1%
+                                                      }\\\hline%
+      \xintFor* ##1 in{\xintSeq{1}{10}}\do{%
+      ##1\xintFor* ##2 in{\xintSeq{1}{10}}\do{%
+                                &\ListeAAfficherOrdre[\fpeval{10*(##1-1)+##2}]
+                                  }\\\hline%
+      }%
+    \end{tabular}%
+  \else
+    \xdef\PfCFooSauvToutTab{}%
+    \begin{tabular}{|>{\columncolor{gray!15}\rule[-1.375\tabcolsep]{0pt}{\PfCDefiTableLargTab+2.125\tabcolsep}\centering\arraybackslash}m{\PfCDefiTableLargTab}|*{10}{>{\rule[-1.375\tabcolsep]{0pt}{\PfCDefiTableLargTab+2.125\tabcolsep}\centering\arraybackslash}m{\PfCDefiTableLargTab}|}}
+      \hline
+      \rowcolor{gray!15}$\times$&\xintFor* ##1 in {\xintSeq {1}{10}}\do{%
+                                  \xintifForFirst{}{&}##1%
+                                                      }\\\hline%
+      \xintFor* ##1 in{\xintSeq{1}{10}}\do{%
+      ##1\xintFor* ##2 in{\xintSeq{1}{10}}\do{%
+                                &\xintFor* ##3 in{\xintSeq{1}{\NombreDeProduitATester}}\do{%
+                                  \xintifboolexpr{\fpeval{##1*##2}==\ListeDesProduits[##3] 'and' any(\useKV[DefiTable]{ValeurMin}<=##2<=\useKV[DefiTable]{ValeurMax},\useKV[DefiTable]{ValeurMin}<=##1<=\useKV[DefiTable]{ValeurMax})}{\ListeFinaleDesCaracteres[##3]\xdef\PfCFooSauvToutTab{\PfCFooSauvToutTab/\ListeFinaleDesCaracteres[##3]}}{}%
+                                  }%
+                                  }\\\hline%
+      }%
+    \end{tabular}%
+%    Les caractères à sauvegarder dans l'ordre (?) sont \PfCFooSauvToutTab\\
+%    On la sauvegarde
+    \expandafter\xdef\csname ListeFinaleDesCaracteresRetenusDansOrdre\Roman{PfCNbDefiTable}\endcsname{\PfCFooSauvToutTab}%
+  \fi
+}%
+\makeatother
+
+\NewDocumentCommand\BuildTabDefiTableTexte{m}{%
+  \setcounter{PfCNbDefiTableRestore}{#1}%
+  \ifcsname ListeFinaleDuTableauDeDecodage\Roman{PfCNbDefiTableRestore}\endcsname
+    % PfCNbDefiTableRestore = \thePfCNbDefiTableRestore\\
+    % Pas encore en place
+    \setsepchar[*]{§* }\ignoreemptyitems%
+    \xdef\ListeDefiFooLettres{\csname ListeFinaleDuTableauDeDecodage\Roman{PfCNbDefiTableRestore}\endcsname}%
+    \xdef\ListeDefiFooNombres{\csname ListeFinaleDeNombresDeDecodage\Roman{PfCNbDefiTableRestore}\endcsname}%
+    \readlist*\ListeDefiTableTableau{\ListeDefiFooLettres}%
+    \setsepchar[*]{/}\ignoreemptyitems%
+    \readlist*\ListeDefiTableTableauNombres{\ListeDefiFooNombres}%
+    \reademptyitems%
+%    Liste des lettres de décodage : \showitems\ListeDefiTableTableau[]\\
+%    Liste des nombres de décodage : \showitems\ListeDefiTableTableauNombres[]\\
+    \xdef\ListeDefiTableTableauMax{\csname ListeDefiTableMax\Roman{PfCNbDefiTableRestore}\endcsname}%
+%    Max : \ListeDefiTableTableauMax\\
+    \xdef\PfCDecalageRetenu{0}%
+    \begin{tabular}{*{\fpeval{\ListeDefiTableTableauMax}}{>{\centering\arraybackslash}m{\useKV[DefiTable]{LargeurT}}}}%
+      \xintFor* ##1 in {\xintSeq {1}{\fpeval{\ListeDefiTableTableaulen}}}\do{%
+      \StrLen{\ListeDefiTableTableau[##1]}[\PfCDTLongueur]%
+      \xintFor* ##2 in {\xintSeq {1}{\PfCDTLongueur}}\do{%
+      \xintifForFirst{}{&}%
+                          \StrMid{\ListeDefiTableTableau[##1]}{##2}{##2}[\DefiTableMaLettre]%
+                          \IfStrEq{\DefiTableMaLettre}{ }{\cellcolor{white}}{\cellcolor{gray!50}\ifboolKV[DefiTable]{Solution}{\DefiTableMaLettre}{}}%
+                          }\\
+      \StrLen{\ListeDefiTableTableau[##1]}[\PfCDTLongueur]%
+      \xintFor* ##2 in {\xintSeq {1}{\PfCDTLongueur}}\do{%
+      \xintifForFirst{}{&}%
+                          \StrMid{\ListeDefiTableTableau[##1]}{##2}{##2}[\DefiTableMaLettre]%
+                          \IfStrEq{\DefiTableMaLettre}{ }{}{\xdef\PfCDecalageRetenu{\fpeval{\PfCDecalageRetenu+1}}\footnotesize\ListeDefiTableTableauNombres[\PfCDecalageRetenu]}%
+        }\\[0.75em]
+      }%
+    \end{tabular}
+  \else
+    \xdef\RetiensToutesLettres{}%
+    \xdef\RetiensTousProduits{}%
+    \begin{tabular}{*{\fpeval{\ListeDefiTableMax}}{>{\centering\arraybackslash}m{\useKV[DefiTable]{LargeurT}}}}%
+      \xintFor* ##2 in {\xintSeq{1}{\fpeval{\ListeDefiTableTableaulen}}}\do{%
+      \StrLen{\ListeDefiTableTableau[##2]}[\PfCDTLongueur]%
+      \xintFor* ##3 in {\xintSeq{1}{\PfCDTLongueur}}\do{%
+      \xintifForFirst{}{&}%
+                          \StrMid{\ListeDefiTableTableau[##2]}{##3}{##3}[\DefiTableMaLettre]%
+                          \xdef\RetiensToutesLettres{\RetiensToutesLettres\DefiTableMaLettre}%
+                          \IfStrEq{\DefiTableMaLettre}{ }{\cellcolor{white}}{\cellcolor{gray!50}\ifboolKV[DefiTable]{Solution}{\DefiTableMaLettre}{}}%
+                          }\\
+      \xdef\RetiensToutesLettres{\RetiensToutesLettres§}%
+      \StrLen{\ListeDefiTableTableau[##2]}[\PfCDTLongueur]%
+      \xintFor* ##3 in {\xintSeq{1}{\PfCDTLongueur}}\do{%
+      \xintifForFirst{}{&}%
+                          \StrMid{\ListeDefiTableTableau[##2]}{##3}{##3}[\DefiTableMaLettre]%
+                          \IfStrEq{\DefiTableMaLettre}{*}{}{%
+                          \xintFor* ##4 in{\xintSeq{1}{\NombreDeProduitATester}}\do{%
+                          \IfStrEq{\DefiTableMaLettre}{\ListeFinaleDesCaracteres[##4]}{\footnotesize\ListeDesProduits[##4]\xdef\RetiensTousProduits{\RetiensTousProduits\ListeDesProduits[##4]/}}{}%
+                          }%
+                          }%
+                          }\\[0.75em]
+      }%
+    \end{tabular}
+%    C'est la première fois que je passe ici, le PfCNbDefiTable vaut \thePfCNbDefiTable.\\
+    \expandafter\xdef\csname ListeFinaleDuTableauDeDecodage\Roman{PfCNbDefiTable}\endcsname{\RetiensToutesLettres}%
+    \expandafter\xdef\csname ListeFinaleDeNombresDeDecodage\Roman{PfCNbDefiTable}\endcsname{\RetiensTousProduits}%
+%    J'ai exporté les listes ListeFinaleDuTableauDeDecodage\Roman{PfCNbDefiTable} et ListeFinaleDeNombresDeDecodage\Roman{PfCNbDefiTable}.\\
+  \fi%
+}%
+
+\NewDocumentCommand\DefiTable{om}{%
+  % 1 les clés
+  % 2 la table de décodage
+  \useKVdefault[DefiTable]%
+  \setKV[DefiTable]{#1}%
+  \renewcommand{\arraystretch}{\useKV[DefiTable]{Stretch}}%
+  \ifboolKV[DefiTable]{Restores}{%
+    \setcounter{PfCNbDefiTableRestore}{\useKV[DefiTable]{Restore}}%
+%    Restore vaut \thePfCNbDefiTableRestore\\  
+    \ifcsname ListeFinaleDesCaracteresRetenusDansOrdre\Roman{PfCNbDefiTable}\endcsname%
+      \BuildTabDefiTable{\thePfCNbDefiTableRestore}%
+    \else%
+      Il faut définir le jeu avant.%
+    \fi%
+  }{%
+    \stepcounter{PfCNbDefiTable}%
+%    Le compteur vaut \thePfCNbDefiTable.\\
+    \ifboolKV[DefiTable]{Creation}{%
+      \ifboolKV[DefiTable]{Graines}{\PfCGraineAlea{\useKV[DefiTable]{Graine}}}{}%
+      \ifcsname ListeFinaleDesCaracteresRetenusDansOrdre\Roman{PfCNbDefiTable}\endcsname%
+      \else
+        \DefiTableNombreLettreduCode{#2}%
+      \fi
+      \ifboolKV[DefiTable]{Restreint}{%
+        \xdef\PfCNbColonnes{\fpeval{\useKV[DefiTable]{ValeurMax}-\useKV[DefiTable]{ValeurMin}+1}}%
+        \begin{tabular}{|>{\columncolor{gray!15}}c|*{\PfCNbColonnes}{c|}}
+          \hline
+          \rowcolor{gray!15}$\times$&\xintFor* ##1 in {\xintSeq {1}{\PfCNbColonnes}}\do{%
+          \xintifForFirst{}{&}\fpeval{\useKV[DefiTable]{ValeurMin}+##1-1}%
+        }\\\hline%
+          \xintFor* ##1 in{\xintSeq{1}{10}}\do{%
+          ##1\xintFor* ##2 in{\xintSeq{\useKV[DefiTable]{ValeurMin}}{\useKV[DefiTable]{ValeurMax}}}\do{%
+          &\xintFor* ##3 in{\xintSeq{1}{\NombreDeProduitATester}}\do{%
+          \xintifboolexpr{\fpeval{##1*##2}==\ListeDesProduits[##3] 'and' any(\useKV[DefiTable]{ValeurMin}<=##2<=\useKV[DefiTable]{ValeurMax},\useKV[DefiTable]{ValeurMin}<=##1<=\useKV[DefiTable]{ValeurMax})}{\ListeFinaleDesCaracteres[##3]}{}%
+            }%
+            }\\\hline%
+          }%
+        \end{tabular}%
+      }{%
+        \BuildTabDefiTable{\thePfCNbDefiTable}%
+      }%
+    }{%
+      \setsepchar[*]{§* }%
+      \readlist*\ListeDefiTableCode{#2}%
+      \begin{NiceTabular}{>{\columncolor{gray!15}}{c}*{10}{c}}[hvlines]%,color-inside]
+        \rowcolor{gray!15}$\times$&\xintFor* ##1 in {\xintSeq {1}{10}}\do{%
+          \xintifForFirst{}{&}##1}
+        \\
+        1\xintFor* ##1 in {\xintSeq {1}{10}}\do{%
+          &\ListeDefiTableCode[1,##1]%
+        }\\
+        \xintFor* ##1 in {\xintSeq {2}{9}}\do{%
+          ##1\xintFor* ##2 in {\xintSeq {1}{##1}}\do{%
+            &\ListeDefiTableCode[##2,\fpeval{##1-##2+1}]%
+          }\xintFor* ##2 in {\xintSeq {1}{\fpeval{10-##1}}}\do{%
+            &\ListeDefiTableCode[##1,\fpeval{##2+1}]%
+          }%
+          \\
+        }%
+        10&\ListeDefiTableCode[1,10]&\ListeDefiTableCode[2,9]&\ListeDefiTableCode[3,8]&\ListeDefiTableCode[4,7]&\ListeDefiTableCode[5,6]&\ListeDefiTableCode[6,5]&\ListeDefiTableCode[7,4]&\ListeDefiTableCode[8,3]&\ListeDefiTableCode[9,2]&\ListeDefiTableCode[10,1]\\
+      \end{NiceTabular}%
+    }%
+  }%
+}%
+
+
+\NewDocumentCommand\DefiTableTexte{somm}{%
+  \useKVdefault[DefiTable]%
+  \setKV[DefiTable]{#2}%
+  \ifboolKV[DefiTable]{Restores}{%
+    \setcounter{PfCNbDefiTableRestore}{\useKV[DefiTable]{Restore}}%
+%    Restore vaut \thePfCNbDefiTableRestore\\
+    \BuildTabDefiTableTexte{\thePfCNbDefiTableRestore}
+  }{%
+  \ifboolKV[DefiTable]{Creation}{%
+    \ifboolKV[DefiTable]{Graines}{\PfCGraineAlea{\useKV[DefiTable]{Graine}}}{}%
+    \DefiTableNombreLettreduCode{#4}%
+    \setsepchar[*]{\\* }%
+    \readlist*\ListeDefiTableTableau{#4}%
+    \xdef\ListeDefiTableMax{0}%
+    \xintFor* ##2 in{\xintSeq{1}{\ListeDefiTableTableaulen}}\do{%
+      \StrLen{\ListeDefiTableTableau[##2]}[\PfCDTLongueur]%
+      \xintifboolexpr{\ListeDefiTableMax<\PfCDTLongueur}{\xdef\ListeDefiTableMax{\fpeval{\PfCDTLongueur}}}{}%%
+    }%
+    \expandafter\xdef\csname ListeDefiTableMax\Roman{PfCNbDefiTable}\endcsname{\ListeDefiTableMax}%
+    % \par Le max est \ListeDefiTableMax
+    \IfBooleanTF{#1}{%
+      \BuildTabDefiTableTexte{\thePfCNbDefiTable}
+    }{%
+      \begin{NiceTabular}{*{\fpeval{\ListeDefiTableMax}}{>{\centering\arraybackslash}m{\useKV[DefiTable]{LargeurT}}}}
+        \xintFor* ##2 in {\xintSeq {1}{\fpeval{\ListeDefiTableTableaulen}}}\do{%
+          \StrLen{\ListeDefiTableTableau[##2]}[\PfCDTLongueur]%
+          \xintFor* ##3 in {\xintSeq {1}{\PfCDTLongueur}}\do{%
+            \xintifForFirst{}{&}%
+            \StrMid{\ListeDefiTableTableau[##2]}{##3}{##3}[\DefiTableMaLettre]%
+            \IfStrEq{\DefiTableMaLettre}{ }{\Block[]{1-1}{}}{\Block[borders={bottom}]{1-1}{\ifboolKV[DefiTable]{Solution}{\StrMid{\ListeDefiTableTableau[##2]}{##3}{##3}}{}}}%
+          }\\
+          \StrLen{\ListeDefiTableTableau[##2]}[\PfCDTLongueur]%
+          \xintFor* ##3 in {\xintSeq {1}{\PfCDTLongueur}}\do{%
+            \xintifForFirst{}{&}%
+            \StrMid{\ListeDefiTableTableau[##2]}{##3}{##3}[\DefiTableMaLettre]%
+            \IfStrEq{\DefiTableMaLettre}{*}{}{%
+              \xintFor* ##4 in{\xintSeq{1}{\NombreDeProduitATester}}\do{%
+                \IfStrEq{\DefiTableMaLettre}{\ListeFinaleDesCaracteres[##4]}{\Block{}{\footnotesize\ListeDesProduits[##4]}}{}%
+              }%
+            }%
+          }\\
+          \StrLen{\ListeDefiTableTableau[##2]}[\PfCDTLongueur]%
+          \xintFor* ##3 in {\xintSeq {1}{\PfCDTLongueur}}\do{%
+            \xintifForFirst{}{&}
+          }\\
+        }%
+      \end{NiceTabular}%
+    }%
+  }{%
+    \setsepchar[*]{§*/}%
+    \readlist*\ListeDefiTableTableau{#3}%
+    \xdef\ListeDefiTableMax{0}%
+    \setsepchar{§}%
+    \readlist*\ListeDefiTablePhrase{#4}%
+    \foreachitem\compteur\in\ListeDefiTableTableau{%
+      \xintifboolexpr{\ListeDefiTableMax<\listlen\ListeDefiTableTableau[\compteurcnt]}{\xdef\ListeDefiTableMax{\fpeval{\listlen\ListeDefiTableTableau[\compteurcnt]}}}{}%
+    }%
+    \begin{NiceTabular}{*{\fpeval{\ListeDefiTableMax}}{>{\centering\arraybackslash}m{\useKV[DefiTable]{LargeurT}}}}
+      \xintFor* ##2 in {\xintSeq {1}{\fpeval{\ListeDefiTableTableaulen}}}\do{%
+        \xintFor* ##3 in {\xintSeq {1}{\listlen\ListeDefiTableTableau[##2]}}\do{%
+          \xintifForFirst{}{&}\ifboolKV[DefiTable]{Solution}{%
+            \StrMid{\ListeDefiTablePhrase[##2]}{##3}{##3}[\DefiTableMaLettre]%
+            \IfStrEq{\DefiTableMaLettre}{*}{\Block[]{2-1}{}}{\Block[borders={bottom}]{2-1}{\StrMid{\ListeDefiTablePhrase[##2]}{##3}{##3}}}%
+          }{%
+            \IfStrEq{\ListeDefiTableTableau[##2,##3]}{*}{\Block[]{2-1}{}}{\Block[borders={bottom}]{2-1}{}}%
+          }%%
+        }\\
+        \xintFor* ##3 in {\xintSeq {1}{\listlen\ListeDefiTableTableau[##2]}}\do{%
+          \xintifForFirst{}{&}
+        }\\
+        \xintFor* ##3 in {\xintSeq {1}{\listlen\ListeDefiTableTableau[##2]}}\do{%
+          \xintifForFirst{}{&}\IfStrEq{\ListeDefiTableTableau[##2,##3]}{*}{}{\footnotesize\ifboolKV[DefiTable]{Math}{\ListeDefiTableTableau[##2,##3]}{\num{\ListeDefiTableTableau[##2,##3]}}}%
+        }\\
+      }%
+    \end{NiceTabular}%
+  }%
+}%
+}%

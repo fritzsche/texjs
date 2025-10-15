@@ -1,0 +1,351 @@
+%%%
+% Ppt\'es des droites (6eme)
+%%%
+\def\filedatePptesDroites{2024/08/04}%
+\def\fileversionPptesDroites{0.1}%
+\message{-- \filedatePptesDroites\space v\fileversionPptesDroites}%
+%
+\setKVdefault[ClesDroites]{Brouillon=false,CitePropriete=false,Num=1,Figure=false,Remediation=false,FigureSeule=false}
+
+\newcommand\Redaction[4][]{%
+  \ifboolKV[ClesDroites]{Remediation}{%
+    \xintifboolexpr{\useKV[ClesDroites]{Num}==1}{%
+      \ifboolKV[ClesDroites]{CitePropriete}{%
+        Les droites $(\hbox to2em{\dotfill})$ et $(\hbox to2em{\dotfill})$ sont parall\`eles. Les droites $(\hbox to2em{\dotfill})$ et $(\hbox to2em{\dotfill})$ sont parall\`eles.%
+        
+        Or, si deux droites sont parall\`eles, alors toute droite parall\`ele \`a l'une est parall\`ele \`a l'autre.%
+        
+        Donc les droites $(\hbox to2em{\dotfill})$ et $(\hbox to2em{\dotfill})$ sont parall\`eles.%
+      }{%
+        Comme les droites $(\hbox to2em{\dotfill})$ et $(\hbox to2em{\dotfill})$ sont toutes les deux parall\`eles \`a la m\^eme droite $(\hbox to2em{\dotfill})$, alors les droites $(\hbox to2em{\dotfill})$ et $(\hbox to2em{\dotfill})$ sont parall\`eles.%
+      }
+    }{\xintifboolexpr{\useKV[ClesDroites]{Num}==2}{%
+        \ifboolKV[ClesDroites]{CitePropriete}{%
+          Les droites $(\hbox to2em{\dotfill})$ et $(\hbox to2em{\dotfill})$ sont perpendiculaires. Les droites $(\hbox to2em{\dotfill})$ et $(\hbox to2em{\dotfill})$ sont perpendiculaires.%
+          
+          Or, si deux droites sont perpendiculaires \`a une m\^eme droite, alors elles sont parall\`eles.%
+          
+          Donc les droites $(\hbox to2em{\dotfill})$ et $(\hbox to2em{\dotfill})$ sont parall\`eles.
+        }{%
+          Comme les droites $(\hbox to2em{\dotfill})$ et $(\hbox to2em{\dotfill})$ sont toutes les deux perpendiculaires \`a la m\^eme droite $(\hbox to2em{\dotfill})$, alors les droites $(\hbox to2em{\dotfill})$ et $(\hbox to2em{\dotfill})$ sont parall\`eles.
+        }
+      }{%
+        \ifboolKV[ClesDroites]{CitePropriete}{%
+          Les droites $(\hbox to2em{\dotfill})$ et $(\hbox to2em{\dotfill})$ sont parall\`eles. Les droites $(\hbox to2em{\dotfill})$ et $(\hbox to2em{\dotfill})$ sont perpendiculaires.%
+          
+          Or, si deux droites sont parall\`eles, alors toute droite perpendiculaire \`a l'une est perpendiculaire \`a l'autre.%
+          
+          Donc les droites $(\hbox to2em{\dotfill})$ et $(\hbox to2em{\dotfill})$ sont perpendiculaires.
+        }{%
+          Comme les droites $(\hbox to2em{\dotfill})$ et $(\hbox to2em{\dotfill})$ sont parall\`eles, alors la droite $(\hbox to2em{\dotfill})$ qui est perpendiculaire \`a $(\hbox to2em{\dotfill})$ est \'egalement perpendiculaire \`a la droite $(\hbox to2em{\dotfill})$.
+        }
+      }
+    }%
+  }{%
+    \xintifboolexpr{\useKV[ClesDroites]{Num}==1}{%
+      \ifboolKV[ClesDroites]{CitePropriete}{%
+        Les droites $(#2)$ et $(#4)$ sont parall\`eles. Les droites $(#3)$ et $(#4)$ sont parall\`eles.%
+        
+        Or, si deux droites sont parall\`eles, alors toute droite parall\`ele \`a l'une est parall\`ele \`a l'autre.%
+        
+        Donc les droites $(#2)$ et $(#3)$ sont parall\`eles.
+      }{%
+        Comme les droites $(#2)$ et $(#3)$ sont toutes les deux parall\`eles \`a la m\^eme droite $(#4)$, alors les droites $(#2)$ et $(#3)$ sont parall\`eles.
+      }
+    }{\xintifboolexpr{\useKV[ClesDroites]{Num}==2}{%
+        \ifboolKV[ClesDroites]{CitePropriete}{%
+          Les droites $(#2)$ et $(#4)$ sont perpendiculaires. Les droites $(#3)$ et $(#4)$ sont perpendiculaires.%
+          
+          Or, si deux droites sont perpendiculaires \`a une m\^eme droite, alors elles sont parall\`eles.%
+          
+          Donc les droites $(#2)$ et $(#3)$ sont parall\`eles.
+        }{%
+          Comme les droites $(#2)$ et $(#3)$ sont toutes les deux perpendiculaires \`a la m\^eme droite $(#4)$, alors les droites $(#2)$ et $(#3)$ sont parall\`eles.
+        }
+      }{%
+        \ifboolKV[ClesDroites]{CitePropriete}{%
+          Les droites $(#2)$ et $(#4)$ sont parall\`eles. Les droites $(#3)$ et $(#4)$ sont perpendiculaires.%
+          
+          Or, si deux droites sont parall\`eles, alors toute droite perpendiculaire \`a l'une est perpendiculaire \`a l'autre.%
+          
+          Donc les droites $(#2)$ et $(#3)$ sont perpendiculaires.
+        }{%
+          Comme les droites $(#2)$ et $(#4)$ sont parall\`eles, alors la droite $(#3)$ qui est perpendiculaire \`a $(#4)$ est \'egalement perpendiculaire \`a la droite $(#2)$.
+        }%
+      }%
+    }%
+  }%
+}%
+
+\newcommand\Brouillon[4][]{%
+  \setlength{\abovedisplayskip}{0pt}
+  \ifboolKV[ClesDroites]{Remediation}{%
+    \xintifboolexpr{\useKV[ClesDroites]{Num}==1}{%
+      \[\left.
+          \begin{array}{l}
+            (\hbox to2em{\dotfill})//(\hbox to2em{\dotfill})\\
+            \\
+            (\hbox to2em{\dotfill})//(\hbox to2em{\dotfill})
+          \end{array}
+        \right\}(\hbox to2em{\dotfill})//(\hbox to2em{\dotfill})
+      \]
+    }{\xintifboolexpr{\useKV[ClesDroites]{Num}==2}{%
+        \[\left.
+            \begin{array}{l}
+              (\hbox to2em{\dotfill})\perp(\hbox to2em{\dotfill})\\
+              \\
+              (\hbox to2em{\dotfill})\perp(\hbox to2em{\dotfill})\\
+            \end{array}
+          \right\}(\hbox to2em{\dotfill})//(\hbox to2em{\dotfill})
+        \]
+      }{%
+        \[\left.
+            \begin{array}{l}
+              (\hbox to2em{\dotfill})//(\hbox to2em{\dotfill})\\
+              \\
+              (\hbox to2em{\dotfill})\perp(\hbox to2em{\dotfill})\\
+            \end{array}
+          \right\}(\hbox to2em{\dotfill})\perp(\hbox to2em{\dotfill})
+        \]
+      }
+    }
+  }{
+    \xintifboolexpr{\useKV[ClesDroites]{Num}==1}{%
+      \[\left.
+          \begin{array}{l}
+            (#2)//(#4)\\
+            \\
+            (#3)//(#4)
+          \end{array}
+        \right\}(#2)//(#3)
+      \]
+    }{\xintifboolexpr{\useKV[ClesDroites]{Num}==2}{%
+        \[\left.
+            \begin{array}{l}
+              (#2)\perp(#4)\\
+              \\
+              (#3)\perp(#4)\\
+            \end{array}
+          \right\}(#2)//(#3)
+        \]
+      }{%
+        \[\left.
+            \begin{array}{l}
+              (#2)//(#4)\\
+              \\
+              (#3)\perp(#4)\\
+            \end{array}
+          \right\}(#2)\perp(#3)
+        \]
+      }%
+    }%
+  }%
+}%
+
+\def\MPFigureDroite#1#2{%
+  \ifluatex
+  %\mplibcodeinherit{enable}
+  \mplibforcehmode
+  \begin{mplibcode}
+    pair A,B,C,D,E,F,G,H,I,J,K;
+    u:=7.5mm;
+    A=u*(1,3);
+    B-A=u*(3,2);
+    C-A=u*(2,-1);
+    E-C=u*(1,-1.5);
+    G-E=u*(1.5,0);
+    I-A=whatever*(B-A);
+    I-G=whatever*((B-A) rotated 90);
+    D-B=C-A;
+    F-D=E-C;
+    H=1.1[G,I];
+    J=(C--D) intersectionpoint (G--H);
+    K=(E--F) intersectionpoint (G--H);
+    path Codeperp[];
+    pair M[];
+    M1-I=7*unitvector(B-I);
+    M3-I=7*unitvector(J-I);
+    M2-M3=M1-I;
+    Codeperp1=M1--M2--M3;
+    Codeperp2=Codeperp1 shifted(J-I);
+    picture Codepara[];
+    pair R,S,T;
+    path cd;
+    Codepara1=image(
+    R=1/3[A,B];
+    T=1/3[E,F];
+    S=1/3[R,T];
+    cd=(fullcircle scaled 6mm) shifted S;
+    drawoptions(withcolor 0.75*white);
+    drawarrow reverse((R{dir(210+angle(R-T))}..{dir(150+angle(R-T))}S) cutafter cd);
+    drawarrow reverse((T{dir(210+angle(T-R))}..{dir(150+angle(T-R))}S) cutafter cd);
+    draw cd;
+    label(btex $//$ etex ,S);
+    drawoptions();
+    );
+    Codepara2=image(
+    R:=1/2[C,D];
+    T:=1/2[E,F];
+    S:=1/2[R,T];
+    cd:=(fullcircle scaled 6mm) shifted S;
+    drawoptions(withcolor 0.75*white);
+    drawarrow reverse((R{dir(210+angle(R-T))}..{dir(150+angle(R-T))}S) cutafter cd);
+    drawarrow reverse((T{dir(210+angle(T-R))}..{dir(150+angle(T-R))}S) cutafter cd);
+    draw cd;
+    label(btex $//$ etex ,S);
+    drawoptions();
+    );
+    path d[];
+    d1=A--B;
+    d2=C--D;
+    d3=E--F;
+    d4=G--H;
+    picture reste;
+    reste=image(
+    %trac\'es des droites
+    draw d1;
+    if #1=2:
+    draw d2;
+    elseif #1=3:
+    draw d3;
+    fi;
+    if #2=3:
+    draw d3;
+    elseif #2=4:
+    draw d4;
+    fi;
+    % trac\'es des codes
+    if (#1=2) and (#2=3):
+    draw Codepara1; draw Codepara2;
+    fi;
+    if (#1=2) and (#2=4):
+    draw Codeperp1; draw Codeperp2;
+    fi;
+    if (#1=3) and (#2=4):
+    draw Codepara1; draw Codeperp1;
+    fi;
+    );
+    reste:=reste rotatedabout(u*(3,3),-90+uniformdeviate(180));
+    draw reste;
+  \end{mplibcode}
+  %\mplibcodeinherit{disable}
+  \else
+  \begin{mpost}
+    pair A,B,C,D,E,F,G,H,I,J,K;
+    u:=7.5mm;
+    A=u*(1,3);
+    B-A=u*(3,2);
+    C-A=u*(2,-1);
+    E-C=u*(1,-1.5);
+    G-E=u*(1.5,0);
+    I-A=whatever*(B-A);
+    I-G=whatever*((B-A) rotated 90);
+    D-B=C-A;
+    F-D=E-C;
+    H=1.1[G,I];
+    J=(C--D) intersectionpoint (G--H);
+    K=(E--F) intersectionpoint (G--H);
+    path Codeperp[];
+    pair M[];
+    M1-I=7*unitvector(B-I);
+    M3-I=7*unitvector(J-I);
+    M2-M3=M1-I;
+    Codeperp1=M1--M2--M3;
+    Codeperp2=Codeperp1 shifted(J-I);
+    picture Codepara[];
+    pair R,S,T;
+    path cd;
+    Codepara1=image(
+    R=1/3[A,B];
+    T=1/3[E,F];
+    S=1/3[R,T];
+    cd=(fullcircle scaled 6mm) shifted S;
+    drawoptions(withcolor 0.75*white);
+    drawarrow reverse((R{dir(210+angle(R-T))}..{dir(150+angle(R-T))}S) cutafter cd);
+    drawarrow reverse((T{dir(210+angle(T-R))}..{dir(150+angle(T-R))}S) cutafter cd);
+    draw cd;
+    label(btex $//$ etex ,S);
+    drawoptions();
+    );
+    Codepara2=image(
+    R:=1/2[C,D];
+    T:=1/2[E,F];
+    S:=1/2[R,T];
+    cd:=(fullcircle scaled 6mm) shifted S;
+    drawoptions(withcolor 0.75*white);
+    drawarrow reverse((R{dir(210+angle(R-T))}..{dir(150+angle(R-T))}S) cutafter cd);
+    drawarrow reverse((T{dir(210+angle(T-R))}..{dir(150+angle(T-R))}S) cutafter cd);
+    draw cd;
+    label(btex $//$ etex ,S);
+    drawoptions();
+    );
+    path d[];
+    d1=A--B;
+    d2=C--D;
+    d3=E--F;
+    d4=G--H;
+    picture reste;
+    reste=image(
+    %trac\'es des droites
+    draw d1;
+    if #1=2:
+    draw d2;
+    elseif #1=3:
+    draw d3;
+    fi;
+    if #2=3:
+    draw d3;
+    elseif #2=4:
+    draw d4;
+    fi;
+    % trac\'es des codes
+    if (#1=2) and (#2=3):
+    draw Codepara1; draw Codepara2;
+    fi;
+    if (#1=2) and (#2=4):
+    draw Codeperp1; draw Codeperp2;
+    fi;
+    if (#1=3) and (#2=4):
+    draw Codepara1; draw Codeperp1;
+    fi;
+    );
+    reste:=reste rotatedabout(u*(3,3),-90+uniformdeviate(180));
+    draw reste;
+  \end{mpost}
+  \fi
+}
+
+\newcommand\FaireFigure[4][]{%
+  \setlength{\abovedisplayskip}{0pt}
+  \xintifboolexpr{\useKV[ClesDroites]{Num}==1}{%
+    \MPFigureDroite{2}{3}%
+  }{\xintifboolexpr{\useKV[ClesDroites]{Num}==2}{%
+      \MPFigureDroite{2}{4}%
+    }{%
+      \MPFigureDroite{3}{4}%
+    }%
+  }%
+}%
+
+\newcommand\ProprieteDroites[4][]{%
+  \useKVdefault[ClesDroites]%
+  \setKV[ClesDroites]{#1}%
+  \ifboolKV[ClesDroites]{FigureSeule}{%
+    \FaireFigure[#1]{#2}{#3}{#4}%
+  }{%
+    \ifboolKV[ClesDroites]{Figure}{%
+      \begin{multicols}{2}%
+        \begin{center}%
+          \FaireFigure[#1]{#2}{#3}{#4}%
+        \end{center}%
+        \columnbreak
+        \ifboolKV[ClesDroites]{Brouillon}{\Brouillon[#1]{#2}{#3}{#4}}{}%
+        \Redaction[#1]{#2}{#3}{#4}%
+        \par%
+      \end{multicols}
+    }{%
+      \ifboolKV[ClesDroites]{Brouillon}{\Brouillon[#1]{#2}{#3}{#4}}{}%
+      \Redaction[#1]{#2}{#3}{#4}%
+    }%
+  }%
+}%

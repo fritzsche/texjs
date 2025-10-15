@@ -1,0 +1,602 @@
+%%%
+% Nonogramme
+%%%
+\def\filedateNonogramme{2024/08/04}%
+\def\fileversionNonogramme{0.1}%
+\message{-- \filedateNonogramme\space v\fileversionNonogramme}%
+%
+\setKVdefault[Nono]{Largeur=10pt,Taille=5,Unite=1cm,Solution=false,Enonce=true}
+
+\newtoks\toklistenonoa%
+\newtoks\toklistenonob%
+\def\UpdatetoksNonoa#1\nil{\addtotok\toklistenonoa{#1,}}%
+\def\UpdatetoksNonob#1\nil{\addtotok\toklistenonob{#1,}}%
+
+\def\UpdatetoksNonoA#1\nil{\addtotok\toklistenonoa{"#1",}}%
+\def\UpdatetoksNonoB#1\nil{\addtotok\toklistenonob{"#1",}}%
+
+\NewDocumentCommand\Nonogrammeold{o m m}{%
+  \useKVdefault[Nono]%
+  \setKV[Nono]{#1}%
+  \setsepchar{,}%
+  \readlist*\PfCListeNonoa{#2}%
+  \readlist*\PfCListeNonob{#3}%
+  \toklistenonoa{}%
+  \foreachitem\compteur\in\PfCListeNonoa{\expandafter\UpdatetoksNonoa\compteur\nil}%
+  \toklistenonob{}%
+  \foreachitem\compteur\in\PfCListeNonob{\expandafter\UpdatetoksNonob\compteur\nil}%
+  \BuildNono{\the\toklistenonoa}{\the\toklistenonob}%
+}%
+
+\NewDocumentCommand\Nonogramme{o m}{%
+  \useKVdefault[Nono]%
+  \setKV[Nono]{#1}%
+  \setsepchar{,}%
+  \readlist*\PfCListeNonoa{#2}%
+  \toklistenonoa{}%
+  \toklistenonob{}%
+  \foreachitem\compteur\in\PfCListeNonoa{\expandafter\UpdatetoksNonoA\compteur\nil}%
+  \xintFor* ##2 in{\xintSeq{1}{\useKV[Nono]{Taille}}}\do{%
+    \xdef\PfCNonoFoo{}%
+    \xintFor* ##1 in{\xintSeq{1}{\PfCListeNonoalen}}\do{%
+      \StrChar{\PfCListeNonoa[##1]}{##2}[\PfCNonoRetiens]
+      \xdef\PfCNonoFoo{\PfCNonoFoo\PfCNonoRetiens}
+    }%
+    \expandafter\UpdatetoksNonoB\PfCNonoFoo\nil%
+  }%
+  \BuildNono{\the\toklistenonoa}{\the\toklistenonob}%
+ }%
+
+\NewDocumentCommand\BuildNono{m m}{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    Taille:=\useKV[Nono]{Taille};
+    u:=\useKV[Nono]{Unite};
+    Unite=\useKV[Nono]{Unite};
+    %
+    if u<7mm:
+    nu:=7mm;
+    else:
+    nu:=u;
+    fi;
+    %
+    boolean Solution,Enonce;
+    Solution:=\useKV[Nono]{Solution};
+    Enonce:=\useKV[Nono]{Enonce};
+    
+    color NonoFill;
+    NonoFill=white;
+    
+    numeric nbretenir[][];
+    numeric nbretenircol[][];
+    
+    vardef NombreLigne(text t)=
+    retiens:=0;
+    nblignes:=0;
+    for p_=t:
+    nblignes:=nblignes+1;
+    endfor;
+    enddef;
+
+    path Square;
+    Square=unitsquare scaled u;
+    
+    vardef Nonoa(text t)=
+    cptretiensnblignes:=1;
+    for p_=t:
+    for k=0 upto Taille-1:
+    if substring(k,k+1) of p_="o":
+    elseif substring(k,k+1) of p_="X":
+    if Solution: fill ((Square scaled 0.95) shifted(u*((k,-cptretiensnblignes)+(0.025,0.025)))) fi;
+    fi;
+    trace (Square shifted(u*(k,-cptretiensnblignes)));
+    endfor;
+    cptretiensnblignes:=cptretiensnblignes+1;
+    endfor;
+    enddef;
+
+    string Sequence[][];
+    string SequenceCol[][];
+    
+    vardef AffichageL(text t)=
+    cptnblignes:=0;
+    for p_=t:
+    pas:=0;
+    cptnblignes:=cptnblignes+1;
+    nbcoups:=0;
+    for k=0 upto Taille-1:
+    if substring(k,k+1) of p_="o":
+    pas:=pas+1;
+    nbcoups:=0;
+    elseif substring(k,k+1) of p_="X":
+    nbcoups:=nbcoups+1;
+    Sequence[cptnblignes][pas]:=decimal(nbcoups);
+    fi;
+    endfor;
+    nbpas:=0;
+    for k=pas downto 0:
+    if unknown Sequence[cptnblignes][k]:
+    else:
+    nbpas:=nbpas+1;
+    label.lft(TEX(Sequence[cptnblignes][k]),(0,0) shifted (-(nbpas-1)*0.5*nu-0.25*nu,u*(-cptnblignes+0.5)));
+    fi;
+    endfor;
+    endfor;
+    enddef;
+
+    vardef AffichageC(text t)=
+    cptnbcolonnes:=0;
+    for p_=t:
+    pas:=0;
+    cptnbcolonnes:=cptnbcolonnes+1;
+    nbcoups:=0;
+    for k=0 upto nblignes-1:
+    if substring(k,k+1) of p_="o":
+    pas:=pas+1;
+    nbcoups:=0;
+    elseif substring(k,k+1) of p_="X":
+    nbcoups:=nbcoups+1;
+    SequenceCol[cptnbcolonnes][pas]:=decimal(nbcoups);
+    fi;
+    endfor;
+    nbpas:=0;
+    for k=pas downto 0:
+    if unknown SequenceCol[cptnbcolonnes][k]:
+    else:
+    nbpas:=nbpas+1;
+    label.top(TEX(SequenceCol[cptnbcolonnes][k]),(0,0) shifted (u*(cptnbcolonnes-0.5),(nbpas-1)*0.5*nu+0.25*nu));
+    fi;
+    endfor;
+    endfor;
+    enddef;
+    
+    NombreLigne(#1);
+    Nonoa(#1);
+    if Enonce:
+    AffichageL(#1);
+    AffichageC(#2);
+    fi;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={Taille:=\useKV[Nono]{Taille};u:=\useKV[Nono]{Unite};boolean Solution,Enonce;Solution:=\useKV[Nono]{Solution};Enonce:=\useKV[Nono]{Enonce};}]
+    color NonoFill;
+    NonoFill=white;
+    
+    numeric nbretenir[][];
+    numeric nbretenircol[][];
+    
+    vardef NombreLigne(text t)=
+    retiens:=0;
+    nblignes:=0;
+    for p_=t:
+    nblignes:=nblignes+1;
+    endfor;
+    enddef;
+
+    path Square;
+    Square=unitsquare scaled u;
+    
+    vardef Nonoa(text t)=
+    cptretiensnblignes:=1;
+    for p_=t:
+    for k=0 upto Taille-1:
+    if substring(k,k+1) of p_="o":
+    elseif substring(k,k+1) of p_="X":
+    if Solution: fill ((Square scaled 0.95) shifted(u*((k,-cptretiensnblignes)+(0.025,0.025)))) fi;
+    fi;
+    trace (Square shifted(u*(k,-cptretiensnblignes)));
+    endfor;
+    cptretiensnblignes:=cptretiensnblignes+1;
+    endfor;
+    enddef;
+
+    string Sequence[][];
+    string SequenceCol[][];
+    
+    vardef AffichageL(text t)=
+    cptnblignes:=0;
+    for p_=t:
+    pas:=0;
+    cptnblignes:=cptnblignes+1;
+    nbcoups:=0;
+    for k=0 upto Taille-1:
+    if substring(k,k+1) of p_="o":
+    pas:=pas+1;
+    nbcoups:=0;
+    elseif substring(k,k+1) of p_="X":
+    nbcoups:=nbcoups+1;
+    Sequence[cptnblignes][pas]:=decimal(nbcoups);
+    fi;
+    endfor;
+    nbpas:=0;
+    for k=pas downto 0:
+    if unknown Sequence[cptnblignes][k]:
+    else:
+    nbpas:=nbpas+1;
+    label.lft(LATEX(Sequence[cptnblignes][k]),(0,0) shifted (-(nbpas-1)*5mm-2.5mm,u*(-cptnblignes+0.5)));
+    fi;
+    endfor;
+    endfor;
+    enddef;
+
+    vardef AffichageC(text t)=
+    cptnbcolonnes:=0;
+    for p_=t:
+    pas:=0;
+    cptnbcolonnes:=cptnbcolonnes+1;
+    nbcoups:=0;
+    for k=0 upto nblignes-1:
+    if substring(k,k+1) of p_="o":
+    pas:=pas+1;
+    nbcoups:=0;
+    elseif substring(k,k+1) of p_="X":
+    nbcoups:=nbcoups+1;
+    SequenceCol[cptnbcolonnes][pas]:=decimal(nbcoups);
+    fi;
+    endfor;
+    nbpas:=0;
+    for k=pas downto 0:
+    if unknown SequenceCol[cptnbcolonnes][k]:
+    else:
+    nbpas:=nbpas+1;
+    label.top(LATEX(SequenceCol[cptnbcolonnes][k]),(0,0) shifted (u*(cptnbcolonnes-0.5),(nbpas-1)*5mm+2.5mm));
+    fi;
+    endfor;
+    endfor;
+    enddef;
+    
+    NombreLigne(#1);
+    Nonoa(#1);
+    if Enonce:
+    AffichageL(#1);
+    AffichageC(#2);
+    fi;
+  \end{mpost}
+  \fi
+}
+ 
+\NewDocumentCommand\BuildNonoold{m m}{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    Taille:=\useKV[Nono]{Taille};
+    u:=\useKV[Nono]{Unite};
+    boolean Solution,Enonce;
+    Solution:=\useKV[Nono]{Solution};
+    Enonce:=\useKV[Nono]{Enonce};
+
+    color NonoFill;
+    NonoFill=white;
+
+    numeric nbretenir[][];
+    numeric nbretenircol[][];
+    
+    vardef NombreLigne(text t)=
+    retiens:=0;
+    nblignes:=0;
+    for p_=t:
+    retiens:=retiens+p_;
+    if retiens=Taille:
+    nblignes:=nblignes+1;
+    retiens:=0;
+    fi;
+    endfor;
+    enddef;
+
+    path Square;
+    Square=unitsquare scaled u;
+    
+    vardef Nonoa(text t)=
+    nbcoups:=0;
+    nbcases:=0;
+    nbcaseslignes:=0;
+    cptretiensnb:=0;
+    cptretiensnblignes:=1;
+    for p_=t:
+    if p_=0:
+    cptretiensnb:=cptretiensnb+1;
+    nbretenir[cptretiensnblignes][cptretiensnb]=p_;
+    NonoFill:=black;
+    else:
+    nbcoups:=nbcoups+1;
+    for l=0 upto p_-1:
+        if Solution: fill ((Square scaled 0.95) shifted(u*((nbcases mod Taille)+l,-(nbcases div Taille))+u*(0.025,0.025))) withcolor NonoFill; fi;
+    trace (Square shifted(u*((nbcases mod Taille)+l,-(nbcases div Taille))));
+    endfor;
+    nbcaseslignes:=nbcaseslignes+p_;
+    nbcases:=nbcases+p_;
+    if (nbcaseslignes mod Taille)=0:
+    NonoFill:=white;
+    cptretiensnb:=cptretiensnb+1;
+    nbretenir[cptretiensnblignes][cptretiensnb]=p_;
+    cptretiensnblignes:=cptretiensnblignes+1;
+    cptretiensnb:=0;
+    else:
+    if NonoFill=white: NonoFill:=black else: NonoFill:=white fi;
+    cptretiensnb:=cptretiensnb+1;
+    nbretenir[cptretiensnblignes][cptretiensnb]=p_;
+    fi;
+    fi;
+    endfor;
+    enddef;
+
+    string SequenceColo;
+    
+    vardef Nonob(text t)=
+    nbcoups:=0;
+    nbcases:=0;
+    nbcasescolonnes:=0;
+    cptretiensnb:=0;
+    cptretiensnbcolonnes:=1;
+    SequenceColo="";
+    for p_=t:
+    if p_=0:
+    cptretiensnb:=cptretiensnb+1;
+    nbretenircol[cptretiensnbcolonnes][cptretiensnb]=p_;
+    NonoFill:=black;
+    else:
+    nbcoups:=nbcoups+1;
+    nbcasescolonnes:=nbcasescolonnes+p_;
+    nbcases:=nbcases+p_;
+    if (nbcasescolonnes mod nblignes)=0:
+    NonoFill:=white;
+    cptretiensnb:=cptretiensnb+1;
+    nbretenircol[cptretiensnbcolonnes][cptretiensnb]=p_;
+    cptretiensnbcolonnes:=cptretiensnbcolonnes+1;
+    cptretiensnb:=0;
+    else:
+    if NonoFill=white: NonoFill:=black else: NonoFill:=white fi;
+    cptretiensnb:=cptretiensnb+1;
+    nbretenircol[cptretiensnbcolonnes][cptretiensnb]=p_;
+    fi;
+    fi;
+    endfor;
+    enddef;
+    
+    string Sequence[][];
+    string SequenceCol[][];
+    
+    boolean STOP;
+    STOP:=false;
+    
+    vardef Affichage=
+    for k=1 upto nblignes:
+    Sequence[k][1]=if nbretenir[k][1]=0:decimal(nbretenir[k][2]) else:"" fi;
+    if nbretenir[k][1]=0:
+    n:=2;
+    p:=1;
+    else:
+    n:=1;
+    p:=0;
+    fi;
+    forever:
+    n:=n+1;
+    if unknown nbretenir[k][n]:
+    STOP:=true;
+    else:
+    if nbretenir[k][n]>0:
+    if (n mod 2)=0:
+    p:=p+1;
+    Sequence[k][p]:=decimal(nbretenir[k][n]);
+    fi;
+    fi;
+    fi;
+    exitif STOP;
+    endfor;
+    for r=p downto 1:
+    label.lft(TEX(Sequence[k][r]),(0,0) shifted (-(r-1)*5mm,u*(-k+1+0.5)));
+    endfor;
+    STOP:=false;
+    endfor;
+    enddef;
+
+    vardef Affichagecol=
+    STOP:=false;
+    for k=1 upto Taille:
+    SequenceCol[k][1]=if nbretenircol[k][1]=0:decimal(nbretenircol[k][2]) else:"" fi;
+    if nbretenircol[k][1]=0:
+    n:=2;
+    p:=1;
+    else:
+    n:=1;
+    p:=0;
+    fi;
+    forever:
+    n:=n+1;
+    if unknown nbretenircol[k][n]:
+    STOP:=true;
+    else:
+    if nbretenircol[k][n]>0:
+    if (n mod 2)=0:
+    p:=p+1;
+    SequenceCol[k][p]:=decimal(nbretenircol[k][n]);
+    fi;
+    fi;
+    fi;
+    exitif STOP;
+    endfor;
+    for r=p downto 1:
+    label.top(TEX(SequenceCol[k][r]),(0,0) shifted (k*u-0.5u,1u+(p-r)*5mm));
+    endfor;
+    STOP:=false;
+    endfor;
+    enddef;
+    
+    NombreLigne(#1);
+    Nonoa(#1);
+    Nonob(#2);
+    if Enonce:
+    Affichage;
+    Affichagecol;
+    fi;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={Taille:=\useKV[Nono]{Taille};u:=\useKV[Nono]{Unite};boolean Solution,Enonce;Solution:=\useKV[Nono]{Solution};Enonce:=\useKV[Nono]{Enonce};}]
+    color NonoFill;
+    NonoFill=white;
+
+    numeric nbretenir[][];
+    numeric nbretenircol[][];
+    
+    vardef NombreLigne(text t)=
+    retiens:=0;
+    nblignes:=0;
+    for p_=t:
+    retiens:=retiens+p_;
+    if retiens=Taille:
+    nblignes:=nblignes+1;
+    retiens:=0;
+    fi;
+    endfor;
+    enddef;
+
+    path Square;
+    Square=unitsquare scaled u;
+    
+    vardef Nonoa(text t)=
+    nbcoups:=0;
+    nbcases:=0;
+    nbcaseslignes:=0;
+    cptretiensnb:=0;
+    cptretiensnblignes:=1;
+    for p_=t:
+    if p_=0:
+    cptretiensnb:=cptretiensnb+1;
+    nbretenir[cptretiensnblignes][cptretiensnb]=p_;
+    NonoFill:=black;
+    else:
+    nbcoups:=nbcoups+1;
+    for l=0 upto p_-1:
+        if Solution: fill ((Square scaled 0.95) shifted(u*((nbcases mod Taille)+l,-(nbcases div Taille))+u*(0.025,0.025))) withcolor NonoFill; fi;
+    trace (Square shifted(u*((nbcases mod Taille)+l,-(nbcases div Taille))));
+    endfor;
+    nbcaseslignes:=nbcaseslignes+p_;
+    nbcases:=nbcases+p_;
+    if (nbcaseslignes mod Taille)=0:
+    NonoFill:=white;
+    cptretiensnb:=cptretiensnb+1;
+    nbretenir[cptretiensnblignes][cptretiensnb]=p_;
+    cptretiensnblignes:=cptretiensnblignes+1;
+    cptretiensnb:=0;
+    else:
+    if NonoFill=white: NonoFill:=black else: NonoFill:=white fi;
+    cptretiensnb:=cptretiensnb+1;
+    nbretenir[cptretiensnblignes][cptretiensnb]=p_;
+    fi;
+    fi;
+    endfor;
+    enddef;
+
+    string SequenceColo;
+    
+    vardef Nonob(text t)=
+    nbcoups:=0;
+    nbcases:=0;
+    nbcasescolonnes:=0;
+    cptretiensnb:=0;
+    cptretiensnbcolonnes:=1;
+    SequenceColo="";
+    for p_=t:
+    if p_=0:
+    cptretiensnb:=cptretiensnb+1;
+    nbretenircol[cptretiensnbcolonnes][cptretiensnb]=p_;
+    NonoFill:=black;
+    else:
+    nbcoups:=nbcoups+1;
+    nbcasescolonnes:=nbcasescolonnes+p_;
+    nbcases:=nbcases+p_;
+    if (nbcasescolonnes mod nblignes)=0:
+    NonoFill:=white;
+    cptretiensnb:=cptretiensnb+1;
+    nbretenircol[cptretiensnbcolonnes][cptretiensnb]=p_;
+    cptretiensnbcolonnes:=cptretiensnbcolonnes+1;
+    cptretiensnb:=0;
+    else:
+    if NonoFill=white: NonoFill:=black else: NonoFill:=white fi;
+    cptretiensnb:=cptretiensnb+1;
+    nbretenircol[cptretiensnbcolonnes][cptretiensnb]=p_;
+    fi;
+    fi;
+    endfor;
+    enddef;
+    
+    string Sequence[][];
+    string SequenceCol[][];
+    
+    boolean STOP;
+    STOP:=false;
+    
+    vardef Affichage=
+    for k=1 upto nblignes:
+    Sequence[k][1]=if nbretenir[k][1]=0:decimal(nbretenir[k][2]) else:"" fi;
+    if nbretenir[k][1]=0:
+    n:=2;
+    p:=1;
+    else:
+    n:=1;
+    p:=0;
+    fi;
+    forever:
+    n:=n+1;
+    if unknown nbretenir[k][n]:
+    STOP:=true;
+    else:
+    if nbretenir[k][n]>0:
+    if (n mod 2)=0:
+    p:=p+1;
+    Sequence[k][p]:=decimal(nbretenir[k][n]);
+    fi;
+    fi;
+    fi;
+    exitif STOP;
+    endfor;
+    for r=p downto 1:
+    label.lft(LATEX(Sequence[k][r]),(0,0) shifted (-(r-1)*5mm,u*(-k+1+0.5)));
+    endfor;
+    STOP:=false;
+    endfor;
+    enddef;
+
+    vardef Affichagecol=
+    STOP:=false;
+    for k=1 upto Taille:
+    SequenceCol[k][1]=if nbretenircol[k][1]=0:decimal(nbretenircol[k][2]) else:"" fi;
+    if nbretenircol[k][1]=0:
+    n:=2;
+    p:=1;
+    else:
+    n:=1;
+    p:=0;
+    fi;
+    forever:
+    n:=n+1;
+    if unknown nbretenircol[k][n]:
+    STOP:=true;
+    else:
+    if nbretenircol[k][n]>0:
+    if (n mod 2)=0:
+    p:=p+1;
+    SequenceCol[k][p]:=decimal(nbretenircol[k][n]);
+    fi;
+    fi;
+    fi;
+    exitif STOP;
+    endfor;
+    for r=p downto 1:
+    label.top(LATEX(SequenceCol[k][r]),(0,0) shifted (k*u-0.5u,1u+(p-r)*5mm));
+    endfor;
+    STOP:=false;
+    endfor;
+    enddef;
+    
+    NombreLigne(#1);
+    Nonoa(#1);
+    Nonob(#2);
+    if Enonce:
+    Affichage;
+    Affichagecol;
+    fi;    
+  \end{mpost}
+  \fi
+}

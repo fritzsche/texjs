@@ -1,0 +1,109 @@
+%%%
+% Enquête
+%%%
+\def\filedateEnquete{2024/08/04}%
+\def\fileversionEnquete{0.1}%
+\message{-- \filedateEnquete\space v\fileversionEnquete}%
+%
+\setKVdefault[ClesEnquete]{Perso=Qui ?,Objet=Quoi ?,Lieu=Où ?,Largeur=4.5cm}
+
+\newcommand\Enquete[1][]{%
+  \useKVdefault[ClesEnquete]%
+  \setKV[ClesEnquete]{#1}%
+}
+
+\newcommand\ListePersonnages[1]{%
+  \setsepchar{§}%
+  \readlist*\RetiensListePersonnages{#1}%
+  \setsepchar{,}%
+}
+
+\newcommand\ListeObjets[1]{%
+  \setsepchar{§}%
+  \readlist*\RetiensListeObjets{#1}%
+  \setsepchar{,}%
+}
+
+\newcommand\ListeLieux[1]{%
+  \setsepchar{§}%
+  \readlist*\RetiensListeLieux{#1}%
+  \setsepchar{,}%
+}
+
+\newcommand\ListeQuestions[1]{%
+  \setsepchar[*]{§*/}%
+  \readlist*\RetiensListeQuestions{#1}
+  % On crée la liste des numéros des questions
+  \xdef\foo{}%
+  \xintFor* ##1 in {\xintSeq{1}{\RetiensListeQuestionslen}}\do{%
+    \xdef\foo{\foo ##1,}%
+  }%
+  % Mélange des questions
+  % on crée les 6 premieres solutions.
+  \MelangeListe{\foo}{\fpeval{\RetiensListePersonnageslen}}%
+  \readlist*\ListeMelangeePersonnages{\faa}%
+  \readlist*\ListeRestante{\fii}%\ListeRestante[]
+  \MelangeListe{\faa}{\fpeval{\RetiensListePersonnageslen-1}}%
+  \readlist*\ListefuuPerso{\faa}%
+  % on crée les 6 solutions suivantes.
+  \xdef\fuuu{}%
+  \foreachitem\compteur\in\ListeRestante{\xdef\fuuu{\fuuu,\ListeRestante[\compteurcnt]}}%
+  \MelangeListe{\fuuu}{\fpeval{\RetiensListeObjetslen}}%
+  \readlist*\ListeMelangeeObjets{\faa}%
+  \readlist*\ListeRestante{\fii}%
+  \MelangeListe{\faa}{\fpeval{\RetiensListeObjetslen-1}}%
+  \readlist*\ListefuuObjets{\faa}%
+  % on crée les dernieres solutions.
+  \xdef\fuuu{}%
+  \foreachitem\compteur\in\ListeRestante{\xdef\fuuu{\fuuu,\ListeRestante[\compteurcnt]}}%
+  \MelangeListe{\fuuu}{\fpeval{\RetiensListeLieuxlen}}
+  \readlist*\ListeMelangeeLieux{\faa}%
+  %% \readlist*\ListeRestante{\fii}%
+  \MelangeListe{\faa}{\fpeval{\RetiensListeLieuxlen-1}}%
+  \readlist*\ListefuuLieux{\faa}%
+  % --------------
+  % Liste des questions sauvegardees
+  \xdef\fuu{}%
+  \foreachitem\compteur\in\ListefuuPerso{\xdef\fuu{\fuu,\ListefuuPerso[\compteurcnt]}}%
+  \foreachitem\compteur\in\ListefuuObjets{\xdef\fuu{\fuu,\ListefuuObjets[\compteurcnt]}}%
+  \foreachitem\compteur\in\ListefuuLieux{\xdef\fuu{\fuu,\ListefuuLieux[\compteurcnt]}}%
+  \ignoreemptyitems\setsepchar{,}%
+  \MelangeListe{\fuu}{\fpeval{\RetiensListePersonnageslen+\RetiensListeObjetslen+\RetiensListeLieuxlen-3}}%
+  \readlist*\ListeMelangeeQuestions{\faa}%
+  \reademptyitems%
+}%
+
+\newcommand\AffichageQuestions{%
+  \begin{enumerate}
+    \xintFor* ##1 in {\xintSeq{1}{\fpeval{\RetiensListePersonnageslen+\RetiensListeObjetslen+\RetiensListeLieuxlen-3}}}\do{%
+    \item\xdef\Compteur{\ListeMelangeeQuestions[##1]}\RetiensListeQuestions[\Compteur,1]
+    }
+  \end{enumerate}
+}
+
+\newcommand\AffichageTableau{%
+  \begin{tabular}{|>{\PfCTBstrut$\square$~}m{\useKV[ClesEnquete]{Largeur}}|}
+    \hline
+    \rowcolor{gray!15}\multicolumn{1}{|c|}{\PfCTBstrut\useKV[ClesEnquete]{Perso}}\\
+    \hline
+    \xintFor* ##1 in {\xintSeq{1}{\RetiensListePersonnageslen}}\do{%
+    \RetiensListePersonnages[##1]\xdef\PfCCompteurMelange{\ListeMelangeePersonnages[##1]} $\star$ \RetiensListeQuestions[\PfCCompteurMelange,2]\\
+    }
+    % 
+    \hline
+    \rowcolor{gray!15}\multicolumn{1}{|c|}{\PfCTBstrut\useKV[ClesEnquete]{Objet}}\\
+    \hline
+    \xintFor* ##1 in {\xintSeq{1}{\RetiensListeObjetslen}}\do{%
+    \RetiensListeObjets[##1]\xdef\PfCCompteurMelange{\ListeMelangeeObjets[##1]} $\star$ \RetiensListeQuestions[\PfCCompteurMelange,2]\\
+    }
+    % 
+    \hline
+    \rowcolor{gray!15}\multicolumn{1}{|c|}{\PfCTBstrut\useKV[ClesEnquete]{Lieu}}\\
+    \hline
+    \xintFor* ##1 in {\xintSeq{1}{\RetiensListeLieuxlen}}\do{%
+    \RetiensListeLieux[##1]\xdef\PfCCompteurMelange{\ListeMelangeeLieux[##1]} $\star$ \RetiensListeQuestions[\PfCCompteurMelange,2]
+    \\
+    }
+    \hline
+  \end{tabular}
+}%

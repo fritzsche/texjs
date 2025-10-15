@@ -1,0 +1,282 @@
+% \iffalse meta-comment
+%
+% Copyright 2023 Sigitas Tolušis, and any
+% individual authors listed elsewhere in this file.  All rights
+% reserved.
+% 
+% This file is part of the Babel system.
+% --------------------------------------
+% 
+% It may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2003/12/01 or later.
+%
+% This work has the LPPL maintenance status "maintained".
+%
+% The Current Maintainer of this work is Sigitas Tolušis.
+%
+% The list of derived (unpacked) files belonging to the distribution
+% and covered by LPPL is defined by the unpacking scripts (with
+% extension .ins) which are part of the distribution.
+% \fi
+% \iffalse
+%    Tell the \LaTeX\ system who we are and write an entry on the
+%    transcript.
+%<*dtx>
+\ProvidesFile{babel-lithuanian.dtx}
+%</dtx>
+%<code>
+%<code>\ProvidesLanguage{lithuanian}
+%<code>        [2023/03/07 v1.0 Lithuanian support from the babel system]
+% \fi
+% \iffalse
+%<*filedriver>
+\documentclass{ltxdoc}
+\usepackage[utf8]{inputenc}
+\usepackage[L7x,T1]{fontenc}
+\title{The Lithuanian style for babel, v1.0}
+\author{Sigitas Tolušis} 
+\newcommand*\babel{\textsf{babel}}
+\begin{document}
+ \maketitle
+ \DocInput{babel-lithuanian.dtx}
+\end{document}
+%</filedriver>
+%\fi
+%
+% \section{The Lithuanian Language}
+%
+% The file \textsf{lithuanian.ldf} defines the language definition 
+% macros for the Lithuanian language.
+%
+% Since the |T1| encoding doesn't contain all the characters required
+% for Lithuanian, you should use |L7x| instead for 8-bit fonts.
+% In this case best choice is to use \textsf{tex-gyre} fonts collection.
+% As alternative you can use Open Type fonts with \textsf{luatex} or
+% \textsf{xetex}.
+% 
+% A complete example is:
+%\begin{verbatim}
+%\documentclass{article}
+% %
+% %% 8-bit fonts
+%\usepackage[utf8x]{inputenc}
+% %%\usepackage[utf8x]{luainputenc} %% in case using lualatex with 8-bit fonts
+%\usepackage[L7x]{fontenc}
+%\usepackage{tgtermes} %% or tgpagella, tgbonum, tgschola, etc.
+% %
+% %% Open Type fonts
+% %\usepackage{fontspec}
+% %\setmainfont{texgyrebonum-regular.otf}
+% %%
+%\usepackage[lithuanian]{babel}
+%\usepackage[pdftex,unicode]{hyperref}
+%
+%\begin{document}
+%
+%\section*{Abėcėlė}
+%Lietuvių kalbos abėcėlę sudaro 32 raidės:
+%\par\medskip
+% Aa Ąą Bb Cc Čč Dd Ee Ęę Ėė Ff Gg Hh Ii Įį Yy Jj
+% Kk Ll Mm Nn Oo Pp Rr Ss Šš Tt Uu Ųų Ūū Vv Zz Žž
+%
+%\subsection*{Didžiosios raidės}
+%\MakeUppercase{Aa Ąą Bb Cc Čč Dd Ee Ęę Ėė Ff Gg Hh Ii Įį Yy Jj
+% Kk Ll Mm Nn Oo Pp Rr Ss Šš Tt Uu Ųų Ūū Vv Zz Žž}
+%
+%\subsection*{Mažosios raidės}
+%\MakeLowercase{Aa Ąą Bb Cc Čč Dd Ee Ęę Ėė Ff Gg Hh Ii Įį Yy Jj
+% Kk Ll Mm Nn Oo Pp Rr Ss Šš Tt Uu Ųų Ūū Vv Zz Žž}
+%
+%\end{document}
+%\end{verbatim}
+%
+% \StopEventually{}
+%
+%  \subsection*{The code}
+%
+%    \begin{macrocode}
+%<*code>
+\LdfInit{lithuanian}\captionslithuanian
+\ifx\undefined\l@lithuanian
+  \@nopatterns{Lithuanian}
+  \adddialect\l@lithuanian0
+\fi
+%    \end{macrocode}
+%
+%  \subsubsection*{Hyphenmins}
+%
+%    \begin{macrocode}
+
+\providehyphenmins{lithuanian}{\tw@\tw@}
+%    \end{macrocode}
+%
+%  \subsubsection*{Captions and date}
+%
+%    \begin{macrocode}
+
+\StartBabelCommands*{lithuanian}{captions}
+    [unicode, charset=utf8, fontenc=TU EU1 EU2]
+
+  \SetString\prefacename{Pratarmė}
+  \SetString\refname{Literatūra}
+  \SetString\abstractname{Santrauka}
+  \SetString\bibname{Literatūra}
+  \SetString\chaptername{skyrius}
+  \SetString\appendixname{Priedas}
+  \SetString\contentsname{Turinys}
+  \SetString\listfigurename{Iliustracijų sąrašas}
+  \SetString\listtablename{Lentelių sąrašas}
+  \SetString\indexname{Rodyklė}
+  \SetString\figurename{pav.}
+  \SetString\tablename{lentelė}
+  \SetString\partname{Dalis}
+  \SetString\enclname{Įdėta}
+  \SetString\ccname{Kopijos}
+  \SetString\headtoname{Kam}
+  \SetString\pagename{puslapis}
+  \SetString\seename{žiūrėk}%% žr.
+  \SetString\alsoname{taip pat}%% ten pat, tas pat
+  \SetString\proofname{Įrodymas}
+  \SetString\glossaryname{Terminų žodynas}
+
+\StartBabelCommands*{lithuanian}{captions}
+
+  \SetString\prefacename{Pratarm\.e}
+  \SetString\refname{Literat\=ura}
+  \SetString\abstractname{Santrauka}
+  \SetString\bibname{Literat\=ura}
+  \SetString\chaptername{skyrius}
+  \SetString\appendixname{Priedas}
+  \SetString\contentsname{Turinys}
+  \SetString\listfigurename{Iliustracij\k{u} s\k{a}ra\v{s}as}
+  \SetString\listtablename{Lenteli\k{u} s\k{a}ra\v{s}as}
+  \SetString\indexname{Rodykl\.e}
+  \SetString\figurename{pav.}
+  \SetString\tablename{lentel\.e}
+  \SetString\partname{Dalis}
+  \SetString\enclname{\k{I}d\.eta}
+  \SetString\ccname{Kopijos}
+  \SetString\headtoname{Kam}
+  \SetString\pagename{puslapis}
+  \SetString\seename{\v{z}i\=ur\.ek}%% \v{z}.r.
+  \SetString\alsoname{taip pat}%% ten pat, tas pat
+  \SetString\proofname{\k{I}rodymas}
+  \SetString\glossaryname{Termin\k{u} \v{z}odynas}%
+
+\StartBabelCommands*{lithuanian}{date}
+    [unicode, charset=utf8, fontenc=TU EU1 EU2]
+
+  \SetStringLoop{month#1lithuanian}{%
+    sausio,vasario,kovo,balandžio,gegužės,birželio,%
+    liepos,rugpjūčio,rugsėjo,spalio,lapkričio,gruodžio%
+    }
+
+\StartBabelCommands*{lithuanian}{date}
+
+  \SetStringLoop{month#1lithuanian}{%
+    sausio,vasario,kovo,baland\v{z}io,gegu\v{z}\.es,bir\v{z}elio,%
+    liepos,rugpj\=u\v{c}io,rugs\.ejo,spalio,lapkri\v{c}io,gruod\v{z}io%
+    }
+
+\SetString\today{%
+  \number\year~m.%
+  ~\csname month\romannumeral\month lithuanian\endcsname
+  ~\number\day~d.%
+  }
+%    \end{macrocode}
+%
+%  \subsubsection*{Extra chars cases}
+%
+%    \begin{macrocode}
+
+\StartBabelCommands{lithuanian}{}[l7xenc, fontenc=L7x]
+
+  \SetCase{%
+     \uccode"E0="C0\relax % ąĄ 
+     \uccode"E8="C8\relax % čČ
+     \uccode"E6="C6\relax % ęĘ
+     \uccode"EB="CB\relax % ėĖ
+     \uccode"E1="C1\relax % įĮ
+     \uccode"F0="D0\relax % šŠ
+     \uccode"F8="D8\relax % ųŲ
+     \uccode"FB="DB\relax % ūŪ
+     \uccode"FE="DE\relax % žŽ
+    }{%
+     \lccode"C0="E0\relax % Ąą 
+     \lccode"C8="E8\relax % Čč
+     \lccode"C6="E6\relax % Ęę
+     \lccode"CB="EB\relax % Ėė
+     \lccode"C1="E1\relax % Įį
+     \lccode"D0="F0\relax % Šš
+     \lccode"D8="F8\relax % Ųų
+     \lccode"DB="FB\relax % Ūū
+     \lccode"DE="FE\relax % Žž
+    }
+
+\StartBabelCommands{lithuanian}{}[unicode, fontenc=TU EU1 EU2, charset=utf8]
+
+  \SetCase{%
+     \uccode`ą=`Ą\relax
+     \uccode`č=`Č\relax
+     \uccode`ę=`Ę\relax
+     \uccode`ė=`Ė\relax
+     \uccode`į=`Į\relax
+     \uccode`š=`Š\relax
+     \uccode`ų=`Ų\relax
+     \uccode`ū=`Ū\relax
+     \uccode`ž=`Ž\relax
+    }{%
+     \lccode`Ą=`ą\relax
+     \lccode`Č=`č\relax
+     \lccode`Ę=`ę\relax
+     \lccode`Ė=`ė\relax
+     \lccode`Į=`į\relax
+     \lccode`Š=`š\relax
+     \lccode`Ų=`ų\relax
+     \lccode`Ū=`ū\relax
+     \lccode`Ž=`ž\relax
+    }
+
+\EndBabelCommands
+%    \end{macrocode}
+%
+%  \subsubsection*{Extras macros}
+%
+%    \begin{macrocode}
+
+\addto\extraslithuanian{%
+  \babel@save\fnum@figure
+  \def\fnum@figure{\thefigure\nobreakspace\figurename}%
+  \babel@save\fnum@table
+  \def\fnum@table{\thetable\nobreakspace\tablename}%
+  }
+\addto\noextraslithuanian{}
+
+\ldf@finish{lithuanian}
+
+%</code>
+%    \end{macrocode}
+%
+% \Finale
+% \endinput
+%% \CharacterTable
+%%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%%   Digits        \0\1\2\3\4\5\6\7\8\9
+%%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%%   Dollar        \$     Percent       \%     Ampersand     \&
+%%   Acute accent  \'     Left paren    \(     Right paren   \)
+%%   Asterisk      \*     Plus          \+     Comma         \,
+%%   Minus         \-     Point         \.     Solidus       \/
+%%   Colon         \:     Semicolon     \;     Less than     \<
+%%   Equals        \=     Greater than  \>     Question mark \?
+%%   Commercial at \@     Left bracket  \[     Backslash     \\
+%%   Right bracket \]     Circumflex    \^     Underscore    \_
+%%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%%   Right brace   \}     Tilde         \~}
+%% 

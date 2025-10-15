@@ -1,0 +1,999 @@
+%%%
+% Nombre Premier
+%%%
+\def\filedateDecompNbPremier{2025/05/28}%
+\def\fileversionDecompNbPremier{0.1c}%
+\message{-- \filedateDecompNbPremier\space v\fileversionDecompNbPremier}%
+%
+\setKVdefault[ClesNombrePremier]{Tableau=false,TableauVide=false,TableauVertical=false,TableauVerticalVide=false,Exposant=false,Longue=false,All=false,Arbre=false,ArbreVide=false,ArbreComplet=false,ArbreDessine=false,ArbreDessineVide=false,Entoure=false,Entourefin=false,Diviseurs=false,DiviseursT=false,Dot=\dotfill,Impose=false,ImposeAll=false,Potence=false,Decalage=10,Vide=false,CouleurFeuillage=ForestGreen,CouleurTronc=BurlyWood,CouleurFruits=Red,CouleurTexte=white,Poisson=false,Echelle=1cm,AngleArete=45,CouleurPoisson=white,Visible=false,Solution=false,Impression=false,ElementsVisibles={},CouleurSolution={},Nombre={}}%
+\defKV[ClesNombrePremier]{%
+  Nombre=\ifempty{#1}{}{\setKV[ClesNombrePremier]{Impose}},%\ifboolKV[ClesNombrePremier]{ArbreDessine}{}{\ifboolKV[ClesNombrePremier]{ArbreDessineVide}{}{\setKV[ClesNombrePremier]{Impose}}},%
+%  AllNombre=\setKV[ClesNombrePremier]{ImposeAll},%
+  ElementsVisibles=\ifempty{#1}{}{\setKV[ClesNombrePremier]{Visible}\setKV[ClesNombrePremier]{Vide}},%
+  CouleurSolution=\ifempty{#1}{}{\setKV[ClesNombrePremier]{Solution}}
+}% 
+
+\newtoks\tokNPElementsVisibles%
+\def\UpdatetoksElementAfficher#1\nil{\addtotok\tokNPElementsVisibles{#1,}}%
+
+\NewDocumentCommand\Decomposition{om}{%
+  \useKVdefault[ClesNombrePremier]%
+  \setKV[ClesNombrePremier]{#1}%
+  \ifboolKV[ClesNombrePremier]{Impression}{\setKV[ClesNombrePremier]{CouleurFeuillage=white,CouleurTronc=white,CouleurFruits=gris,CouleurTexte=black}}{}%
+  \ifboolKV[ClesNombrePremier]{Impose}{\xdef\PfCRetiensA{\useKV[ClesNombrePremier]{Nombre}}\NombrePremierImpose{#2}{\PfCRetiensA}{\fpeval{#2/\PfCRetiensA}}}{}%
+  \ifboolKV[ClesNombrePremier]{ImposeAll}{\NombrePremierImpose{#2}{\useKV[ClesNombrePremier]{AllNombre}}{\fpeval{#2/\useKV[ClesNombrePremier]{AllNombre}}}}{}%
+  \ifboolKV[ClesNombrePremier]{Tableau}{\NombrePremier{#2}}{}%
+  \ifboolKV[ClesNombrePremier]{TableauVide}{\NombrePremier{#2}}{}%
+  \ifboolKV[ClesNombrePremier]{Potence}{\NombrePremierPotence{#2}}{}%
+  \ifboolKV[ClesNombrePremier]{TableauVertical}{\NombrePremierVertical{#2}}{}%
+  \ifboolKV[ClesNombrePremier]{TableauVerticalVide}{\NombrePremierVerticalVide{#2}}{}%
+  \ifboolKV[ClesNombrePremier]{Exposant}{\PremierExposant{#2}}{}%
+  \ifboolKV[ClesNombrePremier]{Longue}{\PremierLong{#2}}{}%
+  \ifboolKV[ClesNombrePremier]{All}{\NombrePremierExposant{#2}}{}%
+  \ifboolKV[ClesNombrePremier]{Arbre}{\MPArbre{#2}}{}%
+  \ifboolKV[ClesNombrePremier]{ArbreComplet}{\MPArbreComplet{#2}}{}%
+  \ifboolKV[ClesNombrePremier]{ArbreVide}{\MPArbreVide{#2}}{}%
+  \ifboolKV[ClesNombrePremier]{ArbreDessine}{\MPArbreDessine{#2}{\useKV[ClesNombrePremier]{Nombre}}}{}%
+  \ifboolKV[ClesNombrePremier]{ArbreDessineVide}{\setKV[ClesNombrePremier]{Vide=true}\MPArbreDessine{#2}{\useKV[ClesNombrePremier]{Nombre}}}{}%
+  \ifboolKV[ClesNombrePremier]{Diviseurs}{\ListeDiviseur{#2}}{}%
+  \ifboolKV[ClesNombrePremier]{DiviseursT}{\ListeDiviseurT{#2}}{}%
+  \ifboolKV[ClesNombrePremier]{Poisson}{%
+    \tokNPElementsVisibles{}%
+    \PfCTousLesDiviseurs{#2}%
+    \ifboolKV[ClesNombrePremier]{Visible}{%
+      \xdef\foo{\useKV[ClesNombrePremier]{ElementsVisibles}}%
+      \readlist*\ListeElementsAAfficher{\foo}%
+    }{%
+      \xdef\foo{-1}\readlist*\ListeElementsAAfficher{\foo}%
+    }%
+    \foreachitem\compteur\in\ListeElementsAAfficher{\expandafter\UpdatetoksElementAfficher\compteur\nil}%
+    \MPFish{\PfCPileDiviseurs}{#2}{\the\tokNPElementsVisibles}%
+  }{}%
+}%
+
+\newcommand\PfCTousLesDiviseurs[1]{%
+  %#1 : le nombre entier \`a tester
+  \xdef\anpl{#1}%\relax%
+  \xdef\bnpl{2}%\relax%
+  \xdef\pilebl{2}%\relax%
+  \xdef\PfCPileDiviseurs{1}%
+  \loop%
+  \ifnum\fpeval{\bnpl}<\fpeval{\anpl}\relax%
+    \modulo{\fpeval{\anpl}}{\fpeval{\bnpl}}%
+    \ifnum\remainder=0\relax%
+      \xdef\PfCPileDiviseurs{\PfCPileDiviseurs,\fpeval{\bnpl}}%
+    \fi%
+    \xdef\bnpl{\fpeval{\bnpl+1}}%
+    \repeat%
+    \xdef\PfCPileDiviseurs{\PfCPileDiviseurs,#1}%
+}%%
+
+\def\MPFish#1#2#3{
+  \ifluatex%
+    \mplibforcehmode%
+    \mplibnumbersystem{double}%
+    \begin{mplibcode}
+      Echelle=\useKV[ClesNombrePremier]{Echelle};
+      AngleArete=\useKV[ClesNombrePremier]{AngleArete};
+
+      boolean Vide,Visible,Solution;
+      Vide=\useKV[ClesNombrePremier]{Vide};
+      Visible=\useKV[ClesNombrePremier]{Visible};
+      Solution=\useKV[ClesNombrePremier]{Solution};
+      color CoulTete,CoulSol;
+      CoulTete=\useKV[ClesNombrePremier]{CouleurPoisson};
+      if Solution:
+      CoulSol=\useKV[ClesNombrePremier]{CouleurSolution};
+      fi;
+      
+      numeric Diviseurs[];
+      vardef LectureDiviseurs(text t)=
+      n:=0;
+      for p_=t:
+        n:=n+1;
+        Diviseurs[n]=p_;
+      endfor;
+      enddef;
+
+      LectureDiviseurs(#1);
+      TotalDiviseurs:=n;
+
+      boolean RETOUR;
+      RETOUR=false;
+      
+      vardef TestVisible(expr nrt)=
+        RETOUR:=false;
+        for p_=#3:
+          if p_=nrt:
+            RETOUR:=true;
+          fi;
+        endfor;
+      enddef;   
+      
+      
+      pair Ah[],Ab[],O[],Ac;
+      O0=(0,0);
+      O[-1]=O0+Echelle*(0,1);
+      O[-2]=O0+Echelle*(0,-1);
+      fill (arccercle(O[-1],O[-2],O0)--cycle) withcolor CoulTete;
+      trace arccercle(O[-1],O[-2],O0)--cycle;
+      label.lft(TEX("\num{"&decimal(#2)&"}"),O0);
+      % 
+      for k=1 upto (TotalDiviseurs div 2):
+      if k=1:Echelle:=Echelle/2;fi;
+      O[k]-O[k-1]=Echelle*(1,0);
+      if k=1:Echelle:=Echelle*2;fi;
+      Ah[k]-O[k]=Echelle*(cosd(AngleArete),sind(AngleArete));
+      Ab[k]-O[k]=Echelle*(cosd(AngleArete),-sind(AngleArete));
+      draw O[k-1]--O[k];
+      draw Ah[k]--O[k]--Ab[k];
+      if Vide=false:
+        label.top(TEX("\num{"&decimal(Diviseurs[k])&"}"),Ah[k]);
+        label.bot(TEX("\num{"&decimal(Diviseurs[TotalDiviseurs+1-k])&"}"),Ab[k]);
+      else:
+       if Visible:
+          TestVisible(Diviseurs[k]);
+          if RETOUR:
+            label.top(TEX("\num{"&decimal(Diviseurs[k])&"}"),Ah[k]);
+          else:
+            if Solution:
+              drawoptions(withcolor CoulSol);
+              label.top(TEX("\num{"&decimal(Diviseurs[k])&"}"),Ah[k]);
+              drawoptions();
+            fi;
+          fi;
+          TestVisible(Diviseurs[TotalDiviseurs+1-k]);
+          if RETOUR:
+            label.bot(TEX("\num{"&decimal(Diviseurs[TotalDiviseurs+1-k])&"}"),Ab[k]);
+          else:
+            if Solution:
+              drawoptions(withcolor CoulSol);
+              label.bot(TEX("\num{"&decimal(Diviseurs[TotalDiviseurs+1-k])&"}"),Ab[k]);
+              drawoptions();
+            fi;
+          fi;
+        fi;
+      fi;
+      endfor;
+      if (TotalDiviseurs mod 2)<>0:
+      Ac-O[TotalDiviseurs div 2]=Echelle*(1,0);
+      draw Ac--O[TotalDiviseurs div 2];
+      if Vide=false:
+      label.rt(TEX("\num{"&decimal(Diviseurs[(TotalDiviseurs+1) div 2])&"}"),Ac);
+      fi;
+      fi;      
+    \end{mplibcode}
+    \mplibnumbersystem{scaled}%
+  \fi%
+}%
+
+\def\MPArbre#1{%
+  \ifluatex
+    \mplibforcehmode%
+    \mplibnumbersystem{double}%
+  \begin{mplibcode}
+    input PfCArithmetique;
+    numeric depart;
+    pair Ancre[];
+    numeric decalage;
+    decalage=\useKV[ClesNombrePremier]{Decalage}*1mm;
+
+    k:=0;
+    Ancre0:=(0,0);
+    racine:=#1;
+
+    label(TEX("\num{#1}"),(0,0));
+    forever:
+    PremierSimple(racine);
+    exitif racine=1;
+    endfor;
+
+    if \useKV[ClesNombrePremier]{Entoure}:
+    for l=1 upto k:
+    if Estcepremier(retenirnb[l]):
+    draw cercles(Ancre[l],0.25*decalage);
+    fi;
+    endfor;
+    fi;
+  \end{mplibcode}
+    \mplibnumbersystem{scaled}%
+  \else%
+  \begin{mpost}[mpsettings={numeric decalage;decalage=\useKV[ClesNombrePremier]{Decalage}*1mm; boolean Entoure; Entoure=\useKV[ClesNombrePremier]{Entoure};}]
+    input PfCArithmetique;
+    numeric depart;
+    pair Ancre[];
+    
+    k:=0;
+    Ancre0:=(0,0);
+    racine:=#1;
+    label(LATEX("\num{"&decimal(racine)&"}"),(0,0));
+    forever:
+    PremierSimplePdf(racine);
+    exitif racine=1;
+    endfor;
+
+    if \useKV[ClesNombrePremier]{Entoure}:
+    for l=1 upto k:
+    if Estcepremier(retenirnb[l]):
+    draw cercles(Ancre[l],0.25*decalage);
+    fi;
+    endfor;
+    fi;
+\end{mpost}
+\fi%
+}%
+
+\def\MPArbreComplet#1{%
+  \ifluatex
+    \mplibforcehmode%
+    \mplibnumbersystem{double}%
+  \begin{mplibcode}
+    input PfCArithmetique;
+    numeric depart;
+    pair Ancre[];
+    numeric decalage;
+    decalage=\useKV[ClesNombrePremier]{Decalage}*1mm;
+    
+    dx:=1cm;
+    dy:=1cm;
+    
+    pair N[][];
+    nbe:=NbEtape(#1);
+    Positions(nbe);
+    if \useKV[ClesNombrePremier]{Entoure}:
+    draw polygone(N[nbe-1][0]+(-0.25*dx,0.25*decalage),N[nbe-1][nbe-1]+(0.25*dx,0.25*decalage),N[nbe-1][nbe-1]+(0.25*dx,-0.25*decalage),N[nbe-1][0]+(-0.25*dx,-0.25*decalage)) dashed evenly;
+  fi;
+\end{mplibcode}
+  \mplibnumbersystem{scaled}%
+  \else%
+  \begin{mpost}[mpsettings={numeric decalage;decalage=\useKV[ClesNombrePremier]{Decalage}*1mm;}]
+    input PfCArithmetique;
+    numeric depart;
+    pair Ancre[];
+
+    dx:=1cm;
+    dy:=1cm;
+
+    pair N[][];
+
+    PositionsPdf(NbEtape(#1));
+  \end{mpost}
+  \fi%
+}%
+
+\def\MPArbreVide#1{%
+  \ifluatex
+    \mplibforcehmode%
+    \mplibnumbersystem{double}%
+  \begin{mplibcode}
+    input PfCArithmetique;
+    numeric depart;
+    pair Ancre[];
+    numeric decalage;
+    decalage=\useKV[ClesNombrePremier]{Decalage}*1mm;
+    
+    dx:=1cm;
+    dy:=1cm;
+    
+    pair N[][];
+    
+    PositionsVide(NbEtape(#1));
+  \end{mplibcode}
+    \mplibnumbersystem{scaled}%
+  \else%
+  \begin{mpost}[mpsettings={numeric decalage; decalage=\useKV[ClesNombrePremier]{Decalage}*1mm;}]
+    input PfCArithmetique;
+    numeric depart;
+    pair Ancre[];
+    
+    dx:=1cm;
+    dy:=1cm;
+
+    pair N[][];
+
+    PositionsVidePdf(NbEtape(#1));
+  \end{mpost}
+  \fi%
+}%
+
+\def\MPArbreDessine#1#2{%
+  \ifluatex%
+    \mplibforcehmode%
+    \mplibnumbersystem{double}%
+  \begin{mplibcode}
+    input PfCArithmetique;
+    numeric depart;
+    pair Ancre[];
+    numeric decalage;
+    decalage=\useKV[ClesNombrePremier]{Decalage}*1mm;
+    rayonfruits:=3mm;
+
+    color CouleurTronc,CouleurFeuillage,CouleurFruits,CouleurTexte;
+    CouleurTronc=\useKV[ClesNombrePremier]{CouleurTronc};
+    CouleurFeuillage=\useKV[ClesNombrePremier]{CouleurFeuillage};
+    CouleurFruits=\useKV[ClesNombrePremier]{CouleurFruits};
+    CouleurTexte=\useKV[ClesNombrePremier]{CouleurTexte};
+    
+    k:=0;
+    Ancre0:=(0,0);
+    racine:=#1;
+    k:=1;
+    Ancre1:=(-decalage,-decalage);
+    draw Branche(Ancre0,Ancre1);
+    retenirnb[1]:=#2;
+    racine:=#2;
+    forever:
+    PremierSimpleArbre(racine);
+    exitif racine=1;
+    endfor;
+    k:=k+1;
+    Ancre[k]:=(decalage,-decalage);
+    draw Branche(Ancre0,Ancre[k]);
+    retenirnb[k]:=#1 div #2;
+    racine:=retenirnb[k];
+    forever:
+    PremierSimpleArbre(racine);
+    exitif racine=1;
+    endfor;
+
+    fill cercles(Ancre[0],rayonfruits) withcolor white;
+    label(btex \num{#1} etex,(0,0));
+    for l=1 upto k:
+    if \useKV[ClesNombrePremier]{Vide}:
+    fill cercles(Ancre[l],rayonfruits) withcolor white;
+    else:
+    if Estcepremier(retenirnb[l]):
+    fill cercles(Ancre[l],rayonfruits) withcolor CouleurFruits;
+    drawoptions(withcolor CouleurTexte);
+    label(TEX("\num{"&decimal(retenirnb[l])&"}"),Ancre[l]);
+    drawoptions();
+    else:
+    fill cercles(Ancre[l],rayonfruits) withcolor white;
+    label(TEX("\num{"&decimal(retenirnb[l])&"}"),Ancre[l]);
+    fi;
+    fi;
+    endfor;
+    for l=0 upto k:
+    draw cercles(Ancre[l],rayonfruits);
+    endfor;
+    picture Bilan;
+    Bilan=currentpicture;
+    currentpicture:=nullpicture;
+    % Habillage
+    % On récupère le min des ordonnées des Ancre pour le feuillage
+    minord=1000;
+    nbancrearetenir=0;
+    for l=0 upto k:
+    if ypart(Ancre[l])<minord:
+    minord:=ypart(Ancre[l]);
+    nbancrearetenir:=l;
+    fi;
+    endfor;
+    pair D[];
+    D0=0.5[Ancre0,(0,ypart(Ancre[nbancrearetenir]))];
+    dotlabel("",D0);
+    % Herbe du sol
+    pair A[];
+    A0=(xpart(Ancre0)-1cm,ypart(Ancre[nbancrearetenir])-2cm);
+    A10=(xpart(Ancre0)+1cm,ypart(Ancre[nbancrearetenir])-2cm);
+    for l=1 upto 9:
+    A[l]=(l/10)[A0,A10]+uniformdeviate(5)*(unitvector(A10-A0) rotated 90);
+    endfor;
+    %Pour le tronc
+    pair B[];
+    B1=D0+(10+uniformdeviate(10))*(unitvector(D0-A0) rotated 90);
+    B2=symetrie(B1,Ancre0,1/2[A0,A10]);%=(-2mm,0);
+    B3=1/2[Ancre0,(xpart(1/2[A0,A10]),ypart(Ancre[k]))];
+    path tronc;
+    tronc=A0{dir angle(A1-A0)}..{dir90}B1--B2{dir-90}..{dir angle(A10-A9)}A10--reverse(A0 for l=1 upto 10:--A[l] endfor)--cycle;%
+    fill tronc withcolor CouleurTronc;
+    trace tronc;
+    % Pour le feuillage
+    path feuillage;
+    feuillage=cercles((0,0),abs(Ancre[nbancrearetenir]-D0));%
+    pair C[];
+    for l=0 upto 7:
+    C[l]=(pointarc(feuillage,l*45+(-5+uniformdeviate(10))) xscaled 1.25 yscaled 1) shifted D0;
+    endfor;
+    feuillage:=C[0] for l=1 upto 7:..(C[l] if (l mod 2)=0:+(0,2mm) else: +(0,-2mm) fi) endfor ..cycle;
+    fill feuillage withcolor CouleurFeuillage;
+    trace feuillage;
+    draw Bilan;
+  \end{mplibcode}
+    \mplibnumbersystem{scaled}%
+  \else%
+  \begin{mpost}[mpsettings={numeric decalage;decalage=\useKV[ClesNombrePremier]{Decalage}*1mm;color CouleurTronc,CouleurFeuillage,CouleurFruits,CouleurTexte;CouleurTronc=\useKV[ClesNombrePremier]{CouleurTronc};CouleurFeuillage=\useKV[ClesNombrePremier]{CouleurFeuillage};CouleurFruits=\useKV[ClesNombrePremier]{CouleurFruits}; CouleurTexte=\useKV[ClesNombrePremier]{CouleurTexte}; boolean Vide; Vide=\useKV[ClesNombrePremier]{Vide};}]
+    input PfCArithmetiquePDF;
+    numeric depart;
+    pair Ancre[];
+    rayonfruits:=3mm;
+    
+    k:=0;
+    Ancre0:=(0,0);
+    racine:=#1;
+    k:=1;
+    Ancre1:=(-decalage,-decalage);
+    draw Branche(Ancre0,Ancre1);
+    retenirnb[1]:=#2;
+    racine:=#2;
+    forever:
+    PremierSimpleArbre(racine);
+    exitif racine=1;
+    endfor;
+    k:=k+1;
+    Ancre[k]:=(decalage,-decalage);
+    draw Branche(Ancre0,Ancre[k]);
+    retenirnb[k]:=#1 div #2;
+    racine:=retenirnb[k];
+    forever:
+    PremierSimpleArbre(racine);
+    exitif racine=1;
+    endfor;
+
+    fill cercles(Ancre[0],rayonfruits) withcolor white;
+    label(btex \num{#1} etex,(0,0));
+    for l=1 upto k:
+    if Vide:
+    fill cercles(Ancre[l],rayonfruits) withcolor white;
+    else:
+    if Estcepremier(retenirnb[l]):
+    fill cercles(Ancre[l],rayonfruits) withcolor CouleurFruits;
+    drawoptions(withcolor CouleurTexte);
+    label(LATEX("\num{"&decimal(retenirnb[l])&"}"),Ancre[l]);
+    drawoptions();
+    else:
+    fill cercles(Ancre[l],rayonfruits) withcolor white;
+    label(LATEX("\num{"&decimal(retenirnb[l])&"}"),Ancre[l]);
+    fi;
+    fi;
+    endfor;
+    for l=0 upto k:
+    draw cercles(Ancre[l],rayonfruits);
+    endfor;
+    picture Bilan;
+    Bilan=currentpicture;
+    currentpicture:=nullpicture;
+    % Habillage
+    minord=1000;
+    nbancrearetenir=0;
+    for l=0 upto k:
+    if ypart(Ancre[l])<minord:
+    minord:=ypart(Ancre[l]);
+    nbancrearetenir:=l;
+    fi;
+    endfor;
+    pair D[];
+    D0=0.5[Ancre0,(0,ypart(Ancre[nbancrearetenir]))];
+    pair A[];
+    A0=(xpart(Ancre0)-1cm,ypart(Ancre[nbancrearetenir])-2cm);
+    A10=(xpart(Ancre0)+1cm,ypart(Ancre[nbancrearetenir])-2cm);
+    for l=1 upto 9:
+    A[l]=(l/10)[A0,A10]+uniformdeviate(5)*(unitvector(A10-A0) rotated 90);
+    endfor;
+    pair B[];
+    B1=D0+(10+uniformdeviate(10))*(unitvector(D0-A0) rotated 90);
+    B2=symetrie(B1,Ancre0,1/2[A0,A10]);%
+    B3=1/2[Ancre0,(xpart(1/2[A0,A10]),ypart(Ancre[k]))];
+    path tronc;
+    tronc=A0{dir angle(A1-A0)}..{dir90}B1--B2{dir-90}..{dir angle(A10-A9)}A10--reverse(A0 for l=1 upto 10:--A[l] endfor)--cycle;%
+    fill tronc withcolor CouleurTronc;
+    trace tronc;
+    path feuillage;
+    feuillage=cercles((0,0),abs(Ancre[nbancrearetenir]-D0));%
+    pair C[];
+    for l=0 upto 7:
+    C[l]=(pointarc(feuillage,l*45+(-5+uniformdeviate(10))) xscaled 1.25 yscaled 1) shifted D0;
+    endfor;
+    feuillage:=C[0] for l=1 upto 7:..(C[l] if (l mod 2)=0:+(0,2mm) else: +(0,-2mm) fi) endfor ..cycle;
+    fill feuillage withcolor CouleurFeuillage;
+    trace feuillage;
+    draw Bilan;
+  \end{mpost}
+\fi%
+}%
+
+\newcount\premier%
+
+\newcommand\NombrePremier[1]{%\'ecrire la d\'ecomposition compl\`ete
+  % #1 le nombre premier \`a tester
+  \newcount\anp\newcount\bnp\newcount\cnp%
+  \anp=#1\relax
+  \bnp=2\relax
+  \premier=-1\relax
+  % Pour d\'eterminer le nombre d'\'etapes
+  \whiledo{\anp > 1}{%
+    \modulo{\the\anp}{\the\bnp}
+    \ifnum\remainder=0\relax
+      \global\premier=\numexpr\premier+1\relax
+      \cnp=\numexpr\anp/\bnp\relax
+      \anp=\cnp\relax
+    \else%
+      \bnp=\numexpr\bnp+1\relax%
+    \fi%
+  }
+  \ifnum\premier=0
+    Le nombre \num{#1} est un nombre premier.
+  \else%
+    \begin{align*}
+      \xintFor* ##1 in {\xintSeq {1}{\premier}}\do {\num{#1}&=\ifboolKV[ClesNombrePremier]{TableauVide}{\phantom{\PremierEtape{#1}{##1}}}{\PremierEtape{#1}{##1}}\xintifboolexpr{##1<\premier}{\\}{}}%
+    \end{align*}
+  \fi%
+}%
+
+\newcount\premierun
+\newcount\premierdeux
+
+\newcommand\NombrePremierImpose[3]{%
+  % #1 le nombre premier \`a tester
+  % #2 est le premier facteur imposé
+  % #3 est le deuxième facteur imposé
+  \newcount\anp\newcount\bnp\newcount\cnp%
+  % Pour d\'eterminer le nombre d'\'etapes pour #1
+  \anp=#1\relax
+  \bnp=2\relax
+  \premier=-1\relax
+  \whiledo{\anp > 1}{%
+    \modulo{\the\anp}{\the\bnp}
+    \ifnum\remainder=0\relax
+      \global\premier=\numexpr\premier+1\relax
+      \cnp=\numexpr\anp/\bnp\relax
+      \anp=\cnp\relax
+    \else%
+      \bnp=\numexpr\bnp+1\relax%
+    \fi%
+  }%
+  % Pour d\'eterminer le nombre d'\'etapes pour #2
+  \anp=#2\relax
+  \bnp=2\relax
+  \premierun=-1\relax
+  \whiledo{\anp > 1}{%
+    \modulo{\the\anp}{\the\bnp}
+    \ifnum\remainder=0\relax
+      \global\premierun=\numexpr\premierun+1\relax
+      \cnp=\numexpr\anp/\bnp\relax
+      \anp=\cnp\relax
+    \else%
+      \bnp=\numexpr\bnp+1\relax%
+    \fi%
+  }%
+  % Pour d\'eterminer le nombre d'\'etapes pour #3
+  \anp=#3\relax
+  \bnp=2\relax
+  \premierdeux=-1\relax
+  \whiledo{\anp > 1}{%
+    \modulo{\the\anp}{\the\bnp}
+    \ifnum\remainder=0\relax
+      \global\premierdeux=\numexpr\premierdeux+1\relax
+      \cnp=\numexpr\anp/\bnp\relax
+      \anp=\cnp\relax
+    \else%
+      \bnp=\numexpr\bnp+1\relax%
+    \fi%
+  }%
+  \ifboolKV[ClesNombrePremier]{ImposeAll}{\xdef\PfCRappelImposeAll{1}}{\xdef\PfCRappelImposeAll{0}}%
+  \ifnum\premier=0
+  Le nombre \num{#1} est un nombre premier.
+  \else
+  \xintifboolexpr{\premierun>\premierdeux}{\premier=\premierun}{\premier=\premierdeux}
+  \begin{align*}
+    \num{#1}&=\num{#2}\times\num{#3}%\\
+    \xintifboolexpr{\premier>0}{\\%
+    \xintFor* ##1 in {\xintSeq {1}{\premier}}\do {\num{#1}&=\xintifboolexpr{##1<\premierun}{\PremierEtape{#2}{##1}}{\Decomposition[Longue]{#2}}\mathrel{\times}\xintifboolexpr{##1<\premierdeux}{\PremierEtape{#3}{##1}}{\Decomposition[Longue]{#3}}\xintifboolexpr{##1<\premier}{\\}{}}%
+    }{}%
+    \xintifboolexpr{\PfCRappelImposeAll==1}{\\\num{#1}&=\PremierExposant{#1}}{}%
+  \end{align*}
+  \fi%
+}%
+
+\newcommand\NombrePremierVertical[1]{%\'ecrire la d\'ecomposition compl\`ete
+  % #1 le nombre premier \`a tester
+  \newcount\anpv\newcount\bnpv\newcount\cnpv%
+  \anpv=#1\relax
+  \bnpv=2\relax
+  \premier=-1\relax
+  % Pour d\'eterminer le nombre d'\'etapes
+  \whiledo{\anpv > 1}{%
+    \modulo{\the\anpv}{\the\bnpv}
+    \ifnum\remainder=0\relax
+      \global\premier=\numexpr\premier+1\relax
+      \cnpv=\numexpr\anpv/\bnpv\relax
+      \anpv=\cnpv\relax
+    \else%
+      \bnpv=\numexpr\bnpv+1\relax%
+    \fi%
+  }
+  \ifnum\premier=0
+    Le nombre \num{#1} est un nombre premier.
+    \else%
+    \begin{tabular}{c|c}
+      \xintFor* ##1 in {\xintSeq {0}{\premier}}\do
+      {\PremierMultipleVide{#1}{##1}&\xdef\Etape{\fpeval{##1+1}}\PremierDiviseurVide{#1}{\Etape}
+                                      \xintifboolexpr{##1<\premier}{\\}{\\1\\}}%
+    \end{tabular}
+  \fi%
+}%
+
+\newcommand\NombrePremierPotence[1]{%
+  % #1 le nombre premier \`a tester
+  \newcount\anpv\newcount\bnpv\newcount\cnpv%
+  \anpv=#1\relax
+  \bnpv=2\relax
+  \premier=-1\relax
+  % Pour d\'eterminer le nombre d'\'etapes
+  \whiledo{\anpv > 1}{%
+    \modulo{\the\anpv}{\the\bnpv}
+    \ifnum\remainder=0\relax
+      \global\premier=\numexpr\premier+1\relax
+      \cnpv=\numexpr\anpv/\bnpv\relax
+      \anpv=\cnpv\relax
+    \else%
+      \bnpv=\numexpr\bnpv+1\relax%
+    \fi%
+  }
+  \ifnum\premier=0%
+    Le nombre \num{#1} est un nombre premier.%
+  \else%
+  \xdef\PotenceCases{\fpeval{\premier+2}}%
+    \begin{NiceTabular}{*{\PotenceCases}{c}}
+      %\Body
+      \PremierMultipleVide{#1}{0}&\multicolumn{1}{|c}{\PremierDiviseurVide{#1}{1}}\\
+      \hhline{~-}
+      \xintFor* ##1 in {\xintSeq {1}{\premier}}\do{%
+        \xintifboolexpr{##1 == 0}{}{\xintFor* ##2 in {\xintSeq {1}{##1}}\do{%
+            &}%
+        }%
+        \multicolumn{1}{|c}{\PremierMultipleVide{#1}{##1}}&\multicolumn{1}{|c}{\xdef\Etape{\fpeval{##1+1}}\PremierDiviseurVide{#1}{\Etape}}\\
+        \hhline{*{\fpeval{##1+1}}{~}-}
+      }%
+      \xintFor* ##1 in {\xintSeq {1}{\fpeval{\PotenceCases-2}}}\do{%
+        &}&\multicolumn{1}{|c}{1}\\
+      \CodeAfter
+      \tikz \draw [white,fill=white] (1 -|2) circle (0.5mm);
+      \xintFor* ##1 in {\xintseq{2}{\PotenceCases}}\do{%
+        \tikz \draw [white,fill=white,transform canvas={xshift=0mm}] (\fpeval{##1-1} -|##1) circle (0.5mm);
+      }%
+    \end{NiceTabular}%
+  \fi%
+}%
+
+\newcommand\PremierDiviseurVide[2]{%
+  %#1 : le nombre entier \`a tester
+  %#2 : le nombre d'\'etapes \`a effectuer
+  \newcount\anpvv\newcount\bnpvv\newcount\cnpvv\newcount\dnpvv%
+  \ensuremath{%
+    \anpvv=#1\relax
+    \bnpvv=2\relax
+    \dnpvv=0\relax%
+    \whiledo{\anpvv > 1}{%
+      \whiledo{\dnpvv < \number#2}{%
+        \modulo{\the\anpvv}{\the\bnpvv}
+        \ifnum\remainder=0\relax
+          \dnpvv=\numexpr\dnpvv+1\relax
+          \cnpvv=\numexpr\anpvv/\bnpvv\relax
+          \anpvv=\cnpvv\relax
+        \else%
+          \bnpvv=\numexpr\bnpvv+1\relax%
+        \fi%
+      }%
+      \num{\the\bnpvv}%
+      \anpvv=1%
+    }%
+  }%
+}%
+
+\newcommand\PremierMultipleVide[2]{%
+  %#1 : le nombre entier \`a tester
+  %#2 : le nombre d'\'etapes \`a effectuer
+  \newcount\anpmv\newcount\bnpmv\newcount\cnpmv\newcount\dnpmv%
+  \ensuremath{%
+    \anpmv=#1\relax
+    \bnpmv=2\relax
+    \dnpmv=0\relax%
+    \whiledo{\anpmv > 1}{%
+      \whiledo{\dnpmv < \number#2}{%
+        \modulo{\the\anpmv}{\the\bnpmv}
+        \ifnum\remainder=0\relax
+          \dnpmv=\numexpr\dnpmv+1\relax
+          \cnpmv=\numexpr\anpmv/\bnpmv\relax
+          \anpmv=\cnpmv\relax
+        \else%
+          \bnpmv=\numexpr\bnpmv+1\relax%
+        \fi%
+      }
+      \num{\the\anpmv}%
+      \anpmv=1%
+    }%
+  }%
+}%
+
+\newcommand\NombrePremierVerticalVide[1]{%
+  % #1 le nombre premier \`a tester
+  \newcount\anpv\newcount\bnpv\newcount\cnpv%
+  \anpv=#1\relax
+  \bnpv=2\relax
+  \premier=-1\relax
+  % Pour d\'eterminer le nombre d'\'etapes
+  \whiledo{\anpv > 1}{%
+    \modulo{\the\anpv}{\the\bnpv}
+    \ifnum\remainder=0\relax
+      \global\premier=\numexpr\premier+1\relax
+      \cnpv=\numexpr\anpv/\bnpv\relax
+      \anpv=\cnpv\relax
+    \else%
+      \bnpv=\numexpr\bnpv+1\relax%
+    \fi%
+  }
+  \ifnum\premier=0
+    Le nombre \num{#1} est un nombre premier.%
+    \else
+    \renewcommand{\arraystretch}{1.5}
+    \begin{tabular}{c|c}
+      \PremierMultipleVide{#1}{0}&\hbox to1cm{\useKV[ClesNombrePremier]{Dot}}\\
+      \xintFor* ##1 in {\xintSeq {1}{\premier}}\do
+      {\hbox to1cm{\useKV[ClesNombrePremier]{Dot}}&\hbox
+                              to1cm{\useKV[ClesNombrePremier]{Dot}}\xintifboolexpr{##1<\premier}{\\}{\\\hbox
+      to1cm{\useKV[ClesNombrePremier]{Dot}}\\}}%
+    \end{tabular}
+    \renewcommand{\arraystretch}{1}%
+  \fi%
+}%
+
+\newcommand\NombrePremierExposant[1]{%
+  \newcount\anp\newcount\bnp\newcount\cnp%
+  % #1 le nombre premier \`a tester
+  \anp=#1\relax%
+  \bnp=2\relax%
+  \premier=-1\relax%
+  % Pour d\'eterminer le nombre d'\'etapes
+  \whiledo{\anp > 1}{%
+    \modulo{\the\anp}{\the\bnp}
+    \ifnum\remainder=0\relax%
+      \global\premier=\numexpr\premier+1\relax%
+      \cnp=\numexpr\anp/\bnp\relax%
+      \anp=\cnp\relax%
+    \else%
+      \bnp=\numexpr\bnp+1\relax%
+      \fi%
+  }%
+  \ifnum\premier=0%
+    Le nombre \num{#1} est un nombre premier.%
+  \else%
+  \begin{align*}
+      \xintFor* ##1 in {\xintSeq {1}{\premier}}\do {\num{#1}&=\PremierEtape{#1}{##1}\\}%
+      \num{#1}&=\PremierExposant{#1}%
+    \end{align*}%
+  \fi%
+}%
+  
+\newcommand\PremierEtape[2]{%
+  %#1 : le nombre entier \`a tester
+  %#2 : le nombre d'\'etapes \`a effectuer
+  \newcount\anp\newcount\bnp\newcount\cnp\newcount\dnp%
+  \ensuremath{%
+    \anp=#1\relax
+    \bnp=2\relax
+    \dnp=0\relax%
+    \whiledo{\anp > 1}{%
+      \whiledo{\dnp < \number#2}{%
+        \modulo{\the\anp}{\the\bnp}
+        \ifnum\remainder=0\relax
+          \dnp=\numexpr\dnp+1\relax
+          \cnp=\numexpr\anp/\bnp\relax
+          \anp=\cnp\relax
+          \num{\the\bnp}\times%
+        \else%
+          \bnp=\numexpr\bnp+1\relax%
+        \fi%
+      }
+      \num{\the\anp}%
+      \anp=1%
+    }%
+  }%
+}%
+
+\newcommand\PremierExposant[1]{%
+  %#1 : le nombre entier \`a tester
+  \ensuremath{%
+  \newcount\anp\newcount\bnp\newcount\cnp%
+  \newcount\pileb\newcount\exposant%
+  \exposant=0\relax%
+  \anp=#1\relax%
+  \bnp=2\relax%
+  \pileb=2\relax%
+  \whiledo{\the\anp > 1}{%
+    \modulo{\the\anp}{\the\bnp}
+    \ifnum\remainder=0\relax
+      \cnp=\numexpr\anp/\bnp\relax
+      \ifnum\pileb=\bnp
+      \exposant=\numexpr\exposant+1\relax
+      \fi
+      \anp=\cnp\relax
+    \else%
+      \ifnum\exposant>0\relax
+        \num{\the\pileb}\ifnum\exposant>1 ^{\num{\the\exposant}}\fi\times%
+      \fi
+      \bnp=\numexpr\bnp+1\relax%
+      \pileb=\bnp\relax%
+      \exposant=0\relax%
+    \fi%
+  }%
+  \num{\the\pileb}\ifnum\exposant>1^{\num{\the\exposant}}\fi%
+  }%
+}%
+
+\newcommand\PremierLong[1]{%
+  %#1 : le nombre entier \`a tester
+  \ensuremath{%
+  \newcount\anpl\newcount\bnpl\newcount\cnpl%
+  \newcount\pilebl%
+  \anpl=#1\relax%
+  \bnpl=2\relax%
+  \pilebl=2\relax%
+  \whiledo{\the\anpl > 1}{%
+    \modulo{\the\anpl}{\the\bnpl}
+    \ifnum\remainder=0\relax
+      \cnpl=\numexpr\anpl/\bnpl\relax
+      \num{\the\bnpl}\ifnum\anpl>\bnpl\times\fi%
+      \anpl=\cnpl\relax
+    \else%
+      \bnpl=\numexpr\bnpl+1\relax%
+      \pilebl=\bnpl\relax%
+    \fi%
+    }%
+  }%
+}%
+
+\NewDocumentCommand\PfCSommeChiffres{m}{%
+  \xdef\PfCSMSomme{0}%
+  \ensuremath{
+    \StrLen{#1}[\PfCSMLongueur]
+    \xintFor* ##1 in{\xintSeq{1}{\PfCSMLongueur}}\do{
+      \StrChar{#1}{##1}[\PfCSMChiffre]
+      \xdef\PfCSMSomme{\fpeval{\PfCSMSomme+\PfCSMChiffre}}
+      \num{\PfCSMChiffre}\xintifForLast{=}{+}
+    }
+    \num{\fpeval{\PfCSMSomme}}
+  }%
+}%
+
+\newcommand\ListeTousFacteursPremier[1]{%
+  %#1 : le nombre entier \`a tester
+  \ensuremath{%
+  \newcount\anpl\newcount\bnpl\newcount\cnpl%
+  \newcount\pilebl%
+  \anpl=#1\relax%
+  \bnpl=2\relax%
+  \pilebl=2\relax%
+  \xdef\PfCPileFacteurs{}%
+  \whiledo{\the\anpl > 1}{%
+    \modulo{\the\anpl}{\the\bnpl}
+    \ifnum\remainder=0\relax
+      \cnpl=\numexpr\anpl/\bnpl\relax
+      \xdef\PfCPileFacteurs{\PfCPileFacteurs\the\bnpl}%
+%      \num{\the\bnpl}\ifnum\anpl>\bnpl\times\fi%
+      \anpl=\cnpl\relax
+    \else%
+      \bnpl=\numexpr\bnpl+1\relax%
+      \pilebl=\bnpl\relax%
+    \fi%
+    }%
+  }%
+}%
+
+\newcommand\RecupListeTousFacteursPremier[1]{%
+  %#1 : le nombre entier \`a tester
+  \ensuremath{%
+  \newcount\anpl\newcount\bnpl\newcount\cnpl%
+  \newcount\pilebl%
+  \anpl=#1\relax%
+  \bnpl=2\relax%
+  \pilebl=2\relax%
+  \xdef\PfCPileFacteurs{}%
+  \whiledo{\the\anpl > 1}{%
+    \modulo{\the\anpl}{\the\bnpl}
+    \ifnum\remainder=0\relax
+      \cnpl=\numexpr\anpl/\bnpl\relax
+      \xdef\PfCPileFacteurs{\PfCPileFacteurs,\the\bnpl}%
+%      \num{\the\bnpl}\ifnum\anpl>\bnpl,\fi%
+      \anpl=\cnpl\relax
+    \else%
+      \bnpl=\numexpr\bnpl+1\relax%
+      \pilebl=\bnpl\relax%
+    \fi%
+    }%
+  }%
+}%
+
+\newcommand\LesFacteursPremiers[1]{%
+  %#1 : le nombre entier \`a tester
+%  \newcount\anpl\newcount\bnpl\newcount\cnpl%
+ % \newcount\pilebl%
+  \xdef\anpl{#1}%\relax%
+  \xdef\bnpl{2}%\relax%
+  \xdef\pilebl{2}%\relax%
+  \xdef\PfCPileFacteurs{}%
+  \whiledo{\fpeval{\anpl} > 1}{%
+    \modulo{\fpeval{\anpl}}{\fpeval{\bnpl}}
+    \ifnum\remainder=0\relax
+      \xdef\cnpl{\fpeval{\anpl/\bnpl}}%
+      \xdef\PfCPileFacteurs{\PfCPileFacteurs,\fpeval{\bnpl}}%
+      % \num{\the\bnpl}\ifnum\anpl>\bnpl,\fi%
+      \xdef\anpl{\cnpl}%\relax
+    \else%
+      \xdef\bnpl{\fpeval{\bnpl+1}}%
+      \xdef\pilebl{\bnpl}%\relax%
+    \fi%
+  }%
+}%%
+
+\newcommand\ListeDiviseur[1]{%#1 : le nombre entier \`a tester
+  \newcount\anp\newcount\bnp%
+  \anp=#1%
+  \bnp=2\relax%
+  \ifnum\anp=1
+    1%
+  \else
+    1 %
+    \whiledo{\bnp<\anp}{%
+      \modulo{\the\anp}{\the\bnp}{}%
+      \ifnum\remainder=0%
+        ; $\num{\the\bnp}$ %
+      \fi%
+      \bnp=\numexpr\bnp+1%
+    }%
+    et \num{\the\anp}%
+  \fi%
+}%
+
+\newcount\anpT\newcount\bnpT\newcount\cnpT\newcount\dnpT%
+
+\newcommand\ListeDiviseurT[1]{%#1 : le nombre entier \`a tester
+  \anpT=#1%
+  \bnpT=2\relax%
+  %On compte les diviseurs propres.
+  \cnpT=0\relax%
+  \whiledo{\bnpT<\anpT}{%
+    \modulo{\the\anpT}{\the\bnpT}{}%
+    \ifnum\remainder=0%
+    \cnpT=\numexpr\cnpT+1%
+    \fi%
+    \bnpT=\numexpr\bnpT+1%
+  }%
+  \ifodd\cnpT%
+    \begin{tabular}{c|c}%
+    1&\num{#1}\\
+    \xintFor* ##1 in {\xintSeq {1}{\fpeval{(\cnpT+1)/2}}}\do{%
+    \DiviseurNumero{#1}{##1}\num{\fpeval{\dnpT}}\uppercase{&}\DiviseurNumero{#1}{##1}\xintifboolexpr{\dnpT==\fpeval{#1/\dnpT}}{\num{\fpeval{\dnpT}}}{\num{\fpeval{#1/\dnpT}}}\\
+    }
+  \end{tabular}%
+  \else%
+    \begin{tabular}{c|c}
+      1&\num{#1}
+      \ifnum\cnpT>1\relax\\
+    \xintFor* ##1 in {\xintSeq {1}{\fpeval{\cnpT/2}}}\do{%
+    \DiviseurNumero{#1}{##1}\num{\fpeval{\dnpT}}\uppercase{&}\DiviseurNumero{#1}{##1}\num{\fpeval{#1/\dnpT}}\\
+      }
+      \fi
+  \end{tabular}%
+  \fi%
+}%
+
+\newcommand\DiviseurNumero[2]{%
+  % #1 nb entier \`a tester
+  % #2 no du diviseur (\`a part 1 et #1)
+  \anpT=#1%
+  \bnpT=2\relax%
+  %On compte les diviseurs propres.
+  \cnpT=0\relax%
+  \whiledo{\bnpT<\anpT}{%
+    \modulo{\the\anpT}{\the\bnpT}{}%
+    \ifnum\remainder=0%
+    \cnpT=\numexpr\cnpT+1%
+    \ifnum\cnpT=\numexpr#2-1%
+    \dnpT=\bnpT%
+    \bnpT=\anpT%
+    \fi%
+    \fi%
+    \bnpT=\numexpr\bnpT+1%
+  }%
+}%

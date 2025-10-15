@@ -1,0 +1,496 @@
+% -*- coding: utf-8 -*-
+% ----------------------------------------------------------------------------
+% Author:  Jianrui Lyu <tolvjr@163.com>
+% License: The LaTeX Project Public License 1.3c
+% ----------------------------------------------------------------------------
+% This package started as a fork of mediummath code of nccmath package,
+% aiming to provide more stable and flexible medium-size math commands.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{medmath}[2025-02-22 v2025A Better medium-size math commands]
+
+\RequirePackage{array}
+\RequirePackage{etoolbox}
+
+\newbool{mdm@bare}     \boolfalse{mdm@bare}    % don't define any public commands
+\newbool{mdm@base}     \boolfalse{mdm@base}    % define only basic public commands
+
+\DeclareKeys{
+  bare         .if = mdm@bare,
+  base         .if = mdm@base,
+  all          .ifnot = mdm@base,
+}
+
+\ProcessKeyOptions
+
+\RequirePackage{amsmath}
+
+%%% --------------------------------------------------------
+%%> \section{Define medium-size math commands with base option}
+%%% --------------------------------------------------------
+
+%% The |\mdm@select@msize| command prepares dimensions for medium-size math:
+%% \begin{itemize}
+%% \item In |\mdm@fracrulewidth| --- a rule width in fractions;
+%% \item In |@tempdima| --- a raising value; and
+%% \item In |@tempdimb| --- a font size to be used in medium fractions
+%%       and matrices.
+%% \end{itemize}
+
+\newdimen\mdm@fracrulewidth
+\def\mdm@select@msize{\relax
+% |\@tempdima| contains the current font size
+  \@tempdima \f@size\p@
+% Calculate in |\@tempdimb| a text font size in medium fraction
+  \ifdim\@tempdima>11.5\p@
+    \@tempdimb .83\@tempdima
+  \else
+    \@tempdimb .8\@tempdima
+    \ifdim\@tempdimb<5\p@ \@tempdimb 5\p@\fi
+  \fi
+% Calculate in |\mdm@fracrulewidth| the rule width and in
+% |\@tempdima| --- the raising value
+  \mdm@fracrulewidth .04\@tempdima
+  \@tempdima 1.25\mdm@fracrulewidth
+  \ifdim\mdm@fracrulewidth>.45\p@ \else
+    \ifdim\mdm@fracrulewidth>.34\p@ \mdm@fracrulewidth .4\p@
+    \else \mdm@fracrulewidth .3\p@
+    \fi
+  \fi
+}
+
+%% The |\mdm@innerfrac|\marg{style} prepares a fraction with a
+%% special width in the given style:
+
+\def\mdm@innerfrac#1{\genfrac{}{}\mdm@fracrulewidth{#1}}
+
+%% Select a font by rounding its pt-size to the nearest integer
+%% and redefine fractions to have the given rule width. The |\binom|
+%% command is redefined also to its original value because it can be
+%% changed when the |mediummath| option is applied.
+
+\def\mdm@prepare@msize{%
+  \@tempdima 1.2\@tempdimb
+  \advance\@tempdimb .5\p@
+  \edef\@tempa{\strip@pt\@tempdimb}%
+  \expandafter\mdm@floor\expandafter\@tempa\@tempa.\@nil
+  \fontsize\@tempa\@tempdima\selectfont
+  \def\frac{\protect\mdm@innerfrac{}}%
+  \def\dfrac{\mdm@innerfrac\z@}%
+  \def\tfrac{\mdm@innerfrac\@ne}%
+  \def\binom{\protect\genfrac()\z@{}}%
+}
+\def\mdm@floor#1#2.#3\@nil{\def#1{#2}}
+
+%% Fix fractions and subfractions in superscripts/subscripts
+%% Always use current style size to typeset the fractions
+
+\newcommand{\mdm@larger@frac}[2]{%
+  \mathchoice{\genfrac{}{}{}{0}{#1}{#2}}{\genfrac{}{}{}{0}{#1}{#2}}%
+             {\genfrac{}{}{}{1}{#1}{#2}}{\genfrac{}{}{}{2}{#1}{#2}}%
+}
+\def\mdm@prepare@msize{%
+  \@tempdima 1.2\@tempdimb
+  \advance\@tempdimb .5\p@
+  \edef\@tempa{\strip@pt\@tempdimb}%
+  \expandafter\mdm@floor\expandafter\@tempa\@tempa.\@nil
+  \fontsize\@tempa\@tempdima\selectfont
+  \let\frac=\mdm@larger@frac
+  \def\dfrac{\mdm@innerfrac\z@}%
+  \def\tfrac{\mdm@innerfrac\@ne}%
+  \def\binom{\protect\genfrac()\z@{}}%
+}
+
+%% |\mdm@op@prepare|\marg{integral}
+%% command prepares an integral. It looks forward, extracts indices
+%% and limits-change commands, and puts the integral with required kerning
+%% of indices. The |\mdm@op@print| driver is a command to print the integral.
+%% Its default value is |\mdm@op@printm|. The driver uses the following hooks:
+%% |\mdm@op| contains an integral command, |\mdm@op@lim| contains
+%% the selected limits-style, |\mdm@op@sb| contains a subscript,
+%% |\mdm@op@sp| contains a superscript, |mdm@op@kern| contains the
+%% kerning value for medium-size integrals. If subscript or superscript
+%% is omitted, the corresponding hook is equal to |\relax|.
+
+\DeclareRobustCommand*\mdm@op@prepare[1]{%
+  \def\mdm@op{#1}%
+  \let\mdm@op@print\mdm@op@printm
+  \mdm@op@prepare@
+}
+\def\mdm@op@prepare@{%
+  \let\mdm@op@lim\ilimits@
+  \let\mdm@op@sp\relax
+  \let\mdm@op@sb\relax
+  \mdm@op@next
+}
+\def\mdm@op@next{\futurelet\@let@token\mdm@op@getnext}
+% Test the next token and get it if necessary:
+\def\mdm@op@getnext{%
+  \let\@tempa\mdm@op@skip
+  \ifx\@let@token\limits
+   \let\mdm@op@lim\limits \else
+    \ifx\@let@token\nolimits
+     \let\mdm@op@lim\nolimits \else
+      \ifx\@let@token\displaylimits
+       \let\mdm@op@lim\displaylimits \else
+        \ifx\@let@token\sp
+         \mdm@op@test\mdm@op@sp
+         \def\@tempa{\mdm@op@get\mdm@op@sp}\else
+          \ifx\@let@token\sb
+           \mdm@op@test\mdm@op@sb
+           \def\@tempa{\mdm@op@get\mdm@op@sb}\else
+            \ifx\@let@token\@sptoken
+             \let\@tempa\mdm@op@skipsp \else
+             \let\@tempa\mdm@op@print
+            \fi
+          \fi
+        \fi
+      \fi
+    \fi
+  \fi
+  \@tempa
+}
+% Skip |\limits|-like token:
+\def\mdm@op@skip#1{\mdm@op@next}
+% Skip a space token. A space token is skipped within |\@ifnextchar|
+% before comparing it with the first parameter. So, it does not important
+% what char to test for:
+\def\mdm@op@skipsp{%
+  \@ifnextchar0{\mdm@op@next}{\mdm@op@next}%
+}
+% Test subscript or superscript to be already defined:
+\def\mdm@op@test#1{%
+  \ifx#1\relax \else
+    \PackageError{nccmath}{Double index in math operator}{}
+  \fi
+}
+% Get a subscript or superscript:
+\def\mdm@op@get#1#2#3{\def#1{#3}\mdm@op@next}
+
+%% Driver for printing the medium-size integral with indices:
+
+\def\mdm@op@printm{%
+  \ifx\mdm@op@lim\nolimits \mdm@op@printm@\@ne \else
+    \ifx\mdm@op@lim\limits \mdm@op@printm@\z@ \else
+      \mathchoice{\displaystyle\mdm@op@printm@\z@}%
+                 {\textstyle\mdm@op@printm@\@ne}%
+                 {\scriptstyle\mdm@op@printm@\@ne}%
+                 {\scriptscriptstyle\mdm@op@printm@\@ne}%
+    \fi
+  \fi
+}
+\def\mdm@op@printm@{\mdm@op@print@\mdm@op\mdm@op@kern}
+
+%% Fix sizes of integral operators in superscripts/subscripts
+
+\newlength{\@mdm@em}
+\setlength{\@mdm@em}{1em}
+\newcommand{\mdm@style@unit}[1]{%
+  \mathchoice{\setlength{\@mdm@em}{1em}#1}{\setlength{\@mdm@em}{1em}#1}
+             {\setlength{\@mdm@em}{0.5em}#1}{\setlength{\@mdm@em}{0.3em}#1}%
+}
+\let\mdm@saved@op@printm=\mdm@op@printm
+\def\mdm@op@printm{\mdm@style@unit{\mdm@saved@op@printm}}
+
+%% |\mdm@op@print@|\marg{integral}\marg{kern}\marg{level} command
+%% prints an \meta{integral} using the specified \meta{kern} in indices.
+%% If \meta{level} = 0 use |\limits| else use |\nolimits|.
+
+\def\mdm@op@print@#1#2#3{\mathop{#1}%
+  \setlength\@tempdima{#2}%
+  \@tempswatrue
+  \ifx\mdm@op@sb\relax \else \ifnum#3>\z@ \@tempswafalse \fi \fi
+  \ifx\mdm@op@sp\relax \else \ifnum#3>\z@ \@tempswafalse \fi \fi
+  \edef\@tempa{%
+    \ifnum#3=\z@ \noexpand\limits \else \noexpand\nolimits \fi
+    \ifx\mdm@op@sb\relax \else
+      \noexpand\sb{%
+        \ifnum#3=\z@ \kern -\@tempdima\else \kern -.8\@tempdima \fi
+        \noexpand\mdm@op@sb}%
+    \fi
+    \ifx\mdm@op@sp\relax \else
+      \noexpand\sp{\ifnum#3=\z@ \kern \@tempdima\fi
+        \noexpand\mdm@op@sp}%
+    \fi
+    \if@tempswa \kern -.2\@tempdima \fi
+  }%
+  \@tempa
+}
+
+%% The |\medmath|\marg{formula} prepares a medium-size formula
+%% in display style:
+
+\NewDocumentCommand\mdm@base@medmath{m}{\mdm@select@msize
+  \mathord{\raise\@tempdima\hbox{\mdm@prepare@msize
+    $\displaystyle#1$}}%
+}
+
+%% Fix sizes of non integral operators in superscripts/subscripts
+%% We use the method in scalerel package for saving math styles
+% big operator in normal text is 80% of the size of \displaystyle
+% big operator in script is 80% of the size of \textstyle
+% big operator in script script is 80% of the size of \scriptstyle
+
+\def\@mdm@style@D{\displaystyle}
+\def\@mdm@style@T{\displaystyle}
+\def\@mdm@style@S{\textstyle}
+\def\@mdm@style@s{\scriptstyle}
+\def\mdm@style@saved{\csname @mdm@style@\@mdm@style@switch\endcsname}
+\newcommand{\mdm@style@this}[1]{%
+  \mathchoice{\def\@mdm@style@switch{D}#1}{\def\@mdm@style@switch{T}#1}
+             {\def\@mdm@style@switch{S}#1}{\def\@mdm@style@switch{s}#1}%
+}
+\DeclareDocumentCommand\mdm@base@medmath{m}{\mdm@select@msize
+  \mathord{\mdm@style@this{\raise\@tempdima\hbox{\mdm@prepare@msize$\mdm@style@saved #1$}}}%
+}
+
+%% The |\medop|\marg{operator} prepares an operator in the medium size:
+
+\NewExpandableDocumentCommand\mdm@base@medop{m}{\DOTSB\mathop{\medmath{#1}}\slimits@}
+
+%% The |\medintcorr|\marg{length} specifies an italic correction
+%% for a medium integral:
+
+\NewExpandableDocumentCommand\mdm@base@medintcorr{m}{\def\mdm@op@kern{#1}}
+\mdm@base@medintcorr{0.5\@mdm@em}
+
+%% The |\medint|\marg{integral} command prepares a medium integral:
+
+\NewExpandableDocumentCommand\mdm@base@medint{m}{\DOTSI\mdm@op@prepare{\medmath{#1}}}
+
+%% The |\mfrac|\marg{numerator}\marg{denominator} prepares
+%% a medium-size fraction:
+
+\NewDocumentCommand\mdm@base@mfrac{mm}{\medmath{\frac{#1}{#2}}}
+
+%% The |\mbinom|\marg{numerator}\marg{denominator} prepares
+%% a medium-size binomial expression:
+
+\NewDocumentCommand\mdm@base@mbinom{mm}{%
+  \Bigl(\medmath{\genfrac{}{}{\z@}{}{#1}{#2}}\Bigr)%
+}
+
+%% The |medsize| environment is useful for preparing medium-size arrays:
+
+\NewDocumentEnvironment{mdm@base@medsize}{}{\mdm@select@msize
+  \mathord\bgroup
+    \raise\@tempdima\hbox\bgroup\mdm@prepare@msize
+      \arraycolsep .8\arraycolsep $}{$\egroup\egroup}
+
+%% The |mmatrix| environment prepares a medium-size matrix:
+
+\NewDocumentEnvironment{mdm@base@mmatrix}{}{\medsize\begin{matrix}}{\end{matrix}\endmedsize}
+
+%% Improve the |\MultiIntegral| kerning method on the base of
+%% |\mdm@op@prepare@| hook. The original method from |amsmath| works
+%% bad if a multi-integral is an argument of the |\medint| command.
+
+\NewDocumentCommand\mdm@base@MultiIntegral{m}{%
+  \edef\mdm@op{\noexpand\intop
+    \ifnum#1=\z@\noexpand\intdots@\else\noexpand\intkern@\fi
+    \ifnum#1>\tw@\noexpand\intop\noexpand\intkern@\fi
+    \ifnum#1>\thr@@\noexpand\intop\noexpand\intkern@\fi
+    \noexpand\intop
+  }%
+  \let\mdm@op@print\mdm@op@printd
+  \mdm@op@prepare@
+}
+\def\mdm@op@printd{%
+  \setlength\@tempdima{\mdm@op@kern}%
+  \ifx\mdm@op@lim\nolimits \@tempcnta\@ne \else
+    \ifx\mdm@op@lim\limits \@tempcnta\z@ \else
+      \@tempcnta\m@ne
+    \fi
+  \fi
+  \mathchoice{\mdm@op@printd@{\displaystyle}{1.2\@tempdima}}%
+             {\mdm@op@printd@{\textstyle}{.8\@tempdima}}%
+             {\mdm@op@printd@{\scriptstyle}{.8\@tempdima}}%
+             {\mdm@op@printd@{\scriptscriptstyle}{.8\@tempdima}}%
+}
+\def\mdm@op@printd@#1#2{#1%
+  \ifnum\@tempcnta>\m@ne
+    \mdm@op@print@{\hbox{$#1\mdm@op$}}{#2}\@tempcnta
+  \else
+    \ifx#1\displaystyle
+      \mdm@op@print@{\hbox{$#1\mdm@op$}}{#2}\z@
+    \else
+      \mdm@op@print@{\hbox{$#1\mdm@op$}}{#2}\@ne
+    \fi
+  \fi
+}
+
+%%% --------------------------------------------------------
+%%> \section{Redefine existing math commands with all option}
+%%% --------------------------------------------------------
+
+%% We have to replace "\displaystyle\frac" with "\dfrac" in the definition.
+%% Otherwise more than four level nested \cfrac will cause infinite loop.
+
+\DeclareRobustCommand{\mdm@all@cfrac}[3][c]{{\dfrac{%
+  \strut\ifx r#1\hfill\fi#2\ifx l#1\hfill\fi}{#3}}%
+  \kern-\nulldelimiterspace}
+
+%% Redifine fractions and binoms.
+
+\NewDocumentCommand\mdm@all@frac{}{\mdm@op@select\mfrac{\genfrac{}{}{}{}}}
+\NewDocumentCommand\mdm@all@binom{}{\mdm@op@select\mbinom{\genfrac()\z@{}}}
+\def\mdm@op@select#1#2#3#4{%
+  \mathchoice{#1{#3}{#4}}{#1{#3}{#4}}%
+             {\scriptstyle#2{#3}{#4}}{\scriptscriptstyle#2{#3}{#4}}%
+}
+
+%% Fix fractions and subfractions in superscripts/subscripts
+%% Always use current style size to typeset the fractions
+
+\DeclareDocumentCommand\mdm@all@frac{mm}{%
+  \mathchoice{\mfrac{#1}{#2}}{\mfrac{#1}{#2}}%
+             {\mdm@larger@frac{#1}{#2}}{\mdm@larger@frac{#1}{#2}}%
+}
+
+%% Redefine all math operators except integrals:
+
+\NewDocumentCommand\mdm@redef@operators{mmm}{%
+  \ifx#2\@undefined \let#2#1\fi
+  \def#3{\DOTSB\medop{#2}}%
+}
+\mdm@redef@operators \coprod    \coprod@    \mdm@all@coprod
+\mdm@redef@operators \bigvee    \bigvee@    \mdm@all@bigvee
+\mdm@redef@operators \bigwedge  \bigwedge@  \mdm@all@bigwedge
+\mdm@redef@operators \biguplus  \biguplus@  \mdm@all@biguplus
+\mdm@redef@operators \bigcap    \bigcap@    \mdm@all@bigcap
+\mdm@redef@operators \bigcup    \bigcup@    \mdm@all@bigcup
+\mdm@redef@operators \prod      \prod@      \mdm@all@prod
+\mdm@redef@operators \sum       \sum@       \mdm@all@sum
+\mdm@redef@operators \bigotimes \bigotimes@ \mdm@all@bigotimes
+\mdm@redef@operators \bigoplus  \bigoplus@  \mdm@all@bigoplus
+\mdm@redef@operators \bigodot   \bigodot@   \mdm@all@bigodot
+\mdm@redef@operators \bigsqcup  \bigsqcup@  \mdm@all@bigsqcup
+
+%% Redefine integrals:
+
+\@ifundefined{NCC@op}{\let\mdm@op@int=\intop}{\let\mdm@op@int=\NCC@op@int}
+\NewDocumentCommand\mdm@all@intop{}{\mathop{\medmath{\mdm@op@int}}}
+\newcommand*\mdm@all@int{\DOTSI\mdm@op@prepare{\mdm@all@intop}}
+
+\@ifundefined{NCC@op}{\let\mdm@op@oint=\ointop}{\let\mdm@op@oint=\NCC@op@oint}
+\NewDocumentCommand\mdm@all@ointop{}{\mathop{\medmath{\mdm@op@oint}}}
+\newcommand*\mdm@all@oint{\DOTSI\mdm@op@prepare{\mdm@all@ointop}}
+
+%% Adjust \oiint operator.
+
+\ifdef{\oiint}{%
+  \let\mdm@op@oiint=\oiint
+  \NewDocumentCommand\mdm@all@oiintop{}{\mathop{\medmath{\mdm@op@oiint}}}%
+  \newcommand*\mdm@all@oiint{\DOTSI\mdm@op@prepare{\mdm@all@oiintop}}%
+}{}%
+
+%% Redefine multiple integrals:
+
+\NewDocumentCommand\mdm@all@MultiIntegral{m}{%
+  \edef\mdm@op{\noexpand\intop
+    \ifnum#1=\z@\noexpand\intdots@\else\noexpand\intkern@\fi
+    \ifnum#1>\tw@\noexpand\intop\noexpand\intkern@\fi
+    \ifnum#1>\thr@@\noexpand\intop\noexpand\intkern@\fi
+    \noexpand\intop
+  }%
+  \let\mdm@op@print\mdm@op@printm
+  \mdm@op@prepare@
+}
+\NewDocumentCommand\mdm@all@intkern@{}{\kern-\mdm@op@kern}
+\NewDocumentCommand\mdm@all@intdots@{}{\setlength\@tempdima{\mdm@op@kern}%
+  \kern-.4\@tempdima{\cdotp}\mkern1.5mu{\cdotp}%
+  \mkern1.5mu{\cdotp}\kern-.4\@tempdima}
+
+%% The definite integrals in cases environment may cause infinite loops
+%% Our redefinition moves \quad to the beginning of the second columns
+%% Therefore removing extra spaces when there is only one column in it
+
+\NewDocumentEnvironment{mdm@all@cases}{}{%
+  \left\{\linespread{1.0}\selectfont\def\arraystretch{1.2}%
+  \begin{array}{@{}l@{}>{\quad}l@{}}%
+}{%
+  \end{array}\right.%
+}
+
+%%% --------------------------------------------------------
+%%> \section{Activate definitions at the beginning of the document}
+%%% --------------------------------------------------------
+
+%% Current largesymbols font of math version normal is stored in \mv@normal:
+%% ... \getanddefine@fonts \symlargesymbols \OMX/cmex/m/n ...
+
+\def\mdm@get@font@cmd#1\getanddefine@fonts\symlargesymbols#2#3\@mdm@scan@stop{%
+  \expandafter\mdm@get@font@name\string#2\@mdm@scan@stop
+}
+
+\def\mdm@get@font@name#1#2/#3/#4/#5\@mdm@scan@stop{%
+  \def\@mdm@font@name{#3}%
+}
+
+\def\@mdm@intcorr@factor@cmex{0.5}  % default largesymbols font
+\def\@mdm@intcorr@factor@mdput{0.3} % [utopia]{mathdesign}
+\def\@mdm@intcorr@factor@mdbch{0.3} % [charter]{mathdesign}, {arevmath}
+
+\NewDocumentCommand\mdm@adjust@intcorr{}{%
+  \expandafter\mdm@get@font@cmd\mv@normal\@mdm@scan@stop
+  \ifcsdef{@mdm@intcorr@factor@\@mdm@font@name}{%
+    \edef\@mdm@intcorr@factor{\csuse{@mdm@intcorr@factor@\@mdm@font@name}}%
+  }{%
+    \def\@mdm@intcorr@factor{0.5}% default value
+  }%
+  \ExpandArgs{No}\def\mdm@op@kern{\@mdm@intcorr@factor\@mdm@em}%
+}
+
+\NewDocumentCommand\mdm@activate@base{}{%
+  \mdm@adjust@intcorr
+  \let \medmath       = \mdm@base@medmath
+  \let \medop         = \mdm@base@medop
+  \let \medintcorr    = \mdm@base@medintcorr
+  \let \medint        = \mdm@base@medint
+  \let \mfrac         = \mdm@base@mfrac
+  \let \mbinom        = \mdm@base@mbinom
+  \let \medsize       = \mdm@base@medsize
+  \let \endmedsize    = \endmdm@base@medsize
+  \let \mmatrix       = \mdm@base@mmatrix
+  \let \endmmatrix    = \endmdm@base@mmatrix
+  \let \MultiIntegral = \mdm@base@MultiIntegral
+}
+
+\NewDocumentCommand\mdm@activate@all{}{%
+  \mdm@activate@base
+  \let \cfrac         = \mdm@all@cfrac
+  \let \frac          = \mdm@all@frac
+  \let \binom         = \mdm@all@binom
+  \let \coprod        = \mdm@all@coprod
+  \let \bigvee        = \mdm@all@bigvee
+  \let \bigwedge      = \mdm@all@bigwedge
+  \let \biguplus      = \mdm@all@biguplus
+  \let \bigcap        = \mdm@all@bigcap
+  \let \bigcup        = \mdm@all@bigcup
+  \let \prod          = \mdm@all@prod
+  \let \sum           = \mdm@all@sum
+  \let \bigotimes     = \mdm@all@bigotimes
+  \let \bigoplus      = \mdm@all@bigoplus
+  \let \bigodot       = \mdm@all@bigodot
+  \let \bigsqcup      = \mdm@all@bigsqcup
+  \let \intop         = \mdm@all@intop
+  \let \int           = \mdm@all@int
+  \let \ointop        = \mdm@all@ointop
+  \let \oint          = \mdm@all@oint
+  \ifdef{\oiint}{%
+    \let \oiintop     = \mdm@all@oiintop
+    \let \oiint       = \mdm@all@oiint
+  }{}%
+  \let \MultiIntegral = \mdm@all@MultiIntegral
+  \let \intkern@      = \mdm@all@intkern@
+  \let \intdots@      = \mdm@all@intdots@
+  \let \cases         = \mdm@all@cases
+  \let \endcases      = \endmdm@all@cases
+}
+
+\AtBeginDocument{%
+  \ifbool{mdm@bare}{}{%
+    \ifbool{mdm@base}{\mdm@activate@base}{\mdm@activate@all}%
+  }%
+}
+

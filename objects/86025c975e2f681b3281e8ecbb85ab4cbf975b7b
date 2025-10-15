@@ -1,0 +1,502 @@
+%%
+%% This is file `zeckendorfcore.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% zeckendorf.dtx  (with options: `core')
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from zeckendorfcore.tex.
+%% 
+%% For distribution of the original source see the terms
+%% for copying and modification in the file zeckendorf.dtx.
+%% 
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+%% ---------------------------------------------------------------
+%% The zeckendorf package: Zeckendorf representation of big integers
+%% Copyright (C) 2025 Jean-Francois Burnol
+%%
+\input xintexpr.sty
+\input xintbinhex.sty
+\wlog{Package: zeckendorfcore 2025/10/07 v0.9b (JFB)}%
+\edef\ZECKrestorecatcodes{\XINTrestorecatcodes}%
+\def\ZECKrestorecatcodesendinput{\ZECKrestorecatcodes\endinput}%
+\XINTsetcatcodes%
+\def\zeck_abort#1\xint:{{}}%
+\def\zeck_done#1\xint:{\iffalse{\fi}}%
+\def\Zeck@FPair#1{\expandafter\zeck@fpair\the\numexpr #1.}%
+\def\zeck@fpair #1{%
+   \xint_UDzerominusfork
+      #1-\zeck@fpair_n
+      0#1\zeck@fpair_n
+      0-\zeck@fpair_p
+   \krof #1%
+}%
+\def\zeck@fpair_p #1.{\Zeck@@FPair{#1}}%
+\def\zeck@fpair_n #1.{%
+    \ifodd#1 \expandafter\zeck@fpair_ei\else\expandafter\zeck@fpair_eii\fi
+    \romannumeral`&&@\Zeck@@FPair{1-#1}%
+}%
+\def\zeck@fpair_ei{\expandafter\zeck@fpair_fi}%
+\def\zeck@fpair_eii{\expandafter\zeck@fpair_fii}%
+\def\zeck@fpair_fi#1;#2;{%
+    \romannumeral0\xintiiexpro #2\expandafter\relax\expandafter;%
+    \romannumeral0\xintiiexpro -#1\relax;%
+}%
+\def\zeck@fpair_fii#1;#2;{%
+    \romannumeral0\xintiiexpro -#2\expandafter\relax\expandafter;%
+    #1;%
+}%
+\def\Zeck@@FPair#1{%
+    \expandafter\Zeck@start
+    \romannumeral0\xintdectobin{\the\numexpr#1\relax};%
+}%
+\def\Zeck@start 1#1{%
+    \csname Zeck@#1\expandafter\endcsname
+    \romannumeral0\xintiiexpro 1\expandafter\relax\expandafter;%
+    \romannumeral0\xintiiexpro 0\relax;%
+}%
+\expandafter\def\csname Zeck@0\endcsname #1;#2;#3{%
+    \csname Zeck@#3\expandafter\endcsname
+    \romannumeral0\xintiiexpro (#1+2*#2)*#1\expandafter\relax\expandafter;%
+    \romannumeral0\xintiiexpro #1*#1+#2*#2\relax;%
+}%
+\expandafter\def\csname Zeck@1\endcsname #1;#2;#3{%
+    \csname Zeck@#3\expandafter\endcsname
+    \romannumeral0\xintiiexpro 2*(#1+#2)*#1+#2*#2\expandafter\relax\expandafter;%
+    \romannumeral0\xintiiexpro (#1+2*#2)*#1\relax;%
+}%
+\expandafter\let\csname Zeck@;\endcsname\empty
+\def\Zeck@@FN{\expandafter\zeck@@fn\romannumeral`&&@\Zeck@@FPair}%
+\def\zeck@@fn#1;#2;{#1}%
+\def\ZeckTheFN{\xintthe\expandafter\zeck@@fn\romannumeral`&&@\Zeck@FPair}%
+\def\ZeckTheFSeq#1#2{%#1=starting index, #2>#1=ending index
+    \expanded\bgroup\expandafter\ZeckTheF@Seq
+    \the\numexpr #1\expandafter.\the\numexpr #2.%
+}%
+\def\ZeckTheF@Seq #1.#2.{%
+    \expandafter\ZeckTheF@Seq@loop
+    \the\numexpr #2-#1-1\expandafter.\romannumeral0\Zeck@FPair{#1+1}%
+}%
+\def\ZeckTheF@Seq@loop #1.#2;#3;{% standard Fibonacci recursion
+    {\xintthe#3}\ifnum #1=\z@ \expandafter\ZeckTheF@Seq@end\fi
+    \expandafter\ZeckTheF@Seq@loop
+    \the\numexpr #1-1\expandafter.%
+    \romannumeral0\xintiiexpro #2+#3\relax;#2;%
+}%
+\def\ZeckTheF@Seq@end#1;#2;{{\xintthe#2}\iffalse{\fi}}%
+\def\ZeckNearIndex#1{\xintiRound{0}{%
+    \xintFloatDiv[8]{\PoorManLogBaseTen_raw{\xintFloatMul[8]{2236068[-6]}{#1}}}%
+                    {20898764[-8]}%
+                          }%
+}%
+\def\ZeckIndex{\expanded\zeckindex}%
+\def\zeckindex#1{\expandafter\zeckindex_fork\romannumeral`&&@#1\xint:}%
+\def\zeckindex_fork#1{%
+  \xint_UDzerominusfork
+    #1-\zeck_abort
+    0#1\zeck_abort
+    0-{\zeckindex_a#1}%
+  \krof
+}%
+\def\zeckindex_a #1\xint:{%
+    \expandafter\zeckindex_b
+    \the\numexpr\ZeckNearIndex{#1}\xint:#1\xint:
+}%
+\def\zeckindex_b #1\xint:{%
+    \expandafter\zeckindex_c
+    \romannumeral`&&@\Zeck@@FPair{#1}#1\xint:
+}%
+\def\zeckindex_c #1;#2;#3\xint:#4\xint:{%
+    \xintiiifGt{\xintthe#1}{#4}%
+       {{\expandafter}\the\numexpr#3-1\relax}%
+       {{}#3}%
+}%
+\def\ZeckIndices{\expanded\zeckindices}%
+\let\ZeckZeck\ZeckIndices
+\def\zeckindices#1{\expandafter\zeckindices_fork\romannumeral`&&@#1\xint:}%
+\def\zeckindices_fork#1{%
+  \xint_UDzerominusfork
+    #1-\zeck_abort
+    0#1\zeck_abort
+    0-{\bgroup\zeckindices_a#1}%
+  \krof
+}%
+\def\zeckindices_a #1\xint:{%
+    \expandafter\zeckindices_b
+    \the\numexpr\ZeckNearIndex{#1}\xint:#1\xint:
+}%
+\def\zeckindices_b #1\xint:{%
+    \expandafter\zeckindices_c
+    \romannumeral`&&@\Zeck@@FPair{#1}#1\xint:
+}%
+\def\zeckindices_c #1;#2;#3\xint:#4\xint:{%
+    \xintiiifGt{\xintthe#1}{#4}\zeckindices_A\zeckindices_B
+    #1;#2;#3\xint:#4\xint:
+}%
+\def\zeckindices_A#1;#2;#3\xint:#4\xint:{%
+    \the\numexpr#3-1\relax
+    \expandafter\zeckindices_loop
+    \romannumeral`&&@\xinttheiiexpr #4-#2\relax\xint:
+}%
+\def\zeckindices_B#1;#2;#3\xint:#4\xint:{%
+    #3%
+    \expandafter\zeckindices_loop
+    \romannumeral`&&@\xinttheiiexpr #4-#1\relax\xint:
+}%
+\def\zeckindices_loop#1{%
+    \xint_UDzerofork#1\zeck_done 0{, \zeckindices_a#1}\krof
+}%
+\def\ZeckBList{\expanded\zeckblist}%
+\def\zeckblist#1{\expandafter\zeckblist_fork\romannumeral`&&@#1\xint:}%
+\def\zeckblist_fork#1{%
+  \xint_UDzerominusfork
+    #1-\zeck_abort
+    0#1\zeck_abort
+    0-{\bgroup\zeckblist_a#1}%
+  \krof
+}%
+\def\zeckblist_a #1\xint:{%
+    \expandafter\zeckblist_b
+    \the\numexpr\ZeckNearIndex{#1}\xint:#1\xint:
+}%
+\def\zeckblist_b #1\xint:{%
+    \expandafter\zeckblist_c
+    \romannumeral`&&@\Zeck@@FPair{#1}#1\xint:
+}%
+\def\zeckblist_c #1;#2;#3\xint:#4\xint:{%
+    \xintiiifGt{\xintthe#1}{#4}\zeckblist_A\zeckblist_B
+    #1;#2;#3\xint:#4\xint:
+}%
+\def\zeckblist_A#1;#2;#3\xint:#4\xint:{%
+    {\the\numexpr#3-1\relax}%
+    \expandafter\zeckblist_loop
+    \romannumeral`&&@\xinttheiiexpr #4-#2\relax\xint:
+}%
+\def\zeckblist_B#1;#2;#3\xint:#4\xint:{%
+    {#3}%
+    \expandafter\zeckblist_loop
+    \romannumeral`&&@\xinttheiiexpr #4-#1\relax\xint:
+}%
+\def\zeckblist_loop#1{\xint_UDzerofork#1\zeck_done 0{\zeckblist_a#1}\krof}%
+\def\ZeckIndexedSumSep{+\allowbreak}%
+\let\ZeckExplicitSumSep\ZeckIndexedSumSep
+\def\ZeckExplicitOne{\xintthe\Zeck@@FN}%
+\def\ZeckIndexedSum#1{%
+    \expandafter\zeckindexedsum\expanded\zeckindices{#1},;%
+}%
+\def\zeckindexedsum#1{%
+    \if,#1\expandafter\xint_gob_til_sc\fi \zeckindexedsum_a#1%
+}%
+\def\zeckindexedsum_a#1,{F\sb{#1}\zeckindexedsum_b}%
+\def\zeckindexedsum_b #1{%
+    \if;#1\expandafter\xint_gob_til_sc\fi
+    \ZeckIndexedSumSep\zeckindexedsum_a#1%
+}%
+\def\ZeckExplicitSum#1{%
+    \expandafter\zeckexplicitsum\expanded\zeckindices{#1},;%
+}%
+\def\zeckexplicitsum#1{%
+    \if,#1\expandafter\xint_gob_til_sc\fi \zeckexplicitsum_a#1%
+}%
+\def\zeckexplicitsum_a#1,{\ZeckExplicitOne{#1}\zeckexplicitsum_b}%
+\def\zeckexplicitsum_b #1{%
+    \if;#1\expandafter\xint_gob_til_sc\fi
+    \ZeckExplicitSumSep\zeckexplicitsum_a#1%
+}%
+\def\ZeckWord{\expanded\zeckword}%
+\def\zeckword#1{\expandafter\zeckword_fork\romannumeral`&&@#1\xint:}%
+\def\zeckword_fork#1{%
+  \xint_UDzerominusfork
+    #1-\zeck_abort
+    0#1\zeck_abort
+    0-{\bgroup\zeckword_a#1}%
+  \krof
+}%
+\def\zeckword_a #1\xint:{%
+    \expandafter\zeckword_b\the\numexpr\ZeckNearIndex{#1}\xint:
+    #1\xint:
+}%
+\def\zeckword_b #1\xint:{%
+    \expandafter\zeckword_c\romannumeral`&&@\Zeck@@FPair{#1}#1\xint:
+}%
+\def\zeckword_c #1;#2;#3\xint:#4\xint:{%
+    \xintiiifGt{\xintthe#1}{#4}\zeckword_A\zeckword_B
+    #1;#2;#3\xint:#4\xint:
+}%
+\def\zeckword_A#1;#2;#3\xint:#4\xint:{%
+    \expandafter\zeckword_d
+    \romannumeral`&&@\xinttheiiexpr#4-#2\expandafter\relax\expandafter\xint:
+    \the\numexpr#3-1.%
+}%
+\def\zeckword_B#1;#2;#3\xint:#4\xint:{%
+    \expandafter\zeckword_d
+    \romannumeral`&&@\xinttheiiexpr#4-#1\relax\xint:
+    #3.%
+}%
+\def\zeckword_d #1%
+    {\xint_UDzerofork#1\zeckword_done0{1\zeckword_e}\krof #1}%
+\def\zeckword_done#1\xint:#2.{1\xintReplicate{#2-2}{0}\iffalse{\fi}}%
+\def\zeckword_e #1\xint:{%
+    \expandafter\zeckword_f\the\numexpr\ZeckNearIndex{#1}\xint:
+    #1\xint:
+}%
+\def\zeckword_f #1\xint:{%
+    \expandafter\zeckword_g\romannumeral`&&@\Zeck@@FPair{#1}#1\xint:
+}%
+\def\zeckword_g #1;#2;#3\xint:#4\xint:{%
+    \xintiiifGt{\xintthe#1}{#4}\zeckword_gA\zeckword_gB
+    #1;#2;#3\xint:#4\xint:
+}%
+\def\zeckword_gA#1;#2;#3\xint:#4\xint:{%
+    \expandafter\zeckword_h
+    \the\numexpr#3-1\expandafter.%
+    \romannumeral`&&@\xinttheiiexpr #4-#2\relax\xint:
+}%
+\def\zeckword_gB#1;#2;#3\xint:#4\xint:{%
+    \expandafter\zeckword_h
+    \the\numexpr#3\expandafter.%
+    \romannumeral`&&@\xinttheiiexpr #4-#1\relax\xint:
+}%
+\def\zeckword_h #1.#2\xint:#3.{%
+    \xintReplicate{#3-#1-1}{0}%
+    \zeckword_d #2\xint:#1.%
+}%
+\def\ZeckKMul{\romannumeral0\zeckkmul}%
+\def\zeckkmul#1#2{\expandafter\zeckkmul_a
+                  \expanded{\ZeckIndices{#1}%
+                            ,;%
+                            \ZeckIndices{#2}%
+                            ,,}%
+}%
+\def\zeckkmul_a{\expandafter\xintiisum\expanded{{\iffalse}}\fi
+                \zeckkmul_b}%
+\def\zeckkmul_b#1;#2,{%
+    \if\relax#2\relax\expandafter\zeckkmul_done\fi
+    \zeckkmul_c{#2}#1,\zeckkmul_b#1;%
+}%
+\def\zeckkmul_c#1#2,{%
+    \if\relax#2\relax\expandafter\xint_gobble_iii\fi
+    {\xintthe\Zeck@@FN{#1+#2}}\zeckkmul_c{#1}%
+}%
+\def\zeckkmul_done#1;{\iffalse{{\fi}}}%
+\def\ZeckNFromIndices{\romannumeral0\zecknfromindices}%
+\def\zecknfromindices#1{\expandafter\zecknfromindices_a\romannumeral`&&@#1,;}%
+\def\zecknfromindices_a{\expandafter\xintiisum\expanded{{\iffalse}}\fi
+                  \zecknfromindices_b
+}%
+\def\zecknfromindices_b#1{%
+    \if;#1\xint_dothis\zecknfromindices_done\fi
+    \if,#1\xint_dothis\zecknfromindices_skip\fi
+    \xint_orthat\zecknfromindices_c #1%
+}%
+\def\zecknfromindices_c #1,{%
+    {\ZeckTheFN{#1}}\expandafter\zecknfromindices_b\romannumeral`&&@%
+}%
+\def\zecknfromindices_skip,{\expandafter\zecknfromindices_b\romannumeral`&&@}%
+\def\zecknfromindices_done;{\iffalse{{\fi}}}%
+\def\ZeckNFromWord{\romannumeral0\zecknfromword}%
+\def\zecknfromword#1{%
+    \expandafter\zecknfromword_a\romannumeral0\xintreversedigits{#1};%
+}%
+\def\zecknfromword_a{%
+    \expandafter\xintiisum\expanded{{\iffalse}}\fi\zecknfromword_b 2.%
+}%
+\def\zecknfromword_b#1.#2{%
+    \if;#2\expandafter\zecknfromword_done\fi
+    \if#21{\xintthe\Zeck@@FN{#1}}\fi
+    \expandafter\zecknfromword_b\the\numexpr#1+1.%
+}%
+\def\zecknfromword_done#1.{\iffalse{{\fi}}}%
+\def\XINT_iiexpr_func_fib #1#2#3%
+{%
+    \expandafter #1\expandafter #2\expandafter{%
+    \romannumeral`&&@\XINT:NEhook:f:one:from:one
+    {\romannumeral`&&@\ZeckTheFN#3}}%
+}%
+\def\ZeckTheFNnum#1{\ZeckTheFN{\xintNum{#1}}}%
+\def\XINT_expr_func_fib #1#2#3%
+{%
+    \expandafter #1\expandafter #2\expandafter{%
+    \romannumeral`&&@\XINT:NEhook:f:one:from:one
+    {\romannumeral`&&@\ZeckTheFNnum#3}}%
+}%
+\let\XINT_flexpr_func_fib\XINT_expr_func_fib
+\def\XINT_iiexpr_func_fibseq #1#2#3%
+{%
+    \expandafter #1\expandafter #2\expandafter{%
+    \romannumeral`&&@\XINT:NEhook:f:one:from:two
+    {\romannumeral`&&@\ZeckTheFSeq#3}}%
+}%
+\def\ZeckTheFSeqnum#1#2{\ZeckTheFSeq{\xintNum{#1}}{\xintNum{#2}}}%
+\def\XINT_expr_func_fibseq #1#2#3%
+{%
+    \expandafter #1\expandafter #2\expandafter{%
+    \romannumeral`&&@\XINT:NEhook:f:one:from:two
+    {\romannumeral`&&@\ZeckTheFSeqnum#3}}%
+}%
+\let\XINT_flexpr_func_fibseq\XINT_expr_func_fibseq
+\def\XINT_iiexpr_func_zeckindex #1#2#3%
+{%
+    \expandafter #1\expandafter #2\expandafter{%
+    \romannumeral`&&@\XINT:NEhook:f:one:from:one
+    {\romannumeral`&&@\ZeckIndex#3}}%
+}%
+\def\ZeckIndexnum#1{\ZeckIndex{\xintNum{#1}}}%
+\def\XINT_expr_func_zeckindex #1#2#3%
+{%
+    \expandafter #1\expandafter #2\expandafter{%
+    \romannumeral`&&@\XINT:NEhook:f:one:from:one
+    {\romannumeral`&&@\ZeckIndexnum#3}}%
+}%
+\let\XINT_flexpr_func_zeckindex\XINT_expr_func_zeckindex
+\def\XINT_iiexpr_func_zeck #1#2#3%
+{%
+    \expandafter #1\expandafter #2\expandafter{%
+    \romannumeral`&&@\XINT:NEhook:f:one:from:one
+    {\romannumeral`&&@\ZeckBList#3}}%
+}%
+\def\ZeckBListnum#1{\ZeckBList{\xintNum{#1}}}%
+\def\XINT_expr_func_zeck #1#2#3%
+{%
+    \expandafter #1\expandafter #2\expandafter{%
+    \romannumeral`&&@\XINT:NEhook:f:one:from:one
+    {\romannumeral`&&@\ZeckBListnum#3}}%
+}%
+\let\XINT_flexpr_func_zeck\XINT_expr_func_zeck
+\ifdefined\xintdefinfix
+  \def\zeckdefinfix{\xintdefinfix {iiexpr}}%
+\else
+\ifdefined\xint_noxpd\else\let\xint_noxpd\unexpanded\fi % support old xint
+\def\ZECK_defbin_c #1#2#3#4#5#6#7#8%
+{%
+  \XINT_global\def #1##1% \XINT_#8_op_<op>
+  {%
+    \expanded{\xint_noxpd{#2{##1}}\expandafter}%
+    \romannumeral`&&@\expandafter#3\romannumeral`&&@\XINT_expr_getnext
+  }%
+  \XINT_global\def #2##1##2##3##4% \XINT_#8_exec_<op>
+  {%
+    \expandafter##2\expandafter##3\expandafter
+      {\romannumeral`&&@\XINT:NEhook:f:one:from:two{\romannumeral`&&@#7##1##4}}%
+  }%
+  \XINT_global\def #3##1% \XINT_#8_check-_<op>
+  {%
+    \xint_UDsignfork
+      ##1{\expandafter#4\romannumeral`&&@#5}%
+        -{#4##1}%
+    \krof
+  }%
+  \XINT_global\def #4##1##2% \XINT_#8_checkp_<op>
+  {%
+    \ifnum ##1>#6%
+      \expandafter#4%
+      \romannumeral`&&@\csname XINT_#8_op_##2\expandafter\endcsname
+    \else
+      \expandafter ##1\expandafter ##2%
+    \fi
+  }%
+}%
+\def\ZECK_defbin_b #1#2#3#4#5%
+{%
+  \expandafter\ZECK_defbin_c
+  \csname XINT_#1_op_#2\expandafter\endcsname
+  \csname XINT_#1_exec_#2\expandafter\endcsname
+  \csname XINT_#1_check-_#2\expandafter\endcsname
+  \csname XINT_#1_checkp_#2\expandafter\endcsname
+  \csname XINT_#1_op_-\romannumeral\ifnum#4>12 #4\else12\fi\expandafter\endcsname
+  \csname xint_c_\romannumeral#4\endcsname
+  #5%
+  {#1}% #8 for \ZECK_defbin_c
+  \XINT_global
+  \expandafter
+  \let\csname XINT_expr_precedence_#2\expandafter\endcsname
+      \csname xint_c_\romannumeral#3\endcsname
+}%
+\def\zeckdefinfix #1#2#3#4%
+{%
+    \edef\ZECK_tmpa{#1}%
+    \edef\ZECK_tmpa{\xint_zapspaces_o\ZECK_tmpa}%
+    \edef\ZECK_tmpL{\the\numexpr#3\relax}%
+    \edef\ZECK_tmpL
+         {\ifnum\ZECK_tmpL<4 4\else\ifnum\ZECK_tmpL<23 \ZECK_tmpL\else 22\fi\fi}%
+    \edef\ZECK_tmpR{\the\numexpr#4\relax}%
+    \edef\ZECK_tmpR
+         {\ifnum\ZECK_tmpR<4 4\else\ifnum\ZECK_tmpR<23 \ZECK_tmpR\else 22\fi\fi}%
+    \ZECK_defbin_b {iiexpr}\ZECK_tmpa\ZECK_tmpL\ZECK_tmpR #2%
+    \expandafter\ZECK_dotheitselves\ZECK_tmpa\relax
+  \unless\ifcsname
+    XINT_iiexpr_exec_-\romannumeral\ifnum\ZECK_tmpR>12 \ZECK_tmpR\else 12\fi
+  \endcsname
+    \xintMessage{zeckendorf}{Error}{Right precedence not among accepted values.}%
+    \errhelp{Accepted values include 12, 14, and 17.}%
+    \errmessage{Sorry, you can not use \ZECK_tmpR\space as right precedence.}%
+  \fi
+  \ifxintverbose
+    \xintMessage{zeckendorf}{info}{infix operator \ZECK_tmpa\space
+    \ifxintglobaldefs globally \fi
+        does
+        \xint_noxpd{#2}\MessageBreak with precedences \ZECK_tmpL, \ZECK_tmpR;}%
+  \fi
+}%
+\def\ZECK_dotheitselves#1#2%
+{%
+    \if#2\relax\expandafter\xint_gobble_ii
+    \else
+  \XINT_global
+      \expandafter\edef\csname XINT_expr_itself_#1#2\endcsname{#1#2}%
+      \unless\ifcsname XINT_expr_precedence_#1\endcsname
+  \XINT_global
+        \expandafter\edef\csname XINT_expr_precedence_#1\endcsname
+                        {\csname XINT_expr_precedence_\ZECK_tmpa\endcsname}%
+  \XINT_global
+        \expandafter\odef\csname XINT_iiexpr_op_#1\endcsname
+                        {\csname XINT_iiexpr_op_\ZECK_tmpa\endcsname}%
+      \fi
+    \fi
+    \ZECK_dotheitselves{#1#2}%
+}%
+\fi
+\ifdefined\xintdefinfix
+\else
+\ifdefined\xint_noxpd\else\let\xint_noxpd\unexpanded\fi % support old xint
+\def\ZECK_undefbin_b #1#2%
+{%
+  \XINT_global\expandafter\let
+    \csname XINT_#1_op_#2\endcsname\xint_undefined
+  \XINT_global\expandafter\let
+    \csname XINT_#1_exec_#2\endcsname\xint_undefined
+  \XINT_global\expandafter\let
+    \csname XINT_#1_check-_#2\endcsname\xint_undefined
+  \XINT_global\expandafter\let
+    \csname XINT_#1_checkp_#2\endcsname\xint_undefined
+  \XINT_global\expandafter\let
+    \csname XINT_expr_precedence_#2\endcsname\xint_undefined
+  \XINT_global\expandafter\let
+    \csname XINT_expr_itself_#2\endcsname\xint_undefined
+}%
+\def\zeckundefinfix #1%
+{%
+    \edef\ZECK_tmpa{#1}%
+    \edef\ZECK_tmpa{\xint_zapspaces_o\ZECK_tmpa}%
+    \ZECK_undefbin_b {iiexpr}\ZECK_tmpa
+%%  \ifxintverbose
+    \xintMessage{zeckendorf}{Warning}{infix operator \ZECK_tmpa\space
+        has been DELETED!}%
+%%  \fi
+}%
+\fi
+\zeckdefinfix{$}{\ZeckKMul}{14}{14}% $ (<-only to tame Emacs/AUCTeX highlighting)
+\def\ZeckSetAsKnuthOperator#1{\zeckdefinfix{#1}{\ZeckKMul}{14}{14}}%
+\def\ZeckDeleteOperator#1{\zeckundefinfix{#1}}%
+\endinput
+%%
+%% End of file `zeckendorfcore.tex'.

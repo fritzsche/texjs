@@ -1,0 +1,947 @@
+%%%
+% Urne et probabilités
+%%%
+\def\filedateUrneProba{2025/05/26}%
+\def\fileversionUrneProba{0.1a}%
+\message{-- \filedateUrneProba\space v\fileversionUrneProba}%
+%
+\newtoks\tokUrneListeCouleurs%
+\newtoks\tokUrneListeColonnes%
+\newtoks\tokUrneListeNombres%
+
+\def\UpdatetoksUrneCouleurs#1\nil{\addtotok\tokUrneListeCouleurs{#1,}}%
+\def\UpdatetoksUrneNombres#1\nil{\addtotok\tokUrneListeNombres{"#1",}}%
+\def\UpdatetoksUrneColonnes#1\nil{\addtotok\tokUrneListeColonnes{"#1",}}%
+
+\setKVdefault[PfCUrne]{Couleurs=false,Nombres=false,Pas=4,Echelle=1,Repartition={1,2,3},Double=false,RepartitionC={1,2,3},RepartitionN={1,2,3},Roue=false,Rayon=3,Tableau=false,SansRemise=false,Solution=false,Codes=false,CouleurLigne=0.85white,CouleurColonne=0.85white,Different=false,RepartitionLigne={1,2,3},RepartitionColonne={1,2,3},Impression,Casino=false,Traces={},ListeCouleurs={},ListeNombres={},ListeColonne={},ListeLigne={},Orientation=false,CoefEcart=17}%
+\defKV[PfCUrne]{%
+  Traces=\ifempty{#1}{}{\setKV[PfCUrne]{Codes}},%
+  ListeCouleurs=\ifempty{#1}{}{\setKV[PfCUrne]{Couleurs}\setsepchar{,}\ignoreemptyitems\readlist*\ListeCouleursAv{#1}\reademptyitems},
+  ListeNombres=\ifempty{#1}{}{\setKV[PfCUrne]{Nombres}\setsepchar{,}\ignoreemptyitems\readlist*\ListeNombresAv{#1}\reademptyitems},%
+  ListeColonne=\ifempty{#1}{}{\setsepchar{,}\ignoreemptyitems\readlist*\ListeCouleursAv{#1}\reademptyitems},%
+  ListeLigne=\ifempty{#1}{}{\setsepchar{,}\ignoreemptyitems\readlist*\ListeNombresAv{#1}\reademptyitems}%
+}%
+
+\NewDocumentCommand\BuildRoulette{}{%
+  \ifluatex
+    \begin{Geometrie}[Cadre="aucun"]
+      u:=\useKV[PfCUrne]{Echelle}*1cm;
+
+      color colzero,colrouge,coltoura,coltourb,colbarre;
+
+      boolean Impression;
+      Impression=\useKV[PfCUrne]{Impression};
+
+      if Impression=false:
+      colzero=green;
+      colrouge=red;
+      coltoura=(179,103,0)/256;
+      coltourb=(179,111,48)/256;%(184,114,50)/256;
+      colbarre=0.7529white;
+      else:
+      colzero=white;
+      colrouge=white;
+      coltoura=black;
+      coltourb=black;
+      colbarre=black;
+      fi;
+      pair O,A[],B[],C[],D[];
+      path cc[];
+      O=(0,0);
+      cc1=cercles(O,2u);
+      cc2=cercles(O,2.75u);
+      cc3=cercles(O,3.5u);
+      cc4=cercles(O,3.7u);
+      cc5=cercles(O,4u);
+      cc6=cercles(O,3.125u);
+      cc7=cercles(O,2.375u);
+      if Impression=false:
+      fill cc5 withcolor coltoura;
+      fill cc4 withcolor coltourb;
+      fill cc1 withcolor coltoura;
+      trace cc1 withpen pencircle scaled 1.05;
+      trace cc5 withpen pencircle scaled 1.05;
+      trace cc4 withpen pencircle scaled 1.05;
+      trace cc3 withpen pencircle scaled 1.05;
+      else:
+      fill cc5;
+      fill cc4 withcolor white;
+      trace cc1;
+      trace cc3;
+      fi;
+      for k=0 upto 38:
+      A[k]=pointarc(cc3,90-k*(360/37));
+      B[k]=pointarc(cc1,90-k*(360/37));
+      endfor;
+      na:=1;
+      for p_=32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26,0:
+      if (na mod 2)=0:
+      fill arccercle(A[na],A[na-1],O)--B[na-1]--reverse(arccercle(B[na],B[na-1],O))--cycle;
+      drawoptions(withcolor white);
+      label(TEX("\textbf{"&decimal(p_)&"}") rotated (-na*(360/37)),pointarc(cc6,90+0.5*(360/37)-na*(360/37)));
+      drawoptions();
+      else:
+      if p_=0:
+      fill arccercle(A[na],A[na-1],O)--B[na-1]--reverse(arccercle(B[na],B[na-1],O))--cycle withcolor colzero;
+      else:
+      fill arccercle(A[na],A[na-1],O)--B[na-1]--reverse(arccercle(B[na],B[na-1],O))--cycle withcolor colrouge;
+      fi;
+      if Impression=false:
+      drawoptions(withcolor white);
+      fi;
+      label(TEX("\textbf{"&decimal(p_)&"}") rotated (-na*(360/37)),pointarc(cc6,90+0.5*(360/37)-na*(360/37)));
+      if Impression=false:
+      drawoptions();
+      fi;
+      fi;
+      trace arccercle(A[na],A[na-1],O)--B[na-1]--reverse(arccercle(B[na],B[na-1],O))--cycle;
+      na:=na+1;
+      endfor;
+      trace cc2;
+      fill cercles(pointarc(cc7,90+0.5*(360/37)),0.125u);%dotlabel("",);
+      % barre
+      cc8=cercles(O,1.5u);
+      cc9=cercles(O,0.25u);
+      fill cc9 withcolor colbarre;
+      pair E[];
+      anglebase=floor(uniformdeviate(360));
+      E1=pointarc(cc8,anglebase);
+      E4=pointarc(cc8,anglebase+6);
+      E3=symetrie(E1,O);
+      E2=symetrie(E4,O);
+      E5=pointarc(cc8,anglebase+90);
+      E8=pointarc(cc8,anglebase+6+90);
+      E7=symetrie(E5,O);
+      E6=symetrie(E8,O);
+      fill polygone(E1,E2,E3,E4) withcolor colbarre;
+      fill polygone(E5,E6,E7,E8) withcolor colbarre;
+      pair F[];
+      F1=(E1--iso(E1,E2)) intersectionpoint cc9;
+      F2=(E4--iso(E3,E4)) intersectionpoint cc9;
+      F3=(E5--iso(E6,E5)) intersectionpoint cc9;
+      F4=(E8--iso(E7,E8)) intersectionpoint cc9;
+      F5=(E3--iso(E4,E3)) intersectionpoint cc9;
+      F6=(E2--iso(E2,E1)) intersectionpoint cc9;
+      F7=(E7--iso(E8,E7)) intersectionpoint cc9;
+      F8=(E6--iso(E6,E5)) intersectionpoint cc9;
+      trace E1--E4--F2--arccercle(F2,F3,O)--E5--E8--F4--arccercle(F4,F5,O)--E3--E2--F6--arccercle(F6,F7,O)--E7--E6--F8--arccercle(F8,F1,O)--cycle;
+    \end{Geometrie}
+  \fi    
+}%
+
+\NewDocumentCommand\BuildTableauDoubleEntreeDifferent{mmmm}{%
+  % #1 : les labels en colonne
+  % #2 : les labels en ligne
+  % #3 : la répartition en colonne
+  % #4 : la répartition en ligne
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      u:=\useKV[PfCUrne]{Echelle}*1cm;
+      numeric RetiensNumC[],RetiensNumL[];
+      %
+      vardef RecupRepartition(text t)=
+      n:=0;
+      for p_=t:
+      RetiensNumL[n]=p_;
+      n:=n+1;
+      endfor;
+      totallignes=n;
+      enddef;
+      %
+      vardef RecupRepartitionC(text t)=
+      n:=0;
+      for p_=t:
+      RetiensNumC[n]=p_;
+      n:=n+1;
+      endfor;
+      totalcolonnes=n;
+      enddef;
+      %
+      string Colonnes[];
+      vardef RecuperationColonnes(text t)=
+      n:=0;
+      for p_=t:
+      n:=n+1;
+      Colonnes[n]=p_;
+      endfor;
+      enddef;
+      %
+      string Lignes[];
+      vardef RecuperationLignes(text t)=
+      n:=0;
+      for p_=t:
+      n:=n+1;
+      Lignes[n]=p_;
+      endfor;
+      enddef;
+      %
+      boolean Solution, Codes;
+      Solution=\useKV[PfCUrne]{Solution};
+      Codes=\useKV[PfCUrne]{Codes};
+      %
+      color ColLigne,ColColonne;
+      ColLigne=\useKV[PfCUrne]{CouleurLigne};
+      ColColonne=\useKV[PfCUrne]{CouleurColonne};
+      %
+      RecupRepartitionC(#3);
+      RecupRepartition(#4);
+      RecuperationColonnes(#1);
+      RecuperationLignes(#2);
+
+      pair A[][],C[][];
+      for k=0 upto totallignes+1:
+      for l=0 upto totalcolonnes+1:
+      A[k][l]=(0,0) shifted(u*(l,-k));
+      C[k][l]=A[k][l] shifted(u*(0.5,-0.5));
+      endfor;
+      endfor;
+
+      fill polygone(A[0][1],A[0][totalcolonnes+1],A[1][totalcolonnes+1],A[1][1]) withcolor ColLigne;
+      fill polygone(A[1][0],A[totallignes+1][0],A[totallignes+1][1],A[1][1]) withcolor ColColonne;
+      for k=1 upto totalcolonnes:
+      label(TEX(Colonnes[RetiensNumC[k-1]]),iso(A[1][k],A[0][k+1]));
+      endfor;
+      for k=1 upto totallignes:
+      label(TEX(Lignes[RetiensNumL[k-1]]),iso(A[k][0],A[k+1][1]));
+      endfor;
+      %
+      for k=1 upto totallignes:
+      trace segment(A[k][0],A[k][totalcolonnes+1]);
+      endfor;
+      for k=1 upto totalcolonnes:
+      trace segment(A[0][k],A[totallignes+1][k]);
+      endfor;
+      trace A[1][0]--A[totallignes+1][0]--A[totallignes+1][totalcolonnes+1]--A[0][totalcolonnes+1]--A[0][1];
+      labeloffset:=labeloffset*4;
+      label.top(TEX("Tirage 1"),iso(A[0][1],A[0][totalcolonnes+1]));
+      label.lft(TEX("Tirage 2") rotated 90,iso(A[totallignes+1][0],A[1][0]));
+      labeloffset:=labeloffset/4;
+
+      path ccsol[][];      
+      
+      if Solution:
+      for k=1 upto totallignes:
+      for l=1 upto totalcolonnes:
+      label(TEX(Colonnes[RetiensNumC[l-1]]&"--"&Lignes[RetiensNumL[k-1]]),iso(A[k][l],A[k+1][l+1]));
+      endfor;
+      endfor;
+      fi;
+
+      if Codes:
+      \useKV[PfCUrne]{Traces};
+      fi;
+    \end{mplibcode}
+  \fi
+}%
+
+\NewDocumentCommand\BuildTableauDoubleEntree{mmm}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      u:=\useKV[PfCUrne]{Echelle}*1cm;
+      numeric RetiensNum[];
+      %
+      vardef RecupRepartition(text t)=
+      n:=0;
+      for p_=t:
+      RetiensNum[n]=p_;
+      n:=n+1;
+      endfor;
+      totalboules=n;
+      enddef;
+      %
+      color Col[];
+      vardef RecuperationCouleurs(text t)=
+      n:=0;
+      for p_=t:
+      n:=n+1;
+      Col[n]=p_;
+      endfor;
+      enddef;
+      %
+      string Nombres[];
+      vardef RecuperationNombres(text t)=
+      n:=0;
+      for p_=t:
+      n:=n+1;
+      Nombres[n]=p_;
+      endfor;
+      enddef;
+      %
+      numeric Pas,Rayon;
+      Pas=\useKV[PfCUrne]{Pas};
+      Rayon=\useKV[PfCUrne]{Rayon};
+      %
+      boolean Couleurs, Nombres, Roue, Solution, SansRemise, Codes;
+      Couleurs=\useKV[PfCUrne]{Couleurs};
+      Nombres=\useKV[PfCUrne]{Nombres};
+      Roue=\useKV[PfCUrne]{Roue};
+      Solution=\useKV[PfCUrne]{Solution};
+      SansRemise=\useKV[PfCUrne]{SansRemise};
+      Codes=\useKV[PfCUrne]{Codes};
+
+      color ColLigne,ColColonne;
+      ColLigne=\useKV[PfCUrne]{CouleurLigne};
+      ColColonne=\useKV[PfCUrne]{CouleurColonne};
+      
+      RecupRepartition(#3);
+      if Couleurs:
+      RecuperationCouleurs(#1);
+      fi;
+      if Nombres:
+      RecuperationNombres(#2);
+      fi;
+
+      pair O;
+      pair A[][],C[][];
+      for k=0 upto totalboules+1:
+      for l=0 upto totalboules+1:
+      A[k][l]:=(0,0) shifted(u*(l,-k));
+      endfor;
+      endfor;
+
+      for k=0 upto totalboules:
+      for l=0 upto totalboules:
+      C[k][l]=A[k][l] shifted(u*(0.5,-0.5));
+      endfor;
+      endfor;
+      
+      if Couleurs:
+      drawoptions(withpen pencircle scaled 0.75);
+      for k=1 upto totalboules:
+      fill cercles(iso(A[1][k],A[0][k+1]),0.35u) withcolor Col[RetiensNum[k-1]];
+      fill cercles(iso(A[k][0],A[k+1][1]),0.35u) withcolor Col[RetiensNum[k-1]];
+      trace cercles(iso(A[1][k],A[0][k+1]),0.35u);
+      trace cercles(iso(A[k][0],A[k+1][1]),0.35u);
+      endfor;
+      drawoptions();
+      else:
+      fill polygone(A[0][1],A[0][totalboules+1],A[1][totalboules+1],A[1][1]) withcolor ColLigne;
+      fill polygone(A[1][0],A[totalboules+1][0],A[totalboules+1][1],A[1][1]) withcolor ColColonne;
+      for k=1 upto totalboules:
+      label(TEX(Nombres[RetiensNum[k-1]]),iso(A[1][k],A[0][k+1]));
+      label(TEX(Nombres[RetiensNum[k-1]]),iso(A[k][0],A[k+1][1]));
+      endfor;
+      fi;
+      if SansRemise:
+      for k=1 upto totalboules:
+      draw 1/8[A[k][k],A[k+1][k+1]]--7/8[A[k][k],A[k+1][k+1]];
+      draw 1/8[A[k+1][k],A[k][k+1]]--7/8[A[k+1][k],A[k][k+1]];
+      endfor;
+      fi;
+      for k=1 upto totalboules:
+      trace segment(A[k][0],A[k][totalboules+1]);
+      trace segment(A[0][k],A[totalboules+1][k]);
+      endfor;
+      trace A[1][0]--A[totalboules+1][0]--A[totalboules+1][totalboules+1]--A[0][totalboules+1]--A[0][1];
+      labeloffset:=labeloffset*4;
+      label.top(TEX("Tirage 1"),iso(A[0][1],A[0][totalboules+1]));
+      label.lft(TEX("Tirage 2") rotated 90,iso(A[totalboules+1][0],A[1][0]));
+      labeloffset:=labeloffset/4;
+
+      path ccsol[][];      
+      
+      if Solution:
+      if Couleurs:
+      drawoptions(withpen pencircle scaled 0.75);
+      for k=1 upto totalboules:
+      for l=1 upto totalboules:
+      ccsol[k][l]=cercles(iso(A[k][l],A[k+1][l+1]),0.25u);
+      if SansRemise:
+      if k<>l:
+      fill arccercle(pointarc(ccsol[k][l],315),pointarc(ccsol[k][l],135),iso(A[k][l],A[k+1][l+1]))--iso(A[k][l],A[k+1][l+1])--cycle withcolor Col[RetiensNum[l-1]];
+      fill arccercle(pointarc(ccsol[k][l],135),pointarc(ccsol[k][l],315),iso(A[k][l],A[k+1][l+1]))--iso(A[k][l],A[k+1][l+1])--cycle withcolor Col[RetiensNum[k-1]];
+      trace segment(pointarc(ccsol[k][l],135),pointarc(ccsol[k][l],315));
+      trace ccsol[k][l];
+      fi;
+      else:
+      fill arccercle(pointarc(ccsol[k][l],315),pointarc(ccsol[k][l],135),iso(A[k][l],A[k+1][l+1]))--iso(A[k][l],A[k+1][l+1])--cycle withcolor Col[RetiensNum[l-1]];
+      fill arccercle(pointarc(ccsol[k][l],135),pointarc(ccsol[k][l],315),iso(A[k][l],A[k+1][l+1]))--iso(A[k][l],A[k+1][l+1])--cycle withcolor Col[RetiensNum[k-1]];
+      trace segment(pointarc(ccsol[k][l],135),pointarc(ccsol[k][l],315));
+      trace ccsol[k][l];
+      fi;
+      endfor;
+      endfor;
+      drawoptions();
+      else:
+      for k=1 upto totalboules:
+      for l=1 upto totalboules:
+      if SansRemise:
+      if k<>l:
+      label(TEX(Nombres[RetiensNum[l-1]]&"--"&Nombres[RetiensNum[k-1]]),iso(A[k][l],A[k+1][l+1]));
+      fi;
+      else:
+      label(TEX(Nombres[RetiensNum[l-1]]&"--"&Nombres[RetiensNum[k-1]]),iso(A[k][l],A[k+1][l+1]));
+      fi;
+      endfor;
+      endfor;
+      fi;
+      fi;
+
+      if Codes:
+      \useKV[PfCUrne]{Traces};
+      fi;
+    \end{mplibcode}
+  \fi
+}%
+
+\NewDocumentCommand\BuildUrne{mmm}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      u:=\useKV[PfCUrne]{Echelle}*1cm;
+      numeric RetiensNum[];
+      vardef RecupRepartition(text t)=
+        n:=0;
+        for p_=t:
+          RetiensNum[n]=p_;
+          n:=n+1;
+        endfor;
+        totalboules=n;
+      enddef;
+
+      color Col[];
+      vardef RecuperationCouleurs(text t)=
+        n:=0;
+        for p_=t:
+          n:=n+1;
+          Col[n]=p_;
+        endfor;
+      enddef;
+
+      string Nombres[];
+      vardef RecuperationNombres(text t)=
+        n:=0;
+        for p_=t:
+          n:=n+1;
+          Nombres[n]=p_;
+        endfor;
+      enddef;
+      
+      numeric Pas,Rayon,CoefEcart;
+      CoefEcart=\useKV[PfCUrne]{CoefEcart};
+      Pas=\useKV[PfCUrne]{Pas};
+      Rayon=\useKV[PfCUrne]{Rayon};
+      
+      boolean Couleurs, Nombres, Roue, Orientation;
+      Couleurs=\useKV[PfCUrne]{Couleurs};
+      Nombres=\useKV[PfCUrne]{Nombres};
+      Roue=\useKV[PfCUrne]{Roue};
+      Orientation=\useKV[PfCUrne]{Orientation};
+      
+      RecupRepartition(#3);
+      if Couleurs:
+        RecuperationCouleurs(#1);
+      fi;
+      if Nombres:
+        RecuperationNombres(#2);
+      fi;
+
+      pair O;
+      pair A[],B[];
+
+      if Roue:
+        O=(0,0);
+        path cc;
+        cc=cercles(O,Rayon*u);
+        angd=180/totalboules;
+        angr=360/totalboules;
+        for k=1 upto totalboules:
+          A[k]=(CoefEcart/20)[O,pointarc(cc,angd+(k-1)*angr)];
+        endfor;
+        drawarrow rotation((O+u*(0,1.35*Rayon))--(O+u*(0,1.1*Rayon)),O,angd);
+        % trace cc;
+        B[0]=pointarc(cc,0);
+        for k=1 upto totalboules:
+          B[k]=pointarc(cc,k*angr);
+          if Couleurs:
+            fill O--arccercle(B[k-1],B[k],O)--cycle withcolor if unknown Col[RetiensNum[k-1]]:white else: Col[RetiensNum[k-1]] fi;
+          else:
+            if Orientation:
+              label(TEX(Nombres[RetiensNum[k-1]]) rotated angle(A[k]-O),iso(O,A[k]));
+            else:
+              label(TEX(Nombres[RetiensNum[k-1]]),A[k]);
+            fi;
+          fi;
+        endfor;
+        trace cc;
+        for k=1 upto totalboules:
+          trace O--B[k];
+        endfor;
+      else:      
+        for k=0 upto (totalboules div Pas)-1:
+          for l=0 upto Pas-1:
+            rang:=k*Pas+l;
+            A[rang]=u*(0.5,0.5)+u*(l,k);
+            if Couleurs:
+              fill cercles(A[rang],0.5u) withcolor if unknown Col[RetiensNum[rang]]:white else: Col[RetiensNum[rang]] fi;
+            else:
+              label(TEX(Nombres[RetiensNum[rang]]),A[rang]);
+            fi;
+            % trace cercles(A[k*Pas+l],0.5u);
+          endfor;
+        endfor;
+        for k=0 upto (totalboules mod Pas)-1:
+          rang:=(totalboules div Pas)*Pas+k;
+          A[rang]=u*(0.5,0.5)+u*(k+0.5,totalboules div Pas-1+cosd(30));
+          if Couleurs:
+            fill cercles(A[rang],0.5u) withcolor if unknown Col[RetiensNum[rang]]:white else: Col[RetiensNum[rang]] fi;
+          else:
+            label(TEX(Nombres[RetiensNum[rang]]),A[rang]);
+          fi;
+          % trace cercles(A[(totalboules div Pas)*Pas+k],0.5u);
+        endfor;
+        % 
+        for k=0 upto (totalboules div Pas)-1:
+          for l=0 upto Pas-1:
+            rang:=k*Pas+l;
+            trace cercles(A[rang],0.5u);
+          endfor;
+        endfor;
+        for k=0 upto (totalboules mod Pas)-1:
+          rang:=(totalboules div Pas)*Pas+k;
+          trace cercles(A[rang],0.5u);
+        endfor;
+        % 
+        drawoptions(withpen pencircle scaled 1.2);
+        if totalboules<Pas:
+          trace u*(0,(totalboules div Pas)+1.15)--u*(0,0-(1-cosd(30)))--u*(Pas,0-(1-cosd(30)))--u*(Pas,(totalboules div Pas)+1.15);
+        else:
+          trace u*(0,(totalboules div Pas)+1.15)--u*(0,0)--u*(Pas,0)--u*(Pas,(totalboules div Pas)+1.15);
+        fi;
+      fi;
+    \end{mplibcode}
+  \else
+    \begin{mpost}[mpsettings={u:=\useKV[PfCUrne]{Echelle}*1cm;numeric Pas;Pas=\useKV[PfCUrne]{Pas}; boolean Couleurs, Nombres; Couleurs=\useKV[PfCUrne]{Couleurs}; Nombres=\useKV[PfCUrne]{Nombres};}]
+      numeric RetiensNum[];
+      vardef RecupRepartition(text t)=
+      n:=0;
+      for p_=t:
+      RetiensNum[n]=p_;
+      n:=n+1;
+      endfor;
+      totalboules=n;
+      enddef;
+
+      color Col[];
+      vardef RecuperationCouleurs(text t)=
+      n:=0;
+      for p_=t:
+      n:=n+1;
+      Col[n]=p_;
+      endfor;
+      enddef;
+
+      string Nombres[];
+      vardef RecuperationNombres(text t)=
+      n:=0;
+      for p_=t:
+      n:=n+1;
+      Nombres[n]=p_;
+      endfor;
+      enddef;
+      
+      RecupRepartition(#3);
+      if Couleurs:
+      RecuperationCouleurs(#1);
+      fi;
+      if Nombres:
+      RecuperationNombres(#2);
+      fi;
+
+      pair A[];
+      
+      for k=0 upto (totalboules div Pas)-1:
+      for l=0 upto Pas-1:
+      rang:=k*Pas+l;
+      A[rang]=u*(0.5,0.5)+u*(l,k);
+      if Couleurs:
+      fill cercles(A[rang],0.5u) withcolor if unknown Col[RetiensNum[rang]]:white else: Col[RetiensNum[rang]] fi;
+      else:
+      label(LATEX(Nombres[RetiensNum[rang]]),A[rang]);
+      fi;
+      %trace cercles(A[k*Pas+l],0.5u);
+      endfor;
+      endfor;
+      for k=0 upto (totalboules mod Pas)-1:
+      rang:=(totalboules div Pas)*Pas+k;
+      A[rang]=u*(0.5,0.5)+u*(k+0.5,totalboules div Pas-1+cosd(30));
+      if Couleurs:
+      fill cercles(A[rang],0.5u) withcolor if unknown Col[RetiensNum[rang]]:white else: Col[RetiensNum[rang]] fi;
+      else:
+      label(LATEX(Nombres[RetiensNum[rang]]),A[rang]);
+      fi;
+      %trace cercles(A[(totalboules div Pas)*Pas+k],0.5u);
+      endfor;
+      %
+      for k=0 upto (totalboules div Pas)-1:
+      for l=0 upto Pas-1:
+      rang:=k*Pas+l;
+      trace cercles(A[rang],0.5u);
+      endfor;
+      endfor;
+      for k=0 upto (totalboules mod Pas)-1:
+      rang:=(totalboules div Pas)*Pas+k;
+      trace cercles(A[rang],0.5u);
+      endfor;
+      %
+      drawoptions(withpen pencircle scaled 1.2);
+      if totalboules<Pas:
+      trace u*(0,(totalboules div Pas)+1.15)--u*(0,0-(1-cosd(30)))--u*(Pas,0-(1-cosd(30)))--u*(Pas,(totalboules div Pas)+1.15);
+      else:
+      trace u*(0,(totalboules div Pas)+1.15)--u*(0,0)--u*(Pas,0)--u*(Pas,(totalboules div Pas)+1.15);
+      fi;
+    \end{mpost}
+  \fi
+}%
+
+\NewDocumentCommand\BuildUrneDouble{mmmm}{%
+  % #1 Liste Couleurs
+  % #2 Liste Nombres
+  % #3 Repartition des couleurs
+  % #4 Repartition des nombres
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      u:=\useKV[PfCUrne]{Echelle}*1cm;
+      numeric RetiensC[],RetiensNum[];
+      vardef RecupRepartitionC(text t)=
+      n:=0;
+      for p_=t:
+      RetiensC[n]=p_;
+      n:=n+1;
+      endfor;
+      totalboules=n;
+      enddef;
+
+      vardef RecupRepartition(text t)=
+      n:=0;
+      for p_=t:
+      RetiensNum[n]=p_;
+      n:=n+1;
+      endfor;
+      enddef;
+
+      color Col[];
+      vardef RecuperationCouleurs(text t)=
+      n:=0;
+      for p_=t:
+      n:=n+1;
+      Col[n]=p_;
+      endfor;
+      enddef;
+
+      string Nombres[];
+      vardef RecuperationNombres(text t)=
+      n:=0;
+      for p_=t:
+      n:=n+1;
+      Nombres[n]=p_;
+      endfor;
+      enddef;
+      
+      numeric Pas,Rayon;
+      Pas=\useKV[PfCUrne]{Pas};
+      Rayon=\useKV[PfCUrne]{Rayon};
+      
+      boolean Roue;
+      Roue=\useKV[PfCUrne]{Roue};
+      
+      RecupRepartitionC(#3);
+      RecupRepartition(#4);
+      RecuperationCouleurs(#1);
+      RecuperationNombres(#2);
+
+      pair O;
+      pair A[],B[];
+
+      if Roue:
+      O=(0,0);
+      path cc;
+      cc=cercles(O,Rayon*u);
+      angd=180/totalboules;
+      angr=360/totalboules;
+      for k=1 upto totalboules:
+      A[k]=17/20[O,pointarc(cc,angd+(k-1)*angr)];
+      endfor;
+      B[0]=pointarc(cc,0);
+      for k=1 upto totalboules:
+      B[k]=pointarc(cc,k*angr);
+      fill O--arccercle(B[k-1],B[k],O)--cycle withcolor if unknown Col[RetiensC[k-1]]:white else: Col[RetiensC[k-1]] fi;
+      label(TEX(Nombres[RetiensNum[k-1]]),A[k]);
+      endfor;
+      trace cc;
+      for k=1 upto totalboules:
+      trace O--B[k];
+      endfor;
+      drawarrow rotation((O+u*(0,1.35*Rayon))--(O+u*(0,1.1*Rayon)),O,angd);
+      else:      
+      for k=0 upto (totalboules div Pas)-1:
+      for l=0 upto Pas-1:
+      rang:=k*Pas+l;
+      A[rang]=u*(0.5,0.5)+u*(l,k);
+      fill cercles(A[rang],0.5u) withcolor if unknown Col[RetiensC[rang]]:white else: Col[RetiensC[rang]] fi;
+      label(TEX(Nombres[RetiensNum[rang]]),A[rang]);
+      endfor;
+      endfor;
+      for k=0 upto (totalboules mod Pas)-1:
+      rang:=(totalboules div Pas)*Pas+k;
+      A[rang]=u*(0.5,0.5)+u*(k+0.5,totalboules div Pas-1+cosd(30));
+      fill cercles(A[rang],0.5u) withcolor if unknown Col[RetiensC[rang]]:white else: Col[RetiensC[rang]] fi;
+      label(TEX(Nombres[RetiensNum[rang]]),A[rang]);
+      endfor;
+      %
+      for k=0 upto (totalboules div Pas)-1:
+      for l=0 upto Pas-1:
+      rang:=k*Pas+l;
+      trace cercles(A[rang],0.5u);
+      endfor;
+      endfor;
+      for k=0 upto (totalboules mod Pas)-1:
+      rang:=(totalboules div Pas)*Pas+k;
+      trace cercles(A[rang],0.5u);
+      endfor;
+      %
+      drawoptions(withpen pencircle scaled 1.2);
+      if totalboules<Pas:
+      trace u*(0,(totalboules div Pas)+1.15)--u*(0,0-(1-cosd(30)))--u*(Pas,0-(1-cosd(30)))--u*(Pas,(totalboules div Pas)+1.15);
+      else:
+      trace u*(0,(totalboules div Pas)+1.15)--u*(0,0)--u*(Pas,0)--u*(Pas,(totalboules div Pas)+1.15);
+      fi;
+      fi;
+    \end{mplibcode}
+  \else
+    \begin{mpost}[mpsettings={u:=\useKV[PfCUrne]{Echelle}*1cm;numeric RetiensC[],RetiensNum[];numeric Pas,Rayon;Pas=\useKV[PfCUrne]{Pas};Rayon=\useKV[PfCUrne]{Rayon};boolean Roue;Roue=\useKV[PfCUrne]{Roue};}]
+      vardef RecupRepartitionC(text t)=
+      n:=0;
+      for p_=t:
+      RetiensC[n]=p_;
+      n:=n+1;
+      endfor;
+      totalboules=n;
+      enddef;
+
+      vardef RecupRepartition(text t)=
+      n:=0;
+      for p_=t:
+      RetiensNum[n]=p_;
+      n:=n+1;
+      endfor;
+      enddef;
+
+      color Col[];
+      vardef RecuperationCouleurs(text t)=
+      n:=0;
+      for p_=t:
+      n:=n+1;
+      Col[n]=p_;
+      endfor;
+      enddef;
+
+      string Nombres[];
+      vardef RecuperationNombres(text t)=
+      n:=0;
+      for p_=t:
+      n:=n+1;
+      Nombres[n]=p_;
+      endfor;
+      enddef;
+      
+      RecupRepartitionC(#3);
+      RecupRepartition(#4);
+      RecuperationCouleurs(#1);
+      RecuperationNombres(#2);
+
+      pair O;
+      pair A[],B[];
+
+      if Roue:
+      O=(0,0);
+      path cc;
+      cc=cercles(O,Rayon*1cm);
+      angd=180/totalboules;
+      angr=360/totalboules;
+      for k=1 upto totalboules:
+      A[k]=17/20[O,pointarc(cc,angd+(k-1)*angr)];
+      endfor;
+      B[0]=pointarc(cc,0);
+      for k=1 upto totalboules:
+      B[k]=pointarc(cc,k*angr);
+      fill O--arccercle(B[k-1],B[k],O)--cycle withcolor if unknown Col[RetiensC[k-1]]:white else: Col[RetiensC[k-1]] fi;
+      label(LATEX(Nombres[RetiensNum[k-1]]),A[k]);
+      endfor;
+      trace cc;
+      for k=1 upto totalboules:
+      trace O--B[k];
+      endfor;
+      else:      
+      for k=0 upto (totalboules div Pas)-1:
+      for l=0 upto Pas-1:
+      rang:=k*Pas+l;
+      A[rang]=u*(0.5,0.5)+u*(l,k);
+      fill cercles(A[rang],0.5u) withcolor if unknown Col[RetiensC[rang]]:white else: Col[RetiensC[rang]] fi;
+      label(LATEX(Nombres[RetiensNum[rang]]),A[rang]);
+      endfor;
+      endfor;
+      for k=0 upto (totalboules mod Pas)-1:
+      rang:=(totalboules div Pas)*Pas+k;
+      A[rang]=u*(0.5,0.5)+u*(k+0.5,totalboules div Pas-1+cosd(30));
+      fill cercles(A[rang],0.5u) withcolor if unknown Col[RetiensC[rang]]:white else: Col[RetiensC[rang]] fi;
+      label(LATEX(Nombres[RetiensNum[rang]]),A[rang]);
+      endfor;
+      %
+      for k=0 upto (totalboules div Pas)-1:
+      for l=0 upto Pas-1:
+      rang:=k*Pas+l;
+      trace cercles(A[rang],0.5u);
+      endfor;
+      endfor;
+      for k=0 upto (totalboules mod Pas)-1:
+      rang:=(totalboules div Pas)*Pas+k;
+      trace cercles(A[rang],0.5u);
+      endfor;
+      %
+      drawoptions(withpen pencircle scaled 1.2);
+      if totalboules<Pas:
+      trace u*(0,(totalboules div Pas)+1.15)--u*(0,0-(1-cosd(30)))--u*(Pas,0-(1-cosd(30)))--u*(Pas,(totalboules div Pas)+1.15);
+      else:
+      trace u*(0,(totalboules div Pas)+1.15)--u*(0,0)--u*(Pas,0)--u*(Pas,(totalboules div Pas)+1.15);
+      fi;
+      fi;
+    \end{mpost}
+  \fi
+}%
+
+\NewDocumentCommand\SchemaProba{o}{%
+  \useKVdefault[PfCUrne]%
+  \setKV[PfCUrne]{#1}%
+  \tokUrneListeCouleurs{}%
+  \tokUrneListeNombres{}%
+  \tokUrneListeColonnes{}%
+  \ifboolKV[PfCUrne]{Casino}{%
+    \BuildRoulette%
+  }{%
+    \ifboolKV[PfCUrne]{Tableau}{%
+      \ifboolKV[PfCUrne]{Different}{%
+        \edef\PfCFooRepartitionC{\useKV[PfCUrne]{RepartitionColonne}}%
+        \edef\PfCFooRepartitionL{\useKV[PfCUrne]{RepartitionLigne}}%
+        \setsepchar{,}\ignoreemptyitems%
+        \readlist*\ListeRepartitionCAv{\PfCFooRepartitionC}%
+        \readlist*\ListeRepartitionLAv{\PfCFooRepartitionL}%
+        \reademptyitems%
+        % Repartition : \showitems\ListeRepartitionAv[]%
+        \edef\PfCFooListeRepartitionC{}%
+        \edef\PfCFooListeRepartitionL{}%
+        \edef\PfCTotalC{0}%
+        \edef\PfCTotalL{0}%
+        \xintFor* ##1 in{\xintSeq{1}{\ListeRepartitionCAvlen}}\do{%
+          \xintFor* ##2 in{\xintSeq{1}{\ListeRepartitionCAv[##1]}}\do{%
+            \edef\PfCFooListeRepartitionC{\PfCFooListeRepartitionC,##1}%
+            \edef\PfCTotalC{\fpeval{\PfCTotalC+1}}%
+          }%
+        }%
+        \xintFor* ##1 in{\xintSeq{1}{\ListeRepartitionLAvlen}}\do{%
+          \xintFor* ##2 in{\xintSeq{1}{\ListeRepartitionLAv[##1]}}\do{%
+            \edef\PfCFooListeRepartitionL{\PfCFooListeRepartitionL,##1}%
+            \edef\PfCTotalL{\fpeval{\PfCTotalL+1}}%
+          }%
+        }%
+        \foreachitem\compteur\in\ListeCouleursAv{\expandafter\UpdatetoksUrneColonnes\compteur\nil}%
+        \foreachitem\compteur\in\ListeNombresAv{\expandafter\UpdatetoksUrneNombres\compteur\nil}%    
+        \BuildTableauDoubleEntreeDifferent{\the\tokUrneListeColonnes}{\the\tokUrneListeNombres}{\PfCFooListeRepartitionC}{\PfCFooListeRepartitionL}%
+     }{%
+       \edef\PfCFooRepartition{\useKV[PfCUrne]{Repartition}}%
+       \setsepchar{,}\ignoreemptyitems%
+       \readlist*\ListeRepartitionAv{\PfCFooRepartition}%
+       \reademptyitems%
+       \edef\PfCFooListeRepartition{}%
+       \edef\PfCTotal{0}%
+       \xintFor* ##1 in{\xintSeq{1}{\ListeRepartitionAvlen}}\do{%
+         \xintFor* ##2 in{\xintSeq{1}{\ListeRepartitionAv[##1]}}\do{%
+           \edef\PfCFooListeRepartition{\PfCFooListeRepartition,##1}%
+           \edef\PfCTotal{\fpeval{\PfCTotal+1}}%
+         }%
+       }%
+       \ifboolKV[PfCUrne]{Couleurs}{%
+         \foreachitem\compteur\in\ListeCouleursAv{\expandafter\UpdatetoksUrneCouleurs\compteur\nil}%
+         \BuildTableauDoubleEntree{\the\tokUrneListeCouleurs}{}{\PfCFooListeRepartition}%
+       }{%
+         \ifboolKV[PfCUrne]{Nombres}{%
+           \foreachitem\compteur\in\ListeNombresAv{\expandafter\UpdatetoksUrneNombres\compteur\nil}%
+           \BuildTableauDoubleEntree{}{\the\tokUrneListeNombres}{\PfCFooListeRepartition}%
+         }{}%
+       }%
+     }%
+   }{%
+     \ifboolKV[PfCUrne]{Double}{%
+       \edef\PfCFooRepartitionC{\useKV[PfCUrne]{RepartitionC}}%
+       \edef\PfCFooRepartitionN{\useKV[PfCUrne]{RepartitionN}}%
+       \setsepchar{,}\ignoreemptyitems%
+       \readlist*\ListeRepartitionCAv{\PfCFooRepartitionC}%
+       \readlist*\ListeRepartitionNAv{\PfCFooRepartitionN}%
+       % Repartition : \showitems\ListeRepartitionAv[]%
+       \reademptyitems%
+       \edef\PfCFooListeRepartitionC{}%
+       \edef\PfCFooListeRepartitionN{}%
+       \edef\PfCTotalC{0}%
+       \edef\PfCTotalN{0}%
+       \xintFor* ##1 in{\xintSeq{1}{\ListeRepartitionCAvlen}}\do{%
+         \xintFor* ##2 in{\xintSeq{1}{\ListeRepartitionCAv[##1]}}\do{%
+           \edef\PfCFooListeRepartitionC{\PfCFooListeRepartitionC,##1}%
+           \edef\PfCTotalC{\fpeval{\PfCTotalC+1}}%
+         }%
+       }%
+       \xintFor* ##1 in{\xintSeq{1}{\ListeRepartitionNAvlen}}\do{%
+         \xintFor* ##2 in{\xintSeq{1}{\ListeRepartitionNAv[##1]}}\do{%
+           \edef\PfCFooListeRepartitionN{\PfCFooListeRepartitionN,##1}%
+           \edef\PfCTotalN{\fpeval{\PfCTotalN+1}}%
+         }%
+       }%
+       \MelangeListe{\PfCFooListeRepartitionC}{\PfCTotalC}%
+       \edef\ListeRepartitionCouleurs{\faa}%
+       \foreachitem\compteur\in\ListeCouleursAv{\expandafter\UpdatetoksUrneCouleurs\compteur\nil}%
+       \MelangeListe{\PfCFooListeRepartitionN}{\PfCTotalN}%
+       \edef\ListeRepartitionNombres{\faa}%
+       \foreachitem\compteur\in\ListeNombresAv{\expandafter\UpdatetoksUrneNombres\compteur\nil}%    
+       \BuildUrneDouble{\the\tokUrneListeCouleurs}{\the\tokUrneListeNombres}{\ListeRepartitionCouleurs}{\ListeRepartitionNombres}%
+     }{%
+       \edef\PfCFooRepartition{\useKV[PfCUrne]{Repartition}}%
+       \setsepchar{,}\ignoreemptyitems%
+       \readlist*\ListeRepartitionAv{\PfCFooRepartition}%
+       % Repartition : \showitems\ListeRepartitionAv[]%
+       \reademptyitems%
+       \edef\PfCFooListeRepartition{}%
+       \edef\PfCTotal{0}%
+       \xintFor* ##1 in{\xintSeq{1}{\ListeRepartitionAvlen}}\do{%
+         \xintFor* ##2 in{\xintSeq{1}{\ListeRepartitionAv[##1]}}\do{%
+           \edef\PfCFooListeRepartition{\PfCFooListeRepartition,##1}%
+           \edef\PfCTotal{\fpeval{\PfCTotal+1}}%
+         }%
+       }%
+       \ifboolKV[PfCUrne]{Couleurs}{%
+         \edef\ListeAvantCouleurs{\useKV[PfCUrne]{ListeCouleurs}}%
+         % Couleurs = \ListeAvantCouleurs
+         \MelangeListe{\PfCFooListeRepartition}{\PfCTotal}%
+         \edef\ListeRepartitionCouleurs{\faa}%
+         % \foreachitem\compteur\in\ListeCouleursAv{\expandafter\UpdatetoksUrneCouleurs\compteur\nil}%
+         % Couleurs :\\
+         % La répartition est : \ListeRepartitionCouleurs\\
+         % Les couleurs sont : \the\tokUrneListeCouleurs.\\
+         % \BuildUrne{\the\tokUrneListeCouleurs}{}{\ListeRepartitionCouleurs}%
+         \BuildUrne{\ListeAvantCouleurs}{}{\ListeRepartitionCouleurs}%
+       }{%
+         \ifboolKV[PfCUrne]{Nombres}{%
+           \MelangeListe{\PfCFooListeRepartition}{\PfCTotal}%
+           \edef\ListeRepartitionNombres{\faa}%
+           \foreachitem\compteur\in\ListeNombresAv{\expandafter\UpdatetoksUrneNombres\compteur\nil}%
+%            Nombres :\\
+%            La répartition est : \ListeRepartitionNombres\\
+%            Les nombres sont : \the\tokUrneListeNombres.\\
+           \BuildUrne{}{\the\tokUrneListeNombres}{\ListeRepartitionNombres}%
+         }{}%
+       }%
+     }%
+   }%
+ }%
+}%

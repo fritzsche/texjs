@@ -1,0 +1,83 @@
+%%%
+% Barres de calculs
+%%%
+\def\filedateBarresCalculs{2024/08/04}%
+\def\fileversionBarresCalculs{0.1}%
+\message{-- \filedateBarresCalculs\space v\fileversionBarresCalculs}%
+\setKVdefault[SuiteBarre]{Litteral=false,Perso=false,Decimaux=false}
+
+\NewDocumentCommand\BarresCalculs{o m m}{%
+  \useKVdefault[SuiteBarre]%
+  \setKV[SuiteBarre]{#1}%
+  \xdef\PfCListeCalculsBarre{}%
+  \xdef\PfCListeResultatsBarre{}%
+  \ignoreemptyitems%
+  \ifboolKV[SuiteBarre]{Perso}{%
+    \setsepchar[*]{,*§}%
+    \readlist*\PfCListeBarresCalculs{#2}%
+    \foreachitem\compteur\in\PfCListeBarresCalculs{%
+      \StrChar{#3}{\compteurcnt}[\PfCLettreB]%
+      \StrSubstitute[0]{\PfCLettreB}{*}{Départ}[\PfCLettreC]%
+      \xdef\PfCListeResultatsBarre{\PfCListeResultatsBarre \PfCLettreC,}%
+    }%
+    \setsepchar{,}%
+    \readlist*\PfCListeResultats{\PfCListeResultatsBarre}%
+    \begin{NiceTabular}{ccc}[hvlines]
+      \xintFor* ##1 in{\xintSeq{1}{\PfCListeResultatslen}}\do{%
+        \xintifForFirst{\Block{2-1}{}}{\Block{2-1}{\ifboolKV[SuiteBarre]{Decimaux}{%
+              \num{\fpeval{\PfCListeBarresCalculs[\fpeval{##1-1},1]}}%
+              }{%
+                \begin{CAS}
+              c = \PfCListeBarresCalculs[\fpeval{##1-1},1]
+            \end{CAS}$\print{c:autosimplify()}$}%
+        }}&\Block{2-1}{\PfCListeResultats[##1]}&\Block{2-1}{$\PfCListeBarresCalculs[##1,2]$}\\
+        &&\\
+      }%
+    \end{NiceTabular}
+  }{%
+    \setsepchar{,}%\ignoreemptyitems%
+    \readlist*\PfCListeBarresCalculs{#2}%
+    \ifboolKV[SuiteBarre]{Litteral}{%
+      \foreachitem\compteur\in\PfCListeBarresCalculs{%
+        \StrChar{#3}{\compteurcnt}[\PfCLettreB]%
+        \StrSubstitute[0]{\PfCLettreB}{*}{Départ}[\PfCLettreC]%
+        \xdef\PfCListeResultatsBarre{\PfCListeResultatsBarre \PfCLettreC,}%
+      }%
+      \setsepchar[*]{,*/}%
+      \readlist*\PfCListeResultats{\PfCListeResultatsBarre}%
+      \setsepchar{,}%
+      \readlist*\PfCListeCalculs{#2}%
+      \begin{NiceTabular}{ccc}[hvlines]
+        \xintFor* ##1 in{\xintSeq{1}{\PfCListeResultatslen}}\do{%
+          \xintifForFirst{\Block{2-1}{}}{\Block{2-1}{$\print{c:expand():topolynomial()}$}}&\Block{2-1}{\PfCListeResultats[##1,1]}&\Block{2-1}{\begin{CAS}
+              vars('x')
+              c = \PfCListeCalculs[##1]
+            \end{CAS}$\print{c}$}\\
+          &&\\
+        }%
+      \end{NiceTabular}
+    }{%
+      \foreachitem\compteur\in\PfCListeBarresCalculs{%
+        \StrChar{#3}{\compteurcnt}[\PfCLettreB]%
+        \StrSubstitute[0]{\PfCLettreB}{*}{Départ}[\PfCLettreC]%
+        \xdef\PfCListeResultatsBarre{\PfCListeResultatsBarre \num{\fpeval{\compteur}}/\PfCLettreC,}%
+        \StrSubstitute[0]{\compteur}{*}{\times}[\PfCListeResultatEtapeA]%
+        \StrSubstitute[0]{\PfCListeResultatEtapeA}{/}{\div}[\PfCListeResultatEtapeB]%
+        \StrSubstitute[0]{\PfCListeResultatEtapeB}{(}{\left(}[\PfCListeResultatEtapeC]%
+          \StrSubstitute[0]{\PfCListeResultatEtapeC}{)}{\right)}[\PfCListeResultatEtapeD]%
+        \xdef\PfCListeCalculsBarre{\PfCListeCalculsBarre $\PfCListeResultatEtapeD$,}%
+      }%
+      \setsepchar[*]{,*/}%
+      \readlist*\PfCListeResultats{\PfCListeResultatsBarre}%
+      \setsepchar{,}%
+      \readlist*\PfCListeCalculs{\PfCListeCalculsBarre}%
+      \begin{NiceTabular}{ccc}[hvlines]
+        \xintFor* ##1 in{\xintSeq{1}{\PfCListeResultatslen}}\do{%
+          \xintifForFirst{\Block{2-1}{}}{\Block{2-1}{\PfCListeResultats[\fpeval{##1-1},1]}}&\Block{2-1}{\PfCListeResultats[##1,2]}&\Block{2-1}{\PfCListeCalculs[##1]}\\
+          &&\\
+        }%
+      \end{NiceTabular}
+    }%
+  }%
+  \reademptyitems%
+}%

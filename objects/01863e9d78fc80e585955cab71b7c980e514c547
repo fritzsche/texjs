@@ -1,0 +1,787 @@
+% \iffalse meta-comment
+%
+% File: ltx-talk-frame.dtx Copyright (C) 2023-2025 Joseph Wright
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+% This file is part of the "ltx-talk bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% The released version of this bundle is available from CTAN.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/josephwright/ltx-talk
+%
+% for those people who are interested.
+%
+% -----------------------------------------------------------------------
+%
+%<*driver>
+\documentclass{l3doc}
+% Additional commands needed in this source
+\NewDocumentCommand\email{m}{\href{mailto:#1}{\nolinkurl{#1}}}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% ^^A As we are dealing with a class, this has to be done manually
+% \def\filedate{2025-10-10}
+% \def\fileversion{v0.2.3}
+%
+% \title{^^A
+%   \pkg{ltx-talk-frame} -- The structure of frames^^A
+%   \thanks{This file describes \fileversion,
+%     last revised \filedate.}^^A
+% }
+%
+% \author{^^A
+%  Joseph Wright^^A
+%  \thanks{^^A
+%    E-mail: \email{joseph@texdev.net}^^A
+%   }^^A
+% }
+%
+% \date{Released \filedate}
+%
+% \maketitle
+%
+% \begin{documentation}
+%
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{ltx-talk-frame} implementation}
+%
+% Start the \pkg{DocStrip} guards.
+%    \begin{macrocode}
+%<*class>
+%    \end{macrocode}
+%
+% Identify the internal prefix.
+%    \begin{macrocode}
+%<@@=talk>
+%    \end{macrocode}
+%
+% \subsection{Slides in frames}
+%
+% Currently, each slide in a frame will produce a separate page in the output
+% (unless the slide is suppressed entirely). Material is then hidden on some
+% pages by using opacity. An alternative approach would be to use Optional
+% Content Groups to have a similar effect on one page per frame. However,
+% whilst that would be relatively clear for appear/disappear effects, it would
+% be much less straight-forward for partial transparency, \foreign{etc.}, plus
+% would depend more heavily on viewer support. At a future stage we may wish to
+% revisit this.
+%
+% \begin{variable}{\g_@@_slide_continue_bool}
+%   Tracks whether the frame continues after the current slide.
+%    \begin{macrocode}
+\bool_new:N \g_@@_slide_continue_bool
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\l_@@_slide_box}
+%    \begin{macrocode}
+\box_new:N \l_@@_slide_box
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\g_@@_slide_int, \c@slide, \theslide}
+%   The slide number inside the current frame: needed to know which overlays
+%   are active. We also provide \LaTeX{} counter-style access.
+%    \begin{macrocode}
+\int_new:N \g_@@_slide_int
+\cs_new_eq:NN \c@slide \g_@@_slide_int
+\cs_new:Npn \theslide { \@arabic \c@slide }
+%    \end{macrocode}
+% \end{variable}
+%
+% Required to know which is the last slide in a frame for tagging.
+%    \begin{macrocode}
+\property_new:nnnn { slides } { now } { 1 } { \int_use:N \g_@@_slide_int }
+%    \end{macrocode}
+%
+% \begin{macro}{\@@_slide:nn}
+% \begin{macro}{\@@_slide_aux:n}
+%  Each slide is parsed inside simple set up, the only complexity being if we
+%  are handling fragile frames. There, all \cs{obeyedline} in the grabbed
+%  tokens need to be turned back into |^^M| before rescanning: this ensures
+%  that any verbatim grabbing in the frame still works. The strange business
+%  with setting the continuation boolean is needed as otherwise we get an
+%  infinite loop if there is an overlay specification for the frame itself.
+%  Tagging should not of itself force slide continuation, so the global
+%  boolean is reset for the tagged slide.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_slide:nn #1#2
+  { 
+    \group_begin:
+      \tl_set:Ne \l_@@_tmp_tl
+        {
+          \property_ref:ee { frame . \int_use:N \g_@@_frame_int }
+            { slides }
+        }
+      \str_if_eq:VnTF \l_@@_frame_tagging_str { n }
+        { \str_set:NV \l_@@_frame_tagging_str \l_@@_tmp_tl }
+        {
+          \str_replace_all:NnV \l_@@_frame_tagging_str { ,n }
+            \l_@@_tmp_tl
+          \str_replace_all:NnV \l_@@_frame_tagging_str { ,~n }
+            \l_@@_tmp_tl
+        }
+      \int_gzero:N \g_@@_slide_int
+      \RenewCommandCopy \frame \@@_latexe_frame:n
+      \bool_do_while:Nn \g_@@_slide_continue_bool
+        {
+          \int_gincr:N \g_@@_slide_int
+          \bool_gset_false:N \g_@@_slide_continue_bool
+          \@@_if_overlay:nT {#1}
+            {
+              \@@_slide_begin:
+              \@@_if_overlay:VTF \l_@@_frame_tagging_str
+                {
+                  \bool_gset_false:N \g_@@_slide_continue_bool
+                  \@@_frame_tag:n
+                }
+                {
+                  \bool_gset_false:N \g_@@_slide_continue_bool
+                  \@@_frame_notag:n
+                }
+                  {
+                    \bool_if:NTF \l_@@_frame_verb_bool
+                      { \@@_slide_aux:n }
+                      { \use:n }
+                        {#2}
+                  }
+               \@@_slide_end:
+            }
+        }
+      \property_record:ee { frame . \int_use:N \g_@@_frame_int }
+        { slides }
+    \group_end:
+  }
+\cs_new_protected:Npn \@@_slide_aux:n #1
+  {
+    \group_begin:
+      \cs_set:Npn \obeyedline { ^^J }
+      \use:e
+        {
+          \group_end:
+          \tl_retokenize:n {#1}
+        }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% The very last frame will not be recorded by the above, so we have to add to
+% the hook at the very end of the run.
+%    \begin{macrocode}
+\AddToHook { enddocument / afterlastpage }
+  {
+    \property_record:ee { frame . \int_use:N \g_@@_frame_int }
+      { slides }
+  }
+%    \end{macrocode}
+%
+% \begin{variable}{\g_@@_frame_struct_int}
+%  The tagging structure number for the slide: needed by the content placed
+%  outside of the current box (for example the frame title).
+%    \begin{macrocode}
+\int_new:N \g_@@_frame_struct_int
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}{\@@_slide_begin:, \@@_slide_end:}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_slide_begin:
+  {
+    \int_gzero:N \g_@@_pauses_int
+    \tl_gclear:N \g_@@_frame_title_tl
+    \tl_gclear:N \g_@@_frame_subtitle_tl
+    \@@_cnt_save:
+    \vbox_set:Nw \l_@@_slide_box
+      \tl_gclear:N \g_@@_onslide_tl
+  }
+\cs_new_protected:Npn \@@_slide_end:
+  {
+      \tl_use:N \g_@@_onslide_tl
+    \vbox_set_end:
+    \bool_if:NT \g_@@_slide_continue_bool
+      { \@@_cnt_restore: }
+    \vbox_to_ht:nn { \textheight }
+      {
+        \use:c { @@_slide_align_ \l_@@_frame_alignment_tl :n }
+          { \vbox_unpack_drop:N \l_@@_slide_box }
+      }
+    \clearpage
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}
+%   {
+%     \@@_slide_align_bottom:n  ,
+%     \@@_slide_align_center:n  ,
+%     \@@_slide_align_stretch:n ,
+%     \@@_slide_align_top:n
+%   }
+%   A pretty standard abstraction: we make sure there are always two skips.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_slide_align_bottom:n #1
+  {
+    \skip_vertical:n { 0pt~plus~1fil }
+    #1
+    \skip_vertical:n { 0pt }
+  }
+\cs_new_protected:Npn \@@_slide_align_center:n #1
+  {
+    \skip_vertical:n { 0pt~plus~0.5fil }
+    #1
+    \skip_vertical:n { 0pt~plus~0.5fil }
+  }
+\cs_new_protected:Npn \@@_slide_align_stretch:n #1
+  {
+    \skip_vertical:n { 0pt }
+    #1
+    \skip_vertical:n { 0pt }
+  }
+\cs_new_protected:Npn \@@_slide_align_top:n #1
+  {
+    \skip_vertical:n { 0pt }
+    #1
+    \skip_vertical:n { 0pt~plus~1fil }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Counters}
+%
+% \begin{variable}{\l_@@_cnt_reset_seq}
+%   As \cs{stepcounter}, \foreign{etc}., will increment at each overlay, there
+%   is a need to save and reset. The list will be finalized at the end of the
+%   preamble, so the data storage is created at that point. The starting point
+%   is counters created before the class is loaded (other than those for lists,
+%   which reset \enquote{naturally}). Other cases are handled by adding to
+%   \cs{newcounter}.
+%    \begin{macrocode}
+\seq_new:N \l_@@_cnt_reset_seq
+\seq_set_from_clist:Nn \l_@@_cnt_reset_seq
+  {
+    equation       ,
+    footnote       ,
+    mpfootnote     ,
+    parentequation
+  }
+\seq_map_inline:Nn \l_@@_cnt_reset_seq
+    {
+      \int_new:c { g_@@_saved_ #1 _int }
+      \int_gset_eq:cc { g_@@_saved_ #1 _int } { c@ #1 }
+    }
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}{\@@_cnt_save:, \@@_cnt_restore:}
+%   A simple save-and-restore pair.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_cnt_save:
+  {
+    \seq_map_inline:Nn \l_@@_cnt_reset_seq
+      { \int_gset_eq:cc { g_@@_saved_ ##1 _int } { c@ ##1 } }
+  }
+\cs_new_protected:Npn \@@_cnt_restore:
+  {
+    \seq_map_inline:Nn \l_@@_cnt_reset_seq
+      { \int_gset_eq:cc { c@ ##1 } { g_@@_saved_ ##1 _int } }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@definecounter, \std@definecounter}
+%   Track all counters for resetting.
+%    \begin{macrocode}
+\cs_new_eq:NN \std@definecounter \@definecounter
+\cs_gset_protected:Npn \@definecounter #1
+  {
+    \std@definecounter {#1}
+    \int_new:c { g_@@_saved_ #1 _int }
+    \seq_gput_right:Nn \l_@@_cnt_reset_seq {#1}
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Frame options}
+%
+% \begin{variable}{\l_@@_frame_alignment_tl}
+%    \begin{macrocode}
+\tl_new:N \l_@@_frame_alignment_tl
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\l_@@_action_spec_str, \l_@@_frame_tagging_str}
+%    \begin{macrocode}
+\keys_define:nn { talk / frame }
+  {
+    action-spec .str_set:N
+      = \l_@@_action_spec_str ,
+    tag-slides .str_set:N
+      = \l_@@_frame_tagging_str ,
+    vertical-alignment .choices:nn =
+      { bottom , center , stretch , top }
+      {
+        \tl_set_eq:NN \l_@@_frame_alignment_tl
+          \l_keys_value_tl
+      }
+  }
+\keys_set:nn { talk / frame }
+  {
+    action-spec        =        ,
+    tag-slides         = n      ,
+    vertical-alignment = center
+  }
+%    \end{macrocode}
+% \end{variable}
+%
+% \subsection{Tagging for headers}
+%
+% \begin{macro}{\@@_header_tag_begin:n, \@@_header_tag_begin:e}
+% \begin{macro}{\@@_header_tag_end:}
+%   Generalized control for inserting material into the header area (which is
+%   otherwise outside of tagging).
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_header_tag_begin:n #1
+  {
+    \tag_resume:n { header }
+    \tag_mc_end:
+    \tag_struct_begin:n {#1}
+    \tag_mc_begin:n { }
+  }
+\cs_generate_variant:Nn \@@_header_tag_begin:n { e }
+\cs_new_protected:Npn \@@_header_tag_end:
+  {
+    \tag_mc_end:
+    \tag_struct_end:
+    \tag_mc_begin:n { artifact }
+    \tag_suspend:n { header }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \subsection{Wallpaper}
+%
+% \begin{variable}
+%   {
+%     \l_@@_footelem_left_skip ,
+%     \l_@@_footelem_right_skip ,
+%     \l_@@_footelem_color_tl ,
+%     \l_@@_footelem_font_tl
+%   }
+%    \begin{macrocode}
+\NewTemplateType { footer-element } { 1 }
+\DeclareTemplateInterface { footer-element } { talk } { 1 }
+  {
+    color      : tokenlist ,
+    font       : tokenlist = ,
+    left-skip  : length = 0em ,
+    right-skip : length = 0em
+  }
+\DeclareTemplateCode { footer-element } { talk } { 1 }
+  {
+    color      = \l_@@_footelem_color_tl ,
+    font       = \l_@@_footelem_font_tl ,
+    left-skip  = \l_@@_footelem_left_skip ,
+    right-skip = \l_@@_footelem_right_skip
+  }
+  {
+    \tl_if_empty:nF {#1}
+      {
+        \hspace { \l_@@_footelem_left_skip }
+        \group_begin:
+          \tl_if_empty:NF \l_@@_footelem_color_tl
+            { \color_select:V \l_@@_footelem_color_tl }
+          \l_@@_footelem_font_tl
+          #1
+        \group_end:
+        \hspace { \l_@@_footelem_right_skip }
+      }
+  }
+\DeclareInstance { footer-element } { date } { talk } { }
+\DeclareInstance { footer-element } { author } { talk } { }
+\DeclareInstance { footer-element } { title } { talk } { }
+\DeclareInstance { footer-element } { institute } { talk } { }
+\DeclareInstance { footer-element } { framenumber } { talk } { }
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}
+%    {
+%     \l_@@_header_bg_tl           ,
+%     \l_@@_header_fg_tl           , 
+%     \l_@@_header_font_tl         ,
+%     \l_@@_header_ht_dim          ,
+%     \l_@@_header_left_skip       ,
+%     \l_@@_header_frametitle_bool ,
+%     \l_@@_header_right_skip 
+%   }
+%   Templates for the header area. The background always covers the full width,
+%   but the text area may be narrower. The setup here aims to avoid repeated
+%   kerns but also dealing with complex conditionals, hence we always move to
+%   the edge of the paper first then adjust as required.
+%    \begin{macrocode}
+\NewTemplateType { header } { 0 }
+\DeclareTemplateInterface { header } { talk } { 0 }
+  {
+    background-color  : tokenlist,
+    color             : tokenlist = structure ,
+    font              : tokenlist = \normalfont ,
+    height            : length = \Gm@tmargin + \headsep ,
+    left-hspace       : skip = \Gm@lmargin ,
+    print-frame-title : boolean = true ,
+    right-hspace      : skip = \Gm@rmargin
+  }
+\DeclareTemplateCode { header } { talk } { 0 }
+  {
+    background-color  = \l_@@_header_bg_tl ,
+    color             = \l_@@_header_fg_tl ,
+    font              = \l_@@_header_font_tl ,
+    height            = \l_@@_header_ht_dim ,
+    left-hspace       = \l_@@_header_left_skip ,
+    print-frame-title = \l_@@_header_frametitle_bool ,
+    right-hspace      = \l_@@_header_right_skip
+  }
+  {
+    \noindent
+    \@@_wallpaper_hrule:Nnn
+      \l_@@_header_bg_tl
+      { \l_@@_header_ht_dim - \headsep }
+      { \headsep }
+    \skip_horizontal:n { \l_@@_header_left_skip }
+    \group_begin:
+      \tl_if_empty:NF \l_@@_header_fg_tl
+        { \color_select:V \l_@@_header_fg_tl }
+      \l_@@_header_font_tl
+      \bool_if:NT \l_@@_header_frametitle_bool
+        {
+          \ExpandArgs { nnV }
+            \UseInstance { frametitle } { header }
+              \g_@@_frame_title_tl
+        }
+    \group_end:
+  }
+\DeclareInstance { header } { std } { talk } { }
+\AddToHook { begindocument }
+  {
+    \DeclareInstanceCopy { header } { wallpaper } { std }
+    \EditInstance { header } { wallpaper }
+      { print-frame-title = false }
+  }
+%    \end{macrocode}
+% \end{variable}
+% \begin{variable}
+%   {
+%     \l_@@_footer_bg_tl       ,
+%     \l_@@_footer_fg_tl       ,
+%     \l_@@_footer_font_tl     ,
+%     \l_@@_footer_order_clist ,
+%     \l_@@_footer_sep_tl      ,
+%     \l_@@_footer_font_tl     ,
+%     \l_@@_footer_left_skip   ,
+%     \l_@@_footer_right_skip 
+%   }
+%   Templates for the footer area. Again the margins are handled in stages:
+%   here we do have a box for the content so the right skip is used, and we
+%   avoid an overfull box by including consideration of the right margin of the
+%   page layout.
+%    \begin{macrocode}
+\NewTemplateType { footer } { 0 }
+\DeclareTemplateInterface { footer } { talk } { 0 }
+  {
+    background-color : tokenlist ,
+    color            : tokenlist ,
+    element-order    : commalist ,
+    font             : tokenlist = \tiny ,
+    left-skip        : length = \Gm@lmargin ,
+    right-skip       : length = \Gm@rmargin ,
+    separator        : tokenlist = \hfil
+  }
+\DeclareTemplateCode { footer } { talk } { 0 }
+  {
+    background-color = \l_@@_footer_bg_tl ,
+    color            = \l_@@_footer_fg_tl ,
+    element-order    = \l_@@_footer_order_clist ,
+    separator        = \l_@@_footer_sep_tl ,
+    font             = \l_@@_footer_font_tl ,
+    left-skip        = \l_@@_footer_left_skip ,
+    right-skip       = \l_@@_footer_right_skip
+  }
+  {
+    \noindent
+    \@@_wallpaper_hrule:Nnn
+      \l_@@_footer_bg_tl
+      { \footskip }
+      { \Gm@bmargin - \footskip }
+    \skip_horizontal:n { \l_@@_footer_left_skip }
+    \vbox_set_to_wd:Nnn \l_@@_tmp_box
+      {
+          \paperwidth
+        - \l_@@_footer_left_skip
+        - \l_@@_footer_right_skip
+      }
+      {
+        \tl_if_empty:NF \l_@@_footer_fg_tl
+          { \color_select:V \l_@@_footer_fg_tl }
+        \l_@@_footer_font_tl
+        \clist_pop:NNT \l_@@_footer_order_clist \l_@@_tmp_tl
+          {
+            \ExpandArgs { nVv } \UseInstance { footer-element } \l_@@_tmp_tl
+              { @ \l_@@_tmp_tl }
+            \clist_map_inline:Nn \l_@@_footer_order_clist
+              { 
+                \tl_if_empty:cF { @ ##1 }
+                  {
+                    \l_@@_footer_sep_tl
+                    \ExpandArgs { nnv }
+                      \UseInstance { footer-element } {##1} { @ ##1 }
+                  }
+              }
+          }
+        \hfil
+      }
+    \box_use_drop:N \l_@@_tmp_box
+    \skip_horizontal:n { \l_@@_footer_right_skip - \Gm@rmargin }
+  }
+\DeclareInstance { footer } { std } { talk } { }
+\AddToHook { begindocument }
+  {
+    \DeclareInstanceCopy { footer } { wallpaper } { std }
+    \EditInstance { footer } { wallpaper }
+      { element-order = }
+  }
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}{\@@_wallpaper_hrule:Nnn}
+%   A simple abstraction for the top and bottom rules on the page.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_wallpaper_hrule:Nnn #1#2#3
+  {
+    \skip_horizontal:n { -\Gm@lmargin }
+    \tl_if_empty:NF #1
+      {
+        \group_begin:
+          \color_select:V #1
+          \rule:nnn { \paperwidth } {#2} {#3}
+          \skip_horizontal:n { -\paperwidth }
+        \group_end:
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\ps@plain, \ps@wallpaper, \ps@talk}
+%   Install a standard header and footer template, and redefine the
+%   \texttt{plain} one as this will be used for frames without
+%   \enquote{wallpaper} which still need core links, \foreign{etc}. We also
+%   provide a version that only shows the visual elements: this is deliberately
+%   using the same settings as the main templates.
+%    \begin{macrocode}
+\cs_set_nopar:Npn \ps@plain
+  {
+    \cs_set_nopar:Npn \@oddhead
+      {
+        \@@_section_tagged:
+        \hfil
+      }
+    \cs_set_nopar:Npn \@oddfoot { }
+    \cs_set_eq:NN \@evenhead \@oddhead
+    \cs_set_eq:NN \@evenfoot \@oddfoot
+  }
+\cs_set_nopar:Npn \ps@wallpaper
+  {
+    \cs_set_nopar:Npn \@oddhead
+      {
+        \@@_section_tagged:
+        \UseInstance { header } { wallpaper }
+        \hfil
+      }
+    \cs_set_nopar:Npn \@oddfoot
+      {
+        \UseInstance { footer } { wallpaper }
+        \hfil
+      }
+    \cs_set_eq:NN \@evenhead \@oddhead
+    \cs_set_eq:NN \@evenfoot \@oddfoot
+  }
+\cs_new_nopar:Npn \ps@talk
+  {
+    \cs_set_nopar:Npn \@oddhead
+      {
+        \@@_section_tagged:
+        \UseInstance { header } { std }
+        \hfil
+      }
+    \cs_set_nopar:Npn \@oddfoot { \UseInstance { footer } { std } }
+    \cs_set_eq:NN \@evenhead \@oddhead
+    \cs_set_eq:NN \@evenfoot \@oddfoot
+  }
+\pagestyle { talk }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{The \texttt{frame} environment}
+%
+% \begin{variable}{\l_@@_frame_bool}
+%  To track whether we are inside a frame or not.
+%    \begin{macrocode}
+\bool_new:N \l_@@_frame_bool
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\g_@@_frame_tag_bool}
+%   To track when a frame is being tagged: mainly needed for the header
+%   (and as a result global).
+%    \begin{macrocode}
+\bool_new:N \g_@@_frame_tag_bool
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\l_@@_frame_verb_bool}
+%  Indicates that material was collected verbatim (and thus needs rescanning).
+%    \begin{macrocode}
+\bool_new:N \l_@@_frame_verb_bool
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\g_@@_frame_int, \c@frame, \theframe, \@framenumber}
+%   The overall frame number, including \LaTeX{} counter-like access.
+%    \begin{macrocode}
+\int_new:N \g_@@_frame_int
+\cs_new_eq:NN \c@frame \g_@@_frame_int
+\cs_new:Npn \theframe { \@arabic \c@frame }
+\cs_new:Npn \@framenumber { \arabic { frame } }
+%    \end{macrocode}
+% \end{variable}
+%
+% The total frames can be handled using the kernel properties.
+%    \begin{macrocode}
+\property_new:nnnn { totalframes } { shipout } { -1 }
+  { \int_use:N \g_@@_frame_int }
+\AddToHook { enddocument / afterlastpage }
+  { \property_record:nn { lastpage } { totalframes } }
+%    \end{macrocode}
+% 
+% \begin{macro}{\@@_latexe_frame:n}
+%   As we will need to re-define \cs{frame} but have it available inside
+%   frames, a copy is made here.
+%    \begin{macrocode}
+\NewCommandCopy \@@_latexe_frame:n \frame
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_frame_process:nn}
+%   Here, the frame content is received as the argument.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_frame_process:nn #1#2
+  {
+    \int_gincr:N \g_@@_frame_int
+    \bool_set_true:N \l_@@_frame_bool
+    \@@_slide:nn {#1} {#2}
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_frame_tag:n}
+%   Wraps some content in tagging for a frame: we may have multiple of these
+%   in one logical frame, but that is non-standard.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_frame_tag:n #1
+  {
+    \tag_struct_begin:n { tag = frame }
+    \int_gset:Nn \g_@@_frame_struct_int { \tag_get:n { struct_num } }
+    \bool_gset_true:N \g_@@_frame_tag_bool
+    #1
+    \tag_struct_end:
+  }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_frame_notag:n}
+%   The alternative: turn off tagging and suppress the function that would
+%   tag the frame title.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_frame_notag:n #1
+  {
+    \tag_mc_begin:n { artifact }
+    \tag_suspend:n { frame }
+    \bool_gset_false:N \g_@@_frame_tag_bool
+    #1
+    \par
+    \tag_resume:n { frame }
+    \tag_mc_end:
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{frame, frame*}
+%   The definition for the \env{frame} and \env{frame*} environments: the exact
+%   interface at both the document and code levels is still open.
+%    \begin{macrocode}
+\bool_if:NTF \l_@@_frame_title_bool
+  {
+    \RenewDocumentEnvironment { frame }
+      { D <> { all } = { action-spec } O { } +m +b }
+      {
+        \keys_set:nn { talk / frame } {#2}
+        \bool_set_false:N \l_@@_frame_verb_bool
+        \@@_frame_process:nn {#1} { \frametitle {#3} #4 }
+      }
+      { }
+    \NewDocumentEnvironment { frame* }
+      { D <> { all } = { action-spec } O { } +m c }
+      {
+        \keys_set:nn { talk / frame } {#2}
+        \bool_set_true:N \l_@@_frame_verb_bool
+        \tl_gset:Nn \g_@@_frame_title_tl {#3}
+        \exp_args:Nne \@@_frame_process:nn {#1}
+          { \tl_to_str:n { \frametitle } \exp_not:n { {#3} #4 } }
+      }
+      { }
+  }
+  {
+    \RenewDocumentEnvironment { frame }
+      { !D <> { all } = { action-spec } !O { } +b }
+      {
+        \keys_set:nn { talk / frame } {#2}
+        \bool_set_false:N \l_@@_frame_verb_bool
+        \@@_frame_process:nn {#1} {#3}
+      }
+      { }
+    \NewDocumentEnvironment { frame* }
+      { !D <> { all } = { action-spec } !O { } c }
+      {
+        \keys_set:nn { talk / frame } {#2}
+        \bool_set_true:N \l_@@_frame_verb_bool
+        \@@_frame_process:nn {#1} {#3}
+      }
+      { }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</class>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \PrintIndex

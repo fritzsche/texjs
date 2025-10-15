@@ -1,0 +1,2151 @@
+% -*- coding: utf-8; time-stamp-format: "%02d-%02m-%:y at %02H:%02M:%02S %Z" ; time-stamp-active: nil -*-
+%<*dtx>
+\def\zeckdtxtimestampaux #1<#2>{#2}
+\edef\zeckdtxtimestamp{\zeckdtxtimestampaux Time-stamp: <07-10-2025 at 21:41:02 CEST>}
+%</dtx>
+%<*drv>
+%% ---------------------------------------------------------------
+\def\zeckpackdate{2025/10/07}%
+\def\zeckversion {0.9b}%
+%</drv>
+%<*dtx>
+\catcode0 0 \catcode`\\ 12
+^^@iffalse
+%</dtx>
+%<*readme>--------------------------------------------------------
+| Source:   zeckendorf.dtx
+| Version:  0.9b, 2025/10/07
+| Author:   Jean-François Burnol
+| Keywords: Zeckendorf representation; Knuth multiplication
+| License:  LPPL 1.3c
+
+Aim
+===
+
+This package adds to `\xintiieval`'s syntax the `$` character as
+infix operator computing the Knuth multiplication of positive
+integers.  It adds `fib()` and `fibseq()` functions to compute
+Fibonacci numbers and `zeck()`, `zeckindex()` to compute the
+Zeckendorf indices of positive integers.
+
+Conversion between integers and Zeckendorf binary words (or lists
+of indices as done by `zeck()` inside `\xintiieval{}`) is
+available through macros.  Of course they all work using expansion
+only, and as the package is an add-on to `xintexpr` it handles
+arbitrarily big integers (up to thousands of digits at most).
+
+It can be used in three ways:
+- as a LaTeX package: `\usepackage{zeckendorf}`,
+- as a Plain e-TeX macro file: `\input zeckendorfcore.tex`,
+- or interactively on the command line: `etex zeckendorf`. If
+  available use rather `rlwrap etex zeckendorf` for a smoother
+  experience.
+
+The package is in alpha stage and its user interface may change
+in backwards incompatible ways.
+Of course, suggestions are most welcome.
+
+Installation
+============
+
+Exert `etex zeckendorf.dtx` to extract macro files.  To build the
+documentation run `xelatex` on the extracted `zeckendorf-doc.tex`,
+or directly on `zeckendorf.dtx`.
+
+The recommended TDS structure is:
+
+    /tex/generic/zeckendorf/zeckendorfcore.tex
+    /tex/generic/zeckendorf/zeckendorf.tex
+    /tex/generic/zeckendorf/zeckendorf.sty
+    /source/generic/zeckendorf/zeckendorf.dtx
+    /doc/generic/zeckendorf/zeckendorf-doc.pdf
+    /doc/generic/zeckendorf/README.md
+
+License
+=======
+
+Copyright © 2025 Jean-François Burnol
+
+| This Work may be distributed and/or modified under the
+| conditions of the LaTeX Project Public License 1.3c.
+| This version of this license is in
+
+>   <http://www.latex-project.org/lppl/lppl-1-3c.txt>
+
+| and version 1.3 or later is part of all distributions of
+| LaTeX version 2005/12/01 or later.
+
+This Work has the LPPL maintenance status "author-maintained".
+
+The Author and Maintainer of this Work is Jean-François Burnol.
+
+This Work consists of the main source file and its derived files
+
+    zeckendorf.dtx,
+    zeckendorfcore.tex, zeckendorf.tex, zeckendorf.sty,
+    README.md, zeckendorf-doc.tex, zeckendorf-doc.pdf
+
+%</readme>--------------------------------------------------------
+%<*!readme>
+%% ---------------------------------------------------------------
+%% The zeckendorf package: Zeckendorf representation of big integers
+%% Copyright (C) 2025 Jean-Francois Burnol
+%%
+%</!readme>
+%<*changes>-------------------------------------------------------
+\item[0.9b (2025/10/07)]\mbox{}\newline
+\textbf{Bug fixes:}
+  \begin{itemize}
+  \item The instructions for interactive use mentioned |1e100| as possible
+    input, but the author had forgotten that this syntax is not legitimate in
+    |\xintiieval| (for example |1+1e10| crashes immediately).
+  \item The code tries at some locations to be compatible with \xintexprname
+    versions earlier than |1.4n|.  But these versions did not load
+    \xintbinhexname automatically and the needed |\RequirePackage| or |\input|
+    for Plain \TeX{} was lacking from the \zeckname code.
+  \end{itemize}
+\textbf{Other changes:} In the interactive interface, the input may now start
+  with an |\xintiieval| function such as |binomial| whose first letter coincides
+  with one of the letter commands without it being needed to for example
+  add some |\empty| control sequence first.  On the other hand, it was possible
+  to use the full command names, now only their first letters (lower or uppercase)
+  are recognized as such.
+\item[0.9alpha (2025/10/06)] Initial release.
+%</changes>-------------------------------------------------------
+%<*drv>-----------------------------------------------------------
+%% latex zeckendorf-doc.tex (thrice) && dvipdfmx zeckendorf-doc.dvi
+%% to produce zeckendorf-doc.pdf
+%%
+%% Doing latexmk -pdf zeckendorf-doc.tex is also possible but
+%% will produce a bigger file due usage of pdflatex.
+%%
+\NeedsTeXFormat{LaTeX2e}[2020/02/02]
+\ProvidesFile{zeckendorf-doc.tex}%
+[\zeckpackdate\space v\zeckversion\space driver file for %
+  zeckendorf documentation (JFB)]%
+\PassOptionsToClass{a4paper,fontsize=11pt}{scrartcl}
+\RequirePackage{iftex}
+\chardef\Withdvipdfmx \iftutex0 \else\ifpdf0 \else1 \fi\fi
+\chardef\NoSourceCode 0 % replace 0 by 1 for not including source code
+\input zeckendorf.dtx
+%%% Local Variables:
+%%% mode: latex
+%%% End:
+%</drv>-----------------------------------------------------------
+%<*dtx>
+^^@fi ^^@catcode`\ 0 \catcode0 12
+\def\hiddenifs{\iftutex0 \else\ifpdf0 \else1 \fi\fi}%
+\chardef\noetex 0
+\ifx\numexpr\undefined \chardef\noetex 1 \fi
+\ifnum\noetex=1 \chardef\extractfiles 0 % extract files, then stop
+\else
+    \ifx\ProvidesFile\undefined
+      \chardef\extractfiles 0 % no LaTeX2e; etex, ... on zeckendorf.dtx
+    \else % latex/pdflatex on zeckendorf-doc.tex or on zeckendorf.dtx
+      \NeedsTeXFormat{LaTeX2e}[2020/02/02]%
+      \ProvidesFile{zeckendorf.dtx}[bundle source (\zeckpackdate)]%
+      \ifx\Withdvipdfmx\undefined
+        % latex run is on zeckendorf.dtx, we will extract all files
+        \chardef\extractfiles 1 % 1 = extract and typeset, 2=only typeset
+        \chardef\NoSourceCode 0 % 0 = include source code, 1 = do not
+        \PassOptionsToClass{a4paper,fontsize=11pt}{scrartcl}%
+        \RequirePackage{iftex}\relax
+        \chardef\Withdvipdfmx \hiddenifs
+      \else % latex run is on zeckendorf-doc.tex,
+        \chardef\extractfiles 2 % no extractions
+      \fi
+    \fi
+\fi
+\ifnum\extractfiles<2 % we extract files
+ \def\MessageDeFin{\newlinechar10 \let\Msg\message
+ \Msg{^^J}%
+ \Msg{********************************************************************^^J}%
+ \Msg{*^^J}%
+ \Msg{* To finish the installation you have to move the following^^J}%
+ \Msg{* files into a directory searched by TeX:^^J}%
+ \Msg{*^^J}%
+ \Msg{*\space\space\space\space zeckendorf.sty^^J}%
+ \Msg{*\space\space\space\space zeckendorf.tex^^J}%
+ \Msg{*\space\space\space\space zeckendorfcore.tex^^J}%
+ \Msg{*^^J}%
+ \Msg{* Happy TeXing!^^J}%
+ \Msg{*^^J}%
+ }%
+ \ifnum\extractfiles=0 % only extraction
+  \expandafter\def\expandafter\MessageDeFin\expandafter{%
+  \MessageDeFin
+  \Msg{* To produce the documentation run latex thrice on zeckendorf-doc.tex^^J}%
+  \Msg{* then dvipdfmx on zeckendorf-doc.dvi.^^J}%
+  \Msg{*^^J}%
+  \Msg{********************************************************************^^J}%
+  }%
+ \else %% *latex run on zeckendorf.dtx
+  \ifnum\Withdvipdfmx=1 % for dvipdfmx
+   \expandafter\def\expandafter\MessageDeFin\expandafter{%
+   \MessageDeFin
+   \Msg{* Please use dvipdfmx once the LaTeX runs are done, and^^J}%
+   \Msg{* consider renaming zeckendorf.pdf to zeckendorf-doc.pdf^^J}%
+   \Msg{********************************************************************^^J}%
+   }%
+  \else % pdflatex, lualatex or xelatex
+   \expandafter\def\expandafter\MessageDeFin\expandafter{%
+   \MessageDeFin
+   \Msg{* Please consider renaming zeckendorf.pdf to zeckendorf-doc.pdf^^J}%
+   \Msg{********************************************************************^^J}%
+   }%
+  \fi
+ \fi
+ % file extraction
+ \begingroup
+    \input docstrip.tex
+    \askforoverwritefalse
+    \generate{\nopreamble\nopostamble
+    \file{README.md}{\from{zeckendorf.dtx}{readme}}
+    \usepreamble\defaultpreamble
+    \usepostamble\defaultpostamble
+    \file{zeckendorfchanges.tex}{\from{zeckendorf.dtx}{changes}}
+    \file{zeckendorf-doc.tex}{\from{zeckendorf.dtx}{drv}}
+    \file{zeckendorfcore.tex}{\from{zeckendorf.dtx}{core}}
+    \file{zeckendorf.tex}{\from{zeckendorf.dtx}{interactive}}
+    \file{zeckendorf.sty}{\from{zeckendorf.dtx}{sty}}}
+ \endgroup
+\else % *latex on zeckendorf-doc.tex we skipped extraction
+ \ifnum\Withdvipdfmx=1
+  \def\MessageDeFin{\newlinechar10 \let\Msg\message
+  \Msg{^^J}% too lazy to add the multipls spaces to make a frame
+  \Msg{********************************************************************^^J}%
+  \Msg{* Please use dvipdfmx once the LaTeX runs are done^^J}%
+  \Msg{********************************************************************^^J}%
+  }%
+ \fi
+\fi
+\ifnum\extractfiles=0
+% direct tex/etex/xetex on zeckendorf.dtx, files now extracted, stop
+  \MessageDeFin\expandafter\end
+\fi
+\ifdefined\MessageDeFin\AtEndDocument{\MessageDeFin}\fi
+%-------------------------------------------------------------------------------
+\documentclass {scrartcl}
+%%% START OF CUSTOM doc.sty LOADING (May 21, 2022)
+\usepackage{doc}[=v2]
+% As explained above I was formerly using scrdoc hence ltxdoc indirectly.
+% Let's emulate here the little I appear to need from ltxdoc.cls and
+% srcdoc.cls.
+%
+\AtBeginDocument{\MakeShortVerb{\|}}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}{<-> ssub * cmtt/m/n}{}
+\DeclareFontFamily{OMS}{cmtt}{\skewchar\font 48}  % '60
+\DeclareFontShape{OMS}{cmtt}{m}{n}{<-> ssub * cmsy/m/n}{}
+\DeclareFontShape{OMS}{cmtt}{bx}{n}{<-> ssub * cmsy/b/n}{}
+\DeclareFontShape{OT1}{cmss}{m}{it}{<->ssub*cmss/m/sl}{}
+\ifnum\NoSourceCode=1
+  \OnlyDescription
+\fi
+\CodelineNumbered
+\DisableCrossrefs
+% \setcounter{StandardModuleDepth}{1} % we don't use this mechanism currently
+\def\cmd#1{\cs{\expandafter\cmd@to@cs\string#1}}
+\def\cmd@to@cs#1#2{\char\number`#2\relax}
+% This is hyperref compatible (contrarily to using \bslash)
+% I need the \detokenize due to usage in implementation part with names
+% containing the underscore for example
+\DeclareRobustCommand\cs[1]{\texttt{\textbackslash\detokenize{#1}}}
+\providecommand\marg[1]{%
+  {\ttfamily\char`\{}\meta{#1}{\ttfamily\char`\}}}
+\providecommand\oarg[1]{%
+  {\ttfamily[}\meta{#1}{\ttfamily]}}
+\providecommand\parg[1]{%
+  {\ttfamily(}\meta{#1}{\ttfamily)}}
+
+% There is very little we seem to need from the scrdoc extras: page geometry
+% is set by geometry package and a4paper option from zeckendorf.tex file.  So it
+% seems I only need the hologo loading:
+\usepackage{hologo}
+\DeclareRobustCommand*{\eTeX}{\hologo{eTeX}}%
+%\DeclareRobustCommand*{\LuaTeX}{\hologo{LuaTeX}}%
+%
+%%% end of ltxdoc+srcdoc emulation.
+
+\ifnum\NoSourceCode=1 \OnlyDescription\fi
+\usepackage{ifpdf}
+\ifpdf\chardef\Withdvipdfmx 0 \fi
+\makeatletter
+\ifnum\Withdvipdfmx=1
+% I think those are mostly obsolete...
+   \@for\@tempa:=hyperref,bookmark,graphicx,xcolor,pict2e\do
+            {\PassOptionsToPackage{dvipdfmx}\@tempa}
+   %
+   \PassOptionsToPackage{dvipdfm}{geometry}
+   \PassOptionsToPackage{bookmarks=true}{hyperref}
+   \PassOptionsToPackage{dvipdfmx-outline-open}{hyperref}
+   %\PassOptionsToPackage{dvipdfmx-outline-open}{bookmark}
+   %
+   \def\pgfsysdriver{pgfsys-dvipdfm.def}
+\else
+   \PassOptionsToPackage{bookmarks=true}{hyperref}
+\fi
+\makeatother
+
+\pagestyle{headings}
+
+\iftutex\else % but newtxtt requires it anyhow
+\usepackage[T1]{fontenc}
+\fi
+
+\usepackage[hscale=0.66,vscale=0.75]{geometry}
+
+\usepackage{amsmath}
+\allowdisplaybreaks
+
+% requires newtxtt 1.05 or later
+\usepackage[zerostyle=d,scaled=0.95,straightquotes]{newtxtt}
+\renewcommand\familydefault\ttdefault
+\usepackage[noendash]{mathastext}
+\renewcommand\familydefault\sfdefault
+
+% pas le temps d'expliquer pourquoi
+\iftutex
+  \catcode`⊙\active\def⊙{\ensuremath{\odot}}
+\else
+  \DeclareUnicodeCharacter{2299}{\ensuremath{\odot}}
+\fi
+
+\usepackage{graphicx}
+
+\usepackage[dvipsnames,svgnames]{xcolor}
+
+\definecolor{joli}{RGB}{225,95,0}
+\definecolor{JOLI}{RGB}{225,95,0}
+\definecolor{BLUE}{RGB}{0,0,255}
+%% \definecolor{niceone}{RGB}{38,128,192}% utilisé avant pour urlcolor
+%% \colorlet{jfverbcolor}{yellow!5}
+\colorlet{shortverbcolor}{magenta}% 1.6 release NavyBlue RoyalPurple
+\colorlet{softwrapcolor}{blue}
+\colorlet{digitscolor}{olive}% 1.6 {OrangeRed}
+
+% transféré de xint-manual.tex (maintenant dans xint.dtx)
+\DeclareFontFamily{U}{MdSymbolC}{}
+\DeclareFontShape {U}{MdSymbolC}{m}{n}{<-> MdSymbolC-Regular}{}
+
+\makeatletter
+\newbox\cdbx@SoftWrapIcon
+\def\cdbx@SetSoftWrapBox{%
+    \setbox\cdbx@SoftWrapIcon\hb@xt@\z@
+    {\hb@xt@\fontdimen2\font
+        {\hss{\color{softwrapcolor}\usefont{U}{MdSymbolC}{m}{n}\char"97}\hss}%
+     \hss}%
+   }
+\makeatother
+
+\usepackage[english]{babel}
+
+\usepackage{hyperref}
+\hypersetup{%
+%linktoc=all,%
+breaklinks=true,%
+colorlinks=true,%
+urlcolor=Cerulean,% 1.6 ProcessBlue,%SkyBlue
+linkcolor=PineGreen,%
+pdfauthor={Jean-François Burnol},%
+pdftitle={The Zeckendorf package},%
+pdfsubject={Arithmetic with TeX},%
+pdfkeywords={Expansion, arithmetic, TeX},%
+pdfstartview=FitH,%
+pdfpagemode=UseOutlines}
+\usepackage{bookmark}
+
+% importé de xint 2021/05/14
+\newcommand\RaisedLabel[2][6]{%
+\vspace*{-#1\baselineskip}%
+\begingroup
+  \let\leavevmode\relax\phantomsection
+  \label{#2}%
+\endgroup
+\vspace*{#1\baselineskip}%
+}
+
+%---- \verb, and verbatim like `environments'. \MicroFont et \MacroFont
+\makeatletter
+\def\MicroFont {\ttfamily\cdbx@SetSoftWrapBox\color{shortverbcolor}}
+%\def\MicroFont {\ttfamily \color[named]{OrangeRed}\cdbx@SetSoftWrapBox }
+
+% \MacroFont est utilisé par macrocode, mais sa définition est figée dans
+% \macro@font au \begin{document}
+
+\def\MacroFont {\ttfamily \baselineskip12pt\relax }
+
+%--- November 4, 2014 making quotes straight. (maintenu pour *)
+%
+% there is no hook in \macrocode after \dospecials etc. Thus I will need to
+% take the risk that some future evolution of doc.sty (or perhaps scrdoc)
+% invalidates the following.
+%
+% Actually, I should not at all rely on the doc class, I should do it all by
+% myself.
+
+\def\macrocode{\macro@code
+               \frenchspacing \@vobeyspaces
+               \makestarlowast % \makequotesstraight (obsolète)
+               \xmacro@code }
+
+%--- lower * symbol in text
+
+\def\lowast{\raisebox{-.25\height}{*}}
+\catcode`* \active
+\def\makestarlowast {\let*\lowast\catcode`\*\active}%
+\catcode`* 12
+
+\def\verb #1%
+{%
+  \relax\leavevmode\null
+  \begingroup
+   \MicroFont
+   \def\@makeletter##1{\catcode`##1=11\relax}%
+   % \scantokens will have a result of inserting a space after cs's.
+   % hence the need to have the catcodes of things like _ right.
+   % I also need < for > for code comments
+   % \dospecials at begin document
+   % \do\ \do\\\do\{\do\}\do\$\do\&\do\#\do\^\do\_\do\%\do\~\do\|
+   \odef\dospecials{\dospecials\do\:\do\<\do\>\do\-\do\+}%
+   % naturally won't work in footnotes though.
+   % this code is truly not satisfying, but enough for my needs here.
+   \catcode`\\ 11 \catcode`## 11
+   % I don't do \catcode`\% 11 to avoid surprises in code comments
+   % if my |...| has a linebreak
+   \def\@jfverb ##1#1{\let\do\@makeletter \dospecials
+   % lowering a bit the *
+                      \makestarlowast
+   %\let\do\do@noligs  \verbatim@nolig@list % not needed here
+                      \@vobeyspaces\everyeof{\noexpand}%
+                      \expandafter\@@jfverb\scantokens{##1}\relax}%
+  \@jfverb
+}%
+
+\def\@@jfverb #1{\ifcat\noexpand#1\relax\endgroup\@\else
+       \nobreak\hskip0pt plus 1pt % added 2025/10/06 for Zeckendorf
+       \discretionary{\copy\cdbx@SoftWrapIcon}{}{}%
+       #1\expandafter\@@jfverb\fi }
+
+\makeatother
+
+
+% everbatim environment
+% =====================
+
+% October 13-14, 2014
+% Verbatim with an \everypar hook, mainly to have background color, followed by
+% execution of the contents (not limited by a group-scope)
+
+\makeatletter
+\colorlet{everbatimfgcolor}{DarkBlue}
+\colorlet{everbatimbgcolor}{Beige}
+\colorlet{everbatimxfgcolor}{Maroon}
+
+\def\everbatim {\s@everbatim\@everbatim}
+\@namedef{everbatim*}{\s@everbatim\@everbatimx}
+
+% Note: one can not use everbatim inside itself or everbatim* inside itself
+\def\s@everbatim {%
+     \everbatimtop % put there size changes
+       \topsep    \z@skip
+       \partopsep \z@skip
+       \itemsep   \z@skip
+       \parsep    \z@skip
+       \parskip   \z@skip
+       \lineskip  \z@skip
+     \let\do\@makeother \dospecials
+     \let\do\do@noligs  \verbatim@nolig@list
+     \makestarlowast
+     \everbatimhook
+     \trivlist
+       \@topsepadd \z@skip
+       \item\relax
+       \leftskip   \@totalleftmargin
+       \rightskip  \z@skip
+       \parindent  \z@
+       \parfillskip\@flushglue
+       \parskip    \z@skip
+       \@@par
+       \def\par{\leavevmode\null\@@par\pagebreak[1]}%
+       \everypar\expandafter{\the\everypar \unpenalty
+                \everbatimeverypar
+                \everypar \expandafter{\the\everypar\everbatimeverypar}%
+       }%
+       \obeylines \@vobeyspaces
+}
+% 27 mai 2022, plus de \small
+\def\everbatimtop {\MacroFont }%
+\let\everbatimhook\empty
+\def\everbatimeverypar{\strut
+                   {\color{everbatimbgcolor}\vrule\@width\linewidth }%
+                   \kern-\linewidth
+                   \kern\everbatimindent }
+\def\everbatimindent {\z@}% voir plus loin atbegindocument
+
+\begingroup
+\lccode`X 13
+\catcode`X \active
+\lccode`Y `* % this is because of \makestarlowast.
+% I have to think whether this is useful: obviously if I were to provide
+% everbatim and everbatim*  in a package I wouldn't do that.
+\catcode`Y  \active
+\catcode`| 0 \catcode`[ 1 \catcode`] 2 \catcode`* 12
+\catcode`{ 12 \catcode`} 12 |catcode`\\ 12
+|lowercase[|endgroup% both freezes catcodes and converts X to active ^^M
+|def|@everbatim #1X#2\end{everbatim}%
+  [#2|end[everbatim]|everbatimbottom ]
+|def|@everbatimx #1X#2\end{everbatimY}]%
+  {#2\end{everbatim*}%
+% No group here: this allows executed code to make macro
+% definitions which may reused in later uses of everbatim.
+% refactored 2022/01/11, rather than passing \newlinechar value
+% as was done formerly via everbatim* (see above) and fetching it here as #1 
+% it is thus assumed executed contents do not terminate a scope
+     \edef\everbatimrestorenewlinechar{\newlinechar\the\newlinechar\relax}%
+     \newlinechar 13
+% refactored 2022/01/11 to fix a \parskip issue
+% attention, \parskip thus set to zero for execution of contents
+% reason: avoid extra space if everbatim* is in an \item of a list
+% between verbatim and output of execution, if it starts a paragraph
+% a \vskip-\parskip approach (cf former \everbatimundoparskip)
+% would be no good in case contents create a display
+     \edef\everbatimrestoreparskip{\parskip\the\parskip\relax}%
+     \parskip\z@skip
+% execution of the contents (expected to be LaTeX code...)
+     \everbatimxprehook
+     \scantokens {#2}%
+     \everbatimrestorenewlinechar
+     \everbatimrestoreparskip
+     \everbatimxposthook
+% input after \end{everbatim*} on same line in source is allowed
+}%
+% L'espace venant du endofline final mis par \scantokens sera inhibé si #2 se
+% termine par un % ou un \x, etc...
+\let\everbatimbottom\empty
+
+\def\endeverbatim{\if@newlist \leavevmode\fi\endtrivlist}
+\@namedef{endeverbatim*}{\endeverbatim}
+\def\everbatimxprehook {\colorlet{everbsavedcolor}{.}%
+                        \color{everbatimxfgcolor}}%
+\def\everbatimxposthook{\color{everbsavedcolor}}
+{\sbox0{\color{everbatimxfgcolor}\xdef\@tempa{\current@color}}}
+\ifpdf
+ \ifluatex
+   \edef\everbatimxprehook
+       {\pdfextension colorstack\noexpand\@pdfcolorstack push{\@tempa}\relax}
+   \def\everbatimxposthook
+       {\pdfextension colorstack\@pdfcolorstack pop\relax}
+ \else
+   \edef\everbatimxprehook
+      {\pdfcolorstack\noexpand\@pdfcolorstack push{\@tempa}\relax}
+   \def\everbatimxposthook{\pdfcolorstack\@pdfcolorstack pop\relax}
+ \fi
+\else
+  \ifxetex
+   \edef\everbatimxprehook{\special{color push \@tempa}}
+   \def\everbatimxposthook{\special{color pop}}
+  \else
+    \ifnum\Withdvipdfmx=1
+     \edef\everbatimxprehook{\special{color push \@tempa}}
+     \def\everbatimxposthook{\special{color pop}}
+    \fi
+  \fi
+\fi
+\makeatother
+
+% 2025/10/05
+% Toujours pénible de devoir se battre avec les espaces verticaux de LaTeX.
+% J'ai dû réexaminer la situation pour Zeckendorf, différent de bnumexpr
+% où j'utilise \[..\] pour les \bneshoweval etc...
+\AtBeginDocument{%
+% \message{ICI below: \the\belowdisplayskip^^J%
+%              belowshort: \the\belowdisplayshortskip^^J%
+%              above: \the\abovedisplayskip^^J%
+%              aboveshor: \the\abovedisplayshortskip^^J%
+% }%
+% below: 11.0pt plus 3.0pt minus 6.0pt
+% belowshort: 6.5pt plus 3.5pt minus 3.0pt
+% above: 11.0pt plus 3.0pt minus 6.0pt
+% aboveshor: 0.0pt plus 3.0pt
+   \belowdisplayskip\belowdisplayshortskip
+   \abovedisplayskip\belowdisplayskip
+}
+
+\usepackage{xspace}
+
+\def\zeckname
+   {\href{http://www.ctan.org/pkg/zeckendorf}{zeckendorf}\xspace }%
+
+\def\zecknameimp
+   {\texorpdfstring
+          {\hyperref[part:zeckendorfcode]{{\color{shortverbcolor}\ttzfamily zeckendorf}}}
+          {zeckendorf}%
+    \xspace }%
+
+\def\zecknameuserdoc
+   {\texorpdfstring
+          {\hyperref[titlepage]{{\color{PineGreen}\ttzfamily zeckendorf}}}
+          {zeckendorf}%
+    \xspace }%
+
+\def\bnumexprname
+   {\href{http://www.ctan.org/pkg/bnumexpr}{bnumexpr}\xspace }%
+\def\xintkernelname
+   {\href{http://www.ctan.org/pkg/xint}{xintkernel}\xspace }%
+\def\xintcorename
+   {\href{http://www.ctan.org/pkg/xint}{xintcore}\xspace }%
+\def\xintname
+   {\href{http://www.ctan.org/pkg/xint}{xint}\xspace }%
+\def\xinttoolsname
+   {\href{http://www.ctan.org/pkg/xint}{xinttools}\xspace }%
+\def\xintfracname
+   {\href{http://www.ctan.org/pkg/xint}{xintfrac}\xspace }%
+\def\xintexprname
+   {\href{http://www.ctan.org/pkg/xintexpr}{xintexpr}\xspace }%
+\def\xintbinhexname
+   {\href{http://www.ctan.org/pkg/xint}{xintbinhex}\xspace }%
+
+\DeclareRobustCommand\ctanpackage[1]{\href{https://ctan.org/pkg/#1}{#1}}
+
+\usepackage{zeckendorf}
+
+\usepackage{etoc}
+\usepackage{centeredline}
+\usepackage{framed}
+\makeatletter\let\check@percent\relax\makeatother
+\usepackage[autolanguage,np]{numprint}
+\usepackage{enumitem}
+
+\newenvironment{TeXnote}{\par\footnotesize\medskip\noindent\textbf{\TeX-nical note:
+  }}{\par\medskip}
+
+\newcommand\dgts{\textcolor{digitscolor}}
+\newcommand\mdgts{\mathcolor{digitscolor}}
+
+\begin{document}
+\thispagestyle{empty}
+\ttzfamily
+\pdfbookmark[1]{Title page}{TOP}
+
+{%
+\normalfont\Large\parindent0pt \parfillskip 0pt\relax
+ \leftskip 2cm plus 1fil \rightskip 2cm plus 1fil
+ The \zeckname package\par
+}
+
+\RaisedLabel{titlepage}
+
+{\centering
+  \textsc{Jean-François Burnol}\par
+  \footnotesize
+  jfbu (at) free (dot) fr\par
+  Package version: \zeckversion\ (\zeckpackdate)\par
+  {From source file \texttt{zeckendorf.dtx} of \texttt{\zeckdtxtimestamp}}\par
+}
+
+\etocsetnexttocdepth{subsection}
+\etocsettagdepth{code}{section}
+\etocsettocstyle{}{}
+\etocdefaultlines
+\tableofcontents
+
+\part{User manual}
+\section{Mathematical background}
+\label{sec:math}
+
+Let us recall that the Fibonacci sequence starts with $F_0=0$,
+$F_1=1$, and obeys the recurrence $F_n=F_{n-1} + F_{n-2}$ for $n\geq2$.  So $F_2=1$,
+$F_3=2$, $F_4=3$ and by a simple induction $F_k = k-1$.  Ahem, not at all!
+Here are the first few, starting at $F_2=1$:
+\[
+\xintiieval{*fibseq(2, 18)}\dots
+\]
+
+\def\testN{100000000}
+\oodef\testword{\ZeckWord{\testN}}
+\oodef\testmaxindex{\ZeckIndex{\testN}}
+\ifnum\xintNthElt{0}{\testword}=\numexpr\testmaxindex-1\relax\else\ERROR\fi
+
+\textbf{Zeckendorf}'s Theorem says that any positive integer has a unique
+representation as a sum of the Fibonacci numbers $F_n$, $n\geq2$, under the
+conditions that no two indices differ by one, and that no index is repeated.
+For example:
+\begin{align*}
+\xintFor #1 in {10,100,1000,10000,100000, 1000000, 10000000}\do{
+\np{#1} &= \mdgts{\ZeckExplicitSum{#1}}\\
+}
+\np{\testN} &= \mdgts{\ZeckIndexedSum{\testN}}
+\end{align*}
+This is called the Zeckendorf representation, and it can be given either as
+above, or as the list of the indices (in decreasing or increasing order), or
+as a binary word which in the examples above are
+%
+\begin{align*}
+\xintFor #1 in {10,100,1000,10000,100000, 1000000, 10000000}\do{
+\np{#1} &= \mdgts{\ZeckWord{#1}_{\text{Zeckendorf}}}\\
+}
+\np{\testN} &= \mdgts{\ZeckWord{\testN}_{\text{Zeckendorf}}}\\
+\np{1000000000} &= \mdgts{\ZeckWord{1000000000}_{\text{Zeckendorf}}}
+\end{align*}
+%
+The least significant digit says whether the Zeckendorf representation uses
+$F_2$ and so on from right to left (one may prefer to put the binary digits in
+the reverse order, but doing as above is more reminiscent of binary, decimal,
+or other representations using a given radix). In the next-to-last example the word
+length is $\testmaxindex-2+1=\mdgts{\the\numexpr\testmaxindex-1\relax}$, and in
+general it is $K-1$ where $K$ is the largest index such that $F_K$ is at most
+equal to the given positive integer.  For $\np{1000000000}$ this maximal index is
+\dgts{\ZeckIndex{1000000000}} and indeed the associated word has length
+\dgts{\expanded{\noexpand\xintLength{\ZeckWord{1000000000}}}}.
+
+In a Zeckendorf binary word the sub-word
+\dgts{11} never occurs, and this, combined wih the fact that
+the leading digit is \dgts{1}, characterizes the Zeckendorf words.
+
+
+\textbf{Donald Knuth} (whose name may ring some bells to \TeX{} users) has
+shown that defining $ a \circ b$ as $\sum_i\sum_j F_{a_i+b_j}$ where the
+$a_i$'s and the $b_j$'s are the indices involved in the respective Zeckendorf
+representations of $a$ and $b$ is an \emph{associative} operation on positive
+integers (it is obviously commutative).
+
+The Fibonacci recurrence can also be prolungated to negative $n$'s, and it
+turns out that $F_{-n}=(-1)^{n-1}F_n$.  \textbf{Donald Knuth} has shown that
+any relative integer has a unique representation as a sum of these
+``NegaFibonacci'' numbers $F_{-n}$, $n\geq1$, again with the condition that no
+index is repeated and no two indices differ by one. In the special case of
+zero, the representation is an empty sum.  Here is the sequence of these
+``NegaFibonacci'' numbers starting at $n=-1$:
+% \[
+% \xintiieval{seq((-1)^(n-1)*fib(n), n=1..16)}\dots
+% \]
+% implémentation négatifs a marché du premier coup...
+% Pas envie pour le moment d'implémenter fibseq(a,b) avec b<=a
+\[
+\xintiieval{*reversed(fibseq(-16,-1))}\dots
+\]
+
+% à noter que (-1)^{n-1} au lieu de (-1)^(n-1) donne un résultat très
+% contreintuitif car xintexpr va retirer les {..} donc c'est comme
+% (-1)^n - 1 donc totalement snas rapport... (si l'input est (-1)^{n-1} * x,
+% le 1 sera absorbé par le *x d'ailleurs).
+
+\section{Use on the command line}
+\label{sec:interactive}
+
+Open a command line window and execute:
+\centeredline{|etex zeckendorf|}
+then follow the displayed instructions.
+
+The (\TeX{} Live) |*tex| executables are not linked with the |readline|
+library, and this makes interactive use quite painful.  If you are on a decent
+system, launch the interactive session rather via
+\centeredline{|rlwrap etex zeckendorf|}
+for a smoother experience. 
+
+
+\section{Use as a \LaTeX{} package}
+\label{sec:latex}
+
+As expected, add to the preamble: \centeredline{|\usepackage{zeckendorf}|}
+There are no options.
+
+\xintexprname is loaded, macros are defined to go from integers to Zeckendorf
+representations and back, and to compute the Knuth multiplication of positive
+integers.
+
+|\xintiieval| is extended with the functions |fib()|, |fibseq()|, |zeckindex()|
+and |zeck()|.  The |$| is added to the syntax as infix operator
+(with same precedence as multiplication) doing
+the Knuth multiplication.%$ que Emacs/AucTeX est bête
+
+\begin{description}
+\item[\cs{ZeckTheFN}]  This macro computes Fibonacci numbers.
+\begin{everbatim*}
+\ZeckTheFN{100}, \ZeckTheFN{100 + 15}\newline
+\end{everbatim*}%
+  As shown, the argument can be an integer expression (only in the sense of
+  |\inteval|, not in the one of |\xinteval|, for example you can not have
+  powers only additions and multiplications).  Negative arguments are allowed:
+\begin{everbatim*}
+\ZeckTheFN{0}, \ZeckTheFN{-1}, \ZeckTheFN{-2}, \ZeckTheFN{-3},
+\ZeckTheFN{-4} 
+\end{everbatim*}
+
+The syntax of |\xintiieval| is extended via addition of a |fib()| function, which
+gives a convenient interface:
+\begin{everbatim*}
+\xintiieval{seq(fib(n), n=-5..5, 10, 20, 100)}
+\end{everbatim*}
+\begin{everbatim*}
+\xintiieval{seq(fib(2^n), n=1..7)}
+\end{everbatim*}
+
+\item[\cs{ZeckTheFSeq}] This computes not only one but a whole contiguous
+  series of Fibonacci numbers but its output format is a sequence of braced
+  numbers, and tools such as those of \xinttoolsname are needed to manipulate
+  its output.  For this reason it is not further documented here.
+
+  The syntax of |\xintiieval| is extended via addition of a |fibseq()|
+  function, which gives a convenient interface:
+\begin{everbatim*}
+\xintiieval{fibseq(10,20)}\newline
+\end{everbatim*}%
+  Notice the square brackets used on output.  In the terminology of
+  \xintexprname, the function produces a |nutple|.  Use the |*| prefix to
+  remove the brackets:
+\begin{everbatim*}
+\xintiieval{reversed(*fibseq(-20,-10))}
+\end{everbatim*}
+
+  \textbf{IMPORTANT:} currently, |fibseq(a,b)| \textbf{falls into an infinite loop} if
+  $a\geq b$.  Use it only with $a<b$.  Above we used the |reversed()| function
+  to get the output in order from $F_{-10}$ to $F_{-20}$ and not from
+  $F_{-20}$ to $F_{-10}$.
+
+\item[\cs{ZeckIndex}] This computes the largest index $k$ such that $F_k\leq x$,
+  where $x$ is the input.  The input is only \emph{f}-expanded, if you need it
+  to be an expression you must wrap it in |\xintiieval|.
+
+  The syntax of |\xintiieval| is extended via addition of a |zeckindex()|
+  function, which gives a more convenient interface.
+
+  \textbf{IMPORTANT:} The input \textbf{must be positive} (for now).  No check
+  is made that this is the case.
+
+  \textbf{Note:} Input must not have more than a few thousand decimal digits.
+
+\begin{everbatim*}
+\ZeckIndex{123456789123456789123456789123456789}
+\end{everbatim*}
+\begin{everbatim*}
+\ZeckTheFN{\ZeckIndex{123456789123456789123456789123456789}}
+\end{everbatim*}
+\begin{everbatim*}
+\ZeckTheFN{1+\ZeckIndex{123456789123456789123456789123456789}}
+\end{everbatim*}
+\begin{everbatim*}
+\ZeckIndex{\xintiieval{2^100}}
+\end{everbatim*}
+\begin{everbatim*}
+\xintiieval{zeckindex(2^100)}
+\end{everbatim*}
+\begin{everbatim*}
+\xintiieval{fib(zeckindex(2^100))}
+\end{everbatim*}
+\begin{everbatim*}
+\xintiieval{2^100}
+\end{everbatim*}
+\begin{everbatim*}
+\xintiieval{fib(1 + zeckindex(2^100))}
+\end{everbatim*}
+\begin{everbatim*}
+\xintiieval{seq(zeckindex(10^n), n = 0..40)}
+\end{everbatim*}
+
+\item[\cs{ZeckIndices}] This computes the Zeck representation as a comma
+  separated list of indices.  The input is only \emph{f}-expanded, if you need it
+  to be an expression you must wrap it in |\xintiieval|.
+
+  The macro is also known as |\ZeckZeck|.
+
+  The syntax of |\xintiieval| is extended via addition of a |zeck()|
+  function, which gives a more convenient interface.
+
+  \textbf{IMPORTANT:} The input \textbf{must be positive}.  No check
+  is made that this is the case.
+
+  \textbf{Note:} Input must not have more than a few thousand decimal digits.
+
+\begin{everbatim*}
+\ZeckZeck{123456789123456789123456789}
+\end{everbatim*}
+
+Here is with |zeck()|:
+\begin{everbatim*}
+\xintiieval{zeck(123456789)}
+\end{everbatim*}
+
+There are brackets, because the |zeck()| function produces a \emph{nutple}
+(see \xintexprname documentation).  You can use the |*| prefix to unpack.
+\begin{everbatim*}
+\xintiieval{*zeck(123456789123456789123456789)}
+\end{everbatim*}
+
+It is easy with this syntax to manipulate the indices in various ways.  Let's
+simple print them from smallest to largest:
+\begin{everbatim*}
+\xintiieval{*reversed(zeck(123456789123456789123456789))}
+\end{everbatim*}
+
+The power of the |\xintiieval|, always eager to prove |A=A|, can be demonstrated:
+\begin{everbatim*}
+\xintiieval{add(fib(n), n = *zeck(123456789))}
+\end{everbatim*}
+\begin{everbatim*}
+\xintiieval{add(fib(n), n = *zeck(123456789123456789123456789))}
+\end{everbatim*}
+
+\begin{TeXnote}
+  There is also \cs{ZeckBList} which produces the indices as a sequence of
+  braced items.  To manipulate conveniently such outputs you need macros from
+  \xinttoolsname or from \LaTeX3.  It is easier to use the powerful
+  |\xintiieval| interface such as for example:
+\begin{everbatim*}
+The first five indices are \xintiieval{*zeck(123456789123456789123456789)[:5]}.
+\end{everbatim*}
+
+\begin{everbatim*}
+The Zeckendorf representation of 123456789123456789123456789 uses
+\xintiieval{len(zeck(123456789123456789123456789))} Fibonacci numbers.
+\end{everbatim*}
+\end{TeXnote}
+
+\item[\cs{ZeckWord}]  This computes the Zeck representation as a binary word.
+  The input is only \emph{f}-expanded, if you need it
+  to be an expression you must wrap it in |\xintiieval|.
+
+  \textbf{IMPORTANT:} The input \textbf{must be positive}.  No check
+  is made that this is the case.
+
+  \textbf{Note:} Input must not have more than a few thousand decimal digits.
+
+\begin{everbatim*}
+\ZeckWord{123456789}
+\end{everbatim*}
+\begin{everbatim*}
+\ZeckWord{\xintiieval{2^40}}
+\end{everbatim*}
+
+  As \TeX{} does not by default split long strings of digits at the line ends,
+  we gave so far only some small examples.  See \xintname or \bnumexprname
+  documentations for a \cs{printnumber} macro able to add linebreaks.  Using 
+  such an auxiliary (a bit refined) we can for example obtain this:
+\begin{everbatim}
+\ZeckWord{\xintiieval{2^100}}
+\end{everbatim}
+
+\vspace{-4pt}
+\begingroup\colorlet{shortverbcolor}{everbatimxfgcolor}
+\expandafter|\expanded{\ZeckWord{\xintiieval{2^100}}}|
+\endgroup
+
+Compare the above with the list of indices in the Zeckendorf representation:
+\textcolor{everbatimxfgcolor}{\ZeckZeck{\xintiieval{2^100}}}.
+
+\item[\cs{ZeckNFromIndices}] This computes an integer from a list of (comma
+  separated) indices.  These indices do not have to be positive, their order
+  is indifferent and they can be repeated or differ by only one unit.  The
+  list is allowed to be empty. Contiguous commas (or commas separated only by
+  space characters) act as a single one, a final comma is tolerated.  A new
+  \emph{f}-expansion is done at each item, they can be (\emph{f}-expandable)
+  macros.
+
+\begin{everbatim*}
+\ZeckNFromIndices{}\newline
+\ZeckNFromIndices{100, ,,, 90, 80, 70, 60, 50, 40, 30 , , ,,,}
+\end{everbatim*}
+\begin{everbatim*}
+\ZeckIndices{357128524055170099155}
+\end{everbatim*}
+\begin{everbatim*}
+\ZeckIndices{\ZeckNFromIndices{100, 90, 80, 70, 60, 50, 40, 30}}
+\end{everbatim*}
+\begin{everbatim*}
+\ZeckNFromIndices{3,-1,4,-1,5,-9,2,-6,5,-3}
+\end{everbatim*}
+
+There is no associated |\xintiieval| function (currently) but it is a one-liner
+in its syntax:
+\begin{everbatim*}
+\xintiieval{add(fib(i), i= 100, 90, 80, 70, 60, 50, 40, 30)}
+\end{everbatim*}
+\begin{everbatim*}
+\xintiieval{add(fib(i), i= 3, -1, 4, -1, 5, -9, 2, -6, 5, -3)}
+\end{everbatim*}
+\begin{everbatim*}
+\xintiieval{add(fib(i), i = *zeck(10^60))}
+\end{everbatim*}
+
+\begin{TeXnote}
+  The first version of this documentation was using |1e60| in place of
+  |10^60|, which did not crash by sheer (mis-) luck (|1+1e60| would have) and
+  actually gave the correct result by some improbable combination of factors.
+  The author had forgotten than the scientific notation |1e60| is not accepted
+  (attow, using \xintexprname |1.4o|) in |\xintiieval|, contrarily to what
+  happens with |\xinteval|.  There is a shortcut for decimal powers which is a
+  bit confidential: |1[|\meta{exponent}|]|, so here we can use |1[60]| or more
+  generally |n[E]| as shortcut for |E| added trailing zeros.  These things
+  are, or should be, explained in some sections in fine print (or which should
+  be in fine print) in the \xintexprname PDF documentation.
+\end{TeXnote}
+
+\item[\cs{ZeckNFromWord}] This computes a positive integer from a binary word.
+  The word can be arbitrary apart from not being empty.
+
+\begin{everbatim*}
+\ZeckNFromWord{1}, \ZeckNFromWord{11}, \ZeckNFromWord{111},
+\ZeckNFromWord{1111}, \ZeckNFromWord{11111}
+\end{everbatim*}
+\begin{everbatim*}
+\ZeckNFromWord{\xintReplicate{30}{10}}
+\end{everbatim*}
+\begin{everbatim*}
+\ZeckWord{4052739537880}
+\end{everbatim*}
+
+\item[\cs{ZeckKMul}] This computes the Knuth multiplication of its two
+  \textbf{positive} integer arguments.  The two arguments are only
+  \emph{f}-expanded, you need to wrap each in an |\xintiieval| if
+  it is an expression.
+
+  The syntax of |\xintiieval| is extended via addition of a |$| %$
+  infix operator, which gives a more convenient interface.
+
+\begin{everbatim*}
+\ZeckKMul{100}{200}
+\end{everbatim*}
+\begin{everbatim*}
+\ZeckKMul{\ZeckKMul{100}{200}}{300}
+\end{everbatim*}
+\begin{everbatim*}
+\ZeckKMul{100}{\ZeckKMul{200}{300}}
+\end{everbatim*}
+
+\begin{everbatim*}
+\xintiieval{100 $ 200, (100 $ 200) $ 300, 100 $ (200 $ 300)}
+\end{everbatim*}
+
+  The implementation is done via the Knuth definition: each operand is
+  converted to a Zeckendorf representation, the indices are added and the sum
+  of Fibonacci numbers is computed.  Let us mention here that we could have
+  defined a |knuth()| function easily using the powerful |\xintiieval| syntax:%
+%
+\footnote{We could not have used \expandafter|\string\xintdefiifunc|
+  here to define |knuth()|, so we used the \expandafter|\string\xintNewFunction|
+  interface.  The sole inconvenient is that when using |knuth()| it is
+  as if we injected by hand the replacement expression, which will have
+  to be parsed by \cs{xintiieval}.}
+%
+\begin{everbatim*}
+\xintNewFunction{knuth}[2]
+   {add(fib(x), x = flat(ndmap(+, *zeck(#1); *zeck(#2);)))}
+\xintiieval{knuth(100,200), knuth(knuth(100,200),300),
+                            knuth(100,knuth(200,300))}
+\end{everbatim*}
+
+The advantage of knowing this is that we can now check that our intuition
+about what happens when we compute |(a $ b) $ c|, which Knuth proved to be the
+same as |a $ (b $ c)|, is valid:
+\begin{everbatim*}
+\xintNewFunction{knuththree}[3]
+ {add(fib(x), x= flat(ndmap(+, *zeck(#1); *zeck(#2); *zeck(#3);)))}
+\xintiieval{knuththree(100, 200, 300)}
+\newline
+\xintiieval{knuththree(1000, 2000, 3000), (1000 $ 2000) $ 3000,
+                                          1000 $ (2000 $ 3000)}
+\end{everbatim*}
+
+\item[\cs{ZeckSetAsKnuthOperator}] This takes as input a charcter, or multiple
+  characters, and turns them (as a unit) work into an infix operator inside of
+  |\xintiieval| computing the Knuth multiplication.  The pre-defined use of
+  |$| for this will not be canceled.  You need to also do
+  |\ZeckDeleteOperator{$}| if you want this meaning of |$| to be lost.  In
+  general repeated usage will only extend the list of operators doing the
+  Knuth multiplication without removing the previously defined ones, % $
+  except if |\ZeckDeleteOperator| is used for them.
+
+  \textbf{IMPORTANT:} There is NO WARNING if you override a pre-existing
+  operator from the |\xintiieval| syntax (and not all such operators are
+  user-documented because some exist for internal purposes only).  But if done
+  inside a group or environment, the former meaning will be recovered on exit.
+
+
+  A possible choice is to use |$$|.  This may help avoiding syntax
+  highlighting problems in your editor (or make them worse as I am currently
+  experimenting while writing this).  You can use |$ $| it is the same as
+  |$$| to |\xintiieval|.
+
+\begin{everbatim*}
+\ZeckSetAsKnuthOperator{$$}
+\xintiieval{100 $$ 200, 200 $ $ 300, 100 $ $ 300}
+\end{everbatim*}
+
+  There are a few important points to be aware of:
+  \begin{itemize}[nosep]
+  \item You can use a letter such as |o| as operator but it then must be used
+    prefixed by |\string| which is not convenient:
+\begin{everbatim*}
+\ZeckSetAsKnuthOperator{o}
+\xintiieval{100 \string o 200 \string o 300}
+\end{everbatim*}
+  \item
+    With a Unicode engine, they are plenty of available characters
+    that are already of catcode 12.  For example:
+\begin{everbatim}
+\ZeckSetAsKnuthOperator{⊙}
+\xintiieval{100 ⊙ 200 ⊙ 300}
+\end{everbatim}
+\begingroup
+\iftutex
+\catcode`⊙=12
+\ZeckSetAsKnuthOperator{⊙}
+\noindent\textcolor{everbatimxfgcolor}{\xintiieval{100 ⊙ 200 ⊙ 300}}
+\else
+\noindent\textcolor{everbatimxfgcolor}{\xintiieval{100 $ 200 $ 300}}
+\fi
+\endgroup
+
+    You can also use letters from Greek or other scripts, but make
+    sure they have catcode 12.
+
+
+  \item It is not possible to use as operator a control sequence such as
+    |\odot|.  It has to be one or more characters.  It can not be the period
+    (full stop) which, although not being a predefined operator is recognized
+    as decimal separator (even in |\xintiieval| due to some shared code with
+    |\xinteval|).
+
+  \item In case your document is compiled with |pdflatex| or |latex| and uses
+    Babel, some characters may be catcode active.  To use them as part of a
+    name of an operator defined by |\ZeckSetAsKnuthOperator|, each such
+    catcode active character has to be prefixed with |\string|.  But |\string|
+    is then \emph{unneeded} inside |\xintiieval| (since \xintexprname
+    |1.4n|).
+\end{itemize}
+
+ \item[\cs{ZeckIndexedSum}] This is a utility which produces (expandably) |F_a
+   + F_{a'} +| \dots{} where |a, a', ...| are the Zeckendorf indices in
+   decreasing order and the Fibonacci numbers are represented by the letter |F|
+   and the index as subscript.  Can only be used from inside math mode.
+\begin{everbatim*}
+$\ZeckIndexedSum{100000000000000}$.
+\end{everbatim*}
+
+   The |+| is actually injected by |\ZeckIndexedSumSep| which defaults
+   to mean |{+\allowbreak}|, so that as shown above a linebreak can be
+   inserted by \TeX.
+
+ \item[\cs{ZeckExplicitSum}] This is a utility which produces (expandably)
+   |F_a + F_{a'} +| \dots{} where |a, a', ...| are the Zeckendorf indices in
+   decreasing order, and the Fibonacci numbers are written explicitly using
+   decimal digits.  May be used outside of math mode, but there will then be
+   no spacing around the |+| signs.
+\begin{everbatim*}
+$\ZeckExplicitSum{100000000000000}$.
+\end{everbatim*}
+
+   The |+| is actually injected by |\ZeckExplicitSumSep| which defaults
+   to mean |{+\allowbreak}|, so that as shown above a linebreak can be
+   inserted by \TeX.
+
+   However, as one can see above and was already mentioned, \TeX{} and
+   \LaTeX{} do not know out-of-the-box to split strings of digits at line
+   endings.  Hence the first line is squeezed, which is not pleasing, and a
+   number extends nevertheless into the margin.  The actual printing (and
+   computation from the index) of the Fibonacci number is done via |\ZeckExplicitOne|
+   whose default definition is to be an alias of |\ZeckTheFN|.
+
+   So if we
+   redefine for example this way
+   \centeredline{|\renewcommand\ZeckExplicitOne[1]{F_{#1}}|}
+   we will simply reconstruct what |\ZeckIndexedSum| does.
+   Or, with the help of a \xinttoolsname utility we can inject breakpoints
+   in between digits:
+\begin{everbatim*}
+\renewcommand\ZeckExplicitOne[1]
+   {\xintListWithSep{\allowbreak}{\ZeckTheFN{#1}}}
+$\ZeckExplicitSum{100000000000000}$.
+\end{everbatim*}
+
+\begingroup
+\colorlet{shortverbcolor}{everbatimxfgcolor}
+\mathsurround0pt
+\def\ZeckExplicitSumSep{{}+{}}
+\def\ZeckExplicitOne#1{$\expandafter|\expanded{\ZeckTheFN{#1}}|$}%
+% exit math mode because we use \ttfamily
+   Expert \LaTeX{} users will know how to achieve a result
+   such as this one, which pleasantly decorate the linebreaks:
+
+$\ZeckExplicitSum{100000000000000}$.\par
+\endgroup
+   
+\end{description}
+
+\section{Use with Plain \eTeX{}}
+\label{sec:plain}
+
+You will need to input the core code using:
+\centeredline{|\input zeckendorfcore.tex|}
+\textbf{IMPORTANT:} after this |\input|, the catcode regimen is a specific
+one (for example |_|, |:|, and |^| all have catcode letter).  So, you will
+probably want to emit |\ZECKrestorecatcodes| immediately after this
+import, it will reset all modified catcodes to their values as prior to the
+import.
+
+Then you can use the exact same interface as described in the previous
+section.
+
+\begingroup
+\small
+% Systématiquement à devoir hacker pour avoir quelque chose
+% qui fonctionne correctement
+\makeatletter\def\size@section{\normalsize} \makeatother
+
+\section{Changes}
+\label{sec:changes}
+
+\begin{description}
+\input zeckendorfchanges.tex
+\end{description}
+
+\section{License}
+\label{sec:license}
+
+\makeatletter
+% 2025/10/04
+% attention au © qui pose problème avec ts1newtxttz.fd bogué
+% j'ai fait le report à MS mais peut-être mon mail il y a plusieurs
+% mois a fini dans le spam.  Donc ici ne pas oublier le \ttfamily.
+%
+% 2025/10/06 le © est cassé avec xelatex + newtxtt. Sur un mwe
+% si on utilise newtxtext c'est bon, mais pas ici et je n'ai pas
+% le temps de m'acharner.
+\def\MacroFont{\ttfamily \baselineskip11pt }%
+\begin{verbatim}
+Copyright (c) 2025 Jean-François Burnol
+
+| This Work may be distributed and/or modified under the
+| conditions of the LaTeX Project Public License 1.3c.
+| This version of this license is in
+
+>   <http://www.latex-project.org/lppl/lppl-1-3c.txt>
+
+| and version 1.3 or later is part of all distributions of
+| LaTeX version 2005/12/01 or later.
+
+This Work has the LPPL maintenance status "author-maintained".
+
+The Author and Maintainer of this Work is Jean-François Burnol.
+
+This Work consists of the main source file and its derived files
+
+    zeckendorf.dtx,
+    zeckendorfcore.tex, zeckendorf.tex, zeckendorf.sty,
+    README.md, zeckendorf-doc.tex, zeckendorf-doc.pdf
+
+\end{verbatim}
+\endgroup
+
+\StopEventually{\end{document}\endinput}
+
+% provisoire
+\def\csh{\cs}
+
+% workaround
+% https://github.com/latex3/latex2e/issues/563
+\makeatletter
+\AddToHook{env/macrocode/begin}{\partopsep0pt\relax}
+\AddToHook{env/macrocode/after}{\@nobreakfalse}
+\makeatother
+\newgeometry{hscale=0.75,vscale=0.75}% ATTENTION \newgeometry fait
+                                % un reset de vscale si on ne le
+                                % précise pas ici !!!
+
+\MakePercentIgnore
+\AddToHook{env/macrocode/begin}{\bfseries}
+%
+% \catcode`\<=0 \catcode`\>=11 \catcode`\*=11 \catcode`\/=11
+% \let</dtx>\relax
+% \def<*core>{\catcode`\<=12 \catcode`\>=12 \catcode`\*=12 \catcode`\/=12 }
+%</dtx>
+%<*core>
+% \etocdepthtag.toc{code}
+% \part{Commented source code}
+% \localtableofcontents
+%
+% \label{part:zeckendorfcode}
+% \etocmarkbothnouc{\zecknameuserdoc \hyperref[sec:zeckendorfcode]{implementation}}
+% \section{Core code}
+% \label{sec:code:core}
+% \etocignoredepthtags
+% \etocsetnexttocdepth{subsection}
+% \localtableofcontents
+%
+% A general remark is that expandable macros (usually) \emph{f}-expand their
+% arguments, and most are \emph{f}-expandable.  This \emph{f}-expandability is
+% achieved via \cs{expanded} triggers, diverging a bit from the overall style
+% of the \xintname codebase (which predates availability of \cs{expanded}).
+%
+% Extracts to |zeckendorfcore.tex|.
+%
+% \subsection{Loading \xintexprname and setting catcodes}
+% |0.9alpha| had a left-over |\noexpand| before the |\endinput| due
+% to an oversight after replacing an |\edef| by a |\def|, embarrassing
+% but unimportant.  Also it made at a few places some effort to be
+% compatible with older \xintname, but did not explicitly require
+% \xintbinhexname, which is automatically loaded only since
+% \xintexprname |1.4n|.
+%    \begin{macrocode}
+\input xintexpr.sty
+\input xintbinhex.sty
+\wlog{Package: zeckendorfcore 2025/10/07 v0.9b (JFB)}%
+\edef\ZECKrestorecatcodes{\XINTrestorecatcodes}%
+\def\ZECKrestorecatcodesendinput{\ZECKrestorecatcodes\endinput}%
+\XINTsetcatcodes%
+%    \end{macrocode}
+% Small helpers related to \cs{expanded}-based methods.  But the package only
+% has a few macros and these helpers are used only once or twice, some macros
+% needing their own terminators due to various optimizations in the code
+% organization.
+%    \begin{macrocode}
+\def\zeck_abort#1\xint:{{}}%
+\def\zeck_done#1\xint:{\iffalse{\fi}}%
+%    \end{macrocode}
+% \subsection{Support for computing Fibonacci numbers:
+% \csh{ZeckTheFN}, \csh{ZeckTheFSeq}}
+% The multiplicative algorithm is as in the \bnumexprname manual (at
+% |1.7b|), but termination is different and simply leaves |F_n;F_{n-1};|
+% in input stream (in a form requiring |\xintthe|).
+%
+% |\Zeck@FPair| and |\Zeck@@FPair| are not public interface.
+% The former is a wrapper of the latter to handle negative or zero
+% argument.
+%
+% The public |\ZeckTheFN| uses the |\Zeck@FPair| which accepts a negative
+% or zero argument.  The non public |\Zeck@@FN| uses |\Zeck@@FPair|
+% and is thus limited to positive argument, also it remains in |\xintexpr|
+% encapsulated format requiring |\xintthe| for explicit digits.
+%    \begin{macrocode}
+\def\Zeck@FPair#1{\expandafter\zeck@fpair\the\numexpr #1.}%
+\def\zeck@fpair #1{%
+   \xint_UDzerominusfork
+      #1-\zeck@fpair_n
+      0#1\zeck@fpair_n
+      0-\zeck@fpair_p
+   \krof #1%
+}%
+\def\zeck@fpair_p #1.{\Zeck@@FPair{#1}}%
+\def\zeck@fpair_n #1.{%
+    \ifodd#1 \expandafter\zeck@fpair_ei\else\expandafter\zeck@fpair_eii\fi
+    \romannumeral`&&@\Zeck@@FPair{1-#1}%
+}%
+\def\zeck@fpair_ei{\expandafter\zeck@fpair_fi}%
+\def\zeck@fpair_eii{\expandafter\zeck@fpair_fii}%
+\def\zeck@fpair_fi#1;#2;{%
+    \romannumeral0\xintiiexpro #2\expandafter\relax\expandafter;%
+    \romannumeral0\xintiiexpro -#1\relax;%
+}%
+\def\zeck@fpair_fii#1;#2;{%
+    \romannumeral0\xintiiexpro -#2\expandafter\relax\expandafter;%
+    #1;%
+}%
+\def\Zeck@@FPair#1{%
+    \expandafter\Zeck@start
+    \romannumeral0\xintdectobin{\the\numexpr#1\relax};%
+}%
+\def\Zeck@start 1#1{%
+    \csname Zeck@#1\expandafter\endcsname
+    \romannumeral0\xintiiexpro 1\expandafter\relax\expandafter;%
+    \romannumeral0\xintiiexpro 0\relax;%
+}%
+\expandafter\def\csname Zeck@0\endcsname #1;#2;#3{%
+    \csname Zeck@#3\expandafter\endcsname
+    \romannumeral0\xintiiexpro (#1+2*#2)*#1\expandafter\relax\expandafter;%
+    \romannumeral0\xintiiexpro #1*#1+#2*#2\relax;%
+}%
+\expandafter\def\csname Zeck@1\endcsname #1;#2;#3{%
+    \csname Zeck@#3\expandafter\endcsname
+    \romannumeral0\xintiiexpro 2*(#1+#2)*#1+#2*#2\expandafter\relax\expandafter;%
+    \romannumeral0\xintiiexpro (#1+2*#2)*#1\relax;%
+}%
+\expandafter\let\csname Zeck@;\endcsname\empty
+%    \end{macrocode}
+% For individual Fibonacci numbers, we have non public |\Zeck@@FN| and public
+% |\ZeckTheFN|.
+%    \begin{macrocode}
+\def\Zeck@@FN{\expandafter\zeck@@fn\romannumeral`&&@\Zeck@@FPair}%
+\def\zeck@@fn#1;#2;{#1}%
+\def\ZeckTheFN{\xintthe\expandafter\zeck@@fn\romannumeral`&&@\Zeck@FPair}%
+%    \end{macrocode}
+% The computation of stretches of Fibonacci numbers is not needed for the
+% package, but is provided for user convenience.  This is lifted from the
+% development version of the |\xintname| user manual, which refactored a bit
+% the code which has been there for over ten years.  As we want to add a
+% |fibseq()| function to |\xintiieval|, it is better to make it
+% \emph{f}-expandable.
+%
+% Here we also handle negative arguments but still require the
+% second argument to be larger (more positive) than the first.
+%    \begin{macrocode}
+\def\ZeckTheFSeq#1#2{%#1=starting index, #2>#1=ending index
+    \expanded\bgroup\expandafter\ZeckTheF@Seq
+    \the\numexpr #1\expandafter.\the\numexpr #2.%
+}%
+%    \end{macrocode}
+% The |#1+1| is because |\Zeck@FPair{N}| expands to |F_{N};F_{N-1};|,
+% so here we will have |F_{A+1},F_{A};| as starting point.
+% We want up to |F_B|.
+% If |B=A+1| there will be nothing to do.
+%    \begin{macrocode}
+\def\ZeckTheF@Seq #1.#2.{%
+    \expandafter\ZeckTheF@Seq@loop
+    \the\numexpr #2-#1-1\expandafter.\romannumeral0\Zeck@FPair{#1+1}%
+}%
+%    \end{macrocode}
+% Now leave in stream one coefficient, test if we have reached B
+% and until then apply standard Fibonacci recursion.
+% We insert |\xintthe| although not needed for typesetting but
+% this is useful for matters of defining an associated |fibseq()|
+% function. 
+%    \begin{macrocode}
+\def\ZeckTheF@Seq@loop #1.#2;#3;{% standard Fibonacci recursion
+    {\xintthe#3}\ifnum #1=\z@ \expandafter\ZeckTheF@Seq@end\fi
+    \expandafter\ZeckTheF@Seq@loop
+    \the\numexpr #1-1\expandafter.%
+    \romannumeral0\xintiiexpro #2+#3\relax;#2;%
+}%
+\def\ZeckTheF@Seq@end#1;#2;{{\xintthe#2}\iffalse{\fi}}%
+%    \end{macrocode}
+% \subsection{\csh{ZeckNearIndex}, \csh{ZeckIndex}}
+% If the ratio of logarithms was the exact mathematical value it would be
+% certain (via rough estimates valid at least for say $x\geq10$, and even
+% smaller, but anyhow we can check manually it does work) that its integer
+% rounding gives an integer |K| such that either |K| or |K-1| is the largest
+% index |J| with $F_J\leq x$.  But the computation is done with only about 8
+% or 9 digits of precision.  So certainly this assumption fails for $x$ having
+% more than one hundred million decimal digits, and would become a bit risky
+% with an input having ten million digits.
+%
+% But this is way beyond the reasonable range for usage of the package, as
+% anyhow \xintname can handle multiplications only with operands of about up
+% to \dgts{13000} digits, so there is no worry.
+%
+% \xintfracname's |\xintiRound{0}| is guaranteed to round correctly the input
+% it has been given.  This input is some approximation to an exact theoretical
+% value involving ratio of logarithms (and square root of \dgts{5}).  Prior to
+% rounding the computed numerical approximation, we are close to the exact
+% theoretical value, where ``close'' means we expect to have about \dgts{8}
+% leading digits in common (and we have already limited our scope so that we
+% are talking about a value less than \dgts{10000} at any rate).  If the
+% computed rounding differs from the exact rounding of the exact value it must
+% be that argument $x$ is about mid-way (in log scale) between two consecutive
+% Fibonacci numbers.  The conclusion is that the integer we obtain after
+% rounding can not be anything else than either |J| or |J+1|.
+%
+% The argument is more subtle than it looks.  The conclusion is important to
+% us as it means we do not have to add extraneous checks involving computation
+% of one or more additional Fibonacci numbers.
+%
+% The formula with macros was obtained via an |\xintdeffloatfunc| and
+% |\xintverbosetrue| after having set |\xintDigits*| to \dgts{8}, and then we
+% optimized a bit manually.  The advantage here is that we don't have to set
+% ourself |\xintDigits| and later restore it.
+%
+% We can not use (except if only caring about interactive sessions where
+% we control entirely the whole environment)
+% |\XINTinFloatDiv| or |\XINTinFloatMul| if we don't set |\xintDigits| (which
+% is user customizable) because they hardcode usage of |\XINTdigits|.
+%
+% For the exact same reason |0.9b| adds |_raw| postfix which had been
+% forgotten at |0.9alpha|.  Indeed |\PoorManLogBaseTen| (without |_raw|) does
+% an ``in-float'' conversion of its output, and this uses the current
+% |\XINTdigits| and adds unnecessary overhead.  The fix at |0.9b| of this
+% |0.9alpha| oversight brought an efficiency gain of about \dgts{5\%} for this
+% macro for inputs of \dgts{50} digits.
+%    \begin{macrocode}
+\def\ZeckNearIndex#1{\xintiRound{0}{%
+    \xintFloatDiv[8]{\PoorManLogBaseTen_raw{\xintFloatMul[8]{2236068[-6]}{#1}}}%
+                    {20898764[-8]}%
+                          }%
+}%
+%    \end{macrocode}
+% Now we compute the actual maximal index.  This macro is only for user
+% interface, because when obtaining the Zeckendorf representation via the
+% greedy algorithm, we will want for efficienty to not discard the computed
+% pair of Fibonacci numbers, but proceed using it.
+%    \begin{macrocode}
+\def\ZeckIndex{\expanded\zeckindex}%
+\def\zeckindex#1{\expandafter\zeckindex_fork\romannumeral`&&@#1\xint:}%
+\def\zeckindex_fork#1{%
+  \xint_UDzerominusfork
+    #1-\zeck_abort
+    0#1\zeck_abort
+    0-{\zeckindex_a#1}%
+  \krof
+}%
+\def\zeckindex_a #1\xint:{%
+    \expandafter\zeckindex_b
+    \the\numexpr\ZeckNearIndex{#1}\xint:#1\xint:
+}%
+\def\zeckindex_b #1\xint:{%
+    \expandafter\zeckindex_c
+    \romannumeral`&&@\Zeck@@FPair{#1}#1\xint:
+}%
+\def\zeckindex_c #1;#2;#3\xint:#4\xint:{%
+    \xintiiifGt{\xintthe#1}{#4}%
+       {{\expandafter}\the\numexpr#3-1\relax}%
+       {{}#3}%
+}%
+%    \end{macrocode}
+% \subsection{\csh{ZeckIndices}, \csh{ZeckZeck}}
+% As explained at start of code comments, I decided when packaging the whole
+% thing to make macros \emph{f}-expandable via \cs{expanded}-trigger, not
+% \cs{romannumeral}.
+%
+% This and other macros start by computing the max index.  It then subtracts
+% the Fibonacci number from the input and loops.
+%    \begin{macrocode}
+\def\ZeckIndices{\expanded\zeckindices}%
+\let\ZeckZeck\ZeckIndices
+\def\zeckindices#1{\expandafter\zeckindices_fork\romannumeral`&&@#1\xint:}%
+\def\zeckindices_fork#1{%
+  \xint_UDzerominusfork
+    #1-\zeck_abort
+    0#1\zeck_abort
+    0-{\bgroup\zeckindices_a#1}%
+  \krof
+}%
+\def\zeckindices_a #1\xint:{%
+    \expandafter\zeckindices_b
+    \the\numexpr\ZeckNearIndex{#1}\xint:#1\xint:
+}%
+\def\zeckindices_b #1\xint:{%
+    \expandafter\zeckindices_c
+    \romannumeral`&&@\Zeck@@FPair{#1}#1\xint:
+}%
+\def\zeckindices_c #1;#2;#3\xint:#4\xint:{%
+    \xintiiifGt{\xintthe#1}{#4}\zeckindices_A\zeckindices_B
+    #1;#2;#3\xint:#4\xint:
+}%
+%    \end{macrocode}
+% There is a slight annoyance here which is that we have to use the
+% |\xintthe...| macros to have explicit digits so that we can test if the
+% number is zero (if there is some macro for that in \xintexprname it would do
+% as us, look at the first digit, so we don't bother to check).  But alas, the
+% \xintexprname manual has documented things such as |\xintiiexprPrintOne| as
+% being customizable, so there is a potentiality here for user modifications
+% causing a crash, if a custom |\xintiiexprPrintOne| prints |Z| or some other
+% symbol in case of the zero value...  We do have at our disposal
+% |\xintthebareiieval| but it needs one more brace stripping step.  So some
+% |\xinttheunbracedbareiieval| is needed upstream and when this is done the
+% code here will get updated.
+%    \begin{macrocode}
+\def\zeckindices_A#1;#2;#3\xint:#4\xint:{%
+    \the\numexpr#3-1\relax
+    \expandafter\zeckindices_loop
+    \romannumeral`&&@\xinttheiiexpr #4-#2\relax\xint:
+}%
+\def\zeckindices_B#1;#2;#3\xint:#4\xint:{%
+    #3%
+    \expandafter\zeckindices_loop
+    \romannumeral`&&@\xinttheiiexpr #4-#1\relax\xint:
+}%
+\def\zeckindices_loop#1{%
+    \xint_UDzerofork#1\zeck_done 0{, \zeckindices_a#1}\krof
+}%
+%    \end{macrocode}
+% \subsection{\csh{ZeckBList}}
+% This is the variant which produces the results as a sequence of braced
+% indices.  Useful as support for a |zeck()| function.
+%
+% Originally in \xintname, \xinttoolsname, the term ``list'' is used for
+% braced items.  In the user manual of this package I have been using ``list''
+% more colloquially for comma separated values.  Here I stick with \xintname
+% conventions but use |BList| (short for ``list of Braced items'') and not only
+% ``List'' in the name.
+%    \begin{macrocode}
+\def\ZeckBList{\expanded\zeckblist}%
+\def\zeckblist#1{\expandafter\zeckblist_fork\romannumeral`&&@#1\xint:}%
+\def\zeckblist_fork#1{%
+  \xint_UDzerominusfork
+    #1-\zeck_abort
+    0#1\zeck_abort
+    0-{\bgroup\zeckblist_a#1}%
+  \krof
+}%
+\def\zeckblist_a #1\xint:{%
+    \expandafter\zeckblist_b
+    \the\numexpr\ZeckNearIndex{#1}\xint:#1\xint:
+}%
+\def\zeckblist_b #1\xint:{%
+    \expandafter\zeckblist_c
+    \romannumeral`&&@\Zeck@@FPair{#1}#1\xint:
+}%
+\def\zeckblist_c #1;#2;#3\xint:#4\xint:{%
+    \xintiiifGt{\xintthe#1}{#4}\zeckblist_A\zeckblist_B
+    #1;#2;#3\xint:#4\xint:
+}%
+\def\zeckblist_A#1;#2;#3\xint:#4\xint:{%
+    {\the\numexpr#3-1\relax}%
+    \expandafter\zeckblist_loop
+    \romannumeral`&&@\xinttheiiexpr #4-#2\relax\xint:
+}%
+\def\zeckblist_B#1;#2;#3\xint:#4\xint:{%
+    {#3}%
+    \expandafter\zeckblist_loop
+    \romannumeral`&&@\xinttheiiexpr #4-#1\relax\xint:
+}%
+\def\zeckblist_loop#1{\xint_UDzerofork#1\zeck_done 0{\zeckblist_a#1}\krof}%
+%    \end{macrocode}
+% \subsection{\csh{ZeckIndexedSum}, \csh{ZeckExplicitSum}}
+% They are expandable, but need \emph{x}-expansion.  The first one assumes it
+% expands in math mode.  We use |\sb| because the current catcode of |_| is letter,
+% and using |\sb| spares us some juggling.
+%    \begin{macrocode}
+\def\ZeckIndexedSumSep{+\allowbreak}%
+\let\ZeckExplicitSumSep\ZeckIndexedSumSep
+\def\ZeckExplicitOne{\xintthe\Zeck@@FN}%
+\def\ZeckIndexedSum#1{%
+    \expandafter\zeckindexedsum\expanded\zeckindices{#1},;%
+}%
+\def\zeckindexedsum#1{%
+    \if,#1\expandafter\xint_gob_til_sc\fi \zeckindexedsum_a#1%
+}%
+\def\zeckindexedsum_a#1,{F\sb{#1}\zeckindexedsum_b}%
+\def\zeckindexedsum_b #1{%
+    \if;#1\expandafter\xint_gob_til_sc\fi
+    \ZeckIndexedSumSep\zeckindexedsum_a#1%
+}%
+\def\ZeckExplicitSum#1{%
+    \expandafter\zeckexplicitsum\expanded\zeckindices{#1},;%
+}%
+\def\zeckexplicitsum#1{%
+    \if,#1\expandafter\xint_gob_til_sc\fi \zeckexplicitsum_a#1%
+}%
+\def\zeckexplicitsum_a#1,{\ZeckExplicitOne{#1}\zeckexplicitsum_b}%
+\def\zeckexplicitsum_b #1{%
+    \if;#1\expandafter\xint_gob_til_sc\fi
+    \ZeckExplicitSumSep\zeckexplicitsum_a#1%
+}%
+%    \end{macrocode}
+% \subsection{\csh{ZeckWord}}
+% This is slightly more complicated than \cs{ZeckIndices} and \cs{ZeckBList}
+% because we have to keep track of the previous index to know how many zeros
+% to inject.
+%    \begin{macrocode}
+\def\ZeckWord{\expanded\zeckword}%
+\def\zeckword#1{\expandafter\zeckword_fork\romannumeral`&&@#1\xint:}%
+\def\zeckword_fork#1{%
+  \xint_UDzerominusfork
+    #1-\zeck_abort
+    0#1\zeck_abort
+    0-{\bgroup\zeckword_a#1}%
+  \krof
+}%
+\def\zeckword_a #1\xint:{%
+    \expandafter\zeckword_b\the\numexpr\ZeckNearIndex{#1}\xint:
+    #1\xint:
+}%
+\def\zeckword_b #1\xint:{%
+    \expandafter\zeckword_c\romannumeral`&&@\Zeck@@FPair{#1}#1\xint:
+}%
+\def\zeckword_c #1;#2;#3\xint:#4\xint:{%
+    \xintiiifGt{\xintthe#1}{#4}\zeckword_A\zeckword_B
+    #1;#2;#3\xint:#4\xint:
+}%
+\def\zeckword_A#1;#2;#3\xint:#4\xint:{%
+    \expandafter\zeckword_d
+    \romannumeral`&&@\xinttheiiexpr#4-#2\expandafter\relax\expandafter\xint:
+    \the\numexpr#3-1.%
+}%
+\def\zeckword_B#1;#2;#3\xint:#4\xint:{%
+    \expandafter\zeckword_d
+    \romannumeral`&&@\xinttheiiexpr#4-#1\relax\xint:
+    #3.%
+}%
+\def\zeckword_d #1%
+    {\xint_UDzerofork#1\zeckword_done0{1\zeckword_e}\krof #1}%
+\def\zeckword_done#1\xint:#2.{1\xintReplicate{#2-2}{0}\iffalse{\fi}}%
+\def\zeckword_e #1\xint:{%
+    \expandafter\zeckword_f\the\numexpr\ZeckNearIndex{#1}\xint:
+    #1\xint:
+}%
+\def\zeckword_f #1\xint:{%
+    \expandafter\zeckword_g\romannumeral`&&@\Zeck@@FPair{#1}#1\xint:
+}%
+\def\zeckword_g #1;#2;#3\xint:#4\xint:{%
+    \xintiiifGt{\xintthe#1}{#4}\zeckword_gA\zeckword_gB
+    #1;#2;#3\xint:#4\xint:
+}%
+\def\zeckword_gA#1;#2;#3\xint:#4\xint:{%
+    \expandafter\zeckword_h
+    \the\numexpr#3-1\expandafter.%
+    \romannumeral`&&@\xinttheiiexpr #4-#2\relax\xint:
+}%
+\def\zeckword_gB#1;#2;#3\xint:#4\xint:{%
+    \expandafter\zeckword_h
+    \the\numexpr#3\expandafter.%
+    \romannumeral`&&@\xinttheiiexpr #4-#1\relax\xint:
+}%
+\def\zeckword_h #1.#2\xint:#3.{%
+    \xintReplicate{#3-#1-1}{0}%
+    \zeckword_d #2\xint:#1.%
+}%
+%    \end{macrocode}
+% \subsection{The Knuth Multiplication: \csh{ZeckKMul}}
+% Here a |\romannumeral0| trigger is used to match |\xintiisum|.  Although
+% it induces defining one more macro we obide by the general coding style of
+% \xintname with a CamelCase then a lowercase macro, rather than having them 
+% merged as only one.
+%    \begin{macrocode}
+\def\ZeckKMul{\romannumeral0\zeckkmul}%
+\def\zeckkmul#1#2{\expandafter\zeckkmul_a
+                  \expanded{\ZeckIndices{#1}%
+                            ,;%
+                            \ZeckIndices{#2}%
+                            ,,}%
+}%
+%    \end{macrocode}
+% The space token at start of |#2| after first one is not a problem
+% as it ends up in a |\numexpr| anyhow.
+%    \begin{macrocode}
+\def\zeckkmul_a{\expandafter\xintiisum\expanded{{\iffalse}}\fi
+                \zeckkmul_b}%
+\def\zeckkmul_b#1;#2,{%
+    \if\relax#2\relax\expandafter\zeckkmul_done\fi
+    \zeckkmul_c{#2}#1,\zeckkmul_b#1;%
+}%
+\def\zeckkmul_c#1#2,{%
+    \if\relax#2\relax\expandafter\xint_gobble_iii\fi
+    {\xintthe\Zeck@@FN{#1+#2}}\zeckkmul_c{#1}%
+}%
+\def\zeckkmul_done#1;{\iffalse{{\fi}}}%
+%    \end{macrocode}
+% \subsection{\csh{ZeckNFromIndices}}
+% Spaces before commas are not a problem they disappear in |\numexpr|.
+%
+% Each item is \emph{f}-expanded to check not empty, but perhaps we could skip
+% expanding, as they end up in |\numexpr|.  Advantage of expansion of each
+% item is that at any location we can generate multiple indices if desired.
+%    \begin{macrocode}
+\def\ZeckNFromIndices{\romannumeral0\zecknfromindices}%
+\def\zecknfromindices#1{\expandafter\zecknfromindices_a\romannumeral`&&@#1,;}%
+\def\zecknfromindices_a{\expandafter\xintiisum\expanded{{\iffalse}}\fi
+                  \zecknfromindices_b
+}%
+\def\zecknfromindices_b#1{%
+    \if;#1\xint_dothis\zecknfromindices_done\fi
+    \if,#1\xint_dothis\zecknfromindices_skip\fi
+    \xint_orthat\zecknfromindices_c #1%
+}%
+\def\zecknfromindices_c #1,{%
+    {\ZeckTheFN{#1}}\expandafter\zecknfromindices_b\romannumeral`&&@%
+}%
+\def\zecknfromindices_skip,{\expandafter\zecknfromindices_b\romannumeral`&&@}%
+\def\zecknfromindices_done;{\iffalse{{\fi}}}%
+%    \end{macrocode}
+% \subsection{\csh{ZeckNFromWord}}
+% The |\xintreversedigits| will \emph{f}-expand its argument.
+%    \begin{macrocode}
+\def\ZeckNFromWord{\romannumeral0\zecknfromword}%
+\def\zecknfromword#1{%
+    \expandafter\zecknfromword_a\romannumeral0\xintreversedigits{#1};%
+}%
+\def\zecknfromword_a{%
+    \expandafter\xintiisum\expanded{{\iffalse}}\fi\zecknfromword_b 2.%
+}%
+\def\zecknfromword_b#1.#2{%
+    \if;#2\expandafter\zecknfromword_done\fi
+    \if#21{\xintthe\Zeck@@FN{#1}}\fi
+    \expandafter\zecknfromword_b\the\numexpr#1+1.%
+}%
+\def\zecknfromword_done#1.{\iffalse{{\fi}}}%
+%    \end{macrocode}
+% \subsection{Extension of the \cs{xintiieval} syntax with fib(), fibseq(),
+% zeck() and zeckindex() functions}
+% |fib()| and |fibseq()|  accept negative arguments, but |fibseq(a,b)| must be
+% with |b>a|, else falls into an infinite loop.  |zeck()| and |zeckindex()|
+% require, but do not check, that their argument is positive.
+%
+% We also add support for these functions to |\xinteval| and |\xintfloateval|.
+% Arguments are then truncated (not rounded) to integers.
+%    \begin{macrocode}
+\def\XINT_iiexpr_func_fib #1#2#3%
+{%
+    \expandafter #1\expandafter #2\expandafter{%
+    \romannumeral`&&@\XINT:NEhook:f:one:from:one
+    {\romannumeral`&&@\ZeckTheFN#3}}%
+}%
+\def\ZeckTheFNnum#1{\ZeckTheFN{\xintNum{#1}}}%
+\def\XINT_expr_func_fib #1#2#3%
+{%
+    \expandafter #1\expandafter #2\expandafter{%
+    \romannumeral`&&@\XINT:NEhook:f:one:from:one
+    {\romannumeral`&&@\ZeckTheFNnum#3}}%
+}%
+\let\XINT_flexpr_func_fib\XINT_expr_func_fib
+\def\XINT_iiexpr_func_fibseq #1#2#3%
+{%
+    \expandafter #1\expandafter #2\expandafter{%
+    \romannumeral`&&@\XINT:NEhook:f:one:from:two
+    {\romannumeral`&&@\ZeckTheFSeq#3}}%
+}%
+\def\ZeckTheFSeqnum#1#2{\ZeckTheFSeq{\xintNum{#1}}{\xintNum{#2}}}%
+\def\XINT_expr_func_fibseq #1#2#3%
+{%
+    \expandafter #1\expandafter #2\expandafter{%
+    \romannumeral`&&@\XINT:NEhook:f:one:from:two
+    {\romannumeral`&&@\ZeckTheFSeqnum#3}}%
+}%
+\let\XINT_flexpr_func_fibseq\XINT_expr_func_fibseq
+\def\XINT_iiexpr_func_zeckindex #1#2#3%
+{%
+    \expandafter #1\expandafter #2\expandafter{%
+    \romannumeral`&&@\XINT:NEhook:f:one:from:one
+    {\romannumeral`&&@\ZeckIndex#3}}%
+}%
+\def\ZeckIndexnum#1{\ZeckIndex{\xintNum{#1}}}%
+\def\XINT_expr_func_zeckindex #1#2#3%
+{%
+    \expandafter #1\expandafter #2\expandafter{%
+    \romannumeral`&&@\XINT:NEhook:f:one:from:one
+    {\romannumeral`&&@\ZeckIndexnum#3}}%
+}%
+\let\XINT_flexpr_func_zeckindex\XINT_expr_func_zeckindex
+\def\XINT_iiexpr_func_zeck #1#2#3%
+{%
+    \expandafter #1\expandafter #2\expandafter{%
+    \romannumeral`&&@\XINT:NEhook:f:one:from:one
+    {\romannumeral`&&@\ZeckBList#3}}%
+}%
+\def\ZeckBListnum#1{\ZeckBList{\xintNum{#1}}}%
+\def\XINT_expr_func_zeck #1#2#3%
+{%
+    \expandafter #1\expandafter #2\expandafter{%
+    \romannumeral`&&@\XINT:NEhook:f:one:from:one
+    {\romannumeral`&&@\ZeckBListnum#3}}%
+}%
+\let\XINT_flexpr_func_zeck\XINT_expr_func_zeck
+%    \end{macrocode}
+% \subsection{Extension of the \cs{xintiieval} syntax with \textdollar{} as
+% infix operator for the Knuth multiplication}
+%
+% Unfortunately, contrarily to \bnumexprname, \xintexprname (at
+% |1.4o|) has no public interface to define an infix operator, and the macros
+% it defines to that end have acquired another meaning at end of loading
+% |xintexpr.sty|, so we have to copy quite a few lines of code. This is
+% provisory and will be removed when xintexpr.sty will have been udpated. We
+% also copy/adapt |\bnumdefinfix|.
+%
+% We test for existence of |\xintdefinfix| so as to be able to update upstream
+% and not have to sync it immediately.  But perhaps upstream will choose some
+% other name than |\xintdefinfix|...
+%    \begin{macrocode}
+\ifdefined\xintdefinfix
+  \def\zeckdefinfix{\xintdefinfix {iiexpr}}%
+\else
+\ifdefined\xint_noxpd\else\let\xint_noxpd\unexpanded\fi % support old xint
+\def\ZECK_defbin_c #1#2#3#4#5#6#7#8%
+{%
+  \XINT_global\def #1##1% \XINT_#8_op_<op>
+  {%
+    \expanded{\xint_noxpd{#2{##1}}\expandafter}%
+    \romannumeral`&&@\expandafter#3\romannumeral`&&@\XINT_expr_getnext
+  }%
+  \XINT_global\def #2##1##2##3##4% \XINT_#8_exec_<op>
+  {%
+    \expandafter##2\expandafter##3\expandafter
+      {\romannumeral`&&@\XINT:NEhook:f:one:from:two{\romannumeral`&&@#7##1##4}}%
+  }%
+  \XINT_global\def #3##1% \XINT_#8_check-_<op>
+  {%
+    \xint_UDsignfork
+      ##1{\expandafter#4\romannumeral`&&@#5}%
+        -{#4##1}%
+    \krof
+  }%
+  \XINT_global\def #4##1##2% \XINT_#8_checkp_<op>
+  {%
+    \ifnum ##1>#6%
+      \expandafter#4%
+      \romannumeral`&&@\csname XINT_#8_op_##2\expandafter\endcsname
+    \else
+      \expandafter ##1\expandafter ##2%
+    \fi
+  }%
+}%
+%    \end{macrocode}
+% ATTENTION there is lacking at end here compared to the \bnumexprname version
+%           an adjustment for updating minus operator,
+%           if some other right precedence than 12, 14, 17 is used.
+% Doing this would requiring copying still more, so is not done.
+%    \begin{macrocode}
+\def\ZECK_defbin_b #1#2#3#4#5%
+{%
+  \expandafter\ZECK_defbin_c
+  \csname XINT_#1_op_#2\expandafter\endcsname
+  \csname XINT_#1_exec_#2\expandafter\endcsname
+  \csname XINT_#1_check-_#2\expandafter\endcsname
+  \csname XINT_#1_checkp_#2\expandafter\endcsname
+  \csname XINT_#1_op_-\romannumeral\ifnum#4>12 #4\else12\fi\expandafter\endcsname
+  \csname xint_c_\romannumeral#4\endcsname
+  #5%
+  {#1}% #8 for \ZECK_defbin_c
+  \XINT_global
+  \expandafter
+  \let\csname XINT_expr_precedence_#2\expandafter\endcsname
+      \csname xint_c_\romannumeral#3\endcsname
+}%
+%    \end{macrocode}
+% These next two currently lifted from \bnumexprname with some adaptations,
+% see previous comment about precedences.
+%    \begin{macrocode}
+\def\zeckdefinfix #1#2#3#4%
+{%
+    \edef\ZECK_tmpa{#1}%
+    \edef\ZECK_tmpa{\xint_zapspaces_o\ZECK_tmpa}%
+    \edef\ZECK_tmpL{\the\numexpr#3\relax}%
+    \edef\ZECK_tmpL
+         {\ifnum\ZECK_tmpL<4 4\else\ifnum\ZECK_tmpL<23 \ZECK_tmpL\else 22\fi\fi}%
+    \edef\ZECK_tmpR{\the\numexpr#4\relax}%
+    \edef\ZECK_tmpR
+         {\ifnum\ZECK_tmpR<4 4\else\ifnum\ZECK_tmpR<23 \ZECK_tmpR\else 22\fi\fi}%
+    \ZECK_defbin_b {iiexpr}\ZECK_tmpa\ZECK_tmpL\ZECK_tmpR #2%
+    \expandafter\ZECK_dotheitselves\ZECK_tmpa\relax
+  \unless\ifcsname  
+    XINT_iiexpr_exec_-\romannumeral\ifnum\ZECK_tmpR>12 \ZECK_tmpR\else 12\fi
+  \endcsname
+    \xintMessage{zeckendorf}{Error}{Right precedence not among accepted values.}%
+    \errhelp{Accepted values include 12, 14, and 17.}%
+    \errmessage{Sorry, you can not use \ZECK_tmpR\space as right precedence.}%
+  \fi
+  \ifxintverbose
+    \xintMessage{zeckendorf}{info}{infix operator \ZECK_tmpa\space
+    \ifxintglobaldefs globally \fi
+        does
+        \xint_noxpd{#2}\MessageBreak with precedences \ZECK_tmpL, \ZECK_tmpR;}%
+  \fi
+}%
+\def\ZECK_dotheitselves#1#2%
+{%
+    \if#2\relax\expandafter\xint_gobble_ii
+    \else
+  \XINT_global
+      \expandafter\edef\csname XINT_expr_itself_#1#2\endcsname{#1#2}%
+      \unless\ifcsname XINT_expr_precedence_#1\endcsname
+  \XINT_global
+        \expandafter\edef\csname XINT_expr_precedence_#1\endcsname
+                        {\csname XINT_expr_precedence_\ZECK_tmpa\endcsname}%
+  \XINT_global
+        \expandafter\odef\csname XINT_iiexpr_op_#1\endcsname
+                        {\csname XINT_iiexpr_op_\ZECK_tmpa\endcsname}%
+      \fi
+    \fi
+    \ZECK_dotheitselves{#1#2}%
+}%
+\fi
+%    \end{macrocode}
+% There is no ``undefine operator'' in \bnumexprname currently.  Experimental,
+% I don't want to spend too much time. I sense there is a potential problem
+% with multi-character operators related to ``undoing the itselves'', because
+% of the mechanism which allows to use for example |;;| as short-cut for |;;;|
+% if |;;| was not pre-defined when |;;;| got defined.  To undefine |;;|, I
+% would need to check if it really has been aliased to |;;;|, and I don't do
+% the effort here.
+%    \begin{macrocode}
+\ifdefined\xintdefinfix
+\else
+\ifdefined\xint_noxpd\else\let\xint_noxpd\unexpanded\fi % support old xint
+\def\ZECK_undefbin_b #1#2%
+{%
+  \XINT_global\expandafter\let
+    \csname XINT_#1_op_#2\endcsname\xint_undefined
+  \XINT_global\expandafter\let
+    \csname XINT_#1_exec_#2\endcsname\xint_undefined
+  \XINT_global\expandafter\let
+    \csname XINT_#1_check-_#2\endcsname\xint_undefined
+  \XINT_global\expandafter\let
+    \csname XINT_#1_checkp_#2\endcsname\xint_undefined
+  \XINT_global\expandafter\let
+    \csname XINT_expr_precedence_#2\endcsname\xint_undefined
+  \XINT_global\expandafter\let
+    \csname XINT_expr_itself_#2\endcsname\xint_undefined
+}%
+\def\zeckundefinfix #1%
+{%
+    \edef\ZECK_tmpa{#1}%
+    \edef\ZECK_tmpa{\xint_zapspaces_o\ZECK_tmpa}%
+    \ZECK_undefbin_b {iiexpr}\ZECK_tmpa
+%%  \ifxintverbose
+    \xintMessage{zeckendorf}{Warning}{infix operator \ZECK_tmpa\space
+        has been DELETED!}%
+%%  \fi
+}%
+\fi
+%    \end{macrocode}
+% We do not define the extra |\chardef|'s as does \bnumexprname to allow more
+% user choices of precedences, not only because nobody will ever use the
+% feature, but also because it needs extra configuration for minus unary
+% operator.  (as mentioned above)
+%
+% Attention, this is like |\bnumdefinfix| and thus does not have same order
+% of arguments as the |\ZECK_defbin_b| above.
+%    \begin{macrocode}
+\zeckdefinfix{$}{\ZeckKMul}{14}{14}% $ (<-only to tame Emacs/AUCTeX highlighting)
+\def\ZeckSetAsKnuthOperator#1{\zeckdefinfix{#1}{\ZeckKMul}{14}{14}}%
+\def\ZeckDeleteOperator#1{\zeckundefinfix{#1}}%
+%    \end{macrocode}
+% ATTENTION! we leave the modified catcodes in place! (the question mark
+% has regained its catcode other though).
+%
+% \catcode`\<=0 \catcode`\>=11 \catcode`\*=11 \catcode`\/=11
+% \let</core>\relax
+% \def<*interactive>{\catcode`\<=12 \catcode`\>=12 \catcode`\*=12 \catcode`\/=12 }
+%</core>
+%<*interactive>
+% \makeatletter\global\c@CodelineNo\z@\makeatother
+% \section{Interactive code}
+% Extracts to |zeckendorf.tex|.
+% \label{sec:code:interactive}
+%    \begin{macrocode}
+\input zeckendorfcore.tex
+\xintexprSafeCatcodes
+%    \end{macrocode}
+% First release used some trick, but the nesting of conditionals in the
+% main loop has become more involved, so let's do something more straightforward
+% with a \TeX{} boolean.
+%    \begin{macrocode}
+\let\ZeckShouldISayOrShouldIGo\iftrue
+\def\ZeckCmdQ{\let\ZeckShouldISayOrShouldIGo\iffalse}
+\let\ZeckCmdX\ZeckCmdQ
+\let\ZeckCmdx\ZeckCmdQ
+\let\ZeckCmdq\ZeckCmdQ
+
+\newif\ifzeckindices
+\def\ZeckCmdL{\zeckindicestrue
+              \def\ZeckFromN{\ZeckIndices}\def\ZeckToN{\ZeckNFromIndices}}
+\let\ZeckCmdl\ZeckCmdL
+
+\def\ZeckCmdB{\zeckindicesfalse
+              \def\ZeckFromN{\ZeckWord}\def\ZeckToN{\ZeckNFromWord}}
+\let\ZeckCmdW\ZeckCmdB
+\let\ZeckCmdb\ZeckCmdB
+\let\ZeckCmdw\ZeckCmdB
+
+\newif\ifzeckfromN
+\zeckfromNtrue
+\def\ZeckConvert{\csname Zeck\ifzeckfromN From\else To\fi N\endcsname}
+\def\ZeckCmdT{\ifzeckfromN\zeckfromNfalse\else\zeckfromNtrue\fi}
+\let\ZeckCmdt\ZeckCmdT
+
+\newif\ifzeckmeasuretimes
+\expandafter\def\csname ZeckCmd@\endcsname{%
+  \ifdefined\xinttheseconds
+      \ifzeckmeasuretimes\zeckmeasuretimesfalse\else\zeckmeasuretimestrue\fi
+  \else
+      \immediate\write128{Sorry, this requires xintexpr 1.4n or later.}%
+  \fi
+}
+
+\newif\ifzeckevalonly
+\def\ZeckCmdE{\ifzeckevalonly\zeckevalonlyfalse\else\zeckevalonlytrue\fi}
+\let\ZeckCmde\ZeckCmdE
+
+\ZeckCmdL
+
+\def\ZeckInviteA{Commands are Q(uit), L(ist), W(ord), T(oggle), E(val-only) or @.}
+
+\newlinechar10
+\immediate\write128{}
+\immediate\write128{Welcome to Zeckendorf 0.9b (2025/10/07, JFB).}
+
+\immediate\write128{Command summary (lowercase also):^^J
+ Q to quit. Also X.^^J
+ L for Zeckendorf representations as lists of indices.^^J
+ W for Zeckendorf representations as binary words. Also B.^^J
+ T to toggle the direction of conversions.^^J
+ E to toggle to and from  \string\xintiieval-only mode.^^J
+ @ to toggle measurement of execution times.}
+\immediate\write128{}
+\immediate\write128{%
+The input, except for "Word -> Integer", is parsed in \string\xintiieval.^^J%
+So for example 2^100, 100!, or binomial(100,50) are legitimate.^^J%
+\space\space The fib() function computes Fibonacci numbers.^^J%
+\space\space The character $ serves as symbol for Knuth multiplication.^^J%$
+List input can use negative integers, and order does not matter.^^J%
+Binary word can be arbitrary, except empty.^^J}
+\immediate\write128{**** empty input is not supported! no linebreaks in input! ****}
+
+\def\zeckpar{\par}
+\long\def\xintbye#1\xintbye{}
+\long\def\zeckgobbleii#1#2{}
+\long\def\zeckfirstoftwo#1#2{#1}
+\def\zeckonlyonehelper #1#2#3\zeckonlyonehelper{\xintbye#2\zeckgobbleii\xintbye0}
+
+\xintloop
+\immediate\write128{\ZeckInviteA}
+\message{\ifzeckevalonly (eval only mode, hit E to exit it)\else
+         \ifzeckfromN Integer -> \ifzeckindices indices\else binary word\fi
+         \else
+           \ifzeckindices Indices \else Binary word \fi
+         -> integer\fi\fi
+         : }
+\read-1to\zeckbuf
+\ifx\zeckbuf\zeckpar
+  \immediate\write128{**** empty input is not supported, please try again.}
+\else
+  \edef\zeckbuf{\zeckbuf}
+%    \end{macrocode}
+% Space token at end of |\zeckbuf| is annoying. We could have used
+% |\xintLength| which does not count space tokens.
+%    \begin{macrocode}
+  \if 1\expandafter\zeckonlyonehelper\zeckbuf\xintbye\zeckonlyonehelper1%
+   \ifcsname ZeckCmd\expandafter\zeckfirstoftwo\zeckbuf\relax\endcsname
+     \csname ZeckCmd\expandafter\zeckfirstoftwo\zeckbuf\relax\endcsname
+   \else
+     \immediate\write128{%
+     **** Unrecognized command letter
+          \expandafter\zeckfirstoftwo\zeckbuf\relax. Try again.^^J}
+   \fi
+  \else
+   \ifzeckfromN\edef\ZeckIn{\xintiieval{\zeckbuf}}\else
+      \ifzeckindices\edef\ZeckIn{\xintiieval{\zeckbuf}}\else
+         \def\ZeckIn{\zeckbuf}%
+      \fi
+   \fi
+%    \end{macrocode}
+% Using the conditional so that this can also be used by default
+% with older xint.
+%    \begin{macrocode}
+   \ifzeckmeasuretimes\xintresettimer\fi
+   \immediate\write128{\ifzeckevalonly\ZeckIn\else\ZeckConvert{\ZeckIn}\fi}%
+   \immediate\write128{\ifzeckmeasuretimes
+                       \ifzeckevalonly Evaluation \else Conversion \fi
+                        took \xinttheseconds s^^J\fi}
+  \fi
+\fi
+\ZeckShouldISayOrShouldIGo
+\repeat
+
+\immediate\write128{Bye. Results are also in log file (hard-wrapped too, alas).}
+\bye
+%    \end{macrocode}
+% \catcode`\<=0 \catcode`\>=11 \catcode`\*=11 \catcode`\/=11
+% \let</interactive>\relax
+% \def<*sty>{\catcode`\<=12 \catcode`\>=12 \catcode`\*=12 \catcode`\/=12 }
+%</interactive>
+%<*sty>
+% \makeatletter\global\c@CodelineNo\z@\makeatother
+% \section{\LaTeX{} code}
+% Extracts to |zeckendorf.sty|.
+% \label{sec:code:latex}
+%    \begin{macrocode}
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{zeckendorf}
+   [2025/10/07 v0.9b Zeckendorf representations of big integers (JFB)]%
+\RequirePackage{xintexpr}
+\RequirePackage{xintbinhex}% superfluous if with xint 1.4n or later
+\input zeckendorfcore.tex
+\ZECKrestorecatcodesendinput%
+%    \end{macrocode}
+% \catcode`\<=0 \catcode`\>=11 \catcode`\*=11 \catcode`\/=11
+% \let</sty>\relax
+% \def<*dtx>{\catcode`\<=12 \catcode`\>=12 \catcode`\*=12 \catcode`\/=12 }
+%</sty>
+%<*dtx>
+% \MakePercentComment
+\CheckSum {1334}%
+\makeatletter\check@checksum\makeatother%
+\Finale%
+%% End of file zeckendorf.dtx

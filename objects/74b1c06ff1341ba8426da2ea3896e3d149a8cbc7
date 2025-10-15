@@ -1,0 +1,247 @@
+%%%
+% Cible 4 opérations
+%%%
+\def\filedateCibleQOp{2025/05/26}%
+\def\fileversionCibleQOp{0.1a}%
+\message{-- \filedateCibleQOp\space v\fileversionCibleQOp}%
+
+\newcount\anpcqo\newcount\bnpcqo\newcount\cnpcqo%
+
+\NewDocumentCommand\PfCCQODiviseurs{m}{%#1 : le nombre entier \`a tester
+  \xdef\RetiensDiviseurs{}%
+  \xdef\RetiensNonDiviseurs{}%
+  \anpcqo=#1%
+  \bnpcqo=2%
+  \cnpcqo=0%
+  \whiledo{\bnpcqo<\anpcqo}{%
+    \modulo{\the\anpcqo}{\the\bnpcqo}{}%
+    \ifnum\remainder=0\relax
+      \cnpcqo=\numexpr\cnpcqo+1\relax
+      \ifnum\cnpcqo=1\relax
+        \xdef\RetiensDiviseurs{\the\bnpcqo}%
+      \else%
+        \xdef\RetiensDiviseurs{\RetiensDiviseurs,\the\bnpcqo}%
+      \fi%
+    \else
+      \ifnum\bnpcqo<10
+        \xdef\RetiensNonDiviseurs{\RetiensNonDiviseurs,\the\bnpcqo}%
+      \fi
+    \fi%
+    \bnpcqo=\numexpr\bnpcqo+1%
+  }%
+  \ifnum\cnpcqo=0\relax%
+    \xdef\RetiensDiviseurs{1}%
+  \fi%
+}%
+
+\newtoks\toklistecibleA%
+\newtoks\toklistecibleab%
+\newtoks\toklisteciblestyle%
+
+\def\UpdatetoksCibleQO#1\nil{\addtotok\toklistecibleA{"#1",}}%
+\def\UpdatetoksCibleQOO#1\nil{\addtotok\toklistecibleab{"#1",}}%
+\def\UpdatetoksCibleStyle#1\nil{\addtotok\toklisteciblestyle{"#1"}}%%
+
+\setKVdefault[CibleQO]{Couleur=Crimson,Rayon=2cm,ValeurMin=4,ValeurMax=10,Graines=false,Solution=false,Cibles=false,DivE=false,Style="<->",Graine={},Cible={}}%
+\defKV[CibleQO]{%
+  Graine=\ifempty{#1}{}{\setKV[CibleQO]{Graines}\PfCGraineAlea{#1}},%
+  Cible=\ifempty{#1}{}{\setKV[CibleQO]{Cibles}}%
+}%
+%
+\NewDocumentCommand\CibleQuatreOperations{o}{%
+  \useKVdefault[CibleQO]%
+  \setKV[CibleQO]{#1}%
+  \toklistecibleA{}%
+  \toklistecibleab{}%
+  \toklisteciblestyle{}%
+  \expandafter\UpdatetoksCibleStyle\useKV[CibleQO]{Style}\nil
+  %Le style vaut :\the\toklisteciblestyle
+  \colorlet{CouleurCibleQO}{\useKV[CibleQO]{Couleur}}%
+  % On définit le nombre cible aléatoirement ou fixement.
+  \ifboolKV[CibleQO]{Cibles}{%
+    \xdef\PfCCibleQO{\useKV[CibleQO]{Cible}}%
+  }{%
+    \ChoixAlea{\useKV[CibleQO]{ValeurMin}}{\useKV[CibleQO]{ValeurMax}}{\PfCCiblePremierFacteur}%
+    \ChoixAlea{\useKV[CibleQO]{ValeurMin}}{\useKV[CibleQO]{ValeurMax}}{\PfCCibleDeuxiemeFacteur}%
+    \xdef\PfCCibleQO{\fpeval{\PfCCiblePremierFacteur*\PfCCibleDeuxiemeFacteur}}%
+  }%
+  % On définit les opérations : deux additions, deux soustractions, deux "divisions" inversées, deux "divisions" avec éventuellement une division euclidienne.
+  \PfCCQODiviseurs{\PfCCibleQO}%
+  \setsepchar{,}%
+  \readlist*\PfCRetiensDiviseurs{\RetiensDiviseurs}%
+%  Il y a \PfCRetiensDiviseurslen{} diviseurs.
+  \ifnum\PfCRetiensDiviseurslen=1\relax%
+    \setKV[CibleQO]{DivE}%
+  \fi
+  \ifboolKV[CibleQO]{DivE}{%
+    \xdef\PfCCQOListeOperations{+,+,-,-,*,*,/,d}%
+  }{%
+    \xdef\PfCCQOListeOperations{+,+,-,-,*,*,/,/}%
+  }%
+  \xdef\PfCCQOListeAdditionUn{2,3,4,5,6,7,8,9}%
+  \xdef\PfCCQOListeAdditionDeux{10,11,12,13,14,15,16,17,18,19}%
+  \xdef\PfCCQOListeMultiplication{2,3,5,9,10}%
+  \xdef\PfCFooQO{\useKV[CibleQO]{ListeOperations}}%
+  \xdef\PfCFooNombres{}%
+  \MelangeListe{\PfCCQOListeAdditionUn}{1}%
+  \xdef\PfCFooNombres{\PfCFooNombres \faa}%
+  \MelangeListe{\PfCCQOListeAdditionDeux}{1}%
+  \xdef\PfCFooNombres{\PfCFooNombres \faa}%
+  \MelangeListe{\PfCCQOListeAdditionUn}{1}%
+  \xdef\PfCFooNombres{\PfCFooNombres \faa}%
+  \MelangeListe{\PfCCQOListeAdditionDeux}{1}%
+  \xdef\PfCFooNombres{\PfCFooNombres \faa}%
+  \MelangeListe{\PfCCQOListeMultiplication}{2}%
+  \xdef\PfCFooNombres{\PfCFooNombres \faa}%
+  \ifnum\PfCRetiensDiviseurslen=1\relax%carré parfait
+    \xdef\PfCFooNombres{\PfCFooNombres \RetiensDiviseurs,\PfCCibleQO}%
+  \else%
+    \ifnum\PfCRetiensDiviseurslen=2\relax%
+      \xdef\PfCFooNombres{\PfCFooNombres \RetiensDiviseurs}%
+    \else%
+      \MelangeListe{\RetiensDiviseurs}{2}%
+      \xdef\PfCFooNombres{\PfCFooNombres \faa}%
+    \fi%
+  \fi%
+  \MelangeListe{\RetiensNonDiviseurs}{1}%
+  \ifnum\PfCRetiensDiviseurslen=1\relax%
+    \xdef\PfCFooNombres{\PfCFooNombres,\faa}%
+  \else%
+    \xdef\PfCFooNombres{\PfCFooNombres \faa}%
+  \fi%
+  %Les nombres choisis sont \PfCFooNombres\\
+  \setsepchar{,}\ignoreemptyitems%
+  \MelangeListe{1,2,3,4,5,6,7,8}{8}%
+  \readlist*\PfCOrdreOperations{\faa}%
+  \readlist*\PfCListeCibleNombres{\PfCFooNombres}%
+  \readlist*\PfCListeCibleOperations{\PfCCQOListeOperations}%
+  \reademptyitems%
+  % On détermine les solutions
+  \xdef\PfCListeSolution{\fpeval{\PfCCibleQO-\PfCListeCibleNombres[1]}}%
+  \xdef\PfCListeSolution{\PfCListeSolution,\fpeval{\PfCCibleQO-\PfCListeCibleNombres[2]}}%
+  \xdef\PfCListeSolution{\PfCListeSolution,\fpeval{\PfCCibleQO+\PfCListeCibleNombres[3]}}%
+  \xdef\PfCListeSolution{\PfCListeSolution,\fpeval{\PfCCibleQO+\PfCListeCibleNombres[4]}}%
+  \xdef\PfCListeSolution{\PfCListeSolution,\fpeval{\PfCCibleQO*\PfCListeCibleNombres[5]}}%
+  \xdef\PfCListeSolution{\PfCListeSolution,\fpeval{\PfCCibleQO*\PfCListeCibleNombres[6]}}%
+  \xdef\PfCListeSolution{\PfCListeSolution,\fpeval{\PfCCibleQO/\PfCListeCibleNombres[7]}}%
+  \ifboolKV[CibleQO]{DivE}{%
+    \xdef\PfCListeSolution{\PfCListeSolution,\fpeval{floor(\PfCCibleQO/\PfCListeCibleNombres[9])}}%
+    \xdef\PfCListeSolution{\PfCListeSolution,\fpeval{\PfCCibleQO-\PfCListeCibleNombres[9]*floor(\PfCCibleQO/\PfCListeCibleNombres[9])}}%
+  }{%
+    \xdef\PfCListeSolution{\PfCListeSolution,\fpeval{\PfCCibleQO/\PfCListeCibleNombres[8]}}%
+  }%
+  \readlist*\PfCListeCibleSolutions{\PfCListeSolution}%
+  \xdef\PfCFooRetiensTout{}%
+  \xdef\PfCFooRetiensToutAvecSol{}%
+  \xintFor* ##1 in{\xintSeq{1}{8}}\do{%
+    \xdef\PfCCibleRang{\PfCOrdreOperations[##1]}%
+    \xdef\PfCCibleRang{\PfCCibleRang}%
+    \StrCompare{\PfCListeCibleOperations[\PfCCibleRang]}{*}[\PfCTestEtoile]%
+    \StrCompare{\PfCListeCibleOperations[\PfCCibleRang]}{/}[\PfCTestSlash]%
+    \StrCompare{\PfCListeCibleOperations[\PfCCibleRang]}{d}[\PfCTestDE]%
+    \xintifboolexpr{\PfCTestDE==0}{%
+      \xdef\PfCFooRetiensTout{\PfCFooRetiensTout,$\pointilles[5mm]\PfCSymbolTimes\num{\PfCListeCibleNombres[9]}+\num{\PfCListeCibleSolutions[9]}$}%
+      \xdef\PfCFooRetiensToutAvecSol{\PfCFooRetiensToutAvecSol,$\mathcolor{CouleurCibleQO}{\num{\PfCListeCibleSolutions[8]}}\PfCSymbolTimes\num{\PfCListeCibleNombres[9]}+\num{\PfCListeCibleSolutions[9]}$}%
+    }{%
+    \xdef\PfCFooRetiensTout{\PfCFooRetiensTout,$\pointilles[5mm]\xintifboolexpr{\PfCTestEtoile==0}{\PfCSymbolDiv}{\xintifboolexpr{\PfCTestSlash==0}{\PfCSymbolTimes}{\PfCListeCibleOperations[\PfCCibleRang]}}\num{\PfCListeCibleNombres[\PfCCibleRang]}$}%
+    \xdef\PfCFooRetiensToutAvecSol{\PfCFooRetiensToutAvecSol,$\mathcolor{CouleurCibleQO}{\num{\PfCListeCibleSolutions[\PfCCibleRang]}}\xintifboolexpr{\PfCTestEtoile==0}{\PfCSymbolDiv}{\xintifboolexpr{\PfCTestSlash==0}{\PfCSymbolTimes}{\PfCListeCibleOperations[\PfCCibleRang]}}\num{\PfCListeCibleNombres[\PfCCibleRang]}$}%
+    }%
+  }%
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\PfCCibleQOListeEnonce{\PfCFooRetiensTout}%
+  \readlist*\PfCCibleQOListeSolution{\PfCFooRetiensToutAvecSol}%
+  \reademptyitems
+  \foreachitem\compteur\in\PfCCibleQOListeEnonce{\expandafter\UpdatetoksCibleQO\compteur\nil}%
+  \foreachitem\compteur\in\PfCCibleQOListeSolution{\expandafter\UpdatetoksCibleQOO\compteur\nil}%
+  \BuildCibleQuatreOperations{\PfCCibleQO}{\the\toklistecibleA}{\the\toklistecibleab}{\useKV[CibleQO]{Style}}%
+}%
+
+\def\BuildCibleQOCode{%
+  vardef LectureOperations(text t)=
+  nbop:=0;
+  for p_=t:
+  Op[nbop]=image(
+  label(TEX(p_),(0,0));
+  );
+  nbop:=nbop+1;
+  endfor;
+  enddef;
+  %
+  vardef LectureOperationsPDF(text t)=
+  nbop:=0;
+  for p_=t:
+  Op[nbop]=image(
+  label(LATEX(p_),(0,0));
+  );
+  nbop:=nbop+1;
+  endfor;
+  enddef;
+  %
+  vardef MelangeListe=
+  for k=0 upto 7:
+  x[k]=k;
+  endfor;
+  nbtest=7;
+  for k=0 upto 7:
+  ll:=floor(uniformdeviate(8-k));
+  y[k]=x[ll];
+  nb:=0;
+  for l=0 upto (7-k):
+  if l<>ll:
+  x[nb]:=x[l];
+  nb:=nb+1;
+  fi;
+  endfor;
+  endfor;
+  enddef;
+}%
+
+\NewDocumentCommand\BuildCibleQuatreOperations{mmmm}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      \BuildCibleQOCode
+      string Style;
+      Style=#4;
+            
+      Cible=#1;
+
+      picture Op[];
+
+      Rayon:=\useKV[CibleQO]{Rayon};
+      boolean Solution;
+      Solution=\useKV[CibleQO]{Solution};
+      
+      if Solution:
+      LectureOperations(#3)
+      else:
+      LectureOperations(#2)
+      fi;
+      
+      path cc;
+      pair O,A[];
+      O=(0,0);
+      picture CIBLE;
+      CIBLE=image(label(TEX("\Huge\bfseries"&decimal(Cible)),O));
+      draw CIBLE;
+      cc=cercles(O,Rayon);
+      path Fleche;
+      for k=0 upto 7:
+      A[k]=1.1[O,pointarc(cc,k*45)];
+      Fleche:=((0,0)--(center Op[k] shifted A[k])) cutbefore cercles(O,0.45*Rayon) cutafter (polygone(llcorner Op[k],lrcorner Op[k],urcorner Op[k],ulcorner Op[k]) shifted A[k]);
+      if Style="<->": 
+      drawdblarrow (point(0.75*length Fleche) of Fleche)--(point(0) of Fleche);
+      elseif Style="<-":
+      drawarrow (point(0.75*length Fleche) of Fleche)--(point(0) of Fleche);
+      elseif Style="->":
+      drawarrow (point(0) of Fleche)--(point(0.75*length Fleche) of Fleche);
+      elseif Style="-":
+      draw (point(0) of Fleche)--(point(0.75*length Fleche) of Fleche);
+      elseif Style="--":
+      label(TEX("$=$") rotated (k*45) ,point(0.5*length Fleche) of Fleche);
+      fi;
+      trace Op[k] shifted A[k];
+      endfor;
+    \end{mplibcode}
+  \fi%
+}%

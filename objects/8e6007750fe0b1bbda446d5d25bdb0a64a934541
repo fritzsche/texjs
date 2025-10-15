@@ -1,0 +1,56 @@
+%%%
+% Garam
+%%%
+\def\filedateGaram{2025/05/28}%
+\def\fileversionGaram{0.1}%
+\message{-- \filedateGaram\space v\fileversionGaram}%
+%
+\setKVdefault[Garam]{Taille=7,Largeur=15pt,Solution=false,CouleurSolution={}}%
+\defKV[Garam]{CouleurSolution=\ifempty{#1}{}{\setKV[Garam]{Solution}\colorlet{PfCGaramCoulSol}{#1}}}%
+
+\newlength\PfCGaramHeight
+
+\NewDocumentCommand\Garam{o m}{%
+  \useKVdefault[Garam]%
+  \setKV[Garam]{#1}%
+  \setlength{\PfCGaramHeight}{\useKV[Garam]{Largeur}+\tabcolsep}%
+  \reademptyitems%
+  \setsepchar[*]{§*,*/}%
+  \readlist*\PfCListeGaram{#2}%
+  \begin{NiceTabular}{*{\useKV[Garam]{Taille}}{m{\useKV[Garam]{Largeur}}}}
+    \CodeBefore
+    \xintFor* ##1 in{\xintSeq{2}{\fpeval{\useKV[Garam]{Taille}}}}\do{%
+      \tikz{\draw[dashed,LightGray] (1-|##1)--(last-|##1);}%
+    }%
+    \xintFor* ##1 in{\xintSeq{2}{\fpeval{\PfCListeGaramlen-1}}}\do{%
+      \tikz{\draw[dashed,LightGray] (##1-|1)--(##1-|last);}%
+    }%
+    \tikz{\draw (1-|1) rectangle (last-|last);}%
+    \Body
+    \xintFor* ##1 in{\xintSeq{1}{\PfCListeGaramlen}}\do{%
+      \rule{0pt}{\PfCGaramHeight}\xintFor* ##2 in {\xintSeq{1}{\useKV[Garam]{Taille}}}\do{%
+        \xintifForFirst{}{&}\StrChar{\PfCListeGaram[##1,##2,1]}{1}[\PfCCaracGaram]%
+        \IfStrEq{\PfCCaracGaram}{*}{\Block[draw,fill=black]{1-1}{}}{%
+          \IfStrEq{\PfCCaracGaram}{!}{\Block{}{\ifboolKV[Garam]{Solution}{\color{PfCGaramCoulSol}\StrGobbleLeft{\PfCListeGaram[##1,##2,1]}{1}}{}}}{\Block{}{\PfCListeGaram[##1,##2,1]}}%
+        }%
+      }\\
+    }%
+    \CodeAfter
+    % On place les symboles
+    \xintFor* ##1 in{\xintSeq{1}{\PfCListeGaramlen}}\do{%
+      \xintFor* ##2 in {\xintSeq{1}{\useKV[Garam]{Taille}}}\do{%
+        \StrChar{\PfCListeGaram[##1,##2,1]}{1}[\PfCCaracGaram]%
+        \IfStrEq{\PfCCaracGaram}{*}{}{%
+          \tikz{%
+            \StrSubstitute{\PfCListeGaram[##1,##2,2]}{x}{\PfCSymbolTimes}[\PfCGaramUn]%
+            \StrSubstitute{\PfCGaramUn}{:}{\div}[\PfCGaramUn]%
+            \StrSubstitute{\PfCListeGaram[##1,##2,3]}{x}{\PfCSymbolTimes}[\PfCGaramDeux]%
+            \StrSubstitute{\PfCGaramDeux}{:}{\div}[\PfCGaramDeux]%
+            \xintifForLast{}{\node at (\fpeval{##1+0.5}-|\fpeval{##2+1}) {$\PfCGaramUn$};}
+            \node at (\fpeval{##1+1}-|\fpeval{##2+0.5}) {$\PfCGaramDeux$};
+          }%
+        }%
+      }%
+    }%
+  \end{NiceTabular}%
+}%

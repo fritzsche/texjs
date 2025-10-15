@@ -1,0 +1,711 @@
+%%%
+% Labyrinthe Nombre
+%%%
+\def\filedateLabyNombre{2025/05/28}%
+\def\fileversionLabyNombre{0.1a}%
+\message{-- \filedateLabyNombre\space v\fileversionLabyNombre}%
+%
+\setKVdefault[ClesLabyNb]{Multiple=5,XDepart=0,YDepart=0,Longueur=7,Largeur=4,Solution=false,Echelle=1,Angle=0,Couleur=red,Murs=false,Nom=Ex1,CouleurChemin=LightSteelBlue,DoubleOperation=false,Multiplication=false,Chemin=false,EntreeSortie=false,Entree="Nord",Sortie="Sud",SortieUnique=true,Graines=false,XArrivees=false,YArrivees=false,ArriveeX=5,ArriveeY=5,Graine={},XArrivee={},YArrivee={}}
+\defKV[ClesLabyNb]{%
+  Graine=\ifempty{#1}{}{\setKV[ClesLabyNb]{Graines}},%
+  XArrivee=\ifempty{#1}{}{\setKV[ClesLabyNb]{XArrivees}\setKV[ClesLabyNb]{ArriveeX=#1}},%
+  YArrivee=\ifempty{#1}{}{\setKV[ClesLabyNb]{YArrivees}\setKV[ClesLabyNb]{ArriveeY=#1}}%
+}%
+
+\NewDocumentCommand\LabyNombre{o}{%
+  \useKVdefault[ClesLabyNb]%
+  \setKV[ClesLabyNb]{#1}%
+  \ifboolKV[ClesLabyNb]{XArrivees}{}{\setKV[ClesLabyNb]{ArriveeX=\fpeval{\useKV[ClesLabyNb]{Longueur}-1}}}
+  \ifboolKV[ClesLabyNb]{YArrivees}{}{\setKV[ClesLabyNb]{ArriveeY=\fpeval{\useKV[ClesLabyNb]{Largeur}-1}}}
+  \ifboolKV[ClesLabyNb]{Multiplication}{%
+    \TraceLabyMul{\useKV[ClesLabyNb]{Multiple}}{\useKV[ClesLabyNb]{Longueur}}{\useKV[ClesLabyNb]{Largeur}}{(\useKV[ClesLabyNb]{YDepart},\useKV[ClesLabyNb]{XDepart})}{(\useKV[ClesLabyNb]{ArriveeY},\useKV[ClesLabyNb]{ArriveeX})}%
+  }{%
+    \ifboolKV[ClesLabyNb]{Solution}{%
+      \TraceLabyFactoSolution{\useKV[ClesLabyNb]{Multiple}}{\useKV[ClesLabyNb]{Longueur}}{\useKV[ClesLabyNb]{Largeur}}{(\useKV[ClesLabyNb]{YDepart},\useKV[ClesLabyNb]{XDepart})}{(\useKV[ClesLabyNb]{ArriveeY},\useKV[ClesLabyNb]{ArriveeX})}{\useKV[ClesLabyNb]{Solution}}%
+    }{%
+      \TraceLabyFacto{\useKV[ClesLabyNb]{Multiple}}{\useKV[ClesLabyNb]{Longueur}}{\useKV[ClesLabyNb]{Largeur}}{(\useKV[ClesLabyNb]{YDepart},\useKV[ClesLabyNb]{XDepart})}{(\useKV[ClesLabyNb]{ArriveeY},\useKV[ClesLabyNb]{ArriveeX})}{\useKV[ClesLabyNb]{Solution}}%
+    }%
+  }%
+}%
+
+\newcommand\TraceLabyMul[5]{%
+  \ifluatex%
+  \mplibnumbersystem{double}%
+  \mplibforcehmode%
+  \begin{mplibcode}%
+  input PfCLabyNombre;
+  
+  boolean Murs,Solution,Graines;
+  Murs=\useKV[ClesLabyNb]{Murs};
+  Solution:=\useKV[ClesLabyNb]{Solution};
+  Graines:=\useKV[ClesLabyNb]{Graines};
+  if Graines:
+  randomseed:=\useKV[ClesLabyNb]{Graine}
+  fi;
+
+  path Fullcircle;
+  Fullcircle=fullcircle shifted((0.5,0.5));
+  
+  numeric Multiple;
+  Multiple=#1;
+  % Initialisation du labyrinthe
+  InitialisationLabyrintheMul(#2,#3);
+  % On initialise les paramètres du parcours
+  numeric choixligneD,choixligneA,choixcolonneD,choixcolonneA;
+  choixligneD=xpart(#4);
+  choixcolonneD=ypart(#4);
+  choixligneA=xpart(#5);
+  choixcolonneA=ypart(#5);%
+  pair Depart;
+  Depart=N[choixligneD][choixcolonneD];
+  pair Arrivee;
+  Arrivee=N[choixligneA][choixcolonneA];
+  pair Mobile;
+  Mobile=Depart;
+  RAZPileChemin;
+  % Exploration du labyrinthe
+  PushChemin((choixligneD,choixcolonneD));
+  CaseExploree[choixligneD][choixcolonneD]:=true;
+  VoisinDispo(choixligneD,choixcolonneD);
+  forever: exitif Mobile=Arrivee;%nb=0;
+  nb:=ceiling(uniformdeviate(nbvoisin));
+  if nb>0:
+  for k=1 upto nbvoisin:
+  CaseExploree[xpart(PileVoisin[k])][ypart(PileVoisin[k])]:=true;
+  endfor;
+  PushChemin((xpart(PileVoisin[nb]),ypart(PileVoisin[nb])));
+  Mobile:=N[xpart(PileChemin[indiceChemin])][ypart(PileChemin[indiceChemin])];
+  VoisinDispo(xpart(PileChemin[indiceChemin]),ypart(PileChemin[indiceChemin]));
+  else:
+  PopChemin;
+  fi;
+  endfor;
+
+  vardef PremierInfCent=
+    Totalpremier:=25;
+
+    numeric p[]; boolean n_is_prime; p[1]=2; kis:=1;
+    for nis=3 step 2 until infinity:
+    n_is_prime := true;
+    for jis=2 upto kis:
+    if nis mod p[jis]=0: n_is_prime := false; fi
+    exitif nis/p[jis] < p[jis];
+    endfor
+    if n_is_prime: p[incr kis] := nis; exitif kis=Totalpremier; fi
+    endfor fi
+    
+    numeric PR[],pretiens[];
+    
+    for ki=1 upto Totalpremier-1:
+    pretiens[ki]:=p[ki+1];
+    endfor;
+    
+    Kk:=0;
+    
+    for ki=Totalpremier-1 downto 1:
+    alea:=1+floor(uniformdeviate(ki));
+    PR[incr Kk]:=pretiens[alea];
+    Kkl:=0;
+    for li=1 upto ki:
+    if li<>alea:
+      pretiens[incr Kkl]:=pretiens[li];
+      fi;
+    endfor;
+    endfor;
+    enddef;
+  
+    vardef ListeDiviseurs(expr nbtest)=
+    numeric diviseurs[],nondiviseurs[],pas;
+    nbdiv:=0;
+    nbnondiv:=0;
+    pas=2;
+    forever:
+    if (nbtest mod pas)=0:
+    nbdiv:=nbdiv+1;
+    diviseurs[nbdiv]=pas;
+    else:
+    nbnondiv:=nbnondiv+1;
+    nondiviseurs[nbnondiv]=pas;
+    fi;
+    pas:=pas+1;
+    exitif pas>10;
+    endfor;
+    enddef;    
+    
+  % Affichagefinal
+  % on sauvegarde les nombres aléatoires
+    numeric NbAffiche[];
+    numeric NbSol[];
+    % on écrit des nombres premiers au hasard >10
+    PremierInfCent;
+    numeric nbaffiche;
+    nbaffiche=0;
+    for k=0 upto LargeurLaby-1:
+      for l=0 upto LongueurLaby-1:
+      nbaffiche:=nbaffiche+1;
+      if (nbaffiche mod 2)=0:
+      nbpremier:=3+ceiling(uniformdeviate(Totalpremier-4));
+      NbAffiche[nbaffiche]:=PR[nbpremier];
+      else:
+      NbAffiche[nbaffiche]:=2+floor(uniformdeviate(8));
+      fi;
+      endfor;
+    endfor;
+    % On crée des multiples du nombre choisi
+    NbSol[1]=Multiple;
+    for k=2 upto indiceChemin:
+    if (k mod 2)=0:
+    NbSol[k]=NbSol[k-1]*(2+ceiling(uniformdeviate(8)));
+    else:
+    % Diviseurs du précédent sauf 1 mais inférieur ou égal à 10
+    % choix aléatoire du diviseur
+    ListeDiviseurs(NbSol[k-1]);
+    choixdiv:=ceiling(uniformdeviate(nbdiv));
+    NbSol[k]=diviseurs[choixdiv];
+    fi;
+    endfor;
+  % On affiche
+  picture Corps;
+  Corps=image(
+  drawoptions(withcolor 0.7white);
+  for k=0 upto LargeurLaby-1:
+  trace (N[k][0]--N[k][LongueurLaby-1]) shifted((5mm,0.25*uv));
+  endfor;
+  for k=0 upto LongueurLaby-1:
+  trace (N[0][k]--N[LargeurLaby-1][k]) shifted((5mm,0.25*uv));
+  endfor;
+  drawoptions();
+  nbaffiche:=0;
+  for k=0 upto LargeurLaby-1:
+  for l=0 upto LongueurLaby-1:
+  nbaffiche:=nbaffiche+1;
+    remplis ((Fullcircle scaled 10mm) shifted N[k][l]) withcolor white;
+  label(TEX("\num{"&decimal(NbAffiche[nbaffiche])&"}"),M[k][l]);
+  endfor;
+  endfor;
+  if Solution:
+  trace ((center Fullcircle scaled 10mm) shifted N[choixligneD][choixcolonneD])
+  for k=2 upto indiceChemin-1:
+  -- ((center Fullcircle scaled 10mm) shifted N[xpart(PileChemin[k])][ypart(PileChemin[k])])
+  endfor
+  --((center Fullcircle scaled 10mm) shifted Arrivee) dashed evenly withpen pencircle scaled 1.5 withcolor Brown;
+  fi;
+  remplis ((Fullcircle scaled 10mm) shifted N[choixligneD][choixcolonneD]) withcolor \useKV[ClesLabyNb]{Couleur};
+  if (LargeurLaby mod 2)=0:
+  remplis ((unitsquare scaled 10mm) shifted Arrivee) withcolor \useKV[ClesLabyNb]{Couleur};
+  else:
+  remplis ((Fullcircle scaled 10mm) shifted Arrivee) withcolor \useKV[ClesLabyNb]{Couleur};
+  fi;
+  for k=2 upto indiceChemin-1:
+  remplis ((Fullcircle scaled 10mm) shifted N[xpart(PileChemin[k])][ypart(PileChemin[k])]) withcolor white;
+  label(TEX("\num{"&decimal(NbSol[k])&"}"),M[xpart(PileChemin[k])][ypart(PileChemin[k])]);
+  endfor;
+  k:=1;
+  label(TEX("\num{"&decimal(NbSol[k])&"}"),M[xpart(PileChemin[k])][ypart(PileChemin[k])]);
+  k:=indiceChemin;
+  label(TEX("\num{"&decimal(NbSol[k])&"}"),M[xpart(PileChemin[k])][ypart(PileChemin[k])]);
+  trace TraceLabyrintheMul;
+  );
+  Corps:=(Corps scaled \useKV[ClesLabyNb]{Echelle}) rotated \useKV[ClesLabyNb]{Angle};
+  trace Corps;
+\end{mplibcode}%
+\mplibnumbersystem{scaled}%
+\fi%
+}%
+
+\newcommand\TraceLabyFacto[6]{%
+  \mplibforcehmode%
+  \xdef\PfCNomLabyrinthe{\useKV[ClesLabyNb]{Nom}}%
+  \begin{mplibcode}[\PfCNomLabyrinthe]
+    input PfCLabyNombre;
+
+    boolean Murs;
+    Murs=\useKV[ClesLabyNb]{Murs};
+
+    string Entree,Sortie;
+    Entree=\useKV[ClesLabyNb]{Entree};
+    Sortie=\useKV[ClesLabyNb]{Sortie};
+    boolean SortieUnique,EntreeSortie;
+    SortieUnique:=\useKV[ClesLabyNb]{SortieUnique};
+    EntreeSortie:=\useKV[ClesLabyNb]{EntreeSortie};
+    picture Square;
+    Square=image(
+    path Test;
+    Test=unitsquare scaled 10mm;
+    trace subpath(0.85,1.15) of Test;
+    trace subpath(1.85,2.15) of Test;
+    trace subpath(2.85,3.15) of Test;
+    trace subpath(3.85,4.15) of Test;
+    );
+
+    vardef RemplissagePremier=
+    Totalpremier:=if indiceChemin<62:62 else: indiceChemin fi;
+
+    numeric p[]; boolean n_is_prime; p[1]=2; kis:=1;
+    for nis=3 step 2 until infinity:
+    n_is_prime := true;
+    for jis=2 upto kis:
+    if nis mod p[jis]=0: n_is_prime := false; fi
+    exitif nis/p[jis] < p[jis];
+    endfor
+    if n_is_prime: p[incr kis] := nis; exitif kis=Totalpremier; fi
+    endfor fi
+    
+    numeric PR[],pretiens[];
+    
+    for ki=1 upto Totalpremier-1:
+    pretiens[ki]:=p[ki+1];
+    endfor;
+    
+    Kk:=0;
+    
+    for ki=Totalpremier-1 downto 1:
+    alea:=1+floor(uniformdeviate(ki));
+    PR[incr Kk]:=pretiens[alea];
+    % message("k="&decimal(k)&" alea="&decimal(alea)&" Kk="&decimal(Kk)&" PR[Kk]="&decimal(PR[Kk]));
+    Kkl:=0;
+    for li=1 upto ki:
+    if li<>alea:
+      pretiens[incr Kkl]:=pretiens[li];
+      % message("Kkl="&decimal(Kkl));
+      fi;
+    endfor;
+    endfor;
+    enddef;
+    
+    numeric Multiple;
+    Multiple=#1;
+    % Initialisation du labyrinthe
+    InitialisationLabyrinthe(#2,#3);
+    % On initialise les paramètres du parcours
+    numeric choixligneD,choixligneA,choixcolonneD,choixcolonneA;
+    choixligneD=xpart(#4);
+    choixcolonneD=ypart(#4);
+    choixligneA=xpart(#5);
+    choixcolonneA=ypart(#5);%
+    pair Depart;
+    Depart=N[choixligneD][choixcolonneD];
+    pair Arrivee;
+    Arrivee=N[choixligneA][choixcolonneA];
+    pair Mobile;
+    Mobile=Depart;
+    %
+    RAZPileChemin;
+
+    if \useKV[ClesLabyNb]{SortieUnique}:
+    if (Sortie="Est") or (Sortie="Ouest"):
+    for k=0 upto LargeurLaby-1:
+    if k<>choixligneA:
+    CaseExploree[k][choixcolonneA]:=true;
+    fi;
+    endfor;
+    elseif (Sortie="Nord") or (Sortie="Sud"):
+    for k=0 upto LongueurLaby-1:
+    if k<>choixcolonneA:
+    CaseExploree[choixligneA][k]:=true;
+    fi;
+    endfor;
+    fi;
+    fi;
+    % Exploration du labyrinthe
+    if Entree="Nord":
+    CaseExploree[choixligneD-1][choixcolonneD]:=true;
+    elseif Entree="Sud":
+    CaseExploree[choixligneD+1][choixcolonneD]:=true;
+    elseif Entree="Est":
+    CaseExploree[choixligneD][choixcolonneD+1]:=true;
+    elseif Entree="Ouest":
+    CaseExploree[choixligneD][choixcolonneD-1]:=true;
+    fi;
+    %
+    PushChemin((choixligneD,choixcolonneD));
+    CaseExploree[choixligneD][choixcolonneD]:=true;
+    VoisinDispo(choixligneD,choixcolonneD);
+    forever: exitif Mobile=Arrivee;%nb=0;
+    nb:=ceiling(uniformdeviate(nbvoisin));
+    if nb>0:
+      for k=1 upto nbvoisin:
+        CaseExploree[xpart(PileVoisin[k])][ypart(PileVoisin[k])]:=true;
+      endfor;
+      PushChemin((xpart(PileVoisin[nb]),ypart(PileVoisin[nb])));
+      Mobile:=N[xpart(PileChemin[indiceChemin])][ypart(PileChemin[indiceChemin])];
+      VoisinDispo(xpart(PileChemin[indiceChemin]),ypart(PileChemin[indiceChemin]));
+    else:
+      PopCheminMathAlea;
+    fi;
+    endfor;
+    % Affichagefinal
+    % on sauvegarde les nombres aléatoires
+    numeric NbAffiche[];
+    numeric NbSol[];
+    % on écrit des nombres au hasard, mais sans être multiple du nombre choisi
+    numeric nbaffiche;
+    nbaffiche=0;
+    for k=0 upto LargeurLaby-1:
+      for l=0 upto LongueurLaby-1:
+      nbaffiche:=nbaffiche+1;
+      if Multiple=1:%On affichera que des multiples de 2/3/5/9/10 pour afficher un chemin de nombre premiers
+      mathalea:=uniformdeviate(5);
+      if mathalea<1:
+      NbAffiche[nbaffiche]:=(10+ceiling(uniformdeviate(100)))*2;
+      elseif mathalea<2:
+      NbAffiche[nbaffiche]:=(10+ceiling(uniformdeviate(100)))*3;
+      elseif mathalea<3:
+      NbAffiche[nbaffiche]:=(10+ceiling(uniformdeviate(100)))*5;
+      elseif mathalea<4:
+      NbAffiche[nbaffiche]:=(10+ceiling(uniformdeviate(100)))*9;
+      else:  NbAffiche[nbaffiche]:=(10+ceiling(uniformdeviate(100)))*10;
+      fi;
+      else:
+      NbAffiche[nbaffiche]:=(50+ceiling(uniformdeviate(100)))*Multiple+ceiling(uniformdeviate(Multiple-1));
+      fi;
+      endfor;
+    endfor;
+    % On crée des multiples du nombre choisi
+    RemplissagePremier;
+    
+    for k=1 upto indiceChemin:
+    if Multiple>1:
+    NbSol[k]=(50+ceiling(uniformdeviate(100)))*Multiple;
+    else:
+    NbSol[k]=PR[k];
+    fi;
+    endfor;
+    % On affiche
+    picture Corps;
+    Corps=image(
+      nbaffiche:=0;
+      for k=0 upto LargeurLaby-1:
+        for l=0 upto LongueurLaby-1:
+	  nbaffiche:=nbaffiche+1;
+          label(TEX("\num{"&decimal(NbAffiche[nbaffiche])&"}"),M[k][l]);
+        endfor;
+      endfor;
+      for k=1 upto indiceChemin:
+      remplis ((unitsquare scaled 10mm) shifted N[xpart(PileChemin[k])][ypart(PileChemin[k])]) withcolor white;
+      label(TEX("\num{"&decimal(NbSol[k])&"}"),M[xpart(PileChemin[k])][ypart(PileChemin[k])]);
+      endfor;
+      if EntreeSortie=false:
+      remplis ((unitsquare scaled 10mm) shifted N[choixligneD][choixcolonneD]) withcolor \useKV[ClesLabyNb]{Couleur};
+      remplis ((unitsquare scaled 10mm) shifted Arrivee) withcolor \useKV[ClesLabyNb]{Couleur};
+      trace TraceLabyrinthe;
+      else:
+      for k=0 upto LargeurLaby-1:
+      for l=0 upto LongueurLaby-1:
+      trace Square shifted N[k][l];
+      endfor;
+      endfor;
+      trace u*(0,0)--u*(LongueurLaby,0)--u*(LongueurLaby,-LargeurLaby)--u*(0,-LargeurLaby)--cycle;
+      % On dessine l'entrée.
+      if Entree="Nord":
+      N[-1][-1]:=Depart+(0,10mm);
+      fill ((unitsquare scaled 10mm) shifted N[-1][-1]) withcolor white;
+      draw (subpath(1,4) of unitsquare scaled 10mm) shifted N[-1][-1];
+      undraw (subpath(0.18,0.82) of unitsquare scaled 10mm) shifted N[-1][-1] withpen pencircle scaled 1.25;
+      label(btex \footnotesize Départ etex,(center Square) shifted N[-1][-1]);
+      elseif Entree="Ouest":
+      N[-1][-1]:=Depart+(-10mm,0);
+      fill ((unitsquare scaled 10mm) shifted N[-1][-1]) withcolor white;
+      draw (subpath(2,5) of unitsquare scaled 10mm) shifted N[-1][-1];
+      undraw (subpath(1.15,1.85) of unitsquare scaled 10mm) shifted N[-1][-1] withpen pencircle scaled 1.25;
+      label(btex \footnotesize Départ etex,(center Square) shifted N[-1][-1]);
+      elseif Entree="Sud":
+      N[-1][-1]:=Depart+(0,-10mm);
+      fill ((unitsquare scaled 10mm) shifted N[-1][-1]) withcolor white;
+      draw (subpath(3,6) of unitsquare scaled 10mm) shifted N[-1][-1];
+      undraw (subpath(2.15,2.85) of unitsquare scaled 10mm) shifted N[-1][-1] withpen pencircle scaled 1.25;
+      label(btex \footnotesize Départ etex,(center Square) shifted N[-1][-1]);
+      elseif Entree="Est":
+      N[-1][-1]:=Depart+(10mm,0);
+      fill ((unitsquare scaled 10mm) shifted N[-1][-1]) withcolor white;
+      draw (subpath(0,3) of unitsquare scaled 10mm) shifted N[-1][-1];
+      undraw (subpath(3.18,3.82) of unitsquare scaled 10mm) shifted N[-1][-1] withpen pencircle scaled 1.25;
+      label(btex \footnotesize Départ etex,(center Square) shifted N[-1][-1]);
+      fi;
+      % On dessine les sorties
+      if Sortie="Nord":
+      N[-2][-2]=Arrivee+(5mm,20mm);
+      for k=0 upto LongueurLaby-1:
+      draw ((point(0.15) of unitsquare scaled 10mm)--0.5[(point(0.15) of unitsquare scaled 10mm),(point(2.85) of unitsquare scaled 10mm)]) shifted (N[0][k]+(0,10mm));
+      draw ((point(0.85) of unitsquare scaled 10mm)--0.5[(point(0.85) of unitsquare scaled 10mm),(point(2.15) of unitsquare scaled 10mm)]) shifted (N[0][k]+(0,10mm));
+      undraw (subpath(0.18,0.82) of unitsquare scaled 10mm) shifted (N[0][k]+(0,10mm)) withpen pencircle scaled 1.25;
+      label(TEX("\footnotesize S"&decimal(k)),center (Square) shifted (N[0][k]+(0,10mm)));
+      endfor;
+      elseif Sortie="Ouest":
+      N[-2][-2]=Arrivee+(-10mm,5mm);
+      for k=0 upto LargeurLaby-1:
+      draw ((point(1.15) of unitsquare scaled 10mm)--0.5[(point(1.15) of unitsquare scaled 10mm),(point(3.85) of unitsquare scaled 10mm)]) shifted (N[k][0]+(-10mm,0));
+      draw ((point(1.85) of unitsquare scaled 10mm)--0.5[(point(1.85) of unitsquare scaled 10mm),(point(3.15) of unitsquare scaled 10mm)]) shifted (N[k][0]+(-10mm,0));
+      undraw (subpath(1.18,1.82) of unitsquare scaled 10mm) shifted (N[k][0]+(-10mm,0)) withpen pencircle scaled 1.25;
+      label(TEX("\footnotesize S"&decimal(k)),center (Square) shifted (N[k][0]+(-10mm,0)));
+      endfor;
+      elseif Sortie="Sud":
+      N[-2][-2]=Arrivee+(5mm,-10mm);
+      for k=0 upto LongueurLaby-1:
+      draw ((point(2.85) of unitsquare scaled 10mm)--0.5[(point(0.15) of unitsquare scaled 10mm),(point(2.85) of unitsquare scaled 10mm)]) shifted (N[LargeurLaby-1][k]+(0,-10mm));
+      draw ((point(2.15) of unitsquare scaled 10mm)--0.5[(point(0.85) of unitsquare scaled 10mm),(point(2.15) of unitsquare scaled 10mm)]) shifted (N[LargeurLaby-1][k]+(0,-10mm));
+      undraw (subpath(2.18,2.82) of unitsquare scaled 10mm) shifted (N[LargeurLaby-1][k]+(0,-10mm)) withpen pencircle scaled 1.25;
+      label(TEX("\footnotesize S"&decimal(k)),center (Square) shifted (N[LargeurLaby-1][k]+(0,-10mm)));
+      endfor;
+      elseif Sortie="Est":
+      N[-2][-2]=Arrivee+(20mm,5mm);
+      for k=0 upto LargeurLaby-1:
+      draw ((point(3.15) of unitsquare scaled 10mm)--0.5[(point(3.15) of unitsquare scaled 10mm),(point(1.85) of unitsquare scaled 10mm)]) shifted (N[k][LongueurLaby-1]+(10mm,0));
+      draw ((point(3.85) of unitsquare scaled 10mm)--0.5[(point(3.85) of unitsquare scaled 10mm),(point(1.15) of unitsquare scaled 10mm)]) shifted (N[k][LongueurLaby-1]+(10mm,0));
+      undraw (subpath(3.18,3.8) of unitsquare scaled 10mm) shifted (N[k][LongueurLaby-1]+(10mm,0)) withpen pencircle scaled 1.25;
+      label(TEX("\footnotesize S"&decimal(k)),center (Square) shifted (N[k][LongueurLaby-1]+(10mm,0)));
+      endfor;
+      fi;
+      fi;
+      );
+    Corps:=(Corps scaled \useKV[ClesLabyNb]{Echelle}) rotated \useKV[ClesLabyNb]{Angle};
+    trace Corps;
+  \end{mplibcode}%
+}%
+
+\newcommand\TraceLabyFactoSolution[6]{%
+  \mplibforcehmode%
+  \xdef\PfCNomLabyrinthe{\useKV[ClesLabyNb]{Nom}}%
+  \begin{mplibcode}[\PfCNomLabyrinthe]
+    color CouleurChemin;
+    CouleurChemin:=\useKV[ClesLabyNb]{CouleurChemin};
+    picture CorpsSolution;
+    CorpsSolution=image(
+    nbaffiche:=0;
+      for k=0 upto LargeurLaby-1:
+        for l=0 upto LongueurLaby-1:
+          nbaffiche:=nbaffiche+1;
+          label(TEX("\num{"&decimal(NbAffiche[nbaffiche])&"}"),M[k][l]);
+        endfor;
+      endfor;
+      if EntreeSortie=false:
+            remplis ((unitsquare scaled 10mm) shifted N[choixligneD][choixcolonneD]) withcolor \useKV[ClesLabyNb]{Couleur};
+      remplis ((unitsquare scaled 10mm) shifted Arrivee) withcolor \useKV[ClesLabyNb]{Couleur};
+      for k=2 upto indiceChemin-1:
+        remplis ((unitsquare scaled 10mm) shifted N[xpart(PileChemin[k])][ypart(PileChemin[k])]) withcolor \useKV[ClesLabyNb]{CouleurChemin};
+        label(TEX("\num{"&decimal(NbSol[k])&"}"),M[xpart(PileChemin[k])][ypart(PileChemin[k])]);
+        endfor;
+        else:
+      for k=1 upto indiceChemin:
+      remplis ((unitsquare scaled 10mm) shifted N[xpart(PileChemin[k])][ypart(PileChemin[k])]) withcolor white;
+      label(TEX("\num{"&decimal(NbSol[k])&"}"),M[xpart(PileChemin[k])][ypart(PileChemin[k])]);
+      endfor;
+      fi;
+      if EntreeSortie=false:
+      trace TraceLabyrinthe;
+      else:
+      for k=0 upto LargeurLaby-1:
+      for l=0 upto LongueurLaby-1:
+      trace Square shifted N[k][l];
+      endfor;
+      endfor;
+      trace u*(0,0)--u*(LongueurLaby,0)--u*(LongueurLaby,-LargeurLaby)--u*(0,-LargeurLaby)--cycle;
+      % On dessine l'entrée.
+      if Entree="Nord":
+      N[-1][-1]:=Depart+(0,10mm);
+      fill ((unitsquare scaled 10mm) shifted N[-1][-1]) withcolor white;
+      draw (subpath(1,4) of unitsquare scaled 10mm) shifted N[-1][-1];
+      undraw (subpath(0.18,0.82) of unitsquare scaled 10mm) shifted N[-1][-1] withpen pencircle scaled 1.25;
+      label(btex \footnotesize Départ etex,(center Square) shifted N[-1][-1]);
+      elseif Entree="Ouest":
+      N[-1][-1]:=Depart+(-10mm,0);
+      fill ((unitsquare scaled 10mm) shifted N[-1][-1]) withcolor white;
+      draw (subpath(2,5) of unitsquare scaled 10mm) shifted N[-1][-1];
+      undraw (subpath(1.15,1.85) of unitsquare scaled 10mm) shifted N[-1][-1] withpen pencircle scaled 1.25;
+      label(btex \footnotesize Départ etex,(center Square) shifted N[-1][-1]);
+      elseif Entree="Sud":
+      N[-1][-1]:=Depart+(0,-10mm);
+      fill ((unitsquare scaled 10mm) shifted N[-1][-1]) withcolor white;
+      draw (subpath(3,6) of unitsquare scaled 10mm) shifted N[-1][-1];
+      undraw (subpath(2.15,2.85) of unitsquare scaled 10mm) shifted N[-1][-1] withpen pencircle scaled 1.25;
+      label(btex \footnotesize Départ etex,(center Square) shifted N[-1][-1]);
+      elseif Entree="Est":
+      N[-1][-1]:=Depart+(10mm,0);
+      fill ((unitsquare scaled 10mm) shifted N[-1][-1]) withcolor white;
+      draw (subpath(0,3) of unitsquare scaled 10mm) shifted N[-1][-1];
+      undraw (subpath(3.18,3.82) of unitsquare scaled 10mm) shifted N[-1][-1] withpen pencircle scaled 1.25;
+      label(btex \footnotesize Départ etex,(center Square) shifted N[-1][-1]);
+      fi;
+      % On dessine les sorties
+      if Sortie="Nord":
+      N[-2][-2]=Arrivee+(5mm,20mm);
+      for k=0 upto LongueurLaby-1:
+      draw ((point(0.15) of unitsquare scaled 10mm)--0.5[(point(0.15) of unitsquare scaled 10mm),(point(2.85) of unitsquare scaled 10mm)]) shifted (N[0][k]+(0,10mm));
+      draw ((point(0.85) of unitsquare scaled 10mm)--0.5[(point(0.85) of unitsquare scaled 10mm),(point(2.15) of unitsquare scaled 10mm)]) shifted (N[0][k]+(0,10mm));
+      undraw (subpath(0.18,0.82) of unitsquare scaled 10mm) shifted (N[0][k]+(0,10mm)) withpen pencircle scaled 1.25;
+      label(TEX("\footnotesize S"&decimal(k)),center (Square) shifted (N[0][k]+(0,10mm)));
+      endfor;
+      elseif Sortie="Ouest":
+      N[-2][-2]=Arrivee+(-10mm,5mm);
+      for k=0 upto LargeurLaby-1:
+      draw ((point(1.15) of unitsquare scaled 10mm)--0.5[(point(1.15) of unitsquare scaled 10mm),(point(3.85) of unitsquare scaled 10mm)]) shifted (N[k][0]+(-10mm,0));
+      draw ((point(1.85) of unitsquare scaled 10mm)--0.5[(point(1.85) of unitsquare scaled 10mm),(point(3.15) of unitsquare scaled 10mm)]) shifted (N[k][0]+(-10mm,0));
+      undraw (subpath(1.18,1.82) of unitsquare scaled 10mm) shifted (N[k][0]+(-10mm,0)) withpen pencircle scaled 1.25;
+      label(TEX("\footnotesize S"&decimal(k)),center (Square) shifted (N[k][0]+(-10mm,0)));
+      endfor;
+      elseif Sortie="Sud":
+      N[-2][-2]=Arrivee+(5mm,-10mm);
+      for k=0 upto LongueurLaby-1:
+      % draw (Square) shifted (N[LargeurLaby-1][k]+(0,-10mm)) withcolor red;
+      draw ((point(2.85) of unitsquare scaled 10mm)--0.5[(point(0.15) of unitsquare scaled 10mm),(point(2.85) of unitsquare scaled 10mm)]) shifted (N[LargeurLaby-1][k]+(0,-10mm));
+      draw ((point(2.15) of unitsquare scaled 10mm)--0.5[(point(0.85) of unitsquare scaled 10mm),(point(2.15) of unitsquare scaled 10mm)]) shifted (N[LargeurLaby-1][k]+(0,-10mm));
+      undraw (subpath(2.18,2.82) of unitsquare scaled 10mm) shifted (N[LargeurLaby-1][k]+(0,-10mm)) withpen pencircle scaled 1.25;
+      label(TEX("\footnotesize S"&decimal(k)),center (Square) shifted (N[LargeurLaby-1][k]+(0,-10mm)));
+      endfor;
+      elseif Sortie="Est":
+      N[-2][-2]=Arrivee+(20mm,5mm);
+      for k=0 upto LargeurLaby-1:
+      draw ((point(3.15) of unitsquare scaled 10mm)--0.5[(point(3.15) of unitsquare scaled 10mm),(point(1.85) of unitsquare scaled 10mm)]) shifted (N[k][LongueurLaby-1]+(10mm,0));
+      draw ((point(3.85) of unitsquare scaled 10mm)--0.5[(point(3.85) of unitsquare scaled 10mm),(point(1.15) of unitsquare scaled 10mm)]) shifted (N[k][LongueurLaby-1]+(10mm,0));
+      undraw (subpath(3.18,3.8) of unitsquare scaled 10mm) shifted (N[k][LongueurLaby-1]+(10mm,0)) withpen pencircle scaled 1.25;
+      label(TEX("\footnotesize S"&decimal(k)),center (Square) shifted (N[k][LongueurLaby-1]+(10mm,0)));
+      endfor;
+      fi;
+      path CheminSolution;
+      CheminSolution=(N[-1][-1] shifted (5mm,5mm))--((center unitsquare scaled 10mm) shifted N[choixligneD][choixcolonneD])
+      for k=2 upto indiceChemin-1:
+      -- ((center unitsquare scaled 10mm) shifted N[xpart(PileChemin[k])][ypart(PileChemin[k])])
+      endfor
+      --((center unitsquare scaled 10mm) shifted Arrivee)--N[-2][-2];
+      trace CheminSolution dashed evenly withcolor CouleurChemin;
+      fi;
+      );
+      CorpsSolution:=(CorpsSolution scaled \useKV[ClesLabyNb]{Echelle}) rotated \useKV[ClesLabyNb]{Angle};
+      trace CorpsSolution;
+  \end{mplibcode}%
+}%
+
+\newcommand\TraceLabyNombreDouble[6]{%
+  \mplibforcehmode%
+  \xdef\PfCNomLabyrinthe{\useKV[ClesLabyNb]{Nom}}%
+  \begin{mplibcode}[\PfCNomLabyrinthe]
+    input PfCLabyNombre;
+
+    boolean Murs;
+    Murs=\useKV[ClesLabyNb]{Murs};
+    
+    numeric Multiple;
+    Multiple=#1;
+    % Initialisation du labyrinthe
+    InitialisationLabyrinthe(#2,#3);
+    % On initialise les paramètres du parcours
+    numeric choixligneD,choixligneA,choixcolonneD,choixcolonneA;
+    choixligneD=xpart(#4);
+    choixcolonneD=ypart(#4);
+    choixligneA=xpart(#5);
+    choixcolonneA=ypart(#5);%
+    pair Depart;
+    Depart=N[choixligneD][choixcolonneD];
+    pair Arrivee;
+    Arrivee=N[choixligneA][choixcolonneA];
+    pair Mobile;
+    Mobile=Depart;
+    RAZPileChemin;
+    % Exploration du labyrinthe
+    PushChemin((choixligneD,choixcolonneD));
+    CaseExploree[choixligneD][choixcolonneD]:=true;
+    VoisinDispo(choixligneD,choixcolonneD);
+    forever: exitif Mobile=Arrivee;%nb=0;
+    nb:=ceiling(uniformdeviate(nbvoisin));
+    if nb>0:
+      for k=1 upto nbvoisin:
+        CaseExploree[xpart(PileVoisin[k])][ypart(PileVoisin[k])]:=true;
+      endfor;
+      PushChemin((xpart(PileVoisin[nb]),ypart(PileVoisin[nb])));
+      Mobile:=N[xpart(PileChemin[indiceChemin])][ypart(PileChemin[indiceChemin])];
+      VoisinDispo(xpart(PileChemin[indiceChemin]),ypart(PileChemin[indiceChemin]));
+    else:
+      PopChemin;
+    fi;
+    endfor;
+    % Affichagefinal
+    % on sauvegarde les nombres aléatoires
+    numeric NbAffiche[];
+    numeric NbSol[];
+    % on écrit des nombres au hasard, mais sans être multiple du nombre choisi
+    numeric nbaffiche;
+    nbaffiche=0;
+    NbAffiche[0]=5+ceiling(uniformdeviate(7));
+    for k=0 upto LargeurLaby-1:
+      for l=0 upto LongueurLaby-1:
+      nbaffiche:=nbaffiche+1;
+      mathalea:=uniformdeviate(1);
+      if mathalea<0.95:
+      NbAffiche[nbaffiche]=NbAffiche[nbaffiche-1]+Multiple+1;
+      else:
+      NbAffiche[nbaffiche]=NbAffiche[nbaffiche-1]*(Multiple-1);
+      fi;
+      endfor;
+    endfor;
+    % On crée des multiples du nombre choisi
+    NbSol[1]=5+ceiling(uniformdeviate(7));
+    for k=2 upto indiceChemin-1:
+    mathalea:=uniformdeviate(1);
+    if mathalea<0.9:
+    NbSol[k]=NbSol[k-1]+Multiple;
+    else:
+    NbSol[k]=NbSol[k-1]*Multiple;
+    fi;
+    endfor;
+    % On affiche
+    picture Corps;
+    Corps=image(
+      nbaffiche:=0;
+      for k=0 upto LargeurLaby-1:
+        for l=0 upto LongueurLaby-1:
+	  nbaffiche:=nbaffiche+1;
+          label(TEX("\num{"&decimal(NbAffiche[nbaffiche])&"}"),M[k][l]);
+        endfor;
+      endfor;
+      remplis ((unitsquare scaled 10mm) shifted N[choixligneD][choixcolonneD]) withcolor \useKV[ClesLabyNb]{Couleur};
+      remplis ((unitsquare scaled 10mm) shifted Arrivee) withcolor \useKV[ClesLabyNb]{Couleur};
+      for k=2 upto indiceChemin-1:
+        remplis ((unitsquare scaled 10mm) shifted N[xpart(PileChemin[k])][ypart(PileChemin[k])]) withcolor white;
+        label(TEX("\num{"&decimal(NbSol[k])&"}"),M[xpart(PileChemin[k])][ypart(PileChemin[k])]);
+      endfor;
+      trace TraceLabyrinthe;
+    );
+    Corps:=(Corps scaled \useKV[ClesLabyNb]{Echelle}) rotated \useKV[ClesLabyNb]{Angle};
+    trace Corps;
+  \end{mplibcode}%
+}%
+
+\newcommand\TraceDoubleSolution[6]{%
+  \mplibforcehmode%
+  \xdef\PfCNomLabyrinthe{\useKV[ClesLabyNb]{Nom}}%
+  \begin{mplibcode}[\PfCNomLabyrinthe]
+    picture CorpsSolution;
+    CorpsSolution=image(
+      nbaffiche:=0;
+      for k=0 upto #3-1:
+        for l=0 upto #2-1:
+          nbaffiche:=nbaffiche+1;
+          label(TEX("\num{"&decimal(NbAffiche[nbaffiche])&"}"),M[k][l]);
+        endfor;
+        endfor;
+      remplis ((unitsquare scaled 10mm) shifted N[choixligneD][choixcolonneD]) withcolor \useKV[ClesLabyNb]{Couleur};
+      remplis ((unitsquare scaled 10mm) shifted Arrivee) withcolor \useKV[ClesLabyNb]{Couleur};
+      if \useKV[ClesLabyNb]{Chemin}:
+      for k=2 upto indiceChemin-1:
+      remplis ((unitsquare scaled 10mm) shifted N[xpart(PileChemin[k])][ypart(PileChemin[k])]) withcolor white;
+      endfor;
+      trace ((center unitsquare scaled 10mm) shifted N[choixligneD][choixcolonneD])
+      for k=2 upto indiceChemin-1:
+      -- ((center unitsquare scaled 10mm) shifted N[xpart(PileChemin[k])][ypart(PileChemin[k])])
+      endfor
+      --((center unitsquare scaled 10mm) shifted Arrivee) dashed evenly withcolor Brown;
+      for k=2 upto indiceChemin-1:
+      label(TEX("\num{"&decimal(NbSol[k])&"}"),M[xpart(PileChemin[k])][ypart(PileChemin[k])]);
+      endfor;
+      else:
+      for k=2 upto indiceChemin-1:
+      remplis ((unitsquare scaled 10mm) shifted N[xpart(PileChemin[k])][ypart(PileChemin[k])]) withcolor \useKV[ClesLabyNb]{CouleurChemin};
+      label(TEX("\num{"&decimal(NbSol[k])&"}"),M[xpart(PileChemin[k])][ypart(PileChemin[k])]);
+      endfor;
+      fi;
+      trace TraceLabyrinthe;
+      );
+      CorpsSolution:=(CorpsSolution scaled \useKV[ClesLabyNb]{Echelle}) rotated \useKV[ClesLabyNb]{Angle};
+      trace CorpsSolution;
+  \end{mplibcode}%
+}%

@@ -1,0 +1,881 @@
+%%%
+% Op\'erations pos\'es à trou
+%%%
+\def\filedateOpTrou{2024/08/04}%
+\def\fileversionOpTrou{0.1}%
+\message{-- \filedateOpTrou\space v\fileversionOpTrou}%
+%
+%% D'après https://tex.stackexchange.com/questions/277246/drawing-a-circle-around-the-numbers-in-xlop-package
+
+\newcommand\PfCministrut{\rule{0pt}{1.6ex}}% Top strut
+
+\newcommand\PfCchiffre[2]{\tikz[remember picture] \node[inner sep=0pt](#1){#2};}
+
+\newcommand\PfCentoure[2]{%
+\ifboolKV[ClesOperations]{Gabarit}{%
+\tikz[remember picture,overlay] \node[preaction={draw={\useKV[ClesOperations]{CouleurCadre}},ultra thick,opacity=1,fill=white,
+transform canvas={xshift=0em,yshift=0em}},rectangle,rounded corners,ultra thick,inner sep=.55em,fit=(#1.center)(#2.center)]{};
+}{\tikz[remember picture,overlay] \node[preaction={draw={\useKV[ClesOperations]{CouleurCadre}},ultra thick,opacity=1,
+transform canvas={xshift=0em,yshift=0em}},rectangle,rounded corners,ultra thick,inner sep=.55em,fit=(#1.center)(#2.center)]{};
+}
+}
+
+\newcommand\PfCentouredys[2]{\tikz[remember picture,overlay] \node[preaction={draw={\useKV[ClesOperations]{CouleurCadre}},opacity=1,
+transform canvas={xshift=0em,yshift=0em}},rectangle,rounded corners,inner sep=4pt,fit=(#1.center)(#2.center)]{};}%ultra thick,
+
+\newcommand\PfCchiffreclip[2]{%
+  \ifboolKV[ClesOperations]{Solution}{%
+    \xintFor* ##1 in{\xintSeq{1}{\PfCListeTroulen}}\do{%
+      \xintifboolexpr{\thedivxlop==\PfCListeTrou[##1]}{%
+        \color{PfCSolOp}}{}%
+    }%
+  }{}%
+  \tikz[remember picture] \node[inner sep=0pt](#1){#2};%
+}%
+
+\newcommand\PfCentoureclip[2]{\tikz[remember picture,overlay] \node[preaction={draw={\useKV[ClesOperations]{CouleurCadre}},ultra thick,opacity=1,
+transform canvas={xshift=0em,yshift=0em}},rectangle,fill=PfCSolOp,rounded corners,ultra thick,inner sep=.55em,fit=(#1.center)(#2.center)]{};}
+
+\newcounter{divxlop}%
+%\newcounter{mulxlop}%
+%\newcounter{addxlop}%
+%\newcounter{subxlop}%
+
+\setKVdefault[ClesOperations]{Solution=false,CouleurCadre=LightSteelBlue,CouleurSolution=red,CouleurFond=white,CouleurVirgule=white,CouleurVirguleSol=red,Listes=false,Gabarit=false,CouleursColorees={blue,green,red},Retenue,Liste={}}%
+\defKV[ClesOperations]{Liste=\ifempty{#1}{}{\setKV[ClesOperations]{Listes}\xdef\PfCFooListeTrou{#1}}}%
+
+\newcommand\Division[3][]{%
+  \useKVdefault[ClesOperations]%
+  \setKV[ClesOperations]{#1}%
+  \setcounter{divxlop}{0}%
+  \ifboolKV[ClesOperations]{Solution}{\colorlet{PfCSolOp}{\useKV[ClesOperations]{CouleurSolution}}}{\colorlet{PfCSolOp}{\useKV[ClesOperations]{CouleurFond}}}%
+  \ifboolKV[ClesOperations]{Listes}{%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\PfCListeTrou{\PfCFooListeTrou}%
+    \reademptyitems%
+    %,displayintermediary=all
+    \opidiv[lineheight=1.75em,columnwidth=1.5em,voperator=bottom,operandstyle=\stepcounter{divxlop}\PfCchiffreclip{A\thedivxlop},intermediarystyle=\stepcounter{divxlop}\PfCchiffreclip{A\thedivxlop},remainderstyle=\stepcounter{divxlop}\PfCchiffreclip{A\thedivxlop},resultstyle=\stepcounter{divxlop}\PfCchiffreclip{A\thedivxlop}]{#2}{#3}%
+    \ifboolKV[ClesOperations]{Solution}{}{%
+      \foreachitem\compteur\in\PfCListeTrou{%
+        \xdef\PfCRetiensTrou{\PfCListeTrou[\compteurcnt]}%
+        \PfCentoureclip{A\PfCRetiensTrou}{A\PfCRetiensTrou}%
+      }%
+    }%
+  }{%
+      \opidiv[lineheight=1.5em,columnwidth=1.25em,displayintermediary=all,voperator=bottom,intermediarystyle=\stepcounter{divxlop}\color{PfCSolOp}\PfCchiffre{A\thedivxlop},remainderstyle=\stepcounter{divxlop}\color{PfCSolOp}\PfCchiffre{A\thedivxlop},resultstyle=\stepcounter{divxlop}\color{PfCSolOp}\PfCchiffre{A\thedivxlop}]{#2}{#3}%
+    \foreach \i in {1,...,\thedivxlop}{%
+      \PfCentoure{A\i}{A\i}%
+    }%
+  }%
+}%
+
+\newcommand\DivisionD[3][]{%
+  \useKVdefault[ClesOperations]%
+  \setKV[ClesOperations]{#1}%
+  \setcounter{divxlop}{0}%
+  \ifboolKV[ClesOperations]{Solution}{\colorlet{PfCSolOp}{\useKV[ClesOperations]{CouleurSolution}}\colorlet{PfCCouleurVirgule}{\useKV[ClesOperations]{CouleurVirguleSol}}}{\colorlet{PfCSolOp}{\useKV[ClesOperations]{CouleurFond}}\colorlet{PfCCouleurVirgule}{\useKV[ClesOperations]{CouleurVirgule}}}%
+  \opdiv[decimalsepsymbol={,},lineheight=1.5em,columnwidth=1.5em,displayintermediary=all,voperator=bottom,intermediarystyle=\stepcounter{divxlop}\color{PfCSolOp}\PfCchiffre{A\thedivxlop},remainderstyle=\stepcounter{divxlop}\color{PfCSolOp}\PfCchiffre{A\thedivxlop},resultstyle=\stepcounter{divxlop}\color{PfCSolOp}\PfCchiffre{A\thedivxlop},resultstyle.d=\color{PfCCouleurVirgule}]{#2}{#3}%
+  \foreach \i in {1,...,\thedivxlop}{%
+    \PfCentoure{A\i}{A\i}%
+  }%
+}%
+
+\newcommand\Multiplication[3][]{%
+  \useKVdefault[ClesOperations]%
+  \setKV[ClesOperations]{#1}%
+  \setcounter{divxlop}{0}%
+  \ifboolKV[ClesOperations]{Solution}{\colorlet{PfCSolOp}{\useKV[ClesOperations]{CouleurSolution}}\colorlet{PfCCouleurVirgule}{\useKV[ClesOperations]{CouleurVirguleSol}}}{\colorlet{PfCSolOp}{\useKV[ClesOperations]{CouleurFond}}\colorlet{PfCCouleurVirgule}{\useKV[ClesOperations]{CouleurVirgule}}}%
+  \ifboolKV[ClesOperations]{Listes}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\PfCListeTrou{\PfCFooListeTrou}%
+  \reademptyitems%
+  \begingroup
+  \setlength{\baselineskip}{1.75em}
+  \StrLen{#3}[\PfCLongueurFacteurDeux]
+  \ifnum\PfCLongueurFacteurDeux=1\relax
+  \opset{lineheight=\baselineskip} % nécessaire
+  \else
+  \opset{lineheight=\baselineskip,displayintermediary=all,displayshiftintermediary=all} % nécessaire
+  \fi
+  \opmul[decimalsepsymbol={,},lineheight=1.75em,columnwidth=1.5em,voperator=bottom,operandstyle=\stepcounter{divxlop}\PfCchiffreclip{A\thedivxlop},intermediarystyle=\stepcounter{divxlop}\PfCchiffreclip{A\thedivxlop},resultstyle=\stepcounter{divxlop}\PfCchiffreclip{A\thedivxlop},resultstyle.d=\color{PfCCouleurVirgule}]{#2}{#3}%
+  \endgroup%
+  \ifboolKV[ClesOperations]{Solution}{}{%
+    \foreachitem\compteur\in\PfCListeTrou{%
+      \xdef\PfCRetiensTrou{\PfCListeTrou[\compteurcnt]}%
+      \PfCentoureclip{A\PfCRetiensTrou}{A\PfCRetiensTrou}%
+    }%
+  }%
+  }{%
+  \begingroup
+  \setlength{\baselineskip}{2em}
+  \StrLen{#3}[\PfCLongueurFacteurDeux]
+  \ifnum\PfCLongueurFacteurDeux=1\relax
+  \opset{lineheight=\baselineskip} % nécessaire
+  \else
+  \opset{lineheight=\baselineskip,displayintermediary=all,displayshiftintermediary=all} % nécessaire
+  \fi
+  \opmul[decimalsepsymbol={,},lineheight=2em,columnwidth=1.5em,voperator=bottom,intermediarystyle=\stepcounter{divxlop}\color{PfCSolOp}\PfCchiffre{A\thedivxlop},resultstyle=\stepcounter{divxlop}\color{PfCSolOp}\PfCchiffre{A\thedivxlop},resultstyle.d=\color{PfCCouleurVirgule}]{#2}{#3}%
+  \foreach \i in {1,...,\thedivxlop}{%
+     \PfCentoure{A\i}{A\i}%
+  }%
+  \endgroup
+  }
+}%
+
+\newcommand\Addition[3][]{%
+  \useKVdefault[ClesOperations]%
+  \setKV[ClesOperations]{#1}%
+  \setcounter{divxlop}{0}%
+  \ifboolKV[ClesOperations]{Solution}{\opset{carryadd,carrystyle=\color{PfCSolOp}\scriptsize}\colorlet{PfCSolOp}{\useKV[ClesOperations]{CouleurSolution}}\colorlet{PfCCouleurVirgule}{\useKV[ClesOperations]{CouleurVirguleSol}}}{\opset{carryadd=false}\colorlet{PfCSolOp}{\useKV[ClesOperations]{CouleurFond}}\colorlet{PfCCouleurVirgule}{\useKV[ClesOperations]{CouleurVirgule}}}%
+  \ifboolKV[ClesOperations]{Listes}{%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\PfCListeTrou{\PfCFooListeTrou}%
+    \reademptyitems%
+    \opadd[decimalsepsymbol={,},lineheight=1.75em,columnwidth=1.5em,voperator=bottom,operandstyle.1=\stepcounter{divxlop}\PfCchiffreclip{A\thedivxlop},operandstyle.2=\stepcounter{divxlop}\PfCchiffreclip{A\thedivxlop},resultstyle=\stepcounter{divxlop}\PfCchiffreclip{A\thedivxlop},resultstyle.d=\color{PfCCouleurVirgule}]{#2}{#3}%
+    \ifboolKV[ClesOperations]{Solution}{}{%
+      \foreachitem\compteur\in\PfCListeTrou{%
+        \xdef\PfCRetiensTrou{\PfCListeTrou[\compteurcnt]}%
+        \PfCentoureclip{A\PfCRetiensTrou}{A\PfCRetiensTrou}%
+      }%
+    }%
+  }{%
+    \opadd[decimalsepsymbol={,},lineheight=1.75em,columnwidth=1.5em,voperator=bottom,resultstyle=\stepcounter{divxlop}\color{PfCSolOp}\PfCchiffre{A\thedivxlop},resultstyle.d=\color{PfCCouleurVirgule}]{#2}{#3}
+    \foreach \i in {1,...,\thedivxlop}{%
+      \PfCentoure{A\i}{A\i}%
+    }%
+  }%
+}%
+
+\newcommand\Soustraction[3][]{%
+  \useKVdefault[ClesOperations]%
+  \setKV[ClesOperations]{#1}%
+  \setcounter{divxlop}{0}%
+  \ifboolKV[ClesOperations]{Solution}{\opset{carrysub,carrystyle=\color{PfCSolOp}\scriptsize}\colorlet{PfCSolOp}{\useKV[ClesOperations]{CouleurSolution}}\colorlet{PfCCouleurVirgule}{\useKV[ClesOperations]{CouleurVirguleSol}}}{\opset{carrysub=false}\colorlet{PfCSolOp}{\useKV[ClesOperations]{CouleurFond}}\colorlet{PfCCouleurVirgule}{\useKV[ClesOperations]{CouleurVirgule}}}%
+  \ifboolKV[ClesOperations]{Listes}{%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\PfCListeTrou{\PfCFooListeTrou}%
+    \reademptyitems%
+    \opsub[decimalsepsymbol={,},lineheight=1.75em,columnwidth=1.5em,voperator=bottom,operandstyle=\stepcounter{divxlop}\PfCchiffreclip{A\thedivxlop},resultstyle=\stepcounter{divxlop}\PfCchiffreclip{A\thedivxlop},resultstyle.d=\color{PfCCouleurVirgule}]{#2}{#3}%
+    \ifboolKV[ClesOperations]{Solution}{}{%
+      \foreachitem\compteur\in\PfCListeTrou{%
+        \xdef\PfCRetiensTrou{\PfCListeTrou[\compteurcnt]}%
+        \PfCentoureclip{A\PfCRetiensTrou}{A\PfCRetiensTrou}%
+      }%
+    }%
+  }{%
+    \opsub[decimalsepsymbol={,},lineheight=1.75em,columnwidth=1.5em,voperator=bottom,resultstyle=\stepcounter{divxlop}\color{PfCSolOp}\PfCchiffre{A\thedivxlop},resultstyle.d=\color{PfCCouleurVirgule}]{#2}{#3}%
+    \foreach \i in {1,...,\thedivxlop}{%
+      \PfCentoure{A\i}{A\i}
+    }%
+  }%
+}%
+
+\NewDocumentCommand\MultiAddition{om}{%
+  \useKVdefault[ClesOperations]%
+  \setKV[ClesOperations]{#1}%
+  \setcounter{divxlop}{0}%
+  \ifboolKV[ClesOperations]{Solution}{\opset{carryadd,carrystyle=\color{PfCSolOp}\scriptsize}\colorlet{PfCSolOp}{\useKV[ClesOperations]{CouleurSolution}}\colorlet{PfCCouleurVirgule}{\useKV[ClesOperations]{CouleurVirguleSol}}}{\opset{carryadd=false}\colorlet{PfCSolOp}{\useKV[ClesOperations]{CouleurFond}}\colorlet{PfCCouleurVirgule}{\useKV[ClesOperations]{CouleurVirgule}}}%
+  \opmanyadd[decimalsepsymbol={,},lineheight=1.75em,columnwidth=1.5em,vmanyoperator=bottom,resultstyle=\stepcounter{divxlop}\color{PfCSolOp}\PfCchiffre{A\thedivxlop},resultstyle.d=\color{PfCCouleurVirgule}]#2
+  \foreach \i in {1,...,\thedivxlop}{%
+    \PfCentoure{A\i}{A\i}%
+  }%
+}%
+
+%%%%%%%%%%%%%%%%%%%%% Colorees %%%%%%%%%%%%%%%%%%%
+% Merci JCC
+%%% Seule ligne à modifier selon la convenance %%%
+\newcommand\couleurs{blue,red,green,blue,red,green,blue,red,green,blue,red,green}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcounter{PfCcarry}
+\setcounter{PfCcarry}{0}
+
+\def\blaa{1}
+
+\makeatletter
+\NewDocumentCommand\EncadreRetenue{m}{%
+\stepcounter{PfCcarry}%
+ \setlength{\fboxsep}{1pt}%
+ \ifnum\thePfCcarry<\fpeval{\PfMLongRetenue}\relax%
+  \ifboolKV[ClesOperations]{Solution}{#1}{\begin{mplibcode}draw unitsquare scaled \mpdim{1em} dashed evenly withcolor Purple;\end{mplibcode}}%
+\fi
+}
+
+\NewDocumentCommand\EncadreRetenueSous{m}{%
+  \setlength{\fboxsep}{1pt}%
+  \xdef\blab{#1}%
+  \ifx\blab\blaa\relax\fbox{\ifboolKV[ClesOperations]{Solution}{}{\color{white}}\tiny#1}\fi
+}
+\makeatother
+\newcommand\PfCchiffrer[2]{\tikz[remember picture] \node[inner sep=0pt](#1){\tiny#2};}
+
+\newcount\numint%
+\newcount\indint%
+\newcount\ind%
+\def\nnil{\nil}%
+\def\ExtraitCouleurs{%
+   \ind=0%
+   \expandafter\ExtraitCouleursAux\couleurs,\nil,%
+}%
+\def\ExtraitCouleurscp#1{%
+   \ind=#1%
+   \expandafter\ExtraitCouleursAux\couleurs,\nil,%
+}%
+\def\ExtraitCouleursAux#1,{%
+  \def\arg{#1}%
+  \ifx\arg\nnil%
+     \edef\cmax{\the\ind}%
+   \else%
+     \def\couleur{#1}%
+     \stepcounter{coulxlop}%
+     \stepcounter{coulxlopa}%
+     \stepcounter{coulxlopd}%
+     \expandafter\edef\csname PfCOpCouleurs\Roman{coulxlop}\endcsname{\couleur}%
+     \expandafter\edef
+     \csname op@operandstyle.1.\the\numexpr\ind+1\endcsname{%
+       \noexpand\PfCchiffre{CA\Roman{PfCNumOp}\thecoulxlop}%
+     }%
+     \expandafter\edef
+     \csname op@operandstyle.2.\the\numexpr\ind+1\endcsname{%
+       \noexpand\PfCchiffre{CB\Roman{PfCNumOp}\thecoulxlopa}%
+     }%
+     \expandafter\edef
+     \csname op@resultstyle.\the\numexpr\ind+1\endcsname{%
+       \noexpand\PfCchiffre{CC\Roman{PfCNumOp}\thecoulxlopd}%
+     }%
+     \numint = \numexpr\ind+1
+     \indint = 1
+     \ConstruitIntermediaire
+     \advance\ind by 1
+     \expandafter\ExtraitCouleursAux
+   \fi
+}
+\def\ConstruitIntermediaire{%
+  \ifnum\numint>0
+    \stepcounter{coulxlopi}%
+    \expandafter\edef\csname PfCOpCouleursi\Roman{coulxlopi}\endcsname{\couleur}%
+     \expandafter\edef
+     \csname op@intermediarystyle.\the\numint.\the\indint\endcsname{%
+       \noexpand\PfCchiffre{CD\Roman{PfCNumOp}\thecoulxlopi}%
+     }%
+     \advance\indint by 1
+     \advance\numint by -1
+     \expandafter\ConstruitIntermediaire
+   \fi
+ }
+ \def\ConstruitRemainder{%
+  \ifnum\numint>0
+    \stepcounter{coulxlopidiv}%
+    \expandafter\edef\csname PfCOpCouleursid\Roman{coulxlopidiv}\endcsname{\couleur}%
+     \expandafter\edef
+     \csname op@remainderystyle.\the\numint.\the\indint\endcsname{%
+       \noexpand\PfCchiffre{CE\Roman{PfCNumOp}\thecoulxlopidiv}%
+     }%
+     \advance\indint by 1
+     \advance\numint by -1
+     \expandafter\ConstruitRemainder
+   \fi
+ }
+
+\newcounter{coulxlop}%
+\newcounter{coulxlopi}%
+\newcounter{coulxlopa}%
+\newcounter{coulxlopd}%
+\newcounter{coulxlopidiv}%
+\newcounter{coulxlopcoul}%
+\newcounter{PfCNumOp}%
+\setcounter{PfCNumOp}{0}%
+
+\NewDocumentCommand\PfCentoureColor{mm}{%
+  \expandafter\edef\csname RetiensCouleur\endcsname{\csname PfCOpCouleurs\Roman{coulxlopcoul}\endcsname}\colorlet{CouleurCadre}{\RetiensCouleur}%
+  \ifboolKV[ClesOperations]{Gabarit}{%
+    \tikz[remember picture,overlay] \node[preaction={draw={CouleurCadre},fill=white,ultra thick,opacity=1,transform canvas={xshift=0em,yshift=0em}},rectangle,rounded corners,ultra thick,inner sep=.55em,fit=(#1.center)(#2.center)]{};%
+  }{%
+    \tikz[remember picture,overlay] \node[preaction={draw={CouleurCadre},ultra thick,opacity=1,transform canvas={xshift=0em,yshift=0em}},rectangle,rounded corners,ultra thick,inner sep=.55em,fit=(#1.center)(#2.center)]{};%
+  }%
+}%
+
+\NewDocumentCommand\PfCentoureColorR{mm}{%
+  \expandafter\edef\csname RetiensCouleur\endcsname{\csname PfCOpCouleurs\Roman{coulxlopcoul}\endcsname}\colorlet{CouleurCadre}{\RetiensCouleur}%
+  \ifboolKV[ClesOperations]{Gabarit}{
+\tikz[remember picture,overlay] \node[preaction={draw={CouleurCadre},fill=white,ultra thick,opacity=1, transform canvas={xshift=0em,yshift=0em}},fill=PfCSolOp,rectangle,rounded corners,ultra thick,inner sep=.55em,fit=(#1.center)(#2.center)]{};
+}{
+  \tikz[remember picture,overlay] \node[preaction={draw={CouleurCadre},ultra thick,opacity=1, transform canvas={xshift=0em,yshift=0em}},fill=PfCSolOp,rectangle,rounded corners,ultra thick,inner sep=.55em,fit=(#1.center)(#2.center)]{};
+}
+}
+\NewDocumentCommand\PfCentoureColorI{mm}{%
+  \expandafter\edef\csname RetiensCouleur\endcsname{\csname PfCOpCouleursi\Roman{coulxlopcoul}\endcsname}\colorlet{CouleurCadre}{\RetiensCouleur}%
+  \tikz[remember picture,overlay] \node[preaction={draw={CouleurCadre},ultra thick,opacity=1,
+    transform canvas={xshift=0em,yshift=0em}},rectangle,rounded corners,ultra thick,inner sep=.55em,fit=(#1.center)(#2.center)]{};}
+
+\NewDocumentCommand\PfCentoureColorIR{mm}{%
+  \expandafter\edef\csname RetiensCouleur\endcsname{\csname PfCOpCouleursi\Roman{coulxlopcoul}\endcsname}\colorlet{CouleurCadre}{\RetiensCouleur}%
+    \tikz[remember picture,overlay] \node[preaction={draw={CouleurCadre},ultra thick,opacity=1,
+    transform canvas={xshift=0em,yshift=0em}},rectangle,fill=PfCSolOp,rounded corners,ultra thick,inner sep=.55em,fit=(#1.center)(#2.center)]{};
+}%
+
+\NewDocumentCommand\PfCentoureColorIdiv{mm}{%
+  \expandafter\edef\csname RetiensCouleur\endcsname{\csname PfCOpCouleursid\Roman{coulxlopcoul}\endcsname}\colorlet{CouleurCadre}{\RetiensCouleur}%
+  \tikz[remember picture,overlay] \node[preaction={draw={CouleurCadre},ultra thick,opacity=1,
+transform canvas={xshift=0em,yshift=0em}},rectangle,rounded corners,ultra thick,inner sep=.55em,fit=(#1.center)(#2.center)]{};}
+
+\makeatletter
+\long\def\ifnodedefined#1#2#3{%
+    \@ifundefined{pgf@sh@ns@#1}{#3}{#2}%
+}
+\makeatother
+
+\NewDocumentCommand\MultiplicationColore{omm}{%
+  \useKVdefault[ClesOperations]%
+  \setKV[ClesOperations]{#1}%
+  \setsepchar{,}\ignoreemptyitems%
+  \xdef\PfMRetiensColorees{\useKV[ClesOperations]{CouleursColorees}}%
+  \readlist*\ListeTestTC{\PfMRetiensColorees}%
+  \reademptyitems%
+  \itemtomacro\ListeTestTC[1]\PfMCouleurA%
+  \itemtomacro\ListeTestTC[2]\PfMCouleurB%
+  \itemtomacro\ListeTestTC[3]\PfMCouleurC%
+  \def\couleurs{\PfMCouleurA,\PfMCouleurB,\PfMCouleurC,\PfMCouleurA,\PfMCouleurB,\PfMCouleurC,\PfMCouleurA,\PfMCouleurB,\PfMCouleurC,\PfMCouleurA,\PfMCouleurB,\PfMCouleurC,\PfMCouleurA,\PfMCouleurB,\PfMCouleurC,\PfMCouleurA,\PfMCouleurB,\PfMCouleurC}%
+  \ifboolKV[ClesOperations]{Solution}{\colorlet{PfCSolOp}{\useKV[ClesOperations]{CouleurSolution}}}{\colorlet{PfCSolOp}{\useKV[ClesOperations]{CouleurFond}}}%
+  \setcounter{coulxlop}{0}%
+  \setcounter{coulxlopa}{0}%
+  \setcounter{coulxlopd}{0}%
+  \setcounter{coulxlopi}{0}%
+  \setcounter{coulxlopcoul}{0}%
+  \stepcounter{PfCNumOp}%
+  \StrCut{#2}{.}\PfMRien\PfMNbDeciA%
+  \StrCut{#3}{.}\PfMRien\PfMNbDeciB%
+  \StrLen{\PfMNbDeciA}[\PfMLongDeciA]%
+  \StrLen{\PfMNbDeciB}[\PfMLongDeciB]%
+  \ifnum\fpeval{max(\PfMLongDeciA,\PfMLongDeciB)}=0\relax%
+  \xdef\PfMAjoutDeci{0}%
+  \ExtraitCouleurs%
+  \else%
+    \xdef\PfMAjoutDeci{1}%
+  \ExtraitCouleurscp{\fpeval{-(\PfMLongDeciA+\PfMLongDeciB)-1}}%
+  \fi%
+  \begingroup%
+  \setlength{\baselineskip}{1.75em}%
+  \StrLen{#3}[\PfCLongueurFacteurDeux]%
+  \ifnum\PfCLongueurFacteurDeux=1\relax%
+  \opset{lineheight=\baselineskip}% nécessaire
+  \else%
+    \opset{lineheight=\baselineskip,displayintermediary=all,displayshiftintermediary=all} % nécessaire
+  \fi%
+  \opmul[decimalsepsymbol={,},lineheight=1.75em,columnwidth=1.5em,voperator=bottom]{#2}{#3}%
+  \endgroup%
+  \setcounter{coulxlopcoul}{0}%
+  \foreach \i in {1,...,\thecoulxlop}{%
+    \ifnum\i>\fpeval{\PfMLongDeciA+\PfMLongDeciB+\PfMAjoutDeci}\relax%
+    \stepcounter{coulxlopcoul}%
+  \else%
+    \setcounter{coulxlopcoul}{0}%
+  \fi%
+     \ifnodedefined{CA\Roman{PfCNumOp}\i}{%
+       \ifnum\thecoulxlopcoul=0\relax%
+         \PfCentoure{CA\Roman{PfCNumOp}\i}{CA\Roman{PfCNumOp}\i}%
+       \else%
+         \PfCentoureColor{CA\Roman{PfCNumOp}\i}{CA\Roman{PfCNumOp}\i}%
+       \fi%
+    }{}%
+  }%
+  \setcounter{coulxlopcoul}{0}%
+  \foreach \i in {1,...,\thecoulxlopa}{%
+    \ifnum\i>\fpeval{\PfMLongDeciA+\PfMLongDeciB+\PfMAjoutDeci}\relax%
+    \stepcounter{coulxlopcoul}%
+  \else%
+    \setcounter{coulxlopcoul}{0}%
+  \fi%
+     \ifnodedefined{CB\Roman{PfCNumOp}\i}{%
+       \ifnum\thecoulxlopcoul=0\relax%
+         \PfCentoure{CB\Roman{PfCNumOp}\i}{CB\Roman{PfCNumOp}\i}%
+       \else%
+         \PfCentoureColor{CB\Roman{PfCNumOp}\i}{CB\Roman{PfCNumOp}\i}%
+       \fi%
+    }{}%
+  }%
+  \setcounter{coulxlopcoul}{0}%
+  \foreach \i in {1,...,\thecoulxlopi}{%
+    \setKV[ClesOperations]{CouleurCadre=DimGray}%
+    \stepcounter{coulxlopcoul}%
+    \ifnodedefined{CD\Roman{PfCNumOp}\i}{%
+        \ifboolKV[ClesOperations]{Solution}{\PfCentoure{CD\Roman{PfCNumOp}\i}{CD\Roman{PfCNumOp}\i}}{\PfCentoure{CD\Roman{PfCNumOp}\i}{CD\Roman{PfCNumOp}\i}}%
+    }{}%
+  }%
+  \setcounter{coulxlopcoul}{0}%
+  \foreach \i in {1,...,\thecoulxlopd}{%
+    \ifnum\i>\fpeval{\PfMLongDeciA+\PfMLongDeciB+\PfMAjoutDeci}\relax%
+    \stepcounter{coulxlopcoul}%
+  \else%
+    \setcounter{coulxlopcoul}{0}%
+  \fi%
+     \ifnodedefined{CC\Roman{PfCNumOp}\i}{%
+       \ifnum\thecoulxlopcoul=0\relax%
+                \ifnum\i<\fpeval{\PfMLongDeciA+\PfMLongDeciB+\PfMAjoutDeci}\relax%
+         \PfCentoure{CC\Roman{PfCNumOp}\i}{CC\Roman{PfCNumOp}\i}%
+         \fi%
+       \else%
+         \PfCentoureColor{CC\Roman{PfCNumOp}\i}{CC\Roman{PfCNumOp}\i}%
+       \fi%
+    }{}%
+  }%
+}%
+
+\NewDocumentCommand\AdditionColore{omm}{%
+  \setcounter{PfCcarry}{0}
+  \useKVdefault[ClesOperations]%
+  \setKV[ClesOperations]{#1}%
+  \setsepchar{,}\ignoreemptyitems
+  \xdef\PfMRetiensColorees{\useKV[ClesOperations]{CouleursColorees}}
+  \readlist*\ListeTestTC{\PfMRetiensColorees}%
+  \reademptyitems%
+  \itemtomacro\ListeTestTC[1]\PfMCouleurA%
+  \itemtomacro\ListeTestTC[2]\PfMCouleurB%
+  \itemtomacro\ListeTestTC[3]\PfMCouleurC%
+  \def\couleurs{\PfMCouleurA,\PfMCouleurB,\PfMCouleurC,\PfMCouleurA,\PfMCouleurB,\PfMCouleurC,\PfMCouleurA,\PfMCouleurB,\PfMCouleurC,\PfMCouleurA,\PfMCouleurB,\PfMCouleurC,\PfMCouleurA,\PfMCouleurB,\PfMCouleurC,\PfMCouleurA,\PfMCouleurB,\PfMCouleurC}%
+  \ifboolKV[ClesOperations]{Solution}{\colorlet{PfCSolOp}{\useKV[ClesOperations]{CouleurSolution}}}{\colorlet{PfCSolOp}{\useKV[ClesOperations]{CouleurFond}}}%
+  \setcounter{PfCcarry}{0}%
+  \setcounter{coulxlop}{0}%
+  \setcounter{coulxlopa}{0}%
+  \setcounter{coulxlopd}{0}%
+  \setcounter{coulxlopi}{0}%
+  \setcounter{coulxlopcoul}{0}%
+  \stepcounter{PfCNumOp}%
+  \StrLen{#2}[\PfMLongTermeA]
+  \StrLen{#3}[\PfMLongTermeB]
+  \StrCut{#2}{.}\PfMRien\PfMNbDeciA%
+  \StrCut{#3}{.}\PfMRien\PfMNbDeciB%
+  \StrLen{\PfMNbDeciA}[\PfMLongDeciA]%
+  \StrLen{\PfMNbDeciB}[\PfMLongDeciB]%
+  \ifnum\fpeval{max(\PfMLongDeciA,\PfMLongDeciB)}=0\relax
+  \xdef\PfMLongRetenue{\fpeval{max(\PfMLongTermeA,\PfMLongTermeB)}}%
+  \ExtraitCouleurs
+  \else
+  \ExtraitCouleurscp{\fpeval{-max(\PfMLongDeciA,\PfMLongDeciB)-1}}%
+  \xdef\PfMLongRetenue{\fpeval{max(\PfMLongTermeA,\PfMLongTermeB)-1}}%
+  \fi
+  \ifboolKV[ClesOperations]{Solution}{%
+    \opadd[decimalsepsymbol={,},lineheight=1.75em,columnwidth=1.5em,voperator=bottom]{#2}{#3}%
+  }{%
+  \ifboolKV[ClesOperations]{Retenue}{\opset{carrystyle=\EncadreRetenue}}{\opset{carryadd=false}}%
+  \opadd[decimalsepsymbol={,},lineheight=1.75em,columnwidth=1.5em,voperator=bottom]{#2}{#3}%
+}%
+  \foreach \i in {1,...,\thecoulxlop}{%
+  \ifnum\i>\fpeval{(max(\PfMLongDeciA,\PfMLongDeciB))-1}\relax
+    \stepcounter{coulxlopcoul}%
+  \else
+    \setcounter{coulxlopcoul}{1}%
+  \fi
+    \ifnodedefined{CA\Roman{PfCNumOp}\i}{%
+       \ifnum\thecoulxlopcoul<\fpeval{(max(\PfMLongDeciA,\PfMLongDeciB)+1)}\relax%
+         \PfCentoure{CA\Roman{PfCNumOp}\i}{CA\Roman{PfCNumOp}\i}%
+       \else%
+         \PfCentoureColor{CA\Roman{PfCNumOp}\i}{CA\Roman{PfCNumOp}\i}%
+       \fi%
+    }{}%
+  }%
+  \setcounter{coulxlopcoul}{0}%
+  \foreach \i in {1,...,\thecoulxlopa}{%
+    \ifnum\i>\fpeval{(max(\PfMLongDeciA,\PfMLongDeciB))-1}\relax
+    \stepcounter{coulxlopcoul}%
+  \else
+    \setcounter{coulxlopcoul}{1}%
+  \fi
+    \ifnodedefined{CB\Roman{PfCNumOp}\i}{%
+           \ifnum\thecoulxlopcoul<\fpeval{(max(\PfMLongDeciA,\PfMLongDeciB)+1)}\relax%
+      \PfCentoure{CB\Roman{PfCNumOp}\i}{CB\Roman{PfCNumOp}\i}%
+      \else
+      \PfCentoureColor{CB\Roman{PfCNumOp}\i}{CB\Roman{PfCNumOp}\i}%
+      \fi
+    }{}%
+  }%
+  \setcounter{coulxlopcoul}{0}%
+  \foreach \i in {1,...,\thecoulxlopd}{%
+     \ifnum\i>\fpeval{(max(\PfMLongDeciA,\PfMLongDeciB))-1}\relax
+    \stepcounter{coulxlopcoul}%
+  \else
+    \setcounter{coulxlopcoul}{1}%
+  \fi
+  \ifnum\fpeval{max(\PfMLongDeciA,\PfMLongDeciB)}=0\relax
+    \ifnodedefined{CC\Roman{PfCNumOp}\i}{%
+       \ifnum\thecoulxlopcoul<\fpeval{(max(\PfMLongDeciA,\PfMLongDeciB)+1)}\relax%
+      \ifboolKV[ClesOperations]{Solution}{\PfCentoure{CC\Roman{PfCNumOp}\i}{CC\Roman{PfCNumOp}\i}}{\setKV[ClesOperations]{Gabarit}\PfCentoure{CC\Roman{PfCNumOp}\i}{CC\Roman{PfCNumOp}\i}\setKV[ClesOperations]{Gabarit=false}}%
+      \else
+            \ifboolKV[ClesOperations]{Solution}{\PfCentoureColor{CC\Roman{PfCNumOp}\i}{CC\Roman{PfCNumOp}\i}}{\PfCentoureColorR{CC\Roman{PfCNumOp}\i}{CC\Roman{PfCNumOp}\i}}%
+            \fi
+    }{}%
+\else
+    \ifnum\i=\fpeval{(max(\PfMLongDeciA,\PfMLongDeciB))+1}\relax%
+        \else%
+    \ifnodedefined{CC\Roman{PfCNumOp}\i}{%
+       \ifnum\thecoulxlopcoul<\fpeval{(max(\PfMLongDeciA,\PfMLongDeciB)+1)}\relax%
+      \ifboolKV[ClesOperations]{Solution}{\PfCentoure{CC\Roman{PfCNumOp}\i}{CC\Roman{PfCNumOp}\i}}{\setKV[ClesOperations]{Gabarit}\PfCentoure{CC\Roman{PfCNumOp}\i}{CC\Roman{PfCNumOp}\i}\setKV[ClesOperations]{Gabarit=false}}%
+      \else
+            \ifboolKV[ClesOperations]{Solution}{\PfCentoureColor{CC\Roman{PfCNumOp}\i}{CC\Roman{PfCNumOp}\i}}{\PfCentoureColorR{CC\Roman{PfCNumOp}\i}{CC\Roman{PfCNumOp}\i}}%
+            \fi
+    }{}%
+    \fi%
+    \fi 
+  }%
+}%
+
+\NewDocumentCommand\SoustractionColore{omm}{%
+  \setcounter{PfCcarry}{0}
+  \useKVdefault[ClesOperations]%
+  \setKV[ClesOperations]{#1}%
+  \setsepchar{,}\ignoreemptyitems%
+  \xdef\PfMRetiensColorees{\useKV[ClesOperations]{CouleursColorees}}%
+  \readlist*\ListeTestTC{\PfMRetiensColorees}%
+  \reademptyitems%
+  \itemtomacro\ListeTestTC[1]\PfMCouleurA%
+  \itemtomacro\ListeTestTC[2]\PfMCouleurB%
+  \itemtomacro\ListeTestTC[3]\PfMCouleurC%
+  \def\couleurs{\PfMCouleurA,\PfMCouleurB,\PfMCouleurC,\PfMCouleurA,\PfMCouleurB,\PfMCouleurC,\PfMCouleurA,\PfMCouleurB,\PfMCouleurC,\PfMCouleurA,\PfMCouleurB,\PfMCouleurC,\PfMCouleurA,\PfMCouleurB,\PfMCouleurC,\PfMCouleurA,\PfMCouleurB,\PfMCouleurC}%
+  \ifboolKV[ClesOperations]{Solution}{\colorlet{PfCSolOp}{\useKV[ClesOperations]{CouleurSolution}}}{\colorlet{PfCSolOp}{\useKV[ClesOperations]{CouleurFond}}}%
+  \setcounter{PfCcarry}{0}%
+  \setcounter{coulxlop}{0}%
+  \setcounter{coulxlopa}{0}%
+  \setcounter{coulxlopd}{0}%
+  \setcounter{coulxlopi}{0}%
+  \setcounter{coulxlopcoul}{0}%
+  \stepcounter{PfCNumOp}%
+  \StrLen{#2}[\PfMLongTermeA]
+  \StrLen{#3}[\PfMLongTermeB]
+  \StrCut{#2}{.}\PfMRien\PfMNbDeciA%
+  \StrCut{#3}{.}\PfMRien\PfMNbDeciB%
+  \StrLen{\PfMNbDeciA}[\PfMLongDeciA]%
+  \StrLen{\PfMNbDeciB}[\PfMLongDeciB]%
+  \ifnum\fpeval{max(\PfMLongDeciA,\PfMLongDeciB)}=0\relax
+  \xdef\PfMLongRetenue{\fpeval{max(\PfMLongTermeA,\PfMLongTermeB)}}%
+  \ExtraitCouleurs
+  \else
+  \ExtraitCouleurscp{\fpeval{-max(\PfMLongDeciA,\PfMLongDeciB)-1}}%
+  \xdef\PfMLongRetenue{\fpeval{max(\PfMLongTermeA,\PfMLongTermeB)-1}}%
+  \fi
+  \ifboolKV[ClesOperations]{Solution}{%
+    \opsub[carrysub,lastcarry,offsetcarry=-0.5,decimalsepsymbol={,},lineheight=1.75em,columnwidth=1.5em,voperator=bottom]{#2}{#3}%
+  }{%
+  \ifboolKV[ClesOperations]{Retenue}{\opset{lastcarry,carrysub,carrystyle=\EncadreRetenueSous,offsetcarry=-0.5}}{\opset{carrysub=false}}%
+  \opsub[decimalsepsymbol={,},lineheight=1.75em,columnwidth=1.5em,voperator=bottom]{#2}{#3}%
+}%
+  \foreach \i in {1,...,\thecoulxlop}{%
+  \ifnum\i>\fpeval{(max(\PfMLongDeciA,\PfMLongDeciB))-1}\relax
+    \stepcounter{coulxlopcoul}%
+  \else
+    \setcounter{coulxlopcoul}{1}%
+  \fi
+    \ifnodedefined{CA\Roman{PfCNumOp}\i}{%
+       \ifnum\thecoulxlopcoul<\fpeval{(max(\PfMLongDeciA,\PfMLongDeciB)+1)}\relax%
+         \PfCentoure{CA\Roman{PfCNumOp}\i}{CA\Roman{PfCNumOp}\i}%
+       \else%
+         \PfCentoureColor{CA\Roman{PfCNumOp}\i}{CA\Roman{PfCNumOp}\i}%
+       \fi%
+    }{}%
+  }%
+  \setcounter{coulxlopcoul}{0}%
+  \foreach \i in {1,...,\thecoulxlopa}{%
+    \ifnum\i>\fpeval{(max(\PfMLongDeciA,\PfMLongDeciB))-1}\relax
+    \stepcounter{coulxlopcoul}%
+  \else
+    \setcounter{coulxlopcoul}{1}%
+  \fi
+    \ifnodedefined{CB\Roman{PfCNumOp}\i}{%
+           \ifnum\thecoulxlopcoul<\fpeval{(max(\PfMLongDeciA,\PfMLongDeciB)+1)}\relax%
+      \PfCentoure{CB\Roman{PfCNumOp}\i}{CB\Roman{PfCNumOp}\i}%
+      \else
+      \PfCentoureColor{CB\Roman{PfCNumOp}\i}{CB\Roman{PfCNumOp}\i}%
+      \fi
+    }{}%
+  }%
+  \setcounter{coulxlopcoul}{0}%
+  \foreach \i in {1,...,\thecoulxlopd}{%
+     \ifnum\i>\fpeval{(max(\PfMLongDeciA,\PfMLongDeciB))-1}\relax
+    \stepcounter{coulxlopcoul}%
+  \else
+    \setcounter{coulxlopcoul}{1}%
+  \fi
+  \ifnum\fpeval{max(\PfMLongDeciA,\PfMLongDeciB)}=0\relax
+    \ifnodedefined{CC\Roman{PfCNumOp}\i}{%
+       \ifnum\thecoulxlopcoul<\fpeval{(max(\PfMLongDeciA,\PfMLongDeciB)+1)}\relax%
+      \ifboolKV[ClesOperations]{Solution}{\PfCentoure{CC\Roman{PfCNumOp}\i}{CC\Roman{PfCNumOp}\i}}{\setKV[ClesOperations]{Gabarit}\PfCentoure{CC\Roman{PfCNumOp}\i}{CC\Roman{PfCNumOp}\i}\setKV[ClesOperations]{Gabarit=false}}%
+      \else
+            \ifboolKV[ClesOperations]{Solution}{\PfCentoureColor{CC\Roman{PfCNumOp}\i}{CC\Roman{PfCNumOp}\i}}{\PfCentoureColorR{CC\Roman{PfCNumOp}\i}{CC\Roman{PfCNumOp}\i}}%
+            \fi
+    }{}%
+\else
+    \ifnum\i=\fpeval{(max(\PfMLongDeciA,\PfMLongDeciB))+1}\relax%
+        \else%
+    \ifnodedefined{CC\Roman{PfCNumOp}\i}{%
+       \ifnum\thecoulxlopcoul<\fpeval{(max(\PfMLongDeciA,\PfMLongDeciB)+1)}\relax%
+      \ifboolKV[ClesOperations]{Solution}{\PfCentoure{CC\Roman{PfCNumOp}\i}{CC\Roman{PfCNumOp}\i}}{\setKV[ClesOperations]{Gabarit}\PfCentoure{CC\Roman{PfCNumOp}\i}{CC\Roman{PfCNumOp}\i}\setKV[ClesOperations]{Gabarit=false}}%
+      \else
+            \ifboolKV[ClesOperations]{Solution}{\PfCentoureColor{CC\Roman{PfCNumOp}\i}{CC\Roman{PfCNumOp}\i}}{\PfCentoureColorR{CC\Roman{PfCNumOp}\i}{CC\Roman{PfCNumOp}\i}}%
+            \fi
+    }{}%
+    \fi%
+    \fi 
+  }%
+}%
+
+\NewDocumentCommand\DivisionColore{omm}{%
+  \useKVdefault[ClesOperations]%
+  \setKV[ClesOperations]{#1}%
+  \setcounter{coulxlop}{0}%
+  \setcounter{coulxlopa}{0}%
+  \setcounter{coulxlopd}{0}%
+  \setcounter{coulxlopi}{0}%
+  \setcounter{coulxlopcoul}{0}%
+  \stepcounter{PfCNumOp}%
+  \ifboolKV[ClesOperations]{Solution}{\colorlet{PfCSolOp}{\useKV[ClesOperations]{CouleurSolution}}}{\colorlet{PfCSolOp}{\useKV[ClesOperations]{CouleurFond}}}%
+  \ExtraitCouleurs%
+  \begingroup%
+  \setlength{\baselineskip}{1.75em}%
+  \StrLen{#3}[\PfCLongueurFacteurDeux]%
+  \ifnum\PfCLongueurFacteurDeux=1\relax%
+  \opset{lineheight=\baselineskip} % nécessaire
+  \else%
+    %\opset{lineheight=\baselineskip,displayintermediary=all,displayshiftintermediary=all} % nécessaire
+    \opset{lineheight=\baselineskip,displayintermediary=all} % nécessaire
+  \fi%
+  \opidiv[decimalsepsymbol={,},lineheight=1.75em,columnwidth=1.5em,voperator=bottom]{#2}{#3}%
+  \endgroup%
+  \foreach \i in {1,...,\thecoulxlop}{%
+    \stepcounter{coulxlopcoul}%
+        \ifnodedefined{CA\Roman{PfCNumOp}\i}{%
+            \PfCentoureColor{CA\Roman{PfCNumOp}\i}{CA\Roman{PfCNumOp}\i}%
+            }{}
+  }%
+  \setcounter{coulxlopcoul}{0}%
+  \foreach \i in {1,...,\thecoulxlopa}{%
+    \stepcounter{coulxlopcoul}%
+        \ifnodedefined{CB\Roman{PfCNumOp}\i}{%
+            \PfCentoureColor{CB\Roman{PfCNumOp}\i}{CB\Roman{PfCNumOp}\i}%
+            }{}
+          }%
+          \setcounter{coulxlopcoul}{0}%
+    \foreach \i in {1,...,\thecoulxlopd}{%
+    \stepcounter{coulxlopcoul}%
+        \ifnodedefined{CC\Roman{PfCNumOp}\i}{%
+      \ifboolKV[ClesOperations]{Solution}{\PfCentoureColor{CC\Roman{PfCNumOp}\i}{CC\Roman{PfCNumOp}\i}}{\PfCentoureColorR{CC\Roman{PfCNumOp}\i}{CC\Roman{PfCNumOp}\i}}%
+            }{}
+  }%
+  \setcounter{coulxlopcoul}{0}%
+  \foreach \i in {1,...,\thecoulxlopi}{%
+    \stepcounter{coulxlopcoul}%
+    \ifnodedefined{CD\Roman{PfCNumOp}\i}{%
+        \ifboolKV[ClesOperations]{Solution}{\PfCentoure{CD\Roman{PfCNumOp}\i}{CD\Roman{PfCNumOp}\i}}{\PfCentoure{CD\Roman{PfCNumOp}\i}{CD\Roman{PfCNumOp}\i}}%
+    }{}%
+    \ifnodedefined{CE\Roman{PfCNumOp}\i}{%
+        \ifboolKV[ClesOperations]{Solution}{\PfCentoure{CE\Roman{PfCNumOp}\i}{CE\Roman{PfCNumOp}\i}}{\PfCentoure{CE\Roman{PfCNumOp}\i}{CE\Roman{PfCNumOp}\i}}%
+    }{}%
+  }%
+  coulxlopidiv = \thecoulxlopidiv\\
+  \setcounter{coulxlopcoul}{0}%
+  \foreach \i in {1,...,\thecoulxlopidiv}{%
+    \stepcounter{coulxlopcoul}%
+    La !
+    \ifnodedefined{CE\Roman{PfCNumOp}\i}{%
+    Ici !
+        \ifboolKV[ClesOperations]{Solution}{\PfCentoure{CE\Roman{PfCNumOp}\i}{CE\Roman{PfCNumOp}\i}}{\PfCentoure{CE\Roman{PfCNumOp}\i}{CE\Roman{PfCNumOp}\i}}%
+    }{}%
+  }%
+}%
+
+%% by StevenSStevens
+\def\decchar{.}
+\newcounter{digits}
+\newcounter{decrements}
+
+\newcommand\showdiff[2]{%
+  \let\savediff\relax%
+  \def\borrow{}%
+  \xdef\borrowed{0}%
+  \setcounter{digits}{0}%
+  \let\savediff\relax%
+  \whereischar[q]{#1}{\decchar}%
+  \xdef\locA{\theresult}%
+  \whereischar[q]{#2}{\decchar}%
+  \xdef\locB{\theresult}%
+  \ifnum\numexpr\locA+\locB=0\relax%
+    \def\decloc{-1}%
+    \ifnum#1<#2\relax
+      {\Longstack[r]{#1\,{} \underline{-#2\,} {< 0\,}}}\else
+      \showdiffengine{#1}{#2}\fi
+  \else
+    \ifnum\locA=0\relax%
+      \xdef\numA{#1\decchar}%
+      \whereischar[q]{\numA}{\decchar}%
+      \xdef\locA{\theresult}%
+    \else
+      \xdef\numA{#1}%
+    \fi
+    \stringlength[q]{\numA}%
+    \xdef\lenA{\theresult}%
+    \substring[q]{\numA}{1}{\numexpr\locA-1\relax}%
+    \xdef\preA{\thestring}%
+    \substring[q]{\numA}{\numexpr\locA+1\relax}{$}%
+    \xdef\postA{\thestring}%
+    \ifnum\locB=0\relax%
+      \xdef\numB{#2\decchar}%
+      \whereischar[q]{\numB}{\decchar}%
+      \xdef\locB{\theresult}%
+    \else
+      \xdef\numB{#2}%
+    \fi
+    \stringlength[q]{\numB}%
+    \xdef\lenB{\theresult}%
+    \substring[q]{\numB}{1}{\numexpr\locB-1\relax}%
+    \xdef\preB{\thestring}%
+    \substring[q]{\numB}{\numexpr\locB+1\relax}{$}%
+    \xdef\postB{\thestring}%
+    \def\decsA{\numexpr\lenA-\locA}%
+    \def\decsB{\numexpr\lenB-\locB}%
+    \ifnum\decsA=\decsB%
+    \xdef\decloc{\decsA}%
+    \else\ifnum\decsA>\decsB%
+        \xdef\decloc{\decsA}%
+        \setcounter{decrements}{\the\numexpr\decsA-\decsB}%
+        \paddecimal[0]{\postB}%
+      \else%
+        \xdef\decloc{\decsB}%
+        \setcounter{decrements}{\the\numexpr\decsB-\decsA}%
+        \paddecimal[0]{\postA}%
+      \fi%
+    \fi%
+    \ifnum\preA\postA<\preB\postB\relax
+      {\Longstack[r]{%
+        \preA.\postA\,{} \underline{-\preB.\postB\,} {< 0\,}}}
+    \else
+      \showdiffengine{\preA\postA}{\preB\postB}
+    \fi
+  \fi
+}
+\newcommand\showdiffengine[2]{%
+  \ifnum\value{digits}=\decloc\relax\savestack\savediff{%
+    \Longstack{. \underline{.} .}\savediff}\fi
+  \stepcounter{digits}%
+  \xdef\opA{#1}%
+  \xdef\opB{#2}%
+  \lastdigits{\opA}{\opB}%
+  \ifnum\borrowed=1\relax\xdef\XdigA{\the\numexpr\digA-1}\else\xdef\XdigA{\digA}\fi%
+  \ifnum\XdigA<0\relax\xdef\XdigA{9}\xdef\futureborrowed{1}\else
+    \xdef\futureborrowed{0}\fi
+  \edef\coldiff{\the\numexpr\XdigA-\digB\relax}%
+  \ifnum\coldiff<0\relax%
+    \xdef\borrow{1}%
+    \edef\coldiff{\the\numexpr\borrow\XdigA-\digB\relax}%
+  \else
+    \xdef\borrow{}%
+  \fi
+  \ifnum\borrowed=0\relax%
+    \savestack{\thediff}{\Longstack[l]{%
+      \tiny\bllap[1.5\baselineskip]{\borrow} \XdigA{} \underline{\VdigB\kern3pt} %
+        \coldiff}}%
+  \else
+    \savestack{\thediff}{\Longstack[l]{%
+     \tiny\brlap[.7\baselineskip]{\borrow\the\numexpr\XdigA} \crossout{\digA} %
+        \underline{\VdigB\kern3pt} \coldiff}}%
+  \fi
+  \if\relax\borrow\relax\xdef\borrowed{0}\else\xdef\borrowed{1}\fi
+  \savestack{\savediff}{\thediff\savediff}%
+  \ifnum\futureborrowed>0\relax\xdef\borrowed{1}\xdef\futureborrowed{0}\fi
+  \nextcolumn{\opA}{\opB}%
+  \ifnum\numexpr0\opA+0\opB>0\relax\showdiffengine{\opA}{\opB}%
+  \else
+    \Longstack{\underline{$-$\,} {}}\savediff\fi%
+}
+\newcommand\crossout[1]{\stackengine{0pt}{#1}{/}{O}{c}{F}{F}{L}}
+\newcommand\lastdigits[2]{%
+  \substring[q]{#1}{$}{$}%
+  \xdef\digA{\thestring}%
+  \xdef\VdigA{\digA}\if0\digA\ifnum#1=0\relax\xdef\VdigA{~}\fi\fi%
+  \substring[q]{#2}{$}{$}%
+  \xdef\digB{\thestring}%
+  \xdef\VdigB{\digB}\if0\digB\ifnum#2=0\relax\xdef\VdigB{~}\fi\fi%
+}
+\newcommand\nextcolumn[2]{%
+  \substring[q]{#1}{1}{$-1}%
+  \xdef\opA{0\thestring}%
+  \substring[q]{#2}{1}{$-1}%
+  \xdef\opB{0\thestring}%
+}
+\newcommand\showsum[2]{%
+  \setcounter{digits}{0}%
+  \xdef\remainder{0}%
+  \xdef\Vremainder{~}%
+  \let\savesum\relax%
+  \whereischar[q]{#1}{\decchar}%
+  \xdef\locA{\theresult}%
+  \whereischar[q]{#2}{\decchar}%
+  \xdef\locB{\theresult}%
+  \ifnum\numexpr\locA+\locB=0\relax%
+    \def\decloc{-1}%
+    \showsumengine{#1}{#2}%
+  \else
+    \ifnum\locA=0\relax%
+      \xdef\numA{#1\decchar}%
+      \whereischar[q]{\numA}{\decchar}%
+      \xdef\locA{\theresult}%
+    \else
+      \xdef\numA{#1}%
+    \fi
+    \stringlength[q]{\numA}%
+    \xdef\lenA{\theresult}%
+    \substring[q]{\numA}{1}{\numexpr\locA-1\relax}%
+    \xdef\preA{\thestring}%
+    \substring[q]{\numA}{\numexpr\locA+1\relax}{$}%
+    \xdef\postA{\thestring}%
+    \ifnum\locB=0\relax%
+      \xdef\numB{#2\decchar}%
+      \whereischar[q]{\numB}{\decchar}%
+      \xdef\locB{\theresult}%
+    \else
+      \xdef\numB{#2}%
+    \fi
+    \stringlength[q]{\numB}%
+    \xdef\lenB{\theresult}%
+    \substring[q]{\numB}{1}{\numexpr\locB-1\relax}%
+    \xdef\preB{\thestring}%
+    \substring[q]{\numB}{\numexpr\locB+1\relax}{$}%
+    \xdef\postB{\thestring}%
+    \def\decsA{\numexpr\lenA-\locA}%
+    \def\decsB{\numexpr\lenB-\locB}%
+    \ifnum\decsA=\decsB%
+    \xdef\decloc{\decsA}%
+    \else\ifnum\decsA>\decsB%
+        \xdef\decloc{\decsA}%
+        \setcounter{decrements}{\the\numexpr\decsA-\decsB}%
+        \paddecimal{\postB}%
+      \else%
+        \xdef\decloc{\decsB}%
+        \setcounter{decrements}{\the\numexpr\decsB-\decsA}%
+        \paddecimal{\postA}%
+      \fi%
+    \fi%
+    \showsumengine{\preA\postA}{\preB\postB}%
+  \fi%
+}
+\newcommand\showsumengine[2]{%
+  \ifnum\value{digits}=\decloc\relax\savestack\savesum{%
+    \Longstack{. \underline{.} .}\savesum}\fi
+  \stepcounter{digits}%
+  \xdef\opA{#1}%
+  \xdef\opB{#2}%
+  \lastdigits{\opA}{\opB}%
+  \edef\colsum{\the\numexpr\digA+\digB+0\remainder\relax}%
+  \substring[q]{\colsum}{$}{$}%
+  \savestack{\thesum}{\Longstack[l]{%
+    \tiny\brlap[.7\baselineskip]{\Vremainder} \VdigA{} \underline{\VdigB\,} \thestring}}%
+  \substring[q]{\colsum}{1}{$-1}%
+  \xdef\remainder{\thestring}%
+  \if\relax\remainder\relax\xdef\Vremainder{}\else\xdef\Vremainder{\remainder}\fi%
+  \savestack{\savesum}{\thesum\savesum}%
+  \nextcolumn{\opA}{\opB}%
+  \ifnum\numexpr0\opA+0\opB+0\remainder>0\relax\showsumengine{\opA}{\opB}\else
+    \Longstack{\underline{$+$\,} {}}\savesum\fi%
+}
+\newcommand\paddecimal[2][ ]{%
+  \xdef#2{#2#1}%
+  \addtocounter{decrements}{-1}%
+  \ifnum\value{decrements}>0\relax\paddecimal[#1]{#2}\fi%
+}%

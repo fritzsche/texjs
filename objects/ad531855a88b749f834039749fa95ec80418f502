@@ -1,0 +1,278 @@
+%% This is file `quran-es.sty', and it's completely relies on the quran package.
+%%
+%% Copyright © 2024-2025 by Seiied-Mohammad-Javad Razavian
+%% <javadr@gmail.com>
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either version 1.3c
+%% of this license or (at your option) any later version.
+%% The latest version of this license is in
+%%   http://www.latex-project.org/lppl.txt
+%% and version 1.3c or later is part of all distributions of LaTeX
+%% version 2005/12/01 or later.
+%%
+%% This work has the LPPL maintenance status `maintained'.
+%%
+%% This work is “author-maintained” (as per LPPL maintenance status)
+%% by Seiied-Mohammad-Javad Razavian..
+%% The Current Maintainer of this work is Seiied-Mohammad-Javad Razavian.
+%%
+%% This work consists of the files quran-es.sty,
+%% qurantext-esi.translation.def, qurantext-esii.translation.def,
+%% qurantext-esiii.translation.def, 
+%% quran-es-doc.tex, quran-es-doc.pdf, and quran.png.
+%%
+%% To one who has devoted his life to the Holy Quran
+%%
+\NeedsTeXFormat{LaTeX2e}
+\def\quranesdate{2025/03/31}
+\def\quranesversion{0.11}
+\ProvidesPackage{quran-es}[%
+\quranesdate\space v\quranesversion\space^^J
+Spanish translations extension to the quran package.%
+]
+\RequirePackage{xstring}
+\RequirePackage{biditools}
+\RequirePackage{xkeyval}
+\define@boolkeys{quran-es.sty}[es@]{bornez,cortes,garcia,all}[true]
+\DeclareOptionX*{\PassOptionsToPackage{\CurrentOption}{quran}}
+\DeclareOption*{\PackageWarning{quran-es}{Unknown option ‘\CurrentOption’}}
+\ProcessOptionsX\relax
+\ifes@all
+    \ExecuteOptionsX{bornez,cortes,garcia}
+\else
+    \ExecuteOptionsX{garcia}
+\fi
+\RequirePackage{quran}
+\ifqt@wordwise%
+    \let\qt@newcmd\newcommand
+\else%
+    \let\qt@newcmd\bidi@newrobustcmd
+\fi%
+\input{qurantext-esiii.translation.def}%García as default
+%
+\ifes@bornez%
+    \PackageInfo{quran-es}{Raúl González Bórnez's translation is chosen.}%
+\fi%
+\ifes@cortes%
+    \PackageInfo{quran-es}{Julio Cortes's translation is chosen.}%
+\fi%
+\ifes@garcia%
+    \PackageInfo{quran-es}{Muhammad Isa García's translation is chosen.}%
+\fi%
+\newcount\trans@es
+\trans@es=\@ne
+\define@choicekey*+{quran-es}{trans}[\val\nr]{bornez,cortes,garcia}{%
+    \ifcase\nr\relax
+        \global\trans@es=\z@\relax
+    \or
+        \global\trans@es=\@ne\relax
+    \or
+        \global\trans@es=\tw@\relax
+ \fi}{%
+    \PackageWarning{quran-es}{\string \esSetTrans' paramenter should be one of  `bornez', `cortes', or `garcia'. The package sets to `garcia' by default.}{}%
+    \global\trans@es=\tw@\relax
+}%
+\newcommand*{\esGetTrans}{%
+    \ifcase\trans@es
+        bornez%
+    \or
+        cortes%
+    \or
+        garcia%
+    \fi%
+}
+\newcommand{\esSetTrans}[1]{%
+\IfInteger{#1}%
+{%Yes
+\count255=#1%
+\advance\count255 by -1\relax%
+\trans@es=\count255}%
+{%NO
+\setkeys{quran-es}{trans=#1}}%
+%
+%\makeatother
+%\let\bidi@newrobustcmd\bidi@renewrobustcmd
+%\makeatletter
+\ifqt@wordwise%
+    \makeatother\let\qt@newcmd\renewcommand\makeatletter%
+\else%
+    \makeatother\let\qt@newcmd\bidi@renewrobustcmd\makeatletter%
+\fi%
+\ifcase\trans@es%0
+    \ifes@bornez%
+        \ifx\basmalahes\relax\else%
+            \def\basmalahes{En el nombre de Al.lah, el Clementísimo, el Misericordiosísimo.\qt@par}%
+        \fi%
+        \bidi@renewrobustcmd\Togglebasmalahes{%
+            \ifx\basmalahes\relax%
+                \def\basmalahes{En el nombre de Al.lah, el Clementísimo, el Misericordiosísimo.\qt@par}%
+            \else%
+                \let\basmalahes\relax%
+            \fi%
+        }%
+        \input{qurantext-esi.translation.def}%
+    \else%
+        \PackageError{quran-es}{Raúl González Bórnez's translation has not been loaded}{}%
+    \fi%
+\or%1
+    \ifes@cortes
+        \ifx\basmalahes\relax\else%
+            \def\basmalahes{¡En el nombre de Alá, el Compasivo, el Misericordioso!\qt@par}%
+        \fi
+        \bidi@renewrobustcmd\Togglebasmalahes{%
+            \ifx\basmalahes\relax%
+                \def\basmalahes{¡En el nombre de Alá, el Compasivo, el Misericordioso!\qt@par}%
+            \else%
+                \let\basmalahes\relax%
+            \fi%
+        }%
+        \input{qurantext-esii.translation.def}%
+    \else%
+        \PackageError{quran-es}{Julio Cortes's translation has not been loaded}{}%
+    \fi
+\or%2
+    \ifes@garcia
+        \ifx\basmalahes\relax\else%
+            \def\basmalahes{En el nombre de Dios, el Compasivo con toda la creación, el Misericordioso con los creyentes.\qt@par}%
+        \fi
+        \bidi@renewrobustcmd\Togglebasmalahes{%
+            \ifx\basmalahes\relax%
+                \def\basmalahes{En el nombre de Dios, el Compasivo con toda la creación, el Misericordioso con los creyentes.\qt@par}%
+            \else%
+                \let\basmalahes\relax%
+            \fi%
+        }%
+        \input{qurantext-esiii.translation.def}%
+    \else%
+        \PackageError{quran-es}{Muhammad Isa García's translation has not been loaded}{}%
+    \fi
+\else%
+    \PackageError{quran-es}{\string \esSetTrans{} paramenter should be between 1 to 3}{}%
+\fi
+}%
+\bidi@newrobustcmd\Togglebasmalahes{%
+    \ifx\basmalahes\relax%
+        \ifcase\trans@es% bornez
+            \def\basmalahes{En el nombre de Al.lah, el Clementísimo, el Misericordiosísimo.\qt@par}%
+        \or% cortes
+            \def\basmalahes{¡En el nombre de Alá, el Compasivo, el Misericordioso!\qt@par}%
+        \or% garcia
+            \def\basmalahes{En el nombre de Dios, el Compasivo con toda la creación, el Misericordioso con los creyentes.\qt@par}%
+        \fi%
+    \else%
+        \let\basmalahes\relax%
+    \fi%
+}%
+\let\qt@doqt@orig\qt@doqt
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bidi@apptocmd{\ToggleBasmalah}{\Togglebasmalahes}{}{}
+\let\ToggleBasmalah@orig\ToggleBasmalah
+\def\basmalahes{En el nombre de Dios, el Compasivo con toda la creación, el Misericordioso con los creyentes.\qt@par}%
+\def\basmalahes{%
+        \begingroup%
+        \let\par\relax%
+        \def\qt@no##1{\relax}%
+        \quranayahes[1][1][1]%
+        \endgroup%
+}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\DeclareDocumentCommand\qt@does{ o o }{%
+    \addtocounter{qt@count}{1}%
+    \def\@qtexp{}%
+    \loop%
+        \global\xdef\@qtexp{\@qtexp\csname qurantrans@es@\roman{qt@count}\endcsname\ifnum\value{qt@count}=\qt@max\else\space\fi
+        \ifnum\value{qt@count}<\qt@max\relax\qt@par\fi}%
+        \ifnum\value{qt@count}<\qt@max\relax%
+        \addtocounter{qt@count}{1}%
+    \repeat%
+    \IfNoValueTF{#1}%
+    {\@qtexp\qt@par}%true
+    {\qt@WordCount=0\relax\c@qt@start=\numexpr#1-1\relax%
+    \readlist*\qt@words{\@qtexp}%
+        \IfNoValueTF{#2}%
+        {\c@qt@end=\numexpr\qt@wordslen+1\relax}{\c@qt@end=\numexpr#2+1\relax}%
+        \foreachitem\qt@word\in\qt@words{%
+            \ifnum\qt@wordcnt>\c@qt@start\ifnum\qt@wordcnt<\c@qt@end\qt@word\ifnum\qt@wordcnt=\numexpr\c@qt@end-1\relax\else\xspace\fi\fi\fi%
+        }%
+        \global\edef\qt@currentfont{\the\font}%
+        \qt@showitems{\qt@currentfont\showitems\qt@words}%
+    \qt@par}%false
+}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\DeclareDocumentCommand{\qurantextes}{ s O{\qt@default} o t{+} }{%
+    \IfBooleanTF{#4}{\def\qt@showitems##1{\footnote{##1}}}{\def\qt@showitems##1{\relax}}%
+    \let\qt@doqt\qt@does%
+    \IfBooleanTF{#1}%
+    {\IfBooleanTF{#4}{\qurantext*[#2][#3]+}{\qurantext*[#2][#3]}}%
+    {\IfBooleanTF{#4}{\qurantext[#2][#3]+}{\qurantext[#2][#3]}}%
+    \let\qt@doqt\qt@doqt@orig%
+    \def\qt@showitems##1{\relax}%
+}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\DeclareDocumentCommand\quransurahes{ s O{\qt@surah@default} }{%
+    \let\qt@doqt\qt@does%
+    \IfBooleanTF{#1}%
+    {\quransurah*[#2]}%
+    {\quransurah[#2]}%
+    \let\qt@doqt\qt@doqt@orig%
+}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\DeclareDocumentCommand{\quranayahes}{ s o o o t{+} }{%
+    \let\qt@doqt\qt@does%
+    \let\ToggleBasmalah\Togglebasmalahes%
+    \IfBooleanTF{#1}%
+    {\IfBooleanTF{#5}{\quranayah*[#2][#3][#4]+}{\quranayah*[#2][#3][#4]}}%
+    {\IfBooleanTF{#5}{\quranayah[#2][#3][#4]+}{\quranayah[#2][#3][#4]}}%
+    \let\qt@doqt\qt@doqt@orig%
+    \let\ToggleBasmalah\ToggleBasmalah@orig%
+}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\DeclareDocumentCommand{\quranjuzes}{ s o }{%
+    \let\qt@doqt\qt@does%
+    \IfBooleanTF{#1}%
+    {\quranjuz*[#2]}%
+    {\quranjuz[#2]}%
+    \let\qt@doqt\qt@doqt@orig%
+}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\DeclareDocumentCommand{\quranpagees}{ s o }{%
+    \let\qt@doqt\qt@does%
+    \IfBooleanTF{#1}%
+    {\quranpage*[#2]}%
+    {\quranpage[#2]}%
+    \let\qt@doqt\qt@doqt@orig%
+}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\DeclareDocumentCommand{\quranquarteres}{ s o }{%
+    \let\qt@doqt\qt@does%
+    \IfBooleanTF{#1}%
+    {\quranquarter*[#2]}%
+    {\quranquarter[#2]}%
+    \let\qt@doqt\qt@doqt@orig%
+}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\DeclareDocumentCommand{\quranrukues}{ s o }{%
+    \let\qt@doqt\qt@does%
+    \IfBooleanTF{#1}%
+    {\quranruku*[#2]}%
+    {\quranruku[#2]}%
+    \let\qt@doqt\qt@doqt@orig%
+}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\DeclareDocumentCommand{\quranhizbes}{ s o }{%
+    \let\qt@doqt\qt@does%
+    \IfBooleanTF{#1}%
+    {\quranhizb*[#2]}%
+    {\quranhizb[#2]}%
+    \let\qt@doqt\qt@doqt@orig%
+}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\DeclareDocumentCommand{\quranmanziles}{ s o }{%
+    \let\qt@doqt\qt@does%
+    \IfBooleanTF{#1}%
+    {\quranmanzil*[#2]}%
+    {\quranmanzil[#2]}%
+    \let\qt@doqt\qt@doqt@orig%
+}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% End of file `quran-es.sty'.

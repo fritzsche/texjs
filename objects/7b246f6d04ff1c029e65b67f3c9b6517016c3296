@@ -1,0 +1,106 @@
+% Kale Ewasiuk (kalekje@gmail.com)
+% 2025-02-14
+% Copyright (C) 2021-2025 Kale Ewasiuk
+%
+% Permission is hereby granted, free of charge, to any person obtaining a copy
+% of this software and associated documentation files (the "Software"), to deal
+% in the Software without restriction, including without limitation the rights
+% to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+% copies of the Software, and to permit persons to whom the Software is
+% furnished to do so, subject to the following conditions:
+%
+% The above copyright notice and this permission notice shall be included in
+% all copies or substantial portions of the Software.
+%
+% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+% ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+% TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+% PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT
+% SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+% ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+% ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+% OR OTHER DEALINGS IN THE SOFTWARE.
+
+\ProvidesPackage{penlightplus}[2025-02-14]
+
+\RequirePackage{luacode}
+\RequirePackage{luakeys}
+\RequirePackage[import]{penlight}
+\RequirePackage{etoolbox}
+\RequirePackage{tokcycle}
+
+
+\DeclareOption{globals}{\luadirect{__PL_GLOBALS__ = true}}
+\DeclareOption{pl}{\directlua{pl = penlight}}
+\ProcessOptions*\relax
+
+\luadirect{require'penlightplus'}
+
+
+
+
+\global\newcommand{\writePDFmetadata}{\luadirect{penlight.tex.writePDFmetadata()}}
+
+\NewDocumentCommand{\writePDFmetadatakv}{ s O{f} m }{%
+\MakeluastringCommands[f]{#2}%
+\IfBooleanTF{#1}{% if *, delete existing data
+  \luadirect{
+    __PDFmetadata__ = penlight.tex.makePDFtablekv(\plluastringA{#3})
+  }}{ % if no star, update
+    \luadirect{
+    __PDFmetadata__ = __PDFmetadata__ or {}
+    penlight.tablex.update(__PDFmetadata__, penlight.tex.makePDFtablekv(\plluastringA{#3}))
+  }}%
+  \writePDFmetadata{}%
+}
+
+
+
+\gdef\luastringT#1{\luastring{\unexpanded\expandafter\expandafter\expandafter{#1}}}  % expand luastring twice
+\global\let\luastringF\luastring  % fully expanded luastring
+
+%
+%\xtokcycleenvironment\luastringeenv
+%  {\addcytoks{##1}}
+%  {\processtoks{##1}}
+%  {\addcytoks[1]{##1}}
+%  {\addcytoks{##1}}
+%  {}
+%  {\cytoks\expandafter{\expandafter\luastringO\expandafter{\the\cytoks}}}
+%
+%\def\luastringE#1{\luastringeenv#1\endluastringeenv}
+%\gdef\luastringE#1{\begin{luastringeenv#1\endluastringeenv}
+
+
+% allow control over expansion of arguments to a latex function
+\NewDocumentCommand{\MakeluastringCommands}{O{} m }{% #1 the desired commands #2 defaults
+  \luadirect{penlight.tex.aliasluastring(\luastring{#2},\luastring{#1})}%
+}
+
+
+
+
+
+
+%%%%
+
+\newtoggle{luaexpr}\togglefalse{luaexpr}
+
+\NewDocumentCommand{\ifluax}{m +m +O{}}{% if lua expression is true do {m} if not [o]
+  \luadirect{penlight.toggle_luaexpr(\expanded{#1})}%
+  \iftoggle{luaexpr}{#2}{#3}%
+  \togglefalse{luaexpr}% safety set to false
+}
+
+\NewDocumentCommand{\ifluaxv}{m +m +O{}}{\ifluax{penlight.hasval(#1)}{#2}[#3]}% if lua expression is truthy do {m} else [o]
+
+
+\NewDocumentCommand{\caseswitch}{s m +m}{\ignorespaces\luadirect{penlight.caseswitch(\luastring{#1},\luastring{#2},\luastringN{#3})}\unskip}
+% argument 1 is star option, which throws an error if case is not found
+% argument 2 is the case, fully expanded
+% argument 3 is a luakeys table of options, not expanded
+
+
+
+

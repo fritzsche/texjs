@@ -1,0 +1,1346 @@
+%%%
+% Thales
+%%%
+\def\filedateThales{2025/05/29}%
+\def\fileversionThales{0.1b}%
+\message{-- \filedateThales\space v\fileversionThales}%
+%
+\newcount\ppcm%
+
+\newcommand\PPCM[2]{%
+  \PGCD{#1}{#2}%
+  \ppcm=\numexpr#1*#2/\pgcd\relax%
+}%
+
+\setKVdefault[ClesThales]{Calcul=true,Droites=false,Propor=false,Segment=false,Figure=false,FigureSeule=false,Figurecroisee=false,FigurecroiseeSeule=false,Angle=0,Precision=2,Entier=false,Unite=cm,Reciproque=false,Produit=false,ChoixCalcul=0,Simplification,Redaction=false,Remediation=false,Echelle=1cm,Perso=false,CalculsPerso=false,IntroCalculs,CouleursNum=false,CouleursDen=false,ModeleCouleur=5,CouleurNum={},CouleurDen={}}%
+\defKV[ClesThales]{
+  CouleurNum=\ifempty{#1}{}{\setKV[ClesThales]{CouleursNum}},%
+  CouleurDen=\ifempty{#1}{}{\setKV[ClesThales]{CouleursDen}}%
+}%
+%
+\DeclareSIUnit{\PfCThalesUnit}{\useKV[ClesThales]{Unite}}%
+
+%On d\'efinit la figure \`a utiliser
+\def\MPFigThales#1#2#3#4#5#6{
+    % #1 Premier sommet
+    % #2 Deuxi\`eme sommet
+    % #3 Troisi\`eme sommet
+    % #4 point sur le segment #1#2
+    % #5 point sur le segment #1#3
+    % #6 angle de rotation
+  \ifluatex
+%  \mplibcodeinherit{enable}
+  \mplibforcehmode
+  \begin{mplibcode}
+    defaultcolormodel := \useKV[ClesThales]{ModeleCouleur};
+    u:=\useKV[ClesThales]{Echelle};
+    boolean CouleursNum,CouleursDen;
+    CouleursNum=\useKV[ClesThales]{CouleursNum};
+    CouleursDen=\useKV[ClesThales]{CouleursDen};
+    color CouleurNum,CouleurDen;
+    if CouleursNum:
+    CouleurNum=\useKV[ClesThales]{CouleurNum}
+    else:
+    CouleurNum=black
+    fi;
+    if CouleursDen:
+    CouleurDen=\useKV[ClesThales]{CouleurDen}
+    else:
+    CouleurDen=black
+    fi;
+    pair A,B,C,M,N,O;%
+    %On place les points A,B,C sur le cercle de mani\`ere \`a faciliter la rotation de la figure
+    A=u*(1,1);
+    B-A=u*(4,0);
+    C=(A--2[A,B rotatedabout(A,45)]) intersectionpoint (B--2[B,A rotatedabout(B,-60)]);
+    % On d\'efinit le centre du cercle circonscrit
+    O - .5[A,B] = whatever * (B-A) rotated 90;
+    O - .5[B,C] = whatever * (C-B) rotated 90;
+    % On tourne pour \'eventuellement moins de lassitude :)
+    A:=A rotatedabout(O,#6);
+    B:=B rotatedabout(O,#6);
+    C:=C rotatedabout(O,#6);
+    % on dessine \`a main lev\'ee :)
+    path cotes[];
+    cotes1=A{dir(angle(B-A)+5)}..B{dir(angle(B-A)+5)};
+    cotes2=B{dir(angle(C-B)+5)}..C{dir(angle(C-B)+5)};
+    cotes3=C{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)};
+    M=point(0.4*length cotes1) of cotes1;
+    N=point(0.6*length cotes3) of cotes3;
+    cotes4=1.5[N,M]{dir(angle(N-M)+5)}..1.5[M,N]{dir(angle(N-M)+5)};
+    path triangle;
+    triangle=cotes1--cotes2--cotes3--cycle;
+    draw triangle;
+    draw cotes4;
+    if CouleursDen:
+    draw triangle dashed evenly withpen pencircle scaled 1.5 withcolor CouleurDen;
+    fi;
+    if CouleursNum:
+    draw (cotes1 cutafter cotes4) dashed dashpattern(off 3 on 3) withpen pencircle scaled 1.5 withcolor CouleurNum;
+    draw (cotes4 cutbefore cotes1 cutafter cotes3) dashed dashpattern(off 3 on 3) withpen pencircle scaled 1.5 withcolor CouleurNum;
+    draw (cotes3 cutbefore cotes4) dashed dashpattern(off 3 on 3) withpen pencircle scaled 1.5 withcolor CouleurNum;
+    fi;
+    %on labelise
+    label(btex $#1$ etex,1.15[O,A]);
+    label(btex $#2$ etex,1.15[O,B]);
+    label(btex $#3$ etex,1.15[O,C]);
+    label(btex $#4$ etex,1.1[C,M]);
+    label(btex $#5$ etex,1.1[B,N]);
+    fill (fullcircle scaled 0.75mm) shifted (cotes1 intersectionpoint cotes4);
+    fill (fullcircle scaled 0.75mm) shifted (cotes3 intersectionpoint cotes4);
+    pair I,J,K;
+    I=1/2[M,N];
+    J=1/2[B,C];
+    K=1/2[I,J];
+    path cd;
+    cd=(fullcircle scaled 6mm) shifted K;
+    drawoptions(withcolor 0.75*white);
+    drawarrow reverse((I{dir(210+angle(I-J))}..{dir(150+angle(I-J))}K) cutafter cd);
+    drawarrow reverse((J{dir(210+angle(J-I))}..{dir(150+angle(J-I))}K) cutafter cd);
+    draw cd;
+    label(btex $//$ etex ,K);
+    drawoptions();
+  \end{mplibcode}
+%  \mplibcodeinherit{disable}
+  \else
+  \begin{mpost}[mpsettings={u:=\useKV[ClesThales]{Echelle};boolean CouleursNum,CouleursDen;
+    CouleursNum=\useKV[ClesThales]{CouleursNum};
+    CouleursDen=\useKV[ClesThales]{CouleursDen};
+    color CouleurNum,CouleurDen;
+    if CouleursNum:
+    CouleurNum=\useKV[ClesThales]{CouleurNum}
+    else:
+    CouleurNum=black
+    fi;
+    if CouleursDen:
+    CouleurDen=\useKV[ClesThales]{CouleurDen}
+    else:
+    CouleurDen=black
+    fi;}]
+    pair A,B,C,M,N,O;%
+    %On place les points A,B,C sur le cercle de mani\`ere \`a faciliter la rotation de la figure
+    A=u*(1,1);
+    B-A=u*(4,0);
+    C=(A--2[A,B rotatedabout(A,45)]) intersectionpoint (B--2[B,A rotatedabout(B,-60)]);
+    % On d\'efinit le centre du cercle circonscrit
+    O - .5[A,B] = whatever * (B-A) rotated 90;
+    O - .5[B,C] = whatever * (C-B) rotated 90;
+    % On tourne pour \'eventuellement moins de lassitude :)
+    A:=A rotatedabout(O,#6);
+    B:=B rotatedabout(O,#6);
+    C:=C rotatedabout(O,#6);
+    % on dessine \`a main lev\'ee :)
+    path cotes[];
+    cotes1=A{dir(angle(B-A)+5)}..B{dir(angle(B-A)+5)};
+    cotes2=B{dir(angle(C-B)+5)}..C{dir(angle(C-B)+5)};
+    cotes3=C{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)};
+    M=point(0.4*length cotes1) of cotes1;
+    N=point(0.6*length cotes3) of cotes3;
+    cotes4=1.5[N,M]{dir(angle(N-M)+5)}..1.5[M,N]{dir(angle(N-M)+5)};
+    path triangle;
+    triangle=cotes1--cotes2--cotes3--cycle;
+    draw triangle;
+    draw cotes4;
+        if CouleursDen:
+    draw triangle dashed evenly withpen pencircle scaled 1.5 withcolor CouleurDen;
+    fi;
+    if CouleursNum:
+    draw (cotes1 cutafter cotes4) dashed dashpattern(off 3 on 3) withpen pencircle scaled 1.5 withcolor CouleurNum;
+    draw (cotes4 cutbefore cotes1 cutafter cotes3) dashed dashpattern(off 3 on 3) withpen pencircle scaled 1.5 withcolor CouleurNum;
+    draw (cotes3 cutbefore cotes4) dashed dashpattern(off 3 on 3) withpen pencircle scaled 1.5 withcolor CouleurNum;
+    fi;
+    %on labelise
+    label(btex $#1$ etex,1.15[O,A]);
+    label(btex $#2$ etex,1.15[O,B]);
+    label(btex $#3$ etex,1.15[O,C]);
+    label(btex $#4$ etex,1.1[C,M]);
+    label(btex $#5$ etex,1.1[B,N]);
+    fill (fullcircle scaled 0.75mm) shifted (cotes1 intersectionpoint cotes4);
+    fill (fullcircle scaled 0.75mm) shifted (cotes3 intersectionpoint cotes4);
+    pair I,J,K;
+    I=1/2[M,N];
+    J=1/2[B,C];
+    K=1/2[I,J];
+    path cd;
+    cd=(fullcircle scaled 6mm) shifted K;
+    drawoptions(withcolor 0.75*white);
+    drawarrow reverse((I{dir(210+angle(I-J))}..{dir(150+angle(I-J))}K) cutafter cd);
+    drawarrow reverse((J{dir(210+angle(J-I))}..{dir(150+angle(J-I))}K) cutafter cd);
+    draw cd;
+    label(btex $//$ etex ,K);
+    drawoptions();
+  \end{mpost}
+  \fi
+}
+
+%On d\'efinit la figure \`a utiliser
+\def\MPFigReciThales#1#2#3#4#5#6{
+    % #1 Premier sommet
+    % #2 Deuxi\`eme sommet
+    % #3 Troisi\`eme sommet
+    % #4 point sur le segment #1#2
+    % #5 point sur le segment #1#3
+  \ifluatex
+%  \mplibcodeinherit{enable}
+  \mplibforcehmode
+  \begin{mplibcode}
+    defaultcolormodel := \useKV[ClesThales]{ModeleCouleur};
+    u:=\useKV[ClesThales]{Echelle};
+    pair A,B,C,M,N,O;%
+    %On place les points A,B,C sur le cercle de mani\`ere \`a faciliter la rotation de la figure
+    A=u*(1,1);
+    B-A=u*(4,0);
+    C=(A--2[A,B rotatedabout(A,45)]) intersectionpoint (B--2[B,A rotatedabout(B,-60)]);
+    % On d\'efinit le centre du cercle circonscrit
+    O - .5[A,B] = whatever * (B-A) rotated 90;
+    O - .5[B,C] = whatever * (C-B) rotated 90;
+    % On tourne pour \'eventuellement moins de lassitude :)
+    A:=A rotatedabout(O,#6);
+    B:=B rotatedabout(O,#6);
+    C:=C rotatedabout(O,#6);
+    % on dessine \`a main lev\'ee :)
+    path cotes[];
+    cotes1=A{dir(angle(B-A)+5)}..B{dir(angle(B-A)+5)};
+    cotes2=B{dir(angle(C-B)+5)}..C{dir(angle(C-B)+5)};
+    cotes3=C{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)};
+    M=point(0.4*length cotes1) of cotes1;
+    N=point(0.6*length cotes3) of cotes3;
+    cotes4=1.5[N,M]{dir(angle(N-M)+5)}..1.5[M,N]{dir(angle(N-M)+5)};
+    path triangle;
+    triangle=cotes1--cotes2--cotes3--cycle;
+    draw triangle;
+    draw cotes4;
+    %on labelise
+    label(btex $#1$ etex,1.15[O,A]);
+    label(btex $#2$ etex,1.15[O,B]);
+    label(btex $#3$ etex,1.15[O,C]);
+    label(btex $#4$ etex,1.1[C,M]);
+    label(btex $#5$ etex,1.1[B,N]);
+    fill (fullcircle scaled 0.75mm) shifted (cotes1 intersectionpoint cotes4);
+    fill (fullcircle scaled 0.75mm) shifted (cotes3 intersectionpoint cotes4);
+  \end{mplibcode}
+%  \mplibcodeinherit{disable}
+  \else
+  \begin{mpost}[mpsettings={u:=\useKV[ClesThales]{Echelle};}]
+    pair A,B,C,M,N,O;%
+    %On place les points A,B,C sur le cercle de mani\`ere \`a faciliter la rotation de la figure
+    A=u*(1,1);
+    B-A=u*(4,0);
+    C=(A--2[A,B rotatedabout(A,45)]) intersectionpoint (B--2[B,A rotatedabout(B,-60)]);
+    % On d\'efinit le centre du cercle circonscrit
+    O - .5[A,B] = whatever * (B-A) rotated 90;
+    O - .5[B,C] = whatever * (C-B) rotated 90;
+    % On tourne pour \'eventuellement moins de lassitude :)
+    A:=A rotatedabout(O,#6);
+    B:=B rotatedabout(O,#6);
+    C:=C rotatedabout(O,#6);
+    % on dessine \`a main lev\'ee :)
+    path cotes[];
+    cotes1=A{dir(angle(B-A)+5)}..B{dir(angle(B-A)+5)};
+    cotes2=B{dir(angle(C-B)+5)}..C{dir(angle(C-B)+5)};
+    cotes3=C{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)};
+    M=point(0.4*length cotes1) of cotes1;
+    N=point(0.6*length cotes3) of cotes3;
+    cotes4=1.5[N,M]{dir(angle(N-M)+5)}..1.5[M,N]{dir(angle(N-M)+5)};
+    path triangle;
+    triangle=cotes1--cotes2--cotes3--cycle;
+    draw triangle;
+    draw cotes4;
+    %on labelise
+    label(btex $#1$ etex,1.15[O,A]);
+    label(btex $#2$ etex,1.15[O,B]);
+    label(btex $#3$ etex,1.15[O,C]);
+    label(btex $#4$ etex,1.1[C,M]);
+    label(btex $#5$ etex,1.1[B,N]);
+    fill (fullcircle scaled 0.75mm) shifted (cotes1 intersectionpoint cotes4);
+    fill (fullcircle scaled 0.75mm) shifted (cotes3 intersectionpoint cotes4);
+  \end{mpost}
+  \fi
+}
+
+%On d\'efinit la deuxi\`eme figure \`a utiliser
+\def\MPFigThalesCroisee#1#2#3#4#5#6{%
+    % #1 Premier sommet
+    % #2 Deuxi\`eme sommet
+    % #3 Troisi\`eme sommet
+    % #4 point sur la droite #1#2
+    % #5 point sur la droite #1#3
+  \ifluatex
+  \mplibforcehmode
+%  \mplibcodeinherit{enable}
+  \begin{mplibcode}
+    defaultcolormodel := \useKV[ClesThales]{ModeleCouleur};
+    u:=\useKV[ClesThales]{Echelle};
+    boolean CouleursNum,CouleursDen;
+    CouleursNum=\useKV[ClesThales]{CouleursNum};
+    CouleursDen=\useKV[ClesThales]{CouleursDen};
+    color CouleurNum,CouleurDen;
+    if CouleursNum:
+    CouleurNum=\useKV[ClesThales]{CouleurNum}
+    else:
+    CouleurNum=black
+    fi;
+    if CouleursDen:
+    CouleurDen=\useKV[ClesThales]{CouleurDen}
+    else:
+    CouleurDen=black
+    fi;
+    pair A,B,C,M,N,O;%
+    O=(2.5u,2.5u);
+    path cc;
+    cc=(fullcircle scaled 3u) shifted O;
+    %On place les points A,B,C sur le cercle de mani\`ere \`a faciliter la rotation de la figure
+    A=point(0.1*length cc) of cc;
+    B=A rotatedabout(O,130);
+    C=(A--2[A,B rotatedabout(A,45)]) intersectionpoint (B--2[B,A rotatedabout(B,-60)]);
+    % On tourne pour \'eventuellement moins de lassitude :)
+    A:=A rotatedabout(O,#6);
+    B:=B rotatedabout(O,#6);
+    C:=C rotatedabout(O,#6);
+    % on dessine \`a main lev\'ee :)
+    M=1.4[B,A];
+    N=1.4[C,A];
+    path cotes[];
+    cotes1=A{dir(angle(B-A)+5)}..1.15[A,B]{dir(angle(B-A)+5)};
+    cotes2=1.15[C,B]{dir(angle(C-B)+5)}..1.15[B,C]{dir(angle(C-B)+5)};
+    cotes3=1.15[A,C]{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)};
+    cotes4=1.5[N,M]{dir(angle(N-M)+5)}..1.5[M,N]{dir(angle(N-M)+5)};
+    cotes5=A{dir(angle(M-A)+5)}..1.15[A,M]{dir(angle(M-A)+5)};
+    cotes6=A{dir(angle(N-A)+5)}..1.15[A,N]{dir(angle(N-A)+5)};
+    for k=1 upto 6:
+    draw cotes[k];
+    endfor;
+    if CouleursDen:
+    drawoptions(dashed evenly withpen pencircle scaled 1.5 withcolor CouleurDen);
+    draw (cotes[1] cutafter cotes[2]);
+    draw (cotes[2] cutbefore cotes[1] cutafter cotes[3]);
+    draw (cotes[3] cutbefore cotes[2]);
+    drawoptions();
+    fi;
+    if CouleursNum:
+    drawoptions(dashed evenly withpen pencircle scaled 1.5 withcolor CouleurNum);
+    draw (cotes[5] cutafter cotes[4]);
+    draw (cotes[4] cutbefore cotes[5] cutafter cotes[6]);
+    draw (cotes[6] cutafter cotes[4]);
+    drawoptions();
+    fi;
+    pair I;
+    % On d\'efinit le centre du cercle inscrit \`a AMC
+    (I-C) rotated ((angle(A-C)-angle(M-C))/2) shifted C=whatever[A,C];
+    (I-M) rotated ((angle(C-M)-angle(A-M))/2) shifted M=whatever[M,C];
+    % on labelise
+    pair K,L;
+    K=1/2[B,C];
+    L=2[O,K];
+    label(TEX("$#1$"),I);
+    label(TEX("$#2$"),1/4[B,L]);
+    label(TEX("$#3$"),1/4[C,L]);
+    label(TEX("$#4$"),1.1[B,M]);
+    label(TEX("$#5$"),1.1[C,N]);
+    fill (fullcircle scaled 0.75mm) shifted (cotes5 intersectionpoint cotes4);
+    fill (fullcircle scaled 0.75mm) shifted (cotes6 intersectionpoint cotes4);
+    fill (fullcircle scaled 0.75mm) shifted (cotes1 intersectionpoint cotes2);
+    fill (fullcircle scaled 0.75mm) shifted (cotes3 intersectionpoint cotes2);
+    pair I,J,K;
+    I=1.1[N,M];
+    J=1.1[B,C];
+    K=1/2[I,J];
+    path cd;
+    cd=(fullcircle scaled 6mm) shifted K;
+    drawoptions(withcolor 0.75*white);
+    drawarrow reverse((I{dir(210+angle(I-J))}..{dir(150+angle(I-J))}K) cutafter cd);
+    drawarrow reverse((J{dir(210+angle(J-I))}..{dir(150+angle(J-I))}K) cutafter cd);
+    draw cd;
+    label(btex $//$ etex ,K);
+    drawoptions();
+  \end{mplibcode}
+%  \mplibcodeinherit{disable}
+  \else
+  \begin{mpost}[mpsettings={u:=\useKV[ClesThales]{Echelle};boolean CouleursNum,CouleursDen;
+    CouleursNum=\useKV[ClesThales]{CouleursNum};
+    CouleursDen=\useKV[ClesThales]{CouleursDen};
+    color CouleurNum,CouleurDen;
+    if CouleursNum:
+    CouleurNum=\useKV[ClesThales]{CouleurNum}
+    else:
+    CouleurNum=black
+    fi;
+    if CouleursDen:
+    CouleurDen=\useKV[ClesThales]{CouleurDen}
+    else:
+    CouleurDen=black
+    fi;}]
+    pair A,B,C,M,N,O;%
+    O=(2.5u,2.5u);
+    path cc;
+    cc=(fullcircle scaled 3u) shifted O;
+    %On place les points A,B,C sur le cercle de mani\`ere \`a faciliter la rotation de la figure
+    A=point(0.1*length cc) of cc;
+    B=A rotatedabout(O,130);
+    C=(A--2[A,B rotatedabout(A,45)]) intersectionpoint (B--2[B,A rotatedabout(B,-60)]);
+    % On tourne pour \'eventuellement moins de lassitude :)
+    A:=A rotatedabout(O,#6);
+    B:=B rotatedabout(O,#6);
+    C:=C rotatedabout(O,#6);
+    % on dessine \`a main lev\'ee :)
+    M=1.4[B,A];
+    N=1.4[C,A];
+    path cotes[];
+    cotes1=A{dir(angle(B-A)+5)}..1.15[A,B]{dir(angle(B-A)+5)};
+    cotes2=1.15[C,B]{dir(angle(C-B)+5)}..1.15[B,C]{dir(angle(C-B)+5)};
+    cotes3=1.15[A,C]{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)};
+    cotes4=1.5[N,M]{dir(angle(N-M)+5)}..1.5[M,N]{dir(angle(N-M)+5)};
+    cotes5=A{dir(angle(M-A)+5)}..1.15[A,M]{dir(angle(M-A)+5)};
+    cotes6=A{dir(angle(N-A)+5)}..1.15[A,N]{dir(angle(N-A)+5)};
+    for k=1 upto 6:
+    draw cotes[k];
+    endfor;
+    if CouleursDen:
+    drawoptions(dashed evenly withpen pencircle scaled 1.5 withcolor CouleurDen);
+    draw (cotes[1] cutafter cotes[2]);
+    draw (cotes[2] cutbefore cotes[1] cutafter cotes[3]);
+    draw (cotes[3] cutbefore cotes[2]);
+    drawoptions();
+    fi;
+    if CouleursNum:
+    drawoptions(dashed evenly withpen pencircle scaled 1.5 withcolor CouleurNum);
+    draw (cotes[5] cutafter cotes[4]);
+    draw (cotes[4] cutbefore cotes[5] cutafter cotes[6]);
+    draw (cotes[6] cutafter cotes[4]);
+    drawoptions();
+    fi;
+    pair I;
+    % On d\'efinit le centre du cercle inscrit \`a AMC
+    (I-C) rotated ((angle(A-C)-angle(M-C))/2) shifted C=whatever[A,C];
+    (I-M) rotated ((angle(C-M)-angle(A-M))/2) shifted M=whatever[M,C];
+    %on labelise
+    label(btex $#1$ etex,I);
+    label(btex $#2$ etex,1.2[M,B]);
+    label(btex $#3$ etex,1.2[N,C]);
+    label(btex $#4$ etex,1.1[B,M]);
+    label(btex $#5$ etex,1.1[C,N]);
+    fill (fullcircle scaled 0.75mm) shifted (cotes5 intersectionpoint cotes4);
+    fill (fullcircle scaled 0.75mm) shifted (cotes6 intersectionpoint cotes4);
+    pair I,J,K;
+    I=1.1[N,M];
+    J=1.1[B,C];
+    K=1/2[I,J];
+    path cd;
+    cd=(fullcircle scaled 6mm) shifted K;
+    drawoptions(withcolor 0.75*white);
+    drawarrow reverse((I{dir(210+angle(I-J))}..{dir(150+angle(I-J))}K) cutafter cd);
+    drawarrow reverse((J{dir(210+angle(J-I))}..{dir(150+angle(J-I))}K) cutafter cd);
+    draw cd;
+    label(btex $//$ etex ,K);
+    drawoptions();
+  \end{mpost}
+  \fi
+}%
+
+%On d\'efinit la deuxi\`eme figure \`a utiliser
+\def\MPFigReciThalesCroisee#1#2#3#4#5#6{%
+  % #1 Premier sommet
+    % #2 Deuxi\`eme sommet
+    % #3 Troisi\`eme sommet
+    % #4 point sur la droite #1#2
+    % #5 point sur la droite #1#3
+  \ifluatex
+  \mplibforcehmode
+%  \mplibcodeinherit{enable}
+  \begin{mplibcode}
+    defaultcolormodel := \useKV[ClesThales]{ModeleCouleur};
+    u:=\useKV[ClesThales]{Echelle};
+    pair A,B,C,M,N,O;%
+    O=(2.5u,2.5u);
+    path cc;
+    cc=(fullcircle scaled 3u) shifted O;
+    %On place les points A,B,C sur le cercle de mani\`ere \`a faciliter la rotation de la figure
+    A=point(0.1*length cc) of cc;
+    B=A rotatedabout(O,130);
+    C=(A--2[A,B rotatedabout(A,45)]) intersectionpoint (B--2[B,A rotatedabout(B,-60)]);
+    % On tourne pour \'eventuellement moins de lassitude :)
+    A:=A rotatedabout(O,#6);
+    B:=B rotatedabout(O,#6);
+    C:=C rotatedabout(O,#6);
+    % on dessine \`a main lev\'ee :)
+    M=1.4[B,A];
+    N=1.4[C,A];
+    path cotes[];
+    cotes1=A{dir(angle(B-A)+5)}..1.15[A,B]{dir(angle(B-A)+5)};
+    cotes2=1.15[C,B]{dir(angle(C-B)+5)}..1.15[B,C]{dir(angle(C-B)+5)};
+    cotes3=1.15[A,C]{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)};
+    cotes4=1.5[N,M]{dir(angle(N-M)+5)}..1.5[M,N]{dir(angle(N-M)+5)};
+    cotes5=A{dir(angle(M-A)+5)}..1.15[A,M]{dir(angle(M-A)+5)};
+    cotes6=A{dir(angle(N-A)+5)}..1.15[A,N]{dir(angle(N-A)+5)};
+    for k=1 upto 6:
+    draw cotes[k];
+    endfor;
+    pair I;
+    % On d\'efinit le centre du cercle inscrit \`a AMC
+    (I-C) rotated ((angle(A-C)-angle(M-C))/2) shifted C=whatever[A,C];
+    (I-M) rotated ((angle(C-M)-angle(A-M))/2) shifted M=whatever[M,C];
+    %on labelise
+    label(btex $#1$ etex,I);
+    label(btex $#2$ etex,1.2[M,B]);
+    label(btex $#3$ etex,1.2[N,C]);
+    label(btex $#4$ etex,1.1[B,M]);
+    label(btex $#5$ etex,1.1[C,N]);
+    fill (fullcircle scaled 0.75mm) shifted (cotes5 intersectionpoint cotes4);
+    fill (fullcircle scaled 0.75mm) shifted (cotes6 intersectionpoint cotes4);
+    fill (fullcircle scaled 0.75mm) shifted (cotes1 intersectionpoint cotes2);
+    fill (fullcircle scaled 0.75mm) shifted (cotes3 intersectionpoint cotes2);
+  \end{mplibcode}
+%  \mplibcodeinherit{disable}
+  \else
+  \begin{mpost}[mpsettings={u:=\useKV[ClesThales]{Echelle};}]
+    pair A,B,C,M,N,O;%
+    O=(2.5u,2.5u);
+    path cc;
+    cc=(fullcircle scaled 3u) shifted O;
+    %On place les points A,B,C sur le cercle de mani\`ere \`a faciliter la rotation de la figure
+    A=point(0.1*length cc) of cc;
+    B=A rotatedabout(O,130);
+    C=(A--2[A,B rotatedabout(A,45)]) intersectionpoint (B--2[B,A rotatedabout(B,-60)]);
+    % On tourne pour \'eventuellement moins de lassitude :)
+    A:=A rotatedabout(O,#6);
+    B:=B rotatedabout(O,#6);
+    C:=C rotatedabout(O,#6);
+    % on dessine \`a main lev\'ee :)
+    M=1.4[B,A];
+    N=1.4[C,A];
+    path cotes[];
+    cotes1=A{dir(angle(B-A)+5)}..1.15[A,B]{dir(angle(B-A)+5)};
+    cotes2=1.15[C,B]{dir(angle(C-B)+5)}..1.15[B,C]{dir(angle(C-B)+5)};
+    cotes3=1.15[A,C]{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)};
+    cotes4=1.5[N,M]{dir(angle(N-M)+5)}..1.5[M,N]{dir(angle(N-M)+5)};
+    cotes5=A{dir(angle(M-A)+5)}..1.15[A,M]{dir(angle(M-A)+5)};
+    cotes6=A{dir(angle(N-A)+5)}..1.15[A,N]{dir(angle(N-A)+5)};
+    for k=1 upto 6:
+    draw cotes[k];
+    endfor;
+    pair I;
+    % On d\'efinit le centre du cercle inscrit \`a AMC
+    (I-C) rotated ((angle(A-C)-angle(M-C))/2) shifted C=whatever[A,C];
+    (I-M) rotated ((angle(C-M)-angle(A-M))/2) shifted M=whatever[M,C];
+    %on labelise
+    label(btex $#1$ etex,I);
+    label(btex $#2$ etex,1.2[M,B]);
+    label(btex $#3$ etex,1.2[N,C]);
+    label(btex $#4$ etex,1.1[B,M]);
+    label(btex $#5$ etex,1.1[C,N]);
+    fill (fullcircle scaled 0.75mm) shifted (cotes5 intersectionpoint cotes4);
+    fill (fullcircle scaled 0.75mm) shifted (cotes6 intersectionpoint cotes4);
+    fill (fullcircle scaled 0.75mm) shifted (cotes1 intersectionpoint cotes2);
+    fill (fullcircle scaled 0.75mm) shifted (cotes3 intersectionpoint cotes2);
+  \end{mpost}
+  \fi
+}
+
+\newcommand\RedactionThales{}%
+\newcommand\EcritureCalculs{}%
+\newcommand\EcritureQuotients{}%
+
+%%%
+\newcommand\TTThales[6][]{%
+  \useKVdefault[ClesThales]%
+  \setKV[ClesThales]{#1}%
+  \ifboolKV[ClesThales]{Perso}{\RedactionThales}{%
+    \ifboolKV[ClesThales]{Droites}{%
+      Les droites \ifboolKV[ClesThales]{Remediation}{\pointilles[2cm]}{$(#3#5)$} et \ifboolKV[ClesThales]{Remediation}{\pointilles[2cm]}{$(#4#6)$} sont s\'ecantes en \ifboolKV[ClesThales]{Remediation}{\pointilles[2cm]}{$#2$}.%
+    }{%
+      Dans le triangle \ifboolKV[ClesThales]{Remediation}{\pointilles[2cm]}{$#2#3#4$}, \ifboolKV[ClesThales]{Remediation}{\pointilles[1cm]}{$#5$} est un point \ifboolKV[ClesThales]{Segment}{du segment}{de la
+        droite}
+      \ifboolKV[ClesThales]{Remediation}{\pointilles[2cm]}{\ifboolKV[ClesThales]{Segment}{$[#2#3]$}{$(#2#3)$}},
+      \ifboolKV[ClesThales]{Remediation}{\pointilles[1cm]}{$#6$} est un
+      point \ifboolKV[ClesThales]{Segment}{du segment}{de la droite}
+      \ifboolKV[ClesThales]{Remediation}{\pointilles[2cm]}{\ifboolKV[ClesThales]{Segment}{$[#2#4]$}{$(#2#4)$}}.%
+    }
+    \\Comme les droites \ifboolKV[ClesThales]{Remediation}{\pointilles[2cm]}{$(#5#6)$} et \ifboolKV[ClesThales]{Remediation}{\pointilles[2cm]}{$(#3#4)$} sont parall\`eles, alors \ifboolKV[ClesThales]{Propor}{le tableau%
+      \[\begin{array}{c|c|c}
+          \ifboolKV[ClesThales]{Remediation}{\pointilles[1cm]}{#2#5}&\ifboolKV[ClesThales]{Remediation}{\pointilles[1cm]}{#2#6}&\ifboolKV[ClesThales]{Remediation}{\pointilles[1cm]}{#5#6}\\
+          \hline
+          \ifboolKV[ClesThales]{Remediation}{\pointilles[1cm]}{#2#3}&\ifboolKV[ClesThales]{Remediation}{\pointilles[1cm]}{#2#4}&\ifboolKV[ClesThales]{Remediation}{\pointilles[1cm]}{#3#4}\\
+        \end{array}
+      \]
+      est un tableau de proportionnalit\'e\ifboolKV[ClesThales]{Segment}{.}{ d'apr\`es le th\'eor\`eme de Thal\`es.}%
+    }{%
+      \ifboolKV[ClesThales]{Segment}{on a :}{le th\'eor\`eme de Thal\`es permet d'\'ecrire :}%
+      \[\frac{\ifboolKV[ClesThales]{Remediation}{\pointilles[1cm]}{\ifboolKV[ClesThales]{CouleursNum}{\mathcolor{\useKV[ClesThales]{CouleurNum}}{#2#5}}{#2#5}}}{\ifboolKV[ClesThales]{Remediation}{\pointilles[1cm]}{\ifboolKV[ClesThales]{CouleursDen}{\mathcolor{\useKV[ClesThales]{CouleurDen}}{#2#3}}{#2#3}}}=\frac{\ifboolKV[ClesThales]{Remediation}{\pointilles[1cm]}{\ifboolKV[ClesThales]{CouleursNum}{\mathcolor{\useKV[ClesThales]{CouleurNum}}{#2#6}}{#2#6}}}{\ifboolKV[ClesThales]{Remediation}{\pointilles[1cm]}{\ifboolKV[ClesThales]{CouleursDen}{\mathcolor{\useKV[ClesThales]{CouleurDen}}{#2#4}}{#2#4}}}=\frac{\ifboolKV[ClesThales]{Remediation}{\pointilles[1cm]}{\ifboolKV[ClesThales]{CouleursNum}{\mathcolor{\useKV[ClesThales]{CouleurNum}}{#5#6}}{#5#6}}}{\ifboolKV[ClesThales]{Remediation}{\pointilles[1cm]}{\ifboolKV[ClesThales]{CouleursDen}{\mathcolor{\useKV[ClesThales]{CouleurDen}}{#3#4}}{#3#4}}}.\]%
+    }%
+  }%
+}%
+
+\newcommand\TThalesCalculsD[8][]{%
+  \setKV[ClesThales]{#1}%
+  \newcount\zzz\newcount\yyy\newcount\xxx%Pour se rappeller des calculs \`a faire et combien en faire%
+  \def\Nomx{}%
+  \def\Nomy{}%
+  \def\Nomz{}%
+  \zzz=0\yyy=0\xxx=0%
+  \TTThales[#1]{\StrMid{#2}{1}{1}}{\StrMid{#2}{2}{2}}{\StrMid{#2}{3}{3}}{\StrMid{#2}{4}{4}}{\StrMid{#2}{5}{5}}\par
+\IfDecimal{#3}{%
+  \IfDecimal{#6}{}{%
+    \IfDecimal{#4}{%
+        \IfDecimal{#7}{%
+          \xxx=5263%#6&=\frac{#3\times#7}{#4}\\
+          \edef\Nomx{#6}\opcopy{#3}{valx}\opcopy{#7}{Valx}\opcopy{#4}{denox}%
+          \xdef\ResultatThalesx{\fpeval{round(#3*#7/#4,\useKV[ClesThales]{Precision})}}%
+        }{%
+          \IfDecimal{#8}{\IfDecimal{#5}{\xxx=5274%\[#6=\frac{#3\times#8}{#5}\]
+              \edef\Nomx{#6}\opcopy{#3}{valx}\opcopy{#8}{Valx}\opcopy{#5}{denox}%
+              \xdef\ResultatThalesx{\fpeval{round(#3*#8/#5,\useKV[ClesThales]{Precision})}}%
+          }{}}{}
+        }
+      }{\IfDecimal{#8}{\IfDecimal{#5}{\xxx=5274%\[#6=\frac{#3\times#8}{#5}\]
+            \edef\Nomx{#6}\opcopy{#3}{valx}\opcopy{#8}{Valx}\opcopy{#5}{denox}%
+            \xdef\ResultatThalesx{\fpeval{round(#3*#8/#5,\useKV[ClesThales]{Precision})}}%
+          }{}}{}
+      }
+    }
+  }{%
+    \IfDecimal{#6}{%
+      \IfDecimal{#4}{%
+        \IfDecimal{#7}{%
+          \xxx=2536%\[#3=\frac{#6\times#4}{#7}\]%
+          \edef\Nomx{#3}\opcopy{#6}{valx}\opcopy{#4}{Valx}\opcopy{#7}{denox}%
+          \xdef\ResultatThalesx{\fpeval{round(#6*#4/#7,\useKV[ClesThales]{Precision})}}%
+        }{%
+          \IfDecimal{#5}{\IfDecimal{#8}{\xxx=2547
+              \edef\Nomx{#3}\opcopy{#6}{valx}\opcopy{#5}{Valx}\opcopy{#8}{denox}%\[#3=\frac{#6\times#5}{#8}\]
+              \xdef\ResultatThalesx{\fpeval{round(#6*#5/#8,\useKV[ClesThales]{Precision})}}%
+            }{}}{}
+        }
+      }{\IfDecimal{#5}{\IfDecimal{#8}{\xxx=2547
+            \edef\Nomx{#3}\opcopy{#6}{valx}\opcopy{#5}{Valx}\opcopy{#8}{denox}%\[#3=\frac{#6\times#5}{#8}\]
+            \xdef\ResultatThalesx{\fpeval{round(#6*#5/#8,\useKV[ClesThales]{Precision})}}%
+          }{}}{}
+      }
+    }{}
+  }%
+  % 
+  \IfDecimal{#4}{%
+    \IfDecimal{#7}{}{%
+      \IfDecimal{#5}{%
+        \IfDecimal{#8}{%
+          \yyy=6374%\[#7=\frac{#4\times#8}{#5}\]%
+          \edef\Nomy{#7}\opcopy{#4}{valy}\opcopy{#8}{Valy}\opcopy{#5}{denoy}%
+          \xdef\ResultatThalesy{\fpeval{round(#4*#8/#5,\useKV[ClesThales]{Precision})}}%
+        }{%
+          \IfDecimal{#6}{\IfDecimal{#3}{\yyy=6352%\[#7=\frac{#4\times#6}{#3}\]
+              \edef\Nomy{#7}\opcopy{#4}{valy}\opcopy{#6}{Valy}\opcopy{#3}{denoy}%
+              \xdef\ResultatThalesy{\fpeval{round(#4*#6/#3,\useKV[ClesThales]{Precision})}}%
+            }{}}{}
+        }
+      }{\IfDecimal{#6}{\IfDecimal{#3}{\yyy=6352%\[#7=\frac{#4\times#6}{#3}\]
+            \edef\Nomy{#7}\opcopy{#4}{valy}\opcopy{#6}{Valy}\opcopy{#3}{denoy}%
+            \xdef\ResultatThalesy{\fpeval{round(#4*#6/#3,\useKV[ClesThales]{Precision})}}%
+            }{}}{}
+      }
+    }
+  }{%
+    \IfDecimal{#7}{%
+      \IfDecimal{#5}{%
+        \IfDecimal{#8}{%
+          \yyy=3647%\[#4=\frac{#7\times#5}{#8}\]%
+          \edef\Nomy{#4}\opcopy{#7}{valy}\opcopy{#5}{Valy}\opcopy{#8}{denoy}%
+          \xdef\ResultatThalesy{\fpeval{round(#7*#5/#8,\useKV[ClesThales]{Precision})}}%
+        }{%
+          \IfDecimal{#3}{\IfDecimal{#6}{\yyy=3625%\[#4=\frac{#7\times#3}{#6}\]
+              \edef\Nomy{#4}\opcopy{#7}{valy}\opcopy{#3}{Valy}\opcopy{#6}{denoy}%
+              \xdef\ResultatThalesy{\fpeval{round(#7*#3/#6,\useKV[ClesThales]{Precision})}}%
+            }{}}{}
+        }
+      }{\IfDecimal{#3}{\IfDecimal{#6}{\yyy=3625%\[#4=\frac{#7\times#3}{#6}\]
+            \edef\Nomy{#4}\opcopy{#7}{valy}\opcopy{#3}{Valy}\opcopy{#6}{denoy}%
+            \xdef\ResultatThalesy{\fpeval{round(#7*#3/#6,\useKV[ClesThales]{Precision})}}%
+            }{}}{}
+      }}{}}%
+  % 
+  \IfDecimal{#5}{%
+    \IfDecimal{#8}{}{%
+      \IfDecimal{#4}{
+        \IfDecimal{#7}{
+          \zzz=7463%\[#8=\frac{#5\times#7}{#4}\]%
+          \edef\Nomz{#8}\opcopy{#5}{valz}\opcopy{#7}{Valz}\opcopy{#4}{denoz}%
+          \xdef\ResultatThalesz{\fpeval{round(#5*#7/#4,\useKV[ClesThales]{Precision})}}%
+        }{%
+          \IfDecimal{#3}{\IfDecimal{#6}{\zzz=7452%\[#8=\frac{#5\times#6}{#3}\]
+              \edef\Nomz{#8}\opcopy{#5}{valz}\opcopy{#6}{Valz}\opcopy{#3}{denoz}%
+              \xdef\ResultatThalesz{\fpeval{round(#5*#6/#3,\useKV[ClesThales]{Precision})}}%
+            }{}}{}
+        }
+      }{\IfDecimal{#3}{\IfDecimal{#6}{\zzz=7452%\[#8=\frac{#5\times#6}{#3}\]
+            \edef\Nomz{#8}\opcopy{#5}{valz}\opcopy{#6}{Valz}\opcopy{#3}{denoz}%
+            \xdef\ResultatThalesz{\fpeval{round(#5*#6/#3,\useKV[ClesThales]{Precision})}}%
+            }{}}{}
+      }
+    }
+  }{%
+    \IfDecimal{#8}{%
+      \IfDecimal{#4}{%
+        \IfDecimal{#7}{%
+          \zzz=4736% \[#5=\frac{#8\times#4}{#7}\]%
+          \edef\Nomz{#5}\opcopy{#8}{valz}\opcopy{#4}{Valz}\opcopy{#7}{denoz}%
+          \xdef\ResultatThalesz{\fpeval{round(#8*#4/#7,\useKV[ClesThales]{Precision})}}%
+        }{%
+          \IfDecimal{#3}{\IfDecimal{#6}{\zzz=4725%\[#5=\frac{#8\times#3}{#6}\]
+              \edef\Nomz{#5}\opcopy{#8}{valz}\opcopy{#3}{Valz}\opcopy{#6}{denoz}%
+              \xdef\ResultatThalesz{\fpeval{round(#8*#3/#6,\useKV[ClesThales]{Precision})}}%
+            }{}}{}
+        }
+      }{\IfDecimal{#3}{\IfDecimal{#6}{\zzz=4725%\[#5=\frac{#8\times#3}{#6}\]
+            \edef\Nomz{#5}\opcopy{#8}{valz}\opcopy{#3}{Valz}\opcopy{#6}{denoz}%
+            \xdef\ResultatThalesz{\fpeval{round(#8*#3/#6,\useKV[ClesThales]{Precision})}}%
+            }{}}{}
+      }}{}
+  }%
+  %%
+  \StrMid{\the\zzz}{1}{1}[\cmza]%
+  \StrMid{\the\yyy}{1}{1}[\cmya]%
+  \StrMid{\the\xxx}{1}{1}[\cmxa]%
+  \ifboolKV[ClesThales]{Calcul}{%
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \ifboolKV[ClesThales]{IntroCalculs}{On remplace par les longueurs connues :}{}%
+  \ifboolKV[ClesThales]{CalculsPerso}{%
+    \EcritureQuotients%
+  }{%
+    \ifboolKV[ClesThales]{Propor}{%
+      \[\begin{array}{c|c|c}
+          \IfDecimal{#3}{\num{#3}}{#3}&\IfDecimal{#4}{\num{#4}}{#4}&\IfDecimal{#5}{\num{#5}}{#5}\\
+          \hline
+          \IfDecimal{#6}{\num{#6}}{#6}&\IfDecimal{#7}{\num{#7}}{#7}&\IfDecimal{#8}{\num{#8}}{#8}
+        \end{array}
+      \]
+    }{%
+      \[\frac{\IfDecimal{#3}{\num{#3}}{#3}}{\IfDecimal{#6}{\num{#6}}{#6}}=\frac{\IfDecimal{#4}{\num{#4}}{#4}}{\IfDecimal{#7}{\num{#7}}{#7}}=\frac{\IfDecimal{#5}{\num{#5}}{#5}}{\IfDecimal{#8}{\num{#8}}{#8}}\]
+    }%
+  }%
+  % On choisit \'eventuellement le calcul \`a faire s'il y en a plusieurs.
+  \xdef\CompteurCalcul{\useKV[ClesThales]{ChoixCalcul}}%
+  \xintifboolexpr{\CompteurCalcul>0}{\xintifboolexpr{\CompteurCalcul==1}{\xdef\cmya{0}\xdef\cmza{0}}{\xintifboolexpr{\CompteurCalcul==2}{\xdef\cmxa{0}\xdef\cmza{0}}{\xdef\cmxa{0}\xdef\cmya{0}}}}{}%
+  %% on fait les calculs
+  \ifboolKV[ClesThales]{CalculsPerso}{%
+    \EcritureCalculs%
+  }{%
+    \begin{align*}
+      % Premier compteur \xxx
+      \ifnum\cmxa>0
+      \Nomx\uppercase{&}=\frac{\opexport{valx}{\valx}\num{\valx}\times\opexport{Valx}{\Valx}\num{\Valx}}{\opexport{denox}{\denox}\num{\denox}}\relax%\global\numx=\numexpr\opprint{valx}*\opprint{Valx}\relax
+    \fi
+    %    % Deuxi\`eme compteur \yyy
+    \ifnum\cmya>0
+      \ifnum\cmxa=0
+      \else
+        \uppercase{&}
+      \fi%
+      \Nomy\uppercase{&}=\frac{\opexport{valy}{\valy}\num{\valy}\times\opexport{Valy}{\Valy}\num{\Valy}}{\opexport{denoy}{\denoy}\num{\denoy}}\relax%\global\numy=\numexpr\opprint{valy}*\opprint{Valy}\relax
+    \fi
+    % Troisi\`eme compteur \zzz
+    \ifnum\cmza>0
+      \ifnum\cmxa=0
+        \ifnum\cmya=0                           
+          %
+        \else
+          \uppercase{&}
+        \fi
+        \Nomz\uppercase{&}=\frac{\opexport{valz}{\valz}\num{\valz}\times\opexport{Valz}{\Valz}\num{\Valz}}{\opexport{denoz}{\denoz}\num{\denoz}}\relax%\global\numz=\numexpr\opprint{valz}*\opprint{Valz}\relax
+      \else
+        \uppercase{&}\Nomz\uppercase{&}=\frac{\opexport{valz}{\valz}\num{\valz}\times\opexport{Valz}{\Valz}\num{\Valz}}{\opexport{denoz}{\denoz}\num{\denoz}}\relax%\global\numz=\numexpr\opprint{valz}*\opprint{Valz}\relax
+      \fi
+    \fi
+    \\
+%    % 2eme ligne du tableau : calcul des num\'erateurs
+%        %Premier compteur \xxx
+    \ifnum\cmxa>0
+      \Nomx\uppercase{&}=\frac{\opmul*{valx}{Valx}{numx}\opexport{numx}{\numx}\num{\numx}}{\opexport{denox}{\denox}\num{\denox}}
+    \fi
+    %    % Deuxi\`eme compteur \yyy
+    \ifnum\cmya>0
+      \ifnum\cmxa=0
+        %
+      \else
+        \uppercase{&}
+      \fi
+      \Nomy\uppercase{&}=\frac{\opmul*{valy}{Valy}{numy}\opexport{numy}{\numy}\num{\numy}}{\opexport{denoy}{\denoy}\num{\denoy}}%
+    \fi
+%    %Troisi\`eme compteur \zzz
+    \ifnum\cmza>0
+      \ifnum\cmxa=0
+        \ifnum\cmya=0                           
+          %
+        \else
+          \uppercase{&}
+        \fi
+        \Nomz\uppercase{&}=\frac{\opmul*{valz}{Valz}{numz}\opexport{numz}{\numz}\num{\numz}}{\opexport{denoz}{\denoz}\num{\denoz}}
+      \else
+        \uppercase{&}\Nomz\uppercase{&}=\frac{\opmul*{valz}{Valz}{numz}\opexport{numz}{\numz}\num{\numz}}{\opexport{denoz}{\denoz}\num{\denoz}}
+      \fi
+    \fi
+    \\
+%    % 3eme ligne : Calculs
+    \ifnum\cmxa>0
+      \Nomx\uppercase{&}\opdiv*{numx}{denox}{resultatx}{restex}\opcmp{restex}{0}\ifopeq=\SI{\ResultatThalesx}{\PfCThalesUnit}\else\approx\SI{\fpeval{round(\ResultatThalesx,\useKV[ClesThales]{Precision})}}{\PfCThalesUnit}\fi%
+    \fi
+    %    % Deuxi\`eme compteur \yyy
+    \ifnum\cmya>0
+      \ifnum\cmxa=0
+        %
+      \else
+        \uppercase{&}
+      \fi
+      \Nomy\uppercase{&}\opdiv*{numy}{denoy}{resultaty}{restey}\opcmp{restey}{0}\ifopeq=\SI{\ResultatThalesy}{\PfCThalesUnit}\else\approx\SI{\fpeval{round(\ResultatThalesy,\useKV[ClesThales]{Precision})}}{\PfCThalesUnit}\fi%
+    \fi
+%    %Troisi\`eme compteur \zzz
+    \ifnum\cmza>0
+      \ifnum\cmxa=0
+        \ifnum\cmya=0                           
+          %
+        \else
+          \uppercase{&}
+        \fi
+        \Nomz\uppercase{&}\opdiv*{numz}{denoz}{resultatz}{restez}\opcmp{restez}{0}\ifopeq=\SI{\ResultatThalesz}{\PfCThalesUnit}\else\approx\SI{\fpeval{round(\ResultatThalesz,\useKV[ClesThales]{Precision})}}{\PfCThalesUnit}\fi%
+      \else
+        \uppercase{&}\Nomz\uppercase{&}\opdiv*{numz}{denoz}{resultatz}{restez}\opcmp{restez}{0}\ifopeq=\SI{\ResultatThalesz}{\PfCThalesUnit}\else\approx\SI{\fpeval{round(\ResultatThalesz,\useKV[ClesThales]{Precision})}}{\PfCThalesUnit}\fi%
+      \fi
+    \fi
+    \end{align*}
+    }
+}{}
+}
+
+\newcommand\TThalesCalculsE[8][]{%
+  \setKV[ClesThales]{#1}%
+  \newcount\zzz\newcount\yyy\newcount\xxx%Pour se rappeller des calculs \`a faire et combien en faire%
+  \newcount\valx\newcount\Valx%
+  \newcount\valy\newcount\Valy%
+  \newcount\valz\newcount\Valz%
+  \newcount\numx\newcount\numy\newcount\numz%
+  \newcount\denox\newcount\denoy\newcount\denoz%
+  \def\Nomx{}%
+  \def\Nomy{}%
+  \def\Nomz{}%
+  \zzz=0\yyy=0\xxx=0%
+  \TTThales[#1]{\StrMid{#2}{1}{1}}{\StrMid{#2}{2}{2}}{\StrMid{#2}{3}{3}}{\StrMid{#2}{4}{4}}{\StrMid{#2}{5}{5}}\par%
+\IfDecimal{#3}{%
+  \IfDecimal{#6}{}{%
+    \IfDecimal{#4}{%
+        \IfDecimal{#7}{%
+          \xxx=5263%#6&=\frac{#3\times#7}{#4}\\
+          \edef\Nomx{#6}\valx=#3\Valx=#7\denox=#4%
+        }{%
+          \IfDecimal{#8}{\IfDecimal{#5}{\xxx=5274%\[#6=\frac{#3\times#8}{#5}\]
+            \edef\Nomx{#6}\valx=#3\Valx=#8\denox=#5%
+          }{}}{}
+        }
+      }{\IfDecimal{#8}{\IfDecimal{#5}{\xxx=5274%\[#6=\frac{#3\times#8}{#5}\]
+            \edef\Nomx{#6}\valx=#3\Valx=#8\denox=#5%
+          }{}}{}
+      }
+    }
+  }{%
+    \IfDecimal{#6}{%
+      \IfDecimal{#4}{%
+        \IfDecimal{#7}{%
+          \xxx=2536%\[#3=\frac{#6\times#4}{#7}\]%
+          \edef\Nomx{#3}\valx=#6\Valx=#4\denox=#7%
+        }{%
+          \IfDecimal{#5}{\IfDecimal{#8}{\xxx=2547
+            \edef\Nomx{#3}\valx=#6\Valx=#5\denox=#8%\[#3=\frac{#6\times#5}{#8}\]
+            }{}}{}
+        }
+      }{\IfDecimal{#5}{\IfDecimal{#8}{\xxx=2547
+            \edef\Nomx{#3}\valx=#6\Valx=#5\denox=#8%\[#3=\frac{#6\times#5}{#8}\]
+            }{}}{}
+      }
+    }{}
+  }%
+  % 
+  \IfDecimal{#4}{%
+    \IfDecimal{#7}{}{%
+      \IfDecimal{#5}{%
+        \IfDecimal{#8}{%
+          \yyy=6374%\[#7=\frac{#4\times#8}{#5}\]%
+          \edef\Nomy{#7}\valy=#4\Valy=#8\denoy=#5%
+        }{%
+          \IfDecimal{#6}{\IfDecimal{#3}{\yyy=6352%\[#7=\frac{#4\times#6}{#3}\]
+            \edef\Nomy{#7}\valy=#4\Valy=#6\denoy=#3%
+            }{}}{}
+        }
+      }{\IfDecimal{#6}{\IfDecimal{#3}{\yyy=6352%\[#7=\frac{#4\times#6}{#3}\]
+            \edef\Nomy{#7}\valy=#4\Valy=#6\denoy=#3%
+            }{}}{}
+      }
+    }
+  }{%
+    \IfDecimal{#7}{%
+      \IfDecimal{#5}{%
+        \IfDecimal{#8}{%
+          \yyy=3647%\[#4=\frac{#7\times#5}{#8}\]%
+          \edef\Nomy{#4}\valy=#7\Valy=#5\denoy=#8%
+        }{%
+          \IfDecimal{#3}{\IfDecimal{#6}{\yyy=3625%\[#4=\frac{#7\times#3}{#6}\]
+            \edef\Nomy{#4}\valy=#7\Valy=#3\denoy=#6%
+            }{}}{}
+        }
+      }{\IfDecimal{#3}{\IfDecimal{#6}{\yyy=3625%\[#4=\frac{#7\times#3}{#6}\]
+            \edef\Nomy{#4}\valy=#7\Valy=#3\denoy=#6%
+            }{}}{}
+      }}{}}%
+  % 
+  \IfDecimal{#5}{%
+    \IfDecimal{#8}{}{%
+      \IfDecimal{#4}{
+        \IfDecimal{#7}{
+          \zzz=7463%\[#8=\frac{#5\times#7}{#4}\]%
+          \edef\Nomz{#8}\valz=#5\Valz=#7\denoz=#4%
+        }{%
+          \IfDecimal{#3}{\IfDecimal{#6}{\zzz=7452%\[#8=\frac{#5\times#6}{#3}\]
+            \edef\Nomz{#8}\valz=#5\Valz=#6\denoz=#3%
+            }{}}{}
+        }
+      }{\IfDecimal{#3}{\IfDecimal{#6}{\zzz=7452%\[#8=\frac{#5\times#6}{#3}\]
+            \edef\Nomz{#8}\valz=#5\Valz=#6\denoz=#3%
+            }{}}{}
+      }
+    }
+  }{%
+    \IfDecimal{#8}{%
+      \IfDecimal{#4}{%
+        \IfDecimal{#7}{%
+          \zzz=4736% \[#5=\frac{#8\times#4}{#7}\]%
+          \edef\Nomz{#5}\valz=#8\Valz=#4\denoz=#7%
+        }{%
+          \IfDecimal{#3}{\IfDecimal{#6}{\zzz=4725%\[#5=\frac{#8\times#3}{#6}\]
+            \edef\Nomz{#5}\valz=#8\Valz=#3\denoz=#6%
+            }{}}{}
+        }
+      }{\IfDecimal{#3}{\IfDecimal{#6}{\zzz=4725%\[#5=\frac{#8\times#3}{#6}\]
+            \edef\Nomz{#5}\valz=#8\Valz=#3\denoz=#6%
+            }{}}{}
+      }}{}
+  }%
+  %%
+\StrMid{\the\zzz}{1}{1}[\cmza]%
+\StrMid{\the\yyy}{1}{1}[\cmya]%
+\StrMid{\the\xxx}{1}{1}[\cmxa]%
+\ifboolKV[ClesThales]{Calcul}{%
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%
+  On remplace par les longueurs connues :
+  \ifboolKV[ClesThales]{Propor}{%
+    \[\begin{array}{c|c|c}
+        \IfDecimal{#3}{\num{#3}}{#3}&\IfDecimal{#4}{\num{#4}}{#4}&\IfDecimal{#5}{\num{#5}}{#5}\\
+        \hline
+        \IfDecimal{#6}{\num{#6}}{#6}&\IfDecimal{#7}{\num{#7}}{#7}&\IfDecimal{#8}{\num{#8}}{#8}\\
+      \end{array}
+    \]
+  }{%
+    \[\frac{\IfDecimal{#3}{\num{#3}}{#3}}{\IfDecimal{#6}{\num{#6}}{#6}}=\frac{\IfDecimal{#4}{\num{#4}}{#4}}{\IfDecimal{#7}{\num{#7}}{#7}}=\frac{\IfDecimal{#5}{\num{#5}}{#5}}{\IfDecimal{#8}{\num{#8}}{#8}}.\]
+  }%
+  % On choisit \'eventuellement le calcul \`a faire s'il y en a plusieurs.
+  \xdef\CompteurCalcul{\useKV[ClesThales]{ChoixCalcul}}%
+  \xintifboolexpr{\CompteurCalcul>0}{\xintifboolexpr{\CompteurCalcul==1}{\xdef\cmya{0}\xdef\cmza{0}}{\xintifboolexpr{\CompteurCalcul==2}{\xdef\cmxa{0}\xdef\cmza{0}}{\xdef\cmxa{0}\xdef\cmya{0}}}}%
+  %%on fait les calculs
+\begin{align*}
+    %Premier compteur \xxx
+    \ifnum\cmxa>0
+      \Nomx\uppercase{&}=\frac{\the\valx\times\the\Valx}{\the\denox}\global\numx=\numexpr\the\valx*\the\Valx\relax
+    \fi
+    %    % Deuxi\`eme compteur \yyy
+    \ifnum\cmya>0
+      \ifnum\cmxa=0
+      \else
+        \uppercase{&}
+      \fi%
+      \Nomy\uppercase{&}=\frac{\the\valy\times\the\Valy}{\the\denoy}\global\numy=\numexpr\the\valy*\the\Valy\relax
+     % \else
+     %   \uppercase{&}\Nomy\uppercase{&}=\frac{\the\valy\times\the\Valy}{\the\denoy}\global\numy=\numexpr\the\valy*\the\Valy\relax
+     % \fi
+    \fi
+    % Troisi\`eme compteur \zzz
+    \ifnum\cmza>0
+      \ifnum\cmxa=0
+        \ifnum\cmya=0                           
+          %\Nomz\uppercase{&}=\frac{\the\valz\times\the\Valz}{\the\denoz}\global\numz=\numexpr\the\valz*\the\Valz\relax
+        \else
+          \uppercase{&}%\Nomz\uppercase{&}=\frac{\the\valz\times\the\Valz}{\the\denoz}\global\numz=\numexpr\the\valz*\the\Valz\relax
+        \fi
+        \Nomz\uppercase{&}=\frac{\the\valz\times\the\Valz}{\the\denoz}\global\numz=\numexpr\the\valz*\the\Valz\relax
+      \else
+        \uppercase{&}\Nomz\uppercase{&}=\frac{\the\valz\times\the\Valz}{\the\denoz}\global\numz=\numexpr\the\valz*\the\Valz\relax
+      \fi
+    \fi
+    \\
+    % 2eme ligne du tableau : calcul des num\'erateurs
+        %Premier compteur \xxx
+    \ifnum\cmxa>0
+      \Nomx\uppercase{&}=\frac{\num{\the\numx}}{\num{\the\denox}}
+    \fi
+    %    % Deuxi\`eme compteur \yyy
+    \ifnum\cmya>0
+      \ifnum\cmxa=0
+        %\Nomy\uppercase{&}=\frac{\num{\the\numy}}{\num{\the\denoy}}
+      \else
+        \uppercase{&}%\Nomy\uppercase{&}=\frac{\num{\the\numy}}{\num{\the\denoy}}
+      \fi
+      \Nomy\uppercase{&}=\frac{\num{\the\numy}}{\num{\the\denoy}}%
+    \fi
+    %Troisi\`eme compteur \zzz
+    \ifnum\cmza>0
+      \ifnum\cmxa=0
+        \ifnum\cmya=0                           
+          %\Nomz\uppercase{&}=\frac{\num{\the\numz}}{\num{\the\denoz}}
+        \else
+          \uppercase{&}%\Nomz\uppercase{&}=\frac{\num{\the\numz}}{\num{\the\denoz}}
+        \fi
+        \Nomz\uppercase{&}=\frac{\num{\the\numz}}{\num{\the\denoz}}
+      \else
+        \uppercase{&}\Nomz\uppercase{&}=\frac{\num{\the\numz}}{\num{\the\denoz}}
+      \fi
+    \fi
+    \\
+    % 3eme ligne : faire les simplifications ou pas ?
+    %Premier compteur \xxx
+    \ifnum\cmxa>0
+      \PGCD{\the\numx}{\the\denox}
+      \ifnum\pgcd>1
+        \Nomx\uppercase{&}=\SSimpli{\the\numx}{\the\denox}
+      \else
+        \uppercase{&}
+      \fi
+    \fi                    
+    %    % Deuxi\`eme compteur \yyy
+    \ifnum\cmya>0
+      \PGCD{\the\numy}{\the\denoy}
+      \ifnum\cmxa=0
+         \ifnum\pgcd>1
+           \Nomy\uppercase{&}=\SSimpli{\the\numy}{\the\denoy}
+         \else
+           \uppercase{&}
+         \fi
+      \else
+        \ifnum\pgcd>1
+          \uppercase{&}\Nomy\uppercase{&}=\SSimpli{\the\numy}{\the\denoy}
+        \else
+          \uppercase{&&}
+        \fi
+      \fi
+    \fi
+    %Troisi\`eme compteur \zzz
+    \ifnum\cmza>0
+      \PGCD{\the\numz}{\the\denoz}
+      \ifnum\cmxa=0
+        \ifnum\cmya=0
+          \ifnum\pgcd>1
+            \Nomz\uppercase{&}=\SSimpli{\the\numz}{\the\denoz}
+          \else
+            \uppercase{&}
+          \fi
+        \else
+          \ifnum\pgcd>1
+            \uppercase{&}\Nomz\uppercase{&}=\SSimpli{\the\numz}{\the\denoz}
+          \else
+            \uppercase{&&}
+          \fi
+        \fi
+      \else
+        \ifnum\pgcd>1
+          \uppercase{&}\Nomz\uppercase{&}=\SSimpli{\the\numz}{\the\denoz}
+        \else
+          \uppercase{&&}
+        \fi
+      \fi
+    \fi
+    \\
+    % 4eme ligne : Terminer les simplifications ?
+    %Premier compteur \xxx
+    \ifnum\cmxa>0
+      \PGCD{\the\numx}{\the\denox}
+      \ifnum\pgcd>1
+        \ifnum\pgcd<\the\denox
+          \Nomx\uppercase{&}=\SSimplifie{\the\numx}{\the\denox}
+        \else
+          \uppercase{&}
+        \fi
+      \else
+        \uppercase{&}
+      \fi
+    \fi                    
+    %    % Deuxi\`eme compteur \yyy
+    \ifnum\cmya>0
+      \PGCD{\the\numy}{\the\denoy}
+      \ifnum\cmxa=0
+        \ifnum\pgcd>1
+          \ifnum\pgcd<\the\denoy
+            \Nomy\uppercase{&}=\SSimplifie{\the\numy}{\the\denoy}
+          \else
+            \uppercase{&}
+          \fi
+         \else
+           \uppercase{&}
+         \fi
+      \else
+        \ifnum\pgcd>1
+          \ifnum\pgcd<\the\denoy
+            \uppercase{&}\Nomy\uppercase{&}=\SSimplifie{\the\numy}{\the\denoy}
+          \else
+            \uppercase{&&}
+          \fi
+        \else
+          \uppercase{&&}
+        \fi
+      \fi
+    \fi
+    %Troisi\`eme compteur \zzz
+    \ifnum\cmza>0
+      \PGCD{\the\numz}{\the\denoz}
+      \ifnum\cmxa=0
+        \ifnum\cmya=0
+          \ifnum\pgcd>1
+            \ifnum\pgcd<\the\denoz
+              \Nomz\uppercase{&}=\SSimplifie{\the\numz}{\the\denoz}
+            \else
+              \uppercase{&}
+            \fi
+          \else
+            \uppercase{&}
+          \fi
+        \else
+          \ifnum\pgcd>1
+            \ifnum\pgcd<\the\denoz
+              \uppercase{&}\Nomz\uppercase{&}=\SSimplifie{\the\numz}{\the\denoz}
+            \else
+              \uppercase{&&}
+            \fi
+          \else
+            \uppercase{&&}
+          \fi
+        \fi
+      \else
+        \ifnum\pgcd>1
+          \ifnum\pgcd<\the\denoz
+            \uppercase{&}\Nomz\uppercase{&}=\SSimplifie{\the\numz}{\the\denoz}
+          \else
+            \uppercase{&&}
+          \fi
+        \else
+          \uppercase{&&}
+        \fi
+      \fi
+    \fi%\\
+\end{align*}
+}{}%
+}
+
+\newcommand\TThales[8][]{%
+  \setKV[ClesThales]{#1}%
+  \StrMid{#2}{1}{1}[\NomA]\StrMid{#2}{2}{2}[\NomB]\StrMid{#2}{3}{3}[\NomC]\StrMid{#2}{4}{4}[\NomM]\StrMid{#2}{5}{5}[\NomN]%
+  \ifboolKV[ClesThales]{FigureSeule}{%
+    \MPFigThales{\NomA}{\NomB}{\NomC}{\NomM}{\NomN}{\useKV[ClesThales]{Angle}}%
+  }{\ifboolKV[ClesThales]{FigurecroiseeSeule}{%
+      \MPFigThalesCroisee{\NomA}{\NomB}{\NomC}{\NomM}{\NomN}{\useKV[ClesThales]{Angle}}%
+    }{%
+      \ifboolKV[ClesThales]{Figure}{%
+        \StrMid{#2}{1}{1}[\NomA]\StrMid{#2}{2}{2}[\NomB]\StrMid{#2}{3}{3}[\NomC]\StrMid{#2}{4}{4}[\NomM]\StrMid{#2}{5}{5}[\NomN]%
+        \begin{multicols}{2}%
+          {\em La figure est donn\'ee \`a titre indicatif.}%
+          \[\MPFigThales{\NomA}{\NomB}{\NomC}{\NomM}{\NomN}{\useKV[ClesThales]{Angle}}\]%
+          \par\columnbreak\par%
+          \ifboolKV[ClesThales]{Entier}{\TThalesCalculsE[#1]{#2}{#3}{#4}{#5}{#6}{#7}{#8}}{\TThalesCalculsD[#1]{#2}{#3}{#4}{#5}{#6}{#7}{#8}}%
+        \end{multicols}%
+      }{\ifboolKV[ClesThales]{Figurecroisee}{%
+          \StrMid{#2}{1}{1}[\NomA]\StrMid{#2}{2}{2}[\NomB]\StrMid{#2}{3}{3}[\NomC]\StrMid{#2}{4}{4}[\NomM]\StrMid{#2}{5}{5}[\NomN]%
+          \begin{multicols}{2}%
+            {\em La figure est donn\'ee \`a titre indicatif.}%
+            \[\MPFigThalesCroisee{\NomA}{\NomB}{\NomC}{\NomM}{\NomN}{\useKV[ClesThales]{Angle}}\]%
+            \par\columnbreak\par%
+            \ifboolKV[ClesThales]{Entier}{\TThalesCalculsE[#1]{#2}{#3}{#4}{#5}{#6}{#7}{#8}}{\TThalesCalculsD[#1]{#2}{#3}{#4}{#5}{#6}{#7}{#8}}%
+          \end{multicols}%
+        }{\ifboolKV[ClesThales]{Entier}{\TThalesCalculsE[#1]{#2}{#3}{#4}{#5}{#6}{#7}{#8}}{\TThalesCalculsD[#1]{#2}{#3}{#4}{#5}{#6}{#7}{#8}}}%
+      }%
+    }%
+  }%
+}%
+%%%%
+
+\newcommand\ReciThales[6][]{%
+  \ifboolKV[ClesThales]{Droites}{%
+    Les droites $(#3#5)$ et $(#4#6)$ sont s\'ecantes en $#2$.
+  }{%
+    Dans le triangle $#2#3#4$, $#5$ est un point
+    \ifboolKV[ClesThales]{Segment}{du segment $[#2#3]$}{de la
+      droite $(#2#3)$}, $#6$ est un point
+    \ifboolKV[ClesThales]{Segment}{du segment $[#2#4]$}{de la droite
+      $(#2#4)$}.
+  } %
+  \ifboolKV[ClesThales]{Propor}{Le tableau $\begin{array}{c|c}
+        #2#5&#2#6\\
+        \hline
+        #2#3&#2#4\\
+      \end{array}
+    $ est-il un tableau de proportionnalit\'e ?
+  }{%
+  }
+}
+
+\newcommand\ReciThalesCalculs[8][]{%
+  \StrMid{#2}{1}{1}[\NomA]%
+  \StrMid{#2}{2}{2}[\NomB]%
+  \StrMid{#2}{3}{3}[\NomC]%
+  \StrMid{#2}{4}{4}[\NomM]%
+  \StrMid{#2}{5}{5}[\NomN]%
+  \ifboolKV[ClesThales]{Produit}{%
+    \begin{align*}
+      \dfrac{\NomA\NomM}{\NomA\NomB}=\dfrac{\num{#3}}{\num{#4}}&&\dfrac{\NomA\NomN}{\NomA\NomC}=\dfrac{\num{#5}}{\num{#6}}
+    \end{align*}
+    Effectuons les produits en croix :\xdef\NumA{\fpeval{#3*#6}}\xdef\NumB{\fpeval{#4*#5}}
+    \begin{align*}
+      \num{#3}\times\num{#6}&=\num{\fpeval{#3*#6}}&&&\num{#4}\times\num{#5}&=\num{\fpeval{#4*#5}}
+    \end{align*}
+    \xintifboolexpr{\NumA == \NumB}{Comme les produits en croix sont
+      \'egaux, alors
+      $\dfrac{\NomA\NomM}{\NomA\NomB}=\dfrac{\NomA\NomN}{\NomA\NomC}$.\\[0.5em]%
+    }{%
+      Comme les produits en croix sont diff\'erents, alors
+      $\dfrac{\NomA\NomM}{\NomA\NomB}\not=\dfrac{\NomA\NomN}{\NomA\NomC}$.\\%
+    }%
+  }{%
+    \[\left.
+        \begin{array}{l}
+          \dfrac{\NomA\NomM}{\NomA\NomB}=\dfrac{\num{#3}}{\num{#4}}\ifx\bla#7\bla\ifboolKV[ClesThales]{Simplification}{\PGCD{#3}{#4}\xintifboolexpr{\pgcd==1}{%il faut regarder si on doit continuer avec le PPCM...
+          \PGCD{#5}{#6}\xintifboolexpr{\pgcd>1}{\xdef\DenomSimpaa{\fpeval{#6/\pgcd}}\PPCM{#4}{\DenomSimpaa}\xintifboolexpr{\ppcm==#4}{}{=\dfrac{#3\times\num{\fpeval{\ppcm/#4}}}{#4\times\num{\fpeval{\ppcm/#4}}}=\dfrac{\num{\fpeval{#3*\ppcm/#4}}}{\num{\fpeval{\ppcm}}}}}{}%
+          }{=\displaystyle\Simplification[All]{#3}{#4}\PGCD{#3}{#4}\xdef\NumSimp{\fpeval{#3/\pgcd}}\xdef\DenomSimp{\fpeval{#4/\pgcd}}\PGCD{#5}{#6}\xdef\NumSimpa{\fpeval{#5/\pgcd}}\xdef\DenomSimpa{\fpeval{#6/\pgcd}}\PPCM{\DenomSimp}{\DenomSimpa}\xintifboolexpr{\fpeval{\the\ppcm/\DenomSimp}==1}{}{=\dfrac{\num{\NumSimp}\times\num{\fpeval{\the\ppcm/\DenomSimp}}}{\num{\DenomSimp}\times\PPCM{\DenomSimp}{\DenomSimpa}\num{\fpeval{\the\ppcm/\DenomSimp}}}=\dfrac{\PPCM{\DenomSimp}{\DenomSimpa}\num{\fpeval{\NumSimp*\the\ppcm/\DenomSimp}}}{\PPCM{\DenomSimp}{\DenomSimpa}\num{\the\ppcm}}}}}{\PPCM{#4}{#6}\xintifboolexpr{\fpeval{\the\ppcm/#4}==1}{}{=\dfrac{\num{#3}\times\num{\fpeval{\the\ppcm/#4}}}{\num{#4}\times\PPCM{#4}{#6}\num{\fpeval{\the\ppcm/#4}}}=\dfrac{\PPCM{#4}{#6}\num{\fpeval{#3*\the\ppcm/#4}}}{\PPCM{#4}{#6}\num{\the\ppcm}}}}\xdef\NumA{\fpeval{#3*#6}}\else%
+         \xintifboolexpr{#7==1}{}{=\dfrac{\num{#3}\times\num{#7}}{\num{#4}\times\num{#7}}=\dfrac{\num{\fpeval{#3*#7}}}{\num{\fpeval{#4*#7}}}}\xdef\NumC{\fpeval{#4*#7}}\xdef\NumD{\fpeval{#6*#8}}\PPCM{\NumC}{\NumD}\xintifboolexpr{\the\ppcm==\fpeval{#4*#7}}{}{=\dfrac{\num{\fpeval{#3*#7}}\times\num{\fpeval{\the\ppcm/(#4*#7)}}}{\num{\fpeval{#4*#7}}\times\xdef\NumC{\fpeval{#4*#7}}\xdef\NumD{\fpeval{#6*#8}}\PPCM{\NumC}{\NumD}\num{\fpeval{\the\ppcm/(#4*#7)}}}=\dfrac{\xdef\NumC{\fpeval{#4*#7}}\xdef\NumD{\fpeval{#6*#8}}\PPCM{\NumC}{\NumD}\num{\fpeval{#3*\the\ppcm/#4}}}{\xdef\NumC{\fpeval{#4*#7}}\xdef\NumD{\fpeval{#6*#8}}\PPCM{\NumC}{\NumD}\num{\fpeval{\the\ppcm}}}}\xdef\NumA{\fpeval{#3*#7*#6*#8}}
+          \fi
+          \\
+          \\
+          \dfrac{\NomA\NomN}{\NomA\NomC}=\dfrac{\num{#5}}{\num{#6}}%
+          \ifx\bla#8\bla%
+          \ifboolKV[ClesThales]{Simplification}{\PGCD{#5}{#6}\xintifboolexpr{\pgcd==1}{%il faut regarder si on doit continuer avec le PPCM...
+          \PGCD{#3}{#4}\xintifboolexpr{\pgcd>1}{\xdef\DenomSimpaa{\fpeval{#4/\pgcd}}\PPCM{#6}{\DenomSimpaa}\xintifboolexpr{\ppcm==#6}{}{=\dfrac{#5\times\num{\fpeval{\ppcm/#6}}}{#6\times\num{\fpeval{\ppcm/#6}}}=\dfrac{\num{\fpeval{#5*\ppcm/#6}}}{\num{\fpeval{\ppcm}}}}}{}%
+          }{=\displaystyle\Simplification[All]{#5}{#6}\PGCD{#5}{#6}\xdef\NumSimp{\fpeval{#5/\pgcd}}\xdef\DenomSimp{\fpeval{#6/\pgcd}}\PGCD{#3}{#4}\xdef\NumSimpa{\fpeval{#3/\pgcd}}\xdef\DenomSimpa{\fpeval{#4/\pgcd}}\PPCM{\DenomSimp}{\DenomSimpa}\xintifboolexpr{\fpeval{\the\ppcm/\DenomSimp}==1}{}{=\dfrac{\num{\NumSimp}\times\num{\fpeval{\the\ppcm/\DenomSimp}}}{\num{\DenomSimp}\times\PPCM{\DenomSimp}{\DenomSimpa}\num{\fpeval{\the\ppcm/\DenomSimp}}}=\dfrac{\PPCM{\DenomSimp}{\DenomSimpa}\num{\fpeval{\NumSimp*\the\ppcm/\DenomSimp}}}{\PPCM{\DenomSimp}{\DenomSimpa}\num{\the\ppcm}}}}}{\PPCM{#4}{#6}\xintifboolexpr{\fpeval{\the\ppcm/#6}==1}{}{=\dfrac{\num{#5}\times\num{\fpeval{\the\ppcm/#6}}}{\num{#6}\times\PPCM{#4}{#6}\num{\fpeval{\the\ppcm/#6}}}=\dfrac{\PPCM{#4}{#6}\num{\fpeval{#5*\the\ppcm/#6}}}{\PPCM{#4}{#6}\num{\the\ppcm}}}}\xdef\NumB{\fpeval{#5*#4}}%
+          \else%
+          \xintifboolexpr{#8==1}{}{=\dfrac{\num{#5}\times\num{#8}}{\num{#6}\times\num{#8}}=\dfrac{\num{\fpeval{#5*#8}}}{\num{\fpeval{#6*#8}}}}\xdef\NumC{\fpeval{#4*#7}}\xdef\NumD{\fpeval{#6*#8}}\PPCM{\NumC}{\NumD}\xintifboolexpr{\the\ppcm==\fpeval{#6*#8}}{}{=\dfrac{\num{\fpeval{#5*#8}}\times\num{\fpeval{\the\ppcm/(#6*#8)}}}{\num{\fpeval{#6*#8}}\times\xdef\NumC{\fpeval{#4*#7}}\xdef\NumD{\fpeval{#6*#8}}\PPCM{\NumC}{\NumD}\num{\fpeval{\the\ppcm/(#6*#8)}}}=\dfrac{\xdef\NumC{\fpeval{#4*#7}}\xdef\NumD{\fpeval{#6*#8}}\PPCM{\NumC}{\NumD}\num{\fpeval{#5*\the\ppcm/#6}}}{\xdef\NumC{\fpeval{#4*#7}}\xdef\NumD{\fpeval{#6*#8}}\PPCM{\NumC}{\NumD}\num{\fpeval{\the\ppcm}}}
+          }\xdef\NumB{\fpeval{#5*#8*#4*#7}}
+          \fi\\
+        \end{array}
+      \right\}\ifnum\NumA=\NumB \dfrac{\NomA\NomM}{\NomA\NomB}=\dfrac{\NomA\NomN}{\NomA\NomC}\else\dfrac{\NomA\NomM}{\NomA\NomB}\not=\dfrac{\NomA\NomN}{\NomA\NomC}\fi
+    \]
+  }%
+  \ifboolKV[ClesThales]{Propor}{%
+    \xintifboolexpr{\NumA==\NumB}{Donc le tableau $\begin{array}{c|c}
+        \NomA\NomM&\NomA\NomN\\
+        \hline
+        \NomA\NomB&\NomA\NomC\\
+      \end{array}
+    $ est bien un tableau de proportionnalit\'e.\\De plus, les points
+    $\NomA$, $\NomM$, $\NomB$ sont align\'es dans le m\^eme ordre que les
+    points $\NomA$, $\NomN$, $\NomC$. Donc les droites $(\NomM\NomN)$
+    et $(\NomB\NomC)$ sont parall\`eles d'apr\`es la r\'eciproque du
+    th\'eor\`eme de Thal\`es.}{%
+    Donc les droites $(\NomM\NomN)$ et $(\NomB\NomC)$ ne sont pas parall\`eles.}%
+  }{%
+    \xintifboolexpr{\NumA==\NumB}{%
+      De plus, les points $\NomA$, $\NomM$, $\NomB$ sont align\'es dans
+      le m\^eme ordre que les points $\NomA$, $\NomN$, $\NomC$. Donc les
+      droites $(\NomM\NomN)$ et $(\NomB\NomC)$ sont parall\`eles d'apr\`es
+      la r\'eciproque du th\'eor\`eme de Thal\`es.}{%
+      Donc les droites $(\NomM\NomN)$ et $(\NomB\NomC)$ ne sont pas
+      parall\`eles.}%
+  }%
+}%
+
+\newcommand\ReciproqueThales[8][]{%
+  % #1 Cl\'es
+  % #2 NomTriangle + Points ABCEF pour droite (BC)//(EF)
+  % #3 longueur AE
+  % #4 longueur AB
+  % #5 longueur AF
+  % #6 longueur AC
+  \StrMid{#2}{1}{1}[\NomA]\StrMid{#2}{2}{2}[\NomB]\StrMid{#2}{3}{3}[\NomC]\StrMid{#2}{4}{4}[\NomM]\StrMid{#2}{5}{5}[\NomN]%
+  \ifboolKV[ClesThales]{FigureSeule}{%
+%    \StrMid{#2}{1}{1}[\NomA]\StrMid{#2}{2}{2}[\NomB]\StrMid{#2}{3}{3}[\NomC]\StrMid{#2}{4}{4}[\NomM]\StrMid{#2}{5}{5}[\NomN]%
+    \MPFigReciThales{\NomA}{\NomB}{\NomC}{\NomM}{\NomN}{\useKV[ClesThales]{Angle}}%
+  }{\ifboolKV[ClesThales]{FigurecroiseeSeule}{%
+%      \StrMid{#2}{1}{1}[\NomA]\StrMid{#2}{2}{2}[\NomB]\StrMid{#2}{3}{3}[\NomC]\StrMid{#2}{4}{4}[\NomM]\StrMid{#2}{5}{5}[\NomN]%
+      \MPFigReciThalesCroisee{\NomA}{\NomB}{\NomC}{\NomM}{\NomN}{\useKV[ClesThales]{Angle}}%
+    }{%
+      \ifboolKV[ClesThales]{Figure}{%
+%        \StrMid{#2}{1}{1}[\NomA]\StrMid{#2}{2}{2}[\NomB]\StrMid{#2}{3}{3}[\NomC]\StrMid{#2}{4}{4}[\NomM]\StrMid{#2}{5}{5}[\NomN]%
+        \begin{multicols}{2}
+          {\em La figure est donn\'ee \`a titre indicatif.}
+          \[\MPFigReciThales{\NomA}{\NomB}{\NomC}{\NomM}{\NomN}{\useKV[ClesThales]{Angle}}\]
+          \par\columnbreak\par        
+          \ReciThales[#1]{\StrMid{#2}{1}{1}}{\StrMid{#2}{2}{2}}{\StrMid{#2}{3}{3}}{\StrMid{#2}{4}{4}}{\StrMid{#2}{5}{5}}\par
+          \ReciThalesCalculs[#1]{#2}{#3}{#4}{#5}{#6}{#7}{#8}
+        \end{multicols}
+      }{\ifboolKV[ClesThales]{Figurecroisee}{%
+%          \StrMid{#2}{1}{1}[\NomA]\StrMid{#2}{2}{2}[\NomB]\StrMid{#2}{3}{3}[\NomC]\StrMid{#2}{4}{4}[\NomM]\StrMid{#2}{5}{5}[\NomN]
+          \begin{minipage}{0.4\linewidth}%
+            {\em La figure est donn\'ee \`a titre indicatif.}%
+            \[\MPFigReciThalesCroisee{\NomA}{\NomB}{\NomC}{\NomM}{\NomN}{\useKV[ClesThales]{Angle}}\]%
+          \end{minipage}
+          \hfill
+          \begin{minipage}{0.55\linewidth}%
+            \ReciThales[#1]{\StrMid{#2}{1}{1}}{\StrMid{#2}{2}{2}}{\StrMid{#2}{3}{3}}{\StrMid{#2}{4}{4}}{\StrMid{#2}{5}{5}}\par
+            \ReciThalesCalculs[#1]{#2}{#3}{#4}{#5}{#6}{#7}{#8}%
+          \end{minipage}%
+        }{\ReciThales[#1]{\StrMid{#2}{1}{1}}{\StrMid{#2}{2}{2}}{\StrMid{#2}{3}{3}}{\StrMid{#2}{4}{4}}{\StrMid{#2}{5}{5}}\par
+          \ReciThalesCalculs[#1]{#2}{#3}{#4}{#5}{#6}{#7}{#8}%
+        }%
+      }%
+    }%
+  }%
+}%
+
+\newcommand\Thales[8][]{%
+  \useKVdefault[ClesThales]%
+  \setKV[ClesThales]{#1}%
+  %Définir les points pour une utilisation perso
+  \StrMid{#2}{1}{1}[\NomA]\StrMid{#2}{2}{2}[\NomB]\StrMid{#2}{3}{3}[\NomC]\StrMid{#2}{4}{4}[\NomM]\StrMid{#2}{5}{5}[\NomN]%
+  \xdef\NomPointA{\NomA}%
+  \xdef\NomPointB{\NomB}%
+  \xdef\NomPointC{\NomC}%
+  \xdef\NomTriangle{\NomA\NomB\NomC}%
+  \xdef\NomPointM{\NomM}%
+  \xdef\NomPointN{\NomN}%
+  %
+  \ifboolKV[ClesThales]{Reciproque}{%
+    \ReciproqueThales[#1]{#2}{#3}{#4}{#5}{#6}{#7}{#8}%
+  }{%
+    \ifboolKV[ClesThales]{FigureSeule}{%
+      \StrMid{#2}{1}{1}[\NomA]\StrMid{#2}{2}{2}[\NomB]\StrMid{#2}{3}{3}[\NomC]\StrMid{#2}{4}{4}[\NomM]\StrMid{#2}{5}{5}[\NomN]%
+      \MPFigThales{\NomA}{\NomB}{\NomC}{\NomM}{\NomN}{\useKV[ClesThales]{Angle}}%
+    }{%
+      \ifboolKV[ClesThales]{FigurecroiseeSeule}{%
+        \StrMid{#2}{1}{1}[\NomA]\StrMid{#2}{2}{2}[\NomB]\StrMid{#2}{3}{3}[\NomC]\StrMid{#2}{4}{4}[\NomM]\StrMid{#2}{5}{5}[\NomN]%
+        \MPFigThalesCroisee{\NomA}{\NomB}{\NomC}{\NomM}{\NomN}{\useKV[ClesThales]{Angle}}%
+      }{%
+        \ifboolKV[ClesThales]{Redaction}{%
+          \ifboolKV[ClesThales]{Figure}{%
+            \StrMid{#2}{1}{1}[\NomA]\StrMid{#2}{2}{2}[\NomB]\StrMid{#2}{3}{3}[\NomC]\StrMid{#2}{4}{4}[\NomM]\StrMid{#2}{5}{5}[\NomN]%
+            \begin{multicols}{2}
+              {\em La figure est donn\'ee \`a titre indicatif.}%
+              \[\MPFigThales{\NomA}{\NomB}{\NomC}{\NomM}{\NomN}{\useKV[ClesThales]{Angle}}\]%
+              \par\columnbreak\par%
+              \TTThales[#1]{\StrMid{#2}{1}{1}}{\StrMid{#2}{2}{2}}{\StrMid{#2}{3}{3}}{\StrMid{#2}{4}{4}}{\StrMid{#2}{5}{5}}%
+            \end{multicols}%
+          }{%
+            \ifboolKV[ClesThales]{Figurecroisee}{%
+              \StrMid{#2}{1}{1}[\NomA]\StrMid{#2}{2}{2}[\NomB]\StrMid{#2}{3}{3}[\NomC]\StrMid{#2}{4}{4}[\NomM]\StrMid{#2}{5}{5}[\NomN]%
+              \begin{multicols}{2}
+                {\em La figure est donn\'ee \`a titre indicatif.}%
+                \[\MPFigThalesCroisee{\NomA}{\NomB}{\NomC}{\NomM}{\NomN}{\useKV[ClesThales]{Angle}}\]%
+                \par\columnbreak\par%
+                \TTThales[#1]{\StrMid{#2}{1}{1}}{\StrMid{#2}{2}{2}}{\StrMid{#2}{3}{3}}{\StrMid{#2}{4}{4}}{\StrMid{#2}{5}{5}}%
+              \end{multicols}
+            }{%
+              \TTThales[#1]{\StrMid{#2}{1}{1}}{\StrMid{#2}{2}{2}}{\StrMid{#2}{3}{3}}{\StrMid{#2}{4}{4}}{\StrMid{#2}{5}{5}}%
+            }
+          }    
+        }{%
+          \TThales[#1]{#2}{#3}{#4}{#5}{#6}{#7}{#8}%
+        }%
+      }%
+    }%
+  }%
+}%

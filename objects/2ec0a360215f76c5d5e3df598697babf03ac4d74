@@ -1,0 +1,409 @@
+%%%
+% Number Hive
+%%%
+\def\filedateNumberHive{2025/05/27}%
+\def\fileversionNumberHive{0.1a}%
+\message{-- \filedateNumberHive\space v\fileversionNumberHive}%
+%
+\setKVdefault[NumberHive]{Negatif=false,Produit=false,Niveau=8,Double=false,ListeCouleurs={Cornsilk,LightSteelBlue},CouleurCase=false,Jeton=false,Graines=false,Aide=false,UniteHexa=6mm,Cases={},Jetons={},Graine={}}%
+\defKV[NumberHive]{%
+  Cases=\ifempty{#1}{}{\setKV[NumberHive]{CouleurCase}},
+  Jetons=\ifempty{#1}{}{\setKV[NumberHive]{Jeton}},%
+  Graine=\ifempty{#1}{}{\setKV[NumberHive]{Graines}\PfCGraineAlea{#1}}%
+}%
+%
+\newtoks\toklistenumberhive%
+\newtoks\toklistecasescoloreesNH%
+
+\def\UpdatetoksNHive#1\nil{\addtotok\toklistenumberhive{"#1",}}%
+\def\UpdatetoksCCNHive#1\nil{\addtotok\toklistecasescoloreesNH{#1,}}%
+
+\NewDocumentCommand\NumberHive{o}{%
+  \useKVdefault[NumberHive]%
+  \setKV[NumberHive]{#1}%
+  \toklistenumberhive{}%
+  \toklistecasescoloreesNH{}%
+  \ifboolKV[NumberHive]{CouleurCase}{%
+    \xdef\PfCFooNH{\useKV[NumberHive]{Cases}}%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeCasesColoreesNH{\PfCFooNH}%
+    \reademptyitems%
+    \foreachitem\compteur\in\ListeCasesColoreesNH{\expandafter\UpdatetoksCCNHive\compteur\nil}%
+  }{}%
+  \xdef\ListeAvantCouleurs{\useKV[NumberHive]{ListeCouleurs}}%
+%  \ifboolKV[NumberHive]{Graines}{\PfCGraineAlea{\useKV[NumberHive]{Graine}}}{}%
+  \ifboolKV[NumberHive]{Produit}{%
+    \xdef\PfCNHListe{1,2,3,4,5,6,7,8,9,10,11,12,14,16,18,20,22,24,15,21,27,30,33,36,28,32,40,44,48,25,35,45,50,55,60,42,54,66,72,56,63,70,77,84,64,72,80,88,96,81,90,99,108,100,110,120,121,132,144}%
+    \ifboolKV[NumberHive]{Negatif}{%
+      \xdef\PfCNHListe{-1,-2,-3,-4,-5,-6,-8,-10,-12,-9,-15,-18,-16,-20,-24,-25,-30,-36,1,2,3,4,5,6,8,10,12,9,15,18,16,20,24,25,30,36}%
+      \xdef\PfCNHListe{\PfCNHListe,\PfCNHListe}%
+    }{}%
+    \ifboolKV[NumberHive]{Double}{%
+      \MelangeListe{\PfCNHListe}{59}%
+    }{%
+%      \xdef\PfCNHListe{\PfCNHListe,\PfCNHListe}%
+      \MelangeListe{\PfCNHListe}{46}%
+    }%
+  }{%
+    \ifboolKV[NumberHive]{Negatif}{%
+      \xdef\PfCNHListe{-12,-11,-10,-9,-8,-7,-5,-4,-3,-2,-1,0,1,2,3,4,5,7,8,9,10,11,12}%
+    }{%
+      \xdef\PfCNHListe{2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24}%
+    }%
+    \xdef\PfCNHListe{\PfCNHListe,\PfCNHListe}%
+    \MelangeListe{\PfCNHListe}{46}%
+  }%
+  \setsepchar{,}%
+  \readlist*\ListeCompoNH{\faa}%
+  \foreachitem\compteur\in\ListeCompoNH{\expandafter\UpdatetoksNHive\compteur\nil}%
+  \begin{tikzpicture}
+    \node[xshift=1cm,yshift=-1cm,rotate=45] at (0,0) {\includegraphics[scale=0.1]{PfCLogoNumberHive.png}};
+    \node[anchor=north west] at (0,0) {\BuildNumberHiveAdditif{\the\toklistenumberhive}{\useKV[NumberHive]{Niveau}}{\useKV[NumberHive]{Jetons}}{\ListeAvantCouleurs}{\the\toklistecasescoloreesNH}};
+    \end{tikzpicture}    
+}% 
+
+\NewDocumentCommand\BuildNumberHiveAdditif{mmmmm}{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    boolean Produit,Negatif,CouleurCase,Double,Jeton,Aide;
+    Double=\useKV[NumberHive]{Double};
+    Produit=\useKV[NumberHive]{Produit};
+    Negatif=\useKV[NumberHive]{Negatif};
+    CouleurCase=\useKV[NumberHive]{CouleurCase};
+    Jeton=\useKV[NumberHive]{Jeton};
+    Aide=\useKV[NumberHive]{Aide};
+    UniteHexa=\useKV[NumberHive]{UniteHexa};
+    
+    numeric JetonNegatif[];
+    JetonNegatif[1]=-6;
+    JetonNegatif[2]=-5;
+    JetonNegatif[3]=-4;
+    JetonNegatif[4]=-3;
+    JetonNegatif[5]=-2;
+    JetonNegatif[6]=-1;
+    JetonNegatif[7]=1;
+    JetonNegatif[8]=2;
+    JetonNegatif[9]=3;
+    JetonNegatif[10]=4;
+    JetonNegatif[11]=5;
+    JetonNegatif[12]=6;
+
+    color C[];
+    nb=0;
+    
+    vardef RecupCouleurs(text t)=
+    for p_=t:
+    nb:=nb+1;
+    C[nb]=p_;
+    endfor;
+    enddef;
+
+    RecupCouleurs(#4);
+    
+    pair bu,bv;
+    bu=(1,0);
+    bv=(0,1);
+    vardef unithexa=
+    (cosd(30)*bu+sind(30)*bv)--(cosd(90)*bu+sind(90)*bv)--(cosd(150)*bu+sind(150)*bv)--(cosd(210)*bu+sind(210)*bv)--(cosd(270)*bu+sind(270)*bv)--(cosd(330)*bu+sind(330)*bv)--cycle
+    enddef;
+    
+    pair A[];
+    numeric numcase;
+    
+    vardef PlacerAncres=
+    numcase:=0;
+    if Double:
+    for n=5 upto #2:
+    for k=1 upto n:
+    numcase:=numcase+1;
+    A[numcase]:=(0,0)  shifted((3-n)*(UniteHexa*cosd(30),3*UniteHexa*sind(30))+k*(2*UniteHexa*cosd(30),0));
+    endfor;
+    endfor;
+    % ligne n-1
+    for k=1 upto #2-1:
+    numcase:=numcase+1;
+    A[numcase]:=(0,0) shifted(((3-(#2-1))*UniteHexa*cosd(30),3*UniteHexa*sind(30))+(k*2*UniteHexa*cosd(30),-(3*(#2-1))*UniteHexa*sind(30)));
+    endfor;
+    %dernières lignes
+    for n=#2+2 upto #2+5:
+    for k=(n-#2) upto #2+1:
+    numcase:=numcase+1;
+    A[numcase]:=(0,0) shifted((3-n)*(UniteHexa*cosd(30),3*UniteHexa*sind(30))+k*(2*UniteHexa*cosd(30),0));
+    endfor;
+    endfor;
+    %%
+    else:
+    for n=3 upto #2:
+    for k=1 upto n:
+    numcase:=numcase+1;
+    A[numcase]:=(0,0)  shifted((3-n)*(UniteHexa*cosd(30),3*UniteHexa*sind(30))+k*(2*UniteHexa*cosd(30),0));
+    endfor;
+    endfor;
+    % ligne n-1
+    for k=1 upto #2-1:
+    numcase:=numcase+1;
+    A[numcase]:=(0,0) shifted(((3-(#2-1))*UniteHexa*cosd(30),3*UniteHexa*sind(30))+(k*2*UniteHexa*cosd(30),-(3*(#2-1))*UniteHexa*sind(30)));
+    endfor;
+    %ligne n
+    for k=1 upto #2-2:
+    numcase:=numcase+1;
+    A[numcase]:=(0,0) shifted(((3-(#2-2))*UniteHexa*cosd(30),3*UniteHexa*sind(30))+(k*2*UniteHexa*cosd(30),-(3*#2)*UniteHexa*sind(30)));
+    endfor;
+    fi;
+    NbTotalCases=numcase;
+    enddef;
+
+    vardef PlacerCasesColorees(text t)=
+    rang:=0;
+    for p_=t:
+    rang:=rang+1;
+    fill ((unithexa scaled UniteHexa) shifted A[p_]) withcolor if (rang mod 2)=1:C[1] else: C[2] fi;
+    endfor;
+    enddef;
+
+    vardef TracerHexagones=
+    for k=1 upto NbTotalCases:
+    trace (unithexa scaled UniteHexa) shifted A[k];
+    if Aide:
+    label.top(TEX("\tiny"&decimal(k)),A[k]+(0,-UniteHexa));
+    fi;
+    endfor;
+    enddef;
+    
+    vardef PlacerNombres(text t)=
+    nbcase:=0;
+    for p_=t:
+    if nbcase<numcase:
+    nbcase:=nbcase+1;
+    label(TEX("\num{"&p_&"}"),A[nbcase]);
+    fi;
+    endfor;
+    enddef;
+
+    vardef PlaceJeton(expr ja,jb)=
+    drawoptions(withpen pencircle scaled 1.15);
+    trace cercles(BPlateau[ja],0.75*UniteHexa);
+    trace cercles(BPlateau[jb] shifted(5*2*UniteHexa*cosd(30)+3*3mm,0),0.75*UniteHexa);
+    drawoptions();
+    enddef;
+
+    pair BPlateau[];
+    pair Decal;
+    
+    vardef Plateau=
+    picture PGauche;
+    PGauche=image(
+      NomCase:=0;
+      if Double:
+      Decalage:=10;
+      else:
+      Decalage:=5;
+      fi;
+      for l=0 upto 2:
+      for k=3 downto 0:%
+      NomCase:=NomCase+1;
+      Decal:=(-((k-1)*2*UniteHexa*cosd(30)+k*3mm*cosd(0),(#2+Decalage)*2*UniteHexa*sind(30)+l*(2*UniteHexa*sind(30)+UniteHexa)));
+      BPlateau[NomCase]=(0,0) shifted Decal;
+      fill ((unithexa scaled UniteHexa) shifted Decal)  withcolor 0.75white;
+      trace ((unithexa scaled UniteHexa)) shifted Decal;
+      if Negatif:
+      label(TEX("$"&decimal(JetonNegatif[NomCase])&"$"),(0,0) shifted Decal);
+      else:
+      label(TEX(decimal(NomCase)),(0,0) shifted Decal);
+      fi;
+      endfor;
+      endfor;
+    );
+    draw PGauche;
+    draw PGauche shifted(5*2*UniteHexa*cosd(30)+3*3mm,0);
+    if Jeton:
+    PlaceJeton(#3);
+    fi;
+    if Produit:
+    label(TEX("\Huge$\times$"),(0,0) shifted(-(-4*UniteHexa*cosd(30),(#2+Decalage)*2*UniteHexa*sind(30)+1*(2*UniteHexa*sind(30)+UniteHexa))));
+    else:
+    label(TEX("\Huge$+$"),(0,0) shifted(-(-4*UniteHexa*cosd(30),(#2+Decalage)*2*UniteHexa*sind(30)+1*(2*UniteHexa*sind(30)+UniteHexa))));
+    fi;
+    enddef;    
+
+    PlacerAncres;
+    if CouleurCase:
+    PlacerCasesColorees(#5);
+    fi;
+    TracerHexagones;
+    PlacerNombres(#1);
+    Plateau;
+  \end{mplibcode}
+  \else%
+  \begin{mpost}[mpsettings={boolean Produit,Negatif,CouleurCase,Double,Jeton,Aide;
+    Double=\useKV[NumberHive]{Double};
+    Produit=\useKV[NumberHive]{Produit};
+    Negatif=\useKV[NumberHive]{Negatif};
+    CouleurCase=\useKV[NumberHive]{CouleurCase};
+    Jeton=\useKV[NumberHive]{Jeton};
+    Aide=\useKV[NumberHive]{Aide};
+    UniteHexa=\useKV[NumberHive]{UniteHexa};
+    }]
+    numeric JetonNegatif[];
+    JetonNegatif[1]=-6;
+    JetonNegatif[2]=-5;
+    JetonNegatif[3]=-4;
+    JetonNegatif[4]=-3;
+    JetonNegatif[5]=-2;
+    JetonNegatif[6]=-1;
+    JetonNegatif[7]=1;
+    JetonNegatif[8]=2;
+    JetonNegatif[9]=3;
+    JetonNegatif[10]=4;
+    JetonNegatif[11]=5;
+    JetonNegatif[12]=6;
+    
+    color C[];
+    nb=0;
+    
+    vardef RecupCouleurs(text t)=
+    for p_=t:
+    nb:=nb+1;
+    C[nb]=p_;
+    endfor;
+    enddef;
+
+    RecupCouleurs(#4);
+    
+    pair bu,bv;
+    bu=(1,0);
+    bv=(0,1);
+    vardef unithexa=
+    (cosd(30)*bu+sind(30)*bv)--(cosd(90)*bu+sind(90)*bv)--(cosd(150)*bu+sind(150)*bv)--(cosd(210)*bu+sind(210)*bv)--(cosd(270)*bu+sind(270)*bv)--(cosd(330)*bu+sind(330)*bv)--cycle
+    enddef;
+    
+    pair A[];
+    numeric numcase;
+    
+    vardef PlacerAncres=
+    numcase:=0;
+    if Double:
+    for n=5 upto #2:
+    for k=1 upto n:
+    numcase:=numcase+1;
+    A[numcase]:=(0,0)  shifted((3-n)*(UniteHexa*cosd(30),3*UniteHexa*sind(30))+k*(2*UniteHexa*cosd(30),0));
+    endfor;
+    endfor;
+    % ligne n-1
+    for k=1 upto #2-1:
+    numcase:=numcase+1;
+    A[numcase]:=(0,0) shifted(((3-(#2-1))*UniteHexa*cosd(30),3*UniteHexa*sind(30))+(k*2*UniteHexa*cosd(30),-(3*(#2-1))*UniteHexa*sind(30)));
+    endfor;
+    %dernières lignes
+    for n=#2+2 upto #2+5:
+    for k=(n-#2) upto #2+1:
+    numcase:=numcase+1;
+    A[numcase]:=(0,0) shifted((3-n)*(UniteHexa*cosd(30),3*UniteHexa*sind(30))+k*(2*UniteHexa*cosd(30),0));
+    endfor;
+    endfor;
+    %%
+    else:
+    for n=3 upto #2:
+    for k=1 upto n:
+    numcase:=numcase+1;
+    A[numcase]:=(0,0)  shifted((3-n)*(UniteHexa*cosd(30),3*UniteHexa*sind(30))+k*(2*UniteHexa*cosd(30),0));
+    endfor;
+    endfor;
+    % ligne n-1
+    for k=1 upto #2-1:
+    numcase:=numcase+1;
+    A[numcase]:=(0,0) shifted(((3-(#2-1))*UniteHexa*cosd(30),3*UniteHexa*sind(30))+(k*2*UniteHexa*cosd(30),-(3*(#2-1))*UniteHexa*sind(30)));
+    endfor;
+    %ligne n
+    for k=1 upto #2-2:
+    numcase:=numcase+1;
+    A[numcase]:=(0,0) shifted(((3-(#2-2))*UniteHexa*cosd(30),3*UniteHexa*sind(30))+(k*2*UniteHexa*cosd(30),-(3*#2)*UniteHexa*sind(30)));
+    endfor;
+    fi;
+    NbTotalCases=numcase;
+    enddef;
+
+    vardef PlacerCasesColorees(text t)=
+    rang:=0;
+    for p_=t:
+    rang:=rang+1;
+    fill ((unithexa scaled UniteHexa) shifted A[p_]) withcolor if (rang mod 2)=1:C[1] else: C[2] fi;
+    endfor;
+    enddef;
+
+    vardef TracerHexagones=
+    for k=1 upto NbTotalCases:
+    trace (unithexa scaled UniteHexa) shifted A[k];
+    if Aide:
+    label.top(LATEX("\tiny"&decimal(k)),A[k]+(0,-UniteHexa));
+    fi;
+    endfor;
+    enddef;
+    
+    vardef PlacerNombres(text t)=
+    nbcase:=0;
+    for p_=t:
+    if nbcase<numcase:
+    nbcase:=nbcase+1;
+    label(LATEX("\num{"&p_&"}"),A[nbcase]);
+    fi;
+    endfor;
+    enddef;
+
+    vardef PlaceJeton(expr ja,jb)=
+    drawoptions(withpen pencircle scaled 1.15);
+    trace cercles(BPlateau[ja],0.75*UniteHexa);
+    trace cercles(BPlateau[jb] shifted(5*2*UniteHexa*cosd(30)+3*3mm,0),0.75*UniteHexa);
+    drawoptions();
+    enddef;
+
+    pair BPlateau[];
+    pair Decal;
+    
+    vardef Plateau=
+    picture PGauche;
+    PGauche=image(
+      NomCase:=0;
+      if Double:
+      Decalage:=10;
+      else:
+      Decalage:=5;
+      fi;
+      for l=0 upto 2:
+      for k=3 downto 0:%
+      NomCase:=NomCase+1;
+      Decal:=(-((k-1)*2*UniteHexa*cosd(30)+k*3mm*cosd(0),(#2+Decalage)*2*UniteHexa*sind(30)+l*(2*UniteHexa*sind(30)+4*3mm)));
+      BPlateau[NomCase]=(0,0) shifted Decal;
+      fill ((unithexa scaled UniteHexa) shifted Decal)  withcolor 0.75white;
+      trace ((unithexa scaled UniteHexa)) shifted Decal;
+      if Negatif:
+      label(LATEX("$"&decimal(JetonNegatif[NomCase])&"$"),(0,0) shifted Decal);
+      else:
+      label(LATEX(decimal(NomCase)),(0,0) shifted Decal);
+      fi;
+      endfor;
+      endfor;
+    );
+    draw PGauche;
+    draw PGauche shifted(5*2*UniteHexa*cosd(30)+3*3mm,0);
+    if Jeton:
+    PlaceJeton(#3);
+    fi;
+    if Produit:
+    label(LATEX("\Huge$\times$"),(0,0) shifted(-(-4*UniteHexa*cosd(30),(#2+Decalage)*2*UniteHexa*sind(30)+1*(2*UniteHexa*sind(30)+4*3mm))));
+    else:
+    label(LATEX("\Huge$+$"),(0,0) shifted(-(-4*UniteHexa*cosd(30),(#2+Decalage)*2*UniteHexa*sind(30)+1*(2*UniteHexa*sind(30)+4*3mm))));
+    fi;
+    enddef;    
+
+    PlacerAncres;
+    if CouleurCase:
+    PlacerCasesColorees(#5);
+    fi;
+    TracerHexagones;
+    PlacerNombres(#1);
+    Plateau;
+  \end{mpost}
+  \fi
+}

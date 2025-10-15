@@ -1,0 +1,141 @@
+%%%
+% Puzzle Somme Pyramide
+%%%
+\def\filedatePuzzleSommePyramide{2025/05/26}%
+\def\fileversionPuzzleSommePyramide{0.1a}%
+\message{-- \filedatePuzzleSommePyramide\space v\fileversionPuzzleSommePyramide}%
+%
+\setKVdefault[ClesPuzzleP]{Largeur=40pt,Etages=4,Graines=false,Solutions=false,Jeu,EnonceQuestion=false,NbLignes=7,Graine={},Solution={},Questions={}}%
+%
+\defKV[ClesPuzzleP]{%
+  Graine=\ifempty{#1}{}{\setKV[ClesPuzzleP]{Graines}},%
+  Solution=\ifempty{#1}{}{\setKV[ClesPuzzleP]{Solutions}\setKV[ClesPuzzleP]{Jeu=false}},%
+  Questions=\ifempty{#1}{}{\setKV[ClesPuzzleP]{EnonceQuestion}\setKV[ClesPuzzleP]{Jeu=false}}%
+}%
+\newcounter{PfCPuzzlePcpt}
+\newcounter{PfCPuzzlePavcpt}
+\newlength{\PfCPuzzleP}
+
+\NewDocumentCommand\PuzzlePyramideListeLettres{}{%
+  \setcounter{PfCPuzzlePcpt}{0}%
+  \setcounter{PfCPuzzlePavcpt}{\PfCPuzzlePCptLettre[1]}\Alph{PfCPuzzlePavcpt}, \setcounter{PfCPuzzlePavcpt}{\PfCPuzzlePCptLettre[2]}\Alph{PfCPuzzlePavcpt}, \setcounter{PfCPuzzlePavcpt}{\PfCPuzzlePCptLettre[3]}\Alph{PfCPuzzlePavcpt}, \setcounter{PfCPuzzlePavcpt}{\PfCPuzzlePCptLettre[4]}\Alph{PfCPuzzlePavcpt} et \setcounter{PfCPuzzlePavcpt}{\PfCPuzzlePCptLettre[5]}\Alph{PfCPuzzlePavcpt}%
+}%
+
+\NewDocumentCommand\PuzzlePyramide{o m}{%
+  \useKVdefault[ClesPuzzleP]%
+  \setKV[ClesPuzzleP]{#1}%
+  \ifboolKV[ClesPuzzleP]{Graines}{\PfCGraineAlea{\useKV[ClesPuzzleP]{Graine}}}{}%
+  \setsepchar{§}%
+  \readlist*\PfCPuzzlePQuestions{#2}%
+  \setsepchar{,}%
+  \setlength{\PfCPuzzleP}{\useKV[ClesPuzzleP]{Largeur}}%
+  \xdef\PfCPuzzlePLettres{1}%
+  \xintFor* ##1 in{\xintSeq{2}{\fpeval{\useKV[ClesPuzzleP]{Etages}*(\useKV[ClesPuzzleP]{Etages}+1)/2}}}\do{%
+    \xdef\PfCPuzzlePLettres{\PfCPuzzlePLettres,##1}%
+  }%
+  \MelangeListe{\PfCPuzzlePLettres}{\fpeval{\useKV[ClesPuzzleP]{Etages}*(\useKV[ClesPuzzleP]{Etages}+1)/2}}%
+  \readlist*{\PfCPuzzlePCptLettre}{\faa}%
+  \xdef\PuzzlePyramideLettres{\PuzzlePyramideListeLettres}%
+  \setcounter{PfCPuzzlePcpt}{0}%
+  \ifboolKV[ClesPuzzleP]{Solutions}{%
+%    % Plateau de jeu
+    \begin{center}
+      \begin{NiceTabular}{*{\fpeval{\useKV[ClesPuzzleP]{Etages}*2}}{m{\PfCPuzzleP}}}%[hvlines]
+        \xintFor* ##1 in {\xintSeq{1}{\fpeval{\useKV[ClesPuzzleP]{Etages}}}}\do{%
+          \xintifForLast{\Block[draw]{\useKV[ClesPuzzleP]{NbLignes}-2}{\stepcounter{PfCPuzzlePcpt}\setcounter{PfCPuzzlePavcpt}{\PfCPuzzlePCptLettre[\thePfCPuzzlePcpt]}{\Huge\Alph{PfCPuzzlePavcpt}}}&}{\Block[draw]{\useKV[ClesPuzzleP]{NbLignes}-2}{\stepcounter{PfCPuzzlePcpt}\setcounter{PfCPuzzlePavcpt}{\PfCPuzzlePCptLettre[\thePfCPuzzlePcpt]}{\Huge\Alph{PfCPuzzlePavcpt}}}&&}
+        }\\%
+        \xintFor* ##1 in {\xintSeq{2}{\useKV[ClesPuzzleP]{NbLignes}}}\do{%
+          \xintFor* ##2 in {\xintSeq{1}{\fpeval{\useKV[ClesPuzzleP]{Etages}*2}}}\do{%
+            \xintifForLast{\\}{&}
+          }%
+        }%
+        \xintFor* ##1 in {\xintSeq{1}{\fpeval{\useKV[ClesPuzzleP]{Etages}-1}}}\do{%
+          \xintFor* ##2 in {\xintSeq{1}{##1}}\do{%
+            \xintifForFirst{}{&}
+          }\xintFor* ##2 in {\xintSeq{1}{\fpeval{\useKV[ClesPuzzleP]{Etages}-##1}}}\do{%
+            &\Block[draw]{\useKV[ClesPuzzleP]{NbLignes}-2}{\stepcounter{PfCPuzzlePcpt}\setcounter{PfCPuzzlePavcpt}{\PfCPuzzlePCptLettre[\thePfCPuzzlePcpt]}{\Huge\Alph{PfCPuzzlePavcpt}}}&
+          }%
+          \\
+          \xintFor* ##3 in {\xintSeq{2}{\useKV[ClesPuzzleP]{NbLignes}}}\do{%
+            \xintFor* ##4 in {\xintSeq{1}{\fpeval{\useKV[ClesPuzzleP]{Etages}*2}}}\do{%
+              \xintifForLast{\\}{&}
+            }%
+          }%
+        }%
+      \end{NiceTabular}
+    \end{center}
+  }{%
+    \ifboolKV[ClesPuzzleP]{EnonceQuestion}{%
+      % Plateau des questions
+      \setcounter{PfCPuzzlePcpt}{0}%
+      \begin{center}
+        \begin{NiceTabular}{*{10}{m{\PfCPuzzleP}}}%[hvlines]
+          \xintFor* ##3 in {\xintSeq{1}{\fpeval{ceil(\PfCPuzzlePQuestionslen/5)}}}\do{%
+            \xintFor* ##1 in {\xintSeq{1}{5}}\do{%
+              \xintifForLast{%
+                \Block[draw]{\useKV[ClesPuzzleP]{NbLignes}-2}{%
+                  \stepcounter{PfCPuzzlePcpt}%
+                  \xintifboolexpr{\thePfCPuzzlePcpt>\PfCPuzzlePQuestionslen}{}{%
+                    \xintFor* ##4 in{\xintSeq{1}{\PfCPuzzlePQuestionslen}}\do{%
+                      \xintifboolexpr{\thePfCPuzzlePcpt==\PfCPuzzlePCptLettre[##4]}{\PfCPuzzlePQuestions[##4]}{}%
+                    }%
+                  }%
+                }&%
+              }{%
+                \Block[draw]{\useKV[ClesPuzzleP]{NbLignes}-2}{%
+                  \stepcounter{PfCPuzzlePcpt}%
+                  \xintifboolexpr{\thePfCPuzzlePcpt>\PfCPuzzlePQuestionslen}{}{%
+                    \xintFor* ##4 in{\xintSeq{1}{\PfCPuzzlePQuestionslen}}\do{%
+                      \xintifboolexpr{\thePfCPuzzlePcpt==\PfCPuzzlePCptLettre[##4]}{\PfCPuzzlePQuestions[##4]}{}%
+                    }%
+                  }%
+                }%
+                &&%
+              }%
+            }\\%
+            \xintFor* ##1 in {\xintSeq{2}{\useKV[ClesPuzzleP]{NbLignes}}}\do{%
+              \xintFor* ##2 in {\xintSeq{1}{10}}\do{%
+                \xintifForLast{\\}{&}
+              }%
+            }%
+          }%
+          \CodeAfter
+          \setcounter{PfCPuzzlePcpt}{0}%
+          \xintFor* ##1 in {\xintSeq{1}{\fpeval{ceil(\PfCPuzzlePQuestionslen/5)}}}\do{%
+            \xintFor* ##2 in {\xintSeq{1}{5}}\do{%
+              \tikz{\node[anchor={north west},xshift=1mm,yshift=-1mm] at (\fpeval{(##1-1)*\useKV[ClesPuzzleP]{NbLignes}+1}-|\fpeval{2*##2-1}) {\stepcounter{PfCPuzzlePcpt}\Large\bfseries\Alph{PfCPuzzlePcpt}};}%
+              \tikz{\node[anchor={south east},xshift=-2mm,yshift=-2mm,rectangle,draw] at (\fpeval{##1*\useKV[ClesPuzzleP]{NbLignes}}-|\fpeval{2*##2+1}) {\large\bfseries\hbox to 1.2\PfCPuzzleP{\rule{0pt}{1.8ex}}};}%
+            }%
+          }%
+        \end{NiceTabular}
+      \end{center}%
+    }{%
+      % Plateau de jeu
+      \begin{center}
+        \begin{NiceTabular}{*{\fpeval{\useKV[ClesPuzzleP]{Etages}*2}}{m{\PfCPuzzleP}}}%[hvlines]
+          \xintFor* ##1 in {\xintSeq{1}{\fpeval{\useKV[ClesPuzzleP]{Etages}}}}\do{%
+            \xintifForLast{\Block[draw]{\useKV[ClesPuzzleP]{NbLignes}-2}{\stepcounter{PfCPuzzlePcpt}\setcounter{PfCPuzzlePavcpt}{\PfCPuzzlePCptLettre[\thePfCPuzzlePcpt]}{\Huge\Alph{PfCPuzzlePavcpt}}}&}{\Block[draw]{\useKV[ClesPuzzleP]{NbLignes}-2}{\stepcounter{PfCPuzzlePcpt}\setcounter{PfCPuzzlePavcpt}{\PfCPuzzlePCptLettre[\thePfCPuzzlePcpt]}{\Huge\Alph{PfCPuzzlePavcpt}}}&&}
+          }\\%
+          \xintFor* ##1 in {\xintSeq{2}{\useKV[ClesPuzzleP]{NbLignes}}}\do{%
+            \xintFor* ##2 in {\xintSeq{1}{\fpeval{\useKV[ClesPuzzleP]{Etages}*2}}}\do{%
+              \xintifForLast{\\}{&}
+            }%
+          }%
+          \xintFor* ##1 in {\xintSeq{1}{\fpeval{\useKV[ClesPuzzleP]{Etages}-1}}}\do{%
+            \xintFor* ##2 in {\xintSeq{1}{##1}}\do{%
+              \xintifForFirst{}{&}
+            }\xintFor* ##2 in {\xintSeq{1}{\fpeval{\useKV[ClesPuzzleP]{Etages}-##1}}}\do{%
+              &\Block[draw]{\useKV[ClesPuzzleP]{NbLignes}-2}{}&
+            }%
+            \\
+            \xintFor* ##3 in {\xintSeq{2}{\useKV[ClesPuzzleP]{NbLignes}}}\do{%
+              \xintFor* ##4 in {\xintSeq{1}{\fpeval{\useKV[ClesPuzzleP]{Etages}*2}}}\do{%
+                \xintifForLast{\\}{&}
+              }%
+            }%
+          }%
+        \end{NiceTabular}
+      \end{center}
+    }%
+  }%
+}%

@@ -1,0 +1,793 @@
+%% fancymag.sty
+%% -------------------------------------------------------------------
+%% A LaTeX package for designing elegant author profiles and content
+%% blocks, perfect for academic magazines, scientific books, and
+%% editorial publications.
+%%
+%% Author    : Ashadul Halder; Soumik Ghosh
+%% Version   : 1.0
+%% Date      : 2025-07-07
+%% License   : LaTeX Project Public License (LPPL) v1.3c or later
+%%
+%% This package may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either version 1.3c
+%% of this license or (at your option) any later version.
+%%
+%% The latest version of this license is available at:
+%%   http://www.latex-project.org/lppl.txt
+%%
+%% To use the package, compilation must be done with lualatex 
+%% and a few required folders (as outlined in the documentation) must be present 
+%% in the working directory. These folders contain necessary font and style 
+%% resources that the package depends on.
+%% -------------------------------------------------------------------
+\ProvidesPackage{fancymag}[2025/07/07 v1.0 Modern, stylish typography for academic magazines and scientific publications]
+\RequirePackage{babel}
+\RequirePackage{fontspec}
+
+\babelfont{tt}[Path = fonts/,]{FiraMono-Regular.ttf}
+\babelfont{sf}[Path = fonts/,]{Montserrat-Bold.ttf}
+\RequirePackage{amsfonts}
+\RequirePackage{amsmath}
+\RequirePackage{amssymb}
+%\RequirePackage{chancery}
+%\RequirePackage{pbsi}
+\RequirePackage{fontspec}
+%\RequirePackage{fourier}
+%\RequirePackage{gillius}
+%\RequirePackage[defaultmono, scale=.90]{droidsansmono}
+\RequirePackage{calligra}
+%\RequirePackage[protrusion=true,expansion=true,final,tracking]{microtype}
+\RequirePackage{xcolor}
+\RequirePackage{graphicx}
+\RequirePackage{tikz}
+\RequirePackage{adjustbox}
+\RequirePackage{wrapfig}
+\RequirePackage{eso-pic}
+\RequirePackage{geometry}
+\RequirePackage{titlesec}
+\RequirePackage{caption}
+\RequirePackage{fancyhdr}
+%\RequirePackage{scrextend}
+\RequirePackage{balance}
+\RequirePackage{multicol}
+\RequirePackage{afterpage}
+\RequirePackage{lettrine}
+\RequirePackage{xstring}
+\RequirePackage{shadowtext}
+\RequirePackage{lipsum}
+\RequirePackage{pdfrender}
+\RequirePackage{shadowtext}
+\RequirePackage{fix-cm}
+\RequirePackage{textpos}
+\RequirePackage{everypage-1x}
+
+%\font\beng = {name:kalpurush.ttf:mode=harf;script=beng} at 10pt
+\newfontfamily\customfontone[Path=fonts/,]{Audiowide-Regular.ttf}[]
+\newfontfamily\customfonttwo[Path=fonts/,]{ImperialScript-Regular.ttf}[]
+\newfontfamily\customfontthree[Path=fonts/,]{Rationale-Regular.ttf}[]
+\newfontfamily\customfontfour[Path=fonts/,]{Orbitron-VariableFont_wght.ttf}[]
+\newfontfamily\headrf[Path=fonts/,]{OleoScriptSwashCaps-Regular.ttf}[]
+
+%\RequirePackage[banglamainfont=Kalpurush, 
+%            banglattfont=Kalpurush
+%           ]{latexbangla}  
+
+%\geometry{includehead,top=2cm,bottom=2cm}
+\BeforeBeginEnvironment{wrapfigure}{\setlength{\intextsep}{0pt}}
+\newcommand{\fakebold}[1]{\textpdfrender{TextRenderingMode=FillStroke,LineWidth=0.5pt}{#1}}
+\usetikzlibrary{shadows.blur}
+\usetikzlibrary{patterns}
+
+%\geometry{includehead,top=1.5cm,bottom=2cm}
+\geometry{includehead,left=2.2cm, right=2.2cm, % Left and right margins for odd/even pages
+  top=1.5cm, bottom=2cm,   % Top and bottom margins
+  bindingoffset=1.5cm    % Space for binding on the inner margin
+}
+\setlength{\headheight}{14.16103pt}
+%\BeforeBeginEnvironment{wrapfigure}{\setlength{\intextsep}{0pt}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{1.5pt}
+\fancypagestyle{firstpage}{
+    \fancyhf{} % Clear all headers and footers
+    \renewcommand{\headrulewidth}{0pt}
+    \fancyfoot[c]{\fontsize{15}{15}\selectfont\textcolor{accent}{\headrf {\textbf{\thepage}}}}
+    \fancyhead[R]{}
+    \fancyhead[L]{}
+}
+
+\setlength\parindent{0pt}
+\setlength\parskip{0pt}
+\renewcommand{\baselinestretch}{1.1}
+\setlength\columnsep{18pt}
+\definecolor{accent}{HTML}{0080EE}
+\definecolor{accentlight}{HTML}{77eeff}
+\definecolor{grc}{HTML}{999999}
+\definecolor{mt}{HTML}{007777}
+\definecolor{ttl}{HTML}{0077aa}
+\definecolor{ttl1}{HTML}{005599}
+\renewcommand{\LettrineFontHook}{\color{accent}\Huge\bfseries}
+\setcounter{DefaultLines}{3}
+
+\fancyfoot[RE]{\fontsize{14}{14}\selectfont\textcolor{ttl}{\headrf{\thepage}}}
+\fancyfoot[LO]{\fontsize{14}{14}\selectfont\textcolor{ttl}{\headrf{\thepage}}} 
+
+\newcommand{\bgchange}[1]{%
+    \AddEverypageHook{% Hook for every page
+    \AddToShipoutPictureBG*{
+      \AtPageLowerLeft{
+        \includegraphics[width=\paperwidth,height=\paperheight]{#1}% Background image
+      }
+    }
+  }
+}
+
+\newcommand{\titlepg}[1]{%
+    \newpage
+    \begingroup
+    \onecolumn
+    \shadowoffset{0pt}
+    \shadowrgb{0,0,0}
+    \begin{tikzpicture}[remember picture, overlay]
+       \node[anchor=south west, inner sep=0] at (current page.south west) {
+            \includegraphics[width=\paperwidth, height=\paperheight]{img/fancymag-msg_bg.jpg}
+        };
+        %\node[align=center] at (current page.center) 
+        %{{\fontsize{40}{40}\selectfont \textbf{#1}}};
+     \end{tikzpicture}
+     	\begin{center}
+     	\baselineskip=20pt
+     	\vfill
+        {\noindent\fontsize{40}{40}\selectfont \customfontthree{\textcolor{accent}{#1}}}
+        \vfill
+    	\end{center}
+        
+    	
+    \clearpage
+    \endgroup
+}
+
+\newenvironment{photoenv}{
+  \clearpage
+  \begingroup
+  \onecolumn
+}{
+  \clearpage
+  \endgroup
+}
+
+\newcommand{\albumphoto}[3]{
+    \begin{minipage}[t]{0.99\textwidth}
+        \begin{tikzpicture}
+            \node[draw=white, line width=3mm, inner sep=0pt, outer sep=0pt, blur shadow={shadow xshift=0mm, shadow yshift=0mm, shadow scale=1.04, shadow blur steps=15}] 
+                  (image) at (0,0){\includegraphics[height=8cm, width=12cm]{#3}};
+            \shade[shading=axis, 
+               left color={rgb,255:red,0; green,55; blue,255}, 
+               right color={rgb,255:red,0; green,255; blue,255}, blur shadow={shadow yshift=-2mm, shadow blur steps=8}] 
+              (-\textwidth*0.5, -0.175\textheight) rectangle (\textwidth*0.5, -0.25\textheight);
+            \node[align=center, text width=10cm] at (0.01,-0.212\textheight) {\fontsize{25}{25}\selectfont{\fakebold{\textcolor{black}{#1}}}\\
+                [5em]
+                %\fontsize{15}{15}\selectfont {#2}
+            };
+            \node[align=center, text width=10cm] at (-0.01,-0.208\textheight) {\fontsize{25}{25}\selectfont{\fakebold{\textcolor{black}{#1}}}\\
+                [5em]
+                %\fontsize{15}{15}\selectfont {#2}
+            };
+            \node[align=center, text width=10cm] at (0,-0.21\textheight) {\fontsize{25}{25}\selectfont{\fakebold{\textcolor{white}{#1}}}\\
+                [5em]
+                %\fontsize{15}{15}\selectfont {#2}
+            };
+        \end{tikzpicture}
+    \end{minipage}
+    
+    \vskip 1 cm
+}
+
+\newcommand\SectionBackgroundlold[5]{%
+    \AddThispageHook{%
+        \AddToShipoutPictureBG*{%
+            \put(0,0){%
+                \begin{tikzpicture}[remember picture, overlay]
+                    % Background images
+                    \node[anchor=north west] at (current page.north west) {\includegraphics[width=0.42\paperwidth,height=\paperheight]{#5}};
+                    \node[anchor=north east] at (current page.north east) {\includegraphics[width=0.56\paperwidth,height=\paperheight]{img/fancymag-blank.png}};
+                    
+                    % Shaded background rectangle
+                    \shade[shading=axis, 
+                           left color={rgb,255:red,0; green,255; blue,255}, 
+                           right color={rgb,255:red,0; green,55; blue,255}, blur shadow={shadow yshift=-2mm, shadow blur steps=10}] 
+                          (0, 0.30\textheight) rectangle (\paperwidth, 0.17\textheight);
+
+                    % Main image with frame
+                    \node[anchor=center] at (5, 0.33\textheight) {
+                        \includegraphics[width=3.5cm, height=4.5cm]{#4}
+                    };
+                    \draw[line width=2mm, color=white] (5, 0.33\textheight) rectangle (5+3.5cm, 0.33\textheight + 4.5cm); % Frame around image
+
+                    % Text nodes with shadow effect
+                    \node [anchor=west, font=\LARGE, color={rgb,255:red,255; green,255; blue,255}] at (9, 6.2) {\shadowtext{\fontsize{30}{30}\selectfont {\customfonttwo #1}}};
+                    \node [anchor=west, font=\LARGE, color={rgb,255:red,255; green,255; blue,0}] at (9, 5) {\shadowtext{\fontsize{15}{15}\selectfont \textbf{#2}}};
+                    \node [anchor=west, font=\LARGE, color={rgb,255:red,255; green,255; blue,0}] at (9, 4.5) {\shadowtext{\fontsize{15}{15}\selectfont \textbf{#3}}};
+                \end{tikzpicture}
+            }%
+        }%
+    }%
+}
+
+\newcommand\SectionBackgroundl[5]{%
+    \AddThispageHook{%
+        \AddToShipoutPictureBG*{%
+            \put(0,0){
+                \begin{tikzpicture}
+                    % Background images on the left and right
+                    \node[anchor=north west] at (current page.north west) {
+                        \includegraphics[width=0.42\paperwidth, height=\paperheight]{#5}};
+                    \node[anchor=north east] at (current page.north east) {
+                        \includegraphics[width=0.56\paperwidth, height=\paperheight]{img/fancymag-blank.png}};
+                    % Gradient shading
+                    \shade[shading=axis, 
+                           left color={rgb,255:red,0; green,255; blue,255}, 
+                           right color={rgb,255:red,0; green,55; blue,255}, 
+                           blur shadow={shadow yshift=-2mm, shadow blur steps=8}] 
+                          (0, 0.30\textheight) rectangle (\paperwidth, 0.17\textheight);
+                    % Central image with border and shadow
+                    \node[anchor=center, blur shadow={shadow xshift=-2mm, shadow yshift=-2mm, shadow blur steps=8}] at (5, 0.33\textheight) {
+                        \includegraphics[width=3.5cm, height=4.5cm]{#4}};
+                    \draw[line width=2mm, color=white] 
+                        ([xshift=-1.75cm, yshift=-2.25cm]5, 0.33\textheight) 
+                        rectangle ([xshift=1.75cm, yshift=2.25cm]5, 0.33\textheight);
+                    % Text content
+                    \shadowoffset{0pt}
+                    \shadowrgb{0,0,0}
+                    \node[anchor=west, font=\LARGE, color=white] at (9, 6) {
+                        \shadowtext{\fontsize{25}{25}\selectfont {\textsf{\textit{\textbf{#1}}}}}};
+                    \node[anchor=west, font=\LARGE, color={rgb,255:red,255; green,255; blue,0}] at (9, 5) {
+                        \shadowtext{\fontsize{15}{15}\selectfont \textbf{#2}}};
+                    \node[anchor=west, font=\LARGE, color={rgb,255:red,255; green,255; blue,0}] at (9, 4.5) {
+                        \shadowtext{\fontsize{15}{15}\selectfont \textbf{#3}}};
+                \end{tikzpicture}
+            }
+        }
+    }
+}
+
+\newcommand\SectionBackgroundr[5]{%
+    \AddThispageHook{%
+        \AddToShipoutPictureBG*{%
+            \put(0,0){
+                \begin{tikzpicture}
+                    % Background images on the left and right
+                    \node[anchor=north west] at (current page.north west) {
+                        \includegraphics[width=0.56\paperwidth, height=\paperheight]{img/fancymag-blank.png}};
+                    \node[anchor=north east] at (current page.north east) {
+                        \includegraphics[width=0.42\paperwidth, height=\paperheight]{#5}};
+                    % Gradient shading
+                    \shade[shading=axis, 
+                           left color={rgb,255:red,0; green,55; blue,255}, 
+                           right color={rgb,255:red,0; green,255; blue,255}, 
+                           blur shadow={shadow yshift=-2mm, shadow blur steps=8}] 
+                          (0, 0.30\textheight) rectangle (\paperwidth, 0.17\textheight);
+                    % Central image with border and shadow
+                    \node[anchor=center, blur shadow={shadow xshift=-2mm, shadow yshift=-2mm, shadow blur steps=8}] at (16.5, 0.33\textheight) {
+                        \includegraphics[width=3.5cm, height=4.5cm]{#4}};
+                    \draw[line width=2mm, color=white] 
+                        ([xshift=-1.75cm, yshift=-2.25cm]16.5, 0.33\textheight) 
+                        rectangle ([xshift=1.75cm, yshift=2.25cm]16.5, 0.33\textheight);
+                    % Text content
+                    \shadowoffset{0pt}
+                    \shadowrgb{0,0,0}
+                    \node[anchor=east, font=\LARGE, color=white] at (12, 6) {
+                        \shadowtext{\fontsize{25}{25}\selectfont {\textsf{\textit{\textbf{#1}}}}}};
+                    \node[anchor=east, font=\LARGE, color={rgb,255:red,255; green,255; blue,0}] at (12, 5) {
+                        \shadowtext{\fontsize{15}{15}\selectfont \textbf{#2}}};
+                    \node[anchor=east, font=\LARGE, color={rgb,255:red,255; green,255; blue,0}] at (12, 4.5) {
+                        \shadowtext{\fontsize{15}{15}\selectfont \textbf{#3}}};
+                \end{tikzpicture}
+            }
+        }
+    }
+}
+
+
+\newenvironment{particle2}[6]{
+  \clearpage
+  \twocolumn
+  \balance
+%  \newpage
+  \thispagestyle{firstpage}
+  %\twocolumn
+  \fancyhf{}
+  \fancyhead[LO]{\textcolor{accent}{\large\textbf{#2}}}
+  \fancyhead[RE]{\textcolor{accent}{\textbf{#1}}}
+  \fancyhead[RO]{\textcolor{accent}{\large\textbf{\thepage}}}
+  \fancyhead[LE]{\textcolor{accent}{\large\textbf{\thepage}}}
+  \begingroup
+  \ifodd\value{page}
+    \SectionBackgroundr{#2}{#3}{#4}{#5}{#6}
+    \begin{figure}[b]
+        \centering
+        \begin{tikzpicture}
+            \draw[fill=none, draw=none] (0, 0) rectangle (\linewidth*0.3, \textheight*0.19);
+        \end{tikzpicture}
+    \end{figure}
+    \columnbreak
+    
+    \begin{figure}[b!]
+        \centering
+        \begin{tikzpicture}
+            \draw[fill=none, draw=none] (0, 0) rectangle (0.4*\linewidth, 0.98*\textheight);
+        \end{tikzpicture}
+    \end{figure}
+  \else 
+    \SectionBackgroundl{#2}{#3}{#4}{#5}{#6}
+    \vskip 6.9 cm
+    \begin{figure}[t!]
+        \centering
+        \begin{tikzpicture}
+            \draw[fill=none, draw=none] (0, 0) rectangle (\linewidth*0.4, \textheight*0.99);
+        \end{tikzpicture}
+    \end{figure} 
+    \columnbreak
+    \begin{figure}[b!]  % Place figure at the bottom of the page
+        \centering
+        \begin{tikzpicture}
+            \draw[fill=none, draw=none] (0, 0) rectangle (\linewidth*0.4, \textheight*0.21);
+        \end{tikzpicture}
+    \end{figure}
+  \fi
+  {\fontsize{15.5}{16.5} \selectfont \textcolor{ttl}{\textsf{\textbf{#1}}}}
+  \vskip 1.5 cm
+  \setcounter{figure}{0}
+}{
+  \endgroup
+  \balance
+  \clearpage
+}
+
+\newcommand{\heading}[1]{%
+	\vspace{1.5em} % Space before
+	\noindent\textbf{\textcolor{blue}{\Large #1}}\par
+	\vspace{1em} % Space after
+}
+
+\newcommand{\msgfigurel}[6]{
+    \begin{tikzpicture}
+        \pgfmathsetmacro{\xx}{3}
+        \pgfmathsetmacro{\yy}{-6}
+        \shade[bottom color={rgb,255:red,240; green,250; blue,255},top color={rgb,255:red,255; green,255; blue,255}](-5,7) rectangle (0.78*\linewidth, -0.98*\textheight);
+        \node[anchor=east] at (17,7) {
+            \includegraphics[width=21.9cm,height=25cm]{img/fancymag-msg_bg.jpg}
+        };
+        %\draw[fill=none, draw=none] (5,7) rectangle (0.76*\linewidth, -0.93*\textheight);
+        \draw[thick, pattern=north east lines, pattern color=accentlight, draw=none] 
+            (0+\xx, 3+\yy) -- (2.61+\xx, 1.5+\yy) -- (2.61+\xx, -1.5+\yy) -- 
+            (0+\xx, -3+\yy) -- (-2.61+\xx, -1.5+\yy) -- (-2.61+\xx, 1.5+\yy) -- cycle;
+        \draw[thick, fill=grc, draw=none] 
+            (0, 4.35) -- (3.77, 2.17) -- (3.77, -2.17) -- 
+            (0, -4.35) -- (-3.77, -2.17) -- (-3.77, 2.17) -- cycle;
+        \draw[thick, fill=white, draw=none] 
+            (0, 4.3) -- (3.74, 2.15) -- (3.74, -2.15) -- 
+            (0, -4.3) -- (-3.74, -2.15) -- (-3.74, 2.15) -- cycle;
+        \node[anchor=west,text=mt] at (-3.6,-8.5) {\fontsize{15}{15}\selectfont \textit{#1}};
+        \node[anchor=west, text=black] at (-3.6,-9.5) {\fontsize{15}{15}\selectfont {#2}};
+        \node[anchor=west, text=black] at (-3.6,-10) {\fontsize{11}{11}\selectfont \textit{#3}};
+        \node[anchor=center] at (-1,-6.7) {\includegraphics[width=#6]{#5}};
+        \clip 
+            (0, 4) -- (3.48, 2) -- (3.48, -2) -- 
+            (0, -4) -- (-3.48, -2) -- (-3.48, 2) -- cycle;
+        \node[anchor=center] at (0, 0) {
+            \includegraphics[width=8cm, height=8cm]{#4}
+        };
+        
+    \end{tikzpicture}
+}
+
+\newcommand{\msgfigurer}[6]{
+    \begin{tikzpicture}
+        \pgfmathsetmacro{\xx}{-3} % Width of the hexagon
+        \pgfmathsetmacro{\yy}{-6} % Width of the hexagon
+        \draw[fill=none, draw=none] (5,7) rectangle (-0.76*\linewidth, -0.98*\textheight);
+        \shade[anchor=center,bottom color={rgb,255:red,240; green,250; blue,255}, top color={rgb,255:red,255; green,255; blue,255}](-16.5,7) rectangle (0.78*\linewidth, -\textheight);
+        \node[anchor=east] at (5.5,7) {
+            \includegraphics[width=21.9cm,height=25cm]{img/fancymag-msg_bg.jpg}
+        };
+        \draw[thick, pattern=north east lines, pattern color=accentlight, draw=none]
+            (0+\xx, 3+\yy) -- (2.61+\xx, 1.5+\yy) -- (2.61+\xx, -1.5+\yy) -- 
+            (0+\xx, -3+\yy) -- (-2.61+\xx, -1.5+\yy) -- (-2.61+\xx, 1.5+\yy) -- cycle;
+        \draw[thick, fill=grc, draw=none]
+            (0, 4.35) -- (3.77, 2.17) -- (3.77, -2.17) -- 
+            (0, -4.35) -- (-3.77, -2.17) -- (-3.77, 2.17) -- cycle;
+        \draw[thick, fill=white, draw=none]
+            (0, 4.3) -- (3.74, 2.15) -- (3.74, -2.15) -- 
+            (0, -4.3) -- (-3.74, -2.15) -- (-3.74, 2.15) -- cycle;
+        \node[anchor=east, text=mt] at (4,-8.5) {\fontsize{15}{15}\selectfont \textit{#1}};
+        \node[anchor=east, text=black] at (4,-9.5) {\fontsize{15}{15}\selectfont {#2}};
+        \node[anchor=east, text=black] at (4,-10) {\fontsize{11}{11}\selectfont \textit{#3}};
+        \node[anchor=center] at (1,-7) {\includegraphics[width=#6]{#5}};
+        \clip
+            (0, 4) -- (3.48, 2) -- (3.48, -2) -- 
+            (0, -4) -- (-3.48, -2) -- (-3.48, 2) -- cycle;
+        \node[anchor=center] at (0, 0) {
+            \includegraphics[width=8cm,height=8cm]{#4}
+        };
+    \end{tikzpicture}
+}
+
+\newcommand\msg[8]{%
+    \newpage
+    \thispagestyle{firstpage}
+    \onecolumn
+    \fancyhf{}
+    \fancyhead[LO]{}
+    \fancyhead[RE]{}
+    \fancyhead[RO]{}
+    \fancyhead[LE]{}
+    \AddThispageHook{%
+        \AddToShipoutPictureBG*{%
+        \put(0,0){
+            \parbox[b][\paperheight]{\paperwidth}{
+                \vfill
+                \centering
+                \ifodd\value{page}
+                    \msgfigurer{#1}{#2}{#4}{#5}{#6}{#7}
+                \else
+                    \msgfigurel{#1}{#2}{#4}{#5}{#6}{#7}
+                \fi
+                \vfill
+                }
+            }
+        }
+    }
+    \ifodd\value{page}
+        \newgeometry{left=1.2in, right=2.5in, top=1.5in, bottom=1in}
+        {\fontsize{15}{15}\selectfont \textbf{\textcolor{accent}{\textsf{{#3}}}}}\\
+        \begin{tikzpicture}
+            \draw[fill={rgb,1:red,0;green,0;blue,0.7}, draw=none] (0, 0) rectangle (5cm, 0.15cm);
+        \end{tikzpicture}
+        \vskip 0.5cm
+        \begin{wrapfigure}[24]{r}{0.3\textwidth}
+            \centering
+            \begin{tikzpicture}
+                \draw[fill=none, draw=none] (0, 0) rectangle (1cm, 1cm);
+            \end{tikzpicture}
+        \end{wrapfigure}
+    \else
+        \newgeometry{left=1.2in, right=2.5in, top=1.5in, bottom=1in}
+        \noindent\hspace*{\fill}
+        {\fontsize{15}{15}\selectfont \textbf{\textcolor{accent}{\textsf{{#3}}}}}\\
+        \noindent\hspace*{\fill}
+        \begin{tikzpicture}
+            \draw[fill={rgb,1:red,0;green,0;blue,0.7}, draw=none] (0, 0) rectangle (5cm, 0.15cm);
+        \end{tikzpicture}
+        \vskip 0.5cm
+        \begin{wrapfigure}[38]{l}{0.3\textwidth}
+            \centering
+            \begin{tikzpicture}
+                \draw[fill=none, draw=none] (0, 0) rectangle (1cm, 1cm);
+            \end{tikzpicture}
+        \end{wrapfigure}
+    \fi
+    \noindent
+    #8
+    \restoregeometry
+}
+
+\newcommand{\photograph}[7]{
+    \IfStrEq{#7}{left}{
+        \IfStrEq{#6}{landscape}{
+        	\begin{minipage}[t]{0.99\textwidth}
+        		\vspace{1.5cm}
+        		\begin{tikzpicture}
+        			\node[draw=white, line width=3mm, inner sep=0pt, outer sep=0pt, blur shadow={shadow xshift=-0.5mm, shadow yshift=-0.5mm, shadow scale=1.04, shadow blur steps=15}] 
+        			(image) at (6,0){\includegraphics[height=7cm, width=10cm]{#5}};
+        			\node[anchor=east, align=center, text width=0.35*\linewidth] at (image.west) {\fontsize{20}{20}\selectfont   {\fakebold{\textcolor{accent}{#1}}}\\
+        				[0.8em]
+        				\fontsize{11}{11}\selectfont {#2}\\
+        				[0.5em]
+        				\fontsize{11}{11}\selectfont {#3}
+        			};
+        		\end{tikzpicture}
+        		\vspace{1.5cm}
+        	\end{minipage}
+        }{
+            \begin{minipage}[t]{0.99\textwidth}
+                \begin{tikzpicture}
+                    \node[draw=white, line width=3mm, inner sep=0pt, outer sep=0pt, blur shadow={shadow xshift=-0.5mm, shadow yshift=-0.5mm, shadow scale=1.04, shadow blur steps=15}] 
+                          (image) at (6,0){\includegraphics[height=10cm, width=7cm]{#5}};
+                    \node[anchor=east, align=center, text width=6cm] at (image.west) {\fontsize{20}{20}\selectfont   {\fakebold{\textcolor{accent}{#1}}}\\
+                        [0.8em]
+                        \fontsize{11}{11}\selectfont {#2}\\
+                        [0.6em]
+                        \fontsize{11}{11}\selectfont {#3}
+                    };
+                \end{tikzpicture}
+            \end{minipage}
+        }
+    }{
+        \IfStrEq{#6}{landscape}{
+            \begin{minipage}[t]{0.99\textwidth}
+                \vspace{1.5cm}
+                \begin{tikzpicture}
+                    \node[draw=white, line width=3mm, inner sep=0pt, outer sep=0pt, blur shadow={shadow xshift=-0.5mm, shadow yshift=-0.5mm, shadow scale=1.04, shadow blur steps=15}] 
+                    (image) at (6,0){\includegraphics[height=7cm, width=10cm]{#5}};
+                    \node[anchor=west, align=center, text width=0.35*\linewidth] at (image.east) {\fontsize{20}{20}\selectfont   {\fakebold{\textcolor{accent}{#1}}}\\
+                        [0.8em]
+                        \fontsize{11}{11}\selectfont {#2}\\
+                        [0.5em]
+                        \fontsize{11}{11}\selectfont {#3}
+                    };
+                \end{tikzpicture}
+                \vspace{1.5cm}
+            \end{minipage}
+        }{
+            \begin{minipage}[t]{0.99\textwidth}
+                \begin{tikzpicture}
+                    \node[draw=white, line width=3mm, inner sep=0pt, outer sep=0pt, blur shadow={shadow xshift=-0.5mm, shadow yshift=-0.5mm, shadow scale=1.04, shadow blur steps=15}] 
+                    (image) at (6,0){\includegraphics[height=10cm, width=7cm]{#5}};
+                    \node[anchor=west, align=center, text width=6cm] at (image.east) {\fontsize{20}{20}\selectfont   {\fakebold{\textcolor{accent}{#1}}}\\
+                        [0.8em]
+                        \fontsize{11}{11}\selectfont {#2}\\
+                        [0.6em]
+                        \fontsize{11}{11}\selectfont {#3}
+                    };
+                \end{tikzpicture}
+            \end{minipage}
+        }
+    }
+    \vskip 0.5 cm
+}
+
+\newenvironment{fistpg}{
+    \newpage
+    \begingroup
+    \fancyhf{} % Clear all headers and footers
+    \renewcommand{\headrulewidth}{0pt}
+    \fancyfoot[c]{}
+    \onecolumn
+}{
+    \clearpage
+    \endgroup
+}
+
+\newcommand{\interviewheadl}[8]{
+	\begin{tikzpicture}
+		\pgfmathsetmacro{\xx}{3}
+		\pgfmathsetmacro{\yy}{-6}
+		\shade[bottom color={rgb,255:red,240; green,250; blue,255},top color={rgb,255:red,255; green,255; blue,255}](-5,7) rectangle (0.78*\linewidth, -0.98*\textheight);
+		\node[anchor=east] at (17,7) {
+			\includegraphics[width=21.9cm,height=25cm]{img/fancymag-msg_bg.jpg}
+		};
+		\draw[thick, pattern=north east lines, pattern color=accentlight, draw=none] 
+		(0+\xx, 3+\yy) -- (2.61+\xx, 1.5+\yy) -- (2.61+\xx, -1.5+\yy) -- 
+		(0+\xx, -3+\yy) -- (-2.61+\xx, -1.5+\yy) -- (-2.61+\xx, 1.5+\yy) -- cycle;
+		\draw[thick, fill=grc, draw=none] 
+		(0, 4.35) -- (3.77, 2.17) -- (3.77, -2.17) -- 
+		(0, -4.35) -- (-3.77, -2.17) -- (-3.77, 2.17) -- cycle;
+		\draw[thick, fill=white, draw=none] 
+		(0, 4.3) -- (3.74, 2.15) -- (3.74, -2.15) -- 
+		(0, -4.3) -- (-3.74, -2.15) -- (-3.74, 2.15) -- cycle;
+		
+		\draw[fill={rgb,1:red,0;green,0;blue,0.7}, draw=none] (0, 0) ++(6.7,3.0+0.4) rectangle ++(6.55,0.15);
+		
+		\node[anchor=east,text=accent] at (13.4,3.8+0.4) {\fontsize{20}{20}\selectfont \textsf{\textbf{In Conversation With...}}};
+		\node[anchor=east,text=mt] at (13.4,1.6+0.4)
+		{\fontsize{18}{18}\selectfont \textit{\textbf{#1}}};
+		\node[anchor=east, text=black] at (13.4,0.1-0.3+0.6+0.4) {\fontsize{14}{14}\selectfont {#2}};
+		\node[anchor=east, text=black] at (13.4,-0.4-0.5+0.7+0.4) {\fontsize{12}{12}\selectfont {#3}};
+		\node[anchor=east, text=black] at (13.4,-0.9-0.8+0.9+0.4) {\fontsize{11}{11}\selectfont \textit{#4}};
+		\node[anchor=east, text=mt] at (13.4,-0.9-1.1+0.4) {\fontsize{14}{14}\selectfont {\textbf{#5}}};
+		\node[anchor=east, text=black] at (13.4,-0.9-1.7+0.4) {\fontsize{12}{12}\selectfont {#6}};
+		\node[anchor=east, text=black] at (13.4,-0.9-2.2+0.4) {\fontsize{11}{11}\selectfont \textit{#7}};
+		\clip
+		(0, 4) -- (3.48, 2) -- (3.48, -2) -- 
+		(0, -4) -- (-3.48, -2) -- (-3.48, 2) -- cycle;
+		\node[anchor=center] at (0, 0) {
+			\includegraphics[width=8cm,height=8cm]{#8}};
+		
+	\end{tikzpicture}
+}
+
+\newcommand{\interviewheadr}[8]{
+	\begin{tikzpicture}
+		\pgfmathsetmacro{\xx}{-3} % Width of the hexagon
+		\pgfmathsetmacro{\yy}{-6} % Width of the hexagon
+		\draw[fill=none, draw=none] (5,7) rectangle (-0.76*\linewidth, -0.98*\textheight);
+		\shade[anchor=center,bottom color={rgb,255:red,240; green,250; blue,255}, top color={rgb,255:red,255; green,255; blue,255}](-16.5,7) rectangle (0.78*\linewidth, -\textheight);
+		\node[anchor=east] at (5.5,7) {
+			\includegraphics[width=21.9cm,height=25cm]{img/fancymag-msg_bg.jpg}
+		};
+		\draw[thick, pattern=north east lines, pattern color=accentlight, draw=none]
+		(0+\xx, 3+\yy) -- (2.61+\xx, 1.5+\yy) -- (2.61+\xx, -1.5+\yy) -- 
+		(0+\xx, -3+\yy) -- (-2.61+\xx, -1.5+\yy) -- (-2.61+\xx, 1.5+\yy) -- cycle;
+		\draw[thick, fill=grc, draw=none]
+		(0, 4.35) -- (3.77, 2.17) -- (3.77, -2.17) -- 
+		(0, -4.35) -- (-3.77, -2.17) -- (-3.77, 2.17) -- cycle;
+		\draw[thick, fill=white, draw=none]
+		(0, 4.3) -- (3.74, 2.15) -- (3.74, -2.15) -- 
+		(0, -4.3) -- (-3.74, -2.15) -- (-3.74, 2.15) -- cycle;
+		
+		\draw[fill={rgb,1:red,0;green,0;blue,0.7}, draw=none] (0, 0) ++(-6.7,3.0) rectangle ++(-6.55,0.15);
+		
+		\node[anchor=west,text=accent] at (-13.4,3.8) {\fontsize{20}{20}\selectfont \textsf{\textbf{In Conversation With...}}};
+		\node[anchor=west,text=mt] at (-13.4,1.6)
+		{\fontsize{18}{18}\selectfont \textit{\textbf{#1}}};
+		\node[anchor=west, text=black] at (-13.4,0.1-0.3+0.6) {\fontsize{14}{14}\selectfont {#2}};
+		\node[anchor=west, text=black] at (-13.4,-0.4-0.5+0.7) {\fontsize{12}{12}\selectfont {#3}};
+		\node[anchor=west, text=black] at (-13.4,-0.9-0.8+0.9) {\fontsize{11}{11}\selectfont \textit{#4}};
+		\node[anchor=west, text=mt] at (-13.4,-0.9-1.1) {\fontsize{14}{14}\selectfont {\textbf{#5}}};
+		\node[anchor=west, text=black] at (-13.4,-0.9-1.7) {\fontsize{12}{12}\selectfont {#6}};
+		\node[anchor=west, text=black] at (-13.4,-0.9-2.2) {\fontsize{11}{11}\selectfont \textit{#7}};
+		\clip
+		(0, 4) -- (3.48, 2) -- (3.48, -2) -- 
+		(0, -4) -- (-3.48, -2) -- (-3.48, 2) -- cycle;
+		\node[anchor=center] at (0, 0) {
+			\includegraphics[width=8cm,height=8cm]{#8}};
+		
+	\end{tikzpicture}
+}
+
+
+\newcommand{\interview}[9]{
+	\newpage
+	\onecolumn
+	\fancyhf{}
+	\renewcommand{\headwidth}{0.8\paperwidth}
+	\fancyhead[LO]{\textcolor{accent}{\large\textbf{#1}}}
+	\fancyhead[RE]{\textcolor{accent}{\large\textbf{#1}}}
+	\fancyhead[RO]{\textcolor{accent}{\large\textbf{\thepage}}}
+	\fancyhead[LE]{\textcolor{accent}{\large\textbf{\thepage}}}
+	\thispagestyle{firstpage}
+	\AddThispageHook{%
+		\AddToShipoutPictureBG*{%
+			\put(0,0){
+				\parbox[b][\paperheight]{\paperwidth}{
+					\vfill
+					\centering
+					\ifodd\value{page}
+					\interviewheadr{#1}{#2}{#3}{#4}{#5}{#6}{#7}{#8}
+					\else
+					\interviewheadl{#1}{#2}{#3}{#4}{#5}{#6}{#7}{#8}
+					\fi
+					\vfill
+				}
+			}
+		}
+	}
+	\ifodd\value{page}
+	\newgeometry{left=1.2in, right=0.7in, top=1.5in, bottom=1in}
+	\null\vspace{3.09in}
+	\else
+	\newgeometry{left=1.2in, right=0.7in, top=1.5in, bottom=1in}
+	\null\vspace{3.22in}
+	\fi
+	#9
+	\restoregeometry
+}
+	
+\newenvironment{alumdetail}{
+	\newpage
+	\restoregeometry
+	\fancyhf{}
+	\fancyhead[LO]{\textcolor{accent}{\large\textbf{Alumni}}}
+	\fancyhead[RE]{\textcolor{accent}{\large\textbf{Alumni}}}
+	\fancyhead[RO]{\textcolor{accent}{\large\textbf{\thepage}}}
+	\fancyhead[LE]{\textcolor{accent}{\large\textbf{\thepage}}}
+	\begingroup
+}{
+	\endgroup
+	\clearpage
+}
+	
+\newcommand{\dissoheadl}[7]{
+	\begin{tikzpicture}
+		\pgfmathsetmacro{\xx}{3}
+		\pgfmathsetmacro{\yy}{-6}
+		\shade[bottom color={rgb,255:red,240; green,250; blue,255},top color={rgb,255:red,255; green,255; blue,255}](-5,7) rectangle (0.78*\linewidth, -0.98*\textheight);
+		\node[anchor=east] at (17,7) {
+			\includegraphics[width=21.9cm,height=25cm]{img/fancymag-msg_bg.jpg}
+		};
+		\draw[thick, pattern=north east lines, pattern color=accentlight, draw=none] 
+		(0+\xx, 3+\yy) -- (2.61+\xx, 1.5+\yy) -- (2.61+\xx, -1.5+\yy) -- 
+		(0+\xx, -3+\yy) -- (-2.61+\xx, -1.5+\yy) -- (-2.61+\xx, 1.5+\yy) -- cycle;
+		\draw[thick, fill=grc, draw=none] 
+		(0, 4.35+0.5) -- (3.77, 2.17+0.5) -- (3.77, -2.17+0.5) -- 
+		(0, -4.35+0.5) -- (-3.77, -2.17+0.5) -- (-3.77, 2.17+0.5) -- cycle;
+		\draw[thick, fill=white, draw=none] 
+		(0, 4.3+0.5) -- (3.74, 2.15+0.5) -- (3.74, -2.15+0.5) -- 
+		(0, -4.3+0.5) -- (-3.74, -2.15+0.5) -- (-3.74, 2.15+0.5) -- cycle;
+		
+		\node[anchor=east,text=mt] at (13.4,3.3+0.4-8.2) {\fontsize{13}{13}\selectfont \textsf{\textbf{#1}}};
+		\node[anchor=east,text=mt] at (13.4,2.6+0.4-8.2) {\fontsize{13}{13}\selectfont \textsf{\textbf{#2}}};
+		\node[anchor=east,text=accent] at (13.4,1+0.4)
+		{\fontsize{18}{18}\selectfont \textit{\textbf{#3}}};
+		\node[anchor=east, text=black] at (13.4,0.1-0.3+0.2+0.4) {\fontsize{14}{14}\selectfont {#4}};
+		\node[anchor=east, text=black] at (13.4,-0.4-0.5+0.3+0.4) {\fontsize{12}{12}\selectfont {#5}};
+		\node[anchor=east, text=black] at (13.4,-0.9-0.8+0.5+0.4) {\fontsize{11}{11}\selectfont \textit{#6}};
+		\clip
+		(0, 4+0.5) -- (3.48, 2+0.5) -- (3.48, -2+0.5) -- 
+		(0, -4+0.5) -- (-3.48, -2+0.5) -- (-3.48, 2+0.5) -- cycle;
+		\node[anchor=center] at (0, 0.5) {
+			\includegraphics[width=8cm,height=8cm]{#7}};
+		
+	\end{tikzpicture}
+}
+\newcommand{\dissoheadr}[7]{
+	\begin{tikzpicture}
+		\pgfmathsetmacro{\xx}{-3} % Width of the hexagon
+		\pgfmathsetmacro{\yy}{-6} % Width of the hexagon
+		\draw[fill=none, draw=none] (5,7) rectangle (-0.76*\linewidth, -0.98*\textheight);
+		\shade[anchor=center,bottom color={rgb,255:red,240; green,250; blue,255}, top color={rgb,255:red,255; green,255; blue,255}](-16.5,7) rectangle (0.78*\linewidth, -\textheight);
+		\node[anchor=east] at (5.5,7) {
+			\includegraphics[width=21.9cm,height=25cm]{img/fancymag-msg_bg.jpg}
+		};
+		\draw[thick, pattern=north east lines, pattern color=accentlight, draw=none]
+		(0+\xx, 3+\yy) -- (2.61+\xx, 1.5+\yy) -- (2.61+\xx, -1.5+\yy) -- 
+		(0+\xx, -3+\yy) -- (-2.61+\xx, -1.5+\yy) -- (-2.61+\xx, 1.5+\yy) -- cycle;
+		\draw[thick, fill=grc, draw=none]
+		(0, 4.35+0.3) -- (3.77, 2.17+0.3) -- (3.77, -2.17+0.3) -- 
+		(0, -4.35+0.3) -- (-3.77, -2.17+0.3) -- (-3.77, 2.17+0.3) -- cycle;
+		\draw[thick, fill=white, draw=none]
+		(0, 4.3+0.3) -- (3.74, 2.15+0.3) -- (3.74, -2.15+0.3) -- 
+		(0, -4.3+0.3) -- (-3.74, -2.15+0.3) -- (-3.74, 2.15+0.3) -- cycle;
+		
+		\node[anchor=west,text=mt] at (-13.4,3.3-7.8) {\fontsize{13}{13}\selectfont \textsf{\textbf{#1}}};
+		\node[anchor=west,text=mt] at (-13.4,2.6-7.8) {\fontsize{13}{13}\selectfont \textsf{\textbf{#2}}};
+		\node[anchor=west,text= accent] at (-13.4,1)
+		{\fontsize{18}{18}\selectfont \textit{\textbf{#3}}};
+		\node[anchor=west, text=black] at (-13.4,0.1-0.3+0.2) {\fontsize{14}{14}\selectfont {#4}};
+		\node[anchor=west, text=black] at (-13.4,-0.4-0.5+0.3) {\fontsize{12}{12}\selectfont {#5}};
+		\node[anchor=west, text=black] at (-13.4,-0.9-0.8+0.5) {\fontsize{11}{11}\selectfont \textit{#6}};
+		\clip
+		(0, 4+0.3) -- (3.48, 2+0.3) -- (3.48, -2+0.3) -- 
+		(0, -4+0.3) -- (-3.48, -2+0.3) -- (-3.48, 2+0.3) -- cycle;
+		\node[anchor=center] at (0, 0) {
+			\includegraphics[width=8cm,height=8cm]{#7}};
+		
+	\end{tikzpicture}
+}
+
+\newenvironment{particle1}[9]{
+	\clearpage
+	\twocolumn
+	\fancyhf{}
+	\renewcommand{\headwidth}{0.8\paperwidth}
+	\fancyhead[LO]{\textcolor{accent}{\large\textbf{#3}}}
+	\fancyhead[RE]{\textcolor{accent}{\large\textbf{#3}}}
+	\fancyhead[RO]{\textcolor{accent}{\large\textbf{\thepage}}}
+	\fancyhead[LE]{\textcolor{accent}{\large\textbf{\thepage}}}
+	\thispagestyle{firstpage}
+	\AddThispageHook{%
+		\AddToShipoutPictureBG*{%
+			\put(0,0){
+				\parbox[b][\paperheight]{\paperwidth}{
+					\vfill
+					\centering
+					\ifodd\value{page}
+					\dissoheadr{#1}{#2}{#3}{#4}{#5}{#6}{#7}
+					\else
+					\dissoheadl{#1}{#2}{#3}{#4}{#5}{#6}{#7}
+					\fi
+					\vfill
+				}
+			}
+		}
+	}
+	\ifodd\value{page}
+	\newgeometry{left=1.2in, right=0.7in, top=1.5in, bottom=1in}
+	\null\vspace{3.09in}
+	\else
+	\newgeometry{left=1.2in, right=0.7in, top=1.5in, bottom=1in}
+	\null\vspace{3.22in}
+	\fi
+	\begin{tcolorbox}[colback=blue!5!white, width=\textwidth, opacityfill=0.1]
+		\textbf{Abstract:} #8
+	\end{tcolorbox}
+	
+	\begin{multicols}{2}
+		#9
+	\end{multicols}
+	\restoregeometry
+}
+	

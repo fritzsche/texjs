@@ -1,0 +1,1345 @@
+%\iffalse 
+% file:    linearregression.dtx
+% author:  Battista Benciolini
+% contact: benciolinibattista at gmail dot com
+% 
+% process this file with pdflatex to obtain:
+%
+%  - linearregression.pfd     (full documentation, three pass needed)
+%  - mainlinearregression.tex (interactive main-program document)
+%  - linearregression.sty     (package)
+%  - sampledata.txt           (as the name says)
+% 
+% The author would strongly appreciate to receive  
+% any comment, criticism  and just usage report
+%
+%\fi
+%\iffalse 
+%<*ins>
+\begingroup
+\input docstrip.tex
+\keepsilent
+\preamble
+------------------------------------------------------------------------
+[2024-12-14]
+This file is part of the (expanded) distribution of linearregression
+The author of  linearregression  is  Battista Benciolini 
+<benciolinibattista at gmail dot com >
+------------------------------------------------------------------------
+The author would strongly appreciate to receive  
+any comment, criticism  and just usage report   
+------------------------------------------------------------------------
+This program may be used, distributed and modified under 
+the conditions of the LaTeX Project Public License.
+(see: http://www.latex-project.org/lppl.txt)
+------------------------------------------------------------------------
+\endpreamble
+\askforoverwritefalse
+\generate{\file{linearregression.sty}{\from{linearregression.dtx}{package}}}
+\generate{\file{mainlinearregression.tex}{\from{linearregression.dtx}{main}}}
+\nopreamble\nopostamble
+\generate{\file{sampledata.txt}{\from{linearregression.dtx}{data}}}
+\endgroup
+%</ins>
+%\fi
+%\iffalse 
+%<*driver>
+\documentclass[a4paper,10pt]{ltxdoc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[lite,nobysame,non-compressed-cites]{amsrefs}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{multicol}  
+\usepackage{linearregression} 
+\usepackage{graphics} 
+\DeclareRobustCommand*{\Ars}{\textsf{%
+\lower -.48ex\hbox{\rotatebox{-20}{A}}\kern -.3em{rs}}%
+\discretionary{-}{}{\kern -.05em}\TeX\discretionary{-}{}{%
+\kern -.17em}\lower -.357ex\hbox{nica}}% excerpt from some GUIT sty file 
+\NewDocumentCommand\vect{m}{\underline{#1}}           % vector
+\NewDocumentCommand\barycenter{m}{\overline{#1}}      % barycenter
+\NewDocumentCommand\point{}{\vect{y}}                 % point
+\NewDocumentCommand\coeff{}{\vect{x}}                 % direction
+\NewDocumentCommand\dx{}{\vect\delta}                 % direction variation
+\NewDocumentCommand\vv{}{\vect{v}}                    % barycentric coordinates
+\NewDocumentCommand\trasp{}{^{\mathsf{T}}}            % traspose
+\NewDocumentCommand\Renne{}{\mathbb{R}^n}             % vector space 
+\NewDocumentCommand\dor{}{f}                          % distance from origin 
+\NewDocumentCommand\ipoint{}{i}                       % index for points
+\NewDocumentCommand\pointsum{}{\sum_{\ipoint=1}^m}    % sum over points
+\NewDocumentCommand\reff{m}{(\ref{#1})}               % ref  in ( )
+\NewDocumentCommand\matr{m}{{#1}}                     % matrix
+\NewDocumentCommand\mC{}{\matr{C}}                    % matrix C 
+\NewDocumentCommand\mc{}{k}                           % elements of matrix C 
+\NewDocumentCommand\mL{}{\matr{\Lambda}}              % matrix lambda
+\NewDocumentCommand\mX{}{\matr{X}}                    % matrix X 
+\NewDocumentCommand\spm{}{\phantom{-}}                % space for the sign
+\NewDocumentCommand\ctext{}{caption}                  % caption (a variable !)
+\NewDocumentCommand\matrixtwotwo{mmmm}{               % | 2 x 2 
+\begin{pmatrix} #1 & #2 \\ #3 & #4 \end{pmatrix}}     % | matrix
+\DeclareMathOperator\tr{tr}                           % trace
+\DeclareMathOperator\sgn{sgn}                         % signum 
+\title{Linear regression with \LaTeX}
+\author{Battista Benciolini}
+\NewDocumentCommand\titleauthorfootnote{}{\begingroup% Not an elegant solution
+\let\thefootnote\relax                             % but it is ok at the moment
+\footnote{Linear regression with LaTeX - available in CTAN}% 
+\footnote{Battista Benciolini - contact: benciolinibattista at gmail dot com}%
+\endgroup\setcounter{footnote}{0}}% 
+\parindent=0pt
+\begin{document}
+\hypersetup{hidelinks}
+\maketitle 
+\titleauthorfootnote
+\tableofcontents
+\vfill
+\DocInput{linearregression.dtx}
+\end{document}
+%</driver>
+%\fi
+%
+% \section{Introduction: first description of the problem\label{intro}}
+% I start with a quote from \Ars\ (April 2021, number 31, page 73):
+% \begin{quotation}
+% The physicist Mario Rossi is investigating a phenomenon, 
+% presumably linear, and he performs measurements in his laboratory 
+% to verify his hypothesis; he measures the quantity $x$ which generates 
+% the phenomenon and he measures also one of the characteristics 
+% $y$ showed by the phenomenon under the effect of the stimulation $x$. 
+% \\ ... \par
+% Subsequently Mario graphs the data of the table to judge if the points 
+% reasonably follow a linear trend or not; in this regard he computes the 
+% parameters of the regression line and he draws this line on the graph 
+% in order to judge the quality of the obtained results.
+% \\ ... \par
+% Being a \LaTeX\ user, he thinks to kill two birds with one stone: 
+% using \LaTeX\ to draw the graph with the experimental data consisting 
+% in the $x$, $y$ points and, at the same time, to compute the
+% parameter $a$ e $b$ of the regression line $y = ax+b$, 
+% and finally to draw also this line on the same graph.
+% \end{quotation}
+% A summary description of the problem is therefore the following.
+% A set of data pairs  is available and each pair is represented as a point 
+% in the plane. A straight line is searched that optimally approximates 
+% the points. The first step is therefore the choice of an optimality criterion. 
+% This choice is the topic of the next section. \par
+% From the text we also know that the possible deviation of $y$ 
+% with respect to the model is quite larger than the uncertainty of $x$.
+% \par
+% After reading the description of the problem 
+% of Mario Rossi I tried to produce a solution. 
+% In this work I will use $y_1$ and $y_2$ 
+% instead of $x$ and $y$ for the two measured quantities that 
+% will become the first and second coordinate, or abscissa and ordinate, 
+% in the Cartesian plane.
+% \par
+% The problem can be treated as a mere problem of approximation or 
+% alternatively as an estimation problem in the frame of a 
+% probabilistic description of the uncertainty. The two treatments are 
+% conceptually different. The probabilistic treatment produces some more 
+% results, but the estimation of the parameters is the same. 
+% On the other hand the treatment as an approximation problem is in some sense   
+% more immediate and requires a less extended theoretical background.
+% For this reason it will be preferred here.  
+% I consider the original problem and also a variation 
+% of it based on the assumption that the two variables are known with  
+% the same uncertainty. The two considered situations will prove 
+% to be quite different.
+%
+% \section{Geometric definition of three optimality criteria}
+% \begin{figure}
+% \setlength\unitlength{4cm}
+% \begin{picture}(1, 0.7)(0.,0.)
+% \multiput(0.,0.)(1.1,0){3}{\line(1,0){1}}
+% \multiput(0.,0.)(1.1,0){3}{\line(0,1){1}}
+% \multiput(1,1)(1.1,0){3}{\line(-1,0){1}}
+% \multiput(1,1)(1.1,0){3}{\line(0,-1){1}}
+% \thicklines
+% \multiput(0.08,0.06)(1.1,0){3}{\line(4,3){0.88}}
+% \multiput(0.26,0.09)(1.1,0){3}{\circle{0.03}}
+% \multiput(0.45,0.65)(1.1,0){3}{\circle{0.03}}
+% \multiput(0.92,0.44)(1.1,0){3}{\circle{0.03}}
+% \put(0.26,0.09){\line(0,1){0.1050}}
+% \put(0.45,0.65){\line(0,-1){0.3125}}
+% \put(0.92,0.44){\line(0,1){0.2500}}
+% \put(1.36,0.09){\line(-1,0){0.14}}
+% \put(1.55,0.65){\line( 1,0){0.4167}}
+% \put(2.02,0.44){\line(-1,0){0.3333}}
+% \put(2.46,0.09){\line(-3,4){0.05}}
+% \put(2.65,0.65){\line(3,-4){0.15}}
+% \put(3.12,0.44){\line(-3,4){0.12}}
+% \end{picture}
+% \caption{The three kinds of segments 
+% used in the definition of the objective function}
+% \label{fig:criteria}
+% \end{figure}
+% For each point given in the plane  we can consider the corresponding point 
+% with the same abscissa and belonging to the line. 
+% Remember that the line is exactly what has to be determined.
+% The distance between the given point and the just defined point on the line
+% is a reasonable measure of the discrepancy between the empirical data and the
+% corresponding theoretical model. 
+% The distances we are speaking about are the lengths of the segments shown 
+% in the leftmost scheme of figure (\ref{fig:criteria}).
+% To obtain a global discrepancy measure that considers all the points 
+% at once we perform the sum of the squares of the lengths 
+% of the mentioned segments. It is now clear that the two coordinates 
+% of the points are treated quite differently and play a different role in 
+% the definition of the optimality criterion. This choice is reasonable when 
+% the measuring errors only (or mainly) affect the second coordinate. 
+% The optimal line is the line that minimize the just defined 
+% global discrepancy. The procedure for the determination of the optimal line 
+% is named linear regression. 
+% In this work it is named \textit{classical linear regression}.
+% We can easily exchange the role of the two quantities, i.e.\ we can   
+% imagine that the first quantity is affected by errors. 
+% The problem is not conceptually different. The segments plotted in the
+% central picture 
+% of figure (\ref{fig:criteria}) represent the discrepancy between 
+% the empirical data and the model.
+% This other procedure  is named \textit{classical linear regression  
+% with inverted role of the coordinates}.\par
+% The situation is really different if the two coordinates have to be treated 
+% symmetrically. 
+% In this case the discrepancy between 
+% the empirical data and the model must be defined in a purely geometrical way.
+% Just the line and the points enter in the definition without any special role 
+% for any predefined direction. With these requirements it is quite natural 
+% to use the distance of each point from the line. 
+% Remember that the distance of a point 
+% from a line is intended along the shortest path, i.e.\ measured in the 
+% direction orthogonal to the line itself. The rightmost scheme of 
+% figure (\ref{fig:criteria}) shows the segments that are considered.
+% The global measure of discrepancy is again obtained as the sum 
+% of the squares of the lengts of the mentioned orthogonal segments. 
+% The procedure that obtain the optimal line that 
+% minimize the just defined global discrepancy is named 
+% \textit{symmetrical linear regression}.\par
+% Some arguments of the present section will be repeated in section
+% \ref{package} from the algebraic and computational point of view.
+% 
+% \section{Information on the realised solution, including limitations}
+% The code that implements the solution is recorded in two files, that are 
+% a package (sty) file and a main interactive document.
+% The file |linearregression.sty| provides several commands 
+% that can be used in any document. The file |mainlinearregression.tex|
+% provides a simple interactive user interface.
+% The package described in the sections \ref{manual} and 
+% \ref{package} (user manual and implementation) provides the 
+% functions that execute the various needed operations, i.e.\
+% data input, computations, printing the numerical results and 
+% generating a graphic representation of data and results.
+% Some auxiliary functions complete the package.
+% The design of the output (tables and plots) includes some arbitrary choices.
+% The style of the graphic output is quite minimalist 
+% (e.g.:\ no colors, no variations of line styles).\par
+%
+% \section{Some comments about the programming of the package}
+% Large part of the code is written using the |expl3| language. 
+% I have tried to be compliant with the various recommendations and 
+% prescriptions for a correct use of the language, 
+% but I probably only partly succeeded.\par
+% Different more elegant and more coherent solutions probably exist 
+% both for the general structure of the package and for some specific part 
+% of the code, but this is what I have been able to do.
+% Some perhaps problematic aspects are mentioned here after.\par
+% Several used variables are global and they are accessed by various functions.
+% This makes the various parts of the package 
+% quite connected to each other and creates strong dependencies. \par
+% The layered programming style is only partially applied. 
+% The partition between document command and lower level functions is present, 
+% but part of the low level code is directly in the document commands. 
+% Variants are not used.   
+%
+% \section{A ready to use simple user interface\label{main}}
+% The main file asks the user for the name of a
+% file containing the data and generates a one page output.
+%\iffalse
+%<*main>
+%\fi
+%    \begin{macrocode}
+\documentclass[a4paper]{article}
+\usepackage{lmodern}
+\usepackage{linearregression}
+\begin{document}
+\pagestyle{empty}  
+\lraskfilename 
+\lrcomputation
+\lrplotparameters{0.16}{11.0}
+\lrplot{11.0}{+}{+}{-}{-}
+\lrprint
+\end{document}
+%    \end{macrocode}
+%\iffalse
+%</main>
+%\fi
+% The plot just includes the points and the line obtained with the classical 
+% linear regression. Lines 8 and 9  of the code must be modified if a different 
+% result is desired. See the next section for details.
+%
+% \section{A user manual for the package\label{manual}}
+% The various analysis of a data set and the representation of the data 
+% and of the results is obtained with a sequence of several commands. 
+% The main operations are:
+% (i) selection of the data file, (ii) data imput and computation, 
+% (iii) printing of a table,
+% (iv) printing of a picture (that can be repeated with different parameters).
+% It is generally convenient to put the table and the picture(s) 
+% in a proper floating environment. 
+% The commands for the four mentioned operations are described here after.
+% The first needed operation is to set the name of the data file.
+% This is done with the command \DescribeMacro{\lrfilename} 
+% \cs{lrfilename}\marg{file} that has a mandatory argument. 
+% The argument is the name of the data file. As an alternative the 
+% command \DescribeMacro{\lraskfilename} \cs{lraskfilename} can be used. 
+% It asks the user to type the  name of the data file in the terminal.
+% \par
+% The macro \DescribeMacro{\lrcomputation} 
+% \cs{lrcomputation} reads the data 
+% and performs all the computations. 
+% The results of the computations remain available in internal 
+% variables and are then used by the macro that print them 
+% or generates a plot.
+%\par
+% The macro \DescribeMacro{\lrprint} 
+% \cs{lrprint} generates a table with all the estimated 
+% parameters and some information about the data. 
+% The computed numbers are printed with four decimal digit maximum by default, 
+% but this number can be set to any desired value with the command 
+% \DescribeMacro{\lrnumdigit} \cs{lrnumdigit}\marg{number}. 
+% The mandatory argument is the desired maximum number of digits.
+% \par 
+% The macro \DescribeMacro{\lrplot} 
+% \cs{lrplot}\marg{imagewidth}\marg{key1}\marg{key2}\marg{key3}\marg{key4} 
+% really generates the plot. The first argument is the
+% width of the plot in centimetrs, while the height is computed according 
+% to the distribution of the points or it is recorded with the command 
+% \cs{lrplotparameters} (see below). 
+% The other four arguments are referred 
+% to the data points, to the lines determined with classical regression, 
+% with classical regression with inverted role of the coordinates and 
+% with symmetric regression. 
+% The four items, i.e.\ the set of points and the three lines, are drawn 
+% or not according to the corresponding string found in |key|$i$. 
+% Each item is not plotted if the string is the character |-|, it is plotted 
+% in any other case. Furthermore the lines are accompanied by a label made 
+% by the corresponding |key|, unless it is just a |+| or a |-|.  
+% \par
+% The command \DescribeMacro{\lrplotparameters} 
+% \cs{lrplotparameters}\marg{diameter}\marg{imageheight} 
+% is used to record some more parameters that are related to the generation 
+% of the plot.  
+% The first argument \marg{diameter} is the diameter in centimeters of the discs
+% that represent the points. It must be a real positive number.
+% The default value is 0.2.
+% The second argument \marg{imageheight} is the height of the plot 
+% in centimeters. 
+% It must be a real number with a special meaning of any non positive value.
+% If the number is positive it is really used as the height and the variables are 
+% independently scaled to fill the width and the height of the plot. 
+% If the value is not positive or if the command is not used the 
+% two variables are scaled with the same factor and the height is computed 
+% accordingly. This can generate reasonable results only if the ranges 
+% of the two variables are not too much different.
+% All the arguments are mandatory. 
+% \par
+% The use of \cs{lrnumdigit} and \cs{lrplotparameters} is a convenient solution 
+% to introduce some flexibility in the output and to completely preserve 
+% compatibility with the previous version of the package. 
+% Some more elegant solution could be realized with the use of optional 
+% arguments and perhaps of key-value pairs, but the implemented solution 
+% is preferred because it is extremely simple.
+% \par
+% Few words are necessary about the format of the data file.
+% Each record of the file hold the two values related to a point.
+% The two values must be separated by any number (one is needed as a minimum) of 
+% space and comma characters. No character different from space 
+% can be accepted before the first value and after the  second value. 
+%
+% \section{An example\label{example}}
+% The data  reported here after will be available in |sampledata.txt| 
+% and will be used in the examples presented in this section .
+%\iffalse
+%<*data>
+%\fi
+% \begin{multicols}{4}
+%    \begin{macrocode}
+-0.546  0.107
+ 1.093 -0.510
+ 1.440  1.995
+ 1.414  0.991
+ 0.735  1.585
+-1.848 -0.235
+-0.203 -0.292
+ 1.517  0.779
+ 0.559 -1.341
+-0.462 -0.437
+-0.785 -0.661
+-0.558  0.397
+ 0.181 -2.616
+ 0.619  1.859
+-0.223 -1.915
+ 0.629 -0.534
+-1.989 -2.300
+-0.241  1.098
+-0.931 -1.613
+-1.070  0.592
+ 2.341  0.413
+ 1.993 -0.111
+-2.357 -0.312
+-1.975  0.140
+%    \end{macrocode}
+% \end{multicols}
+%\iffalse
+%</data>
+%\fi
+%
+% The analysis of the sample data and the generation of a numeric table 
+% is  operated by a code similar to the following 
+% (see table \ref{tab:sampledata}). \\
+% |\lrfilename{sampledata.txt}| \\ |\lrcomputation| \\ 
+% |\lrnumdigit{5}| \\ |\begin{table}| \\  
+% |  \lrprint| \\
+% |  \caption{Analysis of ... }| \\  |\label{tab:sampledata}\end{table}| 
+% \par
+% The generation of some different graphical representation of the data and of 
+% the results  is  operated by a code similar to the following 
+% (see figures \ref{fig:sampledataB} ).\\
+% \RenewDocumentCommand\ctext{}{LEFT The three lines are obtained with the three 
+% optimality criteria. (AA) classical linear regression; (BB) classical linear 
+% regression with inverted role of the coordinates; (S) symmetric linear 
+% regression. RIGHT Data points and line estimated with 
+% symmetric linear regression.}
+% |\begin{figure}|\\|\lrplot{10.}{-}{AA}{BB}{S}| \\
+% |\lrplot{10.}{+}{-}{-}{+}|
+% \\ |\caption{|\ctext|}|\\ | \label{fig:sampledataB}  \end{figure}|
+%
+% \lrfilename{sampledata.txt} \lrcomputation \lrnumdigit{5}
+% \begin{table}  \lrprint     \caption{Analysis of the sample data} 
+%  \label{tab:sampledata} \end{table}
+%  \begin{figure}    \lrplot{6.}{-}{AA}{BB}{S} \hfill \lrplot{6.}{+}{-}{-}{+} 
+%    \caption{\ctext} \label{fig:sampledataB} \end{figure}
+% The same data are used to show the effect of the command 
+% \cs{lrplotparameters}.
+%  \begin{figure}    
+% \lrplotparameters{0.12}{5.}  \lrplot{4.}{+}{-}{-}{+} \hfill 
+% \lrplotparameters{0.10}{3.}  \lrplot{4.}{+}{-}{-}{+} \hfill
+% \lrplotparameters{0.11}{-1.} \lrplot{4.}{+}{-}{-}{+} 
+%  \caption{Three different version of a plot to demonstrate the use of 
+%  the command \cs{lrplotparameters}} \label{fig:sampledataC} \end{figure}
+% The commands:\\ |...| \\
+% |\lrplotparameters{0.12}{5.}  \lrplot{4.}{+}{-}{-}{+} \hfill | \\
+% |\lrplotparameters{0.10}{3.}  \lrplot{4.}{+}{-}{-}{+} \hfill | \\
+% |\lrplotparameters{0.11}{-1.} \lrplot{4.}{+}{-}{-}{+} | \\ |...| \\
+% generate the figure (\ref{fig:sampledataC}).
+%
+% \section{A package for linear regression 
+% and the theory behind it\label{package}}
+%\iffalse
+%<*package>
+%\fi
+%
+% \subsection{Math preliminaries and notation \label{prelim}}
+% The coordinates of a set of $m$ points on the plane are available. 
+% A straight line is searched that optimally approximates the points.\par 
+% The coordinates of a generic point are $y_1$ and $y_2$ 
+% and they are collected in the vector $\point$.
+% Any given point is identified with the index $\ipoint$.
+% Explicit indices $(\dots)_1$ or $(\dots)_2$ always refer to the first 
+% or second coordinate of a point or to the first or second component 
+% of a vector in the plane. 
+% Symbolic index $(\dots)\ipoint$ always refers to the different points. Few 
+% formulas require both indices $(\dots)_{1\ipoint}$, $(\dots)_{2\ipoint}$.\par
+% With more then two points a criterion of best approximation 
+% is needed to select the optimal line that describes the data. \par
+% Lower case symbols are used for scalars. Lower case underlined
+% symbols are used for vectors in the plane. Upper case symbols
+% are used for matrices.
+% \par
+% It is possible that certain data generate an ambiguity or a singularity
+% in the computation. 
+% The following mathematical treatment of the problem
+% do not mention these situations and the code does not deal with them.
+%
+% \subsection{Package declaration, required package and definition of variables}
+% The various macro will be provided in a package file
+% that is introduced as usual. Most of the macros require 
+% the \LaTeX3 syntax.
+%    \begin{macrocode}
+\ProvidesPackage{linearregression}[2024-12-14]
+\RequirePackage{pict2e}        	
+\ExplSyntaxOn
+%    \end{macrocode}
+% The variables used in the package are defined hereafter.
+%    \begin{macrocode}
+\ior_new:N  \g_BBLR_file_ior 
+\tl_new:N   \g_BBLR_file_name_tl
+\int_new:N  \g_BBLR_number_of_points_int
+\fp_new:N   \g_BBLR_abscissa_fp 
+\fp_new:N   \g_BBLR_ordinate_fp     
+\fp_new:N   \g_BBLR_mean_abscissa_fp 
+\fp_new:N   \g_BBLR_mean_ordinate_fp 
+\fp_new:N   \g_BBLR_abscissa_SecOrdMoment_fp 
+\fp_new:N   \g_BBLR_ordinate_SecOrdMoment_fp 
+\fp_new:N   \g_BBLR_mixed_SecOrdMoment_fp 
+\fp_new:N   \g_BBLR_slope_A_fp 
+\fp_new:N   \g_BBLR_slope_B_fp   
+\fp_new:N   \g_BBLR_slope_S_fp 
+\fp_new:N   \g_BBLR_intercept_A_fp 
+\fp_new:N   \g_BBLR_intercept_B_fp 
+\fp_new:N   \g_BBLR_intercept_S_fp 
+\fp_new:N   \g_BBLR_cos_fp
+\fp_new:N   \g_BBLR_sin_fp 
+\fp_new:N   \g_BBLR_sig_sin_fp
+\fp_new:N   \g_BBLR_eig_diff_fp 
+\fp_new:N   \g_BBLR_diag_diff_fp 
+\tl_new:N   \g_BBLR_file_line_tl  
+\fp_new:N   \g_BBLR_min_abscissa_fp   
+\fp_new:N   \g_BBLR_min_ordinate_fp 
+\fp_new:N   \g_BBLR_max_abscissa_fp
+\fp_new:N   \g_BBLR_max_ordinate_fp 
+\fp_new:N   \g_BBLR_min_draw_abscissa_fp 
+\fp_new:N   \g_BBLR_max_draw_abscissa_fp  
+\bool_new:N \g_BBLR_data_eof_bool
+\int_new:N  \g_BBLR_record_length_int
+\int_new:N  \g_BBLR_rec_count_int
+\int_new:N  \g_BBLR_first_separator_int
+\int_new:N  \g_BBLR_last_separator_int      
+\str_const:Nn  \c_BBLR_space_str {~}      
+\str_const:Nn  \c_BBLR_comma_str {,}    
+\str_const:Nn  \c_BBLR_plus_str  {+}   
+\str_const:Nn  \c_BBLR_minus_str {-}         
+\bool_new:N   \g_BBLR_plot_points_bool        
+\bool_new:N   \g_BBLR_plot_lineA_bool      
+\bool_new:N   \g_BBLR_plot_lineB_bool       
+\bool_new:N   \g_BBLR_plot_lineS_bool     
+\bool_new:N        \g_BBLR_two_scale_bool 
+\bool_gset_false:N \g_BBLR_two_scale_bool 
+\fp_new:N   \g_BBLR_base_fp                
+\fp_new:N   \g_BBLR_height_fp             
+\fp_new:N   \g_BBLR_Xbase_fp           
+\fp_new:N   \g_BBLR_Xheight_fp            
+\fp_new:N   \g_BBLR_XXheight_fp   
+\fp_new:N   \g_BBLR_Dabscissa_fp         
+\fp_new:N   \g_BBLR_Dordinate_fp         
+\fp_new:N   \g_BBLR_diameter_fp            
+\fp_gset:Nn \g_BBLR_diameter_fp{0.2}    
+\fp_new:N   \g_BBLR_line_base_length_fp    
+\fp_new:N   \g_BBLR_scale_factor_fp      
+\fp_new:N   \g_BBLR_scale_factor_H_fp 
+\str_new:N  \g_BBLR_point_code_str
+\str_new:N  \g_BBLR_labelA_str
+\str_new:N  \g_BBLR_labelB_str         
+\str_new:N  \g_BBLR_labelS_str
+\int_new:N   \g_BBLR_num_dec_dig_int
+\int_gset:Nn \g_BBLR_num_dec_dig_int{4}
+%    \end{macrocode}
+%
+% \subsection{Preparing data input}
+% \begin{macro}{\lrfilename}
+% The command \cs{lrfilename} records the file name passed as argument.
+%    \begin{macrocode}
+\NewDocumentCommand{\lrfilename}{m}{
+\tl_gset:Nn \g_BBLR_file_name_tl {#1}
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\lraskfilename}
+% The command \cs{lraskfilename} asks for the data file name from the terminal.
+%    \begin{macrocode}
+\NewDocumentCommand{\lraskfilename}{}{
+\ior_get_term:nN  {filename ? } \g_BBLR_file_name_tl 
+\tl_trim_spaces:N \g_BBLR_file_name_tl 
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Computation}
+% \begin{macro}{\lrcomputation}
+% The  command \cs{lrcomputation} reads the data file and 
+% performs all the relevant computations to solve the 
+% proposed problem. 
+%    \begin{macrocode}
+\NewDocumentCommand{\lrcomputation}{}{%
+%    \end{macrocode}
+%
+% \subsubsection{Computation of first and second order moments}
+% In the sequel it will results that the first and second order moments 
+% of the data provide everything needed to solve the problem. 
+% The barycenter of the data is defined as 
+% \begin{equation}
+% \barycenter{\point}=\frac{1}{m}\pointsum \point_\ipoint.
+% \label{barycenter} \end{equation}
+% It is convenient to scan the data to accumulate the sum 
+% that appears in \reff{barycenter}.
+% The coordinates of each point are read from the file 
+% and they are immediately used. The data are not globally recorded.
+%    \begin{macrocode}
+\bool_gset_false:N \g_BBLR_data_eof_bool             
+\int_zero:N \g_BBLR_number_of_points_int                
+\fp_zero:N  \g_BBLR_mean_abscissa_fp                     
+\fp_zero:N  \g_BBLR_mean_ordinate_fp                   
+\ior_open:Nn \g_BBLR_file_ior \g_BBLR_file_name_tl   
+\bool_until_do:Nn \g_BBLR_data_eof_bool {            
+  \ior_str_get:NN \g_BBLR_file_ior \g_BBLR_file_line_tl
+  \if_eof:w \g_BBLR_file_ior                        
+    \bool_gset_true:N \g_BBLR_data_eof_bool          
+  \else:                                              
+    \int_incr:N \g_BBLR_number_of_points_int       
+    \BBLR_decode_data:                               
+    \fp_gset:Nn \g_BBLR_mean_abscissa_fp               
+    {\g_BBLR_mean_abscissa_fp  + \g_BBLR_abscissa_fp}   
+    \fp_gset:Nn \g_BBLR_mean_ordinate_fp            
+    {\g_BBLR_mean_ordinate_fp + \g_BBLR_ordinate_fp} 
+  \fi:                                                 
+}                                                    
+%    \end{macrocode}
+% Loop ended. Now close the file and divide by the number of points.
+%    \begin{macrocode}
+\ior_close:N \g_BBLR_file_ior                        
+\fp_gset:Nn \g_BBLR_mean_abscissa_fp                  
+{\g_BBLR_mean_abscissa_fp / \g_BBLR_number_of_points_int}
+\fp_gset:Nn \g_BBLR_mean_ordinate_fp                  
+{\g_BBLR_mean_ordinate_fp / \g_BBLR_number_of_points_int}
+%    \end{macrocode}
+%
+% The barycentric coordinates are defined for each point
+% \begin{equation} \vv_\ipoint= \point_\ipoint - \barycenter{\point}
+% \label{residual} \end{equation}
+%  and the empirical dispersion matrix is defined as: 
+% \begin{equation}  \mC=\frac{1}{m}\pointsum \vv_\ipoint\vv_\ipoint\trasp .
+% \label{matrixC} \end{equation}
+% Superscript as in $()\trasp$ means transpose. The elements of  $\mC$ are the 
+% second order central moments and they are denoted as: 
+% \begin{equation}  \mC=\matrixtwotwo{\mc_{11}}{\mc_{12}}{\mc_{12}}{\mc_{22}}.
+% \label{matrixCc} \end{equation}
+% A second scan of the data is performed to compute the
+% sums that appears in \reff{matrixC} and to determine the 
+% the extremal values of the coordinates. Record scan can be regulated 
+% by a record counter, because the number of points is now known.
+%    \begin{macrocode}
+\fp_zero:N  \g_BBLR_abscissa_SecOrdMoment_fp                      
+\fp_zero:N  \g_BBLR_ordinate_SecOrdMoment_fp                      
+\fp_zero:N  \g_BBLR_mixed_SecOrdMoment_fp                         
+\fp_gset_eq:NN  \g_BBLR_min_abscissa_fp  \g_BBLR_mean_abscissa_fp    
+\fp_gset_eq:NN  \g_BBLR_min_ordinate_fp  \g_BBLR_mean_ordinate_fp        
+\fp_gset_eq:NN  \g_BBLR_max_abscissa_fp  \g_BBLR_mean_abscissa_fp       
+\fp_gset_eq:NN  \g_BBLR_max_ordinate_fp \g_BBLR_mean_ordinate_fp  
+\ior_open:Nn   \g_BBLR_file_ior \g_BBLR_file_name_tl         
+\int_zero:N    \g_BBLR_rec_count_int           
+\int_do_until:nn                  
+{\g_BBLR_rec_count_int = \g_BBLR_number_of_points_int} 
+{                                                        
+    \ior_str_get:NN \g_BBLR_file_ior \g_BBLR_file_line_tl    
+    \int_incr:N \g_BBLR_rec_count_int               
+    \BBLR_decode_data:                                    
+    \fp_gset:Nn \g_tmpa_fp                          
+    {\g_BBLR_abscissa_fp - \g_BBLR_mean_abscissa_fp}
+    \fp_gset:Nn \g_tmpb_fp                          
+    {\g_BBLR_ordinate_fp - \g_BBLR_mean_ordinate_fp}
+    \fp_gset:Nn \g_BBLR_abscissa_SecOrdMoment_fp             
+    {\g_BBLR_abscissa_SecOrdMoment_fp + \g_tmpa_fp * \g_tmpa_fp}
+    \fp_gset:Nn \g_BBLR_mixed_SecOrdMoment_fp                
+    {\g_BBLR_mixed_SecOrdMoment_fp + \g_tmpa_fp * \g_tmpb_fp}     
+    \fp_gset:Nn  \g_BBLR_ordinate_SecOrdMoment_fp           
+    {\g_BBLR_ordinate_SecOrdMoment_fp + \g_tmpb_fp * \g_tmpb_fp}              
+\fp_gset:Nn  \g_BBLR_min_abscissa_fp                               
+{min(\g_BBLR_min_abscissa_fp, \g_BBLR_abscissa_fp)}                 
+\fp_gset:Nn  \g_BBLR_min_ordinate_fp                              
+{min(\g_BBLR_min_ordinate_fp, \g_BBLR_ordinate_fp)}                 
+\fp_gset:Nn  \g_BBLR_max_abscissa_fp                              
+{max(\g_BBLR_max_abscissa_fp, \g_BBLR_abscissa_fp)}                 
+\fp_gset:Nn  \g_BBLR_max_ordinate_fp                              
+{max(\g_BBLR_max_ordinate_fp, \g_BBLR_ordinate_fp)}                 
+}                                                             
+\ior_close:N \g_BBLR_file_ior                                     
+\fp_gset:Nn \g_BBLR_abscissa_SecOrdMoment_fp                       
+{\g_BBLR_abscissa_SecOrdMoment_fp / \g_BBLR_number_of_points_int}   
+\fp_gset:Nn \g_BBLR_mixed_SecOrdMoment_fp                           
+{\g_BBLR_mixed_SecOrdMoment_fp / \g_BBLR_number_of_points_int}      
+\fp_gset:Nn \g_BBLR_ordinate_SecOrdMoment_fp                        
+{\g_BBLR_ordinate_SecOrdMoment_fp / \g_BBLR_number_of_points_int}   
+\fp_gset:Nn \g_BBLR_Dabscissa_fp                               
+{\g_BBLR_max_abscissa_fp - \g_BBLR_min_abscissa_fp }       
+\fp_gset:Nn \g_BBLR_Dordinate_fp                            
+{\g_BBLR_max_ordinate_fp - \g_BBLR_min_ordinate_fp }        
+%    \end{macrocode}
+% A single pass algorithm exists, but it is numerically less stable. 
+%
+% \subsubsection{Classical linear regression \label{classical}}
+% A line in the plane is described by the equation  
+% \begin{equation} y_2=ay_1+b \label{eqab} \end{equation}
+% that contains the parameters $a$ and $b$. 
+% For each point it is possible to define a distance or a discrepancy 
+% of the experimental data with respect to the model.
+% In the given problem the second coordinate is much more affected by 
+% errors than the first coordinate. It is therefore reasonable 
+% to define the approximation error of each point as
+% \begin{equation} e_\ipoint=y_{2\ipoint}-ay_{1\ipoint}-b
+% \label{e}\end{equation}
+% i.e.\ the difference between the empirical value $y_{2\ipoint}$ 
+% and its model counterpart $ay_{1\ipoint}+b$.
+% This is the already mentioned  classical linear regression. In fact the 
+% absolute value of $e_\ipoint$ expressed in (\ref{e}) is the lenght 
+% of the segments shown in the leftmost scheeme of figure (\ref{fig:criteria}).
+% The global discrepancy between the data and the model is measured by the 
+% least square objective function defined by:
+% \begin{equation} \psi=\pointsum e_\ipoint^2 \label{psiab} \end{equation}
+% and the parameters $a$ and $b$ will be determined 
+% just by the minimization of the function $\psi$ defined in \reff{psiab}.
+% \par
+% In the present treatment of the regression problem as a pure 
+% approximation problem the definition  of  $\psi$ in \reff{psiab} 
+% seams quite arbitrary. It is anyway a convenient choice. 
+% \par
+% Expression \reff{e}  can be rewritten in the different form
+% \begin{equation} 
+% e_\ipoint=v_{2\ipoint}-av_{1\ipoint}+\barycenter{y}_2-a\barycenter{y}_1-b
+% \label{e2}\end{equation}
+% so that the function to be minimized can be expressed 
+% as the sum of two quadratic functions:
+% \begin{equation} 
+% \psi=
+% \pointsum (v_{2\ipoint}-av_{1\ipoint})^2+
+% m(\barycenter{y}_2-a\barycenter{y}_1-b)^2 
+% \label{psiab2} \end{equation}
+% and the minimum can be attained considering 
+% the two terms one at a time. 
+% The second term in the right-hand side of \reff{psiab2} 
+% vanishes if the choice of $b$ is: 
+% \begin{equation} b=\barycenter{y}_2-a\barycenter{y}_1.
+% \label{estb} \end{equation}
+% The first term in the right-hand side of \reff{psiab2} becomes:
+% \begin{equation}  \psi_{(a)}=m\left(\mc_{22}-2a\mc_{12}+a^2\mc_{11}\right).
+% \label{parabola} \end{equation}
+% Searching the minimum of $\psi$ w.r.t.\ $a$ is therefore the search 
+% of the abscissa of the vertex of a parabola  
+% with axis parallel to the second coordinated axis.
+% The result is:
+% \begin{equation} a=\mc_{12}/\mc_{11}
+% \label{esta} \end{equation}
+% Now the slope $a$ and the intercept $b$ can be actually computed.
+%    \begin{macrocode}
+\fp_gset:Nn \g_BBLR_slope_A_fp
+{\g_BBLR_mixed_SecOrdMoment_fp / \g_BBLR_abscissa_SecOrdMoment_fp }
+\fp_gset:Nn \g_BBLR_intercept_A_fp
+{\g_BBLR_mean_ordinate_fp - \g_BBLR_slope_A_fp * \g_BBLR_mean_abscissa_fp}
+%    \end{macrocode}
+% \par
+% The empirical data and the estimated values of $a$ and $b$
+% can be used to compute 
+% the value actually attained by the residuals $e_\ipoint$ and
+% by the function $\psi$. Then the index
+% \begin{equation} \hat\sigma_0^2=\psi/(m-2)\end{equation}
+% can be used to evaluate the general quality of the data and of the model.
+% This claim is clearly quite generic. A complete understanding 
+% of this evaluation would require to treat the linear regression 
+% problem in the framework of the probabilistic estimation theory. 
+% The used notation is derived from that theory.\par
+% If the role of the two coordinates is exchanged the result 
+% for $a$ becomes (still with reference to \reff{eqab})
+% \begin{equation} a=\mc_{22}/\mc_{12}.\end{equation}
+% The slope and the intercept can be computed accordingly. 
+%    \begin{macrocode}
+\fp_gset:Nn \g_BBLR_slope_B_fp
+{\g_BBLR_ordinate_SecOrdMoment_fp / \g_BBLR_mixed_SecOrdMoment_fp}
+\fp_gset:Nn \g_BBLR_intercept_B_fp
+{\g_BBLR_mean_ordinate_fp - \g_BBLR_slope_B_fp * \g_BBLR_mean_abscissa_fp}
+%    \end{macrocode}
+%
+% \subsubsection{Symmetric linear regression \label{symmetric}}
+% If both the coordinates of the experimental points are affected 
+% by the same uncertainty it is advisable to use a more symmetric 
+% optimality criterion and it is convenient to use a different model equation.
+% \par
+% The same line can be described by a different equation, i.e.\ 
+% \begin{equation} x_1y_1+x_2y_2=\dor \end{equation}
+% or in vector form:
+% \begin{equation} \coeff\trasp\point=\dor. \label{eqvx} \end{equation}
+% The parameters in \reff{eqvx} 
+% are the scalar $\dor$ and the elements 
+% of the vector $\coeff$, i.e.\ $x_1$ and $x_2$. 
+% The line described by \reff{eqvx} is obviously
+% invariant when the three parameters are simultaneously 
+% scaled by a constant. The normalization condition 
+% \begin{equation} \coeff\trasp\coeff=1,  \label{norm} \end{equation}
+% supplemented by $\dor\ge 0$, 
+% is quite convenient because the parameters will assume 
+% a significant geometrical meaning:
+% $\coeff$ is a unit vector orthogonal to the line and $\dor$ 
+% is the distance of the line from the origin. 
+% The expression 
+% \begin{equation}  d=\dor-\coeff\trasp\point \label{distance} \end{equation}
+% is the distance of the generic point $\point$ from the line 
+% with a sign that is positive for points on the same side of the origin.
+% \par
+% The distance of each given point from the desired optimal line 
+% is denoted by $d_\ipoint$.
+% It has a clear intrinsic geometrical meaning and it does not 
+% privileges one coordinate w.r.t.\ the other.
+% The function to be minimized by the optimal line is 
+% \begin{equation} 
+% \phi=\frac{1}{m}\pointsum d_\ipoint^2. \label{phi1} \end{equation}
+% The parameters of  \reff{eqvx} are determined by the minimization 
+% of the function $\phi$ that can be expressed as:
+% \begin{equation}  
+% \phi=\frac{1}{m}\pointsum (\coeff\trasp\point_{\ipoint}-\dor)^{2}
+% \label{phi2} \end{equation}
+% and then, after some algebraic manipulations:
+% \begin{equation} 
+% \phi=\coeff\trasp\mC\coeff+(\dor-\coeff\trasp\barycenter{\point})^2
+% \label{phi3}. \end{equation}
+% The function $\phi$ is composed (as it was the function $\psi$) by the sum 
+% of two parts. The second term in the right-hand side of \reff{phi3} 
+% vanishes if the choice of $\dor$ is: 
+% \begin{equation} \dor=\coeff\trasp\barycenter{\point}.
+% \label{estd} \end{equation}
+% Both (\ref{estb}) and (\ref{estd}) means that the optimal line includes 
+% the mean point.
+% Then it is necessary to minimize the function
+% \begin{equation}   \phi_{(\coeff)} =  \coeff\trasp\mC\coeff
+% \label{quadraticfun} \end{equation}
+% with the constrain $\coeff\trasp\coeff=1$.
+% It can be proved that the function $\phi_{(\coeff)}$ 
+% is stationary if $\coeff$ is an eigenvector of \mC. \par
+% The function $\phi_{(\coeff)}$ and the constrain must be combined 
+% using a Lagrange multiplier:
+% \begin{equation} 
+% \Phi=  \coeff\trasp\mC\coeff+\lambda(1-\coeff\trasp\coeff).
+% \label{Phi} \end{equation}
+% Then the stationarity points of $\Phi$ must be determined. 
+% Equating to zero the derivatives of $\Phi$ gives
+% \begin{equation} 
+% \mC\coeff=\lambda\coeff
+% \label{auto} \end{equation}
+% i.e.\ $\coeff$ is an eigenvector of $\mC$. \par
+% The same result is obtained with the following argument.
+% The function $\phi_{(\coeff)}$ is stationary if its first variation 
+% is zero. The variation of $\coeff$ is named $\dx$ . 
+% It must respect the constrain, that becomes $\dx\trasp\coeff=0$.
+% The first variation of $\phi_{(\coeff)}$ is $2\dx\trasp\mC\coeff$, 
+% and it is zero if and only if the following implication is valid:
+% $\dx\trasp\coeff=0 \implies \dx\trasp\mC\coeff=0$,
+% and the implication is valid if and only if the vector
+% $\mC\coeff$  has the same direction of $\coeff$, i.e.\ if 
+% $\coeff$ is an eigenvector of $\mC$.
+% \par
+% The result on the optimal line 
+% can be described geometrically in the following way:
+% (i) the optimal line includes the barycenter of the data;  
+% (ii) the optimal line is orthogonal to the eigenvector of 
+% $\mC$ corresponding to the minimum eigenvalue .\par
+% The obtained result can be generalized in $\Renne$.
+% A set of points in $\Renne$ must be approximated by an $(n-1)$-dimensional 
+% affine subspace. (Other more general situations can be considered.)
+% \par
+% The trace of the matrix $\mC$, denoted as $\tr(\mC)$, is a measure of the 
+% global dispersion of the set of points. 
+% The minimum eigenvalue $\lambda_{\textrm{min}}$ of $\mC$ is a measure 
+% of the dispersion of the set of points with 
+% respect to the optimal affine subspace. Therefore the index 
+% \begin{equation}  \frac{n\lambda_{\textrm{min}}}{\tr(\mC)} 
+% \end{equation}  
+% can be used as an indicator of the relative residual 
+% dispersion of the data around the optimal affine subspace.
+% The defined index is dimensionless and it is 
+% always between $0$ and $1$.
+% \par
+% For the actual computation of $\coeff$ it is convenient to consider 
+% the spectral factorization of the matrix $\mC$, i.e.\ 
+% $\mC=\mX\mL\mX\trasp$ where $\mL$ is a diagonal matrix 
+% whose diagonal elements are the eigenvalues of $\mC$ 
+% and $\mX$ is an orthonormal matrix whose columns are 
+% the eigenvectors of $\mC$. The spectral factorization  exists 
+% for any symmetric matrix, but it is specially simple for 
+% a $2\times 2$ matrix.
+% \begin{equation}
+% \matrixtwotwo{\mc_{11}}{\mc_{12}}{\mc_{12}}{\mc_{22}}=
+% \matrixtwotwo{c}{-s}{s}{\spm c} 
+% \matrixtwotwo{\lambda_1}{0}{0}{\lambda_2} 
+% \matrixtwotwo{\spm c}{s}{-s}{c}
+% \label{spectral}\end{equation}
+% The eigenvalues can be easily obtained because 
+% their sum is the trace of $\mC$ 
+% \begin{equation}
+% \lambda_1 + \lambda_2 = \mc_{11}+\mc_{22}
+% \label{Sum}\end{equation}
+% and their product 
+% is the determinant of the same matrix.
+% Therefore after some manipulations it results:
+% \begin{equation}
+% \lambda_1 - \lambda_2 = \sqrt{(\mc_{11}-\mc_{22})^2+4\mc_{12}^2} 
+% \label{Difference}\end{equation}
+% and the two eigenvalues are then immediately obtained. \par
+% It is convenient to compute the difference of the two diagonal elements 
+% of the dispersion matrix and the difference of its eigenvalues.
+%    \begin{macrocode}
+\fp_gset:Nn   \g_BBLR_diag_diff_fp
+{\g_BBLR_abscissa_SecOrdMoment_fp - \g_BBLR_ordinate_SecOrdMoment_fp}
+\fp_gset:Nn   \g_BBLR_eig_diff_fp
+{sqrt(\g_BBLR_diag_diff_fp * \g_BBLR_diag_diff_fp + 
+  4 * \g_BBLR_mixed_SecOrdMoment_fp * \g_BBLR_mixed_SecOrdMoment_fp)}
+%    \end{macrocode}
+% The computation of $c$ and $s$ is obtained from \reff{spectral}
+% taking into account that $c^2+s^2=1$.
+% From \reff{spectral} it results: 
+% \begin{equation} \mc_{11}-\mc_{22}=(\lambda_1-\lambda_2)(c^2-s^2)
+% \label{Cos2A}\end{equation}
+% and also 
+% \begin{equation} \mc_{12}=(\lambda_1-\lambda_2)cs
+% \label{Sin2A}\end{equation}
+% that is only used to determine the sign of $cs$.
+% The expression for the parameters $c$ and $s$ are:
+% \begin{equation} 
+% c=\sqrt{\frac{1}{2}+\frac{\mc_{11}-\mc_{22}}{2(\lambda_1-\lambda_2)}}
+% \label{cos}\end{equation}
+% \begin{equation} 
+% s=\sgn(\mc_{12})
+% \sqrt{\frac{1}{2}-\frac{\mc_{11}-\mc_{22}}{2(\lambda_1-\lambda_2)}}
+% \label{sin}\end{equation}
+% The parameters $s$ and $c$ are the sine and cosine 
+% of the angle between the axis of $y_1$ and the eigenvector 
+% corresponding to the maximum eigenvalue. \par
+% They are computed using the already defined elements.
+%    \begin{macrocode}
+\fp_gset:Nn   \g_BBLR_cos_fp%
+{sqrt((1 + \g_BBLR_diag_diff_fp / \g_BBLR_eig_diff_fp) / 2)}
+\fp_gset:Nn \g_BBLR_sig_sin_fp {\fp_sign:n {\g_BBLR_mixed_SecOrdMoment_fp}}
+\fp_gset:Nn   \g_BBLR_sin_fp                
+{\g_BBLR_sig_sin_fp*sqrt((1-\g_BBLR_diag_diff_fp / \g_BBLR_eig_diff_fp) / 2)}
+%    \end{macrocode}
+% The vector $\coeff$ is :
+% \begin{equation} 
+% \coeff=\sgn(-s\barycenter{y}_1+c\barycenter{y}_2)
+% \begin{pmatrix} -s \\ c\end{pmatrix}.
+% \label{xhat}\end{equation}
+%
+%\par
+% The parameter $a$ of model \reff{eqab} can be obtained as: 
+% \begin{equation} 
+% a=s/c
+% \end{equation}
+% Now the slope and the intercept of the optimal line corresponding to the
+% symmetric criterion can be computed.
+%
+%    \begin{macrocode}
+\fp_gset:Nn \g_BBLR_slope_S_fp
+{\g_BBLR_sin_fp / \g_BBLR_cos_fp }
+\fp_gset:Nn \g_BBLR_intercept_S_fp
+{\g_BBLR_mean_ordinate_fp - 
+\g_BBLR_slope_S_fp * \g_BBLR_mean_abscissa_fp}
+}                    
+%    \end{macrocode}
+%
+% The theoretical treatment of the proposed problem and the 
+% implementation of its numerical solution end here.
+% \end{macro}
+%
+% \subsection{Print of table of results}
+% \begin{macro}{\lrprint}
+% The  command \cs{lrprint} prints  some info on the data 
+% and the results of the computations in tabular form.
+%    \begin{macrocode}
+\NewDocumentCommand{\lrprint}{}{
+\begin{center}
+\begin{tabular}{| l | r |} \hline
+ Data~File                & \g_BBLR_file_name_tl                   \\ 
+ \hline
+ Number~of~points         & \int_use:N\g_BBLR_number_of_points_int \\ 
+ \hline 
+ Mean~values~of~the~coordinates              &% 
+ $\BBLR_print_fp:N \g_BBLR_mean_abscissa_fp$ \\ &
+ $\BBLR_print_fp:N \g_BBLR_mean_ordinate_fp$ \\ \hline
+ Minimum~values~of~the~coordinates        &% 
+ $\BBLR_print_fp:N \g_BBLR_min_abscissa_fp$ \\ &
+ $\BBLR_print_fp:N \g_BBLR_min_ordinate_fp$    \\ \hline
+  Maximum~values~of~the~coordinates    &% 
+ $\BBLR_print_fp:N \g_BBLR_max_abscissa_fp$ \\ &
+ $\BBLR_print_fp:N \g_BBLR_max_ordinate_fp$    \\ \hline 
+ {Second~order~moments}\phantom{xxxxxxxxx}{abscissa} &%
+ $\BBLR_print_fp:N \g_BBLR_abscissa_SecOrdMoment_fp$ \\
+ \multicolumn{1}{|r|}{mixed}   & %
+$\BBLR_print_fp:N \g_BBLR_mixed_SecOrdMoment_fp$ ~ \\ 
+\multicolumn{1}{|r|}{ordinate}   & %
+$\BBLR_print_fp:N \g_BBLR_ordinate_SecOrdMoment_fp$  \\ \hline 
+  Slope~and~intercept~of~optimal~line  & $\BBLR_print_fp:N 
+  \g_BBLR_slope_A_fp$ \\
+ (estimated~with~errors~in~ordinate)&$\BBLR_print_fp:N 
+ \g_BBLR_intercept_A_fp$\\ \hline
+  Slope~and~intercept~of~optimal~line & $\BBLR_print_fp:N 
+  \g_BBLR_slope_B_fp$ \\ 
+ (estimated~with~errors~in~abscissa)&$\BBLR_print_fp:N 
+ \g_BBLR_intercept_B_fp$\\ \hline
+  Unit~vector~along~the~line & $\BBLR_print_fp:N  
+  \g_BBLR_cos_fp$ \\
+  &  $\BBLR_print_fp:N \g_BBLR_sin_fp$   \\
+  Slope~and~intercept~of~optimal~line &$\BBLR_print_fp:N 
+  \g_BBLR_slope_S_fp$ \\
+(estimated~with~symmetric~regression) & 
+ $\BBLR_print_fp:N \g_BBLR_intercept_S_fp$\\ \hline 
+\end{tabular}
+\end{center}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\lrnumdigit}
+% The  command \cs{lrnumdigit} records the maximum number of digits 
+% used in the table for computed numbers. The default value is $4$.
+%    \begin{macrocode}
+\NewDocumentCommand{\lrnumdigit}{m}{
+\int_gset:Nn \g_BBLR_num_dec_dig_int{#1}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Plot of points and lines}   
+% \begin{macro}{\lrplot}
+% The  command \cs{lrplot} produce a framed plot of the data 
+% and of the regression line(s). The size of the plot and its actual 
+% content are determined by the arguments.
+%    \begin{macrocode}
+\NewDocumentCommand{\lrplot}{mmmmm}{%
+%    \end{macrocode}
+% The plotting area is divided into a main plotting area for 
+% the representation of points and line(s) and a small surrounding free space. 
+% The height is computed taking into account the distribution of the points, 
+% if it is not explicitelly given..
+%    \begin{macrocode}
+\fp_gset:Nn \g_BBLR_base_fp {#1}
+\fp_gset:Nn \g_BBLR_Xbase_fp {\g_BBLR_base_fp - 0.6}
+\fp_gset:Nn \g_BBLR_scale_factor_fp{\g_BBLR_Xbase_fp / 
+\g_BBLR_Dabscissa_fp}
+\bool_if:NTF \g_BBLR_two_scale_bool 
+{\fp_gset:Nn \g_BBLR_height_fp {\g_BBLR_XXheight_fp}
+\fp_gset:Nn \g_BBLR_Xheight_fp {\g_BBLR_height_fp - 0.6}
+\fp_gset:Nn \g_BBLR_scale_factor_H_fp{\g_BBLR_Xheight_fp / 
+\g_BBLR_Dordinate_fp}
+}
+{\fp_gset:Nn \g_BBLR_Xheight_fp {\g_BBLR_Dordinate_fp * 
+\g_BBLR_scale_factor_fp}
+\fp_gset:Nn \g_BBLR_height_fp {\g_BBLR_Xheight_fp + 0.6}
+\fp_gset:Nn \g_BBLR_scale_factor_H_fp {\g_BBLR_scale_factor_fp }
+}
+%    \end{macrocode}
+% The information about the items to be plotted is in the remaining arguments.
+%    \begin{macrocode}
+\str_gset:Nn \g_BBLR_point_code_str {#2}
+\str_gset:Nn \g_BBLR_labelA_str     {#3}
+\str_gset:Nn \g_BBLR_labelB_str     {#4}
+\str_gset:Nn \g_BBLR_labelS_str     {#5}
+\bool_gset:Nn \g_BBLR_plot_points_bool
+{!(\str_if_eq_p:NN \g_BBLR_point_code_str \c_BBLR_minus_str)}
+\bool_gset:Nn \g_BBLR_plot_lineA_bool
+{!(\str_if_eq_p:NN \g_BBLR_labelA_str \c_BBLR_minus_str)}
+\bool_gset:Nn \g_BBLR_plot_lineB_bool
+{!(\str_if_eq_p:NN \g_BBLR_labelB_str \c_BBLR_minus_str)}
+\bool_gset:Nn \g_BBLR_plot_lineS_bool
+{!(\str_if_eq_p:NN \g_BBLR_labelS_str \c_BBLR_minus_str)}
+%    \end{macrocode}
+% The unit of length is $1$ centimeter. The plotting area is framed.
+%    \begin{macrocode}
+\setlength{\unitlength}{1.0cm}  
+\fp_gset:Nn \g_tmpa_fp {\g_BBLR_Xbase_fp +0.2}
+\fp_gset:Nn \g_tmpb_fp {\g_BBLR_Xheight_fp +0.1}
+\begin{picture}(\fp_use:N\g_BBLR_base_fp,\fp_use:N\g_BBLR_height_fp)(-0.3,-0.3)
+\put(-0.1,-0.1){\line(1,0){\fp_use:N\g_tmpa_fp}}
+\put(-0.1,\fp_use:N\g_tmpb_fp){\line(1,0){\fp_use:N\g_tmpa_fp}}
+\fp_gset:Nn \g_tmpa_fp {\g_tmpa_fp -0.1}
+\fp_gset:Nn \g_tmpb_fp {\g_tmpb_fp +0.1}
+\put(-0.1,-0.1){\line(0,1){\fp_use:N\g_tmpb_fp}}
+\put(\fp_use:N\g_tmpa_fp,-0.1){\line(0,1){\fp_use:N\g_tmpb_fp}}
+%    \end{macrocode}
+% The plot of points and line(s) is obtained using auxiliary functions.
+%    \begin{macrocode}
+\thicklines
+\bool_if:nT {\g_BBLR_plot_points_bool}{\BBLR_plot_points:}
+\bool_if:nT {\g_BBLR_plot_lineA_bool}{
+\BBLR_draw_line:NNN \g_BBLR_slope_A_fp\g_BBLR_intercept_A_fp
+\g_BBLR_labelA_str}
+\bool_if:nT {\g_BBLR_plot_lineB_bool}{
+\BBLR_draw_line:NNN \g_BBLR_slope_B_fp\g_BBLR_intercept_B_fp
+\g_BBLR_labelB_str}
+\bool_if:nT {\g_BBLR_plot_lineS_bool}{
+\BBLR_draw_line:NNN \g_BBLR_slope_S_fp\g_BBLR_intercept_S_fp
+\g_BBLR_labelS_str}
+\end{picture}
+}%                                                          
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\lrplotparameters}
+% The  command \cs{lrplotparameters} records two parameters related to 
+% the generation of the plot and sets a boolean variable. 
+%    \begin{macrocode}
+\NewDocumentCommand{\lrplotparameters}{mm}{
+\fp_gset:Nn \g_BBLR_diameter_fp{#1}
+\fp_gset:Nn \g_BBLR_XXheight_fp{#2}
+\bool_gset:Nn \g_BBLR_two_scale_bool 
+{\fp_compare_p:nNn {\g_BBLR_XXheight_fp}>{0.}}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Functions for internal use}
+% The functions listed here after are for internal 
+% use and are just minimally documented. \par
+% The function |\BBLR_decode_data:|   
+% \marginpar{\raggedleft\texttt{
+% \textbackslash{}BBLR\textunderscore{}decode\textunderscore{}data:}}
+% extract two numeric values from the string read from the file.
+% Some clever actions are necessary because 
+% a so called csv file sometime do not contains the separating commas. 
+%    \begin{macrocode}
+\cs_new_protected:Nn \BBLR_decode_data: {             
+\tl_trim_spaces:N \g_BBLR_file_line_tl                          
+\int_gzero:N \g_tmpa_int                              
+\int_gzero:N \g_BBLR_first_separator_int                      
+\int_gzero:N \g_BBLR_last_separator_int               
+\int_gset:Nn \g_BBLR_record_length_int {           
+\str_count:N \g_BBLR_file_line_tl}                         
+\str_map_variable:NNn \g_BBLR_file_line_tl \g_tmpa_str {
+\int_gincr:N \g_tmpa_int                 
+\bool_lazy_or:nnTF                                                       
+{\str_if_eq_p:NN \g_tmpa_str \c_BBLR_comma_str}                   
+{\str_if_eq_p:NN \g_tmpa_str \c_BBLR_space_str}                    
+{\int_gset_eq:NN \g_BBLR_last_separator_int \g_tmpa_int
+\int_if_zero:nTF {\g_BBLR_first_separator_int}
+{\int_gset_eq:NN \g_BBLR_first_separator_int \g_tmpa_int
+}{\prg_do_nothing:}                                              
+}{\prg_do_nothing:}                                                
+}                                        
+\int_gincr:N \g_BBLR_last_separator_int                    
+\int_gdecr:N \g_BBLR_first_separator_int                  
+\fp_gset:Nn  \g_BBLR_abscissa_fp{                                   
+\str_range:Nnn \g_BBLR_file_line_tl{1}{\g_BBLR_first_separator_int}}
+\fp_gset:Nn  \g_BBLR_ordinate_fp{                                   
+\str_range:Nnn \g_BBLR_file_line_tl                                 
+{\g_BBLR_last_separator_int}{\g_BBLR_record_length_int}}            
+}                                                
+%    \end{macrocode}
+% The function |\BBLR_plot_points:|  \marginpar{\raggedleft\texttt{
+% \textbackslash{}BBLR\textunderscore{}plot\textunderscore{}points:}}
+% scans the data file to read the coordinates and 
+% it draws a circle for each point.
+% 
+%   \begin{macrocode}
+\cs_new_protected:Nn  \BBLR_plot_points: {
+\ior_open:Nn   \g_BBLR_file_ior \g_BBLR_file_name_tl              
+\int_zero:N    \g_BBLR_rec_count_int        
+\int_do_until:nn                        
+{\g_BBLR_rec_count_int = \g_BBLR_number_of_points_int} 
+{                                                          
+    \ior_str_get:NN \g_BBLR_file_ior \g_BBLR_file_line_tl    
+    \int_incr:N \g_BBLR_rec_count_int               
+    \BBLR_decode_data:                                  
+    \fp_gset:Nn \g_tmpa_fp{(\g_BBLR_abscissa_fp-\g_BBLR_min_abscissa_fp)* 
+    \g_BBLR_scale_factor_fp}
+    \fp_gset:Nn \g_tmpb_fp{(\g_BBLR_ordinate_fp-\g_BBLR_min_ordinate_fp)* 
+    \g_BBLR_scale_factor_H_fp}
+    \put(\fp_use:N\g_tmpa_fp, \fp_use:N\g_tmpb_fp){           
+    {\circle*{\fp_use:N\g_BBLR_diameter_fp}}}                  
+}                                                            
+\ior_close:N \g_BBLR_file_ior                                    
+}                                                
+%    \end{macrocode}
+% The function |\BBLR_draw_line:NNN|  \marginpar{\raggedleft\texttt{
+% \textbackslash{}BBLR\textunderscore{}draw\textunderscore{}line:NNN}}
+% draws the line. The first two parameters given as arguments 
+% are the slope and the intercept. The third parameter is a label.
+% \par The next code finds the intersection of the line with the plotting area.
+%    \begin{macrocode}
+\cs_new_protected:Nn  \BBLR_draw_line:NNN {
+\fp_gset:Nn \fp_tmpa_fp {#1 * \g_BBLR_min_abscissa_fp + #2 }
+\fp_compare:nTF{\fp_tmpa_fp > \g_BBLR_max_ordinate_fp}{
+\fp_gset:Nn \g_BBLR_min_draw_abscissa_fp {(\g_BBLR_max_ordinate_fp -#2) / #1}
+}{
+\fp_compare:nTF{\fp_tmpa_fp < \g_BBLR_min_ordinate_fp}{
+\fp_gset:Nn \g_BBLR_min_draw_abscissa_fp {(\g_BBLR_min_ordinate_fp - #2) / #1}
+}{
+\fp_gset:Nn \g_BBLR_min_draw_abscissa_fp { \g_BBLR_min_abscissa_fp }
+}}
+\fp_gset:Nn \fp_tmpa_fp {#1 * \g_BBLR_max_abscissa_fp + #2 }
+\fp_compare:nTF{\fp_tmpa_fp > \g_BBLR_max_ordinate_fp}{
+\fp_gset:Nn \g_BBLR_max_draw_abscissa_fp {(\g_BBLR_max_ordinate_fp -#2) / #1}
+}{
+\fp_compare:nTF{\fp_tmpa_fp < \g_BBLR_min_ordinate_fp}{
+\fp_gset:Nn \g_BBLR_max_draw_abscissa_fp { (\g_BBLR_min_ordinate_fp - #2) / #1}
+}{
+\fp_gset:Nn \g_BBLR_max_draw_abscissa_fp {  \g_BBLR_max_abscissa_fp }
+}}
+%    \end{macrocode}
+% Some parameters (coordinates of starting point, base-length, scaled slope) 
+% are computed and the line is drawn.
+%    \begin{macrocode}
+\fp_gset:Nn \fp_tmpa_fp {(\g_BBLR_min_draw_abscissa_fp -              
+\g_BBLR_min_abscissa_fp)* \g_BBLR_scale_factor_fp}           
+\fp_gset:Nn \fp_tmpb_fp {(#1 * \g_BBLR_min_draw_abscissa_fp + #2 -
+\g_BBLR_min_ordinate_fp)* \g_BBLR_scale_factor_H_fp}             
+\fp_gset:Nn \fp_BBLR_line_base_length_fp{(\g_BBLR_max_draw_abscissa_fp -
+\g_BBLR_min_draw_abscissa_fp) * \g_BBLR_scale_factor_fp}   
+\fp_gset:Nn \fp_scaled_slope_fp 
+{(#1 * \g_BBLR_scale_factor_H_fp / \g_BBLR_scale_factor_fp)}
+\put(\fp_use:N\fp_tmpa_fp, \fp_use:N\fp_tmpb_fp){          
+\line(1.,\fp_use:N\fp_scaled_slope_fp){\fp_use:N\fp_BBLR_line_base_length_fp}}
+%    \end{macrocode}
+%The third parameter is used as a label, if it is not a |+|.
+%    \begin{macrocode}
+\bool_if:nF {\str_if_eq_p:NN #3 \c_BBLR_plus_str}{       
+\fp_gset:Nn \fp_tmpa_fp                                    
+{0.08 * \g_BBLR_min_draw_abscissa_fp + 0.92 * \g_BBLR_max_draw_abscissa_fp} 
+\fp_gset:Nn \fp_tmpb_fp {#1 * \fp_tmpa_fp + #2 }
+\fp_gset:Nn \fp_tmpa_fp 
+{(\fp_tmpa_fp-\g_BBLR_min_abscissa_fp)*\g_BBLR_scale_factor_fp 
++ 0.3 * #1 /sqrt(1.+#1*#1)}
+\fp_gset:Nn \fp_tmpb_fp 
+{(\fp_tmpb_fp-\g_BBLR_min_ordinate_fp)* \g_BBLR_scale_factor_fp
+- 0.3 /sqrt(1.+#1*#1)}
+\put(\fp_use:N\fp_tmpa_fp, \fp_use:N\fp_tmpb_fp){#3}
+}                                                             
+}                                                 
+%    \end{macrocode}
+% The function |\BBLR_print_fp:N |  \marginpar{\raggedleft\texttt{
+% \textbackslash{}BBLR\textunderscore{}print\textunderscore{}fp:N }}
+% is used to print floating point numbers with a limited number
+% of decimal digit.
+%
+%    \begin{macrocode}
+\cs_new_protected:Nn \BBLR_print_fp:N {%
+{\fp_eval:n{trunc(#1 ,\g_BBLR_num_dec_dig_int)}}
+}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\ExplSyntaxOff
+%    \end{macrocode}
+%
+%
+%\iffalse
+%</package>
+%\fi
+%
+% \section{Versions}
+% 2024-06-10:  first post on CTAN.\par
+% 2024-11-23: small changes in the text, 
+% different format of numbers in the table.\par
+% 2024-12-14: more flexibe output, some changes in the text.
+% 
+% \section{Acknowledgments}
+% The colleagues Paolo Zatelli, Alfonso Vitti and Giulia Graldi
+% read some preliminary version 
+% of this text and suggested several improvements. 
+% Claudio Beccari usefully commented about the first version 
+% when I was preparing the second version. \par
+%
+% \section{Citations and references}
+% \subsection*{Mathematics}
+% The books by Lang \cite{Lang} and by Strang \cite{Strang} give 
+% all the background on linear algebra.\par
+% The texts by Sansò \cites{Sanso1, Sanso2} (in italian) treat the
+% teory of probability and its application to metrology. 
+% The paper  by Pearson \cite{Pearson} is the oldest text that 
+% I have found on the symmetric regression, or total regression.
+% \subsection*{Programming}
+% The two documents \cites{L3A, L3B} are the fountamental and official guide
+% for \LaTeX3 programming. The books by Donald Knuth \cites{Knuth} 
+% and Leslie Lamport \cites{Lamport} are still essential references. 
+% The papers by Enrico Gregorio \cites{egreg1, egreg2, egreg3, egreg4, egreg5}
+% explain some general and some special aspect of \LaTeX3 programming. 
+% \subsection*{References}
+% \begin{biblist}[\normalsize]   
+% \bib{egreg1}{article}{
+% author={Gregorio, Enrico}, 
+% journal={ArsTeXnica},
+% number={14},pages={41\ndash 47}, date={2012},
+% title={\LaTeX3: un nuovo gioco per i maghi e per diventarlo},
+% }
+% \bib{egreg2}{article}{
+% author={Gregorio, Enrico}, 
+% journal={ArsTeXnica},
+% number={22},pages={69\ndash 77}, date={2016},
+% title={Liste, cicli, \LaTeX3},
+% }
+% \bib{egreg3}{article}{
+% author={Gregorio, Enrico}, 
+% journal={ArsTeXnica},
+% number={24},pages={37\ndash 44}, date={2017},
+% title={Condizionali in \LaTeX},
+% }
+% \bib{egreg4}{article}{
+% author={Gregorio, Enrico}, 
+% journal={ArsTeXnica},
+% number={30},pages={36\ndash 45}, date={2020},
+% title={Funzioni e |expl3|},
+% }
+% \bib{egreg5}{article}{
+% author={Gregorio, Enrico}, 
+% journal={TUGboat},
+% volume={41},number={3},pages={299\ndash 307}, date={2020},
+% title={Functions and |expl3|},
+% }
+% \bib{Knuth}{book}{
+% author={Knuth, Donald},
+% title={The TeXbook},
+% date={1986},
+% publisher={American Mathematical Society and Addison-Wesley},
+% } 
+% \bib{Lang}{book}{
+% author={Lang, Serge},
+% title={Linear Algebra},
+% date={1987},
+% publisher={Springer-Verlag},
+% place={Berlin Heidelberg},
+% }
+% \bib{Lamport}{book}{
+% author={Lamport, Leslie},
+% title={LaTeX - A document preparation system (2nd ed.\ )},
+% date={1994},
+% publisher={Addison-Wesley},
+% note={something interesting in the fist edition, too},
+% }
+% \bib{L3A}{article}{
+% title={The |expl3| package and LaTeX3 programming},
+% author={The LaTeX project team}, date={2024},
+% note={file: |expl3.pdf| available in CTAN in l3kernel}, 
+% }
+% \bib{L3B}{article}{
+% title={The \LaTeX3 interface},
+% author={The LaTeX project team}, date={2024},
+% note={file: |interface3.pdf| available in CTAN in l3kernel} 
+% }
+% \bib{Pearson}{article}{
+% title={On lines and planes of closest fit to systems of points in space},
+% author={Pearson, Karl}, date={1901},
+% journal={Philosophical Magazine},
+% volume={2},number={11},pages={559\ndash 572}, 
+% }
+% \bib{Sanso1}{book}{
+% author={Sansò, Fernando},
+% title={Elementi di teoria della probabilità},
+% date={1996},
+% publisher={Città-Studi},
+% place={Milano},
+% note={see: http://www.geolab.polimi.it/text-books/},
+% }
+% \bib{Sanso2}{book}{
+% author={Sansò, Fernando},
+% title={La teoria della stima},
+% date={1996},
+% publisher={Città-Studi},
+% place={Milano},
+% note={see: http://www.geolab.polimi.it/text-books/},
+% }
+% \bib{Strang}{book}{
+% author={Strang, Gilbert},
+% title={Introduction to linear algebra},
+% date={2009},
+% publisher={Wellesley-Cambridge press,},
+% }
+% \end{biblist} 
+%
+% \par\vfill\centerline{\small ***}\vfill
+% \end{document} 
+% 
+%\iffalse
+% END OF FILE linearregression.dtx
+%\fi

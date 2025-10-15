@@ -1,0 +1,172 @@
+%%%
+% Calculatrice
+%%%
+\def\filedateCalculatrice{2024/08/04}%
+\def\fileversionCalculatrice{0.1}%
+\message{-- \filedateCalculatrice\space v\fileversionCalculatrice}%
+%https://tex.stackexchange.com/questions/290321/mimicking-a-calculator-inputs-and-screen
+\definecolor{lightorange}{rgb}{0.9,0.4,0}%
+\definecolor{lightestorange}{rgb}{1,0.8,0.5}%
+\definecolor{darkorange}{rgb}{0.2,0.1,0}%
+%
+\colorlet{blackened}{black!90!white}%
+\colorlet{blackish}{black!70!white}%
+\colorlet{greyish}{black!60!white}%
+\colorlet{whiteish}{white}%
+\colorlet{orangeish}{yellow!90!red}%
+\colorlet{greenish}{green!16!gray}%
+\colorlet{redish}{red!80!black}%
+%
+\tcbset{calbackground/.style={%
+    enhanced,%
+    leftright skip=0.25cm,beforeafter skip=0pt,%
+    toptitle=0mm,bottomtitle=0mm,%
+    right=2mm,left=2mm,%
+    top=1pt,%
+    bottom=0.25cm,%
+    boxsep=0pt,%
+    boxrule=0mm,%
+    sharp corners,%
+    sidebyside,%
+    sidebyside gap=2mm,%
+    lefthand ratio=0.6,%
+    bicolor,%
+    colback=black!10!white,%
+    colbacklower=greenish,%
+    colframe=white,%
+    autoparskip,%
+  }}%
+%
+\newtcbox{\KY}[1][]{%
+  enhanced,%
+  on line,%
+  arc=2pt,outer arc=2pt,%
+  boxrule=0pt,bottomrule=0.25mm,rightrule=0.2mm,%
+  boxsep=0pt,left=0pt,right=0pt,top=1pt,bottom=1pt,%
+  interior style={top color=blackish,bottom color=blackened},%
+  colframe=greyish,%
+  width=2.5em,%
+  tcbox width=forced center,%
+  equal height group=K,%
+  valign=center,%
+  fontupper=\footnotesize\sffamily,%
+  coltext=orangeish,%
+  before upper=\vrule width 0pt height 2ex depth 1ex\relax,%
+}%
+%
+\newtcbox{\KYm}[1][]{%
+  enhanced,%
+  on line,%
+  arc=2pt,outer arc=2pt,%
+  boxrule=0pt,bottomrule=0.25mm,rightrule=0.2mm,%
+  boxsep=0pt,left=0pt,right=0pt,top=1pt,bottom=1pt,%
+  interior style={top color=blackish,bottom color=blackened},%
+  colframe=greyish,%
+  width=2.5em,%
+  tcbox width=forced center,%
+  equal height group=K,%
+  valign=center,%
+  fontupper=\footnotesize\sffamily,%
+  coltext=orangeish,%
+  before upper=\vrule width 0pt height 2ex depth 1ex\relax$,%
+  after upper=$,%
+}%
+%
+\newtcbox{\KN}{%
+  enhanced,%
+  on line,%
+  arc=2pt,outer arc=2pt,%
+  boxrule=0pt,bottomrule=0.25mm,rightrule=0.2mm,%
+  boxsep=0pt,left=0pt,right=0pt,top=1pt,bottom=1pt,%
+  interior style={top color=blackish,bottom color=blackened},%
+  colframe=greyish,%
+  width=1.5em,%
+  tcbox width=forced center,%
+  equal height group=K,%
+  valign=center,%
+  fontupper=\footnotesize\sffamily,%
+  coltext=whiteish,%
+  before upper=\vrule width 0pt height 2ex depth 1ex\relax,%
+}%
+%
+\newtcolorbox{calc}[1][]{%
+  enhanced,bicolor,%
+  boxsep=0pt,%
+  boxrule=0pt,%
+  top=6pt,bottom=0pt,left=6pt,right=0pt,%
+  sharp corners,%
+  frame empty,%
+  colback=black!10,%
+  colbacklower=greenish,%
+  sidebyside,%
+  sidebyside align=top seam,%
+  sidebyside gap=0pt,%
+  righthand width=50.7mm,%
+  before lower=\begin{tabular}{@{}l@{}},%
+  after lower=\end{tabular},%
+  overlay={\node[inner sep=0pt, outer sep=0pt, text height=5pt, text
+    depth=1pt, text width=50.7mm, fill=greenish, anchor=north
+    east, font=\sffamily\tiny\bfseries, align=flush right]
+    at (frame.north east) {#1};}%
+}%
+%
+\def\MPCalculatrice#1#2#3{%
+  % #1 Calcul %2 r\'eponse
+  \ifluatex%
+    \mplibnumbersystem{decimal}%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      defaultcolormodel := \useKV[ClesCalculatrice]{ModeleCouleur};
+      numberprecision:=\useKV[ClesCalculatrice]{Precision};
+      input PfCCalculatrice;
+      if defaultcolormodel=7:
+      cmykcolor coulprint;
+      coulprint=0.2(0,0,0,1);
+      fi;
+      LargeurEcran:=\useKV[ClesCalculatrice]{Largeur};
+      boolean Calcul;
+      Calcul=\useKV[ClesCalculatrice]{Calcul};
+      print:=\useKV[ClesCalculatrice]{Impression};
+      Math:=\useKV[ClesCalculatrice]{Math};
+      LCD(#1)(#2)(#3);
+    \end{mplibcode}%
+    \mplibnumbersystem{scaled}%
+  \else%
+    \begin{mpost}[mpsettings={input PfCCalculatrice;LargeurEcran:=\useKV[ClesCalculatrice]{Largeur};}]%
+      LCD(#1)(#2)(#3);%
+    \end{mpost}%
+  \fi%
+}%
+%
+\setKVdefault[ClesCalculatrice]{ModeleCouleur=5,Ecran=false,NbLignes=0,BL=0.775,Largeur=120,Calcul=false,Impression=false,Math,Precision=12}%
+%
+\NewDocumentCommand\Calculatrice{}{%On désactive le ~ qui pose souci avec babel
+  \begingroup
+  \catcode`\~12
+  \Calculatriceaux
+}%
+
+\NewDocumentCommand\Calculatriceaux{om}{%
+  \endgroup
+  \setstackgap{L}{\useKV[ClesCalculatrice]{BL}\baselineskip}%
+  \useKVdefault[ClesCalculatrice]%
+  \setKV[ClesCalculatrice]{#1}%
+  \ifboolKV[ClesCalculatrice]{Ecran}{%
+    \ifboolKV[ClesCalculatrice]{Calcul}{%
+      \setsepchar[*]{,*§}\reademptyitems%
+      \readlist\ListeCalc{#2}%
+    }{%
+      \setsepchar[*]{,*/}\reademptyitems%
+      \readlist\ListeCalc{#2}%
+    }%
+    \ignoreemptyitems%
+    \MPCalculatrice{\ListeCalc[1,1]}{\ListeCalc[1,2]}{\useKV[ClesCalculatrice]{NbLignes}}%
+  }{%
+    \setsepchar[*]{,*/}\reademptyitems%
+    \readlist\ListeCalc{#2}%
+    \ignoreemptyitems%
+    \foreachitem\compteur\in\ListeCalc{\xintifboolexpr{\listlen\ListeCalc[\compteurcnt]==2}{\Longstack{{\tiny\ListeCalc[\compteurcnt,1]} \KN{\ListeCalc[\compteurcnt,2]}}}{\Longstack{{\tiny\ListeCalc[\compteurcnt,2]} \KY{\ListeCalc[\compteurcnt,3]}}}%
+    }%
+  }%
+  \setstackgap{L}{\baselineskip}%
+}%

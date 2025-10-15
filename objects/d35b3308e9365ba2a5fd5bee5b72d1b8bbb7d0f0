@@ -1,0 +1,114 @@
+%%%
+% Kakurasu
+%%%
+\def\filedateKakurasu{2025/05/26}%
+\def\fileversionKakurasu{0.1a}%
+\message{-- \filedateKakurasu\space v\fileversionKakurasu}%
+%
+\setKVdefault[Kakurasu]{Solution=false,Longueur=6,Largeur=6,Echelle=8mm,Graines=false,Trace=false,Graine={},Traces={}}
+\defKV[Kakurasu]{%
+  Graine=\ifempty{#1}{}{\setKV[Kakurasu]{Graines}},%
+  Traces=\ifempty{#1}{}{\setKV[Kakurasu]{Trace}}%
+}%    
+
+\NewDocumentCommand\Kakurasu{o}{%
+  \useKVdefault[Kakurasu]%
+  \setKV[Kakurasu]{#1}%
+  \BuildKakurasu%
+}%
+
+\NewDocumentCommand\BuildKakurasu{}{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    boolean Graines,Solution,Trace;
+    Graines=\useKV[Kakurasu]{Graines};
+    Solution=\useKV[Kakurasu]{Solution};
+    Trace=\useKV[Kakurasu]{Trace};
+    
+    if Graines:
+    randomseed:=\useKV[Kakurasu]{Graine};
+    fi;
+    
+    numeric Longueur,Largeur;
+    Longueur=\useKV[Kakurasu]{Longueur};
+    Largeur=\useKV[Kakurasu]{Largeur};
+    
+    u:=\useKV[Kakurasu]{Echelle};
+    
+    pair A[][];%centre des carrés.
+    boolean Allume[][];
+    numeric NombreLigne[][],NombreColonne[][];
+    
+    for k=-1 upto Largeur+1:
+    for l=-1 upto Longueur+1:
+    Allume[k][l]=false;
+    endfor;
+    endfor;
+    
+    for k=0 upto Largeur-1:
+    for l=0 upto Longueur-1:
+    A[k][l]=u*(l,-k);
+    trace (unitsquare scaled u) shifted A[k][l];
+    endfor;
+    endfor;
+
+    for k=0 upto Largeur-1:
+    for l=0 upto Longueur-1:
+    if Allume[k][l]:
+    else:
+    Allume[k][l]:=true;
+    m:=uniformdeviate(1);
+    if m<0.5:
+    % on ne met pas de case noire
+    else:
+    % on met une case noire
+    NombreLigne[k][l]=l+1;
+    NombreColonne[k][l]=k+1;
+    if Solution:
+    fill (unitsquare scaled 0.9u) shifted (A[k][l]+0.05*u*(1,1));
+    fi;
+    fi;
+    fi;
+    endfor;
+    endfor;
+    
+    % on compte le nombre de chiffres dans les lignes et on les ajoute
+    for k=0 upto Largeur-1:
+    Somme:=0;
+    for l=0 upto Longueur-1:
+    if unknown NombreLigne[k][l]:
+    else:
+    Somme:=Somme+NombreLigne[k][l];
+    fi;
+    endfor;
+    label(TEX(decimal(Somme)),u*(-0.5,-k+0.5));
+    endfor;
+
+    % on compte le nombre de chiffres dans les colonnes et on les ajoute
+    for k=0 upto Longueur-1:
+    Somme:=0;
+    for l=0 upto Largeur-1:
+    if unknown NombreColonne[l][k]:
+    else:
+    Somme:=Somme+NombreColonne[l][k];
+    fi;
+    endfor;
+    label(TEX(decimal(Somme)),u*(k+0.5,1.5));
+    endfor;
+
+    % On affiche les valeurs des cases noires.
+    drawoptions(withcolor 0.5white);
+    for k=0 upto Longueur-1:
+    label(TEX("\footnotesize"&decimal(k+1)),u*(k+0.5,-Largeur+0.5));
+    endfor;
+    for k=0 upto Largeur-1:
+    label(TEX("\footnotesize"&decimal(k+1)),u*(Longueur+0.5,-k+0.5));
+    endfor;
+    drawoptions();
+    if Trace:
+    \useKV[Kakurasu]{Traces};
+    fi;
+  \end{mplibcode}
+ \fi
+}%

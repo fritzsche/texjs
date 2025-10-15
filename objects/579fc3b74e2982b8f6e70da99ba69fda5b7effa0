@@ -1,0 +1,32 @@
+%%%
+% PyraVoca
+%%%
+\def\filedatePyraVoca{2024/08/04}%
+\def\fileversionPyraVoca{0.1}%
+\message{-- \filedatePyraVoca\space v\fileversionPyraVoca}%
+%
+\newlength{\PfCPyraVocaHauteur}
+
+\setKVdefault[PyraVoca]{Solution=false,Largeur=15pt}
+
+\NewDocumentCommand\PyraVoca{o m}{%
+  \useKVdefault[PyraVoca]%
+  \setKV[PyraVoca]{#1}%
+  \setsepchar[*]{,*/}\ignoreemptyitems%
+  \readlist*\PfCListePyraVoca{#2}%
+  \reademptyitems%
+  \StrLen{\PfCListePyraVoca[1,2]}[\Toto]%
+  \xdef\PfCFooNombreCases{\Toto}%
+  \xintFor* ##1 in{\xintSeq{2}{\PfCListePyraVocalen}}\do{%
+    \StrLen{\PfCListePyraVoca[##1,2]}[\Toto]%
+    \xdef\PfCFooNombreCases{\PfCFooNombreCases,\Toto}%
+  }%
+  \xdef\PfCNombreMaxCases{\fpeval{max(\PfCFooNombreCases)}}%
+  \setlength{\PfCPyraVocaHauteur}{\useKV[PyraVoca]{Largeur}+\tabcolsep}%
+  \begin{NiceTabular}{l*{\PfCNombreMaxCases}{m{\useKV[PyraVoca]{Largeur}}}}%
+    \xintFor* ##1 in{\xintSeq{1}{\PfCListePyraVocalen}}\do{%
+      \StrLen{\PfCListePyraVoca[##1,2]}[\Toto]%
+      \rule{0pt}{\PfCPyraVocaHauteur}\Block[draw,v-center,fill=\xintifboolexpr{\listlen\PfCListePyraVoca[##1]==3}{\PfCListePyraVoca[##1,3]}{white}]{1-1}{\PfCListePyraVoca[##1,1]}\xintFor* ##2 in{\xintSeq{1}{\Toto}}\do{&\Block[draw,v-center,fill=\xintifboolexpr{\listlen\PfCListePyraVoca[##1]==3}{\PfCListePyraVoca[##1,3]}{white}]{}{\ifboolKV[PyraVoca]{Solution}{\StrChar{\PfCListePyraVoca[##1,2]}{##2}}{}}}\\
+    }%
+  \end{NiceTabular}%
+}%

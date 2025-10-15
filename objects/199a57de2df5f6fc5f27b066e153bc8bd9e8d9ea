@@ -1,0 +1,274 @@
+%%%
+% Mosaique
+%%%
+\def\filedateMosaique{2024/08/04}%
+\def\fileversionMosaique{0.1}%
+\message{-- \filedateMosaique\space v\fileversionMosaique}%
+%
+\setKVdefault[ClesMosaique]{Largeur=2,Hauteur=2,Solution=false,Type=1,Label,Echelle=1cm}
+
+\newcommand\DessineMosaique[2][]{%
+  \useKVdefault[ClesMosaique]%
+  \setKV[ClesMosaique]{#1}%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    u:=\useKV[ClesMosaique]{Echelle};
+    Type:=\useKV[ClesMosaique]{Type};
+    input PfCMosaique;
+    trace if Type=1:MosaiqueUn[#2] elseif Type=2: MosaiqueDeux[#2] else: MosaiqueTrois[#2] fi;
+  \end{mplibcode}%
+  \else%
+  \begin{mpost}[mpsettings={u:=\useKV[ClesMosaique]{Echelle};Type:=\useKV[ClesMosaique]{Type};}]%
+    input PfCMosaique;
+    trace if Type=1:MosaiqueUn[#2] elseif Type=2: MosaiqueDeux[#2] fi;
+  \end{mpost}%
+  \fi%
+}%
+
+\newcommand\DessineMosaiqueBin[2][]{%
+  \useKVdefault[ClesMosaique]%
+  \setKV[ClesMosaique]{#1}%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    u:=\useKV[ClesMosaique]{Echelle};
+    Type:=\useKV[ClesMosaique]{Type};
+    input PfCMosaique;
+    trace if Type=1:MosaiqueQuatre(#2) elseif Type=2: MosaiqueCinq(#2) fi;
+  \end{mplibcode}%
+  \else%
+  \begin{mpost}[mpsettings={u:=\useKV[ClesMosaique]{Echelle};Type:=\useKV[ClesMosaique]{Type};}]%
+    input PfCMosaique;
+    trace if Type=1:MosaiqueQuatre(#2) elseif Type=2: MosaiqueCinq(#2) fi;
+  \end{mpost}%
+  \fi%
+}%
+
+\newcommand\DessineMosaiqueComplet[1]{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    input PfCMosaique;
+    Largeur=\useKV[ClesMosaique]{Largeur};
+    Hauteur=\useKV[ClesMosaique]{Hauteur};
+    Type=\useKV[ClesMosaique]{Type};
+    boolean Solution,Label;
+    Solution=\useKV[ClesMosaique]{Solution};
+    Label=\useKV[ClesMosaique]{Label};
+    pair A,B,C,D;
+    A=u*(0,1);
+    B-A=u*(Largeur,0);
+    C-B=u*(0,-Hauteur);
+    D-C=A-B;
+    picture mosaique;
+    path case;
+    case=unitsquare scaled 1cm;
+    if Type=1:
+    mosaique=image(
+    trace case withcolor 0.5white;
+    trace (point(0) of case)--(point(2) of case) withcolor 0.75white;
+    trace (point(1) of case)--(point(3) of case) withcolor 0.75white;
+    trace (point(0.5) of case)--(point(2.5) of case) withcolor 0.75white;
+    trace (point(1.5) of case)--(point(3.5) of case) withcolor 0.75white;
+    );
+    else:
+    mosaique=image(
+    trace case withcolor 0.5white;
+    trace (point(0.5) of case)--(point(2.5) of case) withcolor 0.75white;
+    trace (point(1.5) of case)--(point(3.5) of case) withcolor 0.75white;
+    trace (point(0.5) of case)--(point(1.5) of case)--(point(2.5) of case)--(point(3.5) of case)--cycle withcolor 0.75white;
+    );
+    fi;
+    if Solution:
+    nbmos:=0;
+    for p_=#1:
+    trace if Type=1:MosaiqueUn[xpart(p_)] elseif Type=2: MosaiqueDeux[xpart(p_)] else: MosaiqueTrois[xpart(p_)]fi shifted(u*(nbmos mod Largeur,-(nbmos div Largeur)));
+    nbmos:=nbmos+1;
+    endfor;
+    else:
+    nbmos:=0;
+    for p_=#1:
+    trace mosaique shifted(u*(nbmos mod Largeur,-(nbmos div Largeur)));
+    if Label:
+    label(TEX("\num{"&decimal(ypart(p_))&"}"),center (mosaique  shifted(u*(nbmos mod Largeur,-(nbmos div Largeur)))));
+    fi;
+    nbmos:=nbmos+1;
+    endfor;
+    fi;
+    trace polygone(A,B,C,D);
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={Largeur=\useKV[ClesMosaique]{Largeur};Hauteur=\useKV[ClesMosaique]{Hauteur};Type=\useKV[ClesMosaique]{Type};boolean Solution,Label;Solution=\useKV[ClesMosaique]{Solution};}]
+    Label=\useKV[ClesMosaique]{Label};
+    input PfCMosaique;
+    pair A,B,C,D;
+    A=u*(0,1);
+    B-A=u*(Largeur,0);
+    C-B=u*(0,-Hauteur);
+    D-C=A-B;
+    picture mosaique;
+    path case;
+    case=unitsquare scaled 1cm;
+    if Type=1:
+    mosaique=image(
+    trace case withcolor 0.5white;
+    trace (point(0) of case)--(point(2) of case) withcolor 0.75white;
+    trace (point(1) of case)--(point(3) of case) withcolor 0.75white;
+    trace (point(0.5) of case)--(point(2.5) of case) withcolor 0.75white;
+    trace (point(1.5) of case)--(point(3.5) of case) withcolor 0.75white;
+    );
+    else:
+    mosaique=image(
+    trace case withcolor 0.5white;
+    trace (point(0.5) of case)--(point(2.5) of case) withcolor 0.75white;
+    trace (point(1.5) of case)--(point(3.5) of case) withcolor 0.75white;
+    trace (point(0.5) of case)--(point(1.5) of case)--(point(2.5) of case)--(point(3.5) of case)--cycle withcolor 0.75white;
+    );
+    fi;
+    if Solution:
+    nbmos:=0;
+    for p_=#1:
+    trace if Type=1:MosaiqueUn[xpart(p_)] else: MosaiqueDeux[xpart(p_)] fi shifted(u*(nbmos mod Largeur,-(nbmos div Largeur)));
+    nbmos:=nbmos+1;
+    endfor;
+    else:
+    nbmos:=0;
+    for p_=#1:
+    trace mosaique shifted(u*(nbmos mod Largeur,-(nbmos div Largeur)));
+    if Label:
+    label(LATEX("\num{"&decimal(ypart(p_))&"}"),center (mosaique  shifted(u*(nbmos mod Largeur,-(nbmos div Largeur)))));
+    fi;
+    nbmos:=nbmos+1;
+    endfor;
+    fi;
+    trace polygone(A,B,C,D);
+  \end{mpost}
+  \fi
+}%
+
+\newcommand\DessineMosaiqueCompletBin[1]{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+    input PfCMosaique;
+    Largeur=\useKV[ClesMosaique]{Largeur};
+    Hauteur=\useKV[ClesMosaique]{Hauteur};
+    Type=\useKV[ClesMosaique]{Type};
+    boolean Solution,Label;
+    Solution=\useKV[ClesMosaique]{Solution};
+    Label=\useKV[ClesMosaique]{Label};
+    pair A,B,C,D;
+    A=u*(0,1);
+    B-A=u*(Largeur,0);
+    C-B=u*(0,-Hauteur);
+    D-C=A-B;
+    picture mosaique;
+    path case;
+    case=unitsquare scaled 1cm;
+    if Type=1:
+    mosaique=image(
+    trace case withcolor 0.5white;
+    trace (point(0) of case)--(point(2) of case) withcolor 0.75white;
+    trace (point(1) of case)--(point(3) of case) withcolor 0.75white;
+    trace (point(0.5) of case)--(point(2.5) of case) withcolor 0.75white;
+    trace (point(1.5) of case)--(point(3.5) of case) withcolor 0.75white;
+    );
+    else:
+    mosaique=image(
+    trace case withcolor 0.5white;
+    trace (point(0.5) of case)--(point(2.5) of case) withcolor 0.75white;
+    trace (point(1.5) of case)--(point(3.5) of case) withcolor 0.75white;
+    trace (point(0.5) of case)--(point(1.5) of case)--(point(2.5) of case)--(point(3.5) of case)--cycle withcolor 0.75white;
+    );
+    fi;
+    if Solution:
+    nbmos:=0;
+    for p_=#1:
+    if string p_:
+    trace if Type=1:MosaiqueQuatre(p_) elseif Type=2: MosaiqueCinq(p_) fi shifted(u*(nbmos mod Largeur,-(nbmos div Largeur)));
+    nbmos:=nbmos+1;
+    fi;
+    endfor;
+    else:
+    nbmos:=0;
+    for p_=#1:
+    if string p_:
+    trace mosaique shifted(u*(nbmos mod Largeur,-(nbmos div Largeur)));
+    nbmos:=nbmos+1;
+    else:
+    if Label:
+    label(TEX("\num{"&decimal(p_)&"}"),center (mosaique  shifted(u*((nbmos-1) mod Largeur,-((nbmos-1) div Largeur)))));
+    fi;
+    fi;
+    endfor;
+    fi;
+    trace polygone(A,B,C,D);
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={Largeur=\useKV[ClesMosaique]{Largeur};Hauteur=\useKV[ClesMosaique]{Hauteur};Type=\useKV[ClesMosaique]{Type};boolean Solution,Label;Solution=\useKV[ClesMosaique]{Solution};}]
+    Label=\useKV[ClesMosaique]{Label};
+    input PfCMosaique;
+    pair A,B,C,D;
+    A=u*(0,1);
+    B-A=u*(Largeur,0);
+    C-B=u*(0,-Hauteur);
+    D-C=A-B;
+    picture mosaique;
+    path case;
+    case=unitsquare scaled 1cm;
+    if Type=1:
+    mosaique=image(
+    trace case withcolor 0.5white;
+    trace (point(0) of case)--(point(2) of case) withcolor 0.75white;
+    trace (point(1) of case)--(point(3) of case) withcolor 0.75white;
+    trace (point(0.5) of case)--(point(2.5) of case) withcolor 0.75white;
+    trace (point(1.5) of case)--(point(3.5) of case) withcolor 0.75white;
+    );
+    else:
+    mosaique=image(
+    trace case withcolor 0.5white;
+    trace (point(0.5) of case)--(point(2.5) of case) withcolor 0.75white;
+    trace (point(1.5) of case)--(point(3.5) of case) withcolor 0.75white;
+    trace (point(0.5) of case)--(point(1.5) of case)--(point(2.5) of case)--(point(3.5) of case)--cycle withcolor 0.75white;
+    );
+    fi;
+    if Solution:
+    nbmos:=0;
+    for p_=#1:
+    trace if Type=1:MosaiqueUn[xpart(p_)] else: MosaiqueDeux[xpart(p_)] fi shifted(u*(nbmos mod Largeur,-(nbmos div Largeur)));
+    nbmos:=nbmos+1;
+    endfor;
+    else:
+    nbmos:=0;
+    for p_=#1:
+    trace mosaique shifted(u*(nbmos mod Largeur,-(nbmos div Largeur)));
+    if Label:
+    label(LATEX("\num{"&decimal(ypart(p_))&"}"),center (mosaique  shifted(u*(nbmos mod Largeur,-(nbmos div Largeur)))));
+    fi;
+    nbmos:=nbmos+1;
+    endfor;
+    fi;
+    trace polygone(A,B,C,D);
+  \end{mpost}
+  \fi
+}%
+    
+\newtoks\toklistecaseM%
+\def\UpdatetoksMosaique#1/#2\nil{\addtotok\toklistecaseM{(#1,#2),}}%
+\def\UpdatetoksMosaiqueBin#1/#2\nil{\addtotok\toklistecaseM{"#1",#2,}}%
+
+\NewDocumentCommand\Mosaique{som}{%
+  \useKVdefault[ClesMosaique]%
+  \setKV[ClesMosaique]{#2}%
+  \setsepchar[*]{,*/}%
+  \readlist*\ListeMosaique{#3}%
+  \toklistecaseM{}%
+  \IfBooleanTF{#1}{%
+    \foreachitem\compteur\in\ListeMosaique{\expandafter\UpdatetoksMosaiqueBin\compteur\nil}%
+    \DessineMosaiqueCompletBin{\the\toklistecaseM}%
+  }{%
+    \foreachitem\compteur\in\ListeMosaique{\expandafter\UpdatetoksMosaique\compteur\nil}%
+    \DessineMosaiqueComplet{\the\toklistecaseM}%
+  }%
+}%

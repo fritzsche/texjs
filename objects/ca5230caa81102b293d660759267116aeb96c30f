@@ -1,0 +1,244 @@
+%%%
+% Le compte est bon
+%%%
+\def\filedateCompteBon{2025/05/27}%
+\def\fileversionCompteBon{0.1a}%
+\message{-- \filedateCompteBon\space v\fileversionCompteBon}%
+%
+\setKVdefault[CompteBon]{NombreCalculs=5,NombrePlaques=4,Solution=false,Relatifs=false,Original=false,Graines=false,Plaques=6,CDot=false,Graine={}}
+\defKV[CompteBon]{Graine=\ifempty{#1}{}{\setKV[CompteBon]{Graines}}}%
+
+\makeatletter
+
+\newcommand\PfC@CreerListeCalculs[4]{%
+  \xdef\PfC@ListeCalculs{%
+    #1+#2+#3+#4,%
+    #1+#2+#3*#4/#1+#3*#4+#2/#3*#4+#1+#2,%
+    #1+#3+#2*#4/#1+#2*#4+#3/#2*#4+#1+#3,%
+    #1+#4+#2*#3/#1+#2*#3+#4/#2*#3+#1+#4,%
+    #2+#3+#1*#4/#2+#1*#4+#3/#1*#4+#2+#3,%
+    #2+#4+#1*#3/#2+#1*#3+#4/#2+#4+#1*#3,%
+    #3+#4+#1*#2/#3+#1*#2+#4/#3+#4+#1*#2,%
+    #1*#2+#3*#4/#3*#4+#1*#2,%
+    #1*#3+#2*#4/#2*#4+#1*#3,%
+    #1*#4+#2*#3/#2*#3+#1*#4,%
+    #1*#2*#3+#4/#4+#1*#2*#3,
+    #1*#2*#4+#3/#3+#1*#2*#4,%
+    #1*#3*#4+#2/#2+#1*#3*#4,%
+    #2*#3*#4+#1/#1+#2*#3*#4,%
+    #1*#2*#3*#4,%
+    #1+(#2+#3)*#4/(#2+#3)*#4+#1/#1+#4*(#2+#3)/#4*(#2+#3)+#1,%
+    #1+(#2+#4)*#3/(#2+#4)*#3+#1/#1+#3*(#2+#4)/#3*(#2+#4)+#1,%
+    #1+(#3+#4)*#2/(#3+#4)*#2+#1/#1+#2*(#3+#4)/#2*(#3+#4)+#1,%
+    #2+(#1+#3)*#4,%
+    #2+(#1+#4)*#3,%
+    #2+(#3+#4)*#1,%
+    #3+(#1+#2)*#4,%
+    #3+(#1+#4)*#2,%
+    #3+(#2+#4)*#1,%
+    #4+(#1+#2)*#3,%
+    #4+(#1+#3)*#2,%
+    #4+(#2+#3)*#1,%
+    (#1+#2+#3)*#4,%
+    (#1+#2+#4)*#3,%
+    (#1+#3+#4)*#2,%
+    (#2+#3+#4)*#1,%
+    (#1+#2)*(#3+#4),%
+    (#1+#3)*(#2+#4),%
+    (#1+#4)*(#2+#3)%
+  }%
+  \ifboolKV[CompteBon]{Relatifs}{%
+    \xdef\PfC@ListeCalculs{%
+      \PfC@ListeCalculs,%
+      #1-#2-#3-#4,%
+      #1-#2-#3*#4/#1-#3*#4-#2/#3*#4-#1-#2,%
+      #1-#3-#2*#4/#1-#2*#4-#3/#2*#4-#1-#3,%
+      #1-#4-#2*#3/#1-#2*#3-#4/#2*#3-#1-#4,%
+      #2-#3-#1*#4/#2-#1*#4-#3/#1*#4-#2-#3,%
+      #2-#4-#1*#3/#2-#1*#3-#4/#2-#4-#1*#3,%
+      #3-#4-#1*#2/#3-#1*#2-#4/#3-#4-#1*#2,%
+      #1*#2-#3*#4/#3*#4-#1*#2,%
+      #1*#3-#2*#4/#2*#4-#1*#3,%
+      #1*#4-#2*#3/#2*#3-#1*#4,%
+      #1*#2*#3-#4/#4-#1*#2*#3,
+      #1*#2*#4-#3/#3-#1*#2*#4,%
+      #1*#3*#4-#2/#2-#1*#3*#4,%
+      #2*#3*#4-#1/#1-#2*#3*#4,%
+      #1*#2*#3*#4,%
+      #1-(#2-#3)*#4/(#2-#3)*#4-#1/#1-#4*(#2-#3)/#4*(#2-#3)-#1,%
+      #1-(#2-#4)*#3/(#2-#4)*#3-#1/#1-#3*(#2-#4)/#3*(#2-#4)-#1,%
+      #1-(#3-#4)*#2/(#3-#4)*#2-#1/#1-#2*(#3-#4)/#2*(#3-#4)-#1,%
+      #2-(#1-#3)*#4,%
+      #2-(#1-#4)*#3,%
+      #2-(#3-#4)*#1,%
+      #3-(#1-#2)*#4,%
+      #3-(#1-#4)*#2,%
+      #3-(#2-#4)*#1,%
+      #4-(#1-#2)*#3,%
+      #4-(#1-#3)*#2,%
+      #4-(#2-#3)*#1,%
+      (#1-#2-#3)*#4,%
+      (#1-#2-#4)*#3,%
+      (#1-#3-#4)*#2,%
+      (#2-#3-#4)*#1,%
+      (#1-#2)*(#3-#4),%
+      (#1-#3)*(#2-#4),%
+      (#1-#4)*(#2-#3)%
+    }%
+  }{}%
+}%
+
+\newtoks\tokPfCCBRappels
+\def\UpdatetoksCB#1\nil{\addtotok\tokPfCCBRappels{#1,}}%
+
+\NewDocumentCommand\PfCCompteBonOriginal{o}{%
+  \useKVdefault[CompteBon]
+  \setKV[CompteBon]{#1}%
+  %On définit la liste des cartes
+  \xdef\PfCCBListeCartes{1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,25,50,75,100}%
+  \MelangeListe{\PfCCBListeCartes}{\useKV[CompteBon]{Plaques}}
+  \readlist*\PfCCBListeTirage{\faa}
+  \MelangeListe{\faa}{\useKV[CompteBon]{Plaques}}
+  \readlist*\PfCCBListeTirageAffiche{\faa}
+  %%Tirage ok
+  \xdef\PfCCBResultatFinal{1001}%
+  \whiledo{\PfCCBResultatFinal>1000}{%
+    \xdef\PfCListeATrier{\PfCCBListeTirage[1]}%
+    \xintFor* ##1 in{\xintSeq{2}{\useKV[CompteBon]{Plaques}}}\do{%
+      \xdef\PfCListeATrier{\PfCListeATrier,\PfCCBListeTirage[##1]}%
+    }%
+    % 
+    \tokPfCCBRappels{}%
+    \xintFor* ##1 in{\xintSeq{1}{\fpeval{\useKV[CompteBon]{Plaques}-1}}}\do{%
+      \MelangeListe{\PfCListeATrier}{2}
+      \readlist*\PfCCBListeTirageIntermediaire{\faa}
+      \xintifboolexpr{\PfCCBListeTirageIntermediaire[1]==1 || \PfCCBListeTirageIntermediaire[2]==1}{%
+        % On ne fait pas de multiplication par 1
+        \xdef\PfCCBAlea{\fpeval{randint(1,2)}}%
+        \xintifboolexpr{\PfCCBAlea==1}{%
+          \xdef\PfCCBTest{\PfCCBListeTirageIntermediaire[1]+\PfCCBListeTirageIntermediaire[2]=\fpeval{\PfCCBListeTirageIntermediaire[1]+\PfCCBListeTirageIntermediaire[2]}}%
+          \expandafter\UpdatetoksCB\PfCCBTest\nil%
+          \xdef\PfCCBResultat{\fpeval{\PfCCBListeTirageIntermediaire[1]+\PfCCBListeTirageIntermediaire[2]}}
+          \xintifboolexpr{\PfCCBResultat>10000}{\xintBreakFor\xdef\PfCCBResultat{10000}}{}%
+        }{%
+          \xintifboolexpr{\PfCCBListeTirageIntermediaire[1]==\PfCCBListeTirageIntermediaire[2]}{%
+            \xdef\PfCCBTest{\PfCCBListeTirageIntermediaire[1]+\PfCCBListeTirageIntermediaire[2]=\fpeval{\PfCCBListeTirageIntermediaire[1]+\PfCCBListeTirageIntermediaire[2]}}%
+            \expandafter\UpdatetoksCB\PfCCBTest\nil%
+            \xdef\PfCCBResultat{\fpeval{\PfCCBListeTirageIntermediaire[1]+\PfCCBListeTirageIntermediaire[2]}}
+          }{%
+            \xdef\PfCCBTest{\fpeval{max(\PfCCBListeTirageIntermediaire[1],\PfCCBListeTirageIntermediaire[2])}-\fpeval{min(\PfCCBListeTirageIntermediaire[1],\PfCCBListeTirageIntermediaire[2])}=\fpeval{max(\PfCCBListeTirageIntermediaire[1],\PfCCBListeTirageIntermediaire[2])-min(\PfCCBListeTirageIntermediaire[1],\PfCCBListeTirageIntermediaire[2])}}
+            \expandafter\UpdatetoksCB\PfCCBTest\nil%
+            \xdef\PfCCBResultat{\fpeval{abs(\PfCCBListeTirageIntermediaire[1]-\PfCCBListeTirageIntermediaire[2])}}
+          }%
+          \xintifboolexpr{\PfCCBResultat>10000}{\xintBreakFor\xdef\PfCCBResultat{10000}}{}%
+        }%
+        \xdef\PfCListeATrier{\fii,\PfCCBResultat}%
+      }{%
+        \xdef\PfCCBAlea{\fpeval{randint(1,3)}}%
+        \xintifboolexpr{\PfCCBAlea==1}{%
+          \xdef\PfCCBTest{\PfCCBListeTirageIntermediaire[1]+\PfCCBListeTirageIntermediaire[2]=\fpeval{\PfCCBListeTirageIntermediaire[1]+\PfCCBListeTirageIntermediaire[2]}}%
+          \expandafter\UpdatetoksCB\PfCCBTest\nil%
+          \xdef\PfCCBResultat{\fpeval{\PfCCBListeTirageIntermediaire[1]+\PfCCBListeTirageIntermediaire[2]}}
+          \xintifboolexpr{\PfCCBResultat>10000}{\xintBreakFor\xdef\PfCCBResultat{10000}}{}%
+        }{%
+          \xintifboolexpr{\PfCCBAlea==2}{%
+            \xintifboolexpr{\PfCCBListeTirageIntermediaire[1]==\PfCCBListeTirageIntermediaire[2]}{%
+              \xdef\PfCCBTest{\PfCCBListeTirageIntermediaire[1]+\PfCCBListeTirageIntermediaire[2]=\fpeval{\PfCCBListeTirageIntermediaire[1]+\PfCCBListeTirageIntermediaire[2]}}%
+              \expandafter\UpdatetoksCB\PfCCBTest\nil%
+              \xdef\PfCCBResultat{\fpeval{\PfCCBListeTirageIntermediaire[1]+\PfCCBListeTirageIntermediaire[2]}}
+            }{%
+              \xdef\PfCCBTest{\fpeval{max(\PfCCBListeTirageIntermediaire[1],\PfCCBListeTirageIntermediaire[2])}-\fpeval{min(\PfCCBListeTirageIntermediaire[1],\PfCCBListeTirageIntermediaire[2])}=\fpeval{max(\PfCCBListeTirageIntermediaire[1],\PfCCBListeTirageIntermediaire[2])-min(\PfCCBListeTirageIntermediaire[1],\PfCCBListeTirageIntermediaire[2])}}
+              \expandafter\UpdatetoksCB\PfCCBTest\nil%
+              \xdef\PfCCBResultat{\fpeval{abs(\PfCCBListeTirageIntermediaire[1]-\PfCCBListeTirageIntermediaire[2])}}
+            }%
+            \xintifboolexpr{\PfCCBResultat>10000}{\xintBreakFor\xdef\PfCCBResultat{10000}}{}%
+          }{%
+            \xdef\PfCCBTest{\PfCCBListeTirageIntermediaire[1]*\PfCCBListeTirageIntermediaire[2]=\fpeval{\PfCCBListeTirageIntermediaire[1]*\PfCCBListeTirageIntermediaire[2]}}
+            \expandafter\UpdatetoksCB\PfCCBTest\nil%
+            \xdef\PfCCBResultat{\fpeval{\PfCCBListeTirageIntermediaire[1]*\PfCCBListeTirageIntermediaire[2]}}
+            \xintifboolexpr{\PfCCBResultat>10000}{\xintBreakFor\xdef\PfCCBResultat{10000}}{}%
+          }
+        }%
+        \xdef\PfCListeATrier{\fii,\PfCCBResultat}%
+      }%
+    }%
+    \xintifboolexpr{\useKV[CompteBon]{Plaques}>5}{\xintifboolexpr{\PfCCBResultat<100}{\xdef\PfCCBResultat{1001}}{}}{}%
+    \xdef\PfCCBResultatFinal{\PfCCBResultat}%
+  }%
+  \begin{center}
+    \textbf{\PfCCBResultatFinal}
+    
+    \fbox{\PfCCBListeTirage[1]} \xintFor* ##1 in{\xintSeq{2}{\useKV[CompteBon]{Plaques}}}\do{\qquad \fbox{\PfCCBListeTirage[##1]}}%
+  \end{center}
+  \xdef\PfCCBListeRappels{\the\tokPfCCBRappels}%
+  \setsepchar[*]{,*=}\ignoreemptyitems%
+  \readlist*\PfCCBDecompositionEtapes{\PfCCBListeRappels}%
+  \reademptyitems%
+  \ifboolKV[CompteBon]{Solution}{%
+    \begin{align*}
+      \xintFor* ##1 in{\xintSeq{1}{\fpeval{\useKV[CompteBon]{Plaques}-1}}}\do{
+      \StrSubstitute{\PfCCBDecompositionEtapes[##1,1]}{*}{\PfCSymbolTimes}[\PfCCBAffiche]\PfCCBAffiche&=\PfCCBDecompositionEtapes[##1,2]\xintifForLast{\\}{}
+      }%
+    \end{align*}
+  }{}%
+}%
+
+\NewDocumentCommand\CompteBon{o}{%
+  \useKVdefault[CompteBon]%
+  \setKV[CompteBon]{#1}%
+  \ifboolKV[CompteBon]{Graines}{\PfCGraineAlea{\useKV[CompteBon]{Graine}}}{}%
+  \ifboolKV[CompteBon]{Original}{%
+    \PfCCompteBonOriginal[#1]%
+  }{%
+    % on choisit NombrePlaques parmi la liste des nombres 1 à 9, 10/25/50/75/100, La moitié +1 devant appartenir à 1..9
+    \xdef\PfCCBListeEntiers{2,3,4,5,6,7,8,9}%
+    \xdef\PfCCBListeMultiples{10,25,50,75,100}%
+    \xdef\PfCCBNbPlaqueEntiers{\fpeval{floor(\useKV[CompteBon]{NombrePlaques}/2)+1}}%
+    \xdef\PfCCBNbPlaqueMultiples{\useKV[CompteBon]{NombrePlaques}-\PfCCBNbPlaqueEntiers}%
+    \MelangeListe{\PfCCBListeEntiers}{\PfCCBNbPlaqueEntiers}%
+    \setsepchar{,}%
+    \ignoreemptyitems%
+    \readlist*\PfCCBListeEntiersChoisis{\faa}%
+    \MelangeListe{\PfCCBListeMultiples}{\PfCCBNbPlaqueMultiples}%
+    \ignoreemptyitems%
+    \readlist*\PfCCBListeMultiplesChoisis{\faa}%
+    \reademptyitems%
+    \xdef\PfCCBListeToutesCartes{}%
+    \foreachitem\compteur\in\PfCCBListeEntiersChoisis{%
+      \xdef\PfCCBListeToutesCartes{\PfCCBListeToutesCartes{},\PfCCBListeEntiersChoisis[\compteurcnt]}%
+    }%
+    \foreachitem\compteur\in\PfCCBListeMultiplesChoisis{%
+      \xdef\PfCCBListeToutesCartes{\PfCCBListeToutesCartes{},\PfCCBListeMultiplesChoisis[\compteurcnt]}%
+    }%
+    \MelangeListe{\PfCCBListeToutesCartes}{4}%
+    \readlist*\PfCCBListeFinaleCartes{\faa}%
+    % Choix des calculs
+    \xdef\PfC@CalculUn{\PfCCBListeFinaleCartes[1]}%
+    \xdef\PfC@CalculDeux{\PfCCBListeFinaleCartes[2]}%
+    \xdef\PfC@CalculTrois{\PfCCBListeFinaleCartes[3]}%
+    \xdef\PfC@CalculQuatre{\PfCCBListeFinaleCartes[4]}%
+    \PfC@CreerListeCalculs{\PfC@CalculUn}{\PfC@CalculDeux}{\PfC@CalculTrois}{\PfC@CalculQuatre}
+    \MelangeListe{\PfC@ListeCalculs}{\useKV[CompteBon]{NombreCalculs}}%
+    \setsepchar[*]{,*/}%
+    \readlist*\PfC@ListeCalculsChoisis{\faa}%
+    \begin{center}
+      \setlength{\tabcolsep}{0.5\tabcolsep}
+      % Le tableau des nombres
+      \begin{NiceTabular}{m{20pt}m{10pt}m{20pt}m{10pt}m{20pt}m{10pt}m{20pt}}
+        \Block[draw]{}{\PfCCBListeFinaleCartes[1]}&&\Block[draw]{}{\PfCCBListeFinaleCartes[2]}&&\Block[draw]{}{\PfCCBListeFinaleCartes[3]}&&\Block[draw]{}{\PfCCBListeFinaleCartes[4]}
+      \end{NiceTabular}
+      
+      \bigskip
+      
+      % Le tableau des calculs%
+      \begin{NiceTabular}{m{30pt}cccm{20pt}m{10pt}m{20pt}m{10pt}m{20pt}m{10pt}m{20pt}}
+        \xintFor* ##1 in{\xintSeq{1}{\useKV[CompteBon]{NombreCalculs}}}\do{%
+          \Block[draw]{}{\num{\fpeval{\PfC@ListeCalculsChoisis[##1,1]}}}&&$=$&&\Block[draw]{}{~}&\Block{}{~}&\Block[draw]{}{~}&\Block{}{~}&\Block[draw]{}{~}&\Block{}{~}&\Block[draw]{}{~}\\
+          \ifboolKV[CompteBon]{Solution}{\Block{1-11}{\footnotesize Une solution : \StrSubstitute[0]{\PfC@ListeCalculsChoisis[##1,1]}{*}{\PfCSymbolTimes}[\PfCEcritureCalcul]$\PfCEcritureCalcul$}}{}\\
+        }%
+      \end{NiceTabular}
+    \end{center}
+  }%
+}%
+
+\makeatother

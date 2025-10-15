@@ -1,0 +1,277 @@
+%%%
+% Billard
+%%%
+\def\filedateBillard{2024/08/28}%
+\def\fileversionBillard{0.1a}%
+\message{-- \filedateBillard\space v\fileversionBillard}%
+%
+\newtoks\tokPfCMotBillard{}%
+
+\def\UpdateTokBillard#1\nil{\addtotok\tokPfCMotBillard{"#1"}}%
+
+\setKVdefault[ClesBillard]{Longueur=8cm,Largeur=5cm,Solution=false,Angle=70,Depart=0.5,Vrai=false,Nom=JeuA,Creation=false}
+
+\NewDocumentCommand\Billard{o m}{%
+  \useKVdefault[ClesBillard]%
+  \setKV[ClesBillard]{#1}%
+  \tokPfCMotBillard{}%
+  \ifboolKV[ClesBillard]{Creation}{%
+    \expandafter\UpdateTokBillard#2\nil%
+  }{\tokPfCMotBillard{#2}}%
+  \ifboolKV[ClesBillard]{Solution}{%
+    \MPBillardSolution{\the\tokPfCMotBillard}{\useKV[ClesBillard]{Depart}}{\useKV[ClesBillard]{Angle}}%
+  }{%
+    \MPBillard{\the\tokPfCMotBillard}{\useKV[ClesBillard]{Depart}}{\useKV[ClesBillard]{Angle}}%
+  }%
+}%
+
+\def\MPBillard#1#2#3{%
+  \xdef\PfCNomBillard{\useKV[ClesBillard]{Nom}}
+  \mplibforcehmode
+  \begin{mplibcode}[\PfCNomBillard]
+    _tfig:=20cm;
+    boolean Vrai;
+    Vrai:=\useKV[ClesBillard]{Vrai};
+    % On définit la liste des 25 lettres alphabétiques dans laquelle on choisit autant de lettres que la longueur du mot
+    % On a retiré la lettre Q pour des questions d'alignements esthétiques.
+    vardef ChoixLettre=
+    save Lettre,choixalea;
+    string Lettre;
+    choixalea=floor(uniformdeviate(26)+1);
+    if choixalea=1:
+    Lettre="A";
+    elseif choixalea=2:
+    Lettre="B";
+    elseif choixalea=3:
+    Lettre="C";
+    elseif choixalea=4:
+    Lettre="D";
+    elseif choixalea=5:
+    Lettre="E";
+    elseif choixalea=6:
+    Lettre="F";
+    elseif choixalea=7:
+    Lettre="G";
+    elseif choixalea=8:
+    Lettre="H";
+    elseif choixalea=9:
+    Lettre="I";
+    elseif choixalea=10:
+    Lettre="J";
+    elseif choixalea=11:
+    Lettre="K";
+    elseif choixalea=12:
+    Lettre="L";
+    elseif choixalea=13:
+    Lettre="M";
+    elseif choixalea=14:
+    Lettre="N";
+    elseif choixalea=15:
+    Lettre="O";
+    elseif choixalea=16:
+    Lettre="P";
+    elseif choixalea=17:
+    Lettre="O";
+    elseif choixalea=18:
+    Lettre="R";
+    elseif choixalea=19:
+    Lettre="S";
+    elseif choixalea=20:
+    Lettre="T";
+    elseif choixalea=21:
+    Lettre="U";
+    elseif choixalea=22:
+    Lettre="V";
+    elseif choixalea=23:
+    Lettre="W";
+    elseif choixalea=24:
+    Lettre="X";
+    elseif choixalea=25:
+    Lettre="Y";
+    elseif choixalea=26:
+    Lettre="Z";
+    fi;
+    Lettre
+    enddef;
+    % On crée un Quick Sort
+    def QS(expr ndeb,nfin)=
+    begingroup
+    save v,m,x;
+    if ndeb<nfin:
+      v:=l[cpt[ndeb]];
+      m:=ndeb;
+      for i=(ndeb+1) upto nfin:
+	if l[cpt[i]]<v:
+	  m:=m+1;
+	  x:=cpt[m];cpt[m]:=cpt[i];cpt[i]:=x;
+	fi
+      endfor;
+      x:=cpt[m];cpt[m]:=cpt[ndeb];cpt[ndeb]:=x;
+      QS(ndeb,m-1);
+      QS(m+1,nfin);
+    fi
+    endgroup
+    enddef;
+    % On définit le rectangle
+    pair M[],Co,Intermed;
+    M1=u*(1,2);
+    M2-M1=(\useKV[ClesBillard]{Longueur},0);
+    M3-M2=(0,\useKV[ClesBillard]{Largeur});
+    M4-M3=M1-M2;
+    Co=iso(M1,M3);
+    path rec,cote[];
+    rec=polygone(M1,M2,M3,M4);
+    cote1=segment(M1,M2);
+    cote2=segment(M2,M3);
+    cote3=segment(M3,M4);
+    cote4=segment(M4,M1);
+    trace rec;
+    pair Pt[],FauxPt[];
+    numeric nbfaux,l[],angleref,angledepart,tourne;
+    nbfaux=0;
+    l1=#2;
+    Pt[1]=point(l1) of rec;
+    angleref=#3;
+    if l1>3:
+    angledepart=90+angleref;
+    Pt[2]=demidroite(Pt[1],rotation(M1,Pt1,angledepart)) intersectionpoint (subpath(0,3) of rec);
+    dotlabel.lft(TEX(substring(0,1) of #1),Pt[1]);
+    elseif l1>2:
+    angledepart=180+angleref;
+    Pt[2]=demidroite(Pt[1],rotation(M3,Pt1,angledepart)) intersectionpoint ((subpath(3,4) of rec)--(subpath(0,2) of rec));
+    dotlabel.top(TEX(substring(0,1) of #1),Pt[1]);
+    elseif l1>1:
+    angledepart=angleref-90;
+    Pt[2]=demidroite(Pt[1],rotation(M2,Pt1,angledepart)) intersectionpoint ((subpath(2,4) of rec)--(subpath(0,1) of rec));
+    dotlabel.rt(TEX(substring(0,1) of #1),Pt[1]);
+    else:
+    angledepart=angleref;
+    Pt[2]=demidroite(Pt[1],rotation(M2,Pt1,angledepart)) intersectionpoint (subpath(1,4) of rec);
+    dotlabel.bot(TEX(substring(0,1) of #1),Pt[1]);
+    fi;
+    drawarrow Pt[1]--(Pt[1]+1.5cm*unitvector(Pt[2]-Pt[1])) withpen pencircle scaled 1.25;
+    tourne=90;
+    numeric Blong;
+    BLong:=length #1;
+    %% Détermination des points.
+    if Vrai:
+    for k=3 upto BLong:
+    Intermed:=symetrie(Pt[k-2],Pt[k-1],Pt[k-1]+M2-M3);
+    if (demidroite(1/1000[Pt[k-1],Intermed],Intermed) intersectiontimes rec)<>(-1,-1):
+    Pt[k]:=demidroite(1/1000[Pt[k-1],Intermed],Intermed) intersectionpoint rec;
+    else:
+    Intermed:=symetrie(Pt[k-2],Pt[k-1],Pt[k-1]+M1-M2);
+    Pt[k]:=demidroite(1/1000[Pt[k-1],Intermed],Intermed) intersectionpoint rec;
+    fi;
+    endfor;
+    else:
+    for k=3 upto BLong:
+    Intermed:=rotation(Pt[k-2],Pt[k-1],tourne);
+    if (demidroite(1/1000[Pt[k-1],Intermed],Intermed) intersectiontimes rec)<>(-1,-1):
+    Pt[k]:=demidroite(1/1000[Pt[k-1],Intermed],Intermed) intersectionpoint rec;
+    else:
+    Intermed:=rotation(Pt[k-2],Pt[k-1],-tourne);
+    Pt[k]:=demidroite(1/1000[Pt[k-1],Intermed],Intermed) intersectionpoint rec;
+    fi;
+    endfor;
+    fi;
+    %% Ajout des faux points
+    path SPath[];
+    cpt[1]:=1;
+    cpt[BLong+1]:=BLong+1;
+    l[BLong+1]:=4;
+    for k=2 upto BLong:
+    SPath[k]=rec cutafter demidroite(Co,Pt[k]);
+    l[k]=arclength SPath[k];
+    l[k]:=arctime l[k] of rec;
+    cpt[k]:=k;
+    endfor;
+    QS(1,BLong+1);
+    for k=2 upto BLong+1:
+    if l[cpt[k]]-l[cpt[k-1]]>0.3:
+    nbfaux:=nbfaux+1;
+    FauxPt[nbfaux]=point(l[cpt[k-1]]+0.1) of rec;
+    nbfaux:=nbfaux+1;
+    FauxPt[nbfaux]=point(l[cpt[k]]-0.1) of rec;
+    fi;
+    endfor;
+    drawoptions();
+    % Tracés
+    drawarrow Pt[1]--(Pt[1]+1.5cm*unitvector(Pt[2]-Pt[1])) withpen pencircle scaled 1.25;
+    %% Labelisation
+    for k=2 upto BLong:
+    if (demidroite(1/1000[Pt[k-1],Pt[k]],Pt[k]) intersectiontimes cote[1])<>(-1,-1):
+    dotlabel.bot(TEX(substring(k-1,k) of #1),Pt[k]);
+    elseif (demidroite(1/1000[Pt[k-1],Pt[k]],Pt[k]) intersectiontimes cote[2])<>(-1,-1):
+    dotlabel.rt(TEX(substring(k-1,k) of #1),Pt[k]);
+    elseif (demidroite(1/1000[Pt[k-1],Pt[k]],Pt[k]) intersectiontimes cote[3])<>(-1,-1):
+    dotlabel.top(TEX(substring(k-1,k) of #1),Pt[k]);
+    elseif (demidroite(1/1000[Pt[k-1],Pt[k]],Pt[k]) intersectiontimes cote[4])<>(-1,-1):
+    dotlabel.lft(TEX(substring(k-1,k) of #1),Pt[k]);
+    fi;
+    endfor;
+    for k=1 upto nbfaux:
+    if (demidroite(Co,FauxPt[k]) intersectiontimes cote[1])<>(-1,-1):
+    dotlabel.bot(TEX(ChoixLettre),FauxPt[k]);
+    elseif (demidroite(Co,FauxPt[k]) intersectiontimes cote[2])<>(-1,-1):
+    dotlabel.rt(TEX(ChoixLettre),FauxPt[k]);
+    elseif (demidroite(Co,FauxPt[k]) intersectiontimes cote[3])<>(-1,-1):
+    dotlabel.top(TEX(ChoixLettre),FauxPt[k]);
+    elseif (demidroite(Co,FauxPt[k]) intersectiontimes cote[4])<>(-1,-1):
+    dotlabel.lft(TEX(ChoixLettre),FauxPt[k]);
+    fi;
+    endfor;
+    picture Reponse;
+    Reponse=image(
+    trace segment((0,0),(7*BLong*mm-2mm,0)) dashed dashpattern(on5mm off2mm);
+    );
+    trace Reponse shifted((xpart(Co),5mm)-center Reponse);
+    clip currentpicture to polygone((0,0),(\useKV[ClesBillard]{Longueur}+2cm,0),(\useKV[ClesBillard]{Longueur}+2cm,\useKV[ClesBillard]{Largeur}+3cm),(0,\useKV[ClesBillard]{Largeur}+3cm));
+  \end{mplibcode}%
+}%
+
+\def\MPBillardSolution#1#2#3{%
+  \mplibforcehmode
+  \xdef\PfCNomBillard{\useKV[ClesBillard]{Nom}}
+  \begin{mplibcode}[\PfCNomBillard]
+    trace rec;
+    % Tracés
+    drawarrow Pt[1]--(Pt[1]+1.5cm*unitvector(Pt[2]-Pt[1])) withpen pencircle scaled 1.25;
+    for k=1 upto BLong-1:
+    trace segment(Pt[k],Pt[k+1]);
+    endfor;
+    if Vrai=false:
+    for k=2 upto BLong-1:
+    trace codeperp(Pt[k-1],Pt[k],Pt[k+1],5);
+    endfor;
+    fi;
+    % Labelisation
+    if l1>3:
+    dotlabel.lft(TEX(substring(0,1) of #1),Pt[1]);
+    elseif l1>2:
+    dotlabel.top(TEX(substring(0,1) of #1),Pt[1]);
+    elseif l1>1:
+    dotlabel.rt(TEX(substring(0,1) of #1),Pt[1]);
+    else:
+    dotlabel.bot(TEX(substring(0,1) of #1),Pt[1]);
+    fi;
+    path segmenttest;
+    for k=2 upto BLong:
+    segmenttest:=(9/10)[Pt[k-1],Pt[k]]--(11/10)[Pt[k-1],Pt[k]];
+    if segmenttest intersectiontimes cote[1]<>(-1,-1):
+    dotlabel.bot(TEX(substring(k-1,k) of #1),Pt[k]);
+    elseif segmenttest intersectiontimes cote[2]<>(-1,-1):
+    dotlabel.rt(TEX(substring(k-1,k) of #1),Pt[k]);
+    elseif segmenttest intersectiontimes cote[3]<>(-1,-1):
+    dotlabel.top(TEX(substring(k-1,k) of #1),Pt[k]);
+    elseif segmenttest intersectiontimes cote[4]<>(-1,-1):
+    dotlabel.lft(TEX(substring(k-1,k) of #1),Pt[k]);
+    fi;
+    endfor;
+    trace Reponse shifted((xpart(Co),5mm)-center Reponse);
+    % On affiche les lettres de la réponse.
+    for k=1 upto BLong:
+    label.top(TEX(substring(k-1,k) of #1),((xpart(Co),5mm)-center Reponse)+(k-1)*(7mm,0)+(2.5mm,0));
+    endfor;
+  \end{mplibcode}%
+}%

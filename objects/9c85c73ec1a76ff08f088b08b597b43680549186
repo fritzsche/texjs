@@ -1,0 +1,237 @@
+%%%
+% Frise temporelle
+%%%
+\def\filedateFrise{2024/08/04}%
+\def\fileversionFrise{0.1}%
+\message{-- \filedateFrise\space v\fileversionFrise}%
+%
+\setKVdefault[ClesFrise]{Longueur=8cm,Fleches=false,Ecart=5mm,Sup=false}%
+
+\newtoks\toklistefrise%
+\def\UpdatetoksFrise#1/#2/#3\nil{\addtotok\toklistefrise{"#1","#2","#3",}}%
+
+\newcommand\Frise[2][]{%
+  \useKVdefault[ClesFrise]%
+  \setKV[ClesFrise]{#1}%
+  \setsepchar[*]{,*/}\ignoreemptyitems%
+  \readlist*\ListeTempo{#2}%
+  \toklistefrise{}%
+  \foreachitem\compteur\in\ListeTempo{\expandafter\UpdatetoksFrise\compteur\nil}
+  \MPDessineFrise{\the\toklistefrise}%
+}
+
+\newcommand\MPDessineFrise[1]{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    Longueur:=\useKV[ClesFrise]{Longueur};
+    Ecart:=\useKV[ClesFrise]{Ecart};
+    boolean Fleches;
+    Fleches=\useKV[ClesFrise]{Fleches};
+    boolean Sup;
+    Sup=\useKV[ClesFrise]{Sup};
+    pair A[],B;
+    A0=(0,0);
+    B-A0=(Longueur,0);
+    n=0;
+    for p_=#1:
+    n:=n+1;
+    endfor;
+    for k=1 upto ((n div 3)-2):
+    A[k]=(k/((n div 3)-1))[A0,B];
+    endfor;
+    A[(n div 3)-1]=B;
+    if Sup:
+      for k=0 upto ((n div 3)-1):
+      trace (u*(0,-0.1)--u*(0,0.1)) shifted A[k];
+      endfor;
+      % on définit les points milieu des fleches
+      path Fleche[];
+      pair C[];
+      for k=0 upto ((n div 3)-3):
+      Fleche[k]=(A[k]{dir-30}..{dir30}A[k+1]) shifted((0,-Ecart));
+      C[k]=point (0.5*length Fleche[k]) of Fleche[k];
+      endfor;
+      Fleche[(n div 3)-2]=%(A[(n div 3)-3]{dir-30}..{dir30}A[(n div 3)-1]) shifted((0,-Ecart));
+      chemin(A[(n div 3)-3]+(0,-Ecart),A[(n div 3)-3]+(0,-4*Ecart),A[(n div 3)-1]+(0,-4*Ecart),A[(n div 3)-1]+(0,-Ecart));
+      C[(n div 3)-1]=point (0.5*length Fleche[(n div 3)-2]) of Fleche[(n div 3)-2];
+      Fleche[(n div 3)-1]=(A[(n div 3)-1]{dir-150}..{dir150}A[(n div 3)-2]) shifted((0,-Ecart));
+      C[(n div 3)-2]=point (0.5*length Fleche[(n div 3)-1]) of Fleche[(n div 3)-1];
+      % 
+      maxx:=n;
+      trace segment(A0,A[(n div 3)-2]);
+      trace segment(A[(n div 3)-2],A[(n div 3)-1]) dashed evenly;
+      n:=0;
+      labeloffset:=labeloffset*2;
+      for p_=#1:
+      n:=n+1;
+      if n<maxx+1:
+      if (n mod 3)=1:
+      label.top(TEX(""&p_&""),A[n div 3]);
+      elseif (n mod 3)=2:
+      label.top(TEX(""&p_&""),C[n div 3]);%
+      elseif (n mod 3)=0:
+      label.bot(TEX(""&p_&""),C[(n div 3)-1]);
+      fi;
+      fi;
+      endfor;
+      drawoptions();
+      labeloffset:=labeloffset/2;
+      if Fleches:
+      for k=0 upto ((n div 3)-4):
+      drawarrow Fleche[k];
+      endfor;
+      drawarrow Fleche[(n div 3)-1];
+      drawarrow Fleche[(n div 3)-2];
+      drawarrow (A[(n div 3)-1]{dir-150}..{dir150}A[(n div 3)-2]) shifted((0,-Ecart));
+      for k=0 upto ((n div 3)-2):
+      draw segment(A[k],A[k]+(0,-Ecart)) dashed evenly;
+      endfor;
+      draw segment(A[(n div 3)-1],A[(n div 3)-1]+(0,-Ecart)) dashed evenly;
+      fi;
+    %fin Sup
+    else:
+      for k=0 upto ((n div 3)-1):
+      trace (u*(0,-0.1)--u*(0,0.1)) shifted A[k];
+      endfor;
+      % on définit les points milieu des fleches
+      path Fleche[];
+      pair C[];
+      for k=0 upto ((n div 3)-2):
+      Fleche[k]=(A[k]{dir-30}..{dir30}A[k+1]) shifted((0,-Ecart));
+      C[k]=point (0.5*length Fleche[k]) of Fleche[k];
+      endfor;
+      maxx:=n;
+      trace segment(A0,A[(n div 3)-1]);
+      n:=0;
+      labeloffset:=labeloffset*2;
+      for p_=#1:
+      n:=n+1;
+      if n<maxx:
+      if (n mod 3)=1:
+      label.top(TEX(""&p_&""),A[n div 3]);
+      elseif (n mod 3)=2:
+      if (n div 3)<((maxx div 3)-1):label.top(TEX(""&p_&""),C[n div 3]);fi;
+      elseif (n mod 3)=0:
+      label.bot(TEX(""&p_&""),C[(n div 3)-1]);
+      fi;
+      fi;
+      endfor;
+      labeloffset:=labeloffset/2;
+      if Fleches:
+      for k=0 upto ((n div 3)-2):
+      draw segment(A[k],A[k]+(0,-Ecart)) dashed evenly;
+      drawarrow Fleche[k];
+      endfor;
+      draw segment(A[(n div 3)-1],A[(n div 3)-1]+(0,-Ecart)) dashed evenly;
+      fi;
+    fi;
+  \end{mplibcode}
+  \else
+    \begin{mpost}[mpsettings={%
+    Longueur:=\useKV[ClesFrise]{Longueur};
+    Ecart:=\useKV[ClesFrise]{Ecart};
+    boolean Fleches;
+    Fleches=\useKV[ClesFrise]{Fleches};
+    boolean Sup;
+    Sup=\useKV[ClesFrise]{Sup};
+    }]
+    pair A[],B;
+    A0=(0,0);
+    B-A0=(Longueur,0);
+    n=0;
+    for p_=#1:
+    n:=n+1;
+    endfor;
+    for k=1 upto ((n div 3)-2):
+    A[k]=(k/((n div 3)-1))[A0,B];
+    endfor;
+    A[(n div 3)-1]=B;
+    if Sup:
+      for k=0 upto ((n div 3)-1):
+      trace (u*(0,-0.1)--u*(0,0.1)) shifted A[k];
+      endfor;
+      % on définit les points milieu des fleches
+      path Fleche[];
+      pair C[];
+      for k=0 upto ((n div 3)-3):
+      Fleche[k]=(A[k]{dir-30}..{dir30}A[k+1]) shifted((0,-Ecart));
+      C[k]=point (0.5*length Fleche[k]) of Fleche[k];
+      endfor;
+      Fleche[(n div 3)-2]=%(A[(n div 3)-3]{dir-30}..{dir30}A[(n div 3)-1]) shifted((0,-Ecart));
+      chemin(A[(n div 3)-3]+(0,-Ecart),A[(n div 3)-3]+(0,-4*Ecart),A[(n div 3)-1]+(0,-4*Ecart),A[(n div 3)-1]+(0,-Ecart));
+      C[(n div 3)-1]=point (0.5*length Fleche[(n div 3)-2]) of Fleche[(n div 3)-2];
+      Fleche[(n div 3)-1]=(A[(n div 3)-1]{dir-150}..{dir150}A[(n div 3)-2]) shifted((0,-Ecart));
+      C[(n div 3)-2]=point (0.5*length Fleche[(n div 3)-1]) of Fleche[(n div 3)-1];
+      % 
+      maxx:=n;
+      trace segment(A0,A[(n div 3)-2]);
+      trace segment(A[(n div 3)-2],A[(n div 3)-1]) dashed evenly;
+      n:=0;
+      labeloffset:=labeloffset*2;
+      for p_=#1:
+      n:=n+1;
+      if n<maxx+1:
+      if (n mod 3)=1:
+      label.top(LATEX(""&p_&""),A[n div 3]);
+      elseif (n mod 3)=2:
+      label.top(LATEX(""&p_&""),C[n div 3]);%
+      elseif (n mod 3)=0:
+      label.bot(LATEX(""&p_&""),C[(n div 3)-1]);
+      fi;
+      fi;
+      endfor;
+      drawoptions();
+      labeloffset:=labeloffset/2;
+      if Fleches:
+      for k=0 upto ((n div 3)-4):
+      drawarrow Fleche[k];
+      endfor;
+      drawarrow Fleche[(n div 3)-1];
+      drawarrow Fleche[(n div 3)-2];
+      drawarrow (A[(n div 3)-1]{dir-150}..{dir150}A[(n div 3)-2]) shifted((0,-Ecart));
+      for k=0 upto ((n div 3)-2):
+      draw segment(A[k],A[k]+(0,-Ecart)) dashed evenly;
+      endfor;
+      draw segment(A[(n div 3)-1],A[(n div 3)-1]+(0,-Ecart)) dashed evenly;
+      fi;
+    %fin Sup
+    else:
+      for k=0 upto ((n div 3)-1):
+      trace (u*(0,-0.1)--u*(0,0.1)) shifted A[k];
+      endfor;
+      % on définit les points milieu des fleches
+      path Fleche[];
+      pair C[];
+      for k=0 upto ((n div 3)-2):
+      Fleche[k]=(A[k]{dir-30}..{dir30}A[k+1]) shifted((0,-Ecart));
+      C[k]=point (0.5*length Fleche[k]) of Fleche[k];
+      endfor;
+      maxx:=n;
+      trace segment(A0,A[(n div 3)-1]);
+      n:=0;
+      labeloffset:=labeloffset*2;
+      for p_=#1:
+      n:=n+1;
+      if n<maxx:
+      if (n mod 3)=1:
+      label.top(LATEX(""&p_&""),A[n div 3]);
+      elseif (n mod 3)=2:
+      if (n div 3)<((maxx div 3)-1):label.top(LATEX(""&p_&""),C[n div 3]);fi;
+      elseif (n mod 3)=0:
+      label.bot(LATEX(""&p_&""),C[(n div 3)-1]);
+      fi;
+      fi;
+      endfor;
+      labeloffset:=labeloffset/2;
+      if Fleches:
+      for k=0 upto ((n div 3)-2):
+      draw segment(A[k],A[k]+(0,-Ecart)) dashed evenly;
+      drawarrow Fleche[k];
+      endfor;
+      draw segment(A[(n div 3)-1],A[(n div 3)-1]+(0,-Ecart)) dashed evenly;
+      fi;
+    fi;
+  \end{mpost}
+  \fi
+}

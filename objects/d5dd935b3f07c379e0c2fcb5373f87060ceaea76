@@ -1,0 +1,156 @@
+\ProvidesPackage{fodot}
+
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{amssymb}
+\usepackage{xspace}
+
+
+\newcommand{\fodot}{FO($\cdot$)\xspace}
+\newcommand{\fodott}{FO[$\cdot$]\xspace}
+
+\definecolor{block}{rgb}{0.2, 0.0, 0.667}
+\definecolor{builtin}{rgb}{0.667, 0.0, 0.133}
+\definecolor{annotation}{rgb}{0.0, 0.133, 0.667}
+\definecolor{controls}{rgb}{0.525, 0.231, 0.0}
+
+\definecolor{darkgreen}{rgb}{0.0, 0.5, 0.0}
+\definecolor{violet}{rgb}{0.5, 0.2, 1.0}
+
+\lstdefinelanguage{fodot}{
+    morekeywords={vocabulary, theory, structure, procedure, display}, % blocks
+    morekeywords=[2]{Bool, Int, Date, Real, Concept, true, false}, % types
+    % morekeywords=[3]{\~, !, ?, =, \~=, \>=, =\<, :=, \<:, :\>, -\>, \<-, =\>, \<, \>, \<=\>, \*, in, not in, \|, \&}, %operators , doesnt seem to work, instead see literate environment
+    morekeywords=[4]{type, total, partial, domain, codomain, constructed, from, declared, @prefix, import, var, if, then, else}, %controls and more
+    morekeywords=[5]{min, max, sum, abs}, % built-in functions
+    sensitive=true,                              % case sensitivity
+    morecomment=[l]{//},                         % line comment
+    morecomment=[s]{/*}{*/},                     % block comment
+    morecomment=[s]{[}{]},                       % block comment
+    morestring=[b]",                             % string delimiter
+    morestring=[b]',
+    morestring=[s]{'''}{'''},
+    morestring=[s]{"""}{"""},
+    % morestring=[s]{<http}{>}, % uncomment, if url highliting is desired
+    morestring=[s]{[}{]}, % comment, if Concepts with [] are used
+    literate=
+        % datatype replacements
+        {Bool}{{\textcolor{red}{$\mathbb{B}$}}}1
+        {Int}{{\textcolor{red}{$\mathbb{Z}$}}}1
+        {Real}{{\textcolor{red}{$\mathbb{R}$}}}1
+         % operator replacements / comment if url should be highlighted instead
+        {|}{{\textcolor{red}{$\lor$}}}1
+        {&}{{\textcolor{red}{$\land$}}}1
+        {:}{{\textcolor{red}:}}1
+        {<}{{\textcolor{red}<}}1
+        {>}{{\textcolor{red}>}}1
+        {!}{{\textcolor{red}{$\forall$}}}1
+        {?}{{\textcolor{red}{$\exists$}}}1
+        {~}{{\textcolor{red}{$\neg$}}}1
+        {~=}{{\textcolor{red}{$\neq$}}}2
+        {>=}{{\textcolor{red}{$\geq$}}}1
+        % {=<}{{\textcolor{red}{$\leq$}}}1 % doesnt seem to work, see special replacement =&lt;
+        {:=}{{\textcolor{red}{$\triangleq$}}}2
+        {<:}{{\textcolor{red}{$\subseteq$}}}2
+        {:>}{{\textcolor{red}{$\supseteq$}}}2
+        {<-}{{\textcolor{red}{$\leftarrow$}}}2
+        {->}{{\textcolor{red}{$\rightarrow$}}}2
+        {=}{{\textcolor{red}{=}}}1
+        {=>}{{\textcolor{red}{$\Rightarrow$}}}2
+        {<=}{{\textcolor{red}{$\Leftarrow$}}}2
+        {<=>}{{\textcolor{red}{$\Leftrightarrow$}}}3
+        % special replacements
+        {=&lt;}{{\textcolor{red}{$\leq$}}}1
+        {\#}{{{\textcolor{violet}{\#}}}}1 % # does not seem to work as keyword 
+        {TIMES}{{{\textcolor{red}{$\times$}}}}1 % * does not seem to work as keyword or literal to replace
+}
+
+
+\lstdefinelanguage{fodotASCII}{
+    morekeywords={vocabulary, theory, structure, procedure, display}, % blocks
+    morekeywords=[2]{Bool, Int, Date, Real, Concept, true, false}, % types
+    morekeywords=[3]{\~, !, ?, =, \~=, \>=, =\<, :=, \<:, :\>, -\>, \<-, =\>, \<, \>, \<=\>, \*, in, not in, \|, \&}, %operators , doesnt seem to work, instead see literate environment
+    morekeywords=[4]{type, total, partial, domain, codomain, constructed, from, declared, @prefix, import, var, if, then, else}, %controls and more
+    morekeywords=[5]{min, max, sum, abs}, % built-in functions
+    sensitive=true,                              % case sensitivity
+    morecomment=[l]{//},                         % line comment
+    morecomment=[s]{/*}{*/},                     % block comment
+    morecomment=[s]{[}{]},                       % block comment
+    morestring=[b]",                             % string delimiter
+    morestring=[b]',
+    morestring=[s]{'''}{'''},
+    morestring=[s]{"""}{"""},
+    % morestring=[s]{<http}{>}, % uncomment, if url highliting is desired
+    morestring=[s]{[}{]}, % comment, if Concepts with [] are used
+    literate=
+        %  % operator replacements / comment if url should be highlighted instead
+        {|}{{\textcolor{red}{|}}}1
+        {\&}{{\textcolor{red}{\&}}}1
+        {:}{{\textcolor{red}:}}1
+        {<}{{\textcolor{red}<}}1
+        {>}{{\textcolor{red}>}}1
+        {!}{{\textcolor{red}{!}}}1
+        {?}{{\textcolor{red}{?}}}1
+        {~}{{\textcolor{red}{$\sim$}}}1
+        {~=}{{\textcolor{red}{$\sim=$}}}2
+        {>=}{{\textcolor{red}{>=}}}1
+        {=<}{{\textcolor{red}{=<}}}1
+        {:=}{{\textcolor{red}{:=}}}2
+        {<:}{{\textcolor{red}{<:}}}2
+        {:>}{{\textcolor{red}{:>}}}2
+        {<-}{{\textcolor{red}{<-}}}2
+        {->}{{\textcolor{red}{->}}}2
+        {=}{{\textcolor{red}{=}}}1
+        {=>}{{\textcolor{red}{=>}}}2
+        {<=}{{\textcolor{red}{<=}}}2
+        {<=>}{{\textcolor{red}{<=>}}}3
+        % % special replacements
+        {\#}{{{\textcolor{violet}{\#}}}}1 % # does not seem to work as keyword 
+        {TIMES}{{{\textcolor{red}{$\times$}}}}1 % * does not seem to work as keyword or literal to replace
+}
+
+
+
+% % Setup listings
+\lstdefinestyle{fodot}{
+  language=fodot,
+  basicstyle=\ttfamily\small,
+  commentstyle=\color{darkgreen}\itshape,
+  keywordstyle=\color{block}\bfseries,
+  keywordstyle=[2]\color{builtin}\bfseries,
+  keywordstyle=[3]\color{red}\bfseries,
+  keywordstyle=[4]\color{controls}\bfseries,
+  keywordstyle=[5]\color{violet}\bfseries,
+  stringstyle=\color{annotation},
+  showstringspaces=false,
+  breaklines=true,
+  numberstyle=\tiny\color{gray},
+  numbers=left,
+  stepnumber=1,
+  numbersep=5pt,
+  backgroundcolor=\color{white},
+}
+
+
+
+% Setup listings
+\lstdefinestyle{fodotASCII}{
+  language=fodotASCII,
+  basicstyle=\ttfamily\small,
+  commentstyle=\color{darkgreen}\itshape,
+  keywordstyle=\color{block}\bfseries,
+  keywordstyle=[2]\color{builtin}\bfseries,
+  keywordstyle=[3]\color{red}\bfseries,
+  keywordstyle=[4]\color{controls}\bfseries,
+  keywordstyle=[5]\color{violet}\bfseries,
+  stringstyle=\color{annotation},
+  showstringspaces=false,
+  breaklines=true,
+  numberstyle=\tiny\color{gray},
+  numbers=left,
+  stepnumber=1,
+  numbersep=5pt,
+  backgroundcolor=\color{white},
+}
+
+\endinput

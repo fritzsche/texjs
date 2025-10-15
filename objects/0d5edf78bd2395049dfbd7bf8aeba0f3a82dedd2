@@ -1,0 +1,215 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2022-2023 by Antoine Missier <antoine.missier@ac-toulouse.fr>
+%
+% This file may be distributed and/or modified under the conditions of
+% the LaTeX Project Public License, either version 1.3 of this license
+% or (at your option) any later version.  The latest version of this
+% license is in:
+%
+%   http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of LaTeX version
+% 2005/12/01 or later.
+% \fi
+%
+% \iffalse
+%<*driver>
+\ProvidesFile{ibrackets.dtx}
+%</driver>
+%<*package> 
+\NeedsTeXFormat{LaTeX2e}[2005/12/01]
+\ProvidesPackage{ibrackets}
+    [2023/07/26 v1.2 .dtx ibrackets file]
+%</package>
+%<*driver>
+\documentclass{ltxdoc}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage[charter]{mathdesign}
+\usepackage{amsmath}
+\usepackage{ibrackets}
+\usepackage{sectsty}
+\usepackage{xcolor}
+
+\definecolor{darkbrown}{rgb}{0.5,0.1,0.1}
+\allsectionsfont{\color{darkbrown}}
+\renewcommand\pi{\piup}
+
+\DisableCrossrefs
+%\CodelineIndex
+%\RecordChanges
+\usepackage{hyperref}
+\hypersetup{%
+    colorlinks,
+    linkcolor=blue,
+    citecolor=red,
+    pdftitle={ibrackets},
+    pdfsubject={LaTeX package},
+    pdfauthor={Antoine Missier}
+}
+\MakeShortVerb{"}
+\begin{document}
+\DocInput{ibrackets.dtx}
+%\PrintChanges
+%\PrintIndex
+\end{document}
+%</driver>
+% \fi
+%
+% \CheckSum{49}
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+% \changes{v1.0}{2022/12/19}{Initial version}
+%
+% \changes{v1.1}{2022/12/28}{
+%    - A bug correction in the README.md file
+%    - Tiny changes in documentation}
+%
+% \changes{v1.2}{2023/07/26}{Minor changes in the documentation}
+%
+% \GetFileInfo{ibrackets.sty}
+%
+% \title{Intelligent brackets \\ The \textsf{ibrackets} package}
+% \author{Antoine Missier \\ \texttt{antoine.missier@ac-toulouse.fr}}
+% \date{\filedate, \fileversion}
+% \maketitle
+%
+% \section{Introduction}
+%
+% Open intervals are commonly represented with parenthesis, e.g.\@ $(0, +\infty)$
+% but sometimes square brackets are used, especially in French mathematics: $]0, +\infty[$.
+% In that specific case, the space around the square brackets is often inappropriate, 
+% as in the expression $x \in \mathclose{]} 0, +\infty\mathopen{[}$.
+% This small package address this issue and 
+% redefines brackets symbols $[$ and $]$ for mathematical mode
+% to get correct spacing: $x \in ]0, +\infty[$.
+%
+% \medskip
+% Originally implemented in the \textsf{mismath} package~\cite{MIS}
+% and also in \textsf{frenchmath}~\cite{FR}
+% since version 2.1, our previous redefinitions produce however incorrect spacing
+% when the left bound of the interval begins with a sign - or +,
+% which was then interpreted as a binary operation. As a result, blank
+% spaces surrounding the sign would have been too large.
+% This issue was pointed out by Jean-François Burnol, and
+% an easy solution, that has been documented, consists of nesting the operator
+% or the left bound within a pair of braces, 
+% e.g.\@ |$x \in ]{-}\infty, 0]$|, or using |\left| and |\right| 
+% or even |\mathopen{]}|.
+%
+% \medskip
+% Inspired by Walter Schmidt's \textsf{icomma} package~\cite{ICOMMA}, we now provide 
+% an improved bracket definition that works correctly without the need for
+% these pairs of braces.
+%
+% \medskip
+% Let's also mention other approaches, such as the |\DeclarePairedDelimiters| macro from
+% the \textsf{mathtools} package~\cite{TOOL}, or
+% the \textsf{interval} package~\cite{INT} with its
+% |\interval| macro. However our solution is more lightweight.
+%
+% \section{Usage}
+% With the \textsf{ibrackets} package, you can easily type intervals. For example the code
+% |$x\in]0,\pi[\cup]2\pi, 3\pi[$| yields
+% \begin{align*}
+% x\in]0, \pi[\cup]2\pi, 3\pi[ &\mbox{\quad with \textsf{ibrackets}}, \\
+% \text{instead of \quad}
+% x\in\mathclose{]} 0,\pi \mathopen{[}\cup\mathclose{]} 2\pi, 3\pi\mathopen{[}
+% &\mbox{\quad without \textsf{ibrackets}}. 
+% \end{align*}
+%
+% For the example in the introduction the spacing is now correct with the following simple code:
+% |$x \in ]-\infty, 0]$|, which gives $x \in ]-\infty, 0]$.
+%
+% \medskip
+% In \textsf{ibrackets}, the symbols $[$ and $]$ 
+% and are not defined by default as delimiters.
+% Therefore, a line break could occur between the two brackets. However,
+% it is always possible to transform them 
+% into delimiters using |\left| and |\right|.
+%
+% \medskip
+% Actually, brackets are set as ``active'' characters, 
+% behaving like ordinary characters in most cases. 
+% However, when a bracket is \emph{immediately} followed by a + or - character, 
+% it becomes an open delimiter. Therefore, when the left bound contains an operator sign,
+% \emph{you don't have to leave a space between the first bracket and the sign},
+% otherwise, the spaces surrounding the operator will be too large.
+% For example if you write |$x \in ] -\infty, 0]$| it yields $x \in ] -\infty, 0]$ 
+% instead of $x \in  ]-\infty, 0]$.
+% Conversely, when dealing with algebraic expressions involving intervals, 
+% \emph{you must leave a space between the second bracket and the} +/- \emph{operations}
+% to maintain proper spacing.
+% For instance |$[a, b] + [c, d]$| yields $[a, b] + [c, d]$
+% while |$[a, b]+ [c, d]$| would yield $[a, b]+ [c, d]$.
+%
+% \StopEventually{}
+%
+% \section{Implementation}
+% At |\begin{document}|, we store the original "\mathcode" of the brackets,
+% in the |\math...bracket| macros, and then we make the brackets active in math mode.
+%    \begin{macrocode}
+\AtBeginDocument{%
+  \mathchardef\mathopenbracket\mathcode`[%
+  \mathcode`[="8000
+  \mathchardef\mathclosebracket\mathcode`]%
+  \mathcode`]="8000
+}
+
+%    \end{macrocode}
+% The active brackets check the next input character. If the next character is a - or a +, 
+% the active brackets return |\mathopen| with the saved |\math...bracket|,
+% so that no space will be added after the bracket.
+% Otherwise, |\mathord\math...bracket| is returned.
+%    \begin{macrocode}
+{\catcode`[=\active
+  \gdef[{\futurelet\@next\sm@rtopenbracket}}
+\def\sm@rtopenbracket{%
+  \ifx\@next- \mathopen \else
+  \ifx\@next+ \mathopen \else
+    \mathord\fi\fi \mathopenbracket}
+
+{\catcode`]=\active
+  \gdef]{\futurelet\@next\sm@rtclosebracket}}
+\def\sm@rtclosebracket{%
+  \ifx\@next- \mathopen \else
+  \ifx\@next+ \mathopen \else
+    \mathord\fi\fi \mathclosebracket}
+%    \end{macrocode}
+% We could have use the internal \TeX\ command |\@ifnextchar|
+% to skip blank spaces after the bracket and look if there is a + or - after,
+% but then it would become tricky when you really want
+% to follow an interval with an operation plus or minus.
+%
+% \begin{thebibliography}{5}
+% % \begin{raggedright}
+% \bibitem{MIS} \emph{\textsf{mismath} -- Miscellaneous mathematical macros}. 
+% Antoine Missier, CTAN, v2.0 2022/11/11.
+% \bibitem{FR} \emph{L'extension \textsf{frenchmath}}. Antoine Missier, CTAN, v2.2 2022/12/15.
+% \bibitem{ICOMMA} \emph{The \textsf{icomma} package for \LaTeXe}. 
+% Walter Schmidt, CTAN, v2.0 2002/03/10.
+% \bibitem{TOOL} \emph{The \textsf{mathtools} package}. Morten Høgholm, Lars Madsen, CTAN,
+% v1.21 2018/01/08.
+% \bibitem{INT} \emph{The \textsf{interval} package}. Lars Madsen, CTAN,
+% v0.4 2019/03/06.
+% \end{raggedright}
+% \end{thebibliography}
+% \Finale
+\endinput

@@ -1,0 +1,1026 @@
+%%%
+% Formules
+%%%
+\def\filedateRapFormules{2024/08/04}%
+\def\fileversionRapFormules{0.1}%
+\message{-- \filedateRapFormules\space v\fileversionRapFormules}%
+%
+\setKVdefault[ClesFormule]{Perimetre=false,Aire=false,Volume=false,Surface=carr\'e,Solide=pav\'e,Angle=0,Ancre={(0,0)},Largeur=5cm,Couleur=white,EchelleEspace=70,Echelle=1cm}
+
+\def\MPFigureCarreCode{%
+  u:=\useKV[ClesFormule]{Echelle};
+  vardef FigCarre=
+  drawoptions(dashed dashpattern(on1cm));
+  pair A,B,C,D;
+  A=u*(1,1);
+  B-A=u*(2,0);
+  C=rotation(A,B,-90);
+  D-C=A-B;
+  draw polygone(A,B,C,D);
+  draw codeperp(A,B,C,5);
+  draw codeperp(B,C,D,5);
+  draw codeperp(C,D,A,5);
+  draw codeperp(D,A,B,5);
+  marque_s:=marque_s/3;
+  draw Codelongueur(A,B,B,C,C,D,D,A,2);
+  marque_s:=marque_s*3;
+  draw appelation(A,B,-3mm,btex $c$ etex);
+  enddef;
+}%
+
+\def\MPFigureCarre{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    \MPFigureCarreCode
+    FigCarre;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={\MPFigureCarreCode}]
+    FigCarre;
+  \end{mpost}
+  \fi
+}
+
+\def\MPFigurePolygone{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    u:=\useKV[ClesFormule]{Echelle};
+    drawoptions( dashed dashpattern(on1cm));
+    pair A,B,C,D,E,F;
+    A=u*(1,1);
+    B-A=u*(2,0);
+    C=3/5[B,rotation(A,B,-120)];
+    D-C=u*(0,1);
+    E-D=u*(-1.25,-1);
+    F-E=u*(-1,1);
+    draw polygone(A,B,C,D,E,F);
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={u:=\useKV[ClesFormule]{Echelle};}]
+    pair A,B,C,D,E,F;
+    A=u*(1,1);
+    B-A=u*(2,0);
+    C=3/5[B,rotation(A,B,-120)];
+    D-C=u*(0,1);
+    E-D=u*(-1.25,-1);
+    F-E=u*(-1,1);
+    draw polygone(A,B,C,D,E,F);
+  \end{mpost}
+  \fi
+}
+
+\def\MPFigureParallelogramme{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    u:=\useKV[ClesFormule]{Echelle};
+    vardef marque_para(expr dd,ee,pa)=
+  save im;
+  picture im;
+  pair kk,ll,mn,mo;
+  kk=point(pa*length dd) of dd;
+  ll=projection(kk,point(0.25*length ee) of ee,point(0.5*length ee) of ee);
+  mn=iso(kk,ll);
+  mo=(mn--kk) intersectionpoint cercles(mn,3mm);
+  im=image(
+    drawarrow mo--kk;
+    drawarrow symetrie(mo,mn)--ll;
+    label(btex $//$ etex,mn);
+    );
+  im
+  enddef;
+     
+    drawoptions( dashed dashpattern(on1cm));
+    Figure(-5u,-5u,5u,5u);
+    pair A,B,C,D;
+    A=u*(1,1);
+    B-A=u*(2.25,0.25);
+    D=4/5[A,rotation(B,A,40)];
+    C-D=B-A;
+    draw polygone(A,B,C,D);
+    drawoptions(withcolor gris);
+    draw marque_para(droite(A,B),droite(C,D),0.455);
+    draw marque_para(droite(B,C),droite(A,D),0.43);
+    draw segment(B,2.5[C,B]) dashed evenly;
+    draw segment(A,1.5[D,A]) dashed evenly;
+    draw segment(A,1.55[B,A]) dashed evenly;
+    draw segment(D,2[C,D]) dashed evenly;
+    drawoptions();
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={u:=\useKV[ClesFormule]{Echelle};}]
+    vardef marque_para(expr dd,ee,pa)=
+  save im;
+  picture im;
+  pair kk,ll,mn,mo;
+  kk=point(pa*length dd) of dd;
+  ll=projection(kk,point(0.25*length ee) of ee,point(0.5*length ee) of ee);
+  mn=iso(kk,ll);
+  mo=(mn--kk) intersectionpoint cercles(mn,3mm);
+  im=image(
+    drawarrow mo--kk;
+    drawarrow symetrie(mo,mn)--ll;
+    label(btex $//$ etex,mn);
+    );
+  im
+  enddef;
+  
+    Figure(-5u,-5u,5u,5u);
+    pair A,B,C,D;
+    A=u*(1,1);
+    B-A=u*(2.25,0.25);
+    D=4/5[A,rotation(B,A,40)];
+    C-D=B-A;
+    draw polygone(A,B,C,D);
+    drawoptions(withcolor gris);
+    draw marque_para(droite(A,B),droite(C,D),0.455);
+    draw marque_para(droite(B,C),droite(A,D),0.43);
+    draw segment(B,2.5[C,B]) dashed evenly;
+    draw segment(A,1.5[D,A]) dashed evenly;
+    draw segment(A,1.55[B,A]) dashed evenly;
+    draw segment(D,2[C,D]) dashed evenly;
+    drawoptions();
+  \end{mpost}
+  \fi
+}
+
+\def\MPFigureParallelogrammeAire{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    u:=\useKV[ClesFormule]{Echelle};
+    drawoptions( dashed dashpattern(on1cm));
+    Figure(-5u,-5u,10u,5u);
+    pair A,B,C,D,I,J;
+    A=u*(1,1);
+    B-A=u*(2,0.5);
+    D=3/5[A,rotation(B,A,40)];
+    C-D=B-A;
+    I=projection(D,A,B);
+    draw polygone(A,B,C,D) withcolor gris;
+    draw segment(A,B);
+    draw segment(D,I);
+    draw codeperp(D,I,B,5);
+    A:=A+3*u*(1,0);
+    B:=A+u*(2,0.5);
+    D:=3/5[A,rotation(B,A,40)];
+    C:=D+B-A;
+    J=projection(B,A,D);
+    draw polygone(A,B,C,D) withcolor gris;
+    draw segment(D,1.5[A,D]) dashed evenly withcolor gris;
+    draw segment(A,D);
+    draw segment(B,J);
+    draw codeperp(B,J,A,5);
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={u:=\useKV[ClesFormule]{Echelle};}]
+    Figure(-5u,-5u,10u,5u);
+    pair A,B,C,D,I,J;
+    A=u*(1,1);
+    B-A=u*(2,0.5);
+    D=3/5[A,rotation(B,A,40)];
+    C-D=B-A;
+    I=projection(D,A,B);
+    draw polygone(A,B,C,D) withcolor gris;
+    draw segment(A,B);
+    draw segment(D,I);
+    draw codeperp(D,I,B,5);
+    A:=A+3*u*(1,0);
+    B:=A+u*(2,0.5);
+    D:=3/5[A,rotation(B,A,40)];
+    C:=D+B-A;
+    J=projection(B,A,D);
+    draw polygone(A,B,C,D) withcolor gris;
+    draw segment(D,1.5[A,D]) dashed evenly withcolor gris;
+    draw segment(A,D);
+    draw segment(B,J);
+    draw codeperp(B,J,A,5);
+  \end{mpost}
+  \fi
+}
+
+\def\MPFigureSphere{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    drawoptions( dashed dashpattern(on1cm));
+    typetrace:="3D";
+    Initialisation(5,0,10,\useKV[ClesFormule]{EchelleEspace});
+    color O,A,B,C;
+    O=(0,0,0);
+    A-O=(0,1/2,0);
+    C-O=(-1/2,0,0);
+    B-O=(0,0,1/2);
+    path cc,cd;
+    cc=cercles(O,A,O,A,C);
+    cd=cercles(O,A,O,A,B);
+    draw cd;
+    draw (subpath(0,length cc/2) of cc) dashed evenly;
+    draw subpath(length cc/2,length cc) of cc;
+    draw cotationmil(O,A,0,18,btex rayon $r$ etex);
+    marque_p:="plein";
+    pointe(O);
+    marque_p:="non";
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={v:=\useKV[ClesFormule]{EchelleEspace};}]
+    typetrace:="3D";
+    Figure(-10u,-10u,10u,10u);
+    Initialisation(5,0,10,v);
+    color O,A,B,C;
+    O=(0,0,0);
+    A-O=(0,1/2,0);
+    C-O=(-1/2,0,0);
+    B-O=(0,0,1/2);
+    path cc,cd;
+    cc=cercles(O,A,O,A,C);
+    cd=cercles(O,A,O,A,B);
+    draw cd;
+    draw (subpath(0,length cc/2) of cc) dashed evenly;
+    draw subpath(length cc/2,length cc) of cc;
+    draw cotationmil(O,A,0,18,btex rayon $r$ etex);
+    marque_p:="plein";
+    pointe(O);
+    marque_p:="non";
+  \end{mpost}
+  \fi
+}
+
+\def\MPFigurePave{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    drawoptions( dashed dashpattern(on1cm));
+    typetrace:="3D";
+    typerepre:="persp";
+    Figure(-10u,-10u,10u,10u);
+    Initialisation(5,30,20,115);
+    color A,B,C,D,E,F,G,H;
+    draw Pave(A,B,C,D,E,F,G,H)(0.5,1,1/3) withcolor gris;
+    draw segment(A,B);
+    draw segment(E,F);
+    draw segment(A,F);
+    draw appelation(A,B,-2mm,btex $\ell$ etex);
+    draw appelation(F,E,2mm,btex $p$ etex);
+    draw appelation(A,F,2mm,btex $h$ etex);
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={v:=\useKV[ClesFormule]{EchelleEspace};}]
+    typetrace:="3D";
+    typerepre:="persp";
+    Figure(-10u,-10u,10u,10u);
+    Initialisation(5,30,20,115);
+    color A,B,C,D,E,F,G,H;
+    draw Pave(A,B,C,D,E,F,G,H)(0.5,1,1/3) withcolor gris;
+    draw segment(A,B);
+    draw segment(E,F);
+    draw segment(A,F);
+    draw appelation(A,B,-2mm,\btex $\ell$ etex);
+    draw appelation(F,E,2mm,\btex $p$ etex);
+    draw appelation(A,F,2mm,\btex $h$ etex);
+  \end{mpost}
+  \fi
+}
+
+\def\MPFigurePrisme{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    drawoptions( dashed dashpattern(on1cm));
+    typetrace:="3D";
+    typerepre:="persp";
+    Figure(-10u,-10u,10u,10u);
+    Initialisation(5,30,20,\useKV[ClesFormule]{EchelleEspace});
+    color A,B,C,D,E,F,G,H;
+    D=(0.75,0,0);
+    G=(0,1,0);
+    H=(0,0,0);
+    A-D=(0,0,0.5);
+    C-D=G-H;
+    E-H=A-D;
+    F-E=(0,0.6,0);
+    B-A=F-E;
+    NbS:=8;
+    Sommet1:=A;
+    Sommet2:=B;
+    Sommet3:=C;
+    Sommet4:=D;
+    Sommet5:=E;
+    Sommet6:=F;
+    Sommet7:=G;
+    Sommet8:=H;
+    NF:=6;
+    Fc[100]:=4;Fc[101]:=1;Fc[102]:=4;Fc[103]:=3;Fc[104]:=2;
+    Fc[200]:=4;Fc[201]:=4;Fc[202]:=1;Fc[203]:=5;Fc[204]:=8;
+    Fc[300]:=4;Fc[301]:=4;Fc[302]:=8;Fc[303]:=7;Fc[304]:=3;
+    Fc[400]:=4;Fc[401]:=8;Fc[402]:=5;Fc[403]:=6;Fc[404]:=7;
+    Fc[500]:=4;Fc[501]:=1;Fc[502]:=2;Fc[503]:=6;Fc[504]:=5;
+    Fc[600]:=4;Fc[601]:=2;Fc[602]:=3;Fc[603]:=7;Fc[604]:=6;
+    CoulTrace:=gris;
+    DessineObjet;
+    drawoptions(withcolor gris);
+    draw codeperp(B,A,E,5);
+    draw codeperp(A,B,F,5);
+    draw codeperp(H,D,C,5);
+    draw codeperp(D,C,G,5);
+    drawoptions();
+    draw polygone(A,B,C,D);
+    draw hachurage(polygone(A,B,C,D),60,0.3,0);
+    draw segment(A,E);
+    draw appelation(A,E,3mm,btex hauteur etex);
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={v:=\useKV[ClesFormule]{EchelleEspace};}]
+    typetrace:="3D";
+    typerepre:="persp";
+    Figure(-10u,-10u,10u,10u);
+    Initialisation(5,30,20,115);
+    color A,B,C,D,E,F,G,H;
+    D=(0.75,0,0);
+    G=(0,1,0);
+    H=(0,0,0);
+    A-D=(0,0,0.5);
+    C-D=G-H;
+    E-H=A-D;
+    F-E=(0,0.6,0);
+    B-A=F-E;
+    NbS:=8;
+    Sommet1:=A;
+    Sommet2:=B;
+    Sommet3:=C;
+    Sommet4:=D;
+    Sommet5:=E;
+    Sommet6:=F;
+    Sommet7:=G;
+    Sommet8:=H;
+    NF:=6;
+    Fc[100]:=4;Fc[101]:=1;Fc[102]:=4;Fc[103]:=3;Fc[104]:=2;
+    Fc[200]:=4;Fc[201]:=4;Fc[202]:=1;Fc[203]:=5;Fc[204]:=8;
+    Fc[300]:=4;Fc[301]:=4;Fc[302]:=8;Fc[303]:=7;Fc[304]:=3;
+    Fc[400]:=4;Fc[401]:=8;Fc[402]:=5;Fc[403]:=6;Fc[404]:=7;
+    Fc[500]:=4;Fc[501]:=1;Fc[502]:=2;Fc[503]:=6;Fc[504]:=5;
+    Fc[600]:=4;Fc[601]:=2;Fc[602]:=3;Fc[603]:=7;Fc[604]:=6;
+    CoulTrace:=gris;
+    DessineObjet;
+    drawoptions(withcolor gris);
+    draw codeperp(B,A,E,5);
+    draw codeperp(A,B,F,5);
+    draw codeperp(H,D,C,5);
+    draw codeperp(D,C,G,5);
+    drawoptions();
+    draw polygone(A,B,C,D);
+    draw hachurage(polygone(A,B,C,D),60,0.3,0);
+    draw segment(A,E);
+    draw appelation(A,E,3mm,btex hauteur etex);
+  \end{mpost}
+  \fi
+}
+
+\def\MPFigureCylindre{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    drawoptions( dashed dashpattern(on1cm));
+    typetrace:="3D";
+    typerepre:="persp";
+    Figure(-10u,-10u,10u,10u);
+    Initialisation(5,0,20,\useKV[ClesFormule]{EchelleEspace});
+    color O,O',A,A',B,B',C,C';
+    O=(0,0,0);
+    O'-O=(0,0,1);
+    A-O=(0,1,0);
+    A'-A=O'-O;
+    C=symetrie(A,O);
+    C'-C=O'-O;
+    B-O=(-1/2,0,0);
+    B'-B=O'-O;
+    path cc,cd;
+    cc=cercles(O,A,O,A,B);
+    cd=cercles(O',A',O',A',B');
+    draw cd;
+    draw segment(C,C');
+    draw segment(A,A');
+    draw (subpath(0,length cc/2) of cc) dashed evenly;
+    draw subpath(length cc/2,length cc) of cc;
+    draw segment(O,A);
+    draw cotationmil(C,C',3mm,25,btex hauteur $h$ etex);
+    draw appelation(O,A,2mm,btex rayon $r$ etex);
+    marque_p:="croix";
+    pointe(O);
+    marque_p:="non";
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={v:=\useKV[ClesFormule]{EchelleEspace};}]
+    typetrace:="3D";
+    typerepre:="persp";
+    Figure(-10u,-10u,10u,10u);
+    Initialisation(5,0,20,70);
+    color O,O',A,A',B,B',C,C';
+    O=(0,0,0);
+    O'-O=(0,0,1);
+    A-O=(0,1,0);
+    A'-A=O'-O;
+    C=symetrie(A,O);
+    C'-C=O'-O;
+    B-O=(-1/2,0,0);
+    B'-B=O'-O;
+    path cc,cd;
+    cc=cercles(O,A,O,A,B);
+    cd=cercles(O',A',O',A',B');
+    draw cd;
+    draw segment(C,C');
+    draw segment(A,A');
+    draw (subpath(0,length cc/2) of cc) dashed evenly;
+    draw subpath(length cc/2,length cc) of cc;
+    draw segment(O,A);
+    draw cotationmil(C,C',3mm,25,btex hauteur $h$ etex);
+    draw appelation(O,A,2mm,btex rayon $r$ etex);
+    marque_p:="croix";
+    pointe(O);
+    marque_p:="non";
+  \end{mpost}
+  \fi
+}
+
+\def\MPFigureCone{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    drawoptions( dashed dashpattern(on1cm));
+    typetrace:="3D";
+    typerepre:="persp";
+    Figure(-10u,-10u,10u,10u);
+    Initialisation(5,0,10,\useKV[ClesFormule]{EchelleEspace});
+    color O,O',A,B,C;
+    O=(0,0,0);
+    O'-O=(0,0,1.5);
+    A-O=(0,1,0);
+    C=symetrie(A,O);
+    B-O=(-1/2,0,0);
+    path cc;
+    cc=cercles(O,A,O,A,B);
+    draw chemin(C,O',A);
+    draw (subpath(0,length cc/2) of cc) dashed evenly;
+    draw subpath(length cc/2,length cc) of cc;
+    draw chemin(O',O,A);
+    draw appelation(O,O',2mm,btex hauteur etex);
+    draw appelation(O,A,1mm,btex rayon $r$ etex);
+    marque_p:="croix";
+    pointe(O);
+    marque_p:="non";
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={v:=\useKV[ClesFormule]{EchelleEspace};}]
+    typetrace:="3D";
+    typerepre:="persp";
+    Figure(-10u,-10u,10u,10u);
+    Initialisation(5,0,10,70);
+    color O,O',A,B,C;
+    O=(0,0,0);
+    O'-O=(0,0,1.5);
+    A-O=(0,1,0);
+    C=symetrie(A,O);
+    B-O=(-1/2,0,0);
+    path cc;
+    cc=cercles(O,A,O,A,B);
+    draw chemin(C,O',A);
+    draw (subpath(0,length cc/2) of cc) dashed evenly;
+    draw subpath(length cc/2,length cc) of cc;
+    draw chemin(O',O,A);
+    draw appelation(O,O',2mm,btex hauteur etex);
+    draw appelation(O,A,1mm,btex rayon $r$ etex);
+    marque_p:="croix";
+    pointe(O);
+    marque_p:="non";
+  \end{mpost}
+  \fi
+}
+
+\def\MPFigurePyramide{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    drawoptions( dashed dashpattern(on1cm));
+    u:=0.5cm;
+    z0=(-0.5,0)*u;
+    z1=(2.5,0.5)*u;
+    z2=(4,2)*u;
+    z3=(-0.5,2.75)*u;
+    z4=(-3,1.5)*u;
+    z5=(0.5,6)*u;
+    z6=(0.5,1.5)*u;
+    z7=z6 shifted (5u,0);
+    draw z5--z0 withcolor gris;
+    draw z5--z1 withcolor gris;
+    draw z5--z2 withcolor gris;
+    draw z5--z4 withcolor gris;
+    draw z5--z3 dashed evenly withcolor gris;
+    draw hachurage(polygone(z4,z0,z1,z2,z3,z4),60,0.4,0);
+    remplis codeperp(z7,z6,z5,8)--z6--cycle withcolor white;
+    draw z4--z0--z1--z2;
+    draw z2--z3--z4 dashed evenly;
+    draw z5--z6 dashed evenly;
+    draw codeperp(z7,z6,z5,8);
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={v:=\useKV[ClesFormule]{EchelleEspace};}]
+    Figure(-10u,-10u,10u,10u);
+    u:=0.5cm;
+    z0=(-0.5,0)*u;
+    z1=(2.5,0.5)*u;
+    z2=(4,2)*u;
+    z3=(-0.5,2.75)*u;
+    z4=(-3,1.5)*u;
+    z5=(0.5,6)*u;
+    z6=(0.5,1.5)*u;
+    z7=z6 shifted (5u,0);
+    draw z5--z0 withcolor gris;
+    draw z5--z1 withcolor gris;
+    draw z5--z2 withcolor gris;
+    draw z5--z4 withcolor gris;
+    draw z5--z3 dashed evenly withcolor gris;
+    draw hachurage(polygone(z4,z0,z1,z2,z3,z4),60,0.4,0);
+    remplis codeperp(z7,z6,z5,8)--z6--cycle withcolor white;
+    draw z4--z0--z1--z2;
+    draw z2--z3--z4 dashed evenly;
+    draw z5--z6 dashed evenly;
+    draw codeperp(z7,z6,z5,8);
+  \end{mpost}
+  \fi
+}
+
+\def\MPFigureCube{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    drawoptions( dashed dashpattern(on1cm));
+    typetrace:="3D";
+    typerepre:="persp";
+    Figure(-10u,-10u,10u,10u);
+    Initialisation(5,30,20,80);
+    color A,B,C,D,E,F,G,H;
+    draw Cube(A,B,C,D,E,F,G,H) withcolor gris;
+    draw segment(E,H);
+    draw appelation(E,H,2mm,btex $a$ etex);
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={v:=\useKV[ClesFormule]{EchelleEspace};}]
+    typetrace:="3D";
+    typerepre:="persp";
+    Figure(-10u,-10u,10u,10u);
+    Initialisation(5,30,20,80);
+    color A,B,C,D,E,F,G,H;
+    draw Cube(A,B,C,D,E,F,G,H) withcolor gris;
+    draw segment(E,H);
+    draw appelation(E,H,2mm,btex $a$ etex);
+  \end{mpost}
+  \fi
+}
+
+\def\MPFigureLosange{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    u:=\useKV[ClesFormule]{Echelle};
+    drawoptions( dashed dashpattern(on1cm));
+    Figure(-5u,-5u,5u,5u);
+    pair A,B,C,D;
+    A=u*(1,1);
+    B-A=u*(2,0.5);
+    D=rotation(B,A,40);
+    C-D=B-A;
+    draw polygone(A,B,C,D);
+    marque_s:=marque_s/3;
+    draw Codelongueur(A,B,B,C,C,D,D,A,2);
+    marque_s:=marque_s*3;
+    draw appelation(A,B,-3mm,btex $c$ etex);
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={u:=\useKV[ClesFormule]{Echelle};}]
+    Figure(-5u,-5u,5u,5u);
+    pair A,B,C,D;
+    A=u*(1,1);
+    B-A=u*(2,0.5);
+    D=rotation(B,A,40);
+    C-D=B-A;
+    draw polygone(A,B,C,D);
+    marque_s:=marque_s/3;
+    draw Codelongueur(A,B,B,C,C,D,D,A,2);
+    marque_s:=marque_s*3;
+    draw appelation(A,B,-3mm,btex $c$ etex);
+  \end{mpost}
+  \fi
+}
+
+\def\MPFigureLosangeAire{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+u:=\useKV[ClesFormule]{Echelle};
+    drawoptions( dashed dashpattern(on1cm));
+    Figure(-5u,-5u,5u,5u);
+    pair A,B,C,D;
+    A=u*(1,1);
+    B-A=u*(2,0.5);
+    D=rotation(B,A,40);
+    C-D=B-A;
+    draw polygone(A,B,C,D) withcolor gris;
+    draw segment(A,C);
+    draw segment(B,D);
+    marque_s:=marque_s/3;
+    draw Codelongueur(A,B,B,C,C,D,D,A,2);
+    marque_s:=marque_s*3;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={u:=\useKV[ClesFormule]{Echelle};}]
+    Figure(-5u,-5u,5u,5u);
+    pair A,B,C,D;
+    A=u*(1,1);
+    B-A=u*(2,0.5);
+    D=rotation(B,A,40);
+    C-D=B-A;
+    draw polygone(A,B,C,D) withcolor gris;
+    draw segment(A,C);
+    draw segment(B,D);
+    marque_s:=marque_s/3;
+    draw Codelongueur(A,B,B,C,C,D,D,A,2);
+    marque_s:=marque_s*3;
+  \end{mpost}
+  \fi
+}
+
+\def\MPFigureRectangle{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+u:=\useKV[ClesFormule]{Echelle};
+    drawoptions( dashed dashpattern(on1cm));
+    pair A,B,C,D;
+    A=u*(1,1);
+    B-A=u*(3,0);
+    C=2/3[B,rotation(A,B,-90)];
+    D-C=A-B;
+    draw polygone(A,B,C,D);
+    draw codeperp(A,B,C,5);
+    draw codeperp(B,C,D,5);
+    draw codeperp(C,D,A,5);
+    draw codeperp(D,A,B,5);
+    marque_s:=marque_s/3;
+    draw Codelongueur(A,B,C,D,2);
+    draw Codelongueur(A,D,C,B,5);
+    marque_s:=marque_s*3;
+    draw appelation(A,B,-3mm,btex $L$ etex);
+    label.lft(btex $\ell$ etex,iso(A,D));
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={u:=\useKV[ClesFormule]{Echelle};}]
+    pair A,B,C,D;
+    A=u*(1,1);
+    B-A=u*(3,0);
+    C=2/3[B,rotation(A,B,-90)];
+    D-C=A-B;
+    draw polygone(A,B,C,D);
+    draw codeperp(A,B,C,5);
+    draw codeperp(B,C,D,5);
+    draw codeperp(C,D,A,5);
+    draw codeperp(D,A,B,5);
+    marque_s:=marque_s/3;
+    draw Codelongueur(A,B,C,D,2);
+    draw Codelongueur(A,D,C,B,5);
+    marque_s:=marque_s*3;
+    draw appelation(A,B,-3mm,btex $L$ etex);
+    label.lft(btex $\ell$ etex,iso(A,D));
+  \end{mpost}
+  \fi
+}
+
+\def\MPFigureTriangle{%
+    \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+u:=\useKV[ClesFormule]{Echelle};
+    drawoptions( dashed dashpattern(on1cm));
+    Figure(-5u,-5u,5u,5u);
+    pair A,B,C;
+    A=u*(1,1);
+    B-A=u*(3,0);
+    C=demidroite(A,rotation(B,A,60)) intersectionpoint demidroite(B,rotation(A,B,-45));
+    draw polygone(A,B,C);
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={u:=\useKV[ClesFormule]{Echelle};}]
+    Figure(-5u,-5u,5u,5u);
+    pair A,B,C;
+    A=u*(1,1);
+    B-A=u*(3,0);
+    C=demidroite(A,rotation(B,A,60)) intersectionpoint demidroite(B,rotation(A,B,-45));
+    draw polygone(A,B,C);
+  \end{mpost}
+  \fi
+}
+
+\def\MPFigureCercle{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+u:=\useKV[ClesFormule]{Echelle};
+    drawoptions( dashed dashpattern(on1cm));
+    Figure(-5u,-5u,5u,5u);
+    pair A,B,C;
+    A=u*(2.5,2.5);
+    path cc;
+    cc=cercles(A,1.25u);
+    B=pointarc(cc,195);
+    C=symetrie(B,A);
+    draw cc withcolor gris;
+    draw segment(B,C);
+    marque_p:="croix";
+    pointe(A);
+    draw appelation(B,C,3mm,btex diam\`etre etex);
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={u:=\useKV[ClesFormule]{Echelle};}]
+    Figure(-5u,-5u,5u,5u);
+    pair A,B,C;
+    A=u*(2.5,2.5);
+    path cc;
+    cc=cercles(A,1.25u);
+    B=pointarc(cc,195);
+    C=symetrie(B,A);
+    draw cc withcolor gris;
+    draw segment(B,C);
+    marque_p:="croix";
+    pointe(A);
+    draw appelation(B,C,3mm,\btex diam\`etre etex);
+  \end{mpost}
+  \fi
+}
+
+\def\MPFigureDisque{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+u:=\useKV[ClesFormule]{Echelle};
+    drawoptions( dashed dashpattern(on1cm));
+    Figure(-5u,-5u,5u,5u);
+    pair A,B,C;
+    A=u*(2.5,2.5);
+    path cc;
+    cc=cercles(A,1.25u);
+    B=pointarc(cc,195);
+    C=symetrie(B,A);
+    draw cc withcolor gris;
+    draw segment(A,C);
+    marque_p:="croix";
+    pointe(A);
+    draw appelation(A,C,3mm,btex rayon $r$ etex);
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={u:=\useKV[ClesFormule]{Echelle};}]
+    Figure(-5u,-5u,5u,5u);
+    pair A,B,C;
+    A=u*(2.5,2.5);
+    path cc;
+    cc=cercles(A,1.25u);
+    B=pointarc(cc,195);
+    C=symetrie(B,A);
+    draw cc withcolor gris;
+    draw segment(A,C);
+    marque_p:="croix";
+    pointe(A);
+    draw appelation(A,C,3mm,\btex rayon $r$ etex);
+  \end{mpost}
+  \fi
+}
+
+\def\MPFigureTriangleAire{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+u:=\useKV[ClesFormule]{Echelle};
+    drawoptions( dashed dashpattern(on1cm));
+    pair A,B,C,H,I,J;
+    A=u*(0.5,1);
+    B-A=u*(1.4,0);
+    C=demidroite(A,rotation(B,A,60)) intersectionpoint demidroite(B,rotation(A,B,-45));
+    H=projection(C,A,B);
+    I=projection(A,B,C);
+    J=projection(B,C,A);
+    draw polygone(A,B,C) withcolor gris;
+    drawoptions();
+    draw segment(C,H);
+    draw segment(A,B);
+    draw codeperp(C,H,B,5);
+    drawoptions();
+    A:=A+u*(2.5,0);
+    B:=A+u*(1.4,0);
+    C:=demidroite(A,rotation(B,A,60)) intersectionpoint demidroite(B,rotation(A,B,-45));
+    I:=projection(A,B,C);
+    J:=projection(B,C,A);
+    draw polygone(A,B,C) withcolor gris;
+    drawoptions();
+    draw segment(A,I);
+    draw segment(C,B);
+    draw codeperp(A,I,B,5);
+    drawoptions();
+    A:=A-u*(1.25,1);
+    B:=A+u*(1.4,0);
+    C:=demidroite(A,rotation(B,A,60)) intersectionpoint demidroite(B,rotation(A,B,-45));
+    J:=projection(B,C,A);
+    draw polygone(A,B,C) withcolor gris;
+    drawoptions();
+    draw segment(B,J);
+    draw segment(C,A);
+    draw codeperp(B,J,C,5);
+    drawoptions();
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={u:=\useKV[ClesFormule]{Echelle};}]
+    Figure(-5u,-5u,5u,5u);
+    pair A,B,C,H,I,J;
+    A=u*(0.5,1);
+    B-A=u*(1.4,0);
+    C=demidroite(A,rotation(B,A,60)) intersectionpoint demidroite(B,rotation(A,B,-45));
+    H=projection(C,A,B);
+    I=projection(A,B,C);
+    J=projection(B,C,A);
+    draw polygone(A,B,C) withcolor gris;
+    drawoptions();
+    draw segment(C,H);
+    draw segment(A,B);
+    draw codeperp(C,H,B,5);
+    drawoptions();
+    A:=A+u*(2.5,0);
+    B:=A+u*(1.4,0);
+    C:=demidroite(A,rotation(B,A,60)) intersectionpoint demidroite(B,rotation(A,B,-45));
+    I:=projection(A,B,C);
+    J:=projection(B,C,A);
+    draw polygone(A,B,C) withcolor gris;
+    drawoptions();
+    draw segment(A,I);
+    draw segment(C,B);
+    draw codeperp(A,I,B,5);
+    drawoptions();
+    A:=A-u*(1.25,1);
+    B:=A+u*(1.4,0);
+    C:=demidroite(A,rotation(B,A,60)) intersectionpoint demidroite(B,rotation(A,B,-45));
+    J:=projection(B,C,A);
+    draw polygone(A,B,C) withcolor gris;
+    drawoptions();
+    draw segment(B,J);
+    draw segment(C,A);
+    draw codeperp(B,J,C,5);
+    drawoptions();
+  \end{mpost}
+  \fi
+}%
+
+\newcommand\Formule[1][]{%
+  \useKVdefault[ClesFormule]%
+  \setKV[ClesFormule]{#1}%
+  \setlength{\RoundedBoxWidth}{\useKV[ClesFormule]{Largeur}}%
+  \xdef\ColorFill{\useKV[ClesFormule]{Couleur}}%
+  \ifboolKV[ClesFormule]{Perimetre}{%
+    \begin{tikzpicture}[remember picture, overlay]
+      \node[draw,fill=\ColorFill,dashed,rounded corners,rotate={\useKV[ClesFormule]{Angle}}] (test) at \useKV[ClesFormule]{Ancre} {\begin{minipage}{\RoundedBoxWidth}%
+          \IfStrEqCase{\useKV[ClesFormule]{Surface}}{%
+            {carre}{\begin{center}
+                \MPFigureCarre\par
+                P\'erim\`etre d'un carr\'e :\par$4\times c$
+              \end{center}}%
+            {polygone}{%
+              \begin{center}
+                \MPFigurePolygone\par
+                P\'erim\`etre d'un polygone : \par$\text{Somme des c\^ot\'es}$
+              \end{center}
+            }%
+            {rectangle}{%
+              \begin{center}
+                \MPFigureRectangle\par
+                P\'erim\`etre d'un rectangle : \par$2\times(L+\ell)$
+              \end{center}
+              }%
+              {losange}{%
+                \begin{center}
+                \MPFigureLosange\par
+                P\'erim\`etre d'un losange : \par$4\times c$
+              \end{center}
+              }%
+            {triangle}{%
+              \begin{center}
+                \MPFigureTriangle\par
+                P\'erim\`etre d'un triangle : \par Somme des c\^ot\'es
+              \end{center}
+            }%
+            {cercle}{%
+              \begin{center}
+                \MPFigureCercle\par
+                P\'erim\`etre d'un cercle : \par$\pi\times\text{diam\`etre}$
+              \end{center}
+            }%
+            {parallelogramme}{%
+              \begin{center}
+                \MPFigureParallelogramme\par
+                P\'erim\`etre d'un parall\'elogramme : \par Somme des c\^ot\'es
+              \end{center}
+            }}
+        \end{minipage}};
+    \end{tikzpicture}
+  }{\ifboolKV[ClesFormule]{Aire}{%
+      \begin{tikzpicture}[remember picture, overlay]
+        \node[draw,fill=\ColorFill,dashed,rounded corners=2,rotate={\useKV[ClesFormule]{Angle}}] (test) at \useKV[ClesFormule]{Ancre} {\begin{minipage}{\RoundedBoxWidth}%
+            \IfStrEqCase{\useKV[ClesFormule]{Surface}}{%
+              {carre}{\begin{center}
+                  \MPFigureCarre\par
+                  Aire d'un carr\'e :\par$c\times c$
+              \end{center}}%
+            {rectangle}{%
+              \begin{center}
+                  \MPFigureRectangle\par
+                  Aire d'un rectangle :\par$L\times\ell$
+              \end{center}
+              }%
+              {losange}{%
+                \begin{center}
+                  \MPFigureLosangeAire\par
+                  Aire d'un losange :\par$\dfrac{\text{grande diagonale}\times\text{petite diagonale}}{2}$
+              \end{center}
+              }%
+            {triangle}{%
+              \begin{center}
+                \MPFigureTriangleAire\par\vspace{1em}\par
+                Aire d'un triangle : $\displaystyle\frac{\text{c\^ot\'e}\times\text{hauteur relative \`a ce c\^ot\'e}}{2}$
+              \end{center}
+            }%
+            {disque}{%
+              \begin{center}
+                \MPFigureDisque\par
+                Aire d'un disque :\par$\pi\times r\times r$
+              \end{center}
+            }%
+            {parallelogramme}{%
+              \begin{center}
+                \MPFigureParallelogrammeAire\par
+                Aire d'un parall\'elogramme : $\text{c\^ot\'e}\times\text{hauteur relative \`a ce c\^ot\'e}$
+                \end{center}
+            }
+            {sphere}{%
+              \begin{center}
+                \MPFigureSphere\par
+                Aire d'une sph\`ere : $4\times\pi\times r^2$
+              \end{center}
+            }}
+        \end{minipage}};
+    \end{tikzpicture}
+    }{%Volume
+      \begin{tikzpicture}[remember picture, overlay]
+        \node[draw,fill=\ColorFill,dashed,rounded corners=2,rotate={\useKV[ClesFormule]{Angle}}] (test) at \useKV[ClesFormule]{Ancre} {\begin{minipage}{\RoundedBoxWidth}%
+            \IfStrEqCase{\useKV[ClesFormule]{Solide}}{%
+              {boule}{\begin{center}
+                \MPFigureSphere\par
+                Volume d'une boule : $\dfrac{4\times\pi\times r^3}{3}$
+              \end{center}}%
+            {cube}{%
+              \begin{center}
+                \MPFigureCube\par
+                Volume d'un cube : $a^3\quad(a\times a\times a)$
+              \end{center}
+            }%
+              {pave}{%
+                \begin{center}
+                  \MPFigurePave\par
+                  Volume d'un pav\'e droit : $\ell\times h\times p$
+              \end{center}
+              }
+              {prisme}{%
+                \begin{center}
+                  \MPFigurePrisme\par
+                  Volume d'un prisme droit : $\text{Aire de la base}\times\mbox{hauteur}$
+                \end{center}
+              }
+              {cylindre}{%
+                \begin{center}
+                  \MPFigureCylindre\par
+                  Volume d'un cylindre de r\'evolution : $\pi\times r^2\times h$
+                \end{center}
+              }
+              {pyramide}{%
+                \begin{center}
+                  \MPFigurePyramide\par
+                  Volume d'une pyramide : $\dfrac{\text{Aire de la base}\times\text{hauteur}}{3}$
+                \end{center}
+              }
+              {cone}{%
+                \begin{center}
+                  \MPFigureCone\par
+                  Volume d'un c\^one de r\'evolution : $\displaystyle\dfrac{\pi\times r^2\times h}{3}$
+                \end{center}
+              }
+              }
+          \end{minipage}};
+      \end{tikzpicture}
+    }%
+  }%
+}%

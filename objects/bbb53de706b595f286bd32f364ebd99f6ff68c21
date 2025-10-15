@@ -1,0 +1,345 @@
+%%%
+% Proportionnalit\'e
+%%%
+\def\filedatePropor{2024/09/04}%
+\def\fileversionPropor{0.1a}%
+\message{-- \filedatePropor\space v\fileversionPropor}%
+%
+\setKVdefault[ClesPropor]{GrandeurA=Grandeur A,GrandeurB=Grandeur B,Largeur=1cm,Math=false,Stretch=1,ColorFill=white,CouleurTab=gray!15,Vertical=false,Simple=false,Condense=false}%
+
+\tikzstyle{FlechePropor}=[-stealth]
+
+\def\Updatetoksmath#1/#2\nil{\addtotok\tabtoksa{&#1}\addtotok\tabtoksb{&#2}}%
+\def\updatetokspropor#1/#2\nil{\addtotok\tabtoksa{&\num{#1}}\addtotok\tabtoksb{&\num{#2}}}%
+\def\Buildtabpropor{%
+  \setcounter{NbProporG}{0}%
+  \setcounter{NbProporD}{0}%
+  \colorlet{FondGrandeur}{\useKV[ClesPropor]{CouleurTab}}
+  \renewcommand{\arraystretch}{\useKV[ClesPropor]{Stretch}}%
+  \ifboolKV[ClesPropor]{Vertical}{%
+    \begin{tabular}{c|*{2}{>{\centering\arraybackslash}p{\useKV[ClesPropor]{Largeur}}|}c}%
+      \multicolumn{1}{c}{}&\multicolumn{1}{c}{\setcounter{NbPropor}{1}\TikzPH}&\multicolumn{1}{c}{\TikzPH}&\ifboolKV[ClesPropor]{Condense}{\\[-1em]}{\\}%
+      \hhline{~--~}%
+                          &\cellcolor{\useKV[ClesPropor]{CouleurTab}}\useKV[ClesPropor]{GrandeurA}&\cellcolor{\useKV[ClesPropor]{CouleurTab}}\useKV[ClesPropor]{GrandeurB}&\\
+      \hhline{~--~}%
+      \xintFor* ##1 in {\xintSeq{1}{\fpeval{\ListeValeurlen}}}\do{%
+      \stepcounter{NbProporG}\TikzPG&\ifboolKV[ClesPropor]{Math}{\ListeValeur[##1,1]}{\num{\ListeValeur[##1,1]}}&\ifboolKV[ClesPropor]{Math}{\ListeValeur[##1,2]}{\num{\ListeValeur[##1,2]}}&\stepcounter{NbProporD}\TikzPD\\
+      \hhline{~--~}%
+      }%
+      \multicolumn{1}{c}{}&\multicolumn{1}{c}{\setcounter{NbPropor}{1}\TikzPB}&\multicolumn{1}{c}{\TikzPB}&\ifboolKV[ClesPropor]{Condense}{\\[-1em]}{\\}%
+    \end{tabular}%
+  }{%
+    \tabtoksa{}\tabtoksb{}%
+    \ifboolKV[ClesPropor]{Simple}{}{%
+    \tabtoksa{\cellcolor{FondGrandeur}\useKV[ClesPropor]{GrandeurA}}%
+    \tabtoksb{\cellcolor{FondGrandeur}\useKV[ClesPropor]{GrandeurB}}%
+    }%
+    \ifboolKV[ClesPropor]{Math}{%
+      \foreachitem\compteur\in\ListeValeur{\expandafter\Updatetoksmath\compteur\nil}%
+    }{\foreachitem\compteur\in\ListeValeur{\expandafter\updatetokspropor\compteur\nil}%
+    }%
+    \xdef\LongListe{\ListeValeurlen}%
+    \ifboolKV[ClesPropor]{Simple}{%
+      \begin{tabular}{r|*{\number\numexpr\ListeValeurlen}{>{\centering\arraybackslash}p{\useKV[ClesPropor]{Largeur}}|}l}%
+        \multicolumn{1}{c}{}\setcounter{NbPropor}{1}\xintFor* ##1 in {\xintSeq {1}{\ListeValeurlen}}\do{&\multicolumn{1}{c}{\TikzPH}}&\multicolumn{1}{c}{}\ifboolKV[ClesPropor]{Condense}{\\[-1em]}{\\}%
+        \hhline{~*{\number\numexpr\ListeValeurlen}{-}~}%
+        \multicolumn{1}{c|}{\stepcounter{NbProporG}\TikzPG}\the\tabtoksa&\multicolumn{1}{c}{\stepcounter{NbProporD}\TikzPD}\\%
+        \hhline{~*{\number\numexpr\ListeValeurlen}{-}~}%
+        \multicolumn{1}{c|}{\stepcounter{NbProporG}\TikzPG}\the\tabtoksb&\multicolumn{1}{c}{\stepcounter{NbProporD}\TikzPD}\\%
+        \hhline{~*{\number\numexpr\ListeValeurlen}{-}~}%
+        \multicolumn{1}{c}{}\setcounter{NbPropor}{1}\xintFor* ##1 in {\xintSeq {1}{\ListeValeurlen}}\do{&\multicolumn{1}{c}{\TikzPB}}&\multicolumn{1}{c}{}\ifboolKV[ClesPropor]{Condense}{\\[-1em]}{\\}%
+      \end{tabular}%
+    }{%
+      \begin{tabular}{rc|*{\number\numexpr\ListeValeurlen}{>{\centering\arraybackslash}p{\useKV[ClesPropor]{Largeur}}|}l}%
+        %
+        \multicolumn{1}{c}{}&\multicolumn{1}{c}{}\setcounter{NbPropor}{1}\xintFor* ##1 in {\xintSeq {1}{\ListeValeurlen}}\do{&\multicolumn{1}{c}{\TikzPH}}&\multicolumn{1}{c}{}\ifboolKV[ClesPropor]{Condense}{\\[-1em]}{\\}%
+        \hhline{~*{\number\numexpr\ListeValeurlen+1}{-}~}%
+        \multicolumn{1}{c|}{\stepcounter{NbProporG}\TikzPG}&\the\tabtoksa&\multicolumn{1}{c}{\stepcounter{NbProporD}\TikzPD}\\%
+        \hhline{~*{\number\numexpr\ListeValeurlen+1}{-}~}%
+        \multicolumn{1}{c|}{\stepcounter{NbProporG}\TikzPG}&\the\tabtoksb&\multicolumn{1}{c}{\stepcounter{NbProporD}\TikzPD}\\%
+        \hhline{~*{\number\numexpr\ListeValeurlen+1}{-}~}%
+        \multicolumn{1}{c}{\stepcounter{NbProporG}\TikzPG}&\multicolumn{1}{c}{}\setcounter{NbPropor}{1}\xintFor* ##1 in {\xintSeq {1}{\ListeValeurlen}}\do{&\multicolumn{1}{c}{\TikzPB}}&\multicolumn{1}{c}{}\ifboolKV[ClesPropor]{Condense}{\\[-1em]}{\\}%
+      \end{tabular}%
+    }%
+  }%
+  \renewcommand{\arraystretch}{1}%
+}%
+
+\newcounter{NbPropor}%
+
+\newcommand\TikzPH{%
+  \tikz[remember picture,overlay]{%
+    \coordinate[name=ProporH-\theNbPropor,yshift=-\getstrut\dp*\arraystretch];}%
+  \stepcounter{NbPropor}%
+}%
+
+\newcommand\TikzPB{%
+  \tikz[remember picture, overlay]{%
+    \coordinate[name=ProporB-\theNbPropor,yshift=\getstrut\ht*\arraystretch];}%
+  \stepcounter{NbPropor}%
+}%
+
+\newcommand\TikzPG{%
+  \tikz[remember picture,overlay]{%
+    \coordinate[name=ProporG-\theNbProporG,xshift=\tabcolsep+\arrayrulewidth,yshift=\getstrut\dp];}%
+}%
+\newcommand\TikzPD{%
+  \tikz[remember picture,overlay]{%
+    \coordinate[name=ProporD-\theNbProporD,xshift=-\tabcolsep-\arrayrulewidth,yshift=\getstrut\dp];}%
+}%
+
+\newcommand\TikzPHD{%
+  \setbox1=\hbox{\useKV[ClesPropor]{GrandeurA}}%
+  \setbox2=\hbox{\useKV[ClesPropor]{GrandeurB}}%
+  \xintifboolexpr{\wd1>\wd2}{%
+    \tikz[remember picture,overlay]{%
+      \coordinate[name=ProporHD,xshift=-0.5\wd1,yshift=-\getstrut\dp*\arraystretch];}%
+  }{%
+    \tikz[remember picture,overlay]{%
+      \coordinate[name=ProporHD,xshift=-0.5\wd2,yshift=-\getstrut\dp*\arraystretch];}%
+  }
+}%
+
+\newcommand\TikzPBD{%
+  \setbox1=\hbox{\useKV[ClesPropor]{GrandeurA}}%
+  \setbox2=\hbox{\useKV[ClesPropor]{GrandeurB}}%
+  \xintifboolexpr{\wd1>\wd2}{%
+    \tikz[remember picture, overlay]{%
+      \coordinate[name=ProporBD,xshift=-0.5*\the\wd1,yshift=\getstrut\ht*\arraystretch];}%
+  }{%
+    \tikz[remember picture, overlay]{%
+      \coordinate[name=ProporBD,xshift=-0.5*\the\wd2,yshift=\getstrut\ht*\arraystretch];}%
+  }
+  \stepcounter{NbPropor}%
+}%
+%
+\newcommand\FlechesPH[3]{%
+  \begin{tikzpicture}[remember picture,overlay]%
+    \ifnum#1<#2\relax%
+    \draw[FlechePropor,out=50,in=130] (ProporH-#1) to node[inner sep=0pt, inner xsep=1pt,fill=\colorfill, pos=0.5, sloped]{#3}(ProporH-#2);%
+  \else%
+    \draw[FlechePropor,out=130,in=50] (ProporH-#1) to node[inner sep=0pt, inner xsep=1pt,fill=\colorfill, pos=0.5, sloped]{#3}(ProporH-#2);%
+    \fi%
+  \end{tikzpicture}%
+}%
+%
+\newcommand\FlechesPB[3]{%
+  \ifnum\number#1<\number#2\relax%
+  \begin{tikzpicture}[remember picture,overlay]%
+    \draw[FlechePropor,out=-50,in=-130] (ProporB-#1) to node[inner sep=0pt, inner xsep=1pt,fill=\colorfill, pos=0.5, sloped]{#3}(ProporB-#2);%
+  \end{tikzpicture}%
+  \else%
+  \begin{tikzpicture}[remember picture,overlay]%
+    \draw[FlechePropor,out=-130,in=-50] (ProporB-#1) to node[inner sep=0pt, inner xsep=1pt,fill=\colorfill, pos=0.5, sloped]{#3}(ProporB-#2);%
+  \end{tikzpicture}%
+  \fi%
+}%
+%
+\newcommand\FlechesPG[3]{%
+  \begin{tikzpicture}[remember picture,overlay]%
+    \ifnum#1<#2\relax%
+    \draw[FlechePropor,out=-150,in=150] (ProporG-#1) to node[transform canvas={xshift=-1pt},inner sep=0pt, inner xsep=1pt,fill=\colorfill, pos=0.5,left]{#3}(ProporG-#2);%
+    \else%
+    \draw[FlechePropor,out=150,in=-150] (ProporG-#1) to node[transform canvas={xshift=-1pt},inner sep=0pt, inner xsep=1pt,fill=\colorfill, pos=0.5, left]{#3}(ProporG-#2);%
+    \fi%
+  \end{tikzpicture}%
+}%
+
+\newcommand\FlechesPD[3]{%
+  \begin{tikzpicture}[remember picture,overlay]%
+    \ifnum#1<#2\relax%
+      \draw[FlechePropor,out=-30,in=30] (ProporD-#1) to node[transform canvas={xshift=1pt},inner sep=0pt, inner xsep=1pt,fill=\colorfill, pos=0.5,right]{#3}(ProporD-#2);%
+    \else%
+      \draw[FlechePropor,out=30,in=-30] (ProporD-#1) to node[transform canvas={xshift=1pt},inner sep=0pt, inner xsep=1pt,fill=\colorfill, pos=0.5,right]{#3}(ProporD-#2);%
+    \fi%
+  \end{tikzpicture}%
+}%
+
+\NewDocumentCommand\FlechePCH{mm}{%
+  \begin{tikzpicture}[remember picture,overlay,node distance=\getstrut\ht]%
+    \node[inner sep=0pt] (MilieuH-#1) at ($(ProporH-#1)!\PfCCoeffH!(ProporB-#1)$) {};%
+    \node[inner sep=0pt] (MilieuH-#2) at ($(ProporH-#2)!\PfCCoeffH!(ProporB-#2)$) {};%
+    \node[inner sep=0pt] (MilieuB-#1) at ($(ProporH-#1)!\PfCCoeffB!(ProporB-#1)$) {};%
+    \node[inner sep=0pt] (MilieuB-#2) at ($(ProporH-#2)!\PfCCoeffB!(ProporB-#2)$) {};%
+    \xintifboolexpr{#1<#2}{%
+      \coordinate[right of=MilieuH-#1] (aux1);%
+      \coordinate[left of=MilieuH-#2] (aux2);%
+      \coordinate[right of=MilieuB-#1] (aux3);%
+      \coordinate[left of=MilieuB-#2] (aux4);%
+      \draw[out=-150,in=-30,gray] (aux3) to (aux4);
+    }{%
+      \coordinate[left of=MilieuH-#1] (aux1);%
+      \coordinate[right of=MilieuH-#2] (aux2);%
+      \coordinate[left of=MilieuB-#1] (aux3);%
+      \coordinate[right of=MilieuB-#2] (aux4);%
+      \draw[out=-30,in=-150,gray] (aux3) to (aux4);
+    }%
+    \draw[gray] (aux2) -- (aux3);
+    \draw[FlechePropor,gray] (aux4) -- (aux1);
+  \end{tikzpicture}%
+}%
+
+\NewDocumentCommand\FlechePCB{mm}{%
+  \begin{tikzpicture}[remember picture,overlay,node distance=\getstrut\ht]%
+    \node[inner sep=0pt] (MilieuH-#1) at ($(ProporH-#1)!\PfCCoeffH!(ProporB-#1)$) {};%
+    \node[inner sep=0pt] (MilieuH-#2) at ($(ProporH-#2)!\PfCCoeffH!(ProporB-#2)$) {};%
+    \node[inner sep=0pt] (MilieuB-#1) at ($(ProporH-#1)!\PfCCoeffB!(ProporB-#1)$) {};%
+    \node[inner sep=0pt] (MilieuB-#2) at ($(ProporH-#2)!\PfCCoeffB!(ProporB-#2)$) {};%
+    \xintifboolexpr{#1<#2}{%
+      \coordinate[right of=MilieuH-#1] (aux1);%
+      \coordinate[left of=MilieuH-#2] (aux2);%
+      \coordinate[right of=MilieuB-#1] (aux3);%
+      \coordinate[left of=MilieuB-#2] (aux4);%
+      \draw[out=150,in=30,gray] (aux1) to (aux2);
+    }{%
+      \coordinate[left of=MilieuH-#1] (aux1);%
+      \coordinate[right of=MilieuH-#2] (aux2);%
+      \coordinate[left of=MilieuB-#1] (aux3);%
+      \coordinate[right of=MilieuB-#2] (aux4);%
+      \draw[out=30,in=150,gray] (aux1) to (aux2);
+    }%
+    \draw[gray] (aux4) -- (aux1);
+    \draw[FlechePropor,gray] (aux2) -- (aux3);
+  \end{tikzpicture}%
+}%
+
+\NewDocumentCommand\FlechePCG{mm}{%
+  \begin{tikzpicture}[remember picture,overlay,node distance=\getstrut\ht]%
+    \node[inner sep=0pt] (MilieuH-#1) at ($(ProporH-#1)!\PfCCoeffH!(ProporB-#1)$) {};%
+    \node[inner sep=0pt] (MilieuH-#2) at ($(ProporH-#2)!\PfCCoeffH!(ProporB-#2)$) {};%
+    \node[inner sep=0pt] (MilieuB-#1) at ($(ProporH-#1)!\PfCCoeffB!(ProporB-#1)$) {};%
+    \node[inner sep=0pt] (MilieuB-#2) at ($(ProporH-#2)!\PfCCoeffB!(ProporB-#2)$) {};%
+    \xintifboolexpr{#1<#2}{%
+      \coordinate[right of=MilieuH-#1] (aux1);%
+      \coordinate[left of=MilieuH-#2] (aux2);%
+      \coordinate[right of=MilieuB-#1] (aux3);%
+      \coordinate[left of=MilieuB-#2] (aux4);%
+      \draw[FlechePropor,gray] (aux4) -- (aux1);
+      \draw[out=-30,in=30,gray] (aux2) to (aux4);
+    }{%
+      \coordinate[left of=MilieuH-#1] (aux1);%
+      \coordinate[right of=MilieuH-#2] (aux2);%
+      \coordinate[left of=MilieuB-#1] (aux3);%
+      \coordinate[right of=MilieuB-#2] (aux4);%
+      \draw[FlechePropor,gray] (aux1) -- (aux4);
+      \draw[out=30,in=-30,gray] (aux3) to (aux1);
+    }%
+    \draw[gray] (aux2) -- (aux3);
+  \end{tikzpicture}%
+}%
+
+\NewDocumentCommand\FlechePCD{mm}{%
+  \begin{tikzpicture}[remember picture,overlay,node distance=\getstrut\ht]%
+    \node[inner sep=0pt] (MilieuH-#1) at ($(ProporH-#1)!\PfCCoeffH!(ProporB-#1)$) {};%
+    \node[inner sep=0pt] (MilieuH-#2) at ($(ProporH-#2)!\PfCCoeffH!(ProporB-#2)$) {};%
+    \node[inner sep=0pt] (MilieuB-#1) at ($(ProporH-#1)!\PfCCoeffB!(ProporB-#1)$) {};%
+    \node[inner sep=0pt] (MilieuB-#2) at ($(ProporH-#2)!\PfCCoeffB!(ProporB-#2)$) {};%
+    \xintifboolexpr{#1<#2}{%
+      \coordinate[right of=MilieuH-#1] (aux1);%
+      \coordinate[left of=MilieuH-#2] (aux2);%
+      \coordinate[right of=MilieuB-#1] (aux3);%
+      \coordinate[left of=MilieuB-#2] (aux4);%
+      \draw[FlechePropor,gray] (aux3) -- (aux2);
+      \draw[out=-150,in=150,gray] (aux1) to (aux3);
+    }{%
+      \coordinate[left of=MilieuH-#1] (aux1);%
+      \coordinate[right of=MilieuH-#2] (aux2);%
+      \coordinate[left of=MilieuB-#1] (aux3);%
+      \coordinate[right of=MilieuB-#2] (aux4);%
+      \draw[FlechePropor,gray] (aux2) -- (aux3);
+      \draw[out=-150,in=150,gray] (aux2) to (aux4);
+    }%
+    \draw[gray] (aux4) -- (aux1);
+  \end{tikzpicture}%
+}%
+
+\newcommand\FlecheLineaireG[4]{%
+  \begin{tikzpicture}[remember picture,overlay,node distance=1em]%
+    \node[inner sep=0pt] (MilieuH) at ($(ProporG-#1)!0.5!(ProporG-#2)$) {};%
+    \node[circle,draw,inner sep=0pt] [left of=MilieuH] (aux) {#4} ;%
+    \coordinate[left of=aux] (aux1);%
+    \draw[FlechePropor] (ProporG-#1) -| (aux);%
+    \draw[FlechePropor] (ProporG-#2) -| (aux);%
+    \draw[FlechePropor] (aux) -- (aux1) |- (ProporG-#3);%
+  \end{tikzpicture}%
+}%
+
+\newcommand\FlecheLineaireD[4]{%
+  \begin{tikzpicture}[remember picture,overlay,node distance=1em]%
+    \node[inner sep=0pt] (MilieuH) at ($(ProporD-#1)!0.5!(ProporD-#2)$) {};%
+    \node[circle,draw,inner sep=0pt] [right of=MilieuH] (aux) {#4} ;%
+    \coordinate[right of=aux] (aux1);%
+    \draw[FlechePropor] (ProporD-#1) -| (aux);%
+    \draw[FlechePropor] (ProporD-#2) -| (aux);%
+    \draw[FlechePropor] (aux) -- (aux1) |- (ProporD-#3);%
+  \end{tikzpicture}%
+}%
+
+\newcounter{NbProporG}%
+\newcounter{NbProporD}%
+
+\newcommand\Propor[2][]{%
+  \useKVdefault[ClesPropor]%
+  \setKV[ClesPropor]{#1}%
+  \ifboolKV[ClesPropor]{Condense}{\xdef\PfCCoeffH{-0.1}}{\xdef\PfCCoeffH{0.33}}%
+  \ifboolKV[ClesPropor]{Condense}{\xdef\PfCCoeffB{0.5}}{\xdef\PfCCoeffB{0.67}}%
+  \xdef\colorfill{\useKV[ClesPropor]{ColorFill}}%
+  \xdef\EcartLargeur{\useKV[ClesPropor]{Largeur}}%
+  %  % on lit la liste \'ecrite sous la forme valeur/effectif
+  \setsepchar[*]{,*/}\ignoreemptyitems%
+  \readlist*\ListeValeur{#2}%
+  \Buildtabpropor%
+%  \BuildTabPropor%
+}%
+
+\newcommand\FlecheCoef[2][\EcartLargeur]{%
+  \begin{tikzpicture}[remember picture, overlay]%
+    \node[] (Point1) at ($(ProporH-\LongListe)!0.1!(ProporB-\LongListe)$) {};%
+    \node[] (Point2) at ($(ProporH-\LongListe)!0.9!(ProporB-\LongListe)$) {};%
+    \coordinate[right of=Point1,node distance=0.5*#1+\tabcolsep] (point1);%
+    \coordinate[right of=Point2,node distance=0.5*#1+\tabcolsep] (point2);%
+    \draw[FlechePropor,out=-20,in=20] (point1) to node[midway,right,inner sep=1pt]{#2}(point2);%
+  \end{tikzpicture}%
+}%
+
+\newcommand\FlecheCoefDebut[2][\tabcolsep+\arrayrulewidth]{%
+  \begin{tikzpicture}[remember picture, overlay]%
+    \node[] (Noeud1) at ($(ProporHD)!0.1!(ProporBD)$) {};%
+    \node[] (Noeud2) at ($(ProporHD)!0.9!(ProporBD)$) {};%
+    \coordinate[left of=Noeud1,node distance=#1] (noeud1);%
+    \coordinate[left of=Noeud2,node distance=#1] (noeud2);%
+    \draw[FlechePropor,out=160,in=-160] (noeud2) to node[midway,left,inner sep=1pt]{#2}(noeud1);%
+  \end{tikzpicture}%
+}%
+
+\newcommand\FlecheCoefInv[2][1cm]{%
+  \begin{tikzpicture}[remember picture, overlay]%
+    \node[] (Point1) at ($(ProporH-\LongListe)!0.1!(ProporB-\LongListe)$) {};%
+    \node[] (Point2) at ($(ProporH-\LongListe)!0.9!(ProporB-\LongListe)$) {};%
+    \coordinate[right of=Point1,node distance=0.5*#1+\tabcolsep] (point1);%
+    \coordinate[right of=Point2,node distance=0.5*#1+\tabcolsep] (point2);%
+    \draw[FlechePropor,out=20,in=-20] (point2) to node[midway,right,inner sep=1pt]{#2}(point1);%
+  \end{tikzpicture}%
+}%
+
+\newcommand\FlecheLineaireH[4]{%
+  \begin{tikzpicture}[remember picture,overlay,node distance=\getstrut\ht]%
+    \node[inner sep=0pt] (MilieuH) at ($(ProporH-#1)!0.5!(ProporH-#2)$) {};%
+    \node[circle,draw,inner sep=0pt] [above of=MilieuH] (aux) {#4} ;%
+    \coordinate[above of=aux] (aux1);%
+    \draw[FlechePropor] (ProporH-#1) |- (aux);%
+    \draw[FlechePropor] (ProporH-#2) |- (aux);%
+    \draw[FlechePropor] (aux) -- (aux1) -| (ProporH-#3);%
+  \end{tikzpicture}%
+}%
+
+\newcommand\FlecheLineaireB[4]{%
+  \begin{tikzpicture}[remember picture,overlay,node distance=3mm]%
+    \node[inner sep=0pt] (MilieuB) at ($(ProporB-#1)!0.5!(ProporB-#2)$) {};%
+    \node[circle,draw,inner sep=0pt] [below of=MilieuB] (aux) {#4};%
+    \coordinate[below of=aux,node distance=3mm] (aux1);%
+    \draw[FlechePropor] (ProporB-#1) |- (aux);%
+    \draw[FlechePropor] (ProporB-#2) |- (aux);%
+    \draw[FlechePropor] (aux) -- (aux1) -| (ProporB-#3);%
+  \end{tikzpicture}%
+}%

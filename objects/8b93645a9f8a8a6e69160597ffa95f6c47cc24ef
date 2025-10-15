@@ -1,0 +1,297 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2018 - 2021 by ChairX
+%
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either
+% version 1.3 of this license or (at your option) any later
+% version.  The latest version of this license is in:
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of
+% LaTeX version 2005/12/01 or later.
+%
+% This file contains the documentation of all analysis related macros .
+%
+% Macros have to be described by (delete the first %)
+% \DescribeMacro{\macro}
+% Description and usage of the macro.
+%
+% The description will appear in the usage
+% part of the documentation. Use \subsubsection{} etc. for structuring.
+%
+% The implementation of the macros defined here has to be written in
+% chairxmathAnalysis.dtx
+%\fi
+%
+%\subsubsection{General Anyalsis Macros} \label{sec:Doc_GeneralMacrosAnalysis}
+%
+% \DescribeMacro{\vol}
+% Volume |\vol|: $\vol$\\
+% Uses |operatorfont|
+%
+% \DescribeMacro{\complete}
+% Completion of some space |\complete{V}|: $\complete{V}$
+%
+% \DescribeMacro{\Ball}
+% Open ball |\Ball_{r}(p)|: $\Ball_{r}(p)$
+%
+% \DescribeMacro{\abs}
+% Generic absolute value |\abs{x}|: $\abs{x}$
+%
+% \DescribeMacro{\norm}
+% Generic norm |\norm{v}|: $\norm{v}$
+%
+% \DescribeMacro{\supnorm}
+% Supremum norm |\supnorm{f}|: $\supnorm{f}$
+%
+% \DescribeMacro{\expands}
+% Formal expansions |f(t) \stackrel{t \to 0}{\expands} t^k|:
+% $f(t) \stackrel{t \to 0}{\expands} t^k$, \\
+% or with optional stretching factor (default is 2.5) |a \expands[4] b|: $a \expands[4] b$.
+%
+%
+% \subsubsection{Pseudodifferential Operators}
+% \label{sec:Doc_PseudodifferentialOperators}
+%
+% \DescribeMacro{\std}
+% Standard ordering as small subscript |\sigma_\std|: $\sigma_\std$ \\
+% Uses |scriptfont|
+%
+% \DescribeMacro{\Weyl}
+% Weyl ordering as small subscript |\sigma_\Weyl|: $\sigma_\Weyl$ \\
+% Uses |scriptfont|
+%
+% \DescribeMacro{\Op}
+% Operator for a symbol |\Op(f)|: $\Op(f)$ \\
+% Uses |operatorfont|
+%
+% \DescribeMacro{\Opstd}
+% Standard ordered operator for a symbol |\Opstd(f)|: $\Opstd(f)$ \\
+% Uses |operatorfont|
+%
+% \DescribeMacro{\OpWeyl}
+% Weyl ordered operator for a symbol |\OpWeyl(f)|: $\OpWeyl(f)$ \\
+% Uses |operatorfont|
+%
+%
+%\subsubsection{Function Spaces}
+%
+% \DescribeMacro{\spacename}
+% Font for specific functional spaces |\spacename{F}(X)|: $\spacename{F}(X)$ \\
+% Uses |spacefont|.
+%
+% \DescribeMacro{\Bounded}
+% Bounded functions |\Bounded(X)|: $\Bounded(X)$\\
+% Uses |spacefont|.
+%
+% \DescribeMacro{\Continuous}
+% Continuous functions |\Continuous(X)|: $\Continuous(X)$\\
+% Uses |spacefont|.
+%
+% \DescribeMacro{\Contbound}
+% Continuous bounded functions |\Contbound(X)|: $\Contbound(X)$\\
+% Uses |spacefont|.
+%
+% \DescribeMacro{\Fun}
+% $C^k$-functions (for $\Continuous$ use |\Continuous|) |\Fun(M)|: $\Fun(M)$ and |\Fun[\ell](M)|: $\Fun[\ell](M)$ \\
+% Uses |spacefont|.
+%
+% \DescribeMacro{\Cinfty}
+% Smooth functions |\Cinfty|: $\Cinfty(M)$\\
+% Uses |spacefont|.
+%
+% \DescribeMacro{\Comega}
+% Real-analytic functions |\Comega|: $\Comega(M)$\\
+% Uses |spacefont|.
+%
+% \DescribeMacro{\Holomorphic}
+% Holomorphic functions |\Holomorphic|: $\Holomorphic(U)$\\
+% Uses |spacefont|.
+%
+% \DescribeMacro{\AntiHolomorphic}
+% Anti-holomorphic functions |\AntiHolomorphic|: $\AntiHolomorphic(U)$\\
+% Uses |spacefont|.
+%
+% \DescribeMacro{\Schwartz}
+% Schwartz space |\Schwartz|: $\Schwartz(\mathbb{R}^n)$\\
+% Uses |spacefont|.
+%
+% \DescribeMacro{\Riemann}
+% Riemann integrable functions |\Riemann([a, b])|: $\Riemann([a, b])$ \\
+% Uses |spacefont|.
+%
+% \subsubsection{Locally Convex Analysis and Distributions}
+%
+% \DescribeMacro{\singsupp}
+% Singular support of a distribution |\singsupp u|: $\singsupp u$
+%
+% \DescribeMacro{\seminorm}
+% Font for generic seminorm |\seminorm{p}|: $\seminorm{p}$
+%
+% \DescribeMacro{\ord}
+% Order of a distribution |\ord(u)|: $\ord(u)$
+%
+% \DescribeMacro{\conv}
+% Convex hull |\conv(A)|: $\conv(A)$
+%
+% \DescribeMacro{\extreme}
+% Extreme points |\extreme(A)|: $\extreme(A)$
+%
+% \subsubsection{Hilbert Spaces and Operators}
+%
+% \DescribeMacro{\hilbert}
+% Font for Hilbert spaces |\hilbert{H}|: $\hilbert{H}$ \\
+% Uses |hilbertfont|
+%
+% \DescribeMacro{\prehilb}
+% Font for pre-Hilbert spaces |\prehilb{H}|: $\prehilb{H}$ \\
+% Uses |prehilbfont|.
+%
+% \DescribeMacro{\Adjointable}
+% Adjointable operators |\Adjointable(\hilbert{H})|:
+% $\Adjointable(\hilbert{H})$ or with optional argument
+% |\Adjointable[\algebra{A}](\hilbert{H})|: $\Adjointable[\algebra{A}](\hilbert{H})$ if
+% we have a Hilbert module over an algebra  $\algebra{A}$ instead.
+%
+% \DescribeMacro{\Finite}
+% Finite rank operators |\Finite(\hilbert{H})|: $\Finite(\hilbert{H})$
+% or with optional argument
+% |\Finite[\algebra{A}](\module{H})|: $\Finite[\algebra{A}](\module{H})$
+%
+% \DescribeMacro{\Compact}
+% Compact operators |\Compact(\hilbert{H})|: $\Compact(\hilbert{H})$
+% or with optional argument
+% |\Compact[\algebra{A}](\module{H})|: $\Compact[\algebra{A}](\module{H})$
+%
+% \DescribeMacro{\opdomain}
+% Domain of definition of an operator |\opdomain(A)|: $\opdomain(A)$ \\
+% Uses |\hilbertfont|.
+%
+% \DescribeMacro{\spec}
+% Spectrum of an operator |\spec(A)|: $\spec(A)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\closure}
+% Closure of an operator |\closure{A}|: $\closure{A}$
+%
+% \DescribeMacro{\res}
+% Resolvent set of an operator |\res(A)|: $\res(A)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\Res}
+% Resolvent of an operator |\Res_z(A)|: $\Res_z(A)$\\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\specrad}
+% Spectral radius of an operator |\specrad(A)|: $\specrad(A)$
+%
+% \DescribeMacro{\slim}
+% Strong limit |\slim_{n \longrightarrow \infty} A_n|: $\slim_{n \longrightarrow \infty} A_n$
+%
+% \DescribeMacro{\wlim}
+% Weak limit |\wlim_{n \longrightarrow \infty} A_n|: $\wlim_{n \longrightarrow \infty} A_n$
+%
+% \subsubsection{Dirac's Bra and Ket Notation}
+%
+% \DescribeMacro{\bra}
+% Dirac bra |\bra{\psi}|: $\bra{\psi}$
+%
+% \DescribeMacro{\ket}
+% Dirac ket |\ket{\phi}|: $\ket{\phi}$
+%
+% \DescribeMacro{\braket}
+% Dirac braket |\braket{\phi}{\psi}|: $\braket{\phi}{\psi}$
+%
+% \DescribeMacro{\ketbra}
+% Dirac ketbra |\ketbra{\phi}{\psi}|: $\ketbra{\phi}{\psi}$
+%
+% \subsubsection{Operator Algebras}
+%
+% \DescribeMacro{\Spec}
+% Spectrum of an algebra |\Spec(\algebra{A})|: $\Spec(\algebra{A})$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\Rad}
+% Radical of an algebra |\Rad(\algebra{A})|: $\Rad(\algebra{A})$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\ind}
+% Fredholm index (|\index| is already used!)  |\ind(A)|: $\ind(A)$  \\
+% Uses |operatorfont|.
+%
+% \subsubsection{Measure Theory and Integration}
+%
+% Here we need various function space of integrable functions
+% (calligraphic ones) and the corresponding quotients by zero
+% functions (roman ones):
+%
+% \DescribeMacro{\Measurable}
+% Measurable functions |\Measurable(X)|: $\Measurable(X)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\Meas}
+% Complex measures |\Meas(X)|: $\Meas(X)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\BoundMeas}
+% Bounded measurable functions |\BoundMeas(X)|: $\BoundMeas(X)$ \\
+% Uses |spacefont|.
+%
+% \DescribeMacro{\Lp}
+% Equivalence classes of $p$-integrable functions ($p$ is an optional
+% argument) |\Lp(X)|: $\Lp(X)$ and |\Lp[q](X)|: $\Lp[q](X)$
+%
+% \DescribeMacro{\Lone}
+% Equivalence classes of integrable functions |\Lone(X)|: $\Lone(X)$
+%
+% \DescribeMacro{\Ltwo}
+%  Equivalence classes of square integrable functions |\Ltwo(X)|: $\Ltwo(X)$
+%
+%  \DescribeMacro{\Linfty}
+%  Equivalence classes of essentially bounded functions |\Linfty(X)|: $\Linfty(X)$
+%
+%  \DescribeMacro{\Intp}
+% Space of $p$-integrable functions |\Intp(X)|:
+% $\Intp(X)$ and with optional argument
+% |\Intp[q](X)|: $\Intp[q](X)$
+%
+% \DescribeMacro{\Intone}
+% Space of integrable functions |\Intone(X)|: $\Intone(X)$
+%
+% \DescribeMacro{\Inttwo}
+% Space of square integrable functions |\Inttwo(X)|: $\Inttwo(X)$
+%
+% \DescribeMacro{\Intinfty}
+% Space of essentially bounded functions |\Intinfty(X)|: $\Intinfty(X)$
+%
+% \DescribeMacro{\essrange}
+% Essential range |\essrange(f)|: $\essrange(f)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\esssup}
+% Essential supremum |\esssup(f)|: $\esssup(f)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\esssupnorm}
+% Essential supremum norm |\esssupnorm{f}|: $\esssupnorm{f}$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\ac}
+% Absolutely continuous part of a measure |\mu_\ac|: $\mu_\ac$ \\
+% Uses |scriptfont|.
+%
+% \DescribeMacro{\sing}
+% Singular part of a measure |\mu_\sing|: $\mu_\sing$ \\
+% Uses |scriptfont|.
+%
+% \subsubsection{Limits} \label{sec:Doc_Limits}
+%
+%\DescribeMacro{\indlim}
+% Inductive (or direct) limit |\indlim_{i \in I} A_i|: $\indlim_{i \in I} A_i$\\
+% Uses |operatorfont|.
+%
+%\DescribeMacro{\projlim}
+% Projective (or inverse) limit |\projlim_{i \in I} A_i|: $\projlim_{i \in I} A_i$\\
+% Uses |operatorfont|.

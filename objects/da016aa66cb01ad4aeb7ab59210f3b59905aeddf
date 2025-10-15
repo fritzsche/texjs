@@ -1,0 +1,275 @@
+%%
+%% This is file `rigidnotation.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% rigidnotation.dtx  (with options: `package')
+%% This is a generated file.
+%% Copyright (C) 2024 Philippe Nadeau
+%% This file may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either
+%% version 1.3c of this license or (at your option) any later
+%% version. The latest version of this license is in:
+%% http://www.latex-project.org/lppl.txt
+%% and version 1.3c or later is part of all distributions of
+%% LaTeX version 2008-05-04 or later.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{rigidnotation}[2024/05/13 1.0.0 Rigid Notation]
+\usepackage{xparse}
+\usepackage{mathtools}
+
+\newsavebox{\RN@postbox}
+\newlength{\RN@postboxwd}
+\newsavebox{\RN@expbox}
+\newlength{\RN@expboxwd}
+\def\RN@prespace{0.08em}
+\def\RN@postspace{0.23em}
+
+\NewDocumentCommand{\SetConciseNotation}{g}
+{
+    \newif\IfRN@C
+    \IfNoValueTF{#1}
+    {
+        \RN@Ctrue
+    }
+    {
+        \IfBooleanTF{#1}
+        {
+            \RN@Ctrue
+        }
+        {
+            \RN@Cfalse
+        }
+    }
+}
+\def\UnsetConciseNotation{\SetConciseNotation{\BooleanFalse}}
+\NewDocumentCommand{\RN@makecmd}{omggg}
+{
+    \IfNoValueTF{#1}{\def\RN@symb{\boldsymbol{#2}}}{\def\RN@symb{#1{\boldsymbol{#2}}}}
+    \IfNoValueTF{#3}
+    {%subject is not specified
+        \IfNoValueTF{#4}
+        {%basis is not specified
+            \IfNoValueTF{#5}
+            {%subject, basis and coordinate system are not specified
+                \RN@symb
+            }
+            {%subject and basis are not specified, coordinate system is specified
+                \hspace{\RN@prespace}
+                \prescript{#5}{}{
+                    \hspace{-\RN@prespace}
+                    \RN@symb
+                }
+            }
+        }
+        {%basis is specified
+            \IfNoValueTF{#5}%
+            {%basis is specified, subject and coordinate system are not specified
+                \hspace{\RN@prespace}
+                \prescript{}{#4}{
+                    \hspace{-\RN@prespace}
+                    \RN@symb
+                }
+            }
+            {%basis and coordinate system are specified, subject is not specified
+                \IfEq{#4}{#5}
+                {
+                    \IfRN@C
+                    {%basis and coordinate system are the same and RN@C is set
+                        \hspace{\RN@prespace}
+                        \prescript{}{#4}{
+                            \hspace{-\RN@prespace}
+                            \RN@symb
+                        }
+                    }
+                    {
+                        \hspace{\RN@prespace}
+                        \prescript{#5}{#4}{
+                            \hspace{-\RN@prespace}
+                            \RN@symb
+                        }
+                    }
+                }
+                {
+                    \hspace{\RN@prespace}
+                    \prescript{#5}{#4}{
+                        \hspace{-\RN@prespace}
+                        \RN@symb
+                    }
+                }
+            }
+        }
+        %If there is no subject, no space is needed on the right of the symbol
+        \setlength{\RN@postboxwd}{0pt}
+    }
+    {%subject is specified
+        \IfNoValueTF{#4}
+        {%basis is not specified
+            \IfNoValueTF{#5}
+            {%subject is specified, basis and coordinate system are not specified
+                \RN@symb
+                \hspace{-\RN@postspace}
+                \prescript{}{#3}{}
+            }
+            {%basis is not specified, subject and coordinate system are specified
+                \hspace{\RN@prespace}
+                \prescript{#5}{}{
+                    \hspace{-\RN@prespace}
+                    \RN@symb
+                }
+                \hspace{-\RN@postspace}
+                \prescript{}{#3}{}
+            }
+        }
+        {%basis is specified
+            \IfNoValueTF{#5}
+            {%subject and basis are specified, coordinate system is not specified
+                \hspace{\RN@prespace}
+                \prescript{}{#4}{
+                    \hspace{-\RN@prespace}
+                    \RN@symb
+                }
+                \hspace{-\RN@postspace}
+                \prescript{}{#3}{}
+            }
+            {%subject, basis, and coordinate system are specified
+                \def\RN@argfour{#4}
+                \def\RN@argfive{#5}
+                \ifx\RN@argfour\RN@argfive
+                {
+                    \IfRN@C
+                    {%basis and coordinate system are the same and RN@C is set
+                        \hspace{\RN@prespace}
+                        \prescript{}{#4}{
+                            \hspace{-\RN@prespace}
+                            \RN@symb
+                        }
+                        \hspace{-\RN@postspace}
+                        \prescript{}{#3}{}
+                    }
+                    \else
+                    {
+                        \hspace{\RN@prespace}
+                        \prescript{#5}{#4}{
+                            \hspace{-\RN@prespace}
+                            \RN@symb
+                        }
+                        \hspace{-\RN@postspace}
+                        \prescript{}{#3}{}
+                    }
+                    \fi
+                }
+                \else
+                {
+                    \hspace{\RN@prespace}
+                    \prescript{#5}{#4}{
+                        \hspace{-\RN@prespace}
+                        \RN@symb
+                    }
+                    \hspace{-\RN@postspace}
+                    \prescript{}{#3}{}
+                }
+                \fi
+            }
+        }
+        %If there is a subject, we need to know the width
+        %of the symbol to bring the exponent closer
+        \sbox{\RN@postbox}{$#3$}
+        \setlength{\RN@postboxwd}{\wd\RN@postbox}
+    }
+    %If the following command is an exponent-type command,
+    %we bring it closer to the symbol.
+    %The next line has to be the last of the macro
+    \@ifnextchar^{\hspace{\RN@postspace}\hspace{-\RN@postboxwd}}{}
+}
+\NewDocumentCommand{\NewRigidNotation}{mm}%
+{%
+    \expandafter\NewDocumentCommand\csname #1\endcsname{oggg}%
+    {%
+        \expandafter\csname RN@makecmd\endcsname[##1]{#2}{##2}{##3}{##4}%
+    }%
+}
+\def\Tran{%
+    \sbox{\RN@expbox}{${\scriptscriptstyle\mathsf{T}}$}%
+    \setlength{\RN@expboxwd}{\wd\RN@expbox}%
+    \ifnum \RN@postboxwd>0%
+        \hspace{\RN@postspace}%
+        \hspace{-\RN@postboxwd}%
+        \ifnum \RN@postboxwd>\RN@expboxwd%
+            \mathmakebox[\RN@postboxwd][l]{%
+                {}^{\scriptscriptstyle\mathsf{T}}%
+            }%
+        \else%
+            \mathmakebox[\RN@expboxwd][l]{%
+                {}^{\scriptscriptstyle\mathsf{T}}%
+            }%
+        \fi%
+    \else%
+        ^{\scriptscriptstyle\mathsf{T}}%
+    \fi%
+}
+\def\Inv{%
+    \sbox{\RN@expbox}{${\scriptscriptstyle{-1}}$}%
+    \setlength{\RN@expboxwd}{\wd\RN@expbox}%
+    \ifnum \RN@postboxwd>0%
+        \hspace{\RN@postspace}%
+        \hspace{-\RN@postboxwd}%
+        \ifnum \RN@postboxwd>\RN@expboxwd%
+            \mathmakebox[\RN@postboxwd][l]{%
+                {}^{\scriptscriptstyle{-1}}%
+            }%
+        \else%
+            \mathmakebox[\RN@expboxwd][l]{%
+                {}^{\scriptscriptstyle{-1}}%
+            }%
+        \fi%
+    \else%
+        ^{\scriptscriptstyle{-1}}%
+    \fi%
+}
+\def\Herm{%
+    \sbox{\RN@expbox}{${\scriptscriptstyle\mathsf{H}}$}%
+    \setlength{\RN@expboxwd}{\wd\RN@expbox}%
+    \ifnum \RN@postboxwd>0%
+        \hspace{\RN@postspace}%
+        \hspace{-\RN@postboxwd}%
+        \ifnum \RN@postboxwd>\RN@expboxwd%
+            \mathmakebox[\RN@postboxwd][l]{%
+                {}^{\scriptscriptstyle\mathsf{H}}%
+            }%
+        \else%
+            \mathmakebox[\RN@expboxwd][l]{%
+                {}^{\scriptscriptstyle\mathsf{H}}%
+            }%
+        \fi%
+    \else%
+        ^{\scriptscriptstyle\mathsf{H}}%
+    \fi%
+}
+\def\Conj{%
+    \sbox{\RN@expbox}{${\scriptscriptstyle\ast}$}%
+    \setlength{\RN@expboxwd}{\wd\RN@expbox}%
+    \ifnum \RN@postboxwd>0%
+        \hspace{\RN@postspace}%
+        \hspace{-\RN@postboxwd}%
+        \ifnum \RN@postboxwd>\RN@expboxwd%
+            \mathmakebox[\RN@postboxwd][l]{%
+                {}^{\scriptscriptstyle\ast}%
+            }%
+        \else%
+            \mathmakebox[\RN@expboxwd][l]{%
+                {}^{\scriptscriptstyle\ast}%
+            }%
+        \fi%
+    \else%
+        ^{\scriptscriptstyle\ast}%
+    \fi%
+}
+\NewRigidNotation{Pos}{p}
+\NewRigidNotation{Rot}{R}
+\NewRigidNotation{Pose}{T}
+\UnsetConciseNotation
+\endinput
+%%
+%% End of file `rigidnotation.sty'.

@@ -1,0 +1,59 @@
+%%%
+% Kakuro
+%%%
+\def\filedateKakuro{2025/05/27}%
+\def\fileversionKakuro{0.1a}%
+\message{-- \filedateKakuro\space v\fileversionKakuro}%
+%
+\setKVdefault[Kakuro]{CouleurCase=LightGray,TLargeur=5,THauteur=5,Solution=false,Largeur=2em,Aide=false,CouleurSolution=Black,Tailles=false,ListeNombres={},Taille={}}%,Taille=5
+\defKV[Kakuro]{%
+  ListeNombres=\ifempty{#1}{}{\setKV[Kakuro]{Aide}},%
+  Taille=\ifempty{#1}{}{\setKV[Kakuro]{Tailles}}%
+}%
+
+\newlength\PfCKakuro%
+
+\NewDocumentCommand\Kakuro{o m}{%
+  \useKVdefault[Kakuro]%
+  \setKV[Kakuro]{#1}%
+  \ifboolKV[Kakuro]{Tailles}{%
+    \setKV[Kakuro]{THauteur=\useKV[Kakuro]{Taille}}%
+    \setKV[Kakuro]{TLargeur=\useKV[Kakuro]{Taille}}%
+  }{}%
+  \setlength{\PfCKakuro}{\useKV[Kakuro]{Largeur}+\tabcolsep}%
+  \setsepchar[*]{,*/}\reademptyitems%
+  \readlist*\ListeCasesKK{#2}%
+  \setsepchar{,}\reademptyitems%
+  \ifboolKV[Kakuro]{Aide}{%
+    \xdef\ListeAvantNombres{\useKV[Kakuro]{ListeNombres}}%
+    \readlist*\ListeKakuroNombres{\ListeAvantNombres}%
+  }{}%
+  \savecomparemode%
+  \comparestrict%
+  \begin{NiceTabular}{*{\useKV[Kakuro]{TLargeur}}{m{\useKV[Kakuro]{Largeur}}}}[hvlines]%,color-inside]%
+    \xintFor* ##1 in {\xintSeq{0}{\fpeval{\useKV[Kakuro]{THauteur}-1}}}\do{%
+      \xintFor* ##2 in {\xintSeq{1}{\useKV[Kakuro]{TLargeur}}}\do{%
+        \rule{0pt}{\PfCKakuro}%
+        \StrCompare{\ListeCasesKK[\fpeval{\useKV[Kakuro]{TLargeur}*##1+##2},1]}{*}[\PfCTestBlack]%
+        \xintifboolexpr{\PfCTestBlack==0}{%
+          \Block[fill=black]{1-1}{}%
+        }{%
+          \xintifboolexpr{\listlen\ListeCasesKK[\fpeval{\useKV[Kakuro]{TLargeur}*##1+##2}]==2}{%
+            \Block[fill=\useKV[Kakuro]{CouleurCase}]{1-1}{\diagbox{\ListeCasesKK[\fpeval{\useKV[Kakuro]{TLargeur}*##1+##2},1]}{\ListeCasesKK[\fpeval{\useKV[Kakuro]{TLargeur}*##1+##2},2]}}%
+          }{%
+            \Block{1-1}{\ifboolKV[Kakuro]{Solution}{\Large\color{\useKV[Kakuro]{CouleurSolution}}\num{\ListeCasesKK[\fpeval{\useKV[Kakuro]{TLargeur}*##1+##2},1]}}{%
+                \ifboolKV[Kakuro]{Aide}{%
+                  \xintFor* ##3 in{\xintSeq{1}{\ListeKakuroNombreslen}}\do{%
+                    \Block{1-1}{\xintifboolexpr{\ListeCasesKK[\fpeval{\useKV[Kakuro]{TLargeur}*##1+##2},1]==\ListeKakuroNombres[##3]}{\Large\color{\useKV[Kakuro]{CouleurSolution}}\num{\ListeCasesKK[\fpeval{\useKV[Kakuro]{TLargeur}*##1+##2},1]}}{}}%
+                  }%
+                }{}%
+              }%
+            }%
+          }%
+        }%
+        \xintifForLast{\\}{&}%
+      }%
+    }%
+  \end{NiceTabular}
+  \restorecomparemode%
+}%

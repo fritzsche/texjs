@@ -1,0 +1,1257 @@
+%%%
+% Cards
+%%%
+\def\filedateCartesJeux{2024/08/04}%
+\def\fileversionCartesJeux{0.1}%
+\message{-- \filedateCartesJeux\space v\fileversionCartesJeux}%
+%
+\setKVdefault[Cards]{Formats=false,Largeur=165,Hauteur=250,HauteurTheme=40,Marge=12,Landscape=false,Couleur=Cornsilk,CouleurAr=Cornsilk,Theme=Th\'eor\`eme\\de Pythagore,ThemeSol=Solution,AfficheTheme=false,Trame=false,Jointes=false,TrameVisible=false,RayonArc=5pt,Titre=false,NomTitre=Jeu 1,Loop,JaiQuia=false,Eleve=false,BackgroundAv=false,BackgroundAr=false,%ImageAv=4813762.jpg,ImageAr=4813762.jpg,
+  AffichageSolution=true,SolutionSeule=false,%
+  % Pour Cyril
+  Methode=false,%
+  % Primaire
+  Lecture=false,Majuscule,Minuscule,Cursive,Math=false,
+  % Pour la boite
+  ANbCartes=false,ATypeJeu=false,ANiveau=false,ANumero=false,AThemeJeu=false,CouleurTheme=black,CouleurNiveau=black,CouleurType=black,CouleurNb=black,
+  % Pour le trivial
+  Trivial=false,Symboles={\faInfinity,\faSignal,\faProjectDiagram,\faHiking,\faRuler,\faLockOpen},%
+  % pour les configurations et boites
+  Maths={},ImageAv={},ImageAr={},NbCartes={},TypeJeu={},Niveau={},Numero={},ThemeJeu={},ThemeJaiQuiA={},Format={}%
+}%
+% Pour Lecture et annuler tout
+\defKV[Cards]{%
+  Maths=\ifempty{#1}{}{\setKV[Cards]{Majuscule=false}\setKV[Cards]{Minuscule=false}\setKV[Cards]{Cursive=false}\setKV[Cards]{Math}},%
+  ImageAv=\ifempty{#1}{}{\setKV[Cards]{BackgroundAv}},%
+  ImageAr=\ifempty{#1}{}{\setKV[Cards]{BackgroundAr}},%
+  % Pour moduler l'affichage de textes sur la boite.
+  NbCartes=\ifempty{#1}{}{\setKV[Cards]{ANbCartes}},%
+  TypeJeu=\ifempty{#1}{}{\setKV[Cards]{ATypeJeu}},%
+  Niveau=\ifempty{#1}{}{\setKV[Cards]{ANiveau}},%
+  Numero=\ifempty{#1}{}{\setKV[Cards]{ANumero}},%
+  ThemeJeu=\ifempty{#1}{}{\setKV[Cards]{AThemeJeu}},%
+  ThemeJaiQuiA=\ifempty{#1}{}{\setKV[Cards]{AfficheTheme}},%
+  Format=\ifempty{#1}{}{\setKV[Cards]{Formats}}%
+}%
+\newtcolorbox{Mybox}[3]{%
+  enhanced,%
+  nobeforeafter,%
+  left=0pt,right=0pt,top=0pt,%
+  text fill,%
+  width=\largeurcarte,%
+  height=\hauteurcarte,%
+  arc=\PfCRayonArc,%
+  underlay={%
+    \ifboolKV[Cards]{BackgroundAv}{%
+      \begin{tcbclipinterior}
+        \node[anchor=center,opacity=1]
+        at (interior.center) {%
+          \includegraphics[%
+          height=\tcb@height,
+          width=\tcb@width,
+          ]{\useKV[Cards]{ImageAv}}};%
+      \end{tcbclipinterior}%
+    }{}%
+  },%
+  overlay unbroken and first={%
+    \coordinate[yshift=-0.5\hauteurtitre] (A1) at (frame.north west);%
+    \coordinate[yshift=-0.5\hauteurtitre] (B1) at (frame.north east);%
+    \coordinate[yshift=-\hauteurtitre] (A) at (frame.north west);%
+    \coordinate[yshift=-\hauteurtitre] (B) at (frame.north east);%
+    \coordinate[xshift=1.5pt,yshift=8mm] (S1) at (frame.south west);%
+    \coordinate[xshift=-1.5pt,yshift=8mm] (S2) at (frame.south east);%
+    \coordinate[xshift=3mm+(\largeurtitre/2)] (A2) at (A1);%
+    \coordinate[xshift=-3mm-(\largeurtitre/2)] (B2) at (B1);%
+    \node[rounded corners, draw=black, rectangle,minimum height=1cm,text width=\largeurtitre,fill=TrameCouleur] (T1) at (A2){};%
+    \node[TexteCouleur] (T1a) at (T1){\Large #1};%
+    \node[yshift=-0.65cm] (T1b) at (T1){\tiny r\'eponse pr\'ec\'edente};%
+    \node[inner sep=0pt,rounded corners, rectangle, draw=black,minimum height=1cm,text width=\largeurtitre,fill=TrameCouleur] (T2) at (B2){};%
+    \node[inner sep=0pt,TexteCouleur] (T2a) at (T2){%
+      \begin{minipage}{\largeurtitre}%
+        \begin{center}%
+          #2%
+        \end{center}%
+      \end{minipage}%
+    };%
+    \node[yshift=-0.65cm] (T2b) at (T2){};%
+    \ifboolKV[Cards]{Titre}{\node[] at (T2b) {\tiny\useKV[Cards]{NomTitre}};}{}%
+    \node[rectangle,xshift=5pt,yshift=4.25mm,minimum width=2em,rounded corners,fill=TrameCouleur,draw=black,anchor=west] (R) at (frame.south west) {\color{black}\Large\bfseries #3};%
+    \draw[dashed] (S1) -- (S2);%
+  },%
+  colback=white,%
+  colbacktitle=TrameCouleur,%
+}%
+\newtcolorbox{MyboxAr}{%
+  enhanced,%
+  nobeforeafter,%
+  left=0pt,right=0pt,top=0pt,%
+  text fill,%
+  width=\largeurcarte,%
+  height=\hauteurcarte,%
+  arc=\PfCRayonArc,%
+  underlay={%
+    \ifboolKV[Cards]{BackgroundAr}{%
+      \begin{tcbclipinterior}
+        \node[anchor=center,opacity=1]
+        at (interior.center) {%
+          \includegraphics[%
+          height=\tcb@height,
+          width=\tcb@width,
+          ]{\useKV[Cards]{ImageAr}}};%
+      \end{tcbclipinterior}%
+    }{}%
+  },%
+  colback=white
+}%
+\newcommand\PfCTexteJai{J'ai}%
+\newcommand\PfCTexteJesuis{Je suis\dots}%
+\newcommand\PfCTexteQuia{Qui a ?}%
+
+\makeatletter
+\newtcolorbox{MyboxJQ}[2]{%
+  enhanced,%
+  nobeforeafter,%
+  left=0pt,right=0pt,top=0pt,%
+  text fill,%
+  width=\largeurcarte,%
+  height=\hauteurcarte,%
+  arc=\PfCRayonArc,%
+  underlay={%
+    \ifboolKV[Cards]{BackgroundAv}{%
+      \begin{tcbclipinterior}
+        \node[anchor=center,opacity=1]
+        at (interior.center) {%
+          \includegraphics[%
+          height=\tcb@height,
+          width=\tcb@width,
+          ]{\useKV[Cards]{ImageAv}}};%
+      \end{tcbclipinterior}%
+    }{}%
+  },%
+  overlay unbroken and first={%
+    \coordinate[yshift=-0.5\hauteurtitre] (A1) at (frame.north west);
+    \ifboolKV[Cards]{Eleve}{%
+      \coordinate[yshift=0.1\hauteurcarte] (S3) at (frame.center);
+      \coordinate[yshift=-0.1\hauteurcarte] (S5) at (frame.center);
+    }{%
+      \coordinate (S3) at (frame.center);
+      \coordinate (S5) at (frame.center);
+    }%
+    \coordinate[yshift=3mm] (C3) at (frame.south);
+    \coordinate[xshift=\largeurcarte/2] (A3) at (A1);
+    %Partie Haute
+    \node[rounded corners, draw=black, rectangle,minimum height=1cm,text width=\largeurcarte-6mm,fill=TrameCouleur] (T1) at (A3){};
+    \node[TexteCouleur] at (T1){\Large \PfCTexteJai};
+    \node[minimum height=1cm,text width=\largeurcarte-6mm] (PointTexte1) at ($(A3)!0.5!(S3)$) {\begin{minipage}{\largeurcarte-6mm}%
+        \begin{center}%
+          #1%
+        \end{center}%
+      \end{minipage}%
+    };
+    % Partie Milieu
+    \ifboolKV[Cards]{Eleve}{%
+      \node[rounded corners, draw=black, rectangle,minimum height=1cm,text width=\largeurcarte-6mm,fill=TrameCouleur] (T3) at (S3){};
+    \node[TexteCouleur] at (T3){\Large \PfCTexteJesuis};
+    }{}
+    % Partie Basse
+    \node[rounded corners, draw=black, rectangle,minimum height=1cm,text width=\largeurcarte-6mm,fill=TrameCouleur] (T2) at (S5){};
+    \node[TexteCouleur] at (T2){\Large \PfCTexteQuia};
+    \node[minimum height=1cm,text width=\largeurcarte-6mm] (PointTexte2) at ($(C3)!0.5!(S5)$) {\begin{minipage}{\largeurcarte-6mm}%
+        \begin{center}%
+          #2%
+        \end{center}%
+      \end{minipage}};
+  },
+  colback=white
+}%
+%
+\newtcolorbox{MyboxJQAr}[1]{%
+  enhanced,%
+  nobeforeafter,%
+  left=0pt,right=0pt,top=0pt,%
+  text fill,%
+  width=\largeurcarte,%
+  height=\hauteurcarte,%
+  arc=\PfCRayonArc,%
+  underlay={%
+    \ifboolKV[Cards]{BackgroundAr}{%
+      \begin{tcbclipinterior}
+        \node[anchor=center,opacity=1]
+        at (interior.center) {%
+          \includegraphics[%
+          height=\tcb@height,
+          width=\tcb@width,
+          ]{\useKV[Cards]{ImageAr}}};%
+      \end{tcbclipinterior}%
+    }{}%
+  },%
+  overlay unbroken and first={%
+    \ifboolKV[Cards]{AfficheTheme}{%
+      % \coordinate[yshift=-0.5\hauteurtitre] (A) at (frame.north);%
+      \coordinate[yshift=-2.5mm] (A) at (frame.north);%
+      \node[anchor=north,rounded corners,draw=black,rectangle,minimum height=1cm,text width=\largeurcarte-6mm,fill=TrameCouleur] at (A){\begin{minipage}{\largeurcarte-6mm}%
+         \begin{center}%
+        #1%
+         \end{center}%
+         \end{minipage}
+      };%
+    }{}%
+  },%
+  colback=white
+}%
+%\makeatother
+
+%\makeatletter
+%https://tex.stackexchange.com/questions/347434/clip-background-image-inside-tcolorbox
+\newtcolorbox{MyboxSimpleAv}[1]{%
+  enhanced,%
+  nobeforeafter,%
+  left=0pt,right=0pt,top=\hauteurtitre,bottom=0pt,%
+  text fill,%
+  width=\largeurcarte,%
+  height=\hauteurcarte,%
+  arc=\PfCRayonArc,%
+  colback=white,%
+  underlay={%
+    \ifboolKV[Cards]{BackgroundAv}{%
+      \begin{tcbclipinterior}
+        \node[anchor=center,opacity=1]
+        at (interior.center) {%
+          \includegraphics[%
+          height=\tcb@height,
+          width=\tcb@width,
+          ]{\useKV[Cards]{ImageAv}}};%
+      \end{tcbclipinterior}%
+    }{}%
+  },%
+  overlay unbroken and first={%
+    \coordinate[yshift=-0.5\hauteurtitre] (A) at (frame.north);%
+    \node[rounded corners, draw=black, rectangle,minimum height=1cm,text width=\largeurcarte-6mm,fill=TrameCouleur] (T1) at (A){\begin{minipage}{\largeurcarte-6mm}%
+        \begin{center}%
+          #1%
+        \end{center}%
+      \end{minipage}};%
+    \node[yshift=-0.5em-0.5\hauteurtitre] (B) at (A){};%
+    \ifboolKV[Cards]{Titre}{\node[fill=white] at (B) {\useKV[Cards]{NomTitre}};}{}%
+  }%
+}%
+
+\newtcolorbox{MyboxSimpleAr}[1]{%
+  enhanced,%
+  nobeforeafter,%
+  left=0pt,right=0pt,top=\hauteurtitre,bottom=0pt,%
+  text fill,%
+  width=\largeurcarte,%
+  height=\hauteurcarte,%
+  arc=\PfCRayonArc,%
+  colback=white,%
+  underlay={%
+    \ifboolKV[Cards]{BackgroundAr}{%
+      \begin{tcbclipinterior}
+        \node[anchor=center,opacity=1]
+        at (interior.center) {%
+          \includegraphics[%
+          height=\tcb@height,
+          width=\tcb@width,
+          ]{\useKV[Cards]{ImageAr}}};
+      \end{tcbclipinterior}%,%
+    }{}%
+  },%
+  overlay unbroken and first={%
+    \coordinate[yshift=-0.5\hauteurtitre] (A) at (frame.north);%
+    \node[rounded corners, draw=black, rectangle,minimum height=1cm,text width=\largeurcarte-6mm,fill=TrameCouleurAr] (T1) at (A){\begin{minipage}{\largeurcarte-6mm}%
+        \begin{center}%
+          #1%
+        \end{center}%
+      \end{minipage}};%
+  }%
+}%
+\makeatother
+
+\newtcolorbox{MyboxTrivial}[1][]{%
+  enhanced,%
+  nobeforeafter,%
+  left=0pt,right=0pt,top=0pt,bottom=0pt,%
+  text fill,%
+  width=\largeurcarte,%
+  height=\hauteurcarte,%
+  arc=\PfCRayonArc,%
+  colback=white,%
+  #1
+}%
+
+\newlength{\largeurcards}%
+\newlength{\hauteurcards}%
+\newlength{\margecards}%
+\newlength{\largeurcarte}%
+\newlength{\hauteurcarte}%
+\newlength{\hauteurtitre}%
+\newlength{\largeurtitre}%
+
+\newlength{\margeh}%
+\newlength{\margev}%
+\newlength{\PfCRayonArc}%
+
+\newlength{\PfCCardsH}%pour retenir en cas de décalage sur une page paire
+\newlength{\PfCCardsEcartH}%Pour décaler sur une page paire
+\newlength{\PfCCardsV}%pour retenir en cas de décalage sur une page paire
+\newlength{\PfCCardsEcartV}%Pour décaler sur une page paire
+\setlength{\PfCCardsEcartH}{0pt}%
+\setlength{\PfCCardsEcartV}{0pt}%
+
+\NewDocumentCommand\Cartes{o +m}{%
+  \CartesPerso[#1]{#2}%
+}%
+
+\NewDocumentEnvironment{TramePerso}{+b}{%
+  \ifodd\thepage%
+    \setlength{\PfCCardsH}{\largeurcards}%
+    \setlength{\PfCCardsV}{\hauteurcards}%
+  \else%
+    \setlength{\PfCCardsH}{\largeurcards+\PfCCardsEcartH}%
+    \setlength{\PfCCardsV}{\hauteurcards+\PfCCardsEcartV}%
+  \fi%
+  \begin{tikzpicture}[remember picture,overlay]
+    \coordinate[yshift=-\margev] (A) at (current page.north west);%
+    \coordinate[yshift=-\margev] (B) at (current page.north east);%
+    \xintFor* ##1 in{\xintSeq{0}{\PfCNbCartesHaut}}\do{%
+      \coordinate[yshift=-##1*\hauteurcards] (A##1) at (A);%
+      \coordinate[yshift=-##1*\hauteurcards] (B##1) at (B);%
+    }%
+    \coordinate[xshift=\margeh] (C) at (current page.north west);%
+    \coordinate[xshift=\margeh] (D) at (current page.south west);%
+    \xintFor* ##1 in{\xintSeq{0}{\PfCNbCartesHaut}}\do{%
+      \coordinate[xshift=\fpeval{##1*\largeurcards}] (C##1) at (C);%
+      \coordinate[xshift=\fpeval{##1*\largeurcards}] (D##1) at (D);%
+    }%
+    \ifboolKV[Cards]{TrameVisible}{%
+      \xintFor* ##1 in{\xintSeq{0}{\PfCNbCartesHaut}}\do{%
+        \draw (A##1)--(B##1);
+      }%
+      \xintFor* ##1 in{\xintSeq{0}{\PfCNbCartesHaut}}\do{%
+        \draw (C##1)--(D##1);
+      }%
+    }{}%
+    % points pour placer les cartes
+    \coordinate[xshift=\margeh+0.5\PfCCardsH,yshift=-0.5\PfCCardsV] (Carte0) at (A);%
+    \xintFor* ##1 in{\xintSeq{0}{\fpeval{\PfCNbCartesHaut-1}}}\do{%
+      \xintFor* ##2 in{\xintSeq{0}{\fpeval{\PfCNbCartesLarg-1}}}\do{%
+        \xdef\PfCNumeroCartes{\fpeval{##1*\PfCNbCartesLarg+##2+1}}%
+        \coordinate[xshift=\fpeval{##2*\largeurcards},yshift=\fpeval{-##1*\hauteurcards}] (Carte\PfCNumeroCartes) at (Carte0);%
+      }%
+    }%
+    #1%
+  \end{tikzpicture}%
+}{}%
+
+% Pour construire la liste des cartes lors d'un ajout automatiques
+\newtoks\TokListeAjout
+\def\UpdatetoksCarteSeule#1/#2\nil{\addtotok\TokListeAjout{#1/#2}}%
+\def\UpdatetoksCartes#1/#2\nil{\addtotok\TokListeAjout{§#1/#2}}%
+\def\UpdatetoksCartesDefinies#1/#2\nil{\addtotok\TokListeAjout{#1/#2§}}%
+
+\NewDocumentCommand\CartesPerso{o +m}{%
+  \TokListeAjout{}
+%  0/ La largeur est \useKV[Cards]{Largeur} - La hauteur est \useKV[Cards]{Hauteur}.\par
+  \useKVdefault[Cards]%
+  \setKV[Cards]{#1}%
+%  1/ La largeur est \useKV[Cards]{Largeur} - La hauteur est \useKV[Cards]{Hauteur}.\par
+  \setsepchar[*]{§*/}%
+  \readlist*\ListeCards{#2}%
+  \setsepchar{,}%
+  % Dimensions extérieures des cartes
+  \ifboolKV[Cards]{Landscape}{%
+    \setlength{\largeurcards}{\fpeval{\useKV[Cards]{Hauteur}}pt}%
+    \setlength{\hauteurcards}{\fpeval{\useKV[Cards]{Largeur}}pt}%
+  }{%
+    \setlength{\largeurcards}{\fpeval{\useKV[Cards]{Largeur}}pt}%
+    \setlength{\hauteurcards}{\fpeval{\useKV[Cards]{Hauteur}}pt}%
+  }%
+  \setlength{\margecards}{\fpeval{\useKV[Cards]{Marge}}pt}%
+%  2/    La largeur est \fpeval{\largeurcards} - La hauteur est \fpeval{\hauteurcards}.\par
+  % Format prédéfinis
+  \ifboolKV[Cards]{Formats}{%
+%      Ici, le format est \useKV[Cards]{Format}
+%  3/    La largeur est \fpeval{\largeurcards} - La hauteur est \fpeval{\hauteurcards}.\par
+    \comparestrict%
+    \IfEq{\useKV[Cards]{Format}}{A5p}{%
+      % Dimensions extérieures des cartes
+    \setlength{\largeurcards}{405pt}%
+    \setlength{\hauteurcards}{538pt}%
+%    4/    La largeur est \fpeval{\largeurcards} - La hauteur est \fpeval{\hauteurcards}.\par
+    }{}%
+    \IfEq{\useKV[Cards]{Format}}{A6p}{%
+    \setlength{\largeurcards}{405pt}%
+    \setlength{\hauteurcards}{283pt}%
+    }{}%
+    \IfEq{\useKV[Cards]{Format}}{Huitp}{%
+      \setlength{\largeurcards}{269pt}%
+      \setlength{\hauteurcards}{283pt}%
+    }{}%
+  }{%
+    % 
+    % Dimensions extérieures des cartes
+%    \setlength{\largeurcards}{\fpeval{\useKV[Cards]{Largeur}}mm}%
+%    \setlength{\hauteurcards}{\fpeval{\useKV[Cards]{Hauteur}}mm}%
+  }%
+  \let\Trame\TramePerso\let\endTrame\endTramePerso
+  % Dimensions intérieures des cartes
+  \setlength{\hauteurcarte}{\fpeval{\hauteurcards-\margecards}pt}%
+  \setlength{\largeurcarte}{\fpeval{\largeurcards-\margecards}pt}%
+  % nombre de cartes sur la largeur et sur la hauteur
+  \xdef\PfCNbCartesLarg{\fpeval{floor(\paperwidth/\largeurcards)}}%
+  \xdef\PfCNbCartesHaut{\fpeval{floor(\paperheight/\hauteurcards)}}%
+  \xdef\PfCNbCartesPerso{\fpeval{\PfCNbCartesLarg*\PfCNbCartesHaut}}%
+  % On vérifie si le nombres de déclarations de cartes est compatible avec le nombre total de cartes calculé automatiquement. Mais pas dans le mode Trivial et surtout pas dans le cas où la trame n'est pas utilisée !
+  \ifboolKV[Cards]{Trame}{%
+  \ifboolKV[Cards]{Trivial}{}{%
+      \xintifboolexpr{\PfCNbCartesPerso==\ListeCardslen}{%
+        % Je ne dois pas ajouter de cartes
+      }{%
+%         Je passe ici et j'ajoute des cartes\\
+%         Je dois en ajouter \fpeval{\PfCNbCartesPerso-\ListeCardslen}\\%
+        \ifnum\fpeval{\PfCNbCartesPerso-\ListeCardslen}>0
+          \foreachitem\compteur\in\ListeCards{\expandafter\UpdatetoksCartesDefinies\compteur\nil}%
+          \ifboolKV[Cards]{Methode}{%
+            \def\PfCFooAjout{Non connue/Non connue/Non connue/Non connue/Non connue/Non connue}%
+          }{%
+            \def\PfCFooAjout{Non connue/Non connue}%
+          }%
+        \expandafter\UpdatetoksCarteSeule\PfCFooAjout\nil
+        \ifnum\fpeval{\PfCNbCartesPerso-\ListeCardslen}>1
+        \xintFor* ##1 in {\xintSeq{2}{\fpeval{\PfCNbCartesPerso-\ListeCardslen}}}\do{%
+          \expandafter\UpdatetoksCartes\PfCFooAjout\nil
+        }%
+        \fi%
+%        le Tok : \the\TokListeAjout\\
+        \xdef\PfCFooAjoutBis{\the\TokListeAjout}%
+        \setsepchar[*]{§*/}%
+        \readlist*\ListeCards{\PfCFooAjoutBis}%
+        \setsepchar{,}%
+        \fi%
+      }%
+  }}{}%
+  % fin Ajout automatique
+  % Jointes
+\ifboolKV[Cards]{Jointes}{\setlength{\largeurcards}{\largeurcarte}\setlength{\hauteurcards}{\hauteurcarte}
+    \setlength{\margeh}{\fpeval{(\paperwidth-\PfCNbCartesLarg*\largeurcards)/2}pt}%
+    \setlength{\margev}{\fpeval{(\paperheight-\PfCNbCartesHaut*\hauteurcards)/2}pt}%
+  }{%
+  % décalage entre les cartes ou pas
+  \ifnum\PfCNbCartesLarg>2\relax
+     \setlength{\margeh}{\fpeval{(\paperwidth-\PfCNbCartesLarg*\largeurcards)/(\PfCNbCartesLarg-1)}pt}%
+     % \setlength{\margeh}{0pt}
+   \else
+     \setlength{\margeh}{\fpeval{(\paperwidth-\PfCNbCartesLarg*\largeurcards)/(\PfCNbCartesLarg+1)}pt}%
+  \fi
+  \ifnum\PfCNbCartesHaut>2\relax
+    \setlength{\margev}{\fpeval{(\paperheight-\PfCNbCartesHaut*\hauteurcards)/(\PfCNbCartesHaut-1)}pt}%
+  \else
+    \setlength{\margev}{\fpeval{(\paperheight-\PfCNbCartesHaut*\hauteurcards)/(\PfCNbCartesHaut+1)}pt}%
+  \fi
+  %
+  }%
+  \setlength{\hauteurtitre}{\fpeval{\useKV[Cards]{HauteurTheme}}pt}%
+  \setlength{\largeurtitre}{\fpeval{(\largeurcarte-25)/2}pt}%
+  \colorlet{TexteCouleur}{black}%
+  \colorlet{TrameCouleur}{\useKV[Cards]{Couleur}}%
+  \colorlet{TrameCouleurAr}{\useKV[Cards]{CouleurAr}}%
+  \setlength{\PfCRayonArc}{\useKV[Cards]{RayonArc}}%
+  \ifboolKV[Cards]{Trivial}{%
+    \CartesTrivialPerso%
+  }{%
+    \ifboolKV[Cards]{JaiQuia}{%
+      \CartesJaiQuiaPerso%
+    }{%
+      \ifboolKV[Cards]{Methode}{%
+        \CartesMethode%
+      }{%
+        \ifboolKV[Cards]{Lecture}{%
+          \CartesLecture%
+        }{%
+          \ifboolKV[Cards]{Loop}{%
+            \CartesLoopPerso%
+          }{%
+            \CartesClassiquePerso%
+          }%
+        }%
+      }%
+    }%
+  }%
+}%
+
+\NewDocumentCommand\CartesClassiquePerso{}{%
+  \ifboolKV[Cards]{Trame}{%
+    \clearpage%
+    \thispagestyle{empty}%
+    \begin{Trame}
+      \xintFor* ##1 in{\xintSeq{1}{\PfCNbCartesPerso}}\do{%
+        \node[] at (Carte##1) {%
+          \begin{MyboxSimpleAv}{\useKV[Cards]{Theme}}%
+            \ListeCards[##1,1]%
+          \end{MyboxSimpleAv}%
+        };%
+      }%
+    \end{Trame}%
+    \ifboolKV[Cards]{AffichageSolution}{%
+      \clearpage%
+      \thispagestyle{empty}%
+      \begin{Trame}
+        \xintFor* ##1 in{\xintSeq{0}{\fpeval{\PfCNbCartesHaut-1}}}\do{%
+          \xintFor* ##2 in{\xintSeq{0}{\fpeval{\PfCNbCartesLarg-1}}}\do{%
+            \xdef\PfCNumeroNoeud{\fpeval{##1*\PfCNbCartesLarg+##2+1}}
+            \xdef\PfCNumeroCartes{\fpeval{(##1+1)*\PfCNbCartesLarg-##2}}
+            \node at (Carte\PfCNumeroNoeud) {%
+              \begin{MyboxSimpleAr}{\useKV[Cards]{ThemeSol}}%
+                \ListeCards[\fpeval{\PfCNumeroCartes},2]%
+              \end{MyboxSimpleAr}%
+            };%
+          }%
+        }%
+      \end{Trame}%
+      \clearpage%
+    }{}%
+  }{%
+    \ifboolKV[Cards]{SolutionSeule}{}{%
+      \begin{MyboxSimpleAv}{\useKV[Cards]{Theme}}%
+        \ListeCards[1,1]%
+      \end{MyboxSimpleAv}%
+    }%
+    \ifboolKV[Cards]{AffichageSolution}{%
+      \begin{MyboxSimpleAr}{\useKV[Cards]{ThemeSol}}%
+        \ListeCards[1,2]%
+      \end{MyboxSimpleAr}%
+    }{}%
+  }%
+}%
+
+\NewDocumentCommand\CartesLoopPerso{}{%
+  \ifboolKV[Cards]{Trame}{%
+    \clearpage%
+    \thispagestyle{empty}%
+    \begin{Trame}
+%      \multido{\i=1+1}{\PfCNbCartesPerso}{%
+\xintFor* ##1 in{\xintSeq{1}{\PfCNbCartesPerso}}\do{
+        \node[] at (Carte##1) {%
+          \begin{Mybox}{\ListeCards[##1,1]}{\useKV[Cards]{Theme}}{\ListeCards[##1,2]}%
+            \ListeCards[##1,3]%
+          \end{Mybox}%
+        };%
+      }%
+    \end{Trame}%
+    \clearpage
+    \ifboolKV[Cards]{AffichageSolution}{%
+      \clearpage%
+      \thispagestyle{empty}%
+      \begin{Trame}
+        \xintFor* ##1 in{\xintSeq{0}{\fpeval{\PfCNbCartesHaut-1}}}\do{%
+          \xintFor* ##2 in{\xintSeq{0}{\fpeval{\PfCNbCartesLarg-1}}}\do{%
+            \xdef\PfCNumeroNoeud{\fpeval{##1*\PfCNbCartesLarg+##2+1}}
+            \xdef\PfCNumeroCartes{\fpeval{(##1+1)*\PfCNbCartesLarg-##2}}
+            \node at (Carte\PfCNumeroNoeud) {%
+              \begin{MyboxAr}%
+              \end{MyboxAr}%
+            };%
+          }%
+        }%
+      \end{Trame}%
+      \clearpage%
+    }{}%
+  }{%
+    \ifboolKV[Cards]{SolutionSeule}{}{%
+        \begin{Mybox}{\ListeCards[1,1]}{\useKV[Cards]{Theme}}{\ListeCards[1,2]}%
+          \ListeCards[1,3]%
+        \end{Mybox}%
+    }%
+    \ifboolKV[Cards]{AffichageSolution}{%
+      \begin{MyboxAr}%
+      \end{MyboxAr}%
+    }{}%
+  }%
+}%
+
+\NewDocumentCommand\CartesJaiQuiaPerso{}{%
+  \ifboolKV[Cards]{Trame}{%
+    \clearpage%
+    \thispagestyle{empty}%
+    \begin{Trame}
+%      \multido{\i=1+1}{\PfCNbCartesPerso}{%
+\xintFor* ##1 in{\xintSeq{1}{\PfCNbCartesPerso}}\do{
+        \node[] at (Carte##1) {%
+          \begin{MyboxJQ}{\ListeCards[##1,1]}{\ListeCards[##1,2]}%
+            %% 
+          \end{MyboxJQ}%
+        };%
+      }%
+    \end{Trame}%
+    \ifboolKV[Cards]{AffichageSolution}{%
+      \clearpage%
+      \thispagestyle{empty}%
+      \begin{Trame}
+        \xintFor* ##1 in{\xintSeq{0}{\fpeval{\PfCNbCartesHaut-1}}}\do{%
+          \xintFor* ##2 in{\xintSeq{0}{\fpeval{\PfCNbCartesLarg-1}}}\do{%
+            \xdef\PfCNumeroNoeud{\fpeval{##1*\PfCNbCartesLarg+##2+1}}
+            \xdef\PfCNumeroCartes{\fpeval{(##1+1)*\PfCNbCartesLarg-##2}}
+            \node at (Carte\PfCNumeroNoeud) {%
+              \begin{MyboxJQAr}{\useKV[Cards]{ThemeJaiQuiA}}%
+              \end{MyboxJQAr}%
+            };%
+          }%
+        }%
+      \end{Trame}%
+      \clearpage%
+    }{}%
+  }{%
+    \begin{MyboxJQ}{\ListeCards[1,1]}{\ListeCards[1,2]}%
+      %%
+    \end{MyboxJQ}%
+    \ifboolKV[Cards]{AffichageSolution}{%
+      \ifboolKV[Cards]{AfficheTheme}{%
+        \begin{MyboxJQAr}{\useKV[Cards]{ThemeJaiQuiA}}%
+        \end{MyboxJQAr}%
+      }{%
+        \begin{MyboxJQAr}{}%
+        \end{MyboxJQAr}%
+      }%
+    }{}%
+  }%
+}%
+
+\NewDocumentCommand\CartesTrivialPerso{}{%
+  \xdef\PfCListeSymbolTrivial{\useKV[Cards]{Symboles}}%
+  \setsepchar{,}\readlist*\ListeSymbolesTrivial{\PfCListeSymbolTrivial}%
+  \setlength{\tabcolsep}{0.25\tabcolsep}%
+  \ifboolKV[Cards]{Trame}{%
+    \clearpage%
+    \thispagestyle{empty}%
+    \begin{Trame}
+%      \multido{\i=1+1}{\PfCNbCartesPerso}{%
+\xintFor* ##2 in{\xintSeq{1}{\PfCNbCartesPerso}}\do{
+        \node[] at (Carte##2) {%
+          \begin{MyboxTrivial}%
+            \begin{center}
+              \begin{NiceTabular}[width=0.9\largeurcarte]{X[1,m]X[9,m]}[hvlines]%
+                \xintFor* ##1 in{\xintSeq{1}{6}}\do{%
+                  \rule{0pt}{0.12\hauteurcards}\Block{1-1}{\ListeSymbolesTrivial[##1]}&\ListeCards[##2,\fpeval{1+2*(##1-1)}]\\
+                }%
+              \end{NiceTabular}%
+            \end{center}%
+          \end{MyboxTrivial}%
+        };%
+      }%
+    \end{Trame}%
+    \ifboolKV[Cards]{AffichageSolution}{%
+      \clearpage%
+      \thispagestyle{empty}%
+      \begin{Trame}
+        \xintFor* ##1 in{\xintSeq{0}{\fpeval{\PfCNbCartesHaut-1}}}\do{%
+          \xintFor* ##2 in{\xintSeq{0}{\fpeval{\PfCNbCartesLarg-1}}}\do{%
+            \xdef\PfCNumeroNoeud{\fpeval{##1*\PfCNbCartesLarg+##2+1}}%
+            \xdef\PfCNumeroCartes{\fpeval{(##1+1)*\PfCNbCartesLarg-##2}}%
+            \node at (Carte\PfCNumeroNoeud) {%
+              \begin{MyboxTrivial}%
+              \begin{center}%
+                \begin{NiceTabular}[width=0.9\largeurcarte]{X[1,m]X[10,m]}[hvlines]%
+                  \xintFor* ##3 in{\xintSeq{1}{6}}\do{%
+                    \rule{0pt}{0.12\hauteurcards}\Block{1-1}{\ListeSymbolesTrivial[##3]}&\ListeCards[\fpeval{\PfCNumeroCartes},\fpeval{2*##3}]
+                    \\
+                  }%
+                \end{NiceTabular}%
+              \end{center}%
+            \end{MyboxTrivial}%
+            };%
+          }%
+        }%
+      \end{Trame}%
+      \clearpage%
+    }{}%
+  }{%
+    \begin{MyboxTrivial}%
+      \begin{center}%
+        \begin{NiceTabular}[width=0.9\largeurcarte]{X[1,m]X[10,m]}[hvlines]%
+          \xintFor* ##1 in{\xintSeq{1}{6}}\do{%
+            \rule{0pt}{0.12\hauteurcards}\Block{1-1}{\ListeSymbolesTrivial[##1]}&\ListeCards[1,\fpeval{1+2*(##1-1)}]\\
+          }%
+        \end{NiceTabular}%
+      \end{center}%
+    \end{MyboxTrivial}%
+    \ifboolKV[Cards]{AffichageSolution}{%
+      \begin{MyboxTrivial}%
+        \begin{center}%
+          \begin{NiceTabular}[width=0.9\largeurcarte]{X[1,m]X[10,m]}[hvlines]%
+            \xintFor* ##1 in{\xintSeq{1}{6}}\do{%
+              \rule{0pt}{0.12\hauteurcards}\Block{1-1}{\ListeSymbolesTrivial[##1]}&\ListeCards[1,\fpeval{2*##1}]\\
+            }%
+          \end{NiceTabular}%
+        \end{center}%
+      \end{MyboxTrivial}%
+    }{}%
+  }%
+  \setlength{\tabcolsep}{4\tabcolsep}%
+}%
+
+\NewDocumentCommand\CartesTrivialPersoold{}{%
+  \xdef\PfCListeSymbolTrivial{\useKV[Cards]{Symboles}}%
+  \setsepchar{,}\readlist*\ListeSymbolesTrivial{\PfCListeSymbolTrivial}%
+  \setlength{\tabcolsep}{0.25\tabcolsep}%
+  \ifboolKV[Cards]{Trame}{%
+    \clearpage%
+    \thispagestyle{empty}%
+    \begin{Trame}
+%      \multido{\i=1+1}{\PfCNbCartesPerso}{%
+\xintFor* ##2 in{\xintSeq{1}{\PfCNbCartesPerso}}\do{
+        \node[] at (Carte##2) {%
+          \begin{MyboxTrivial}%
+            \begin{center}
+              \begin{NiceTabular}[width=0.9\largeurcarte]{X[1,m]X[9,m]}[hvlines]%
+                \xintFor* ##1 in{\xintSeq{1}{6}}\do{%
+                  \rule{0pt}{0.12\hauteurcards}\Block{1-1}{\ListeSymbolesTrivial[##1]}&\ListeCards[##2,\fpeval{1+2*(##1-1)}]\\
+                }%
+              \end{NiceTabular}%
+            \end{center}%
+          \end{MyboxTrivial}%
+        };%
+      }%
+    \end{Trame}%
+    \ifboolKV[Cards]{AffichageSolution}{%
+      \clearpage%
+      \thispagestyle{empty}%
+      \begin{Trame}
+        \xintFor* ##1 in{\xintSeq{0}{\fpeval{\PfCNbCartesHaut-1}}}\do{%
+          \xintFor* ##2 in{\xintSeq{0}{\fpeval{\PfCNbCartesLarg-1}}}\do{%
+            \xdef\PfCNumeroNoeud{\fpeval{##1*\PfCNbCartesLarg+##2+1}}
+            \xdef\PfCNumeroCartes{\fpeval{(##1+1)*\PfCNbCartesLarg-##2}}
+            \node at (Carte\PfCNumeroNoeud) {%
+              \begin{MyboxTrivial}%
+              \begin{center}%
+                \begin{NiceTabular}[width=0.9\largeurcarte]{X[1,m]X[10,m]}[hvlines]%
+                  \xintFor* ##1 in{\xintSeq{1}{6}}\do{%
+                    \rule{0pt}{0.12\hauteurcards}\Block{1-1}{\ListeSymbolesTrivial[##1]}&\ListeCards[\fpeval{4-\i},\fpeval{2*##1}]\\
+                  }%
+                \end{NiceTabular}%
+              \end{center}%
+            \end{MyboxTrivial}%
+            };%
+          }%
+        }%
+      \end{Trame}%
+      \clearpage%
+    }{}%
+  }{%
+    \begin{MyboxTrivial}%
+      \begin{center}%
+        \begin{NiceTabular}[width=0.9\largeurcarte]{X[1,m]X[10,m]}[hvlines]%
+          \xintFor* ##1 in{\xintSeq{1}{6}}\do{%
+            \rule{0pt}{0.12\hauteurcards}\Block{1-1}{\ListeSymbolesTrivial[##1]}&\ListeCards[1,\fpeval{1+2*(##1-1)}]\\
+          }%
+        \end{NiceTabular}%
+      \end{center}%
+    \end{MyboxTrivial}%
+    \ifboolKV[Cards]{AffichageSolution}{%
+      \begin{MyboxTrivial}%
+        \begin{center}%
+          \begin{NiceTabular}[width=0.9\largeurcarte]{X[1,m]X[10,m]}[hvlines]%
+            \xintFor* ##1 in{\xintSeq{1}{6}}\do{%
+              \rule{0pt}{0.12\hauteurcards}\Block{1-1}{\ListeSymbolesTrivial[##1]}&\ListeCards[1,\fpeval{2*##1}]\\
+            }%
+          \end{NiceTabular}%
+        \end{center}%
+      \end{MyboxTrivial}%
+    }{}%
+  }%
+}%
+
+\newcommand\SolutionCarte[2]{%
+  \begin{center}
+    \bfseries#1
+  \end{center}
+  
+  #2
+}%
+%%%%%%%%%%%%%%%%%%% Cartes Méthodes
+%Pour cyril : Titre / Contenu Cadre A / Sous-Titre / Contenu Cadre B / Classe / Dos
+\makeatletter
+\newtcolorbox{MyboxCL}[5]{%
+  enhanced,%
+  nobeforeafter,%
+  left=0pt,right=0pt,top=0pt,%
+  text fill,%
+  width=\largeurcarte,%
+  height=\hauteurcarte,%
+  arc=\PfCRayonArc,%
+  underlay={%
+    \ifboolKV[Cards]{BackgroundAv}{%
+      \begin{tcbclipinterior}
+        \node[anchor=center,opacity=1]
+        at (interior.center) {%
+          \includegraphics[%
+          height=\tcb@height,
+          width=\tcb@width,
+          ]{\useKV[Cards]{ImageAv}}};%
+      \end{tcbclipinterior}%
+    }{}%
+  },%
+  overlay unbroken and first={%
+    \node[anchor=north,inner sep=5pt] (A1) at (frame.north){%
+      \begin{minipage}{0.85\largeurcarte}
+        \begin{center}
+          #1
+        \end{center}
+      \end{minipage}
+    };
+    \ifnum\fpeval{\PfCSideBySideA}=1\relax
+      \node[anchor=north west,fill=white,draw=TrameCouleur!75!black,line width=2pt,inner sep=5pt,minimum height=0.775\hauteurcarte,rounded corners] (A2) at (A1.south west){%
+      \begin{minipage}{0.375\largeurcarte}
+        #2
+      \end{minipage}
+    };
+    \node[anchor=south,inner sep=5pt] (A3) at (frame.south){%
+      \begin{minipage}{0.85\largeurcarte}
+        #3
+      \end{minipage}
+    };
+    \node[anchor=north east,inner sep=5pt,draw=TrameCouleur!75!black,line width=2pt,fill=white,minimum height=0.775\hauteurcarte,rounded corners] (A4) at (A1.south east){%
+      \begin{minipage}{0.375\largeurcarte}
+        #4
+      \end{minipage}
+    };
+    \xdef\PfCSideBySideA{0}%
+    \else
+    \node[anchor=north,fill=white,draw=TrameCouleur!75!black,line width=2pt,inner sep=5pt,minimum height=0.35\hauteurcarte,rounded corners] (A2) at (A1.south){%
+      \begin{minipage}{0.85\largeurcarte}
+        #2
+      \end{minipage}
+    };
+    \node[anchor=north,inner sep=5pt] (A3) at (A2.south){%
+      \begin{minipage}{0.85\largeurcarte}
+        #3
+      \end{minipage}
+    };
+    \node[anchor=north,inner sep=5pt,draw=TrameCouleur!75!black,line width=2pt,fill=white,minimum height=0.35\hauteurcarte,rounded corners] (A4) at (A3.south){%
+      \begin{minipage}{0.85\largeurcarte}
+        #4
+      \end{minipage}
+    };
+  \fi
+  },
+  colback=TrameCouleur
+}%
+
+\newtcolorbox{MyboxArCL}[1]{%
+  enhanced,%
+  nobeforeafter,%
+  left=0pt,right=0pt,top=0pt,%
+  text fill,%
+  width=\largeurcarte,%
+  height=\hauteurcarte,%
+  arc=\PfCRayonArc,%
+  underlay={%
+    \ifboolKV[Cards]{BackgroundAr}{%
+      \begin{tcbclipinterior}
+        \node[anchor=center,opacity=1]
+        at (interior.center) {%
+          \includegraphics[%
+          height=\tcb@height,
+          width=\tcb@width,
+          ]{\useKV[Cards]{ImageAr}}};%
+      \end{tcbclipinterior}%
+    }{%
+      \begin{tcbclipinterior}
+        \node[anchor=center,opacity=1]
+        at (interior.center) {%
+          \begin{minipage}{0.9\largeurcarte}
+            #1
+          \end{minipage}
+        };%
+      \end{tcbclipinterior}%
+      }%
+    },%
+  colback=TrameCouleurAr
+}%
+\makeatother
+
+\xdef\PfCSideBySideA{0}%
+
+\NewDocumentCommand\PfCSideBySide{}{%
+  \xdef\PfCSideBySideA{1}%
+}%
+\NewDocumentCommand\PfCFinSideBySide{}{%
+  \xdef\PfCSideBySideA{0}%
+}%
+
+\NewDocumentCommand\CartesMethode{}{%
+  \ifboolKV[Cards]{Trame}{%
+    \clearpage%
+    \thispagestyle{empty}%
+    \begin{Trame}
+      \xintFor* ##1 in{\xintSeq{1}{\PfCNbCartesPerso}}\do{%
+        \node[] at (Carte##1) {%
+          \begin{MyboxCL}{\ListeCards[##1,1]}{\ListeCards[##1,2]}{\ListeCards[##1,3]}{\ListeCards[##1,4]}{\ListeCards[##1,5]}%
+          \end{MyboxCL}%
+        };%
+      }%
+    \end{Trame}%
+    \ifboolKV[Cards]{AffichageSolution}{%
+      \clearpage%
+      \thispagestyle{empty}%
+      \begin{Trame}
+        \xintFor* ##1 in{\xintSeq{0}{\fpeval{\PfCNbCartesHaut-1}}}\do{%
+          \xintFor* ##2 in{\xintSeq{0}{\fpeval{\PfCNbCartesLarg-1}}}\do{%
+            \xdef\PfCNumeroNoeud{\fpeval{##1*\PfCNbCartesLarg+##2+1}}%
+            \xdef\PfCNumeroCartes{\fpeval{(##1+1)*\PfCNbCartesLarg-##2}}%
+            \node at (Carte\PfCNumeroNoeud) {%
+              \begin{MyboxArCL}{\ListeCards[\fpeval{\PfCNumeroCartes},6]}%
+              \end{MyboxArCL}%
+            };%
+          }%
+        }%
+      \end{Trame}%
+      \clearpage%
+    }{}%
+  }{%
+    \ifboolKV[Cards]{SolutionSeule}{}{%
+      \begin{MyboxCL}{\ListeCards[1,1]}{\ListeCards[1,2]}{\ListeCards[1,3]}{\ListeCards[1,4]}{\ListeCards[1,5]}
+      \end{MyboxCL}%
+    }%
+    \ifboolKV[Cards]{AffichageSolution}{%
+      \begin{MyboxArCL}{\ListeCards[1,6]}
+      \end{MyboxArCL}%
+    }{}%
+  }%
+}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Cartes Lecture
+%Pour Primaire : Image / mot
+\makeatletter
+\newtcolorbox{MyboxPrimaire}[2]{%
+  enhanced,%
+  nobeforeafter,%
+  left=0pt,right=0pt,top=0pt,%
+  text fill,%
+  width=\largeurcarte,%
+  height=\hauteurcarte,%
+  arc=\PfCRayonArc,%
+  underlay={%
+    \ifboolKV[Cards]{BackgroundAv}{%
+      \begin{tcbclipinterior}
+        \node[anchor=center,opacity=1]
+        at (interior.center) {%
+          \includegraphics[%
+          height=\tcb@height,
+          width=\tcb@width,
+          ]{\useKV[Cards]{ImageAv}}};%
+      \end{tcbclipinterior}%
+    }{}%
+  },%
+  overlay unbroken and first={%
+    \node[draw,anchor=north,inner sep=0pt,yshift=-5pt] (A1) at (frame.north){%
+      \begin{minipage}{0.85\largeurcarte}
+        \includegraphics[height=0.45\hauteurcarte,width=\linewidth]{#1}
+      \end{minipage}
+    };
+    \node[anchor=north,inner sep=5pt,yshift=-5pt] (A2) at (frame.center){%
+      \begin{minipage}{0.85\largeurcarte}
+        \begin{center}
+          \ifboolKV[Cards]{Majuscule}{\MakeUppercase{#2}\par\vspace{1em}\par}{}%
+          \ifboolKV[Cards]{Minuscule}{\MakeLowercase{#2}\par\vspace{1em}}{}%
+            \ifboolKV[Cards]{Cursive}{\begin{cursive}#2\end{cursive}}{}%
+              \ifboolKV[Cards]{Math}{#2}{}%
+        \end{center}
+      \end{minipage}
+    };    
+  },
+  colback=TrameCouleur
+}%
+
+\newtcolorbox{MyboxArPrimaire}{%
+  enhanced,%
+  nobeforeafter,%
+  left=0pt,right=0pt,top=0pt,%
+  text fill,%
+  width=\largeurcarte,%
+  height=\hauteurcarte,%
+  arc=\PfCRayonArc,%
+  underlay={%
+    \ifboolKV[Cards]{BackgroundAr}{%
+      \begin{tcbclipinterior}
+        \node[anchor=center,opacity=1]
+        at (interior.center) {%
+          \includegraphics[%
+          height=\tcb@height,
+          width=\tcb@width,
+          ]{\useKV[Cards]{ImageAr}}};%
+      \end{tcbclipinterior}%
+    }{} 
+  },%
+  colback=TrameCouleurAr
+}%
+\makeatother
+
+\NewDocumentCommand\CartesLecture{}{%
+  \ifboolKV[Cards]{Trame}{%
+    \clearpage%
+    \thispagestyle{empty}%
+    \begin{Trame}
+      \xintFor* ##1 in{\xintSeq{1}{\PfCNbCartesPerso}}\do{%
+        \node[] at (Carte##1) {%
+          \begin{MyboxPrimaire}{\ListeCards[##1,1]}{\ListeCards[##1,2]}
+          \end{MyboxCL}%
+        };%
+      }%
+    \end{Trame}%
+    \ifboolKV[Cards]{AffichageSolution}{%
+      \clearpage%
+      \thispagestyle{empty}%
+      \begin{Trame}
+        \xintFor* ##1 in{\xintSeq{0}{\fpeval{\PfCNbCartesHaut-1}}}\do{%
+          \xintFor* ##2 in{\xintSeq{0}{\fpeval{\PfCNbCartesLarg-1}}}\do{%
+            \xdef\PfCNumeroNoeud{\fpeval{##1*\PfCNbCartesLarg+##2+1}}%
+            \xdef\PfCNumeroCartes{\fpeval{(##1+1)*\PfCNbCartesLarg-##2}}%
+            \node at (Carte\PfCNumeroNoeud) {%
+              \begin{MyboxArPrimaire}%
+              \end{MyboxArPrimaire}%
+            };%
+          }%
+        }%
+      \end{Trame}%
+      \clearpage%
+    }{}%
+  }{%
+    \ifboolKV[Cards]{SolutionSeule}{}{%
+      \begin{MyboxPrimaire}{\ListeCards[1,1]}{\ListeCards[1,2]}
+      \end{MyboxPrimaire}%
+    }%
+    \ifboolKV[Cards]{AffichageSolution}{%
+      \begin{MyboxArPrimaire}%
+      \end{MyboxArPrimaire}%
+    }{}%
+  }%
+}%
+%%%%%%%% Boites
+\def\BuildBoiteCartesCCCode{%
+  Longueur=10cm;
+  Largeur=7cm;
+  Epaisseur=if \useKV[Cards]{ANbCartes}:\useKV[Cards]{NbCartes}*1mm else: 16mm fi;
+  pair A[],B[],C[],D[];
+  A0=(0,0);
+  A1-A0=Epaisseur*(1,0);
+  A2-A1=Largeur*(1,0);
+  A3-A2=Epaisseur*(1,0);
+  A4-A3=Largeur*(1,0);
+  A5-A4=Epaisseur*(1,0);
+  A6-A5=Longueur*(0,1);
+  A7-A4=A6-A5;
+  A8-A3=A6-A5;
+  A9-A2=A6-A5;
+  A10-A1=A6-A5;
+  A11-A0=A6-A5;
+  A12-A11=A11-A10;
+  A13-A0=A0-A1;
+  B1-A1=Epaisseur*(0,-1);
+  B2-A2=Epaisseur*(0,-1);
+  B3-A3=Epaisseur*(0,-1);
+  B4-A4=Epaisseur*(0,-1);
+  C1=1/3[B1,B2];
+  C4=2/3[B1,B2];
+  C2-C1=B1-A1;
+  C3-C4=B1-A1;
+  C5-A2=(Epaisseur+5mm)*(0,-1);
+  C6-A3=C5-A2;
+  D1=1/5[A5,A6];
+  D2-D1=(Epaisseur+5mm)*(1,0);
+  D4=2/5[A5,A6];
+  D3-D4=D2-D1;
+  D5=3/5[A5,A6];
+  D6-D5=D3-D4;
+  D8=4/5[A5,A6];
+  D7-D8=D6-D5;
+  D9=1/3[A10,A9];
+  D10=2/3[A10,A9];
+  D11-D10=Epaisseur*(0,1);
+  D12-D9=D11-D10;
+  D17-A7=Epaisseur*(0,1);
+  D18-A8=D17-A7;
+  D19-D18=(1cm,Epaisseur+5mm);
+  D20-D17=(-1cm,Epaisseur+5mm);
+  picture Legende,LegendePDF;
+  pair M[];
+  M0=1/2[A8,A7];
+  M6=1/2[A3,A4];
+  M1=1/6[M0,M6];
+  M2=2/6[M0,M6];
+  M3=3/6[M0,M6];
+  M4=4/6[M0,M6];
+  M5=5/6[M0,M6];
+}%
+
+\NewDocumentCommand\BuildBoiteCartesCommerceC{}{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    \BuildBoiteCartesCCCode;
+    boolean AThemeJeu;
+    AThemeJeu=\useKV[Cards]{AThemeJeu};
+    %
+    trace chemin(A11,A12,A13,A0);
+    trace chemin(D9,A11,A0,1/3[A1,A2]);
+    trace chemin(D10,A6,A5,2/3[A1,A2]);
+    trace segment(A1,A10) dashed evenly;
+    trace segment(A1,1/5[A1,A10]);
+    trace segment(2/5[A1,A10],3/5[A1,A10]);
+    trace segment(4/5[A1,A10],A10);
+    trace marquesegment(1/5[A1,A10],2/5[A1,A10]);
+    trace marquesegment(3/5[A1,A10],4/5[A1,A10]);
+    trace segment(A2,A9);
+    trace segment(A3,A8);
+    trace segment(A4,A7);
+    trace segment(1/3[A1,A2],2/3[A1,A2]) dashed evenly;
+    trace marquesegment(1/3[A1,A2],2/3[A1,A2]);
+    % languettes basses
+    trace chemin(B1,B2);
+    trace chemin(B3,B4,A4);
+    trace chemin(C1,C2,C3,C4) shifted (B4-B2);;
+    picture Decoupe[];
+   Decoupe1=image(
+    trace chemin(B2,C5,C6,B3);
+    trace A2--B2 dashed evenly;
+    trace A3--B3 dashed evenly;
+    );
+    Decoupe2=image(
+    trace chemin(B2,C5,C6,A3);
+    trace A2--B2 dashed evenly;
+   );
+    trace Decoupe1;
+    trace symetrie(Decoupe2,iso(A2,A3),iso(C5,C6)) shifted(A0-A2);
+    trace symetrie(Decoupe2 shifted(A4-A2),iso(A0,A11),iso(A5,A6));
+    trace symetrie(Decoupe2 shifted(A4-A2),iso(A8,A4));
+    % languettes droites
+    trace polygone(D1,D2,D3,D4);
+    trace polygone(D5,D6,D7,D8);
+   % languettes hautes
+    path cc;
+    cc=cercles(iso(A10,A9),1/3[A10,A9]);
+    trace Hachurage((subpath(length cc/2,length cc) of cc)--cycle,60,0.25,1);
+    trace (subpath(length cc/2,length cc) of cc)--cycle dashed evenly;
+    trace polygone(D18,D17,D20,D19);
+    trace chemin(1/3[D18,D17],D18,D19,D20,D17,2/3[D18,D17]);
+    % label
+    if AThemeJeu:
+%    drawoptions(withcolor \useKV[Cards]{CouleurTheme});
+    label(TEX("\bfseries\Large\useKV[Cards]{ThemeJeu}"),M2);
+    drawoptions();
+    fi;
+    if \useKV[Cards]{ANiveau}:
+    drawoptions(withcolor \useKV[Cards]{CouleurNiveau});
+    label(TEX("\bfseries Niveau \useKV[Cards]{Niveau}"),M3);
+    drawoptions();
+    fi;
+    if \useKV[Cards]{ANumero}:
+    drawoptions(withcolor \useKV[Cards]{CouleurNiveau});
+    label(TEX("\bfseries Jeu \useKV[Cards]{Numero}"),M4);
+    drawoptions();
+    fi;
+    if \useKV[Cards]{ANbCartes}:
+    drawoptions(withcolor \useKV[Cards]{CouleurNb});
+    label(TEX("\bfseries\useKV[Cards]{NbCartes} cartes"),M5);
+    drawoptions();
+    fi;
+    if \useKV[Cards]{ATypeJeu}:
+    drawoptions(withcolor \useKV[Cards]{CouleurType});
+    label(TEX("\bfseries\Huge\useKV[Cards]{TypeJeu}"),M1);
+    drawoptions();
+    fi;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={\BuildBoiteCartesCCCode;}]
+    trace chemin(A11,A12,A13,A0);
+    trace chemin(D9,A11,A0,1/3[A1,A2]);
+    trace chemin(D10,A6,A5,2/3[A1,A2]);
+    trace segment(A1,A10) dashed evenly;
+    trace segment(A1,1/5[A1,A10]);
+    trace segment(2/5[A1,A10],3/5[A1,A10]);
+    trace segment(4/5[A1,A10],A10);
+    trace marquesegment(1/5[A1,A10],2/5[A1,A10]);
+    trace marquesegment(3/5[A1,A10],4/5[A1,A10]);
+    trace segment(A2,A9);
+    trace segment(A3,A8);
+    trace segment(A4,A7);
+    trace segment(1/3[A1,A2],2/3[A1,A2]) dashed evenly;
+    trace marquesegment(1/3[A1,A2],2/3[A1,A2]);
+    % languettes basses
+    trace chemin(B1,B2);
+    trace chemin(B3,B4,A4);
+    trace chemin(C1,C2,C3,C4) shifted (B4-B2);;
+    picture Decoupe[];
+    Decoupe1=image(
+    trace chemin(B2,C5,C6,B3);
+    trace A2--B2 dashed evenly;
+    trace A3--B3 dashed evenly;
+    );
+    Decoupe2=image(
+    trace chemin(B2,C5,C6,A3);
+    trace A2--B2 dashed evenly;
+    );
+    trace Decoupe1;
+    trace symetrie(Decoupe2,iso(A2,A3),iso(C5,C6)) shifted(A0-A2);
+    trace symetrie(Decoupe2 shifted(A4-A2),iso(A0,A11),iso(A5,A6));
+    trace symetrie(Decoupe2 shifted(A4-A2),iso(A8,A4));
+    % languettes droites
+    trace polygone(D1,D2,D3,D4);
+    trace polygone(D5,D6,D7,D8);
+    % languettes hautes
+    path cc;
+    cc=cercles(iso(A10,A9),1/3[A10,A9]);
+    trace Hachurage((subpath(length cc/2,length cc) of cc)--cycle,60,0.25,1);
+    trace (subpath(length cc/2,length cc) of cc)--cycle dashed evenly;
+    trace polygone(D18,D17,D20,D19);
+    trace chemin(1/3[D18,D17],D18,D19,D20,D17,2/3[D18,D17]);
+  \end{mpost}
+  \fi
+}%
+
+\NewDocumentCommand\BoiteCartes{o}{%
+  \useKVdefault[Cards]%
+  \setKV[Cards]{#1}%
+  \BuildBoiteCartesCommerceC%
+}%
+
+\def\FondMatrix{%
+  \begin{mplibcode}
+    font_size=10+\PfMFontSize;
+    if \useKV[Cards]{Landscape}:
+    num_row=floor(\useKV[Cards]{Largeur}/font_size);
+    num_col=floor(\useKV[Cards]{Hauteur}/font_size);
+    else:
+    num_col=floor(\useKV[Cards]{Largeur}/font_size);
+    num_row=floor(\useKV[Cards]{Hauteur}/font_size);
+    fi;
+  string choix;
+  choix="(@];,?./:!";
+  basetransparence=num_row;
+  pair A,B,C,D;
+  A=(0,0);
+  B-A=(num_col*font_size,0)*1pt;
+  D-A=(0,-num_row*font_size)*1pt;
+  C-D=B-A;
+  trace polygone(A,B,C,D);
+  fill polygone(A,B,C,D);
+  %
+  string retiens;
+  %
+  for k=1 upto num_col-1:
+    ww:=0.5*basetransparence+floor(uniformdeviate(0.5basetransparence));
+    for l=1 upto ww-1:
+      nblettre:=-1+ceiling(uniformdeviate(length choix));
+      drawoptions(withcolor (2*floor(uniformdeviate(basetransparence))/basetransparence)*Html("00B51A"));
+      retiens:=substring(nblettre,nblettre+1) of choix;
+      draw TEX(retiens) shifted ((k,-l)*font_size*1pt);
+      drawoptions();
+    endfor;
+  endfor;
+  picture Titre;
+  Titre=image(
+  label(TEX("\huge Alea\TeX") scaled 2,(0,0));
+  );
+  fill (bbox Titre shifted(font_size*(num_col/2,-num_row/3)-center Titre)) withcolor black;
+  trace (bbox Titre shifted(font_size*(num_col/2,-num_row/3)-center Titre)) withpen pensquare scaled 2 withcolor 2*green;
+  trace (Titre shifted(font_size*(num_col/2,-num_row/3)-center Titre)) withcolor 2*green;
+\end{mplibcode}
+}

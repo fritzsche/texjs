@@ -1,0 +1,343 @@
+primarydef p ! k=((100-k)/100)[p,white] enddef;
+
+def Place expr o =
+  if path o: draw o else: draw o fi
+enddef;
+
+string AlphabetComplet;
+AlphabetComplet="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzàéèùç!?:()[],;.+-=*/ 0123456789";
+
+n:=0;
+
+for p_=1,3,3,2,1,4,2,4,1,8,10,1,1,1,1,3,8,1,1,1,1,4,10,10,10,10,1,3,3,2,1,4,2,4,1,8,10,1,1,1,1,3,8,1,1,1,1,4,10,10,10,10,1,1,1,1,3:
+  Points[n]=p_;
+  n:=n+1;
+endfor;
+
+color CouleurJeton;
+CouleurJeton=Yellow!40;
+
+Gap=0;
+
+boolean NonNumerote;
+NonNumerote=false;
+
+path JetonSC;
+JetonSC=((0.05[point(0) of unitsquare,point(1) of unitsquare])
+    --(0.95[point(0) of unitsquare,point(1) of unitsquare]){dir0}..{dir90}(0.05[point(1) of unitsquare,point(2) of unitsquare])
+    --(0.95[point(1) of unitsquare,point(2) of unitsquare]){dir90}..{dir180}(0.05[point(2) of unitsquare,point(3) of unitsquare])
+    --(0.95[point(2) of unitsquare,point(3) of unitsquare]){dir180}..{dir-90}(0.05[point(3) of unitsquare,point(4) of unitsquare])
+    --(0.95[point(3) of unitsquare,point(4) of unitsquare]){dir-90}..{dir0}cycle) scaled u;
+
+picture BaseDeformation,BaseDeformationa;
+BaseDeformation=image(label(TEX("M"),(0,0)));
+BaseDeformationa=image(label(TEX("\footnotesize 8"),(0,0)));
+coefmise=0.6*u*sqrt(2)/abs(urcorner BaseDeformation-llcorner BaseDeformation);
+coefmisea=0.15*u*sqrt(2)/abs(urcorner BaseDeformationa-llcorner BaseDeformationa);
+
+vardef DessineJeton(expr lettre,position)=
+  save $;
+  picture $;
+  picture ALettre,ANombre;
+  if position<57:
+    ALettre=image(
+	if lettre="à":
+	  label(TEX("\sffamily\bfseries A"),(0,0));
+	elseif lettre="é":
+	  label(TEX("\sffamily\bfseries E"),(0,0));
+	elseif lettre="è":
+	  label(TEX("\sffamily\bfseries E"),(0,0));
+	elseif lettre="ù":
+	  label(TEX("\sffamily\bfseries U"),(0,0));
+	elseif lettre="ç":
+	  label(TEX("\sffamily\bfseries C"),(0,0));
+	else:
+	  label(TEX("\sffamily\bfseries \MakeUppercase{"&lettre&"}"),(0,0));
+	fi;
+     );
+    ANombre=image(
+	label(TEX("\sffamily\bfseries\scriptsize "&decimal(Points[position])),(0,0));
+      );
+  elseif position<82:
+    ALettre=image(
+	if lettre="*":
+	  label(TEX("\sffamily\bfseries $\times$"),(0,0));
+	elseif lettre="+":
+	  label(TEX("\sffamily\bfseries$+$"),(0,0));
+	elseif lettre="-":
+	  label(TEX("\sffamily\bfseries$-$"),(0,0));
+	elseif lettre="=":
+	  label(TEX("\sffamily\bfseries$=$"),(0,0));
+	else:
+	  label(TEX("\sffamily\bfseries "&lettre),(0,0));
+	fi;
+      );
+  fi;
+  $=image(
+      fill JetonSC withcolor if print:0.8white else:CouleurJeton fi;
+    trace JetonSC;
+    if position<57:
+      trace (ALettre scaled (coefmise)) shifted center JetonSC;
+      if NonNumerote=false:trace (ANombre scaled (coefmisea)) shifted (lrcorner JetonSC+u*(-0.15,0.15)-center ANombre) fi;
+    elseif position<82:
+      trace (ALettre scaled (coefmise)) shifted center JetonSC;
+    fi;
+    );
+  $
+enddef;
+
+vardef DessineJetonRapide(expr position)=
+  save $;
+  picture $;
+  picture ALettre;
+  ALettre=image(%
+      label(TEX("\sffamily\bfseries "&substring(position,position+1) of AlphabetComplet),(0,0));
+    );
+  $=image(
+      fill JetonSC withcolor if print:0.8white else:CouleurJeton fi;
+    trace JetonSC;
+    trace (ALettre scaled (coefmise)) shifted center JetonSC;
+    );
+  $
+enddef;
+
+vardef Scrabble(expr mot)=
+  save $;
+  picture $;
+  string Lettre;
+  boolean Trouve;
+  Trouve=false;
+  $=image(
+    longmot:=mpliblength mot;
+    for k=0 upto longmot-1:
+      Lettre:=mplibsubstring(k,k+1) of mot;
+      pos:=-1;
+      forever: exitif Trouve;
+	pos:=pos+1;
+	if Lettre=mplibsubstring(pos,pos+1) of AlphabetComplet:
+	  Trouve:=true;
+	fi;
+     endfor;
+      if pos=81:
+	Trouve:=true;
+     else:
+	trace DessineJeton(Lettre,pos) shifted(k*(u*(1+Gap),0));
+	Trouve:=false;
+     fi;
+    endfor;
+    );
+  $
+enddef;
+
+vardef Scrabbleh(expr mot,casea,caseb)=
+  save $;
+  picture $;
+  string Lettre;
+  boolean Trouve;
+
+  Trouve=false;
+  $=image(
+      longmot:=length mot;
+    if Restreint:
+      Casea:=casea-Ligne;
+      Caseb:=caseb-Colonne;
+    else:
+      Casea:=casea;
+      Caseb:=caseb;
+    fi;
+    for k=0 upto longmot-1:
+      Lettre:=substring(k,k+1) of mot;
+      pos:=-1;
+      forever: exitif Trouve;
+	pos:=pos+1;
+	if Lettre=substring(pos,pos+1) of AlphabetComplet:
+	  Trouve:=true;
+	fi;
+      endfor;
+      trace DessineJeton(Lettre,pos) shifted(k*(u*(1+Gap),0)+(center Case[Casea+Ligne][Caseb+Colonne]-u*(0.5,0.5)));
+      Trouve:=false;
+    endfor;
+    );
+  $
+enddef;
+
+vardef Scrabblev(expr mot,casea,caseb)=
+  save $;
+  picture $;
+  string Lettre;
+  boolean Trouve;
+  Trouve=false;
+  $=image(
+      longmot:=length mot;
+        if Restreint:
+      Casea:=casea-Ligne;
+      Caseb:=caseb-Colonne;
+    else:
+      Casea:=casea;
+      Caseb:=caseb;
+    fi;
+    for k=0 upto longmot-1:
+      Lettre:=substring(k,k+1) of mot;
+      pos:=-1;
+      forever: exitif Trouve;
+	pos:=pos+1;
+	if Lettre=substring(pos,pos+1) of AlphabetComplet:
+	  Trouve:=true;
+	fi;
+      endfor;
+      trace DessineJeton(Lettre,pos) shifted(k*(0,-u*(1+Gap))+(center Case[Casea+Ligne][Caseb+Colonne]-u*(0.5,0.5)));
+      Trouve:=false;
+    endfor;
+    );
+  $
+enddef;
+  
+vardef Melange(expr total)=
+  numeric a[],b[];
+  for k=1 upto total:
+    a[k]=k;
+  endfor;
+  for k=total downto 1:
+    ll:=ceiling(uniformdeviate(k));
+    b[total-k+1]=a[ll];
+    for p=ll+1 upto k:
+      a[p-1]:=a[p];
+    endfor;
+  endfor;
+enddef;
+  
+vardef Tirage(expr mot)=
+  save $;
+  picture $;
+  string Lettre;
+  boolean Trouve;
+  Trouve=false;
+  $=image(
+      longmot:=length mot;
+    Melange(longmot);
+    for k=0 upto longmot-1:
+      Lettre:=substring(b[k+1]-1,b[k+1]) of mot;
+      pos:=-1;
+      forever: exitif Trouve;
+	pos:=pos+1;
+	if Lettre=substring(pos,pos+1) of AlphabetComplet:
+	  Trouve:=true;
+	fi;
+     endfor;
+      trace DessineJeton(Lettre,pos) shifted(k*(u*(1+Gap),0));
+      Trouve:=false;
+    endfor;
+    );
+  $
+enddef;
+
+path BaseCase,BaseCaseL;
+BaseCase=unitsquare scaled u;
+BaseCaseL=unitsquare scaled 0.9u;
+
+color CouleurMarque[];
+CouleurMarque[6]=red!40;
+CouleurMarque[4]=Pink!40;
+CouleurMarque[3]=blue!40;
+CouleurMarque[2]=LightSteelBlue!40;
+CouleurMarque[0]=LightGreen;
+
+vardef CaseSc(expr aa)=
+  save $;
+  picture $;
+  $=image(
+      fill BaseCase shifted (aa-(center BaseCase)) withcolor if print:0.95white else: LightGreen fi;
+    trace BaseCase shifted (aa-(center BaseCase)) withcolor if print:black else: Green!50 fi;
+    );
+  $
+enddef;
+
+picture TexteScore[];
+TexteScore[6]=image(label(TEX("\begin{tabular}{c}Mot\\Triple\end{tabular}"),(0,0)););
+TexteScore[4]=image(label(TEX("\begin{tabular}{c}Mot\\Double\end{tabular}"),(0,0)););
+TexteScore[3]=image(label(TEX("\begin{tabular}{c}Lettre\\Triple\end{tabular}"),(0,0)););
+TexteScore[2]=image(label(TEX("\begin{tabular}{c}Lettre\\Double\end{tabular}"),(0,0)););
+
+vardef MarqueSc(expr bb,aa)=
+  save $;
+  picture $;
+  $=image(
+      fill rotation(BaseCaseL,center BaseCaseL,45) shifted (aa-(center BaseCaseL)) withcolor if print:0.8white else: CouleurMarque[bb] fi;
+    trace rotation(BaseCaseL,center BaseCaseL,45) shifted (aa-(center BaseCaseL)) ;
+    fill BaseCase shifted (aa-(center BaseCase)) withcolor if print:(1-bb/16)*white else:CouleurMarque[bb] fi;
+    trace BaseCase shifted (aa-(center BaseCase));
+    if bb>0:
+      trace (TexteScore[bb] scaled (0.3coefmise)) shifted aa;
+    fi;
+    );
+  $
+enddef;
+
+vardef Grille(text t)=
+  save $;
+  picture $;
+  picture Case[][],Marque[][];
+  $=image(
+      NumCase:=0;
+    for p_=t:
+      Case[1+(NumCase div 8)][1+(NumCase mod 8)]:=CaseSc((u*(NumCase mod 8),-u*(NumCase div 8)));
+      trace Case[1+(NumCase div 8)][1+(NumCase mod 8)];
+      NumCase:=NumCase+1;
+    endfor;
+    NumCase:=0;
+    for p_=t:
+      if p_>0:
+      Marque[1+(NumCase div 8)][1+(NumCase mod 8)]:=MarqueSc(p_,(u*(NumCase mod 8),-u*(NumCase div 8)));
+	trace Marque[1+(NumCase div 8)][1+(NumCase mod 8)];
+      else:
+	Marque[1+(NumCase div 8)][1+(NumCase mod 8)]:=nullpicture;
+      fi;
+      NumCase:=NumCase+1;
+    endfor;
+    );
+  $
+enddef;
+
+vardef GrilleCompleteMP(text t)=
+  save $;
+  picture $;
+  picture Case[][],Marque[][];
+  $=image(
+      NumCase:=0;
+    for p_=t:
+      Case[1+(NumCase div 15)][1+(NumCase mod 15)]:=CaseSc((u*(NumCase mod 15),-u*(NumCase div 15)));
+      trace Case[1+(NumCase div 15)][1+(NumCase mod 15)];
+      NumCase:=NumCase+1;
+    endfor;
+    NumCase:=0;
+    for p_=t:
+      if p_>0:
+      Marque[1+(NumCase div 15)][1+(NumCase mod 15)]:=MarqueSc(p_,(u*(NumCase mod 15),-u*(NumCase div 15)));
+	trace Marque[1+(NumCase div 15)][1+(NumCase mod 15)];
+      else:
+	Marque[1+(NumCase div 15)][1+(NumCase mod 15)]:=nullpicture;
+      fi;
+      NumCase:=NumCase+1;
+    endfor;
+    );
+  $
+enddef;
+
+picture GrilleComplete;
+GrilleComplete=GrilleCompleteMP(%
+    6,0,0,2,0,0,0,6,0,0,0,2,0,0,6,%
+    0,4,0,0,0,3,0,0,0,3,0,0,0,4,0,%
+    0,0,4,0,0,0,2,0,2,0,0,0,4,0,0,%
+    2,0,0,4,0,0,0,2,0,0,0,4,0,0,2,%
+    0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,%
+    0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,%
+    0,0,2,0,0,0,2,0,2,0,0,0,2,0,0,%
+    6,0,0,2,0,0,0,4,0,0,0,2,0,0,6,
+    0,0,2,0,0,0,2,0,2,0,0,0,2,0,0,%
+    0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,%
+    0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,%
+    2,0,0,4,0,0,0,2,0,0,0,4,0,0,2,%
+    0,0,4,0,0,0,2,0,2,0,0,0,4,0,0,%
+    0,4,0,0,0,3,0,0,0,3,0,0,0,4,0,%
+    6,0,0,2,0,0,0,6,0,0,0,2,0,0,6%
+    );

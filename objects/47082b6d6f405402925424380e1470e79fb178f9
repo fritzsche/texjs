@@ -1,0 +1,107 @@
+%% $Id: domaincoloring.sty 979 2024-09-02 16:07:29Z herbert $
+%% This is file `domaincoloring.sty',
+%%
+%% Copyright (C) 2024-   Herbert Voss
+%%
+%% This program can be redistributed and/or modified under the terms
+%% of the LaTeX Project Public License Distributed from CTAN archives.
+%% The latest version of this license is in
+%%    http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+
+\RequirePackage{xkeyval}
+\RequirePackage{graphicx}
+\RequirePackage{shellesc}
+
+\def\fileversion{0.05}
+\def\filedate{2024/09/02}
+\message{`DCol' v\fileversion, \filedate}
+\ProvidesPackage{domaincoloring}
+  [\filedate\ \fileversion\  package for domain coloring of complex functions]
+
+\ifnum\ShellEscapeStatus < 1
+    \PackageError{shellesc}{ShellEscape not enabled! Use --shell-escape}%
+\fi
+
+\define@key{DCol}{domain}{\def\@domaincoloring@domain{#1}}
+\define@key{DCol}{resolution}{\@domaincoloring@res@i#1,\@nil}
+\def\@domaincoloring@res@i#1,#2\@nil{%
+  \ifx\relax#2\relax  % only one value
+    \def\@domaincoloring@res{#1,#1}%
+  \else
+    \def\@domaincoloring@res{#1,#2}%
+  \fi}
+\define@key{DCol}{Rmax}{\def\@domaincoloring@Rmax{#1}}
+\define@key{DCol}{bgcolor}{\def\@domaincoloring@bgcolor{#1}}
+\define@key{DCol}{hsvrgb}{\def\@domaincoloring@hsvrgb{#1}}
+\define@key{DCol}{funcName}{\def\@domaincoloring@funcName{#1}}
+\define@key{DCol}{grfOptions}{\def\@domaincoloring@grf{#1}}
+\define@boolkey{DCol}[DCol@]{invers}[true]{}
+\define@boolkey{DCol}[DCol@]{force}[true]{}
+\define@boolkey{DCol}[DCol@]{grid}[true]{}
+
+\newcounter{DCol@imageCTR}
+\setcounter{DCol@imageCTR}{0}
+\def\@domaincoloring@filename{\jobname-tmp\theDCol@imageCTR}
+
+
+\def\setDColkeys#1{\edef\x{\noexpand\setkeys{DCol}{#1}}\x}
+
+\setDColkeys{
+  funcName={},               % corresponding to external file
+  hsvrgb={phi,1,1},          % given (r,phi) of the complex value
+%  filename=\jobname-tmp,     % the external image filename
+  resolution=500,            % pixel per (x|y) interval
+  domain={-2,2,-2,2},        % x|y domain
+  Rmax=0,                    % max value vor |z|. 0 is same as inactive
+  bgcolor={0,0,0},           % R+G+B value, changes only 1,1,1 -> 255,255,255
+  invers=false,              % 0 or 1 vor inverted colors
+  grfOptions={scale=0.5},    % LaTeX options for the included image
+  force=true,                % only valid for the documentation
+  grid=false,                % draw a grid into the image
+}% 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\DomainColoring{\@ifnextchar[\DomainColoring@i{\DomainColoring@i[]}}
+
+\begingroup
+% Change ^ to normal character to describe functions with lua
+\catcode`\^=11\relax  % for power symbol in Lua
+
+\gdef\DomainColoring@i[#1]#2{%
+  \begingroup
+  \setDColkeys{#1}%
+  \ifDCol@force\else
+    \IfFileExists{\@domaincoloring@filename.pdf}{}{\DCol@forcetrue}%
+  \fi
+  \ifDCol@force  
+    \directlua{%
+      require("domaincoloring-complex-numbers")
+      require ("domaincoloring")
+      createData("\jobname",
+               "#2",
+               "\@domaincoloring@funcName", % user defined, function number from file 
+                                            % domaincoloring-functions.lua 
+               {\@domaincoloring@domain},{\@domaincoloring@res},\@domaincoloring@Rmax,
+               "\@domaincoloring@hsvrgb",
+               {\@domaincoloring@bgcolor},
+               \ifDCol@invers "true" \else "false" \fi,
+               \ifDCol@grid "true" \else "false" \fi)
+    }%
+    \typeout{Convert \jobname-domain.eps file to \@domaincoloring@filename.pdf}%
+    \ShellEscape{epstopdf \jobname-domain.eps \@domaincoloring@filename.pdf}%
+  \fi
+  %
+  \expandafter\includegraphics\expandafter[\@domaincoloring@grf]{\@domaincoloring@filename.pdf}%
+  \stepcounter{DCol@imageCTR}%
+  \gdef\@domaincoloring@filename{\jobname-tmp\theDCol@imageCTR}%
+  \endgroup
+  \ignorespaces
+}
+
+\catcode`\^=7\relax
+\endgroup
+
+\endinput

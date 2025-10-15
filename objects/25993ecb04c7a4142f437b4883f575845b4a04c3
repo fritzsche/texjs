@@ -1,0 +1,91 @@
+%%%
+% Futoshiki
+%%%
+\def\filedateFutoshiki{2024/08/04}%
+\def\fileversionFutoshiki{0.1}%
+\message{-- \filedateFutoshiki\space v\fileversionFutoshiki}%
+%
+\setKVdefault[Futo]{Largeur=15pt,Solution=false,CouleurSolution=Black,CouleurCase=Cornsilk,StyleTexte={}}
+
+\newlength\PfCFutoHeight
+
+\NewDocumentCommand\Futoshiki{o m}{%
+  \useKVdefault[Futo]
+  \setKV[Futo]{#1}%
+  \setlength{\PfCFutoHeight}{\useKV[Futo]{Largeur}+\tabcolsep}%
+  \setsepchar{\\/,}%
+  \readlist\ListeFuto{#2}%
+  \xdef\PfCTailleFuto{\ListeFutolen}%
+  \def\PfCFutoStyleTexte{\useKV[Futo]{StyleTexte}}%
+  \colorlet{PfCFutoCase}{\useKV[Futo]{CouleurCase}}%
+  \begin{NiceTabular}{*{\fpeval{\PfCTailleFuto-1}}{m{\useKV[Futo]{Largeur}}m{5pt}}m{\useKV[Futo]{Largeur}}}%[hvlines]
+    \xintFor* ##1 in{\xintSeq{1}{\PfCTailleFuto}}\do{%
+      \xintFor* ##2 in{\xintSeq{1}{\PfCTailleFuto}}\do{%
+        \rule{0pt}{\PfCFutoHeight}%
+        \StrChar{\ListeFuto[##1,\fpeval{2*##2-1}]}{1}[\PfCCaracFuto]%
+        \IfStrEq{\PfCCaracFuto}{*}{%
+          \StrGobbleLeft{\ListeFuto[##1,\fpeval{2*##2-1}]}{1}[\PfCResteFuto]%
+          \Block[draw]{}{\PfCFutoStyleTexte\PfCResteFuto}%
+        }{%
+          \IfStrEq{\PfCCaracFuto}{!}{%
+            \StrGobbleLeft{\ListeFuto[##1,\fpeval{2*##2-1}]}{1}[\PfCResteFuto]%
+            \Block[draw,fill=PfCFutoCase]{}{\PfCFutoStyleTexte\PfCResteFuto}%
+          }{%
+            \ifboolKV[Futo]{Solution}{\Block[draw]{}{\PfCFutoStyleTexte\color{\useKV[Futo]{CouleurSolution}}\ListeFuto[##1,\fpeval{2*##2-1}]}}{\Block[draw]{}{}}%
+          }%
+        }%
+        \xintifForLast{}{&&}%
+      }\\
+      \rule{0pt}{\fpeval{5pt+\tabcolsep}pt}\Block[]{}{}\\
+    }%
+    \CodeAfter%Pour écrire les symboles
+    \xintFor* ##1 in{\xintSeq{1}{\PfCTailleFuto}}\do{%
+      \xintFor* ##2 in{\xintSeq{1}{\PfCTailleFuto}}\do{%
+        \IfStrEq{\ListeFuto[##1,2*##2]}{>}{%
+          \tikz{%
+            \draw[transform canvas={xshift=\fpeval{2pt+0.5\tabcolsep}pt}] (\fpeval{2*##1-1}-|\fpeval{2*##2})--(\fpeval{2*##1-0.5}-|\fpeval{2*##2+0.5})--(\fpeval{2*##1}-|\fpeval{2*##2});
+          }%
+        }{}%
+        \IfStrEq{\ListeFuto[##1,2*##2]}{<}{%
+          \tikz{%
+            \draw[transform canvas={xshift=\fpeval{2pt+0.5\tabcolsep}pt}] (\fpeval{2*##1-1}-|\fpeval{2*##2+0.5})--(\fpeval{2*##1-0.5}-|\fpeval{2*##2})--(\fpeval{2*##1}-|\fpeval{2*##2+0.5});
+          }%
+        }{}%
+        \IfStrEq{\ListeFuto[##1,2*##2]}{v}{%
+          \tikz{%
+            \draw[transform canvas={yshift=\fpeval{2pt+0.5\tabcolsep}pt}] (\fpeval{2*##1-1.5}-|\fpeval{2*##2-1})--(\fpeval{2*##1-1}-|\fpeval{2*##2-0.5})--(\fpeval{2*##1-1.5}-|\fpeval{2*##2});
+          }%
+        }{}%
+        \IfStrEq{\ListeFuto[##1,2*##2]}{A}{%
+          \tikz{%
+            \draw[transform canvas={yshift=\fpeval{2pt+0.5\tabcolsep}pt}] (\fpeval{2*##1-1}-|\fpeval{2*##2-1})--(\fpeval{2*##1-1.5}-|\fpeval{2*##2-0.5})--(\fpeval{2*##1-1}-|\fpeval{2*##2});
+          }%
+        }{}%
+        \IfStrEq{\ListeFuto[##1,2*##2]}{>A}{%
+          \tikz{%
+            \draw[transform canvas={xshift=\fpeval{2pt+0.5\tabcolsep}pt}] (\fpeval{2*##1-1}-|\fpeval{2*##2})--(\fpeval{2*##1-0.5}-|\fpeval{2*##2+0.5})--(\fpeval{2*##1}-|\fpeval{2*##2});
+            \draw[transform canvas={yshift=\fpeval{2pt+0.5\tabcolsep}pt}] (\fpeval{2*##1-1}-|\fpeval{2*##2-1})--(\fpeval{2*##1-1.5}-|\fpeval{2*##2-0.5})--(\fpeval{2*##1-1}-|\fpeval{2*##2});
+          }%
+        }{}%
+        \IfStrEq{\ListeFuto[##1,2*##2]}{>v}{%
+          \tikz{%
+            \draw[transform canvas={xshift=\fpeval{2pt+0.5\tabcolsep}pt}] (\fpeval{2*##1-1}-|\fpeval{2*##2})--(\fpeval{2*##1-0.5}-|\fpeval{2*##2+0.5})--(\fpeval{2*##1}-|\fpeval{2*##2});
+            \draw[transform canvas={yshift=\fpeval{2pt+0.5\tabcolsep}pt}] (\fpeval{2*##1-1.5}-|\fpeval{2*##2-1})--(\fpeval{2*##1-1}-|\fpeval{2*##2-0.5})--(\fpeval{2*##1-1.5}-|\fpeval{2*##2});
+          }%
+        }{}%
+        \IfStrEq{\ListeFuto[##1,2*##2]}{<A}{%
+          \tikz{%
+            \draw[transform canvas={xshift=\fpeval{2pt+0.5\tabcolsep}pt}] (\fpeval{2*##1-1}-|\fpeval{2*##2+0.5})--(\fpeval{2*##1-0.5}-|\fpeval{2*##2})--(\fpeval{2*##1}-|\fpeval{2*##2+0.5});
+            \draw[transform canvas={yshift=\fpeval{2pt+0.5\tabcolsep}pt}] (\fpeval{2*##1-1}-|\fpeval{2*##2-1})--(\fpeval{2*##1-1.5}-|\fpeval{2*##2-0.5})--(\fpeval{2*##1-1}-|\fpeval{2*##2});
+          }%
+        }{}%
+        \IfStrEq{\ListeFuto[##1,2*##2]}{<v}{%
+          \tikz{%
+            \draw[transform canvas={xshift=\fpeval{2pt+0.5\tabcolsep}pt}] (\fpeval{2*##1-1}-|\fpeval{2*##2+0.5})--(\fpeval{2*##1-0.5}-|\fpeval{2*##2})--(\fpeval{2*##1}-|\fpeval{2*##2+0.5});
+            \draw[transform canvas={yshift=\fpeval{2pt+0.5\tabcolsep}pt}] (\fpeval{2*##1-1.5}-|\fpeval{2*##2-1})--(\fpeval{2*##1-1}-|\fpeval{2*##2-0.5})--(\fpeval{2*##1-1.5}-|\fpeval{2*##2});
+          }%
+        }{}%
+      }%
+    }%
+  \end{NiceTabular}
+}%

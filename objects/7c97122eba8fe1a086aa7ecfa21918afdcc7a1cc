@@ -1,0 +1,549 @@
+%%%
+% Modele en barre
+%%%
+\def\filedateModeleBarre{2025/05/28}%
+\def\fileversionModeleBarre{0.1a}%
+\message{-- \filedateModeleBarre\space v\fileversionModeleBarre}%
+%
+\setKVdefault[ClesModeleBarre]{Hauteur=0.5cm,Largeur=1cm,Separation={0},Homogene=false,Multiplicatif=false,MultiplicatifH=false,MultiplicatifB=false,Codes=false,Dys=false,Longueur={},AccoladesH={},AccoladesB={},Traces={}}%Separation pour conserver le lien avec les équations.
+\defKV[ClesModeleBarre]{%
+  Longueur=\ifempty{#1}{}{\setKV[ClesModeleBarre]{Homogene}},%
+  AccoladesH=\ifempty{#1}{}{\setKV[ClesModeleBarre]{MultiplicatifH}\setKV[ClesModeleBarre]{Multiplicatif}},%
+  AccoladesB=\ifempty{#1}{}{\setKV[ClesModeleBarre]{MultiplicatifB}\setKV[ClesModeleBarre]{Multiplicatif}},%
+  Traces=\ifempty{#1}{}{\setKV[ClesModeleBarre]{Codes}}%
+}%
+%
+\newtoks\toklistemodelbarresup%
+\def\UpdateListeModelBarreSup#1\nil{\addtotok\toklistemodelbarresup{#1,}}%
+\newtoks\toklistemodelbarreinf%
+\def\UpdateListeModelBarreInf#1\nil{\addtotok\toklistemodelbarreinf{#1,}}%
+\newtoks\toklistemodelbarresep%
+\def\UpdateListeModelBarreSep#1\nil{\addtotok\toklistemodelbarresep{#1,}}%
+\newtoks\toklistemodelbarreaccosup%
+\def\UpdateListeModelBarreAccoSup#1\nil{\addtotok\toklistemodelbarreaccosup{#1,}}%
+\newtoks\toklistemodelbarreaccoinf%
+\def\UpdateListeModelBarreAccoInf#1\nil{\addtotok\toklistemodelbarreaccoinf{#1,}}%
+
+\newcommand\ModeleBarre[3][]{%
+  % #1 options
+  % #2 éléments de la barre supérieure C1 2 $x$ 1 3/C2 1 1x/
+  % #3 éléments de la barre inférieure (même lecture)
+  \useKVdefault[ClesModeleBarre]%
+  \setKV[ClesModeleBarre]{#1}%
+  \ifPfCPfMScratchDys\relax\setKV[ClesModeleBarre]{Dys}\fi
+  \setsepchar{\\/ }%
+  \readlist\ListeModelBarreSup{#2}%
+  \readlist\ListeModelBarreInf{#3}%
+  \setsepchar{,}%
+  \xdef\fooSeparation{\useKV[ClesModeleBarre]{Separation}}
+  \readlist\ListeModelBarreSep{\fooSeparation}%
+  \toklistemodelbarresup{}%
+  \foreachitem\compteur\in\ListeModelBarreSup{%
+    \foreachitem\valeur\in\ListeModelBarreSup[\compteurcnt]{%
+      \expandafter\UpdateListeModelBarreSup\valeur\nil%
+    }%
+  }%
+  \toklistemodelbarreinf{}%
+  \foreachitem\compteur\in\ListeModelBarreInf{%
+    \foreachitem\valeur\in\ListeModelBarreInf[\compteurcnt]{%
+      \expandafter\UpdateListeModelBarreInf\valeur\nil%
+    }%
+  }%
+  \toklistemodelbarresep{}%
+  \foreachitem\compteur\in\ListeModelBarreSep{%
+    \expandafter\UpdateListeModelBarreSep\compteur\nil%
+  }%
+  \ifboolKV[ClesModeleBarre]{Homogene}{%
+    \PfCMPDessineModelBarre{\the\toklistemodelbarresup}{\the\toklistemodelbarreinf}%
+  }{%
+    \ifboolKV[ClesModeleBarre]{Multiplicatif}{%
+      %
+      \toklistemodelbarreaccosup{}%
+      \toklistemodelbarreaccoinf{}%
+      \ifboolKV[ClesModeleBarre]{MultiplicatifH}{%
+        \xdef\PfCListeAccoladesH{\useKV[ClesModeleBarre]{AccoladesH}}%
+        \setsepchar{\\/ }%
+        \readlist\ListeModeleBarreAccoSup{\PfCListeAccoladesH}%
+        \foreachitem\compteur\in\ListeModeleBarreAccoSup{%
+          \foreachitem\valeur\in\ListeModeleBarreAccoSup[\compteurcnt]{%
+            \expandafter\UpdateListeModelBarreAccoSup\valeur\nil%
+          }%
+        }%
+      %  Les accolades hautes sont \the\toklistemodelbarreaccosup.\\
+      }{}% 
+      \ifboolKV[ClesModeleBarre]{MultiplicatifB}{%
+        \xdef\PfCListeAccoladesB{\useKV[ClesModeleBarre]{AccoladesB}}%
+        \setsepchar{\\/ }%
+        \readlist\ListeModeleBarreAccoInf{\PfCListeAccoladesB}%
+        \foreachitem\compteur\in\ListeModeleBarreAccoInf{%
+          \foreachitem\valeur\in\ListeModeleBarreAccoInf[\compteurcnt]{%
+            \expandafter\UpdateListeModelBarreAccoInf\valeur\nil%
+          }%
+        }%
+      %  Les accolades basses sont \the\toklistemodelbarreaccoinf.\\
+      }{}%
+      \PfCMPDessineModelBarreNonHomogeneMultiplicatif{\the\toklistemodelbarresup}{\the\toklistemodelbarreinf}{\the\toklistemodelbarresep}{\the\toklistemodelbarreaccosup}{\the\toklistemodelbarreaccoinf}%
+    }{%
+      \PfCMPDessineModelBarreNonHomogene{\the\toklistemodelbarresup}{\the\toklistemodelbarreinf}{\the\toklistemodelbarresep}%
+    }%
+  }%
+}%
+
+\newcommand\PfCMPDessineModelBarre[2]{%
+  \begin{mplibcode}%
+    boolean ModeleBarDys;
+    ModeleBarDys=\useKV[ClesModeleBarre]{Dys};
+
+    if ModeleBarDys:
+    Longueur:=2*\useKV[ClesModeleBarre]{Longueur};
+    else:
+    Longueur:=\useKV[ClesModeleBarre]{Longueur};
+    fi;
+    Hauteur:=\useKV[ClesModeleBarre]{Hauteur};
+    
+    vardef Briquesup(expr col)(text t)=
+    save $;
+    picture $;
+    $=image(
+    u:=Longueur/MBnbcasessuptotal;
+    remplis polygone((0,0),(u,0),(u,Hauteur),(0,Hauteur)) withcolor col;
+    draw polygone((0,0),(u,0),(u,Hauteur),(0,Hauteur));
+    label(TEX(t),iso((0,0),(u,Hauteur)));
+    u:=1cm;
+    );
+    $
+    enddef;
+
+    vardef Briqueinf(expr col)(text t)=
+    save $;
+    picture $;
+    $=image(
+    u:=Longueur/MBnbcasesinftotal;
+    remplis polygone((0,0),(u,0),(u,Hauteur),(0,Hauteur)) withcolor col;
+    draw polygone((0,0),(u,0),(u,Hauteur),(0,Hauteur));
+    label(TEX(t),iso((0,0),(u,Hauteur)));
+    u:=1cm;
+    );
+    $
+    enddef;
+    
+    numeric MBnbcolsup;%compte combien de couleurs
+    MBnbcolsup=0;
+    color MBColSup[];%Sauvegarde les couleurs de la barre sup
+    numeric MBnbinfosup[];%compte combien d'infos par couleurs.
+    numeric MBnbcasessup[][];
+    numeric MBnbcasessuptotal;
+    MBnbcasessuptotal=0;
+    string MBTextcasessup[][];
+    vardef toto(text t)=
+    for p_=t:
+    if color p_:
+    MBnbcolsup:=MBnbcolsup+1;% on incrémente le nombre de couleurs
+    MBColSup[MBnbcolsup]:=p_;% on définit la couleur de la série de cases
+    MBnbinfosup[MBnbcolsup]:=0;
+    else:
+    if numeric p_:
+    MBnbinfosup[MBnbcolsup]:=MBnbinfosup[MBnbcolsup]+1;
+    MBnbcasessuptotal:=MBnbcasessuptotal+p_;
+    MBnbcasessup[MBnbcolsup][MBnbinfosup[MBnbcolsup]]:=p_;
+    else:
+    MBTextcasessup[MBnbcolsup][MBnbinfosup[MBnbcolsup]]:=p_;
+    fi;
+    fi;
+    endfor;
+    enddef;
+    
+    toto(#1);
+
+    numeric MBnbcolinf;%compte combien de couleurs
+    MBnbcolinf=0;
+    color MBColInf[];%Sauvegarde les couleurs de la barre inf
+    numeric MBnbinfoinf[];%compte combien d'infos par couleurs.
+    numeric MBnbcasesinf[][];
+    numeric MBnbcasesinftotal;
+    MBnbcasesinftotal=0;
+    string MBTextcasesinf[][];
+    vardef tata(text t)=
+    for p_=t:
+    if color p_:
+    MBnbcolinf:=MBnbcolinf+1;% on incrémente le nombre de couleurs
+    MBColInf[MBnbcolinf]:=p_;% on définit la couleur de la série de cases
+    MBnbinfoinf[MBnbcolinf]:=0;
+    else:
+    if numeric p_:
+    MBnbinfoinf[MBnbcolinf]:=MBnbinfoinf[MBnbcolinf]+1;
+    MBnbcasesinftotal:=MBnbcasesinftotal+p_;
+    MBnbcasesinf[MBnbcolinf][MBnbinfoinf[MBnbcolinf]]:=p_;
+    else:
+    MBTextcasesinf[MBnbcolinf][MBnbinfoinf[MBnbcolinf]]:=p_;
+    fi;
+    fi;
+    endfor;
+    enddef;
+    
+    tata(#2);
+    
+    pair VecteurDeplasup;
+    VecteurDeplasup=(Longueur/MBnbcasessuptotal,0);
+
+    numeric MBnbdepla;
+    MBnbdepla=0;
+    for k=1 upto MBnbcolsup:
+    for l=1 upto MBnbinfosup[k]:
+    for j=1 upto MBnbcasessup[k][l]:
+    trace Briquesup(MBColSup[k])(MBTextcasessup[k][l]) shifted(MBnbdepla*VecteurDeplasup);
+    MBnbdepla:=MBnbdepla+1;
+    endfor;
+    endfor;
+    endfor;
+
+    pair VecteurDeplainf;
+    VecteurDeplainf=(Longueur/MBnbcasesinftotal,0);
+
+    numeric MBnbdepla;
+    MBnbdepla=0;
+    for k=1 upto MBnbcolinf:
+    for l=1 upto MBnbinfoinf[k]:
+    for j=1 upto MBnbcasesinf[k][l]:
+    trace Briqueinf(MBColInf[k])(MBTextcasesinf[k][l]) shifted(MBnbdepla*VecteurDeplainf+(0,-Hauteur));
+    MBnbdepla:=MBnbdepla+1;
+    endfor;
+    endfor;
+    endfor;
+  \end{mplibcode}%
+}%
+
+\def\PfCMPDessineModelBarreAccoladeCode{%
+}%
+
+\newcommand\PfCMPDessineModelBarreNonHomogeneMultiplicatif[5]{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      boolean ModeleBarDys,Codes;
+      ModeleBarDys=\useKV[ClesModeleBarre]{Dys};
+      Codes=\useKV[ClesModeleBarre]{Codes};
+      if Codes:
+      \useKV[ClesModeleBarre]{Traces};
+      fi;
+      
+      \PfCMPDessineModelBarreNHCode
+      \PfCMPDessineModelBarreBriqueCode
+      % \PfCMPDessineModelBarreAccoladeCode
+
+        vardef TraceAccoH(text t)=
+  pair PfCAccoPtH[];
+  numeric etape,ProporHauteur;
+  etape:=0;
+  ProporHauteur:=1;
+  numeric decaetape[][];
+  string toto;
+  numeric n;
+  n=0;
+  for p_=t:
+  n:=n+1;
+  if (n mod 3)=1:
+  etape:=etape+1;
+  decaetape[etape][1]=p_;
+  fi;
+  if (n mod 3)=2:
+  decaetape[etape][2]=p_;
+  fi;
+  if (n mod 3)=0:
+    toto:=p_;
+  if substring(1,2) of toto="*":
+  ltoto=length toto;
+  ProporHauteur:=scantokens(substring(0,1) of toto)+1;
+  toto:=substring(2,ltoto) of toto;
+  else:
+  ProporHauteur:=1;
+  fi;
+  PfCAccoPtH[1]:=(0,ProporHauteur*Hauteur) shifted(VecteurDepla*(decaetape[etape][1]-1));
+  PfCAccoPtH[2]:=PfCAccoPtH[1] shifted(VecteurDepla*decaetape[etape][2]);
+  if ProporHauteur>1:
+  draw PfCAccoPtH[1]--(PfCAccoPtH[1] shifted(0,-(ProporHauteur-1)*Hauteur)) dashed evenly;
+  draw PfCAccoPtH[2]--(PfCAccoPtH[2] shifted(0,-(ProporHauteur-1)*Hauteur)) dashed evenly;
+  fi;
+  label(TEX("$\overbrace{\hbox to"&decimal(abs(PfCAccoPtH[1]-PfCAccoPtH[2]))&"pt{\PfCTBstrut}}^{"&toto&"}$"),1/2[PfCAccoPtH[1],PfCAccoPtH[2]]);
+  fi;      
+  endfor;
+  enddef;
+  % 
+  vardef TraceAccoB(text t)=
+  pair PfCAccoPtB[];
+  numeric etape,ProporHauteur;
+  etape:=0;
+  ProporHauteur:=1;
+  numeric decaetape[][];
+  string toto;
+  numeric n;
+  n=0;
+  for p_=t:
+  n:=n+1;
+  if (n mod 3)=1:
+  etape:=etape+1;
+  decaetape[etape][1]=p_;
+  fi;
+  if (n mod 3)=2:
+  decaetape[etape][2]=p_;
+  fi;
+  if (n mod 3)=0:
+  toto:=p_;
+  if substring(1,2) of toto="*":
+  ltoto=length toto;
+  ProporHauteur:=scantokens(substring(0,1) of toto)+1;
+  toto:=substring(2,ltoto) of toto;
+  else:
+  ProporHauteur:=1;
+  fi;
+  PfCAccoPtB[1]:=(0,-ProporHauteur*Hauteur) shifted(VecteurDepla*(decaetape[etape][1]-1));
+  PfCAccoPtB[2]:=PfCAccoPtB[1] shifted(VecteurDepla*decaetape[etape][2]);
+  if ProporHauteur>1:
+  draw PfCAccoPtB[1]--(PfCAccoPtB[1] shifted(0,(ProporHauteur-1)*Hauteur)) dashed evenly;
+  draw PfCAccoPtB[2]--(PfCAccoPtB[2] shifted(0,(ProporHauteur-1)*Hauteur)) dashed evenly;
+  fi;
+  label(TEX("$\underbrace{\hbox to"&decimal(abs(PfCAccoPtB[1]-PfCAccoPtB[2]))&"pt{\PfCTBstrut}}_{"&toto&"}$"),1/2[PfCAccoPtB[1],PfCAccoPtB[2]]);
+  fi;      
+  endfor;
+  enddef;
+
+  if ModeleBarDys:
+  Longueur:=2*\useKV[ClesModeleBarre]{Largeur};
+  else:
+  Longueur:=\useKV[ClesModeleBarre]{Largeur};
+  fi;
+      Hauteur:=\useKV[ClesModeleBarre]{Hauteur};
+      u:=Longueur;
+      
+      toto(#1);
+      tata(#2);
+      
+      pair VecteurDepla;
+      VecteurDepla=(Longueur,0);
+      
+      numeric MBnbdepla;
+      MBnbdepla=0;
+      for k=1 upto MBnbcolsup:
+      for l=1 upto MBnbinfosup[k]:
+      trace Brique(MBColSup[k],MBnbcasessup[k][l])(MBTextcasessup[k][l]) shifted(MBnbdepla*VecteurDepla);
+      MBnbdepla:=MBnbdepla+MBnbcasessup[k][l];
+      endfor;
+      endfor;
+      
+      MBnbdepla:=0;
+      for k=1 upto MBnbcolinf:
+      for l=1 upto MBnbinfoinf[k]:
+      trace Brique(MBColInf[k],MBnbcasesinf[k][l])(MBTextcasesinf[k][l]) shifted(MBnbdepla*VecteurDepla+(0,-Hauteur));
+      if MBnbcasesinf[k][l]<0:
+      for j=1 upto (abs(MBnbcasesinf[k][l])-1):
+      trace ((0,0)--(0,Hauteur)) shifted((MBnbdepla+j)*VecteurDepla+(0,-Hauteur)) withcolor black;
+      endfor;
+      fi;
+      MBnbdepla:=MBnbdepla+abs(MBnbcasesinf[k][l]);
+      endfor;
+      endfor;
+      
+      Separation(#3);
+      
+      TraceAccoH(#4);
+      TraceAccoB(#5);
+    \end{mplibcode}%
+  \fi%
+}%
+
+\def\PfCMPDessineModelBarreNHCode{%
+  numeric MBnbcolinf;%compte combien de couleurs
+  MBnbcolinf=0;
+  color MBColInf[];%Sauvegarde les couleurs de la barre inf
+  numeric MBnbinfoinf[];%compte combien d'infos par couleurs.
+  numeric MBnbcasesinf[][];
+  numeric MBnbcasesinftotal;
+  MBnbcasesinftotal=0;
+  string MBTextcasesinf[][];
+  vardef tata(text t)=
+  for p_=t:
+  if color p_:
+  MBnbcolinf:=MBnbcolinf+1;% on incrémente le nombre de couleurs
+  MBColInf[MBnbcolinf]:=p_;% on définit la couleur de la série de cases
+  MBnbinfoinf[MBnbcolinf]:=0;
+  else:
+  if numeric p_:
+  MBnbinfoinf[MBnbcolinf]:=MBnbinfoinf[MBnbcolinf]+1;
+  MBnbcasesinftotal:=MBnbcasesinftotal+p_;
+  MBnbcasesinf[MBnbcolinf][MBnbinfoinf[MBnbcolinf]]:=p_;
+  else:
+  MBTextcasesinf[MBnbcolinf][MBnbinfoinf[MBnbcolinf]]:=p_;
+  fi;
+  fi;
+  endfor;
+  enddef;
+  % 
+  vardef Separation(text t)=
+  for p_=t:
+  if p_>0:
+  nbdecal:=p_;
+  draw (u*nbdecal,-1.5Hauteur)--(u*nbdecal,1.5Hauteur) withpen pencircle scaled 1.5 dashed evenly withcolor red;
+  fi;
+  endfor;
+  enddef;
+  numeric MBnbcolsup;%compte combien de couleurs
+    MBnbcolsup=0;
+    color MBColSup[];%Sauvegarde les couleurs de la barre sup
+    numeric MBnbinfosup[];%compte combien d'infos par couleurs.
+    numeric MBnbcasessup[][];
+    numeric MBnbcasessuptotal;
+    MBnbcasessuptotal=0;
+    string MBTextcasessup[][];
+    vardef toto(text t)=
+    for p_=t:
+    if color p_:
+    MBnbcolsup:=MBnbcolsup+1;% on incrémente le nombre de couleurs
+    MBColSup[MBnbcolsup]:=p_;% on définit la couleur de la série de cases
+    MBnbinfosup[MBnbcolsup]:=0;
+    else:
+    if numeric p_:
+    MBnbinfosup[MBnbcolsup]:=MBnbinfosup[MBnbcolsup]+1;
+    MBnbcasessuptotal:=MBnbcasessuptotal+p_;
+    MBnbcasessup[MBnbcolsup][MBnbinfosup[MBnbcolsup]]:=p_;
+    else:
+    MBTextcasessup[MBnbcolsup][MBnbinfosup[MBnbcolsup]]:=p_;
+    fi;
+    fi;
+    endfor;
+    enddef;
+}%
+
+\def\PfCMPDessineModelBarreBriqueCode{%
+  vardef Brique(expr col,nbfois)(text t)=
+  save $;
+  picture $;
+  $=image(
+  if t="?":
+  draw polygone((0,0),(u*abs(nbfois),0),(u*abs(nbfois),Hauteur),(0,Hauteur)) dashed evenly;
+  else:
+  remplis polygone((0,0),(u*abs(nbfois),0),(u*abs(nbfois),Hauteur),(0,Hauteur)) withcolor col;
+  draw polygone((0,0),(u*abs(nbfois),0),(u*abs(nbfois),Hauteur),(0,Hauteur));
+  fi;
+  if nbfois>0:
+  label(TEX(t),iso((0,0),(u*abs(nbfois),Hauteur)));
+  else:
+  if t<>"":
+  label.bot(TEX(t),iso((0,0),(u*abs(nbfois),-Hauteur)));
+  drawdblarrow (0,-0.5*Hauteur)--(u*abs(nbfois),-0.5*Hauteur);
+  fi;
+  fi;
+  );
+  $
+  enddef;
+}%
+
+\def\PfCMPDessineModelBarreBriqueCodePDF{%
+  vardef Brique(expr col,nbfois)(text t)=
+  save $;
+  picture $;
+  $=image(
+  if t="?":
+  draw polygone((0,0),(u*abs(nbfois),0),(u*abs(nbfois),Hauteur),(0,Hauteur)) dashed evenly;
+  else:
+  remplis polygone((0,0),(u*abs(nbfois),0),(u*abs(nbfois),Hauteur),(0,Hauteur)) withcolor col;
+  draw polygone((0,0),(u*abs(nbfois),0),(u*abs(nbfois),Hauteur),(0,Hauteur));
+  fi;
+  if nbfois>0:
+  label(LATEX(t),iso((0,0),(u*abs(nbfois),Hauteur)));
+  else:
+  if t<>"":
+  label.bot(LATEX(t),iso((0,0),(u*abs(nbfois),-Hauteur)));
+  drawdblarrow (0,-0.5*Hauteur)--(u*abs(nbfois),-0.5*Hauteur);
+  fi;
+  fi;
+  );
+  $
+  enddef;
+}%
+    
+ \newcommand\PfCMPDessineModelBarreNonHomogene[3]{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    boolean ModeleBarDys,Codes;
+    ModeleBarDys=\useKV[ClesModeleBarre]{Dys};
+    Codes=\useKV[ClesModeleBarre]{Codes};
+    if Codes:
+    \useKV[ClesModeleBarre]{Traces};
+    fi;
+    
+    \PfCMPDessineModelBarreNHCode
+    \PfCMPDessineModelBarreBriqueCode
+
+    if ModeleBarDys:
+    Longueur:=2*\useKV[ClesModeleBarre]{Largeur};
+    else:
+    Longueur:=\useKV[ClesModeleBarre]{Largeur};
+    fi;
+    Hauteur:=\useKV[ClesModeleBarre]{Hauteur};
+    u:=Longueur;
+
+    toto(#1);
+    tata(#2);
+    
+    pair VecteurDepla;
+    VecteurDepla=(Longueur,0);
+
+    numeric MBnbdepla;
+    MBnbdepla=0;
+    for k=1 upto MBnbcolsup:
+    for l=1 upto MBnbinfosup[k]:
+    trace Brique(MBColSup[k],MBnbcasessup[k][l])(MBTextcasessup[k][l]) shifted(MBnbdepla*VecteurDepla);
+    MBnbdepla:=MBnbdepla+MBnbcasessup[k][l];
+    endfor;
+    endfor;
+
+    MBnbdepla:=0;
+    for k=1 upto MBnbcolinf:
+    for l=1 upto MBnbinfoinf[k]:
+    trace Brique(MBColInf[k],MBnbcasesinf[k][l])(MBTextcasesinf[k][l]) shifted(MBnbdepla*VecteurDepla+(0,-Hauteur));
+    if MBnbcasesinf[k][l]<0:
+    for j=1 upto (abs(MBnbcasesinf[k][l])-1):
+    trace ((0,0)--(0,Hauteur)) shifted((MBnbdepla+j)*VecteurDepla+(0,-Hauteur)) withcolor black;
+    endfor;
+    fi;
+    MBnbdepla:=MBnbdepla+abs(MBnbcasesinf[k][l]);
+    endfor;
+    endfor;
+
+    Separation(#3);
+  \end{mplibcode}%
+  \else%
+  \begin{mpost}[mpsettings={\PfCMPDessineModelBarreNHCode;\PfCMPDessineModelBarreBriqueCodePDF;Longueur:=\useKV[ClesModeleBarre]{Largeur};Hauteur:=\useKV[ClesModeleBarre]{Hauteur};u:=Longueur;}]
+    toto(#1);
+    tata(#2);
+    
+    pair VecteurDepla;
+    VecteurDepla=(Longueur,0);
+
+    numeric MBnbdepla;
+    MBnbdepla=0;
+    for k=1 upto MBnbcolsup:
+    for l=1 upto MBnbinfosup[k]:
+    trace Brique(MBColSup[k],MBnbcasessup[k][l])(MBTextcasessup[k][l]) shifted(MBnbdepla*VecteurDepla);
+    MBnbdepla:=MBnbdepla+MBnbcasessup[k][l];
+    endfor;
+    endfor;
+
+    MBnbdepla:=0;
+    for k=1 upto MBnbcolinf:
+    for l=1 upto MBnbinfoinf[k]:
+    trace Brique(MBColInf[k],MBnbcasesinf[k][l])(MBTextcasesinf[k][l]) shifted(MBnbdepla*VecteurDepla+u*(0,-0.5));
+    if MBnbcasesinf[k][l]<0:
+    for j=1 upto (abs(MBnbcasesinf[k][l])-1):
+    trace ((0,0)--(0,Hauteur)) shifted((MBnbdepla+j)*VecteurDepla+u*(0,-0.5)) withcolor black;
+    endfor;
+    fi;
+    MBnbdepla:=MBnbdepla+abs(MBnbcasesinf[k][l]);
+    endfor;
+    endfor;
+
+    Separation(#3);
+  \end{mpost}%
+  \fi%
+}%

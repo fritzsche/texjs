@@ -1,0 +1,120 @@
+%%
+%% This is file `hep-reference.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% hep-reference-implementation.dtx  (with options: `package')
+%% This is a generated file.
+%% Copyright (C) 2019-2025 by Jan Hajer
+%% This file may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either
+%% version 1.3c of this license or (at your option) any later
+%% version. The latest version of this license is in:
+%% http://www.latex-project.org/lppl.txt
+%% and version 1.3c or later is part of all distributions of
+%% LaTeX version 2005/12/01 or later.
+\NeedsTeXFormat{LaTeX2e}[2005/12/01]
+\ProvidesPackage{hep-reference}[2025/09/01 v1.4 Convenience macros for references]
+
+\RequirePackage{hyperref}
+\hypersetup{
+  pdfencoding=auto, psdextra,
+  linktoc=all, hidelinks, breaklinks=true,
+  pdfcreator={}, pdfproducer={}
+}
+\AtBeginDocument{\@ifpackageloaded{doc}{\hypersetup{hidelinks}}{}}
+\pdfstringdefDisableCommands{\def\varepsilon{\textepsilon}}
+\pdfstringdefDisableCommands{\def\to{\textrightarrow}}
+\AtBeginDocument{
+  \pdfstringdefDisableCommands{\let\ensuremath\@gobble}
+  \pdfstringdefDisableCommands{\let\mathsurround\@gobble}
+  \pdfstringdefDisableCommands{\let\unskip\@gobble}
+  \pdfstringdefDisableCommands{\let\thanks\@gobble}
+  \pdfstringdefDisableCommands{\let\footnote\@gobble}
+  \pdfstringdefDisableCommands{\let\\\@gobble}
+}
+\AtBeginDocument{
+  \@ifundefined{@title}{}{
+    \@ifundefined{hep@sub@title}{
+      \hypersetup{pdftitle={\@title}}
+    }{
+      \hypersetup{pdftitle={\@title: \hep@sub@title}}
+    }
+  }
+  \@ifundefined{hep@key@words}{}{%
+    \hypersetup{pdfkeywords={\hep@key@words}}%
+  }
+}
+
+\def\BackrefFootnoteTag{}
+\RequirePackage{footnotebackref}
+\let\@foot@note\footnote
+\renewcommand*{\footnote}[1]{\unskip\@foot@note{\ignorespaces#1}}
+
+\AtBeginDocument{
+  \let\hep@ref\ref
+  \renewcommand*\ref{\no@break@before\hep@ref}
+}
+\AtBeginDocument{\@ifpackageloaded{amsmath}{%
+  \renewcommand*\eqref{\no@break@before\labelcref}%
+}{}}
+\providecommand*\hep@use@command{}
+\newcommand*\usecommand[2][1]{%
+  \renewcommand*\hep@use@command[#1]{#2}\hep@use@command%
+}
+\RequirePackage{etoolbox}
+\NewDocumentCommand\textlabel{O{}mO{}m}{%
+  \protected@write\@auxout{}{%
+    \string\newlabel{#2}{%
+      {\hspace{-4pt}\protecting{#1{#4}}}{\thepage}{#4}{#2}{}%
+    }%
+  }%
+  \hypertarget{#2}{}%
+  {#3{#4}}%
+}
+\PassOptionsToPackage{noabbrev, nameinlink}{cleveref}
+\RequirePackage{cleveref}
+\newcommand*{\creflastconjunction}{, and\nobreakspace}
+\crefname{enumi}{point}{points}
+\crefname{inlinelisti}{point}{points}
+\newcommand*\no@break@before{%
+  \relax\ifvmode\else%
+    \ifhmode%
+      \ifdim\lastskip > 0pt%
+        \relax\unskip\nobreakspace%
+      \fi%
+    \fi%
+  \fi%
+}
+\AtBeginDocument{\@ifpackageloaded{subcaption}{%
+  \let\hep@subref\subref
+  \renewcommand*\subref{\no@break@before\hep@subref}
+  \renewcommand*\subcaption@ref[2]{\begingroup%
+    \caption@setoptions{sub}%
+    \subcaption@reffmt\p@subref{\hep@ref#1{sub@#2}}%
+  \endgroup}
+  \newcommand*{\subcref}[1]{\cref{sub@#1}}
+}{}}
+\NewDocumentCommand{\eqcrefname}{mmo}{
+  \crefname{#1}{#2}{\IfValueTF{#3}{#3}{#2s}}
+  \creflabelformat{#1}{(##2##1##3)}
+}
+\DeclareRobustCommand{\labelcrefrange}[2]{%
+  \@crefrangenostar{labelcref}{#1}{#2}%
+}
+\AtBeginDocument{\@ifpackageloaded{hep-title}{%
+  \labelcrefmultiformat{affiliation}{#2#1#3}{%
+    \textsuperscript,#2#1#3}{\textsuperscript,#2#1#3%
+  }{%
+    \textsuperscript,#2#1#3%
+  }
+  \labelcrefrangeformat{affiliation}{#3#1#4\textsuperscript{--}#5#2#6}
+}{}}
+
+\let\hep@cite\cite
+\renewcommand*\cite{\no@break@before\hep@cite}
+
+\endinput
+%%
+%% End of file `hep-reference.sty'.

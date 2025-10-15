@@ -1,0 +1,877 @@
+%%%
+% Patrons de pavés droits et cubes
+%%%
+\def\filedatePatronspaves{2025/05/26}%
+\def\fileversionPatronspaves{0.1a}%
+\message{-- \filedatePatronspaves\space v\fileversionPatronspaves}%
+%
+\setKVdefault[ClesPatron]{Cube,Arete=1cm,ListeCouleurs={white},Pave=false,Largeur=2cm,Hauteur=1.5cm,Profondeur=1cm,Codes=false,AColorier=false,EcartColorier={},Traces={}}%
+%EcartColorier est en nombre de parts pour le cube, en mm pour le pavé.
+\defKV[ClesPatron]{%
+EcartColorier=\ifempty{#1}{}{\setKV[ClesPatron]{AColorier}},%
+Traces=\ifempty{#1}{}{\setKV[ClesPatron]{Codes}}%
+}%
+
+\newtoks\toklistepatron%
+\newtoks\toklistecouleur%
+\def\UpdatetoksPatron#1\nil{\addtotok\toklistepatron{"#1",}}%
+
+\NewDocumentCommand\Patron{om}{%
+  \useKVdefault[ClesPatron]%
+  \setKV[ClesPatron]{#1}%
+  \toklistecouleur{}%
+  \xdef\ListeAvantCouleurs{\useKV[ClesPatron]{ListeCouleurs}}%
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\ListeCouleur{\ListeAvantCouleurs}%
+  \reademptyitems%
+  \foreachitem\couleur\in\ListeCouleur{\expandafter\UpdateCoul\couleur\nil}%
+  \ifboolKV[ClesPatron]{Pave}{%
+    \toklistepatron{}%
+    \readlist*\PfCListePatron{#2}%
+    \foreachitem\compteur\in\PfCListePatron{\expandafter\UpdatetoksPatron\compteur\nil}%
+    \MPPatronPave{\the\toklistepatron}{\the\toklistecouleur}%
+  }{%
+    \ifboolKV[ClesPatron]{Cube}{%
+      \toklistepatron{}%
+      \readlist*\PfCListePatron{#2}%
+      \foreachitem\compteur\in\PfCListePatron{\expandafter\UpdatetoksPatron\compteur\nil}%
+      \MPPatronCube{\the\toklistepatron}{\the\toklistecouleur}%
+    }{%
+    }%
+  }%
+}%
+
+\setsepchar{,}\ignoreemptyitems%
+\readlist*\ListePatronsCube{%
+  {ooxo,xxxx,ooxo},%
+  {oxoo,xxxx,xooo},%
+  {ooxo,xxxx,oxoo},%
+  {ooox,xxxx,xooo},%
+  {ooox,xxxx,oxoo},%
+  {xxxoo,ooxxx},%
+  {xxoo,oxxo,ooxx},%
+  {xxoo,oxxx,ooox},%
+  {xxoo,oxxx,ooxo},%
+  {ooox,xxxx,ooox},%
+  {ooxo,xxxo,ooxx}%
+}%
+\readlist*\ListePatronsCubeCouleurs{%
+  {LightSteelBlue,Crimson,Yellow,Crimson,Yellow,LightSteelBlue},%
+  {LightSteelBlue,Crimson,Yellow,Crimson,Yellow,LightSteelBlue},%
+  {LightSteelBlue,Crimson,Yellow,Crimson,Yellow,LightSteelBlue},%
+  {LightSteelBlue,Crimson,Yellow,Crimson,Yellow,LightSteelBlue},%
+  {LightSteelBlue,Crimson,Yellow,Crimson,Yellow,LightSteelBlue},%
+  {LightSteelBlue,Crimson,LightSteelBlue,Yellow,Crimson,Yellow},%
+  {LightSteelBlue,Crimson,Yellow,LightSteelBlue,Crimson,Yellow},%
+  {LightSteelBlue,Crimson,Yellow,LightSteelBlue,Yellow,Crimson},%
+  {LightSteelBlue,Crimson,Yellow,LightSteelBlue,Yellow,Crimson},%
+  {LightSteelBlue,Crimson,Yellow,Crimson,Yellow,LightSteelBlue},%
+  {LightSteelBlue,Crimson,Yellow,Crimson,LightSteelBlue,Yellow}%
+}%
+
+\readlist*\ListePatronsPave{%
+  {hlpl,lopo,hopo,lopo},%
+  {hlpo,loph,hopo,lopo},%
+  {hlpo,lopo,hopl,lopo},%
+  {hlpo,lopo,hopo,loph},%
+  {hopo,lhph,hopo,lopo},%
+  {hopo,lhpo,hopl,lopo},%
+  {hopo,lhpo,hopo,lopl},%
+  {hopo,lopo,hlpl,lopo},%
+  {hopo,lopo,hlpo,loph},%
+  {hopo,lopo,hopo,lhph},%10
+  {plhl,loho,poho,loho},%
+  {plho,loho,pohl,loho},%
+  {plho,loho,pohl,loho},%
+  {plho,loho,poho,lohp},%
+  {poho,lphp,poho,loho},%
+  {poho,lpho,pohl,loho},%
+  {poho,lpho,poho,lohp},%
+  {poho,loho,plhl,loho},%
+  {poho,loho,plho,lohp},%
+  {poho,loho,poho,lphp},%20
+  {phlh,holo,polo,holo},%
+  {phlo,holp,polo,holo},%
+  {phlo,holo,polh,holo},%
+  {phlo,holo,polo,holp},%
+  {polo,hplp,polo,holo},%
+  {polo,hplo,polh,holo},%
+  {polo,hplo,polo,holp},%
+  {polo,holo,phlh,holo},%
+  {polo,holo,phlo,holp},%
+  {polo,holo,polo,hplp},%30
+  {hlpo,lopo,hopl,pool},%
+  {hopo,lhpo,hopl,pool},%
+  {hopo,lopo,hlph,pool},%
+  {lhpo,hopo,loph,pooh},%
+  {lopo,hlpo,loph,pooh},%
+  {lopo,hopo,lhph,pooh},%
+  {plho,loho,pohl,hool},%
+  {poho,lpho,pohl,hool},%
+  {poho,loho,plhl,hool},%
+  {lpho,poho,lohp,hoop},%40
+  {loho,plho,lohp,hoop},%
+  {loho,poho,lphp,hoop},%
+  {phlo,holo,polh,looh},%
+  {polo,hplo,polh,looh},%
+  {polo,holo,phlh,looh},%
+  {hplo,polo,holp,loop},%
+  {holo,phlo,holp,loop},%
+  {holo,polo,hplp,loop},%
+  {hpo,lpo,hpl,pol,hol},%
+  {lpo,hpo,lph,poh,loh},%50
+  {pho,lho,phl,hol,pol},%
+  {hpoo,lpho,pohl,hool},%
+  {lpoo,hplo,polh,looh},%
+  {phoo,lhpo,hopl,pool}%
+}%
+
+\readlist*\ListePatronsPaveCouleurs{%
+  {Orange,Crimson,Orange,LightGreen,Crimson,LightGreen},%
+  {Orange,Crimson,LightGreen,Orange,Crimson,LightGreen},%
+  {Orange,Crimson,LightGreen,Crimson,Orange,LightGreen},%
+  {Orange,Crimson,LightGreen,Crimson,LightGreen,Orange},%
+  {Crimson,Orange,LightGreen,Orange,Crimson,LightGreen},%
+  {Crimson,Orange,LightGreen,Crimson,Orange,LightGreen},%
+  {Crimson,Orange,LightGreen,Crimson,LightGreen,Orange},%
+  {Crimson,LightGreen,Orange,Crimson,Orange,LightGreen},%
+  {Crimson,LightGreen,Orange,Crimson,LightGreen,Orange},%
+  {Crimson,LightGreen,Crimson,Orange,LightGreen,Orange},%10
+  {LightGreen,Crimson,LightGreen,Orange,Crimson,Orange},%
+  {LightGreen,Crimson,Orange,LightGreen,Crimson,Orange},%
+  {LightGreen,Crimson,Orange,Crimson,LightGreen,Orange},%
+  {LightGreen,Crimson,Orange,Crimson,Orange,LightGreen},%
+  {Crimson,LightGreen,Orange,LightGreen,Crimson,Orange},%
+  {Crimson,LightGreen,Orange,Crimson,LightGreen,Orange},%
+  {Crimson,LightGreen,Orange,Crimson,Orange,LightGreen},%
+  {Crimson,Orange,LightGreen,Crimson,LightGreen,Orange},%
+  {Crimson,Orange,LightGreen,Crimson,Orange,LightGreen},%
+  {Crimson,Orange,Crimson,LightGreen,Orange,LightGreen},%20
+  {Crimson,LightGreen,Crimson,Orange,LightGreen,Orange},%
+  {Crimson,LightGreen,Orange,LightGreen,Crimson,Orange},%
+  {Crimson,LightGreen,Orange,LightGreen,Crimson,Orange},%
+  {Crimson,LightGreen,Orange,LightGreen,Orange,Crimson},%
+  {LightGreen,Crimson,Orange,Crimson,LightGreen,Orange},%
+  {LightGreen,Crimson,Orange,LightGreen,Crimson,Orange},%
+  {LightGreen,Crimson,Orange,LightGreen,Orange,Crimson},%
+  {LightGreen,Orange,Crimson,LightGreen,Crimson,Orange},%
+  {LightGreen,Orange,Crimson,LightGreen,Orange,Crimson},%
+  {LightGreen,Orange,LightGreen,Crimson,Orange,Crimson},%30
+  {Orange,Crimson,LightGreen,Crimson,Orange,LightGreen},%
+  {Crimson,Orange,LightGreen,Crimson,Orange,LightGreen},%
+  {Crimson,LightGreen,Orange,Crimson,Orange,LightGreen},%
+  {Orange,LightGreen,Crimson,LightGreen,Orange,Crimson},%
+  {LightGreen,Orange,Crimson,LightGreen,Orange,Crimson},%
+  {LightGreen,Crimson,Orange,LightGreen,Orange,Crimson},%
+  {LightGreen,Crimson,Orange,Crimson,LightGreen,Orange},%
+  {Crimson,LightGreen,Orange,Crimson,LightGreen,Orange},%
+  {Crimson,Orange,LightGreen,Crimson,LightGreen,Orange},%
+  {LightGreen,Orange,Crimson,Orange,LightGreen,Crimson},%40
+  {Orange,LightGreen,Crimson,Orange,LightGreen,Crimson},%
+  {Orange,Crimson,LightGreen,Orange,LightGreen,Crimson},%
+  {Crimson,LightGreen,Orange,LightGreen,Crimson,Orange},%
+  {LightGreen,Crimson,Orange,LightGreen,Crimson,Orange},%
+  {LightGreen,Orange,Crimson,LightGreen,Crimson,Orange},%
+  {Crimson,Orange,LightGreen,Orange,Crimson,LightGreen},%
+  {Orange,Crimson,LightGreen,Orange,Crimson,LightGreen},%
+  {Orange,LightGreen,Crimson,Orange,Crimson,LightGreen},%
+  {Crimson,LightGreen,Crimson,Orange,LightGreen,Orange},%
+  {LightGreen,Crimson,LightGreen,Orange,Crimson,Orange},%50
+  {Crimson,Orange,Crimson,LightGreen,Orange,LightGreen},%
+  {Crimson,LightGreen,Orange,Crimson,LightGreen,Orange},%
+  {LightGreen,Crimson,Orange,LightGreen,Crimson,Orange},%
+  {Crimson,Orange,LightGreen,Crimson,Orange,LightGreen}%
+}%
+\reademptyitems%
+
+\def\MPPatronPaveCode{%
+  Largeur=\useKV[ClesPatron]{Largeur};
+  Hauteur=\useKV[ClesPatron]{Hauteur};
+  Profondeur=\useKV[ClesPatron]{Profondeur};
+  % 
+  pair C[],M[],N[],O[],P[];
+  % 
+  color Col[],CoulDefaut;
+  CoulDefaut=white;
+  %
+  boolean Codes,Allume[][],AColorier;
+  Codes=\useKV[ClesPatron]{Codes};
+  AColorier=\useKV[ClesPatron]{AColorier};
+  if AColorier:
+  EcartColorier=\useKV[ClesPatron]{EcartColorier}*1mm;
+  fi;
+  %
+  numeric DecalCol[];
+  %
+  vardef Allumage(text t)=
+  nblignes:=0;
+  for p_=t:
+  Long:=length p_;
+  nblignes:=nblignes+1;
+  for k=0 upto Long-1:
+  Allume[nblignes][k]=false;
+  endfor;
+  endfor;
+  enddef;
+  %
+  vardef LectureLargeur(text t)=
+  for p_=t:
+  Long:=length p_;
+  endfor;
+  for k=1 upto Long-1:
+  for p_=t:
+  if substring(k,k+1) of p_="o":
+  if k=1:
+  if (substring(0,1) of p_="h") and (substring(1,2) of p_="p"):
+  DecalCol[k]:=Largeur;
+  fi;
+  if (substring(0,1) of p_="h") and (substring(1,2) of p_="l"):
+  DecalCol[k]:=Profondeur;
+  fi;
+  if (substring(0,1) of p_="p") and (substring(1,2) of p_="h"):
+  DecalCol[k]:=Largeur;
+  fi;
+  if (substring(0,1) of p_="p") and (substring(1,2) of p_="l"):
+  DecalCol[k]:=Hauteur;
+  fi;
+  if (substring(0,1) of p_="l") and (substring(1,2) of p_="h"):
+  DecalCol[k]:=Profondeur;
+  fi;
+  if (substring(0,1) of p_="l") and (substring(1,2) of p_="p"):
+  DecalCol[k]:=Hauteur;
+  fi;
+  fi;
+  elseif substring(k,k+1) of p_="l":
+  DecalCol[k]:=Largeur;
+  elseif substring(k,k+1) of p_="h":
+  DecalCol[k]:=Hauteur;
+  elseif substring(k,k+1) of p_="p":
+  DecalCol[k]:=Profondeur;
+  fi;
+  endfor;
+  endfor;
+  enddef;
+  %
+  vardef Patron(text t)=
+  path PathPave;
+  nblignes:=-1;
+  NBLignes:=0;
+  nbcol:=0;
+  nbfaces:=0;
+  for p_=t:
+  Long:=length p_;
+  nbcolonnes:=0;
+  NBColonnes:=0;
+  if substring(0,1) of p_="h":
+  YEchelle:=Hauteur;
+  elseif substring(0,1) of p_="l":
+  YEchelle:=Largeur;
+  elseif substring(0,1) of p_="p":
+  YEchelle:=Profondeur;
+  fi;
+  nblignes:=nblignes-YEchelle;
+  NBLignes:=NBLignes+1;
+  for k=1 upto Long-1:
+  if substring(k,k+1) of p_="o":
+  if k=1:
+  PathPave:=(unitsquare scaled 0) shifted ((0,-1));
+  fi;
+  elseif substring(k,k+1) of p_="l":
+  nbcol:=nbcol+1;
+  PathPave:=(unitsquare xscaled Largeur yscaled YEchelle) shifted ((nbcolonnes,nblignes));
+  Allume[NBLignes][NBColonnes]:=true;
+  nbfaces:=nbfaces+1;
+  C[nbfaces]=center PathPave;
+  M[nbfaces]=point(0) of PathPave;
+  N[nbfaces]=point(1) of PathPave;
+  O[nbfaces]=point(2) of PathPave;
+  P[nbfaces]=point(3) of PathPave;
+  elseif substring(k,k+1) of p_="h":
+  nbcol:=nbcol+1;
+  PathPave:=(unitsquare xscaled Hauteur yscaled YEchelle) shifted ((nbcolonnes,nblignes));
+  Allume[NBLignes][NBColonnes]:=true;
+  nbfaces:=nbfaces+1;
+  C[nbfaces]=center PathPave;
+  M[nbfaces]=point(0) of PathPave;
+  N[nbfaces]=point(1) of PathPave;
+  O[nbfaces]=point(2) of PathPave;
+  P[nbfaces]=point(3) of PathPave;
+  elseif substring(k,k+1) of p_="p":
+  nbcol:=nbcol+1;
+  PathPave:=(unitsquare xscaled Profondeur yscaled YEchelle) shifted ((nbcolonnes,nblignes));
+  Allume[NBLignes][NBColonnes]:=true;
+  nbfaces:=nbfaces+1;
+  C[nbfaces]=center PathPave;
+  M[nbfaces]=point(0) of PathPave;
+  N[nbfaces]=point(1) of PathPave;
+  O[nbfaces]=point(2) of PathPave;
+  P[nbfaces]=point(3) of PathPave;
+  fi;
+  if (unknown Col[nbcol]):
+  else:
+  if Col[nbcol]=white:
+  else:
+  if AColorier=false:
+  fill PathPave withcolor Col[nbcol];
+  fi;
+  fi;
+  fi;
+  if nbfaces>0:
+  trace M[nbfaces]--P[nbfaces];
+  trace N[nbfaces]--O[nbfaces];
+  trace P[nbfaces]--O[nbfaces];
+  trace M[nbfaces]--N[nbfaces];
+  fi;
+  nbcolonnes:=nbcolonnes+DecalCol[k];
+  NBColonnes:=NBColonnes+1;
+  endfor;
+  endfor;
+  enddef;
+  % 
+  vardef EffectuerTraces=
+  if Codes:
+  \useKV[ClesPatron]{Traces};
+  fi;
+  enddef;
+}%
+
+\def\MPPatronPave#1#2{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}%
+    \MPPatronPaveCode
+    n:=0;
+    for p_=#2:
+    n:=n+1;
+    if color p_:
+    Col[n]=p_;
+    else:
+    Col[n]=CoulDefaut;
+    fi;
+    endfor;
+    %
+    LectureLargeur(#1);
+    Allumage(#1);
+    if AColorier:
+    drawoptions(dashed evenly);
+    fi;
+    Patron(#1);
+    if AColorier:
+    drawoptions();
+    toto:=0;
+    for l=1 upto NBLignes:
+    for k=0 upto NBColonnes-1:
+    if Allume[l][k]:
+    toto:=toto+1;
+    % trait vertical gauche
+    if k=0:
+%    trace M[toto]--P[toto];
+    tpoints:=floor(abs(M[toto]-P[toto])/EcartColorier);
+    for t=1 upto tpoints-1:
+    trace ((t/tpoints)[M[toto],P[toto]])--((t/tpoints)[M[toto],P[toto]]+(2*unitvector(P[toto]-M[toto])) rotated -90);
+    endfor;
+    else:
+    if Allume[l][k-1]=false:
+    % trace M[toto]--P[toto] dashed evenly;
+    tpoints:=floor(abs(M[toto]-P[toto])/EcartColorier);
+    for t=1 upto tpoints-1:
+    trace ((t/tpoints)[M[toto],P[toto]])--((t/tpoints)[M[toto],P[toto]]+(2*unitvector(P[toto]-M[toto])) rotated -90);
+    endfor;
+    fi;
+    fi;
+%    % trait vertical droit
+    if k=Long-1:
+    % trace N[toto]--O[toto] dashed evenly;
+    tpoints:=floor(abs(N[toto]-O[toto])/EcartColorier);
+    for t=1 upto tpoints-1:
+    trace ((t/tpoints)[N[toto],O[toto]])--((t/tpoints)[N[toto],O[toto]]+(2*unitvector(O[toto]-N[toto])) rotated 90);
+    endfor;
+    else:
+    if Allume[l][k+1]=false:
+    %% trace N[toto]--O[toto] dashed evenly;
+    tpoints:=floor(abs(N[toto]-O[toto])/EcartColorier);
+    for t=1 upto tpoints-1:
+    trace ((t/tpoints)[N[toto],O[toto]])--((t/tpoints)[N[toto],O[toto]]+(2*unitvector(O[toto]-N[toto])) rotated 90);
+    endfor;
+    fi;
+    fi;
+%    % trait horizontal haut
+    if l=1:
+    % trace P[toto]--O[toto] dashed evenly;
+    tpoints:=floor(abs(P[toto]-O[toto])/EcartColorier);
+    for t=1 upto tpoints-1:
+    trace ((t/tpoints)[P[toto],O[toto]])--((t/tpoints)[P[toto],O[toto]]+(2*unitvector(O[toto]-P[toto])) rotated -90);
+    endfor;
+    else:
+    if Allume[l-1][k]=false:
+    % trace P[toto]--O[toto] dashed evenly;
+    tpoints:=floor(abs(P[toto]-O[toto])/EcartColorier);
+    for t=1 upto tpoints-1:
+    trace ((t/tpoints)[P[toto],O[toto]])--((t/tpoints)[P[toto],O[toto]]+(2*unitvector(O[toto]-P[toto])) rotated -90);
+    endfor;
+    fi;
+    fi;
+%    % trait horizontal bas
+    if l=NBLignes:
+    %% trace M[toto]--N[toto] dashed evenly;
+    tpoints:=floor(abs(M[toto]-N[toto])/EcartColorier);
+    for t=1 upto tpoints-1:
+    trace ((t/tpoints)[M[toto],N[toto]])--((t/tpoints)[M[toto],N[toto]]+(2*unitvector(M[toto]-N[toto])) rotated -90);
+    endfor;
+    else:
+    if Allume[l+1][k]=false:
+    %% trace M[toto]--N[toto] dashed evenly;
+    tpoints:=floor(abs(M[toto]-N[toto])/EcartColorier);
+    for t=1 upto tpoints-1:
+    trace ((t/tpoints)[M[toto],N[toto]])--((t/tpoints)[M[toto],N[toto]]+(2*unitvector(M[toto]-N[toto])) rotated -90);
+    endfor;
+    fi;
+    fi;
+    fi;
+    endfor;
+    endfor;
+    fi;
+    EffectuerTraces;
+  \end{mplibcode}%
+  \else%
+  \begin{mpost}[mpsettings={\MPPatronPaveCode;}]
+    n:=0;
+    for p_=#2:
+    n:=n+1;
+    if color p_:
+    Col[n]=p_;
+    else:
+    Col[n]=CoulDefaut;
+    fi;
+    endfor;
+    % 
+    LectureLargeur(#1);
+    Patron(#1);
+    EffectuerTraces;
+  \end{mpost}%
+  \fi%
+}%
+
+\def\MPPatronCubeCode{%
+  Arete=\useKV[ClesPatron]{Arete};
+  %
+  pair C[],M[],N[],O[],P[];
+  %
+  color Col[],CoulDefaut;
+  CoulDefaut=white;
+  %
+  boolean Codes,Allume[][],AColorier;
+  Codes=\useKV[ClesPatron]{Codes};
+  AColorier=\useKV[ClesPatron]{AColorier};
+  if AColorier:
+  EcartColorier=\useKV[ClesPatron]{EcartColorier};
+  fi;
+  %
+  vardef Allumage(text t)=
+  nblignes:=-1;
+  for p_=t:
+  Long:=length p_;
+  nblignes:=nblignes+1;
+  for k=0 upto Long-1:
+  Allume[nblignes][k]=false;
+  endfor;
+  endfor;
+  enddef;
+  %
+  vardef Patron(text t)=
+  nblignes:=-1;
+  nbcol:=0;
+  nbfaces:=0;
+  for p_=t:
+  Long:=length p_;
+  nblignes:=nblignes+1;
+  nbcolonnes:=0;
+  for k=0 upto Long-1:
+  nbcolonnes:=nbcolonnes+1;
+  if substring(k,k+1) of p_="x":
+  Allume[nblignes][k]:=true;
+  nbfaces:=nbfaces+1;
+  nbcol:=nbcol+1;
+  if (unknown Col[nbcol]):
+  else:
+  if Col[nbcol]=white:
+  else:
+  if AColorier=false:
+  fill ((unitsquare scaled Arete) shifted (Arete*(nbcolonnes,-nblignes))) withcolor Col[nbcol];
+  fi;
+  fi;
+  fi;
+  C[nbfaces]=(center unitsquare scaled Arete) shifted (Arete*(nbcolonnes,-nblignes));
+  M[nbfaces]=point(0) of ((unitsquare scaled Arete) shifted (Arete*(nbcolonnes,-nblignes)));
+  N[nbfaces]=point(1) of ((unitsquare scaled Arete) shifted (Arete*(nbcolonnes,-nblignes)));
+  O[nbfaces]=point(2) of ((unitsquare scaled Arete) shifted (Arete*(nbcolonnes,-nblignes)));
+  P[nbfaces]=point(3) of ((unitsquare scaled Arete) shifted (Arete*(nbcolonnes,-nblignes)));
+  trace M[nbfaces]--P[nbfaces];
+  trace N[nbfaces]--O[nbfaces];
+  trace P[nbfaces]--O[nbfaces];
+  trace M[nbfaces]--N[nbfaces];
+  fi;
+  endfor;
+  endfor;
+  enddef;
+  % 
+  vardef EffectuerTraces=
+  if Codes:
+  \useKV[ClesPatron]{Traces};
+  fi;
+  enddef;
+}%
+
+\def\MPPatronCube#1#2{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}%
+    \MPPatronCubeCode
+    %
+    n:=0;
+    for p_=#2:
+    n:=n+1;
+    if color p_:
+    Col[n]=p_;
+    else:
+    Col[n]=CoulDefaut;
+    fi;
+    endfor;
+    %
+    Allumage(#1);
+    if AColorier:
+    drawoptions(dashed withdots scaled 0.5);
+    fi;
+    Patron(#1);
+    if AColorier:
+    drawoptions();
+    toto:=0;
+    for l=0 upto nblignes:
+    for k=0 upto Long-1:
+    if Allume[l][k]:
+    toto:=toto+1;
+    % trait vertical gauche
+    if k=0:
+%    trace M[toto]--P[toto] dashed evenly;
+    for t=1 upto EcartColorier-1:
+    trace ((t/EcartColorier)[M[toto],P[toto]])--((t/EcartColorier)[M[toto],P[toto]]+(2*unitvector(P[toto]-M[toto])) rotated -90);
+    endfor;
+    else:
+    if Allume[l][k-1]=false:
+%    trace M[toto]--P[toto] dashed evenly;
+    for t=1 upto EcartColorier-1:
+    trace ((t/EcartColorier)[M[toto],P[toto]])--((t/EcartColorier)[M[toto],P[toto]]+(2*unitvector(P[toto]-M[toto])) rotated -90);
+    endfor;
+    fi;
+    fi;
+    % trait vertical droit
+    if k=Long-1:
+  %  trace N[toto]--O[toto] dashed evenly;
+    for t=1 upto EcartColorier-1:
+    trace ((t/EcartColorier)[N[toto],O[toto]])--((t/EcartColorier)[N[toto],O[toto]]+(2*unitvector(O[toto]-N[toto])) rotated 90);
+    endfor;
+    else:
+    if Allume[l][k+1]=false:
+%    trace N[toto]--O[toto] dashed evenly;
+    for t=1 upto EcartColorier-1:
+    trace ((t/EcartColorier)[N[toto],O[toto]])--((t/EcartColorier)[N[toto],O[toto]]+(2*unitvector(O[toto]-N[toto])) rotated 90);
+    endfor;
+    fi;
+    fi;
+    % trait horizontal haut
+    if l=0:
+%    trace P[toto]--O[toto] dashed evenly;
+    for t=1 upto EcartColorier-1:
+    trace ((t/EcartColorier)[P[toto],O[toto]])--((t/EcartColorier)[P[toto],O[toto]]+(2*unitvector(O[toto]-P[toto])) rotated -90);
+    endfor;
+    else:
+    if Allume[l-1][k]=false:
+%    trace P[toto]--O[toto] dashed evenly;
+    for t=1 upto EcartColorier-1:
+    trace ((t/EcartColorier)[P[toto],O[toto]])--((t/EcartColorier)[P[toto],O[toto]]+(2*unitvector(O[toto]-P[toto])) rotated -90);
+    endfor;
+    fi;
+    fi;
+    % trait horizontal bas
+    if l=nblignes:
+%    trace M[toto]--N[toto] dashed evenly;
+    for t=1 upto EcartColorier-1:
+    trace ((t/EcartColorier)[M[toto],N[toto]])--((t/EcartColorier)[M[toto],N[toto]]+(2*unitvector(M[toto]-N[toto])) rotated -90);
+    endfor;
+    else:
+    if Allume[l+1][k]=false:
+%    trace M[toto]--N[toto] dashed evenly;
+    for t=1 upto EcartColorier-1:
+    trace ((t/EcartColorier)[M[toto],N[toto]])--((t/EcartColorier)[M[toto],N[toto]]+(2*unitvector(M[toto]-N[toto])) rotated -90);
+    endfor;
+    fi;
+    fi;
+    fi;
+    endfor;
+    endfor;
+    fi;
+    EffectuerTraces;
+  \end{mplibcode}%
+  \else%
+  \begin{mpost}[mpsettings={\MPPatronCubeCode;}]%
+    %
+    n:=0;
+    for p_=#2:
+    n:=n+1;
+    if color p_:
+    Col[n]=p_;
+    else:
+    Col[n]=CoulDefaut;
+    fi;
+    endfor;
+    %    
+    Patron(#1);
+    EffectuerTraces;
+  \end{mpost}%
+  \fi%
+}%
+
+\def\MPPatronCubeCodeold{%
+  Arete=\useKV[ClesPatron]{Arete};
+  %
+  pair C[],M[],N[],O[],P[];
+  %
+  color Col[],CoulDefaut;
+  CoulDefaut=white;
+  %
+  boolean Codes;
+  Codes=\useKV[ClesPatron]{Codes};
+  vardef Patron(text t)=
+  nblignes:=-1;
+  nbcol:=0;
+  nbfaces:=0;
+  for p_=t:
+  Long:=length p_;
+  nblignes:=nblignes+1;
+  nbcolonnes:=0;
+  for k=0 upto Long-1:
+  nbcolonnes:=nbcolonnes+1;
+  if substring(k,k+1) of p_="x":
+  nbfaces:=nbfaces+1;
+  nbcol:=nbcol+1;
+  if (unknown Col[nbcol]):
+  else:
+  if Col[nbcol]=white:
+  else:
+  fill ((unitsquare scaled Arete) shifted (Arete*(nbcolonnes,-nblignes))) withcolor Col[nbcol];
+  fi;
+  fi;
+  trace (unitsquare scaled Arete) shifted (Arete*(nbcolonnes,-nblignes));
+  C[nbfaces]=(center unitsquare scaled Arete) shifted (Arete*(nbcolonnes,-nblignes));
+  M[nbfaces]=point(0) of ((unitsquare scaled Arete) shifted (Arete*(nbcolonnes,-nblignes)));
+  N[nbfaces]=point(1) of ((unitsquare scaled Arete) shifted (Arete*(nbcolonnes,-nblignes)));
+  O[nbfaces]=point(2) of ((unitsquare scaled Arete) shifted (Arete*(nbcolonnes,-nblignes)));
+  P[nbfaces]=point(3) of ((unitsquare scaled Arete) shifted (Arete*(nbcolonnes,-nblignes)));
+  fi;
+  endfor;
+  endfor;
+  enddef;
+  % 
+  vardef EffectuerTraces=
+  if Codes:
+  \useKV[ClesPatron]{Traces};
+  fi;
+  enddef;
+}%
+
+\def\MPPatronCubeold#1#2{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}%
+    \MPPatronCubeCode
+    %
+    n:=0;
+    for p_=#2:
+    n:=n+1;
+    if color p_:
+    Col[n]=p_;
+    else:
+    Col[n]=CoulDefaut;
+    fi;
+    endfor;
+    %    
+    Patron(#1);
+    EffectuerTraces;
+  \end{mplibcode}%
+  \else%
+  \begin{mpost}[mpsettings={\MPPatronCubeCode;}]%
+    %
+    n:=0;
+    for p_=#2:
+    n:=n+1;
+    if color p_:
+    Col[n]=p_;
+    else:
+    Col[n]=CoulDefaut;
+    fi;
+    endfor;
+    %    
+    Patron(#1);
+    EffectuerTraces;
+  \end{mpost}%
+  \fi%
+}%
+
+\def\MPPatronPaveCodeold{%
+  Largeur=\useKV[ClesPatron]{Largeur};
+  Hauteur=\useKV[ClesPatron]{Hauteur};
+  Profondeur=\useKV[ClesPatron]{Profondeur};
+  % 
+  pair C[],M[],N[],O[],P[];
+  % 
+  color Col[],CoulDefaut;
+  CoulDefaut=white;
+  %
+  boolean Codes;
+  Codes=\useKV[ClesPatron]{Codes};
+  numeric DecalCol[];
+  %
+  vardef LectureLargeur(text t)=
+  for p_=t:
+  Long:=length p_;
+  endfor;
+  for k=1 upto Long-1:
+  for p_=t:
+  if substring(k,k+1) of p_="o":
+  if k=1:
+  if (substring(0,1) of p_="h") and (substring(1,2) of p_="p"):
+  DecalCol[k]:=Largeur;
+  fi;
+  if (substring(0,1) of p_="h") and (substring(1,2) of p_="l"):
+  DecalCol[k]:=Profondeur;
+  fi;
+  if (substring(0,1) of p_="p") and (substring(1,2) of p_="h"):
+  DecalCol[k]:=Largeur;
+  fi;
+  if (substring(0,1) of p_="p") and (substring(1,2) of p_="l"):
+  DecalCol[k]:=Hauteur;
+  fi;
+  if (substring(0,1) of p_="l") and (substring(1,2) of p_="h"):
+  DecalCol[k]:=Profondeur;
+  fi;
+  if (substring(0,1) of p_="l") and (substring(1,2) of p_="p"):
+  DecalCol[k]:=Hauteur;
+  fi;
+  fi;
+  elseif substring(k,k+1) of p_="l":
+  DecalCol[k]:=Largeur;
+  elseif substring(k,k+1) of p_="h":
+  DecalCol[k]:=Hauteur;
+  elseif substring(k,k+1) of p_="p":
+  DecalCol[k]:=Profondeur;
+  fi;
+  endfor;
+  endfor;
+  enddef;
+  %
+  vardef Patron(text t)=
+  path PathPave;
+  nblignes:=-1;
+  nbcol:=0;
+  nbfaces:=0;
+  for p_=t:
+  Long:=length p_;
+  nbcolonnes:=0;
+  if substring(0,1) of p_="h":
+  YEchelle:=Hauteur;
+  elseif substring(0,1) of p_="l":
+  YEchelle:=Largeur;
+  elseif substring(0,1) of p_="p":
+  YEchelle:=Profondeur;
+  fi;
+  nblignes:=nblignes-YEchelle;
+  for k=1 upto Long-1:
+  if substring(k,k+1) of p_="o":
+  if k=1:
+  PathPave:=(unitsquare scaled 0) shifted ((0,-1));
+  fi;
+  elseif substring(k,k+1) of p_="l":
+  nbcol:=nbcol+1;
+  PathPave:=(unitsquare xscaled Largeur yscaled YEchelle) shifted ((nbcolonnes,nblignes));
+  nbfaces:=nbfaces+1;
+  C[nbfaces]=center PathPave;
+  M[nbfaces]=point(0) of PathPave;
+  N[nbfaces]=point(1) of PathPave;
+  O[nbfaces]=point(2) of PathPave;
+  P[nbfaces]=point(3) of PathPave;
+  elseif substring(k,k+1) of p_="h":
+  nbcol:=nbcol+1;
+  PathPave:=(unitsquare xscaled Hauteur yscaled YEchelle) shifted ((nbcolonnes,nblignes));
+  nbfaces:=nbfaces+1;
+  C[nbfaces]=center PathPave;
+  M[nbfaces]=point(0) of PathPave;
+  N[nbfaces]=point(1) of PathPave;
+  O[nbfaces]=point(2) of PathPave;
+  P[nbfaces]=point(3) of PathPave;
+  elseif substring(k,k+1) of p_="p":
+  nbcol:=nbcol+1;
+  PathPave:=(unitsquare xscaled Profondeur yscaled YEchelle) shifted ((nbcolonnes,nblignes));
+  nbfaces:=nbfaces+1;
+  C[nbfaces]=center PathPave;
+  M[nbfaces]=point(0) of PathPave;
+  N[nbfaces]=point(1) of PathPave;
+  O[nbfaces]=point(2) of PathPave;
+  P[nbfaces]=point(3) of PathPave;
+  fi;
+  if (unknown Col[nbcol]):
+  else:
+  if Col[nbcol]=white:
+  else:
+  fill PathPave withcolor Col[nbcol];
+  fi;
+  fi;
+  trace PathPave;
+  nbcolonnes:=nbcolonnes+DecalCol[k];
+  endfor;
+  endfor;
+  enddef;
+  % 
+  vardef EffectuerTraces=
+  if Codes:
+  \useKV[ClesPatron]{Traces};
+  fi;
+  enddef;
+}%
+
+\def\MPPatronPaveold#1#2{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    \MPPatronPaveCode    
+    n:=0;
+    for p_=#2:
+    n:=n+1;
+    if color p_:
+    Col[n]=p_;
+    else:
+    Col[n]=CoulDefaut;
+    fi;
+    endfor;
+    %
+    LectureLargeur(#1);
+    Patron(#1);
+    %EffectuerTraces;
+  \end{mplibcode}
+  \else%
+  \begin{mpost}[mpsettings={\MPPatronPaveCode;}]
+    n:=0;
+    for p_=#2:
+    n:=n+1;
+    if color p_:
+    Col[n]=p_;
+    else:
+    Col[n]=CoulDefaut;
+    fi;
+    endfor;
+    % 
+    LectureLargeur(#1);
+    Patron(#1);
+    EffectuerTraces;
+  \end{mpost}
+  \fi%
+}%

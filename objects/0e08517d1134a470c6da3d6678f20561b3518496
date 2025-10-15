@@ -1,0 +1,126 @@
+% Author.............: C. Pierquet
+% licence............: Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+% licence cliparts...: CC0 from svgrepo (Darius Dan & Harikadeng)
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ProfLycee-Pictosbac}[2025/08/04 0.1b Pictogrammes Zone Examen]
+%0.1b	Flat version
+%0.1a	Version initiale
+
+%%=====Option(s)
+
+%%=====Packages utiles et indispensables
+\RequirePackage{graphicx}
+\RequirePackage{xstring}
+
+%%====Macro
+\NewDocumentCommand\pflpictobac{ s O{height=1em} m }{%
+	%#* = b&w
+	%#2 = options includegraphics
+	%#3 = name
+	\IfBooleanTF{#1}%
+		{%
+			\IfStrEqCase{#3}{%
+				%les classiques 'monument 10'
+				{amnord}{\includegraphics[page=1,#2]{pfl-pictosbac.pdf}}%
+				{amsud}{\includegraphics[page=3,#2]{pfl-pictosbac.pdf}}%
+				{amsud.v1}{\includegraphics[page=3,#2]{pfl-pictosbac.pdf}}%
+				{amsud.v2}{\includegraphics[page=5,#2]{pfl-pictosbac.pdf}}%
+				{asie}{\includegraphics[page=7,#2]{pfl-pictosbac.pdf}}%
+				{asie.v1}{\includegraphics[page=7,#2]{pfl-pictosbac.pdf}}%
+				{asie.v2}{\includegraphics[page=9,#2]{pfl-pictosbac.pdf}}%
+				{ce}{\includegraphics[page=11,#2]{pfl-pictosbac.pdf}}%
+				{ce.v1}{\includegraphics[page=11,#2]{pfl-pictosbac.pdf}}%
+				{ce.v2}{\includegraphics[page=13,#2]{pfl-pictosbac.pdf}}%
+				{ce.v3}{\includegraphics[page=15,#2]{pfl-pictosbac.pdf}}%
+				{fr}{\includegraphics[page=17,#2]{pfl-pictosbac.pdf}}%
+				{fr.v1}{\includegraphics[page=17,#2]{pfl-pictosbac.pdf}}%
+				{fr.v2}{\includegraphics[page=19,#2]{pfl-pictosbac.pdf}}%
+				{liban}{\includegraphics[page=21,#2]{pfl-pictosbac.pdf}}%
+				{nouvcal}{\includegraphics[page=23,#2]{pfl-pictosbac.pdf}}%
+				{reunion}{\includegraphics[page=27,#2]{pfl-pictosbac.pdf}}%
+				{reunion.v1}{\includegraphics[page=27,#2]{pfl-pictosbac.pdf}}%
+				{reunion.v2}{\includegraphics[page=29,#2]{pfl-pictosbac.pdf}}%
+				{poly}{\includegraphics[page=25,#2]{pfl-pictosbac.pdf}}%
+				{poly.v1}{\includegraphics[page=25,#2]{pfl-pictosbac.pdf}}%
+				{poly.v2}{\includegraphics[page=31,#2]{pfl-pictosbac.pdf}}%
+			}%
+		}%
+		{%
+			\IfStrEqCase{#3}{%
+				%les classiques 'monument 10'
+				{amnord}{\includegraphics[page=2,#2]{pfl-pictosbac.pdf}}%
+				{amsud}{\includegraphics[page=4,#2]{pfl-pictosbac.pdf}}%
+				{amsud.v1}{\includegraphics[page=4,#2]{pfl-pictosbac.pdf}}%
+				{amsud.v2}{\includegraphics[page=6,#2]{pfl-pictosbac.pdf}}%
+				{asie}{\includegraphics[page=8,#2]{pfl-pictosbac.pdf}}%
+				{asie.v1}{\includegraphics[page=8,#2]{pfl-pictosbac.pdf}}%
+				{asie.v2}{\includegraphics[page=10,#2]{pfl-pictosbac.pdf}}%
+				{ce}{\includegraphics[page=12,#2]{pfl-pictosbac.pdf}}%
+				{ce.v1}{\includegraphics[page=12,#2]{pfl-pictosbac.pdf}}%
+				{ce.v2}{\includegraphics[page=14,#2]{pfl-pictosbac.pdf}}%
+				{ce.v3}{\includegraphics[page=16,#2]{pfl-pictosbac.pdf}}%
+				{fr}{\includegraphics[page=18,#2]{pfl-pictosbac.pdf}}%
+				{fr.v1}{\includegraphics[page=18,#2]{pfl-pictosbac.pdf}}%
+				{fr.v2}{\includegraphics[page=20,#2]{pfl-pictosbac.pdf}}%
+				{liban}{\includegraphics[page=22,#2]{pfl-pictosbac.pdf}}%
+				{nouvcal}{\includegraphics[page=24,#2]{pfl-pictosbac.pdf}}%
+				{reunion}{\includegraphics[page=28,#2]{pfl-pictosbac.pdf}}%
+				{reunion.v1}{\includegraphics[page=28,#2]{pfl-pictosbac.pdf}}%
+				{reunion.v2}{\includegraphics[page=30,#2]{pfl-pictosbac.pdf}}%
+				{poly}{\includegraphics[page=26,#2]{pfl-pictosbac.pdf}}%
+				{poly.v1}{\includegraphics[page=26,#2]{pfl-pictosbac.pdf}}%
+				{poly.v2}{\includegraphics[page=32,#2]{pfl-pictosbac.pdf}}%
+			}%
+		}%
+}
+
+%====PICTOBACS
+\NewDocumentCommand\pflflatpictobac{ s O{height=1em} m }{%
+	%#* = crop
+	%#2 = options includegraphics
+	%#3 = name
+	\IfBooleanTF{#1}%
+		{%
+			\IfStrEqCase{#3}{%
+				%les 'world famous' cropped
+				{amnord}{\includegraphics[page=2,#2]{pfl-flatpictosbac.pdf}}%
+				{amnord.v1}{\includegraphics[page=2,#2]{pfl-flatpictosbac.pdf}}%
+				{amsud}{\includegraphics[page=4,#2]{pfl-flatpictosbac.pdf}}%
+				{amsud.v1}{\includegraphics[page=4,#2]{pfl-flatpictosbac.pdf}}%
+				{asie}{\includegraphics[page=6,#2]{pfl-flatpictosbac.pdf}}%
+				{asie.v1}{\includegraphics[page=6,#2]{pfl-flatpictosbac.pdf}}%
+				{asie.v2}{\includegraphics[page=8,#2]{pfl-flatpictosbac.pdf}}%
+				{ce}{\includegraphics[page=10,#2]{pfl-flatpictosbac.pdf}}%
+				{ce.v1}{\includegraphics[page=10,#2]{pfl-flatpictosbac.pdf}}%
+				{ce.v2}{\includegraphics[page=12,#2]{pfl-flatpictosbac.pdf}}%
+				{fr}{\includegraphics[page=14,#2]{pfl-flatpictosbac.pdf}}%
+				{fr.v1}{\includegraphics[page=14,#2]{pfl-flatpictosbac.pdf}}%
+				{fr.v2}{\includegraphics[page=16,#2]{pfl-flatpictosbac.pdf}}%
+				{poly}{\includegraphics[page=18,#2]{pfl-flatpictosbac.pdf}}%
+				{poly.v1}{\includegraphics[page=18,#2]{pfl-flatpictosbac.pdf}}%
+			}%
+		}%
+		{%
+			\IfStrEqCase{#3}{%
+				%les 'world famous' 
+				{amnord}{\includegraphics[page=1,#2]{pfl-flatpictosbac.pdf}}%
+				{amnord.v1}{\includegraphics[page=1,#2]{pfl-flatpictosbac.pdf}}%
+				{amsud}{\includegraphics[page=3,#2]{pfl-flatpictosbac.pdf}}%
+				{amsud.v1}{\includegraphics[page=3,#2]{pfl-flatpictosbac.pdf}}%
+				{asie}{\includegraphics[page=5,#2]{pfl-flatpictosbac.pdf}}%
+				{asie.v1}{\includegraphics[page=5,#2]{pfl-flatpictosbac.pdf}}%
+				{asie.v2}{\includegraphics[page=7,#2]{pfl-flatpictosbac.pdf}}%
+				{ce}{\includegraphics[page=9,#2]{pfl-flatpictosbac.pdf}}%
+				{ce.v1}{\includegraphics[page=9,#2]{pfl-flatpictosbac.pdf}}%
+				{ce.v2}{\includegraphics[page=11,#2]{pfl-flatpictosbac.pdf}}%
+				{fr}{\includegraphics[page=13,#2]{pfl-flatpictosbac.pdf}}%
+				{fr.v1}{\includegraphics[page=13,#2]{pfl-flatpictosbac.pdf}}%
+				{fr.v2}{\includegraphics[page=15,#2]{pfl-flatpictosbac.pdf}}%
+				{poly}{\includegraphics[page=17,#2]{pfl-flatpictosbac.pdf}}%
+				{poly.v1}{\includegraphics[page=17,#2]{pfl-flatpictosbac.pdf}}%
+			}%
+		}%
+}
+
+\endinput

@@ -1,0 +1,196 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2018 - 2021 by ChairX
+%
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either
+% version 1.3 of this license or (at your option) any later
+% version.  The latest version of this license is in:
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of
+% LaTeX version 2005/12/01 or later.
+%
+% This file contains the implementation of all linear algebra related macros .
+%
+% Macros have to be described by (delete the first %)
+% %\begin{macro}{\macro}
+% % Description of the implementation.
+% %    \begin{macrocode}
+%\newcommand{\macro}[]         {}
+% %    \end{macrocode}
+% %\end{macro}
+%
+% The implementation and description will appear in the implementation
+% part of the documentation. Use \subsubsection{} etc. for structuring.
+%
+% The documentation of the macros defined here has to be written in
+% chairxmathLinalgDoc.dtx
+%\fi
+%
+% First we check of macros should be included:
+%    \begin{macrocode}
+\if@loadmath
+%    \end{macrocode}
+%
+%\subsubsection{General Linear Algebra}
+%
+%\begin{macro}{\tr}
+%    \begin{macrocode}
+\newcommand{\tr}{\operatorname{\ch@irxoperatorfont{tr}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\rank}
+%    \begin{macrocode}
+\newcommand{\rank}{\operatorname{\ch@irxoperatorfont{rank}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\codim}
+%    \begin{macrocode}
+\newcommand{\codim}{\operatorname{\ch@irxoperatorfont{codim}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\diag}
+%    \begin{macrocode}
+\newcommand{\diag}{\operatorname{\ch@irxoperatorfont{diag}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Trans}
+%    \begin{macrocode}
+\newcommand{\Trans}{{\ch@irxscriptfont{\scriptscriptstyle{T}}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Mat}
+%    \begin{macrocode}
+\newcommand{\Mat}{\ch@irxoperatorfont{M}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\SymMat}
+%    \begin{macrocode}
+\newcommand{\SymMat}{\ch@irxoperatorfont{SymMat}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\ann}
+%    \begin{macrocode}
+\newcommand{\ann}{\ch@irxscriptfont{ann}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Span}
+%    \begin{macrocode}
+\newcommand{\Span}[1][]{\operatorname{\ch@irxoperatorfont{span}_{#1}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\basis}
+%    \begin{macrocode}
+\newcommand{\basis}[1]{\ch@irxbasisfont{#1}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\subsubsection{Tensors}
+%
+%\begin{macro}{\tensor}
+%    \begin{macrocode}
+\renewcommand{\tensor}[1][{}]{\mathbin{\otimes_{\scriptscriptstyle{#1}}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Tensor}
+%    \begin{macrocode}
+\newcommand{\Tensor}{\ch@irxoperatorfont{T}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Anti}
+%    \begin{macrocode}
+\newcommand{\Anti}{\Lambda}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Sym}
+%    \begin{macrocode}
+\newcommand{\Sym}{\ch@irxoperatorfont{S}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Symmetrizer}
+%    \begin{macrocode}
+\newcommand{\Symmetrizer}{\operatorname{\ch@irxoperatorfont{Sym}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\AntiSymmetrizer}
+%    \begin{macrocode}
+\newcommand{\AntiSymmetrizer}{\operatorname{\ch@irxoperatorfont{Alt}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\ins}
+%    \begin{macrocode}
+\newcommand{\ins}{\operatorname{\ch@irxoperatorfont{i}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\jns}
+%    \begin{macrocode}
+\newcommand{\jns}{\operatorname{\ch@irxoperatorfont{j}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\insa}
+%    \begin{macrocode}
+\newcommand{\insa}{\ins_{\ch@irxscriptfont{a}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\inss}
+%    \begin{macrocode}
+\newcommand{\inss}{\ins_{\ch@irxscriptfont{s}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\degs}
+%    \begin{macrocode}
+\newcommand{\degs}{\ch@irxoperatorfont{deg}_{\ch@irxscriptfont{s}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\dega}
+%    \begin{macrocode}
+\newcommand{\dega}{\ch@irxoperatorfont{deg}_{\ch@irxscriptfont{a}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%
+%\subsubsection{Inner Products}
+%
+%\begin{macro}{\SP}
+%    \begin{macrocode}
+\DeclarePairedDelimiter{\SP} {\langle}{\rangle}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\littlepara}
+%    \begin{macrocode}
+\newcommand{\littlepara}{{\scriptscriptstyle\parallel}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\IP}
+%    \begin{macrocode}
+\newcommand{\IP}[6][{}]{\decorate*[^{#2}_{#3}]{\SP[#1]{#4}}{^{#5}_{#6}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%    \begin{macrocode}
+\fi
+%    \end{macrocode}

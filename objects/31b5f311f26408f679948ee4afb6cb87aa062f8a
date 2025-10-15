@@ -1,0 +1,196 @@
+%%^^A%%  fontspec-code-fontload.dtx -- part of FONTSPEC <latex3.github.io/fontspec>
+
+% \section{expl3 interface for primitive font loading}
+%
+% \begin{function}{\@@_primitive_font_set:Nnn,\@@_primitive_font_gset:Nnn}
+% \begin{syntax}
+% |\@@_primitive_font_set:Nnn| \meta{font cs} \Arg{file/name} \Arg{size (dim.\ expr)}
+% \end{syntax}
+% Wrapper around \TeX\ \cs{font} primitive.
+% \end{function}
+%
+% \begin{function}{\@@_font_suppress_not_found_error:}
+% Wrapper around \XeTeX\/Lua\TeX\ primitive, used to be able to programmatically query font existence.
+% \end{function}
+%
+% \begin{function}[pTF]{\@@_primitive_font_if_null:N}
+% \begin{syntax}
+% |\@@_primitive_font_if_null:NTF| \meta{font cs} \Arg{true code} \Arg{false code}
+% \end{syntax}
+% Query whether the \meta{font cs} is the \cs{nullfont}.
+% \end{function}
+%
+% \begin{function}[TF]{\@@_primitive_font_set:Nnn,\@@_primitive_font_gset:Nnn}
+% \begin{syntax}
+% |\@@_primitive_font_set:NnnTF| \meta{font cs} \Arg{file/name} \Arg{size (dim.\ expr)} \Arg{true code} \Arg{false code}
+% \end{syntax}
+% Attempts to set the \meta{font cs} and provide branching for success or failure according to whether the font exists.
+% \end{function}
+%
+% \begin{function}[TF]{\@@_primitive_font_if_exist:n}
+% \begin{syntax}
+% |\@@_primitive_font_if_exist:nTF| \Arg{file/name} \Arg{true code} \Arg{false code}
+% \end{syntax}
+% Attempts to load the font at the current font size minus 1\,sp with a dummy meta{font cs}
+% (\verb|\l_@@_primitive_font|), and branches according to whether the font exists.
+% This is intended to be used speculatively before potentially performing additional processing
+% steps (e.g., an analysis of available font features) before setting up the `true' font.
+% \end{function}
+%
+% \begin{function}[pTF]{\@@_primitive_font_glyph_if_exist:Nn}
+% \begin{syntax}
+% |\@@_primitive_font_glyph_if_exist:nTF| \meta{font cs} \Arg{char. number (int.\ expr)} \Arg{true code} \Arg{false code}
+% \end{syntax}
+% Wrapper around primitive \cs{iffontchar}.
+% \end{function}
+%
+% \begin{function}{\@@_primitive_font_set_hyphenchar:Nn}
+% \begin{syntax}
+% |\@@_primitive_font_set_hyphenchar:Nn| \meta{font cs} \Arg{char. number (int.\ expr)}
+% \end{syntax}
+% Setter function around primitive \cs{hyphenchar}.
+% \end{function}
+%
+% \begin{function}{\@@_primitive_font_get_name:N,\@@_primitive_font_current_name:}
+% \begin{syntax}
+% |\@@_primitive_font_get_name:N| \meta{font cs}
+% \end{syntax}
+% Wrapper function around \TeX\ primitive \cs{fontname}. The no-argument version is
+% equivalent to \verb|\fontname\font|.
+% \end{function}
+%
+% \section{Implementation}
+% 
+% \iffalse
+%    \begin{macrocode}
+%<*fontspec>
+%    \end{macrocode}
+% \fi
+%
+% \begin{macro}{\@@_primitive_font_set:Nnn,\@@_primitive_font_gset:Nnn}
+%    \begin{macrocode}
+\cs_set:Npn \@@_primitive_font_set:Nnn #1#2#3
+  {
+    \font #1 = #2 ~at~ \dim_eval:n {#3} \scan_stop:
+  }
+%    \end{macrocode}
+%    \begin{macrocode}
+\cs_set:Npn \@@_primitive_font_gset:Nnn #1#2#3
+  {
+    \global \font #1 = #2 ~at~ \dim_eval:n {#3} \scan_stop:
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_font_suppress_not_found_error:}
+%    \begin{macrocode}
+\cs_set:Npn \@@_font_suppress_not_found_error:
+  {
+    \int_set:Nn \suppressfontnotfounderror {1}
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[pTF]{\@@_primitive_font_if_null:N}
+%    \begin{macrocode}
+\prg_new_conditional:Nnn \@@_primitive_font_if_null:N {p,TF,T,F}
+  {
+    \ifx #1 \nullfont
+      \prg_return_true:
+    \else
+      \prg_return_false:
+    \fi
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[TF]{\@@_primitive_font_set:Nnn,\@@_primitive_font_gset:Nnn}
+%    \begin{macrocode}
+\prg_new_conditional:Nnn \@@_primitive_font_set:Nnn {TF,T,F}
+  {
+    \@@_primitive_font_set:Nnn #1 {#2} {#3}
+    \@@_primitive_font_if_null:NTF #1 {\prg_return_false:} {\prg_return_true:}
+  }
+\prg_new_conditional:Nnn \@@_primitive_font_gset:Nnn {TF,T,F}
+  {
+    \@@_primitive_font_gset:Nnn #1 {#2} {#3}
+    \@@_primitive_font_if_null:NTF #1 {\prg_return_false:} {\prg_return_true:}
+  }
+\cs_set:Npn \@@_primitive_font_set:Onn   { \exp_last_unbraced:No \@@_primitive_font_set:Nnn }
+\cs_set:Npn \@@_primitive_font_set:OnnF  { \exp_last_unbraced:No \@@_primitive_font_set:NnnF }
+\cs_set:Npn \@@_primitive_font_gset:Onn  { \exp_last_unbraced:No \@@_primitive_font_gset:Nnn }
+\cs_set:Npn \@@_primitive_font_gset:OnnF { \exp_last_unbraced:No \@@_primitive_font_gset:NnnF }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[TF]{\@@_primitive_font_if_exist:n}
+%    \begin{macrocode}
+\prg_new_conditional:Nnn \@@_primitive_font_if_exist:n {TF,T,F}
+  {
+    \group_begin:
+      \@@_font_suppress_not_found_error:
+      \@@_primitive_font_set:Nnn \l_@@_primitive_font {#1} { \f@size pt - 1sp }
+      \@@_primitive_font_if_null:NTF \l_@@_primitive_font
+        { \group_end: \prg_return_false: }
+        { \group_end: \prg_return_true:  }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[pTF]{\@@_primitive_font_glyph_if_exist:Nn}
+%    \begin{macrocode}
+\prg_new_conditional:Nnn \@@_primitive_font_glyph_if_exist:Nn {p,TF,T,F}
+  {
+    \tex_iffontchar:D #1 \int_eval:n {#2} \scan_stop:
+      \prg_return_true:
+    \else:
+      \prg_return_false:
+    \fi:
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_primitive_font_set_hyphenchar:Nn}
+%    \begin{macrocode}
+\cs_new:Nn \@@_primitive_font_set_hyphenchar:Nn
+  {
+     \tex_hyphenchar:D #1 = \int_eval:n {#2} \scan_stop:
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_primitive_font_get_name:N}
+% \begin{macro}{\@@_primitive_font_current_name:}
+%    \begin{macrocode}
+\cs_new_eq:NN \@@_primitive_font_get_name:N \fontname
+\cs_new:Npn \@@_primitive_font_current_name:
+  {
+    \@@_primitive_font_get_name:N \tex_font:D
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \iffalse
+%    \begin{macrocode}
+%</fontspec>
+%    \end{macrocode}
+% \fi
+
+\endinput
+
+% /©
+% ------------------------------------------------
+% The FONTSPEC package  <latex3.github.io/fontspec>
+% ------------------------------------------------
+% Copyright  2022-2025  The LaTeX project,  LPPL "maintainer"
+% Copyright  2004-2022  Will Robertson
+% Copyright  2009-2015  Khaled Hosny
+% Copyright  2013       Philipp Gesang
+% Copyright  2013-2016  Joseph Wright
+% ------------------------------------------------
+% This package is free software and may be redistributed and/or modified under
+% the conditions of the LaTeX Project Public License, version 1.3c or higher
+% (your choice): <http://www.latex-project.org/lppl/>.
+% ------------------------------------------------
+% ©/

@@ -1,0 +1,387 @@
+%%
+%% This is file `accursius.cbx',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% biblatex-accursius.dtx  (with options: `accursius-cbx')
+%% ---------------------------------------
+%% 
+%% Francesco Contini, The accursius style,
+%% Cagliari 2024
+%% 
+%% Copyright (C) 2024 Francesco Contini
+%% 
+%% The work consists of the README.md, the
+%% biblatex-accursius.dtx and the derived:
+%%         - accursius.bbx,
+%%         - accursius.cbx,
+%%         - italian-accursius.lbx,
+%%         - english-accursius.lbx,
+%%         - french-accursius.lbx,
+%%         - accursius.bib,
+%%         - biblatex-accursius.pdf.
+%%     The .pdf derived file refers to the
+%% preamble from the .dtx source and repro
+%% duces its text.
+%%     The work may be distributed and mod
+%% ified under the conditions of the LaTeX
+%% Project Public License either v. 1.3 of
+%% the license or at your option any later
+%% version. For the latest version of this
+%% license see the url below.  V. 1.3c and
+%% following are part of all distributions
+%% of LaTeX version 2008 or later.
+%%     The product has got the LPPL mainte
+%% nance status `maintained'.
+%%     The current maintainer of this work
+%% is Francesco Contini. To claim and feed
+%% back or to get a clarification email me
+%% to cicciocontini [at] outlook [dot] it.
+%% 
+%% https://www.latex-project.org/lppl.txt
+%% 
+%% ---------------------------------------
+\ProvidesFile{accursius.cbx}
+\RequireCitationStyle{verbose-trad1}
+
+\ExecuteBibliographyOptions{citepages=omit}
+
+\AtEveryCitekey{\togglefalse{bbx:related}}
+\providecommand{\ifcitesingletitle}{\ifsingletitle}
+
+\newtoggle{cbx:authoryearstyle}
+
+\renewbibmacro*{cite:name}{%
+    \printnames{labelname}%
+    \setunit*{\printdelim{nametitledelim}}}
+\renewbibmacro*{cite:idem}{%
+    \bibstring[\mkidem]{idem\thefield{gender}}%
+    \setunit{\printdelim{nametitledelim}}}
+\newbibmacro*{cite:labeldate+extradate}{%
+    \iffieldundef{labelyear}%
+        {}%
+        {\printtext[bibhyperref]{\printlabeldateextra}}}
+
+%%
+%% This block is by Moewe, from the Stack Exchange
+%% community. See the `accursius' style documentation.
+%%
+\def\abx@aux@citesingletitlecount#1#2%
+{\csnumgdef{blx@citesingletitle@counter@#1}{#2}}
+\def\ifcitesingletitle{%
+\ifcsundef%
+{blx@citesingletitle@counter@\thefield{namehash}}
+{\@secondoftwo}
+{\ifnumless{\csuse%
+{blx@citesingletitle@counter@\thefield{namehash}%
+}}{2}}}
+\let\blx@citesingletitle@namelist\empty
+\AtEveryCitekey{%
+\xifinlist{\thefield{namehash}}%
+{\blx@citesingletitle@namelist}{}%
+{\listxadd{\blx@citesingletitle@namelist}%
+{\thefield{namehash}}}%
+\xifinlistcs{\thefield{entrykey}}%
+{blx@citesingletitle@\thefield{namehash}}{}%
+{\listcsxadd%
+{blx@citesingletitle@\thefield{namehash}}%
+{\thefield{entrykey}}}}
+\blx@AtEndDocument{%
+\def\do#1{%
+\begingroup%
+\blx@tempcnta\z@
+\def\do##1{%
+\advance\blx@tempcnta\@ne}%
+\dolistcsloop{blx@citesingletitle@#1}%
+\blx@auxwrite\@mainaux{}{%
+\string\abx@aux@citesingletitlecount{#1}%
+{\the\blx@tempcnta}}%
+\ifnumequal%
+{0\csuse{blx@citesingletitle@counter@#1}}%
+{\blx@tempcnta}%
+{}%
+{\blx@rerun@latex}\endgroup}%
+\dolistloop{\blx@citesingletitle@namelist}}
+%%
+%% It is available under the CC BY-SA 4.0 license.
+%%
+
+\renewbibmacro*{cite:full}{%
+    \usebibmacro{cite:full:citepages}%
+    \ifciteidem%
+        {\printtext[bibhypertarget]{%
+            \usedriver
+            {\renewbibmacro{author}{%
+                \usebibmacro{cite:idem}}}%
+            {\thefield{entrytype}}}}%
+        {\printtext[bibhypertarget]{%
+            \usedriver
+            {\DeclareNameAlias{theauthor}{theauthornotrev}}%
+            {\thefield{entrytype}}}}%
+    \usebibmacro{shorthandintro}}
+
+\newbibmacro*{cite:seenitprov}{%
+    \usebibmacro{thestate}%
+    \setunit*{\iusunitdelim}%
+    \printfield{kindprov}%
+    \setunit{\addspace}%
+    \iffieldundef{titleparties}%
+        {}%
+        {\iffieldundef{shorttitleparties}%
+            {\printfield{titleparties}}%
+            {\printfield{shorttitleparties}}}%
+    \ifboolexpr{test {\iffieldundef{codification}}%
+                and
+                test {\iffieldundef{titleparties}}}%
+        {\iffieldundef{nprov}%
+            {\printorigdate}%
+            {\printfield{nprov}%
+                \setunit{\addslash}%
+                \printfield{origyear}}}%
+        {}}
+
+\newcommand{\citedhref}[1]{%
+    \bibhyperlink{cite\csuse{cbx@lastcite@\thefield{entrykey}}}%
+    {#1}}
+
+\newbibmacro*{cite:eli}{%
+    {\bibsentence\printfield{kindprov}}%
+    \setunit{\addspace}%
+    \iffieldundef{eueli}%
+        {\bibstring[\mkbibparens]{euelistring}}%
+        {}%
+    \setunit{\addspace}%
+    \printfield{origyear}%
+    \setunit{\addslash}%
+    \printfield{neli}%
+    \ifboolexpr{not test {\iffieldundef{eueli}}}%
+        {\setunit{\addslash}%
+            \printfield{eueli}}%
+        {}}
+
+\newbibmacro*{cite:itprov}{%
+    \ifciteseen%
+        {\iffieldundef{shorthand}%
+            {\iffieldundef{codification}%
+                {}%
+                {\printfield{codification}}%
+                \ifboolexpr{not test {\iffieldundef{neli}}}%
+                    {\iffieldundef{textprovtitle}%
+                        {\usebibmacro{cite:eli}}%
+                        {\printfield{textprovtitle}}}%
+                    {}%
+                \ifboolexpr{test {\iffieldundef{codification}}%
+                            and
+                            test {\iffieldundef{neli}}}%
+                    {\usebibmacro{cite:seenitprov}}%
+                    {}%
+                \newunit%
+                \printtext{%
+                \citedhref{%
+                \bibstring{opcit}}}}%
+            {\usebibmacro{cite:shorthand}}}%
+        {\usebibmacro{cite:full}%
+            \usebibmacro{cite:save}}}
+
+\newbibmacro*{cite:label}{%
+    \iffieldundef{label}%
+        {\printtext[bibhyperref]{%
+            \printfield[citetitle]{labeltitle}}}
+        {\printtext[bibhyperref]{%
+            \printfield{label}}}}
+
+\newbibmacro*{cite:authoryearstyle}{%
+    \iffieldundef{shorthand}%
+        {\ifentrytype{itprov}%
+            {\usebibmacro{cite:seenitprov}}%
+            {\ifthenelse{%
+                    \ifnameundef{labelname}%
+                    \OR%
+                    \iffieldundef{labelyear}}%
+                {\usebibmacro{cite:label}%
+                    \setunit{\printdelim{nonameyeardelim}}}%
+                {\printnames{labelname}%
+                    \setunit{\printdelim{nameyeardelim}}}%
+                \usebibmacro{cite:labeldate+extradate}}}%
+        {\usebibmacro{cite:shorthand}}}
+
+\renewbibmacro*{cite:ibid}{%
+    \printtext{%
+    \citedhref{%
+    \ifloccit%
+        {\bibstring[\mkbibemph]{ibidem}%
+            \ifbibstring{ivi}%
+                {\global\toggletrue{cbx:loccit}}%
+                {\global\togglefalse{cbx:loccit}}}%
+        {\ifbibstring{ivi}%
+            {\bibstring{ivi}}%
+            {\bibstring[\mkbibemph]{ibidem}}}}}}
+\renewbibmacro*{cite:title}{%
+    \printtext{%
+    \printfield[citetitle]{labeltitle}}}
+\renewbibmacro*{cite:loccit}{%
+    \printtext{%
+    \citedhref{%
+    \bibstring[\mkbibemph]{loccit}}}%
+    \global\toggletrue{cbx:loccit}}
+\renewbibmacro*{cite:opcit}{%
+    \printtext{%
+    \citedhref{%
+    \ifcitesingletitle%
+        {\bibstring[\mkbibemph]{uniquecited}}%
+        {\bibstring[\mkbibemph]{opultcit}}}}}
+
+\newbibmacro*{cite:verbosestyle:seen}{%
+    \ifciteibid%
+        {\usebibmacro{cite:ibid}}%
+        {\ifthenelse{\ifciteidem\AND\NOT\boolean{cbx:noidem}}%
+            {\usebibmacro{cite:idem}%
+                \usebibmacro{cite:title}%
+                \newunit%
+                \printtext[bibhyperlink]{%
+                \bibstring{opcit}}}%
+            {\ifnameundef{labelname}%
+                {\usebibmacro{cite:title}%
+                    \newunit%
+                    \bibstring{opcit}}%
+                {\usebibmacro{cite:name}%
+                    \ifopcit%
+                        {\ifloccit%
+                            {\usebibmacro{cite:loccit}}%
+                            {\usebibmacro{cite:opcit}}}%
+                        {\usebibmacro{cite:title}%
+                            \newunit%
+                            \printtext{\citedhref{%
+                            \bibstring{opcit}}}}}}}%
+        \usebibmacro{cite:save}}
+
+\newbibmacro*{cite:verbosestyle}{%
+    \ifentrytype{itprov}%
+        {\bibhypertarget{cite\the\value{instcount}}{%
+        \usebibmacro{cite:itprov}}}%
+        {\usebibmacro{cite:citepages}%
+            \global\togglefalse{cbx:loccit}%
+            \bibhypertarget{cite\the\value{instcount}}{%
+            \ifciteseen%
+                {\iffieldundef{shorthand}%
+                    {\usebibmacro{cite:verbosestyle:seen}}%
+                    {\usebibmacro{cite:shorthand}}}%
+                {\usebibmacro{cite:full}%
+                    \usebibmacro{cite:save}}}}}
+
+\renewbibmacro*{cite}{%
+    \iftoggle{cbx:authoryearstyle}%
+        {\usebibmacro{cite:authoryearstyle}}%
+        {\usebibmacro{cite:verbosestyle}}}
+
+\DeclareCiteCommand*{\cite}[\mkoutercitedelims]
+    {\usebibmacro{prenote}}
+    {\usebibmacro{citeindex}%
+        \clearname{author}%
+        \clearlist{institution}%
+        \clearlist{listc}%
+        \clearname{labelname}%
+        \usebibmacro{cite}}
+    {\multicitedelim}
+    {\usebibmacro{cite:postnote}}
+\renewrobustcmd*{\Cite}{%
+    \@ifstar%
+        {\bibsentence\cite*}%
+        {\bibsentence\cite}}
+
+\DeclareCiteCommand{\citeauthor}%
+    {\boolfalse{citetracker}%
+        \boolfalse{pagetracker}%
+        \usebibmacro{prenote}}%
+    {\ifentrytype{itprov}%
+        {\ifciteindex%
+            {\indexlist{institution}}%
+            {}%
+            \printlist[textinstitution]{institution}}%
+        {\ifciteindex%
+            {\indexnames{labelname}}%
+            {}%
+            \printnames[labeltextname]{labelname}}}%
+    {\multicitedelim}%
+    {\usebibmacro{postnote}}
+
+\DeclareCiteCommand{\citetitle}
+    {\boolfalse{citetracker}%
+        \boolfalse{pagetracker}%
+        \usebibmacro{prenote}}%
+    {\ifciteindex%
+        {\indexfield{indextitle}}%
+        {}%
+        \ifboolexpr{test {\ifentrytype{itprov}}%
+                    and
+                    test {\iffieldundef{textprovtitle}}%
+                    and
+                    test {\iffieldundef{codification}}%
+                    and
+                    test {\iffieldundef{titleparties}}}%
+            {\iffieldundef{neli}%
+                {\clearlist{institution}%
+                    \clearlist{listc}%
+                    \clearfield{institutionspec}%
+                    \clearfield{institutionaddon}%
+                    \clearfield{jchamber}%
+                    \clearname{author}%
+                    \usebibmacro{cite:seenitprov}}%
+                {\usebibmacro{cite:eli}}}%
+            {\printfield[citetitle]{labeltitle}}}%
+    {\multicitedelim}%
+    {\usebibmacro{postnote}}
+
+\DeclareCiteCommand{\citeyear}
+    {\boolfalse{citetracker}%
+        \boolfalse{pagetracker}%
+        \usebibmacro{prenote}}%
+    {\ifentrytype{itprov}%
+        {\printfield{origyear}}%
+        {\printfield{year}}}%
+    {\multicitedelim}%
+    {\usebibmacro{postnote}}
+
+\DeclareCiteCommand*{\citeyear}
+    {\boolfalse{citetracker}%
+        \boolfalse{pagetracker}%
+        \usebibmacro{prenote}}%
+    {\ifentrytype{itprov}%
+        {\printfield{origyear}\printfield{extradate}}%
+        {\printfield{year}\printfield{extradate}}}%
+    {\multicitedelim}%
+    {\usebibmacro{postnote}}
+
+\DeclareCiteCommand{\citedate}
+    {\boolfalse{citetracker}%
+        \boolfalse{pagetracker}%
+        \usebibmacro{prenote}}%
+    {\ifentrytype{itprov}%
+        {\printorigdate}%
+        {\printdate}}%
+    {\multicitedelim}
+    {\usebibmacro{postnote}}
+
+\DeclareCiteCommand*{\citedate}
+    {\boolfalse{citetracker}%
+        \boolfalse{pagetracker}%
+        \usebibmacro{prenote}}%
+    {\ifentrytype{itprov}%
+        {\printorigdateextra}%
+        {\printdateextra}}%
+    {\multicitedelim}%
+    {\usebibmacro{postnote}}
+%% ---------------------------------------
+%% 
+%% Francesco Contini, The accursius style,
+%% Cagliari 2024
+%% 
+%% Copyright (C) 2024 Francesco Contini,
+%% Cagliari (Sardinia). Availability under
+%% the LaTeX Project Public License. Email
+%% to cicciocontini [at] outlook [dot] it.
+%% 
+%% ---------------------------------------
+%%
+%% End of file `accursius.cbx'.

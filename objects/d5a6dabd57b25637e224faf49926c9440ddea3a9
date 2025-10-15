@@ -1,0 +1,68 @@
+%%%
+% Fiche m\'emorisation active
+%%%
+\def\filedateFicheMemo{2024/08/04}%
+\def\fileversionFicheMemo{0.1}%
+\message{-- \filedateFicheMemo\space v\fileversionFicheMemo}%
+%
+\setKVdefault[ClesFicheMemo]{TexteReponses=Réponses,TexteQuestions=Questions,Solution=false,Largeur=\linewidth}
+
+\newcommand\FicheMemo[3][]{%
+  \xdef\CountcolUn{0}%
+  \xdef\CountcolDeux{0}%
+  \useKVdefault[ClesFicheMemo]%
+  \setKV[ClesFicheMemo]{#1}%
+  \setsepchar[*]{§*/}\reademptyitems%
+  \readlist*\ListeQuestionColonneUn{#2}%
+  \readlist*\ListeQuestionColonneDeux{#3}%
+  \renewcommand{\arraystretch}{1.35}%
+  \begin{NiceTabular}[width=\useKV[ClesFicheMemo]{Largeur}]{X[1]X[1]X[1]X[1]}[hvlines]
+    \CodeBefore%
+    \rowcolor{gray!15}{1}%
+    \tikz\draw[dashed,gray!50](2-|1.5) to (last-|1.5);%
+    \tikz\draw[dashed,gray!50](2-|4.5) to (last-|4.5);%
+    \Body%
+    \Block{1-1}{\bfseries\useKV[ClesFicheMemo]{TexteReponses}}&&&\Block{1-1}{\bfseries\useKV[ClesFicheMemo]{TexteReponses}}\\
+    \xintFor* ##1 in {\xintSeq {1}{\ListeQuestionColonneUnlen}}\do{%
+      \xintifboolexpr{\listlen\ListeQuestionColonneUn[##1]==2}{%
+        \uppercase{&}}{%
+        \Block[l]{\fpeval{\ListeQuestionColonneUn[##1,1]}-1}{\ifboolKV[ClesFicheMemo]{Solution}{\ListeQuestionColonneUn[##1,3]}{}}%
+        \uppercase{&}\xdef\CountcolUn{\fpeval{\CountcolUn+1}}\Block[l]{\fpeval{\ListeQuestionColonneUn[##1,1]}-1}{\ListeQuestionColonneUn[##1,2]}%
+      }%
+      &%
+      \xintifboolexpr{\listlen\ListeQuestionColonneDeux[##1]==2}{%
+        \uppercase{&}%
+      }{%
+        \xdef\CountcolDeux{\fpeval{\CountcolDeux+1}}\Block[l]{\fpeval{\ListeQuestionColonneDeux[##1,1]}-1}{\ListeQuestionColonneDeux[##1,2]}\uppercase{&}\Block[l]{\fpeval{\ListeQuestionColonneDeux[##1,1]}-1}{\ifboolKV[ClesFicheMemo]{Solution}{\ListeQuestionColonneDeux[##1,3]}{}}%
+      }%
+      \\%
+    }%
+    \CodeAfter%
+    \tikz\node[xshift=0.5em] at (2-|1) {\scriptsize\faCut};%
+    \xdef\PfCCountCutUn{2}%
+    \xintFor* ##1 in {\xintSeq {1}{\ListeQuestionColonneUnlen}}\do{%
+      \xintifboolexpr{\listlen\ListeQuestionColonneUn[##1]==2}{%
+      }{%
+        \xdef\PfCCountCutUn{\fpeval{\PfCCountCutUn+\ListeQuestionColonneUn[##1,1]}}%
+        \tikz\node[xshift=0.5em] at (\fpeval{\PfCCountCutUn}-|1) {\scriptsize\faCut};%
+      }%
+    }%
+    \tikz\node[xshift=-0.5em] at (2-|last) {\scriptsize\rotatebox{180}{\faCut}};%
+    \xdef\PfCCountCutDeux{2}%
+    \xintFor* ##1 in {\xintSeq {1}{\ListeQuestionColonneDeuxlen}}\do{%
+      \xintifboolexpr{\listlen\ListeQuestionColonneDeux[##1]==2}{%
+      }{%
+        \xdef\PfCCountCutDeux{\fpeval{\PfCCountCutDeux+\ListeQuestionColonneDeux[##1,1]}}%
+        \tikz\node[xshift=-0.5em] at (\fpeval{\PfCCountCutDeux}-|last) {\scriptsize\rotatebox{180}{\faCut}};%
+      }%
+    }%
+    \tikz\node[xshift=0.5em] at (1-|1) {\color{gray}\scriptsize\faCut};%
+    \tikz\node[xshift=0.5em] at (last-|1) {\color{gray}\scriptsize\faCut};%
+    \tikz\node[xshift=-0.5em] at (1-|last) {\color{gray}\scriptsize\rotatebox{180}{\faCut}};%
+    \tikz\node[xshift=-0.5em] at (last-|last) {\color{gray}\scriptsize\rotatebox{180}{\faCut}};%
+    \tikz\node at (1.5-|2.5) {\bfseries\useKV[ClesFicheMemo]{TexteQuestions} 1 à \num{\CountcolUn}};%
+    \tikz\node at (1.5-|3.5) {\bfseries\useKV[ClesFicheMemo]{TexteQuestions} \num{\fpeval{\CountcolUn+1}} à \num{\fpeval{\CountcolUn+\CountcolDeux}}};%
+  \end{NiceTabular}%
+  \renewcommand{\arraystretch}{1}%
+  \setsepchar{,}%
+}%

@@ -1,0 +1,71 @@
+% ideavault.sty
+% Copyright 2024-2025 Tomasz M. Czarkowski
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3c
+% of this license or any later version.
+% The latest version of this license is in
+%   https://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2008 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+%
+% The Current Maintainer of this work is Tomasz M. Czarkowski
+%
+% This work consists of the files ideavault.sty and ideavault-lua.lua
+
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ideavault}[1.0.5]
+\RequirePackage[open,openlevel=2,atend]{bookmark}
+\RequirePackage{xargs}
+\RequirePackage{luacode}
+\RequirePackage{xpatch}
+\RequirePackage{mdframed}
+% Magic that lets mdframed nest more than 3 times
+\makeatletter
+\xpatchcmd{\mdf@preenvsetting}
+  {\mdf@envdepth >\tw@}
+  {\mdf@envdepth >20}
+  {}
+  {}
+\makeatother
+\RequirePackage{needspace}
+
+\directlua{require("ideavault-lua")}
+
+% #1: prefix
+% #2: name
+% #3: content
+% #4: dependencies
+% #5: tags
+% #6: weight
+\newcommandx{\createIdea}[6][1=default, 4=,5=,6=-1]{\luadirect{createIdea(\luastringN{#1}, \luastringN{#2}, \luastringN{#3}, {#4}, {#5}, #6)}}
+
+% #1: prefix
+% #2: style
+% #3: name
+\newcommandx{\printIdea}[3][1=default, 2=lcf]{\luadirect{ideaVault:printIdea(\luastringN{#1}, \luastringN{#3}, \luastringN{#2})}}
+
+% #1: prefix
+% #2: style
+\newcommandx{\printAllWithPrefix}[2][1=default, 2=lcf]{\luadirect{ideaVault:printAllWithPrefix(\luastringN{#1}, \luastringN{#2})}}
+
+% #1: prefix
+% #2: style
+% #3: tag
+\newcommandx{\printAllWithTag}[3][1=default, 2=lcf]{\luadirect{ideaVault:printAllWithTag(\luastringN{#1}, \luastringN{#3}, \luastringN{#2})}}
+
+% Commands for managing debug output
+\newcommandx{\debugEnable}{\luadirect{logDebugEnabled = true}}
+\newcommandx{\debugDisable}{\luadirect{logDebugEnabled = false}}
+
+% Internal commands for managing bookmark depth
+\newcounter{bookmarkDepth}
+\newcommand{\bookDown}{\stepcounter{bookmarkDepth}}
+\newcommand{\bookUp}{\addtocounter{bookmarkDepth}{-1}}
+\newcommand{\bookSet}[1]{\setcounter{bookmarkDepth}{#1}}
+\newcommand{\bookDepth}{\arabic{bookmarkDepth}}
+
+\endinput

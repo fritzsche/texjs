@@ -1,0 +1,1073 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2021 Lo̍h Ka-tsùn
+%
+% This file may be distributed and/or modified under the conditions of
+% the LaTeX Project Public License, either version 1.3 of this license
+% or (at your option) any later version.  The latest version of this
+% license is in:
+%
+%     http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of LaTeX version
+% 2005/12/01 or later.
+%
+% \fi
+% \iffalse
+%<*driver>
+\documentclass{ltxdoc}
+\usepackage{parskip}
+\usepackage{pgfplots}
+\usepgflibrary{easing}
+% \usepackage{hyperref}
+\newcommand{\pgf}{\textsc{pgf}}
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+\CheckSum{594}
+\changes{0.1}{2021/07/18}{Initial version}
+\begin{document}
+\DocInput{easing.dtx}
+\end{document}
+%</driver>
+% \fi
+% ^^A for drawing nice little graphs of the functions. pgfplots is
+% ^^A probably overkill for this, so here's some ad-hoc TikZ-ing;
+% ^^A hopefully to be tidied up substantially in a future version:
+%
+%   \def\graphmargindefaulty{0.16}
+%   \def\graphmarginx{0.12}
+%   \edef\graphmarginy{\graphmargindefaulty}
+% \newenvironment{easinggraph}{%
+% \begin{tikzpicture}[x=2.8cm,y=2.8cm]
+%   \fill[white!97!black, use as bounding box]
+%     (-\graphmarginx,-\graphmarginy) rectangle
+%     ({1+\graphmarginx},{1+\graphmarginy});
+%   \draw[white!60!black]
+%     ({1+\graphmarginx},0) -- (-\graphmarginx,0) node[left] {$0$}
+%     ({1+\graphmarginx},1) -- (-\graphmarginx,1) node[left] {$1$};
+%   \draw[white!60!black,dashed]
+%     (0,1) -- (0,-\graphmarginy) node[below] {$a$}
+%     (1,1) -- (1,-\graphmarginy) node[below] {$b$};
+% }{\end{tikzpicture}}
+% \newcommand{\easinggraphplot}[2]{%
+%   \pgfmathparse{#2}
+%   \draw[white!\pgfmathresult!black,thick]
+%     (-\graphmarginx,0) -- (0,0)
+%     \foreach\x in{0,0.01,...,1}{--(\x,{#1(0,1,\x)})}
+%     -- (1,1) -- ({1+\graphmarginx},1);
+% }
+% \newcommand{\easinggraphplotfive}[4]{%
+%   \easinggraphlabel{#1\easingtype}{
+%     \foreach[count=\countv]\paramv
+%       in{#4}{\pgfmathparse{
+%         18*(5-\countv)}{\color{
+%         white!\pgfmathresult!black}\ifnum\countv=1\relax
+%         #3=\else,\fi\paramv}}}
+%   \foreach[count=\countv]\paramv in{#4}{%
+%     \pgfkeys{/easing/#1/#2=\paramv}
+%     \easinggraphplot{#1\easingtype}{18*(5-\countv)}
+%   }
+% }
+% \newcommand{\easinggraphlabel}[2]{%
+%   \node[anchor=text] at (-\graphmarginx,{1+\graphmarginy})
+%     {\footnotesize\tt\raisebox{\baselineskip}{\parbox{3.5cm}{#1\\[-0.4ex]#2}}};
+% }
+% \newcommand{\foreachtypeeasinggraph}[1]{%
+%   \vspace{2\baselineskip}
+%   \foreach[count=\easingtypen]\easingtype in{easein,step,easeout}{%
+%   \ifnum\easingtypen>1\hspace{\fill}\fi
+%   \begin{easinggraph}#1\end{easinggraph}
+%   }
+%   \vspace{\baselineskip}
+% }
+%
+% ^^A for printing code listings. again, there's probably a "proper"
+% ^^A way to do this, but this is good enough i guess
+%
+% \newenvironment{fakelisting}{
+%   \begingroup\parskip 0pt\par\hrulefill}{
+%   \vspace{-1.3\baselineskip}\hrulefill\endgroup
+%   \vspace{\parskip}}
+%
+% ^^A body of documentation proper begins here.
+%
+% \title{The \textsf{easing}\thanks{version 0.1, dated
+% 2021/07/18. This version was tested with \pgf{} version 3.1.9a}
+% \ Library for \pgf}
+%
+% \author{Loh Ka-tsun\thanks{\texttt{loh.ka.tsun@gmail.com}}}
+% \date{}
+% \maketitle
+%
+% \thispagestyle{empty}
+% \vspace{-2em}
+% \begin{center}
+% \begin{easinggraph}
+% \easinggraphplot{smootherstep}{46}
+% \easinggraphplot{smoothstep}{0}
+% \end{easinggraph}
+% \end{center}
+%
+% \tableofcontents\pagebreak
+%
+% \section{Introduction}
+% This library adds easing functions to the \pgf{} mathematical engine.
+%
+% \section{Installation}
+%
+% The \textsf{easing} library is a \pgf{} library; it works both with
+% \LaTeX{} and with plain \TeX{}. Once the file
+% |pgflibraryeasing.code.tex| is in a directory searched by \TeX, the
+% library can be loaded as follows:
+%
+% with plain \TeX:
+% \begin{fakelisting}\begin{verbatim}
+% \input pgf
+% \usepgflibrary{easing}
+% \end{verbatim}\end{fakelisting}
+%
+% with \LaTeX:
+% \begin{fakelisting}\begin{verbatim}
+% \usepackage{pgf}
+% \usepgflibrary{easing}
+% \end{verbatim}\end{fakelisting}
+%
+% The \textsf{easing} library is compatible with, but does not depend
+% on, the floating point unit library provided by \pgf{}. To use both
+% \textsf{easing} and the FPU, the FPU (or any packages/libraries
+% which use the FPU, such as \textsf{pgfplots}) must be loaded
+% before the \textsf{easing} library.
+%
+% \section{Usage}
+%
+% The routines implemented by the \textsf{easing} library are added to
+% \pgf{}'s mathematical engine with |\pgfmathdeclarefunction|, so that
+% they are recognised by by |\pgfmathparse| and can be used in any
+% expression which is processed by the parser.
+% As a first example, the following code produces plots of the
+% function |smoothstep(|$a$|,|$b$|,|$x$|)| against the argument $x$,
+% with one endpoint $a=0$ and the other endpoint $b$ ranging through
+% the integers $-1$ to $3$:
+%
+% \vspace{\parskip}
+% \hspace{-0.05\textwidth}
+% \begin{minipage}[h]{0.55\textwidth}
+% \tikzpicture
+% \axis[
+%   width=\textwidth, ^^A we lie a little and omit this from the source listing
+%   domain=-1.2:3.2, samples=64,
+%   xmin=-1.2, xmax=3.2,
+%   cycle list={[samples of colormap=6 of viridis]},
+%   no marks, thick]
+% \pgfplotsinvokeforeach{-1,...,3}{\addplot{smoothstep(0,#1,x)};}
+% \endaxis
+% \endtikzpicture
+% \end{minipage}%
+% \begin{minipage}[h]{0.5\textwidth}
+% \begin{fakelisting}\begin{verbatim}
+% \input pgfplots
+% \usepgflibrary{easing}
+% \tikzpicture
+% \axis[
+%   domain=-1.2:3.2, samples=64,
+%   xmin=-1.2, xmax=3.2,
+%   cycle list={
+%     [samples of colormap=6 of viridis]},
+%   no marks, thick]
+% \pgfplotsinvokeforeach{-1,...,3}{
+%   \addplot{smoothstep(0,#1,x)};}
+% \endaxis
+% \endtikzpicture
+% \end
+% \end{verbatim}\end{fakelisting}
+% \end{minipage}
+% \vspace{\parskip}
+%
+% (This example also demonstrates the behaviour of the easing
+% functions in some special cases: when the endpoints $b\le a$, and in
+% particular the degenerate case where $a=b$, in which the library
+% chooses to consider the function that is $1$ for all $x\ge 0$ and
+% $0$ otherwise.)
+%
+% Like all functions declared in this way, the functions implemented
+% by \textsf{easing} are also available as ``public'' macros, such as
+% |\pgfmathsmoothstep|:
+%
+% \vspace{\parskip}
+% \begin{minipage}[h]{0.5\textwidth}
+% \foreach\x in{0,0.25,...,1}{
+%   \pgfmathsmoothstep{0}{1}{\x}
+%   $S_1(\x)=\pgfmathresult$\par
+% }
+% \end{minipage}%
+% \begin{minipage}[h]{0.5\textwidth}
+% \begin{fakelisting}\begin{verbatim}
+% \input pgf
+% \usepgflibrary{easing}
+% \foreach\x in{0,0.25,...,1}{
+%   \pgfmathsmoothstep{0}{1}{\x}
+%   $S_1(\x)=\pgfmathresult$\par
+% }
+% \end
+% \end{verbatim}\end{fakelisting}
+% \end{minipage}
+% \vspace{\parskip}
+%
+% See Part VIII of the \pgf{} manual for more details on the
+% mathematical engine.
+%
+% \subsection{Naming conventions}
+%
+% For each shape, three functions are declared, all of which take
+% three arguments $a,b$, and $x$. Where $a<b$, all of these function
+% take value $0$ whenever $x\le a$ and $1$ whenever $x\ge b$. The
+% names of the functions adhere to the following pattern:
+%
+% \begin{itemize}
+%
+% \item The \emph{ease-in} form \meta{shape}|easein(|$a$|,|$b$|,|$x$|)| has easing
+% applied near the endpoint $a$.
+%
+% \item The \emph{ease-out} form \meta{shape}|easeout(|$a$|,|$b$|,|$x$|)| has
+% easing applied near the endpoint $b$. Its graph is that of the
+% ease-in form reflected about both axes.
+%
+% \item The \emph{step function} form \meta{shape}|step(|$a$|,|$b$|,|$x$|)| has
+% easing applied near both endpoints. Its graph is that of the ease-in
+% and ease-out forms concatenated then appropriately scaled.
+%
+% \end{itemize}
+%
+% \vspace{\parskip}
+% \begin{minipage}[h]{0.5\textwidth}
+% \tikzpicture
+% \foreach\x in{0,...,12}{
+%   \draw[gray,dashed]
+%     (0,-1) -- (0,4) (5,-1) -- (5,4);
+%   \draw[thick]
+%     ({5*smootheasein(0,12,\x)},3)
+%     circle (0.25)
+%     ({5*smoothstep(0,12,\x)},1.5)
+%     circle (0.25)
+%     ({5*smootheaseout(0,12,\x)},0)
+%     circle (0.25);
+% }
+% \endtikzpicture
+% \end{minipage}%
+% \begin{minipage}[h]{0.5\textwidth}
+% \begin{fakelisting}\begin{verbatim}
+% \input tikz
+% \usepgflibrary{easing}
+% \tikzpicture
+% \foreach\x in{0,...,12}{
+%   \draw[gray,dashed]
+%     (0,-1) -- (0,4) (5,-1) -- (5,4);
+%   \draw[thick]
+%     ({5*smootheasein(0,12,\x)},3)
+%     circle (0.25)
+%     ({5*smoothstep(0,12,\x)},1.5)
+%     circle (0.25)
+%     ({5*smootheaseout(0,12,\x)},0)
+%     circle (0.25);
+% }
+% \endtikzpicture
+% \end
+% \end{verbatim}\end{fakelisting}
+% \end{minipage}
+% \vspace{\parskip}
+%
+% \subsection{Specifying parameters}
+%
+% Some of these shapes can be modified by adjusting one or more
+% parameters, which is done through |pgfkeys|: the parameter
+% \meta{param} for functions of shape \meta{shape} is specified by
+% setting the \pgf{} key |/easing/|\meta{shape}|/|\meta{param}:
+%
+% \vspace{\parskip}
+% \begin{minipage}[h]{0.5\textwidth}
+% \hspace{-0.11\textwidth}
+% \tikzpicture
+% \axis[
+%   width=1.1\textwidth, ^^A give up on understanding how pgfplots
+%                        ^^A computes the width of a graph and just
+%                        ^^A eyeball it
+%   domain=-0.2:1.2, samples=64,
+%   xmin=0, xmax=1, enlarge x limits,
+%   cycle list={
+%     [samples of colormap=6 of viridis]},
+%   no marks, thick]
+% \pgfplotsinvokeforeach{0,...,4}{
+%   \pgfkeys{easing,back/overshoot=#1}
+%   \addplot{backeaseout(0,1,x)};
+% }
+% \endaxis
+% \endtikzpicture
+% \end{minipage}%
+% \begin{minipage}[h]{0.5\textwidth}
+% \begin{fakelisting}\begin{verbatim}
+% \input pgfplots
+% \usepgflibrary{easing}
+% \tikzpicture
+% \axis[
+%   domain=-0.2:1.2, samples=64,
+%   xmin=0, xmax=1, enlarge x limits,
+%   cycle list={
+%     [samples of colormap=6 of viridis]},
+%   no marks, thick]
+% \pgfplotsinvokeforeach{0,...,4}{
+%   \pgfkeys{easing,back/overshoot=#1}
+%   \addplot{backeaseout(0,1,x)};
+% }
+% \endaxis
+% \endtikzpicture
+% \end
+% \end{verbatim}\end{fakelisting}
+% \end{minipage}
+% \vspace{\parskip}
+%
+% Setting a parameter affects the ease-in, step, and ease-out forms of
+% the relevant function at once.
+%
+% For detailed descriptions of the parameters admitted by each shape,
+% see the following section.
+%
+% \section{List of easing function shapes}
+%
+% An exhaustive list follows of all the easing functions implemented
+% by the \textsf{easing} library. For clarity, where mathematical
+% expressions are given for functions, they are written in terms of
+% a parameter $t$ equal to $\frac{x}{b-a}$.
+%
+% \subsection{Polynomials}
+%
+% \subsubsection{The \texttt{smooth} and \texttt{smoother} shapes}
+%
+% The step function form of the |smooth| shape is a third-order
+% Hermite polynomial interpolation between $0$ and $1$, so that the
+% first derivate at the endpoints are zero. It is defined $3t^2-2t^3$
+% for $0\le t\le 1$.
+%
+% The step function form of the |smoother| shape is a fifth-order
+% Hermite polynomial interpolation between $0$ and $1$, so that the
+% first and second derivatives at the endpoints are zero. It is defined
+% $10t^3-15t^4+6t^5$ for $0\le t\le 1$.
+%
+% \foreachtypeeasinggraph{%
+%     \easinggraphlabel{smooth\easingtype}{{\color{white!46!black}smoother\easingtype}}
+%     \easinggraphplot{smoother\easingtype}{46}
+%     \easinggraphplot{smooth\easingtype}{0}
+% }
+%
+% \subsubsection{The \texttt{pow} shape and friends (\texttt{linear}, \texttt{quad},
+% \texttt{cubic}, \texttt{quart}, and \texttt{quint})}
+%
+% Polynomial easing. The ease-in form is defined as $t^n$ for $0\le
+% t\le 1$, where the exponent $n$ is set with the \pgf{} key
+% |/easing/pow/exponent|, and should be greater than $0$. The parameter
+% defaults to $n=2.4$.
+%
+% When $n=1$, the function is linear between $0$ and $1$. For
+% $0<n\le1$, the ease-in form has discontinuous derivative at $0$.
+%
+% The shapes |linear|, |quad|, |cubic|, |quart|, and |quint| are the
+% same functions as |pow| with $n=1,\dots,5$,
+% respectively. Computations for these shapes are implemented with
+% \TeX{} registers, which is a little faster and more accurate than
+% setting the argument then evaluating the equivalent |pow| function.
+%
+% \foreachtypeeasinggraph{%
+%   \easinggraphplotfive{pow}{exponent}{n}{0.5,1,2,3,4}}
+%
+% \subsubsection{The \texttt{back} shape}
+%
+% Anticipatory easing. The ease-in form is defined as $t^2(1-t)s+t^3$
+% for $0\le t\le 1$, where the parameter $s$ is set with the \pgf{} key
+% |/easing/back/overshoot|. The parameter defaults to $s=1.6$.
+%
+% When $s\le0$, there is no overshoot. When $s=0$, the function is
+% equivalent to |pow| with $n=3$.
+%
+% \def\graphmarginy{0.3}
+% \foreachtypeeasinggraph{%
+%   \easinggraphplotfive{back}{overshoot}{s}{-0.8,0.0,0.8,1.6,2.4}}
+% \edef\graphmarginy{\graphmargindefaulty}
+%
+% \subsection{Trigonometric and exponential}
+%
+% \subsubsection{The \texttt{sine} shape}
+%
+% An easing function that looks like a section of a sinusoid. The ease-out form is
+% defined as $\sin(\frac{\pi}{2}t)$ for $0\le t\le 1$.
+%
+% This shape admits no parameters.
+%
+% \foreachtypeeasinggraph{%
+%   \easinggraphlabel{\phantom{nothing here}}{sine\easingtype}
+%   \easinggraphplot{sine\easingtype}{0}}
+%
+% \subsubsection{The \texttt{exp} shape}
+%
+% An easing function that looks like an exponential function. The
+% ease-in form is defined as $e^{c (t-1)}$ for $0\le t\le 1$, where
+% the parameter $c$ is set with the \pgf{} key |/easing/exp/speed|,
+% and should be greater than $0$. The parameter defaults to
+% $c=7.2$.
+%
+% Because of the nature of the exponential function, this shape is
+% only approximately continuous at the endpoints $a$ and $b$. In
+% practice, the discontinuity only becomes noticeable for small
+% $c$, around $c\le 4$.
+%
+% \foreachtypeeasinggraph{%
+%   \easinggraphplotfive{exp}{speed}{c}{4,7,10,13,16}}
+%
+% \subsection{Other}
+%
+% \subsubsection{The \texttt{circ} shape}
+%
+% An easing function whose graph is part of an ellipse. This shape
+% admits no parameters.
+%
+% \foreachtypeeasinggraph{%
+%   \easinggraphlabel{\phantom{nothing here}}{circ\easingtype}
+%   \easinggraphplot{circ\easingtype}{0}}
+%
+% \subsubsection{The \texttt{elastic} shape}
+%
+% Easing function that looks like a damped harmonic oscillator. The
+% ease-out form is defined as $e^c(t-1)\cos(2\pi f (1-t))$. This shape
+% admits two parameters:
+%
+% \begin{itemize}
+%
+% \item The frequency $f$ is the number of oscillations between the
+% endpoints. It is set with the \pgf{} key
+% |/easing/elastic/frequency|, and should be greater than $0$. The
+% frequency defaults to $f=3$.
+%
+% \item The damping coefficient $b$ affects the speed at which the
+% amplitude decays. It is set with the \pgf{} key
+% |/easing/elastic/damping|, and should be greater than zero. The
+% damping coefficient defaults to $b=7.2$.
+%
+% \end{itemize}
+%
+% The function overshoots the range $[0,1]$ when $f>0.5$. For $0<f\le
+% 1$, this function becomes a family of anticipatory easing curves
+% that look slightly different from the |back| shape but are more
+% expensive to compute.
+%
+% ^^A twiddle with the size of the background so that the curves don't
+% ^^A overshoot the box
+%
+% \def\graphmarginy{0.5}
+% \foreachtypeeasinggraph{%
+%   \easinggraphplotfive{elastic}{frequency}{f}{0.5,1.4,2.3,3.2,4.1}}
+% \edef\graphmarginy{\graphmargindefaulty}
+%
+% \StopEventually{\PrintChanges}
+% \section{Implementation}
+%
+% \begin{macro}{\ifeasing@withfpu}
+% \begin{macro}{\easing@divide}
+%
+% This library uses \TeX{} registers and \pgf's mathematical engine for
+% computations.
+%
+% It is possible that the user is loading this library together with
+% the floating point unit library.  We save the basic routines from
+% |pgfmath|, so that when this happens, the FPU doesn't break
+% everything when it does a switcharoo with the |pgfmath| macros.
+%
+%    \begin{macrocode}
+\newif\ifeasing@withfpu
+\expandafter\ifx\csname pgflibraryfpuifactive\endcsname\relax
+\easing@withfpufalse
+\else
+\easing@withfputrue
+\fi
+\ifeasing@withfpu
+\let\easing@cos\pgfmath@basic@cos@
+\let\easing@divide\pgfmath@basic@divide@
+\let\easing@exp\pgfmath@basic@exp@
+\let\easing@ln\pgfmath@basic@ln@
+\let\easing@sqrt\pgfmath@basic@sqrt@
+\else
+\let\easing@cos\pgfmathcos@
+\let\easing@divide\pgfmathdivide@
+\let\easing@exp\pgfmathexp@
+\let\easing@ln\pgfmathln@
+\let\easing@sqrt\pgfmathsqrt@
+\fi
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\easing@linearstep@ne}
+% \begin{macro}{\easing@linearstep@fixed}
+% \begin{macro}{\easing@linearstep@float}
+% \begin{macro}{\easing@linearstep}
+%
+% In absence of the FPU, the next section of code defines
+% |\easing@linearstep|, which expects as arguments plain numbers
+% (i.e. things that can be assigned to dimension registers). The net
+% effect of |\easing@linearstep{#1}{#2}{#3}| is to set
+% |\pgfmathresult| to
+% $\frac{\mathtt{\#3}-\mathtt{\#1}}{\mathtt{\#2}-\mathtt{\#1}}$,
+% clamped to between $0$ and $1$.
+%
+% If the FPU is loaded, |\easing@linearstep| is instead named
+% |\easing@linearstep@fixed|, and we additionally define
+% |\easing@linearstep@float|, which expects FPU-format floats as
+% arguments. We do not format the output as a float since the FPU is
+% smart enough to do that conversion quietly on its own.
+%
+% The |\easing@linearstep| routine is the first step in the definition
+% of all other routines that compute easing functions.
+%
+%    \begin{macrocode}
+\def\easing@linearstep@ne#1{%
+  \begingroup
+  \pgf@x#1pt
+  \ifdim1pt<\pgf@x\pgf@x 1pt\fi
+  \ifdim0pt>\pgf@x\pgf@x 0pt\fi
+  \pgfmathreturn\pgf@x
+  \endgroup
+}%
+\expandafter\def
+\csname easing@linearstep\ifeasing@withfpu @fixed\fi\endcsname#1#2#3{%
+  \begingroup
+  \pgf@xa#3pt
+  \pgf@xb#2pt
+  \pgf@xc#1pt
+  \ifdim\pgf@xb=\pgf@xc
+  \edef\pgfmathresult{\ifdim\pgf@xa>\pgf@xb 1\else 0\fi}%
+  \else
+  \advance\pgf@xa-\pgf@xc
+  \advance\pgf@xb-\pgf@xc
+  \easing@divide{\pgfmath@tonumber\pgf@xa}{\pgfmath@tonumber\pgf@xb}%
+  \easing@linearstep@ne\pgfmathresult
+  \fi
+  \pgfmathsmuggle\pgfmathresult
+  \endgroup
+}%
+\ifeasing@withfpu
+\def\easing@linearstep@float#1#2#3{%
+  \begingroup
+  \pgfmathfloatsubtract{#3}{#1}%
+  \edef\pgf@tempa{\pgfmathresult}%
+  \pgfmathfloatsubtract{#2}{#1}%
+  \edef\pgf@tempb{\pgfmathresult}%
+  \pgfmathfloatifflags{\pgf@tempb}{0}{%
+    \pgfmathfloatifflags{\pgf@tempa}{-}{%
+      \edef\pgfmathresult{0}%
+    }{%
+      \edef\pgfmathresult{1}%
+    }%
+  }{%
+    \pgfmathfloatdivide\pgf@tempa\pgf@tempb
+    \pgfmathfloattofixed{\pgfmathresult}%
+    \easing@linearstep@ne\pgfmathresult
+  }%
+  \pgfmathsmuggle\pgfmathresult
+  \endgroup
+}%
+\def\easing@linearstep#1#2#3{%
+  \pgflibraryfpuifactive{%
+    \easing@linearstep@float{#1}{#2}{#3}}{%
+    \easing@linearstep@fixed{#1}{#2}{#3}}%
+}%
+\fi
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\easing@linearstep@easein@ne}
+% \begin{macro}{\easing@linearstep@easeout@ne}
+%
+% The linear ease-in and ease-out functions are identical to the
+% linear step function. We define the respective macros so as not to
+% surprise the user with their absence.
+%
+%    \begin{macrocode}
+\let\easing@lineareasein\easing@linearstep
+\pgfmathdeclarefunction{lineareasein}{3}{%
+  \easing@lineareasein{#1}{#2}{#3}}%
+\let\easing@lineareaseout\easing@linearstep
+\pgfmathdeclarefunction{lineareaseout}{3}{%
+  \easing@lineareasein{#1}{#2}{#3}}%
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% ^^A the next few macros have long names, so we scoot this page to
+% ^^A the right to make space in the margins:
+%
+% \begingroup
+% \addtolength\oddsidemargin{50pt}
+% \addtolength\evensidemargin{50pt}
+%
+% \begin{macro}{\easing@derive@easein@nefromstep@ne}
+% \begin{macro}{\easing@derive@easeout@nefromstep@ne}
+% \begin{macro}{\easing@derive@step@nefromeasein@ne}
+% \begin{macro}{\easing@derive@easeout@nefromeasein@ne}
+%
+% The pattern in general is that, for each shape, we define the
+% one-parameter version of the step, ease-in, and ease-out routines
+% interpolating between values $0$ at $1$ at the ends of the unit
+% interval. Then by composing with |\easing@linearstep|, we obtain the
+% three-parameter versions that allow the user to specify the begin
+% and end points of the interpolation.
+%
+% Most of the time it suffices to define just one of the three
+% one-parameter versions of a shape to be able to infer the form of
+% all three. This is done with the  |\easing@derive|--|from|-- macros.
+%
+%    \begin{macrocode}
+\def\easing@derive@easein@nefromstep@ne#1{%
+  \expandafter\def\csname easing@#1easein@ne\endcsname##1{%
+    \begingroup
+    \pgf@x##1 pt
+    \divide\pgf@x 2
+    \csname easing@#1step@ne\endcsname{\pgfmath@tonumber\pgf@x}%
+    \pgf@x\pgfmathresult pt
+    \multiply\pgf@x 2
+    \pgfmathreturn\pgf@x
+    \endgroup
+  }%
+}%
+\def\easing@derive@easeout@nefromstep@ne#1{%
+  \expandafter\def\csname easing@#1easeout@ne\endcsname##1{%
+    \begingroup
+    \pgf@x##1 pt
+    \divide\pgf@x 2
+    \advance\pgf@x 0.5pt
+    \csname easing@#1step@ne\endcsname{\pgfmath@tonumber\pgf@x}%
+    \pgf@x\pgfmathresult pt
+    \multiply\pgf@x 2
+    \advance\pgf@x -1pt
+    \pgfmathreturn\pgf@x
+    \endgroup
+  }%
+}%
+\def\easing@derive@step@nefromeasein@ne#1{%
+  \expandafter\def\csname easing@#1step@ne\endcsname##1{%
+    \begingroup
+    \pgf@x##1 pt
+    \multiply\pgf@x 2
+    \ifdim\pgf@x<1pt
+    \csname easing@#1easein@ne\endcsname{\pgfmath@tonumber\pgf@x}%
+    \pgf@x\pgfmathresult pt
+    \divide\pgf@x 2
+    \else
+    \multiply\pgf@x -1
+    \advance\pgf@x 2pt
+    \csname easing@#1easein@ne\endcsname{\pgfmath@tonumber\pgf@x}%
+    \pgf@x\pgfmathresult pt
+    \divide\pgf@x 2
+    \multiply\pgf@x -1
+    \advance\pgf@x 1pt
+    \fi
+    \pgfmathreturn\pgf@x
+    \endgroup
+  }%
+}%
+\def\easing@derive@easeout@nefromeasein@ne#1{%
+  \expandafter\def\csname easing@#1easeout@ne\endcsname##1{%
+    \begingroup
+    \pgf@x##1pt
+    \multiply\pgf@x -1
+    \advance\pgf@x 1pt
+    \csname easing@#1easein@ne\endcsname{\pgfmath@tonumber\pgf@x}%
+    \pgf@x\pgfmathresult pt
+    \multiply\pgf@x -1
+    \advance\pgf@x 1pt
+    \pgfmathreturn\pgf@x
+    \endgroup
+  }%
+}%
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \endgroup ^^A marginpar modifications
+%
+% \begin{macro}{\easing@pgfmathinstall}
+%
+% The three-parameter versions of each routine is installed
+% into the mathematical engine, so that they are available in
+% |\pgfmathparse|.
+%
+%    \begin{macrocode}
+\def\easing@pgfmathinstall#1{%
+  \pgfmathdeclarefunction{#1step}{3}{%
+    \easing@linearstep{##1}{##2}{##3}%
+    \csname easing@#1step@ne\endcsname\pgfmathresult
+  }%
+  \pgfmathdeclarefunction{#1easein}{3}{%
+    \easing@linearstep{##1}{##2}{##3}%
+    \csname easing@#1easein@ne\endcsname\pgfmathresult
+  }%
+  \pgfmathdeclarefunction{#1easeout}{3}{%
+    \easing@linearstep{##1}{##2}{##3}%
+    \csname easing@#1easeout@ne\endcsname\pgfmathresult
+  }%
+}%
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\easing@smoothstep@ne}
+% \begin{macro}{\easing@smootheasein@ne}
+% \begin{macro}{\easing@smootheaseout@ne}
+%
+% The |smooth| shape.
+%
+%    \begin{macrocode}
+\def\easing@smoothstep@ne#1{%
+  \begingroup
+  \pgf@x#1pt
+  \edef\pgf@temp{\pgfmath@tonumber\pgf@x}%
+  \multiply\pgf@x-2
+  \advance\pgf@x 3pt
+  \pgf@x\pgf@temp\pgf@x
+  \pgf@x\pgf@temp\pgf@x
+  \pgfmathreturn\pgf@x
+  \endgroup
+}%
+\easing@derive@easein@nefromstep@ne{smooth}%
+\easing@derive@easeout@nefromstep@ne{smooth}%
+\easing@pgfmathinstall{smooth}%
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\easing@smootherstep@ne}
+% \begin{macro}{\easing@smoothereasein@ne}
+% \begin{macro}{\easing@smoothereaseout@ne}
+%
+% The |smoother| shape.
+%
+%    \begin{macrocode}
+\def\easing@smootherstep@ne#1{%
+  \begingroup
+  \pgf@x#1pt
+  \edef\pgf@temp{\pgfmath@tonumber\pgf@x}%
+  \multiply\pgf@x 6
+  \advance\pgf@x -15pt
+  \pgf@x\pgf@temp\pgf@x
+  \advance\pgf@x 10pt
+  \pgf@x\pgf@temp\pgf@x
+  \pgf@x\pgf@temp\pgf@x
+  \pgf@x\pgf@temp\pgf@x
+  \pgfmathreturn\pgf@x
+  \endgroup
+}%
+\easing@derive@easein@nefromstep@ne{smoother}%
+\easing@derive@easeout@nefromstep@ne{smoother}%
+\easing@pgfmathinstall{smoother}%
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\easing@powstep@ne}
+% \begin{macro}{\easing@poweasein@ne}
+% \begin{macro}{\easing@poweaseout@ne}
+%
+% The |pow| shape.
+%
+% Because of some wonkiness in the FPU, |\pgfmath@pow@basic@| actually
+% doesn't work. Instead of invoking the |pow| function, we compute
+% $t^n$ approximately by computing $e^{n\ln t}$ using |ln| and |exp|
+% instead (which is what |pgfmath| does anyway when the exponent is
+% not an integer.)
+%
+%    \begin{macrocode}
+\pgfkeys{/easing/.is family}%
+\pgfkeys{easing,
+  pow/exponent/.estore in=\easing@param@pow@exponent,
+  pow/exponent/.default=2.4,
+  pow/exponent}%
+\def\easing@poweasein@ne#1{%
+  \begingroup
+  \pgf@x#1pt
+  \ifdim\pgf@x=0pt
+  \edef\pgfmathresult{0}%
+  \else
+  \easing@ln{#1}%
+  \pgf@x\pgfmathresult pt
+  \pgf@x\easing@param@pow@exponent\pgf@x
+  \easing@exp{\pgfmath@tonumber\pgf@x}%
+  \fi
+  \pgfmathsmuggle\pgfmathresult
+  \endgroup
+}%
+\easing@derive@easeout@nefromeasein@ne{pow}%
+\easing@derive@step@nefromeasein@ne{pow}%
+\easing@pgfmathinstall{pow}%
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\easing@quadstep@ne}
+% \begin{macro}{\easing@quadeasein@ne}
+% \begin{macro}{\easing@quadeaseout@ne}
+%
+% \begin{macro}{\easing@cubicstep@ne}
+% \begin{macro}{\easing@cubiceasein@ne}
+% \begin{macro}{\easing@cubiceaseout@ne}
+%
+% \begin{macro}{\easing@quartstep@ne}
+% \begin{macro}{\easing@quarteasein@ne}
+% \begin{macro}{\easing@quarteaseout@ne}
+%
+% \begin{macro}{\easing@quintstep@ne}
+% \begin{macro}{\easing@quinteasein@ne}
+% \begin{macro}{\easing@quinteaseout@ne}
+%
+% The |quad|--, |cubic|--, |quart|--, and |quint|-- routines have
+% explicit definitions.
+%
+%    \begin{macrocode}
+\def\easing@quadeasein@ne#1{%
+  \begingroup
+  \pgf@x#1pt
+  \edef\pgf@temp{\pgfmath@tonumber\pgf@x}%
+  \pgf@x\pgf@temp\pgf@x
+  \pgfmathreturn\pgf@x
+  \endgroup
+}%
+\easing@derive@step@nefromeasein@ne{quad}%
+\easing@derive@easeout@nefromeasein@ne{quad}%
+\easing@pgfmathinstall{quad}%
+%
+\def\easing@cubiceasein@ne#1{%
+  \begingroup
+  \pgf@x#1pt
+  \edef\pgf@temp{\pgfmath@tonumber\pgf@x}%
+  \pgf@x\pgf@temp\pgf@x
+  \pgf@x\pgf@temp\pgf@x
+  \pgfmathreturn\pgf@x
+  \endgroup
+}%
+\easing@derive@step@nefromeasein@ne{cubic}%
+\easing@derive@easeout@nefromeasein@ne{cubic}%
+\easing@pgfmathinstall{cubic}%
+%
+\def\easing@quarteasein@ne#1{%
+  \begingroup
+  \pgf@x#1pt
+  \edef\pgf@temp{\pgfmath@tonumber\pgf@x}%
+  \pgf@x\pgf@temp\pgf@x
+  \pgf@x\pgf@temp\pgf@x
+  \pgf@x\pgf@temp\pgf@x
+  \pgfmathreturn\pgf@x
+  \endgroup
+}%
+\easing@derive@step@nefromeasein@ne{quart}%
+\easing@derive@easeout@nefromeasein@ne{quart}%
+\easing@pgfmathinstall{quart}%
+%
+\def\easing@quinteasein@ne#1{%
+  \begingroup
+  \pgf@x#1pt
+  \edef\pgf@temp{\pgfmath@tonumber\pgf@x}%
+  \pgf@x\pgf@temp\pgf@x
+  \pgf@x\pgf@temp\pgf@x
+  \pgf@x\pgf@temp\pgf@x
+  \pgf@x\pgf@temp\pgf@x
+  \pgfmathreturn\pgf@x
+  \endgroup
+}%
+\easing@derive@step@nefromeasein@ne{quint}%
+\easing@derive@easeout@nefromeasein@ne{quint}%
+\easing@pgfmathinstall{quint}%
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\easing@backstep@ne}
+% \begin{macro}{\easing@backeasein@ne}
+% \begin{macro}{\easing@backeaseout@ne}
+%
+% The |back| shape.
+%
+%    \begin{macrocode}
+\pgfkeys{easing,
+  back/overshoot/.estore in=\easing@param@back@overshoot,
+  back/overshoot/.default=1.6,
+  back/overshoot}%
+\def\easing@backeasein@ne#1{%
+  \begingroup
+  \pgf@x#1pt
+  \edef\pgf@temp{\pgfmath@tonumber\pgf@x}%
+  \advance\pgf@x -1pt
+  \pgf@x\easing@param@back@overshoot\pgf@x
+  \advance\pgf@x\pgf@temp pt
+  \pgf@x\pgf@temp\pgf@x
+  \pgf@x\pgf@temp\pgf@x
+  \pgfmathreturn\pgf@x
+  \endgroup
+}%
+\easing@derive@step@nefromeasein@ne{back}%
+\easing@derive@easeout@nefromeasein@ne{back}%
+\easing@pgfmathinstall{back}%
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\easing@sinestep@ne}
+% \begin{macro}{\easing@sineeasein@ne}
+% \begin{macro}{\easing@sineeaseout@ne}
+%
+% The |sine| shape.
+%
+% We write down both the |easein| and |step| forms of this, since they
+% are simple compared to what would have been obtained by
+% |\easing@derive|--.
+%
+%    \begin{macrocode}
+\def\easing@sineeasein@ne#1{%
+  \begingroup
+  \pgf@x#1pt
+  \multiply\pgf@x 90
+  \easing@cos{\pgfmath@tonumber\pgf@x}%
+  \pgf@x\pgfmathresult pt
+  \multiply\pgf@x -1
+  \advance\pgf@x 1pt
+  \pgfmathreturn\pgf@x
+  \endgroup
+}%
+\def\easing@sinestep@ne#1{%
+  \begingroup
+  \pgf@x#1pt
+  \multiply\pgf@x 180
+  \easing@cos{\pgfmath@tonumber\pgf@x}%
+  \pgf@x\pgfmathresult pt
+  \divide\pgf@x 2
+  \multiply\pgf@x -1
+  \advance\pgf@x 0.5pt
+  \pgfmathreturn\pgf@x
+  \endgroup
+}%
+\easing@derive@easeout@nefromeasein@ne{sine}%
+\easing@pgfmathinstall{sine}%
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\easing@expstep@ne}
+% \begin{macro}{\easing@expeasein@ne}
+% \begin{macro}{\easing@expeaseout@ne}
+%
+% The |exp| shape.
+%
+%    \begin{macrocode}
+\pgfkeys{easing,
+  exp/speed/.estore in=\easing@param@exponent@speed,
+  exp/speed/.default=7.2,
+  exp/speed}%
+\def\easing@expeasein@ne#1{%
+  \begingroup
+  \pgf@x#1pt
+  \advance\pgf@x -1pt
+  \pgf@x\easing@param@exponent@speed\pgf@x
+  \easing@exp{\pgfmath@tonumber\pgf@x}%
+  \pgfmathsmuggle\pgfmathresult
+  \endgroup
+}%
+\easing@derive@step@nefromeasein@ne{exp}%
+\easing@derive@easeout@nefromeasein@ne{exp}%
+\easing@pgfmathinstall{exp}%
+%    \end{macrocode}
+%
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\easing@circstep@ne}
+% \begin{macro}{\easing@circeasein@ne}
+% \begin{macro}{\easing@circeaseout@ne}
+%
+% The |circ| shape.
+%
+%    \begin{macrocode}
+\def\easing@circeasein@ne#1{%
+  \begingroup
+  \pgf@x#1pt
+  \advance\pgf@x -1pt
+  \edef\pgf@temp{\pgfmath@tonumber\pgf@x}%
+  \pgf@x\pgf@temp\pgf@x
+  \multiply\pgf@x -1
+  \advance\pgf@x 1pt
+  \easing@sqrt{\pgfmath@tonumber\pgf@x}%
+  \pgfmathsmuggle\pgfmathresult
+  \endgroup
+}%
+\easing@derive@step@nefromeasein@ne{circ}%
+\easing@derive@easeout@nefromeasein@ne{circ}%
+\easing@pgfmathinstall{circ}%
+%    \end{macrocode}
+%
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\easing@elasticstep@ne}
+% \begin{macro}{\easing@elasticeasein@ne}
+% \begin{macro}{\easing@elasticeaseout@ne}
+%
+% The |elastic| shape.
+%
+%    \begin{macrocode}
+\pgfkeys{easing,
+  elastic/frequency/.estore in=\easing@param@elastic@frequency,
+  elastic/damping/.estore in=\easing@param@elastic@damping,
+  elastic/frequency/.default=3,
+  elastic/damping/.default=7.2,
+  elastic/frequency, elastic/damping}%
+\def\easing@elasticeasein@ne#1{%
+  \begingroup
+  \pgf@xa#1pt
+  \advance\pgf@xa -1pt
+  \pgf@xb-\pgf@xa
+  \pgf@xa\easing@param@elastic@damping\pgf@xa
+  \easing@exp{\pgfmath@tonumber\pgf@xa}%
+  \pgf@xa\pgfmathresult pt
+  \pgf@xb 360\pgf@xb
+  \pgf@xb\easing@param@elastic@frequency\pgf@xb
+  \easing@cos{\pgfmath@tonumber\pgf@xb}%
+  \pgf@xa\pgfmathresult\pgf@xa
+  \pgfmathreturn\pgf@xa
+  \endgroup
+}%
+\easing@derive@step@nefromeasein@ne{elastic}%
+\easing@derive@easeout@nefromeasein@ne{elastic}%
+\easing@pgfmathinstall{elastic}%
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \Finale

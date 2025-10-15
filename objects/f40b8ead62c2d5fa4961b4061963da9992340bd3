@@ -1,0 +1,329 @@
+if not modules then modules = {} end modules["t-squares"] = {
+	version = 20240223,
+	comment = "Magic and Latin squares",
+	author = "Jairo A. del Rio",
+	copyright = "Jairo A. del Rio",
+	license = "MIT License",
+}
+
+local interfaces = interfaces
+local implement = interfaces.implement
+local magic_reporter = logs.reporter("squares", "magic")
+local latin_reporter = logs.reporter("squares", "latin")
+local random = math.random
+local context = context
+
+-- https://www.iupindia.in/910/IJCM_Magic_Square_Construction_Algorithms34.pdf
+-- https://arxiv.org/pdf/1402.3273.pdf
+-- https://en.wikipedia.org/wiki/Conway%27s_LUX_method_for_magic_squares
+
+-- Helpers
+local function init(s)
+	local q = {}
+	for j = 1, s do
+		q[j] = {}
+		local c = q[j]
+		for i = 1, s do
+			c[i] = 0
+		end
+	end
+	return q
+end
+
+-- Odd numbers
+
+local function magic_01(n)
+	local res = init(n)
+	local i, j = 1 + (n >> 1), 1
+	local k, l
+	res[i][j] = 1
+	for key = 2, n * n do
+		k = i % n + 1
+		l = 2 <= j and j - 1 or n
+		if res[k][l] > 0 then
+			j = j % n + 1
+		else
+			i, j = k, l
+		end
+		res[i][j] = key
+	end
+	return res
+end
+
+-- LUX method
+
+local function magic_02(N)
+	local res = init(N)
+	local n = N // 2
+	local lux = init(n)
+	local L, U, X = 1, 2, 4
+	local x1, x2, x3, x4 = 0, -1, 0, -1
+	for i = 1, n do
+		for j = 1, n // 2 + 1 do
+			lux[i][j] = L
+		end
+	end
+	for i = 1, n do
+		lux[i][n // 2 + 2] = U
+	end
+	for j = n // 2 + 3, n do
+		for i = 1, n do
+			lux[i][j] = X
+		end
+	end
+	lux[n // 2 + 1][n // 2 + 1] = U
+	lux[n // 2 + 1][n // 2 + 2] = L
+	local i, j = 1 + (n >> 1), 1
+	local k, l
+	res[2 * i + x1][2 * j - 1] = 1
+	res[2 * i + x2][2 * j] = 2
+	res[2 * i + x3][2 * j] = 3
+	res[2 * i + x4][2 * j - 1] = 4
+	for key = 2, n * n do
+		k = i % n + 1
+		l = 2 <= j and j - 1 or n
+		if res[2 * k][2 * l] > 0 then
+			j = j % n + 1
+		else
+			i, j = k, l
+		end
+		if lux[i][j] == L then
+			x1, x2, x3, x4 = 0, -1, 0, -1
+		elseif lux[i][j] == U then
+			x1, x2, x3, x4 = -1, -1, 0, 0
+		else
+			x1, x2, x3, x4 = -1, 0, -1, 0
+		end
+		res[2 * i + x1][2 * j - 1] = 4 * (key - 1) + 1
+		res[2 * i + x2][2 * j] = 4 * (key - 1) + 2
+		res[2 * i + x3][2 * j] = 4 * (key - 1) + 3
+		res[2 * i + x4][2 * j - 1] = 4 * key
+	end
+	return res
+end
+
+local function magic_03(n)
+	local res = init(n)
+	for x = 1, n, 4 do
+		for y = 1, n, 4 do
+			local q = 0
+			for i = x, x + 3 do
+				q = q + 1
+				local q1 = 0
+				for j = y, y + 3 do
+					q1 = q1 + 1
+					if i == j or i + j == 5 or q + q1 == 5 or q == q1 then
+						res[i][j] = n * (i - 1) + j
+					else
+						res[i][j] = n * n - ((i - 1) * n + j) + 1
+					end
+				end
+			end
+		end
+	end
+	return res
+end
+
+local currentsquare = nil
+
+local function magicsquare(n)
+	local r = n & 3
+	if r == 0 then
+		return magic_03(n)
+	elseif r == 2 then
+		return magic_02(n)
+	end
+	return magic_01(n)
+end
+
+local bTR, eTR = context.bTR, context.eTR
+local bTD, eTD = context.bTD, context.eTD
+
+implement({
+	name = "magicsquarecell",
+	arguments = { "integer", "integer" },
+	actions = function(x, y)
+		context(currentsquare and currentsquare[x][y] or "")
+	end,
+})
+
+implement({
+	name = "magicsquareinit",
+	arguments = { "integer" },
+	actions = function(n)
+		if n > 0 and n ~= 2 then
+			currentsquare = magicsquare(n)
+		else
+			magic_reporter(("Invalid number %d: nothing will be provided"):format(n))
+		end
+	end,
+})
+
+implement({
+	name = "magicsquarereset",
+	actions = function()
+		currentsquare = nil
+	end,
+})
+
+implement({
+	name = "magicsquare",
+	actions = function()
+		local r = currentsquare
+		if r then
+			local n = #r
+			for j = 1, n do
+				bTR()
+				for i = 1, n do
+					bTD()
+					context(r[i][j])
+					eTD()
+				end
+				eTR()
+			end
+		else
+			magic_reporter("Magic square not initialized...")
+			return
+		end
+	end,
+})
+
+local function rand2(a, b)
+	if random(2) == 1 then
+		return a, b
+	else
+		return b, a
+	end
+end
+
+local function latinsquare(n)
+	local xy = {}
+	local xz = {}
+	local yz = {}
+
+	for i = 1, n do
+		xy[i] = {}
+		xz[i] = {}
+		yz[i] = {}
+		for j = 1, n do
+			xy[i][j] = 0
+			xz[i][j] = 0
+			yz[i][j] = 0
+		end
+	end
+
+	for i = 1, n do
+		for j = 1, n do
+			local k = (i + j - 2) % n + 1
+			xy[i][j] = k
+			xz[i][k] = j
+			yz[j][k] = i
+		end
+	end
+
+	local mxy, mxz, myz = 0, 0, 0
+	local m = { 0, 0, 0 }
+	local proper = true
+	local minIter = n * n * n
+	local iter = 0
+
+	while iter < minIter or not proper do
+		local i, j, k, i2, j2, k2
+		local i2_, j2_, k2_
+
+		if proper then
+			i, j, k = random(n), random(n), random(n)
+			while xy[i][j] == k do
+				i, j, k = random(n), random(n), random(n)
+			end
+
+			i2 = yz[j][k]
+			j2 = xz[i][k]
+			k2 = xy[i][j]
+			i2_, j2_, k2_ = i, j, k
+		else
+			i, j, k = m[1], m[2], m[3]
+
+			i2, i2_ = rand2(yz[j][k], myz)
+			j2, j2_ = rand2(xz[i][k], mxz)
+			k2, k2_ = rand2(xy[i][j], mxy)
+		end
+
+		proper = xy[i2][j2] == k2
+		if not proper then
+			m = { i2, j2, k2 }
+			mxy = xy[i2][j2]
+			myz = yz[j2][k2]
+			mxz = xz[i2][k2]
+		end
+
+		xy[i][j] = k2_
+		xy[i][j2] = k2
+		xy[i2][j] = k2
+		xy[i2][j2] = k
+
+		yz[j][k] = i2_
+		yz[j][k2] = i2
+		yz[j2][k] = i2
+		yz[j2][k2] = i
+
+		xz[i][k] = j2_
+		xz[i][k2] = j2
+		xz[i2][k] = j2
+		xz[i2][k2] = j
+
+		iter = iter + 1
+	end
+	return xy
+end
+
+local currentlatin = nil
+
+implement({
+	name = "latinsquarecell",
+	arguments = { "integer", "integer" },
+	actions = function(x, y)
+		context(currentlatin and currentlatin[x][y] or "")
+	end,
+})
+
+implement({
+	name = "latinsquareinit",
+	arguments = { "integer" },
+	actions = function(n)
+		if n > 0 then
+			currentlatin = latinsquare(n)
+		else
+			latin_reporter(("Invalid number %d: nothing will be provided"):format(n))
+		end
+	end,
+})
+
+implement({
+	name = "latinsquarereset",
+	actions = function()
+		currentlatin = nil
+	end,
+})
+
+implement({
+	name = "latinsquare",
+	actions = function()
+		local r = currentlatin
+		if r then
+			local n = #r
+			for j = 1, n do
+				bTR()
+				for i = 1, n do
+					bTD()
+					context(r[i][j])
+					eTD()
+				end
+				eTR()
+			end
+		else
+			latin_reporter("Latin square not initialized...")
+			return
+		end
+	end,
+})

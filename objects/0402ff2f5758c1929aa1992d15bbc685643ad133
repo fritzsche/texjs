@@ -1,0 +1,231 @@
+%%% 
+% Automatismes
+%%%
+\def\filedateAutomatismes{2025/05/28}%
+\def\fileversionAutomatismes{0.1a}%
+\message{-- \filedateAutomatismes\space v\fileversionAutomatismes}%
+%
+\NewDocumentCommand\ChoixAleaMixold{mmmm}{%
+  \ChoixAlea{1}{2}{\Autograine}%
+  \ifnum\Autograine=1\relax%
+    \ifnum#3=\useKV[Automatismes]{ValeurMin}\relax%
+      \xdef#4{\fpeval{randint(#3+1,#2)}}%
+    \else%
+      \xdef#4{\fpeval{randint(#1,#3-1)}}%
+    \fi%
+  \else%
+    \ifnum#3=\useKV[Automatismes]{ValeurMax}\relax%
+      \xdef#4{\fpeval{randint(#1,#3-1)}}%
+    \else%
+      \xdef#4{\fpeval{randint(#3+1,#2)}}%
+    \fi%
+  \fi%
+}%
+
+\NewDocumentCommand\ChoixAleaMix{mmmm}{%
+  \xintifboolexpr{#1==0 || #1==#3}{%
+    \xdef\PfCListeNombreMix{\fpeval{#1+1}}%
+    \xdef\PfCAutoDebutCompte{2}%
+  }{%
+    \xdef\PfCListeNombreMix{#1}%
+    \xdef\PfCAutoDebutCompte{1}%
+  }%
+  \xintFor* ##1 in{\xintSeq{\PfCAutoDebutCompte}{\fpeval{#2-#1}}}\do{%
+    \xintifboolexpr{\fpeval{#1+##1}==0 || \fpeval{#1+##1}==#3}{}{%
+      \xdef\PfCListeNombreMix{\PfCListeNombreUn,\fpeval{\useKV[Automatismes]{ValeurMin}+##1}}%
+    }%
+  }%
+  \MelangeListe{\PfCListeNombreMix}{1}%
+  \xdef#4{\faa}%
+}%
+
+\newcounter{PfCAutoNbcpt}%
+
+\NewDocumentCommand\ChoixNombreUn{om}{%
+  \setKV[Automatismes]{#1}%
+  \ifboolKV[Automatismes]{Fractions}{%
+    \xdef\PfCAutoNumUn{\PfCListeNombreMelangeUn[\thePfCAutoNbcpt]}%
+    \ChoixAleaMix{\useKV[Automatismes]{ValeurMin}}{\useKV[Automatismes]{ValeurMax}}{\PfCAutoNumUn}{\PfCAutomatismesPremierTerme}%
+  }{%
+    \xdef\PfCAutoNombreUn{\PfCListeNombreMelangeUn[\thePfCAutoNbcpt]}%
+  }%
+}%
+
+\NewDocumentCommand\ChoixNombreDeux{om}{%
+  \setKV[Automatismes]{#1}%
+  \ifboolKV[Automatismes]{Fractions}{%
+    \IfStrEq{\PfCAutomatismesListeOperations[#2]}{+}{%
+      \ChoixAleaMix{\useKV[Automatismes]{ValeurMin}}{\useKV[Automatismes]{ValeurMax}}{\PfCAutomatismesPremierTerme}{\PfCAutoNumDeux}%
+      \xdef\PfCAutomatismesDeuxiemeTerme{\PfCAutomatismesPremierTerme}%
+    }{%
+      \IfStrEq{\PfCAutomatismesListeOperations[#2]}{-}{%
+        \ChoixAleaMix{\useKV[Automatismes]{ValeurMin}}{\useKV[Automatismes]{ValeurMax}}{\PfCAutomatismesPremierTerme}{\PfCAutoNumDeux}%
+        \xdef\PfCAutomatismesDeuxiemeTerme{\PfCAutomatismesPremierTerme}%
+      }{%
+        \xdef\PfCAutoNumDeux{\PfCListeNombreMelangeDeux[\thePfCAutoNbcpt]}%
+        \ChoixAleaMix{\useKV[Automatismes]{ValeurMin}}{\useKV[Automatismes]{ValeurMax}}{0}{\PfCAutomatismesDeuxiemeTerme}%
+      }%
+    }%
+  }{%
+    \ifboolKV[Automatismes]{Relatifs}{%
+      \IfStrEq{\PfCAutomatismesListeOperations[#2]}{/}{%
+        \xdef\PfCAutoNombreDeux{\PfCListeNombreMelangeDeux[\thePfCAutoNbcpt]}%
+        \VariableAlea{\PfCAutoNombreUn}{\PfCAutoNombreUn*\PfCAutoNombreDeux}%
+      }{%
+        \xdef\PfCAutoNombreDeux{\PfCListeNombreMelangeDeux[\thePfCAutoNbcpt]}%
+      }%
+    }{%
+      % Entiers
+      \IfStrEq{\PfCAutomatismesListeOperations[#2]}{-}{%
+        \xdef\PfCAutoRetiensDif{\fpeval{\PfCListeNombreMelangeUn[\thePfCAutoNbcpt]-\PfCListeNombreMelangeDeux[\thePfCAutoNbcpt]}}%
+        \ifnum\PfCAutoRetiensDif<0\relax%
+          \xdef\PfCAutoNombreUn{\PfCListeNombreMelangeDeux[\thePfCAutoNbcpt]}%
+          \xdef\PfCAutoNombreDeux{\fpeval{\PfCAutoNombreUn+\PfCAutoRetiensDif}}%
+        \else%
+          \xdef\PfCAutoNombreUn{\PfCListeNombreMelangeUn[\thePfCAutoNbcpt]}%
+          \xdef\PfCAutoNombreDeux{\PfCListeNombreMelangeDeux[\thePfCAutoNbcpt]}%
+        \fi
+      }{%
+        \IfStrEq{\PfCAutomatismesListeOperations[#2]}{/}{%
+          \xdef\PfCAutoNombreDeux{\PfCListeNombreMelangeDeux[\thePfCAutoNbcpt]}%
+          \VariableAlea{\PfCAutoNombreUn}{\PfCAutoNombreUn*\PfCAutoNombreDeux}%
+        }{%
+          \xdef\PfCAutoNombreDeux{\PfCListeNombreMelangeDeux[\thePfCAutoNbcpt]}%
+        }%
+      }%
+    }%
+  }%
+}%
+
+\NewDocumentCommand\SoustractionPositive{omm}{%
+  \setKV[Automatismes]{#1}%
+  \ifboolKV[Automatismes]{Relatifs}{%
+    \PfCNum{#2}-\PfCNum{#3}%
+  }{%
+    \ifnum#2>#3\relax%
+      \num{#2}-\num{#3}%
+    \else%
+      \num{#3}-\num{#2}%
+    \fi%
+  }%
+}%
+
+\setKVdefault[Automatismes]{Questions=10,ValeurMin=1,ValeurMax=15,Entiers,Relatifs=false,Fractions=false,Stretch=1.5,Graines=false,Priorites=false,Graine={}}%
+\defKV[Automatismes]{Graine=\ifempty{#1}{}{\setKV[Automatismes]{Graines}}}%
+
+\newcommand\PfCTabstrut{\rule{0pt}{2.4ex}}% Top strut
+
+\NewDocumentCommand\Automatismes{o m}{%
+  \setcounter{PfCAutoNbcpt}{0}%
+  \useKVdefault[Automatismes]%
+  \setKV[Automatismes]{#1}%
+  \ifboolKV[Automatismes]{Graines}{\PfCGraineAlea{\useKV[Automatismes]{Graine}}}{}%
+  \xdef\PfCAutomatismesEtages{\fpeval{\useKV[Automatismes]{Questions}}}%
+  % On définit deux listes de nombres
+  \xdef\PfCListeNombreUn{\useKV[Automatismes]{ValeurMin}}%
+  \xintFor* ##1 in{\xintSeq{1}{\fpeval{\useKV[Automatismes]{ValeurMax}-\useKV[Automatismes]{ValeurMin}}}}\do{%
+    \xintifboolexpr{\fpeval{\useKV[Automatismes]{ValeurMin}+##1}==0}{}{%
+      \xdef\PfCListeNombreUn{\PfCListeNombreUn,\fpeval{\useKV[Automatismes]{ValeurMin}+##1}}%
+    }%
+  }%
+  \MelangeListe{\PfCListeNombreUn}{\fpeval{\useKV[Automatismes]{ValeurMax}-\useKV[Automatismes]{ValeurMin}+1}}%
+  \readlist*\PfCListeNombreMelangeUn{\faa}%
+  %%% la deuxième
+  \xdef\PfCListeNombreDeux{\useKV[Automatismes]{ValeurMin}}%
+  \xintFor* ##1 in{\xintSeq{1}{\fpeval{\useKV[Automatismes]{ValeurMax}-\useKV[Automatismes]{ValeurMin}}}}\do{%
+    \xintifboolexpr{\fpeval{\useKV[Automatismes]{ValeurMin}+##1}==0}{}{%
+      \xdef\PfCListeNombreDeux{\PfCListeNombreDeux,\fpeval{\useKV[Automatismes]{ValeurMin}+##1}}%
+    }%
+  }%
+  \MelangeListe{\PfCListeNombreDeux}{\fpeval{\useKV[Automatismes]{ValeurMax}-\useKV[Automatismes]{ValeurMin}+1}}%
+  \readlist*\PfCListeNombreMelangeDeux{\faa}%
+  \setcounter{PfCAutoNbcpt}{0}%
+  \renewcommand{\arraystretch}{\useKV[Automatismes]{Stretch}}%
+  \ifboolKV[Automatismes]{Priorites}{%
+      %On définit une troisième liste 
+      \xdef\PfCListeNombreTrois{\useKV[Automatismes]{ValeurMin}}%
+      \xintFor* ##1 in{\xintSeq{1}{\fpeval{\useKV[Automatismes]{ValeurMax}-\useKV[Automatismes]{ValeurMin}}}}\do{%
+        \xintifboolexpr{\fpeval{\useKV[Automatismes]{ValeurMin}+##1}==0}{}{%
+          \xdef\PfCListeNombreTrois{\PfCListeNombreTrois,\fpeval{\useKV[Automatismes]{ValeurMin}+##1}}%
+        }%
+      }%
+      \MelangeListe{\PfCListeNombreTrois}{\fpeval{\useKV[Automatismes]{ValeurMax}-\useKV[Automatismes]{ValeurMin}+1}}%
+      \readlist*\PfCListeNombreMelangeTrois{\faa}%
+%      La liste un est \showitems\PfCListeNombreMelangeUn\\
+%      La liste deux est \showitems\PfCListeNombreMelangeDeux\\
+%      La liste trois est \showitems\PfCListeNombreMelangeTrois\\
+      \begin{NiceTabular}{|ccc|}[hlines]%
+        \xintFor* ##1 in{\xintSeq{1}{\PfCAutomatismesEtages}}\do{%
+          % On mélange les opérations
+          \MelangeListe{+,-}{1}%
+          \xdef\PfCAutoFoo{\faa ,*}%
+          \MelangeListe{\PfCAutoFoo}{2}%
+          \ignoreemptyitems%
+          \readlist*\PfCAutomatismesListeOperations{\faa}%
+          \reademptyitems%
+          % Il faut positiver les soustractions pour les 6eme
+          \ChoixAlea{1}{2}{\PfCChoixParen}%
+          \ensuremath{%
+            \IfStrEq{\PfCAutomatismesListeOperations[1]}{*}{%
+              \xintifboolexpr{\PfCChoixParen==1}{%
+                 \num{\PfCListeNombreMelangeUn[##1]}\times\left(%
+                   \IfStrEq{\PfCAutomatismesListeOperations[2]}{-}{\SoustractionPositive[#1]{\PfCListeNombreMelangeDeux[##1]}{\PfCListeNombreMelangeTrois[##1]}}{\PfCNum{\PfCListeNombreMelangeDeux[##1]}+\PfCNum{\PfCListeNombreMelangeTrois[##1]}}%
+                 \right)%
+              }{%
+                 \IfStrEq{\PfCAutomatismesListeOperations[2]}{-}{%
+                   \ifboolKV[Automatismes]{Relatifs}{%
+                     \num{\PfCListeNombreMelangeUn[##1]}\times\PfCNum{\PfCListeNombreMelangeDeux[##1]}\PfCAutomatismesListeOperations[2]\PfCNum{\PfCListeNombreMelangeTrois[##1]}%
+                     }{\xintifboolexpr{\fpeval{\PfCListeNombreMelangeUn[##1]*\PfCListeNombreMelangeDeux[##1]\PfCAutomatismesListeOperations[2]\PfCListeNombreMelangeTrois[##1]}>0}{%
+                     \num{\PfCListeNombreMelangeUn[##1]}\times\PfCNum{\PfCListeNombreMelangeDeux[##1]}\PfCAutomatismesListeOperations[2]\PfCNum{\PfCListeNombreMelangeTrois[##1]}%
+                   }{\num{\PfCListeNombreMelangeTrois[##1]}\PfCAutomatismesListeOperations[2]\PfCNum{\PfCListeNombreMelangeUn[##1]}\times\PfCNum{\PfCListeNombreMelangeDeux[##1]}%
+                   }%
+                   }
+                 }{%
+                   \num{\PfCListeNombreMelangeTrois[##1]}\PfCAutomatismesListeOperations[2]\PfCNum{\PfCListeNombreMelangeUn[##1]}\times\PfCNum{\PfCListeNombreMelangeDeux[##1]}%
+                % }%
+                 }%
+              }%
+            }%
+            {%
+              \xintifboolexpr{\PfCChoixParen==1}{%
+                \left(\IfStrEq{\PfCAutomatismesListeOperations[2]}{-}{\SoustractionPositive[#1]{\PfCListeNombreMelangeUn[##1]}{\PfCListeNombreMelangeDeux[##1]}}{\PfCNum{\PfCListeNombreMelangeUn[##1]}+\PfCNum{\PfCListeNombreMelangeDeux[##1]}}\right)\times\PfCNum{\PfCListeNombreMelangeTrois[##1]}%
+              }{%
+                \ifboolKV[Automatismes]{Relatifs}{%
+                    \num{\PfCListeNombreMelangeDeux[##1]}\times\PfCNum{\PfCListeNombreMelangeTrois[##1]}\PfCAutomatismesListeOperations[1]\PfCNum{\PfCListeNombreMelangeUn[##1]}%
+                  }{%
+                \xintifboolexpr{\fpeval{\PfCListeNombreMelangeUn[##1]\PfCAutomatismesListeOperations[1]\PfCListeNombreMelangeDeux[##1]*\PfCListeNombreMelangeTrois[##1]}>0}{%
+                  \num{\PfCListeNombreMelangeUn[##1]}\PfCAutomatismesListeOperations[1]\PfCNum{\PfCListeNombreMelangeDeux[##1]}\times\PfCNum{\PfCListeNombreMelangeTrois[##1]}}{%
+                  \num{\PfCListeNombreMelangeDeux[##1]}\times\PfCNum{\PfCListeNombreMelangeTrois[##1]}\PfCAutomatismesListeOperations[1]\PfCNum{\PfCListeNombreMelangeUn[##1]}}%
+                }%
+              }%
+            }%
+          }%
+          &=&\pointilles[1cm]\\
+        }%
+      \end{NiceTabular}%
+    }{%
+      \setsepchar{,}\ignoreemptyitems%
+      \readlist*\PfCAutomatismesListeOperations{#2}%
+      \reademptyitems%
+      \begin{NiceTabular}{|ccccc|}[hlines]
+        \xintFor* ##1 in{\xintSeq{1}{\PfCAutomatismesEtages}}\do{%
+          \stepcounter{PfCAutoNbcpt}%
+          \xintifboolexpr{\PfCAutomatismesListeOperationslen==1}{%
+            \ChoixNombreUn[#1]{1}\ChoixNombreDeux[#1]{1}%
+          }{%
+        \ChoixNombreUn[#1]{##1}\ChoixNombreDeux[#1]{##1}%
+      }%
+      \Block{}{\ifboolKV[Automatismes]{Fractions}{$\dfrac{\PfCTabstrut\num{\PfCAutoNumUn}}{\PfCBstrut\num{\PfCAutomatismesPremierTerme}}$}{\num{\PfCAutoNombreUn}}}%
+      &\xintifboolexpr{\PfCAutomatismesListeOperationslen==1}{%
+        \StrSubstitute{\PfCAutomatismesListeOperations[1]}{*}{\times}[\PfCCBAffiche]%
+      }{%
+        \StrSubstitute{\PfCAutomatismesListeOperations[##1]}{*}{\times}[\PfCCBAffiche]%
+      }%
+      \StrSubstitute{\PfCCBAffiche}{/}{\div}[\PfCCBAffiche]%
+      $\PfCCBAffiche$%
+      &\Block{}{\ifboolKV[Automatismes]{Fractions}{$\dfrac{\PfCTabstrut\num{\PfCAutoNumDeux}}{\PfCBstrut\num{\PfCAutomatismesDeuxiemeTerme}}$}{\PfCNum{\PfCAutoNombreDeux}}}%
+      &=&\pointilles[1cm]\\
+    }%
+  \end{NiceTabular}%
+  }%
+}%

@@ -1,0 +1,2143 @@
+%%%
+% Fonction
+%%%
+\def\filedateFonction{2025/04/23}
+\def\fileversionFonction{0.1a}%
+\message{-- \filedateFonction\space v\fileversionFonction}%
+%
+\setKVdefault[ClesFonction]{Nom=f,Variable=x,Calcul=x,Tableau=false,Largeur=5mm,Ecriture=false,Definition=false,Points=false,Tangentes=false,PasX=1,PasY=1,UniteX=1,UniteY=1,Prolonge=false,Trace=false,Catmull=false,Splines=false,Lagrange=false,Epaisseur=1,Couleur=black,CouleurTrace=black,PointsCourbe=true,Codes=false,Origine={(0,0)},Vide=false,CouleurGrille=0.75white,Dys=false}
+\defKV[ClesFonction]{Traces=\setKV[ClesFonction]{Codes}}%
+
+\newtoks\toklistePtsFn%pour la discipline
+\newtoks\tokPfCListeDesFonctions%
+\newtoks\tokPfCListeDesNomsFonctions%
+\newtoks\tokPfCLabelX%
+\newtoks\tokPfCLabelY%
+\def\UpdatePfCListeDesFonctions#1\nil{\addtotok\tokPfCListeDesFonctions{"#1",}}%
+\def\UpdatePfCListeDesNomsFonctions#1\nil{\addtotok\tokPfCListeDesNomsFonctions{"#1",}}%
+\def\UpdatePtsFn#1/#2/#3/#4\nil{\addtotok\toklistePtsFn{#1,(#2,#3),#4,}}%
+\def\UpdatePtsFN#1/#2/#3/#4\nil{\addtotok\toklistePtsFn{(#2,#3),}}%
+
+\NewDocumentCommand\Fonction{o m}{%
+  \useKVdefault[ClesFonction]%
+  \setKV[ClesFonction]{#1}%
+  \ifboolKV[ClesFonction]{Trace}{%
+    \useKVdefault[TraceG]%
+    \setKV[TraceG]{#1}%
+    \ifPfCPfMScratchDys\relax\setKV[ClesFonction]{Dys}\fi
+    \tokPfCListeDesFonctions{}%
+    \tokPfCListeDesNomsFonctions{}%
+    \xdef\PfCFooFn{\useKV[ClesFonction]{Calcul}}%
+    \xdef\PfCFooNomFn{\useKV[TraceG]{NomCourbe}}%
+    \ifx\bla\PfCFooFn\bla%
+    \else%
+      \setsepchar{,}\ignoreemptyitems
+      \readlist*\ListeDesFonctions{\PfCFooFn}%
+      \reademptyitems
+    \foreachitem\compteur\in\ListeDesFonctions{\expandafter\UpdatePfCListeDesFonctions\compteur\nil}%
+    \fi%
+    \ifx\bla\PfCFooNomFn\bla%
+    \else%
+    \readlist*\ListeDesNomsFonctions{\PfCFooNomFn}%
+    \foreachitem\compteur\in\ListeDesNomsFonctions{\expandafter\UpdatePfCListeDesNomsFonctions\compteur\nil}%
+  \fi%
+  \tokPfCLabelX{}%
+  \tokPfCLabelY{}%
+  \addtotok\tokPfCLabelX{"\useKV[TraceG]{LabelX}"}%
+  \addtotok\tokPfCLabelY{"\useKV[TraceG]{LabelY}"}%
+  \TraceMultiGraphique{\the\tokPfCListeDesFonctions}{\the\tokPfCListeDesNomsFonctions}%
+  }{%
+    \ifboolKV[ClesFonction]{Points}{%
+      \toklistePtsFn{}%
+      \setsepchar[*]{§*/}%\ignoreemptyitems%
+      \readlist*\ListePoints{#2}%
+      \ifboolKV[ClesFonction]{Lagrange}{
+          \xdef\PfCFooListePoints{}%
+          \foreachitem\compteur\in\ListePoints{%
+            \xdef\PfCFooListePoints{\PfCFooListePoints (\ListePoints[\compteurcnt,2],\ListePoints[\compteurcnt,3]),}%
+          }%
+          \MPLagrange{\PfCFooListePoints}{\useKV[ClesFonction]{PasX}}{\useKV[ClesFonction]{PasY}}{\useKV[ClesFonction]{UniteX}}{\useKV[ClesFonction]{UniteY}}%
+        }{%
+      \ifboolKV[ClesFonction]{Splines}{%
+        \xdef\PfCFooListePoints{}%
+          \foreachitem\compteur\in\ListePoints{%
+            \xdef\PfCFooListePoints{\PfCFooListePoints (\ListePoints[\compteurcnt,2],\ListePoints[\compteurcnt,3]),(\ListePoints[\compteurcnt,1],\ListePoints[\compteurcnt,4]),}%
+          }%
+          \MPSpline{\PfCFooListePoints}{\useKV[ClesFonction]{PasX}}{\useKV[ClesFonction]{PasY}}{\useKV[ClesFonction]{UniteX}}{\useKV[ClesFonction]{UniteY}}%
+      }{%
+        \ifboolKV[ClesFonction]{Catmull}{%
+          \xdef\PfCFooListePoints{(\ListePoints[1,2],\ListePoints[1,3]),}%
+          \foreachitem\compteur\in\ListePoints{%
+            \xdef\PfCFooListePoints{\PfCFooListePoints (\ListePoints[\compteurcnt,2],\ListePoints[\compteurcnt,3]),}%
+          }%
+          \xdef\PfCFooListePoints{\PfCFooListePoints (\ListePoints[\ListePointslen,2],\ListePoints[\ListePointslen,3]),}%
+          \MPCatmull{\PfCFooListePoints}{\useKV[ClesFonction]{PasX}}{\useKV[ClesFonction]{PasY}}{\useKV[ClesFonction]{UniteX}}{\useKV[ClesFonction]{UniteY}}%
+        }{%
+          \xdef\PfCFooListePoints{}
+          \ifboolKV[ClesFonction]{Tangentes}{%
+            \foreachitem\compteur\in\ListePoints{%
+              \xdef\PfCFooListePoints{\PfCFooListePoints \ListePoints[\compteurcnt,1],(\ListePoints[\compteurcnt,2],\ListePoints[\compteurcnt,3]),\ListePoints[\compteurcnt,4],}%
+            }%
+          }{%
+            \foreachitem\compteur\in\ListePoints{%
+              \xdef\PfCFooListePoints{\PfCFooListePoints (\ListePoints[\compteurcnt,2],\ListePoints[\compteurcnt,3]),}%
+            }%
+          }%
+          \MPCourbeNew{\PfCFooListePoints}%
+        }%
+      }%
+    }%
+    }{%
+      \setsepchar{,}\ignoreemptyitems%
+      \readlist*\ListeFonction{#2}%
+      \StrSubstitute{\useKV[ClesFonction]{Calcul}}{\useKV[ClesFonction]{Variable}}{\i}[\temp]%
+      \StrSubstitute{\useKV[ClesFonction]{Calcul}}{**}{^}[\tempa]%
+      \StrSubstitute{\tempa}{*}{}[\tempab]%
+      \ifboolKV[ClesFonction]{Ecriture}{%
+        \ensuremath{\useKV[ClesFonction]{Nom}(\useKV[ClesFonction]{Variable})=\tempab}%
+      }{}%
+      \ifboolKV[ClesFonction]{Definition}{%
+        \ensuremath{\useKV[ClesFonction]{Nom}:\useKV[ClesFonction]{Variable}\mapsto\tempab}%
+      }{}%
+      \ifboolKV[ClesFonction]{Tableau}{%
+        \buildtabfonction%
+      }{}%
+      \reademptyitems%
+    }%
+  }%
+}%
+
+\setKVdefault[LecGra]{NbPoints=7,Image=false,Antecedent=false,Equation=false,UniteX=1,UniteY=1,Epaisseur=1,CouleurTrace=black,Points,Tableau=false,SolutionTableau=false,Prolonge=false,Ajout={}}%
+\defKV[LecGra]{Graine=\PfCGraineAlea{#1}}%
+
+\newread\myread
+
+\NewDocumentCommand\LectureGraphique{o}{%
+  \useKVdefault[LecGra]%
+  \setKV[LecGra]{#1}%
+  % Partie Trace
+  % On choisit les abscisses
+  \xdef\FooAbscisses{\fpeval{randint(-9,-5)}}%
+  \xdef\RappelA{\FooAbscisses}%
+  \xintFor*##1 in{\xintSeq{2}{\useKV[LecGra]{NbPoints}}}\do{%
+    \xdef\NewAbscisse{\fpeval{\RappelA+randint(2,3)}}%
+    \xdef\RappelA{\NewAbscisse}%
+    \xdef\FooAbscisses{\FooAbscisses,\NewAbscisse}%
+  }%
+  % on choisit les ordonnées.
+  \xdef\FooOrdonnees{\fpeval{randint(-3,3)}}%
+  \xdef\RappelO{\FooOrdonnees}%
+  \xdef\ListeDesEcartsO{1,2,3}%
+  \xdef\FooListeDesOperations{+,-}%
+  \MelangeListe{\FooListeDesOperations}{2}%
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\PfCListeChoixOperations{\faa}%
+  \xintFor*##1 in{\xintSeq{2}{\useKV[LecGra]{NbPoints}}}\do{%
+    \MelangeListe{\ListeDesEcartsO}{1}%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\PfCListeEcartSeul{\faa}%
+    \reademptyitems%
+    \modulo{##1}{2}\relax%
+    \ifnum\remainder=0\relax%
+      \xdef\NewOrdonnee{\fpeval{\RappelO\PfCListeChoixOperations[1]\PfCListeEcartSeul[1]}}%
+    \else
+      \xdef\NewOrdonnee{\fpeval{\RappelO\PfCListeChoixOperations[2]\PfCListeEcartSeul[1]}}%
+    \fi
+    \xdef\RappelO{\NewOrdonnee}%
+    \xdef\FooOrdonnees{\FooOrdonnees,\NewOrdonnee}%
+  }%
+  \setsepchar{,}%
+  \readlist*\ListeAbscisses{\FooAbscisses}%
+  \readlist*\ListeOrdonnees{\FooOrdonnees}%
+  \ifboolKV[LecGra]{Tableau}{%
+      \ifboolKV[LecGra]{Prolonge}{\xdef\LecGraDepartTab{2}\xdef\LecGraArriveeTab{\fpeval{\ListeAbscisseslen-1}}}{\xdef\LecGraDepartTab{1}\xdef\LecGraArriveeTab{\ListeAbscisseslen}}
+    \begin{center}
+      \begin{NiceTabular}{c*{\ListeAbscisseslen}{m{12pt}}}[hvlines]
+        $x$\xintFor* ##1 in{\xintSeq{\LecGraDepartTab}{\LecGraArriveeTab}}\do{
+          &\Block{}{\num{\ListeAbscisses[##1]}}%
+        }\\
+        $f(x)$\ifboolKV[LecGra]{SolutionTableau}{\xintFor* ##1 in{\xintSeq{\LecGraDepartTab}{\LecGraArriveeTab}}\do{
+            &\num{\ListeOrdonnees[##1]}%
+          }%
+        }{}\\
+      \end{NiceTabular}
+    \end{center}
+  }{%
+  \xdef\FooPoints{0/\ListeAbscisses[1]/\ListeOrdonnees[1]/0}%
+  \xintFor*##1 in{\xintSeq{2}{\useKV[LecGra]{NbPoints}}}\do{%
+    \xdef\FooPoints{\FooPoints§0/\ListeAbscisses[##1]/\ListeOrdonnees[##1]/0}%
+  }%
+  \xdef\PfCOrdonneeMin{\fpeval{min(\FooOrdonnees)}}%
+  \xdef\PfCOrdonneeMax{\fpeval{max(\FooOrdonnees)}}%
+  \xdef\PfCAbscisseMin{\fpeval{min(\FooAbscisses)}}%
+  \xdef\PfCAbscisseMax{\fpeval{max(\FooAbscisses)}}%
+  \xdef\PfCChoixImage{\fpeval{randint(\PfCAbscisseMin,\PfCAbscisseMax)}}%
+  \xdef\PfCChoixAntecedent{\fpeval{randint(\PfCOrdonneeMin,\PfCOrdonneeMax)}}%
+  \ifboolKV[LecGra]{Image}{On effectue la lecture graphique à partir du point $(\num{\PfCChoixImage};0)$.}{}%
+  \ifboolKV[LecGra]{Antecedent}{On effectue la lecture graphique en cherchant tous les points de la courbe ayant pour ordonnée \num{\PfCChoixAntecedent}.}{}%
+  \begin{center}
+    \Fonction[
+    Points,
+    Splines,
+    Prolonge=\useKV[LecGra]{Prolonge},
+    PointsCourbe=\useKV[LecGra]{Points},
+    Epaisseur=\useKV[LecGra]{Epaisseur},
+    CouleurTrace=\useKV[LecGra]{CouleurTrace},
+    UniteX=\useKV[LecGra]{UniteX},
+    UniteY=\useKV[LecGra]{UniteY},
+    Traces={%
+      \useKV[LecGra]{Ajout};
+      boolean PdtImage,PdtAntecedent,PdtEquation;
+      PdtImage:=\useKV[LecGra]{Image};
+      PdtAntecedent:=\useKV[LecGra]{Antecedent};
+      PdtEquation:=\useKV[LecGra]{Equation};
+      % Image
+      PfCepsilon:=0.001;
+      pair A,B,C,D,Ant[];
+      C=placepoint(\PfCChoixImage,0);
+      path droiteimage,AxeO,droiteantecedent;
+      droiteimage=placepoint(\PfCChoixImage,-100)--placepoint(\PfCChoixImage,100);
+      droiteantecedent=placepoint(-100,\PfCChoixAntecedent)--placepoint(100,\PfCChoixAntecedent);
+      AxeO=placepoint(0,-100)--placepoint(0,100);
+      intersectioncourbes(CourbeTotale,droiteimage);
+      A=pti[1];
+      write  decimal(ypart(retrouvecoord(A))) to "PfCValeurImage.tex";%
+      write EOF to "PfCValeurImage.tex";
+      intersectioncourbes(CourbeTotale,AxeO);
+      if n>0:
+      B=pti[1];
+      else:
+      B=placepoint(0,\PfCOrdonneeMax);
+      fi;
+      D=(xpart(B),ypart(A));
+      if PdtImage:
+      drawoptions(dashed evenly);
+      drawarrow C--1/4[C,A];
+      drawarrow A--3/4[A,D];
+      trace (C--A--D) withpen pencircle scaled 1.25;
+      if ypart(A)>ypart(C):
+      label.bot(TEX("\num{\fpeval{\PfCChoixImage}}"),C);
+      else:
+      label.top(TEX("\num{\fpeval{\PfCChoixImage}}"),C);
+      fi;
+      drawoptions();
+      fi;
+      %antecedent
+      intersectioncourbes(CourbeTotale,droiteantecedent);
+      for k=1 upto n:
+      Ant[k]=pti[k];
+      endfor;
+      NbAntecedents:=1;
+      for k=2 upto n:
+      if abs(xpart(retrouvecoord(Ant[k]))-xpart(retrouvecoord(Ant[k-1])))>PfCepsilon:
+      NbAntecedents:=NbAntecedents+1;
+      Ant[NbAntecedents]:=pti[k];
+      fi;
+      endfor;
+      write decimal(NbAntecedents) to "PfCNombreAntecedents.tex";
+      write EOF to "PfCNombreAntecedents.tex";
+      if NbAntecedents>0:
+      for k=1 upto NbAntecedents:
+      if PdtAntecedent or PdtEquation:
+      draw ((fullcircle scaled 1mm) shifted Ant[k]) withcolor red;
+      draw ((fullcircle scaled 1mm) shifted (xpart(Ant[k]),ypart(C))) withcolor red;
+      draw Ant[k]--(xpart(Ant[k]),ypart(C)) withcolor red;
+      drawarrow Ant[k]--1/4[Ant[k],(xpart(Ant[k]),ypart(C))] withcolor red;
+      fi;
+      write decimal(xpart(retrouvecoord(Ant[k]))) to "PfCListeAntecedents.tex";
+      endfor;
+      fi;
+      write EOF to "PfCListeAntecedents.tex";
+      if PdtAntecedent or PdtEquation:
+      draw droiteantecedent withcolor red;
+      if ypart(placepoint(0,\PfCChoixAntecedent))<ypart(B):
+      dotlabel.lrt(TEX("\num{\fpeval{\PfCChoixAntecedent}}"),placepoint(0,\PfCChoixAntecedent));
+      else:
+      dotlabel.urt(TEX("\num{\fpeval{\PfCChoixAntecedent}}"),placepoint(0,\PfCChoixAntecedent));
+      fi;
+      fi;
+      clip currentpicture to cadreexterieur;
+    }]{%
+      \FooPoints
+    }
+  \end{center}
+  \ifboolKV[LecGra]{Image}{%
+  \openin\myread=PfCValeurImage.tex
+  \read\myread to \LectureImage
+  L'image de \num{\PfCChoixImage} par la fonction $f$ est \num{\fpeval{round(\LectureImage,1)}}.%
+  }{}%
+  \ifboolKV[LecGra]{Antecedent}{%
+      \openin\myread=PfCNombreAntecedents.tex
+  \read\myread to \NombreAntecedents
+  \ifnum\NombreAntecedents=0\relax
+    Le nombre \num{\PfCChoixAntecedent} n'a pas d'antécédent par la fonction $f$.%
+  \else
+    Le nombre \num{\PfCChoixAntecedent} a \numberstringnum{\fpeval{\NombreAntecedents}} antécédent\ifnum\NombreAntecedents>1\relax s\fi{}  par la fonction $f$. % Titia vaut \Titia
+    \openin\myread=PfCListeAntecedents.tex
+    Par lecture graphique, \ifnum\NombreAntecedents>1\relax ce sont \xintFor* ##1 in{\xintSeq{1}{\NombreAntecedents}}\do{%
+      \read\myread to \ListeNombreAntecedents%
+      \xintifForLast{ et }{\xintifForFirst{}{;}}\num{\fpeval{round(\ListeNombreAntecedents,1)}}%
+    }\else c'est \read\myread to \ListeNombreAntecedents\num{\fpeval{round(\ListeNombreAntecedents,1)}}\fi 
+  \fi.%
+}{}%
+}
+}%
+
+\def\MPLagrangeCode{%
+  path Cb[];
+  %
+  boolean PointsCourbe,Code,Prolonge;
+  PointsCourbe=\useKV[ClesFonction]{PointsCourbe};
+  Code=\useKV[ClesFonction]{Codes};
+  Prolonge:=\useKV[ClesFonction]{Prolonge};
+  color CoulTrace;
+  CoulTrace:=\useKV[ClesFonction]{CouleurTrace};
+  Epaisseur:=\useKV[ClesFonction]{Epaisseur};
+  %
+  vardef EffectuerTraces=
+  \useKV[ClesFonction]{Traces};
+  enddef;
+%
+  def enplace=
+  xscaled X.u yscaled Y.u
+  enddef;
+  %
+  vardef placepoint(expr q,r)=
+  (q,r)*cm enplace
+  enddef;
+  %
+  def replace=
+  xscaled (1/X.u) yscaled (1/Y.u)
+  enddef;
+%
+  def retrouvecoord(expr p)=%
+  (p/cm) replace
+  enddef;
+  %
+%  nbpoints:=100;
+  %
+  vardef intersectioncourbes(expr aa,bb)=
+  pair pti[];
+  nbpoints:=100;
+  n:=0;
+  for k=0 upto nbpoints-1:
+  if ((subpath(k/nbpoints*length aa,(k+1)/nbpoints*length aa) of aa) intersectiontimes bb)<>(-1,-1):
+      n:=n+1;
+      pti[n]:=(subpath(k/nbpoints*length aa,(k+1)/nbpoints*length aa) of aa) intersectionpoint bb;
+    fi;
+  endfor;
+  enddef;
+  %
+  vardef IntersectionCourbes(expr aa,bb)=
+  pair pti[];
+  numeric vali[];
+  n:=0;
+  for k=0 upto 100:
+    if ((subpath(k/100*length aa,(k+1)/100*length aa) of aa) intersectiontimes bb)<>(-1,-1):
+      n:=n+1;
+      vali[n]:=k;
+      message("vali : "&decimal(vali[n]));
+      pti[n]:=(subpath(k/100*length aa,(k+1)/100*length aa) of aa) intersectionpoint bb;
+    fi;
+  endfor;
+  enddef;
+  %
+  vardef courbe[](expr a,b,nb)(text texte)=
+ path PfCCb;
+ for i:=0 upto nb :
+ x@[i]:=(a+i*(b-a)/nb);
+ x:=x@[i];
+ y@[i]:=texte;
+% if y@[i]>MaxY:
+% MaxY:=y@[i];
+%    fi;
+%    if y@[i]<MinY:
+%    MinY:=y@[i];
+%    fi;
+ endfor ;
+  Cb@:=placepoint(x@.0,y@.0)
+ for i:=1 upto nb :
+   ..placepoint(x@[i],y@[i])
+ endfor;  
+ PfCCb=Cb@;
+ PfCCb
+enddef;
+}
+
+\def\MPLagrange#1#2#3#4#5{
+  % #1 la liste des points
+  % #2: pas en x
+  % #3: pas en y
+  % #4: unit\'e en x
+  % #5: unit\'e en y
+  \ifluatex
+    \mplibforcehmode
+    \mplibnumbersystem{double}
+    \begin{mplibcode}
+      \MPLagrangeCode
+
+      pair M[];%Les points de passage
+      pair N[][];%Les points conservés pour les calculs.
+      numeric nbm;%Le nombre de points de passage;
+      
+vardef Lagrange(expr valeur)(text t)=
+  save Lagpt;
+  numeric Lagpt;
+  nbm:=0;
+  for p_=t:
+    nbm:=nbm+1;
+  endfor;
+  nbpoints:=0;
+  for p_=t:
+    nbpoints:=nbpoints+1;
+    M[nbpoints]:=p_;
+  endfor;
+  for k=1 upto nbm:
+    nbpoints:=0;
+    for l=1 upto nbm:
+      if l<>k:
+	nbpoints:=nbpoints+1;
+	N[k][nbpoints]:=M[l];
+      fi;
+    endfor;
+  endfor;
+  Lagpt=0;
+  for k=1 upto nbm:
+    ImagePoly:=for l=1 upto (nbm-1):(xpart(M[k])-xpart(N[k][l]))* endfor 1;
+    Lagpt:=Lagpt+((ypart(M[k])/ImagePoly)*for l=1 upto (nbm-1):(valeur-xpart(N[k][l]))* endfor 1);
+    endfor;
+    Lagpt
+    enddef;
+
+x.u:=#2;
+    y.u:=#3;
+    X.u:=#4;
+    Y.u:=#5;
+    %
+    MinX=999;
+    MaxX=-999;
+    MinY=999;
+    MaxY=-999;
+    %
+    nbpointsLg=0;
+    for p_=#1:
+    nbpointsLg:=nbpointsLg+1;
+    M[nbpointsLg]:=p_;
+    endfor;
+    for k=1 upto nbpointsLg:
+    if xpart(M[k])<MinX:
+    MinX:=xpart(M[k]);
+    fi;
+    if xpart(M[k])>MaxX:
+    MaxX:=xpart(M[k]);
+    fi;
+    if ypart(M[k])<MinY:
+    MinY:=ypart(M[k]);
+    fi;
+    if ypart(M[k])>MaxY:
+    MaxY:=ypart(M[k]);
+    fi;
+    endfor;
+    if MaxY<1:
+    MaxY:=2;
+    fi;
+    if MinY>-1:
+    MinY:=-2;
+    fi;
+    if MinY<0:
+    if MinY<>ceiling(MinY):
+    MinY:=ceiling(MinY)-1;
+    fi;
+    fi;
+    if MinX<0:
+    if MinX<>ceiling(MinX):
+    MinX:=ceiling(MinX)-1;
+    fi;
+    fi;
+    if MaxY<>ceiling(MaxY):
+    MaxY:=ceiling(MaxY);
+    fi;
+    if MaxX<>ceiling(MaxX):
+    MaxX:=ceiling(MaxX);
+    fi;
+    if MaxX<1:
+    MaxX:=1;
+    fi;
+    if MaxY<1:
+    MaxY:=1;
+    fi;
+    if Prolonge:
+    draw courbe1(MinX-1,MaxX+1,25,Lagrange(x)(#1)) withpen pencircle scaled Epaisseur withcolor CoulTrace;
+    else:
+    draw courbe1(MinX,MaxX,25,Lagrange(x)(#1)) withpen pencircle scaled Epaisseur withcolor CoulTrace;
+    fi;
+    % Détermination des MinY et MaxY
+%    MinY:=Lagrange(MinX)(#1);
+    for k=0 upto 100:
+    if Lagrange(MinX+(k/100)*(MaxX-MinX))(#1)<MinY:
+    MinY:=Lagrange(MinX+(k/100)*(MaxX-MinX))(#1);
+    fi;
+    endfor;
+    %for k=0 upto 100:
+    %if Lagrange(MinX+(k/100)*(MaxX-MinX))(#2)<MinY:
+    %MinY:=Lagrange(MinX+(k/100)*(MaxX-MinX))(#2);
+    %fi;
+    %endfor;
+%    MaxY:=Lagrange(MinX)(#1);
+    for k=0 upto 100:
+    if Lagrange(MinX+(k/100)*(MaxX-MinX))(#1)>MaxY:
+    MaxY:=Lagrange(MinX+(k/100)*(MaxX-MinX))(#1);
+    fi;
+    endfor;
+    %for k=0 upto 100:
+    %if Lagrange(MinX+(k/100)*(MaxX-MinX))(#2)>MaxY:
+    %MaxY:=Lagrange(MinX+(k/100)*(MaxX-MinX))(#2);
+    %fi;
+    %endfor;
+    %%%
+    path cadreexterieur;
+    cadreexterieur=(((MinX-1)*X.u*cm,(floor(MinY)-1)*Y.u*cm)--((MaxX+1)*X.u*cm,(floor(MinY)-1)*Y.u*cm)--((MaxX+1)*X.u*cm,(floor(MaxY)+1)*Y.u*cm)--((MinX-1)*X.u*cm,(floor(MaxY)+1)*Y.u*cm)--cycle);
+    clip currentpicture to cadreexterieur;
+    picture RetiensCourbe;
+    RetiensCourbe=currentpicture;
+    currentpicture:=nullpicture;
+    for k=(floor(MinY)-1) step y.u until (floor(MaxY)+1):
+    draw cm*((MinX-1)*X.u,k*Y.u)--cm*((MaxX+1)*X.u,k*Y.u) withcolor \useKV[ClesFonction]{CouleurGrille};%0.75white;
+    endfor;
+    for k=MinX-1 step x.u until MaxX+1:
+    draw cm*(k*X.u,(floor(MinY)-1)*Y.u)--cm*(k*X.u,(floor(MaxY)+1)*Y.u) withcolor \useKV[ClesFonction]{CouleurGrille};%0.75white;
+    endfor;
+    draw RetiensCourbe;
+    if PointsCourbe:
+    for k=1 upto nbpointsLg:
+    fill cercles(placepoint(xpart(M[k]),ypart(M[k])),0.5mm);
+    endfor;
+    fi;
+    drawarrow (0,(floor(MinY)-1)*Y.u*cm)--(0,(floor(MaxY)+1)*Y.u*cm);
+    drawarrow ((MinX-1)*X.u*cm,0)--((MaxX+1)*X.u*cm,0);
+    %
+    label.llft(TEX("O"),(0,0));
+    dotlabel.bot(TEX("1"),cm*X.u*(1,0));
+    dotlabel.lft(TEX("1"),cm*Y.u*(0,1));
+    if Code:
+    EffectuerTraces;
+    fi;
+  \end{mplibcode}
+  \mplibnumbersystem{scaled}
+  \fi
+}%
+
+\def\MPSplineCode{%
+  boolean PointsCourbe,Code,Prolonge;
+  PointsCourbe=\useKV[ClesFonction]{PointsCourbe};
+  Code=\useKV[ClesFonction]{Codes};
+  Prolonge:=\useKV[ClesFonction]{Prolonge};
+  color CoulTrace;
+  CoulTrace:=\useKV[ClesFonction]{CouleurTrace};
+  Epaisseur:=\useKV[ClesFonction]{Epaisseur};
+  %
+  vardef EffectuerTraces=
+  \useKV[ClesFonction]{Traces};
+  enddef;
+%
+  def enplace=
+  xscaled X.u yscaled Y.u
+  enddef;
+  %
+  vardef placepoint(expr q,r)=
+  (q,r)*cm enplace
+  enddef;
+  %
+  def replace=
+  xscaled (1/X.u) yscaled (1/Y.u)
+  enddef;
+%
+  def retrouvecoord(expr p)=%
+  (p/cm) replace
+  enddef;
+%
+  vardef intersectioncourbes(expr aa,bb)=
+  pair pti[];
+  n:=0;
+  for k=0 upto nbpoints-1:
+  if ((subpath(k/nbpoints*length aa,(k+1)/nbpoints*length aa) of aa) intersectiontimes bb)<>(-1,-1):
+      n:=n+1;
+      pti[n]:=(subpath(k/nbpoints*length aa,(k+1)/nbpoints*length aa) of aa) intersectionpoint bb;
+    fi;
+  endfor;
+  enddef;
+  %
+  nbspline=0;
+  %
+  nbpoints=50;
+  %
+  vardef SplineCubique(expr xzero,yzero,xuno,yuno,dzero,duno)=
+  nbspline:=nbspline+1;
+  a[nbspline]*(xzero**3)+b[nbspline]*(xzero**2)+c[nbspline]*xzero+d[nbspline]=yzero;
+  a[nbspline]*(xuno**3)+b[nbspline]*(xuno**2)+c[nbspline]*xuno+d[nbspline]=yuno;
+  a[nbspline]*(3*(xzero**2))+b[nbspline]*(2*xzero)+c[nbspline]=dzero;
+  a[nbspline]*(3*(xuno**2))+b[nbspline]*(2*xuno)+c[nbspline]=duno;
+  % 
+  numeric xx[],yy[];
+  for k=1 upto nbpoints-1:
+  xx[k]=xzero+(k/nbpoints)*(xuno-xzero);
+  yy[k]=a[nbspline]*(xx[k]**3)+b[nbspline]*(xx[k]**2)+c[nbspline]*xx[k]+d[nbspline];
+  endfor;
+  save Spline;
+  path Spline;
+  Spline=placepoint(xzero,yzero) for k=1 upto nbpoints-1:
+  --placepoint(xx[k],yy[k])
+  endfor --placepoint(xuno,yuno);
+  Spline
+  enddef;
+  %
+  path Cb[];
+  vardef courbe[](expr a,b,nb)(text texte)=
+  path PfCCb;
+  for i:=0 upto nb :
+  x@[i]:=(a+i*(b-a)/nb);
+  x:=x@[i];
+  y@[i]:=texte;
+%  if y@[i]>MaxY:
+%  MaxY:=y@[i];
+%  fi;
+%  if (y@[i]/(Y.u*cm))<MinY:
+%  MinY:=y@[i];
+%  fi;
+  endfor ;
+  Cb@:=placepoint(x@.0,y@.0)
+  for i:=1 upto nb :
+  ..placepoint(x@[i],y@[i])
+  endfor;  
+  PfCCb=Cb@;
+  PfCCb
+  enddef;
+  %
+  pair M[];%Les points de passage
+      pair N[][];%Les points conservés pour les calculs.
+      numeric nbm;%Le nombre de points de passage;
+  %    
+vardef Lagrange(expr valeur)(text t)=
+  save Lagpt;
+  numeric Lagpt;
+  nbm:=0;
+  for p_=t:
+    nbm:=nbm+1;
+  endfor;
+  nbpoints:=0;
+  for p_=t:
+    nbpoints:=nbpoints+1;
+    M[nbpoints]:=p_;
+  endfor;
+  for k=1 upto nbm:
+    nbpoints:=0;
+    for l=1 upto nbm:
+      if l<>k:
+	nbpoints:=nbpoints+1;
+	N[k][nbpoints]:=M[l];
+      fi;
+    endfor;
+  endfor;
+  Lagpt=0;
+  for k=1 upto nbm:
+    ImagePoly:=for l=1 upto (nbm-1):(xpart(M[k])-xpart(N[k][l]))* endfor 1;
+    Lagpt:=Lagpt+((ypart(M[k])/ImagePoly)*for l=1 upto (nbm-1):(valeur-xpart(N[k][l]))* endfor 1);
+    endfor;
+    Lagpt
+    enddef;
+    vardef SplinePointsDeux(text t)=
+    pair Xxn[],Ffn[],Ddn[];%Xn abscisse,ordonnée D : dérivé g,dérivée d
+    nbsplined=0;
+    for p_=t:
+    nbsplined:=nbsplined+1;
+    if (nbsplined mod 2)=1:
+    Xxn[(nbsplined div 2)+1]=p_;
+    Ffn[(nbsplined div 2)+1]=cm*(X.u*xpart(p_),Y.u*ypart(p_));
+    else:
+    Ddn[(nbsplined div 2)]=p_
+    fi;
+    endfor;
+    enddef;    
+}
+
+\def\MPLagrangeDouble#1#2#3#4#5#6{
+  % #1 la liste des points
+  % #2 la deuxième liste de points
+  % #3: pas en x
+  % #4: pas en y
+  % #5: unit\'e en x
+  % #6: unit\'e en y
+  \ifluatex
+    \mplibforcehmode
+    \mplibnumbersystem{double}
+    \begin{mplibcode}
+      \MPLagrangeCode
+
+      pair M[];%Les points de passage
+      pair N[][];%Les points conservés pour les calculs.
+      numeric nbm;%Le nombre de points de passage;
+      
+      vardef Lagrange(expr valeur)(text t)=
+      save Lagpt;
+      numeric Lagpt;
+      nbm:=0;
+      for p_=t:
+      nbm:=nbm+1;
+      endfor;
+      nbpoints:=0;
+      for p_=t:
+      nbpoints:=nbpoints+1;
+      M[nbpoints]:=p_;
+      endfor;
+      for k=1 upto nbm:
+      nbpoints:=0;
+      for l=1 upto nbm:
+      if l<>k:
+      nbpoints:=nbpoints+1;
+      N[k][nbpoints]:=M[l];
+      fi;
+      endfor;
+      endfor;
+      Lagpt=0;
+      for k=1 upto nbm:
+      ImagePoly:=for l=1 upto (nbm-1):(xpart(M[k])-xpart(N[k][l]))* endfor 1;
+      Lagpt:=Lagpt+((ypart(M[k])/ImagePoly)*for l=1 upto (nbm-1):(valeur-xpart(N[k][l]))* endfor 1);
+      endfor;
+      Lagpt
+      enddef;
+      
+      x.u:=#3;
+      y.u:=#4;
+      X.u:=#5;
+      Y.u:=#6;
+      % 
+      MinY=-10;%999;
+      MaxY=10;%-999;
+      % 
+      MaxX=7;
+      MinX=-7;
+      %
+    draw courbe1(-7,7,100,Lagrange(x)(#1)) withpen pencircle scaled Epaisseur withcolor CoulTrace;
+    draw courbe2(-7,7,100,Lagrange(x)(#2)) withpen pencircle scaled Epaisseur dashed dashpattern(on4 off2) withcolor CoulTrace;
+    % Détermination des MinY et MaxY
+    MinY:=Lagrange(MinX)(#1);
+    for k=0 upto 100:
+    if Lagrange(MinX+(k/100)*(MaxX-MinX))(#1)<MinY:
+    MinY:=Lagrange(MinX+(k/100)*(MaxX-MinX))(#1);
+    fi;
+    endfor;
+    for k=0 upto 100:
+    if Lagrange(MinX+(k/100)*(MaxX-MinX))(#2)<MinY:
+    MinY:=Lagrange(MinX+(k/100)*(MaxX-MinX))(#2);
+    fi;
+    endfor;
+    MaxY:=Lagrange(MinX)(#1);
+    for k=0 upto 100:
+    if Lagrange(MinX+(k/100)*(MaxX-MinX))(#1)>MaxY:
+    MaxY:=Lagrange(MinX+(k/100)*(MaxX-MinX))(#1);
+    fi;
+    endfor;
+    for k=0 upto 100:
+    if Lagrange(MinX+(k/100)*(MaxX-MinX))(#2)>MaxY:
+    MaxY:=Lagrange(MinX+(k/100)*(MaxX-MinX))(#2);
+    fi;
+    endfor;
+    if MinY>0:
+    MinY:=-1;
+    fi;
+    if MaxY<0:
+    MaxY:=1;
+    fi;
+    path cadreexterieur;
+    % cadreexterieur=(((MinX)*X.u*cm,(floor(MinY)-1)*Y.u*cm)--((MaxX)*X.u*cm,(floor(MinY)-1)*Y.u*cm)--((MaxX)*X.u*cm,(floor(MaxY)+1)*Y.u*cm)--((MinX)*X.u*cm,(floor(MaxY)+1)*Y.u*cm)--cycle);
+    cadreexterieur=(((MinX)*X.u*cm,(floor(MinY))*Y.u*cm)--((MaxX)*X.u*cm,(floor(MinY))*Y.u*cm)--((MaxX)*X.u*cm,(ceiling(MaxY))*Y.u*cm)--((MinX)*X.u*cm,(ceiling(MaxY))*Y.u*cm)--cycle);
+    clip currentpicture to cadreexterieur;
+    picture RetiensCourbe;
+    RetiensCourbe=currentpicture;
+    currentpicture:=nullpicture;
+    for k=(floor(MinY)) step y.u until (ceiling(MaxY)):
+    draw cm*((MinX)*X.u,k*Y.u)--cm*((MaxX)*X.u,k*Y.u) withcolor 0.75white;
+    endfor;
+    for k=MinX step x.u until MaxX:
+    draw cm*(k*X.u,(floor(MinY))*Y.u)--cm*(k*X.u,(ceiling(MaxY))*Y.u) withcolor 0.75white;
+    endfor;
+    draw RetiensCourbe;
+%    if PointsCourbe:
+%    for k=1 upto nbpointsLg:
+%    fill cercles(placepoint(xpart(M[k]),ypart(M[k])),0.5mm);
+%    endfor;
+%    fi;
+    drawarrow (0,(floor(MinY))*Y.u*cm)--(0,(ceiling(MaxY))*Y.u*cm);
+    drawarrow ((MinX)*X.u*cm,0)--((MaxX)*X.u*cm,0);
+    %
+    label.llft(TEX("O"),(0,0));
+    dotlabel.bot(TEX("1"),cm*X.u*(1,0));
+    dotlabel.lft(TEX("1"),cm*Y.u*(0,1));
+    if Code:
+    EffectuerTraces;
+    fi;
+    %draw cadreexterieur withpen pencircle scaled 2;
+  \end{mplibcode}
+  \mplibnumbersystem{scaled}
+  \fi
+}%
+
+\def\MPSplineDouble#1#2#3#4#5#6{%
+  % #1 la liste des points
+  % #2 la deuxième liste de points
+  % #3: pas en x
+  % #4: pas en y
+  % #5: unit\'e en x
+  % #6: unit\'e en y
+  \ifluatex
+    \mplibforcehmode
+  \begin{mplibcode}
+    \MPSplineCode;
+    
+    x.u:=#3;
+    y.u:=#4;
+    X.u:=#5;
+    Y.u:=#6;
+
+    pair Xn[][],Fn[][],Dn[][];%Xn abscisse,ordonnée D : dérivé g,dérivée d
+
+    numeric N[];
+    
+    NbTotalSpline=0;
+
+    vardef PointsSplines(text t)=
+    n:=0;
+    NbTotalSpline:=NbTotalSpline+1;
+    for p_=t:
+    n:=n+1;
+    if (n mod 2)=1:
+    Xn[NbTotalSpline][(n div 2)+1]=p_;
+    Fn[NbTotalSpline][(n div 2)+1]=cm*(X.u*xpart(p_),Y.u*ypart(p_));
+    else:
+    Dn[NbTotalSpline][(n div 2)]=p_
+    fi;
+    endfor;
+    N[NbTotalSpline]:=n div 2;
+    enddef;
+
+    PointsSplines(#1);
+    PointsSplines(#2);
+    
+    if Prolonge:
+    debutbalai=2;
+    else:
+    debutbalai=1;
+    fi;
+
+    vardef DeterminationMinMax(expr nbs)=
+    finbalai:=N[nbs];
+    Minx[nbs]=999;
+    Maxx[nbs]=-999;
+    Miny[nbs]=999;
+    Maxy[nbs]=-999;
+    for k=debutbalai upto finbalai:
+    if xpart(Xn[nbs][k])<Minx[nbs]:
+    Minx[nbs]:=xpart(Xn[nbs][k]);
+    fi;
+    if xpart(Xn[nbs][k])>Maxx[nbs]:
+    Maxx[nbs]:=xpart(Xn[nbs][k]);
+    fi;
+    if ypart(Xn[nbs][k])<Miny[nbs]:
+    Miny[nbs]:=ypart(Xn[nbs][k]);
+    fi;
+    if ypart(Xn[nbs][k])>Maxy[nbs]:
+    Maxy[nbs]:=ypart(Xn[nbs][k]);
+    fi;
+    endfor;
+    enddef;
+
+    DeterminationMinMax(1);
+    DeterminationMinMax(2);
+
+    if Minx[1]<Minx[2]:
+    MinX:=Minx[2];
+    else:
+    MinX:=Minx[1];
+    fi;
+
+    if Maxx[1]<Maxx[2]:
+    MaxX:=Maxx[1];
+    else:
+    MaxX:=Maxx[2];
+    fi;
+
+    if Miny[1]<Miny[2]:
+    MinY:=Miny[1];
+    else:
+    MinY:=Miny[2];
+    fi;
+
+    if Maxy[1]<Maxy[2]:
+    MaxY:=Maxy[2];
+    else:
+    MaxY:=Maxy[1];
+    fi;
+    
+    if MaxY<1:
+    MaxY:=2;
+    fi;
+    if MinY>-1:
+    MinY:=-2;
+    fi;
+    if MinY<0:
+    if MinY<>ceiling(MinY):
+    MinY:=ceiling(MinY)-1;
+    fi;
+    fi;
+    if MinX<0:
+    if MinX<>ceiling(MinX):
+    MinX:=ceiling(MinX)-1;
+    fi;
+    fi;
+    if MaxY<>ceiling(MaxY):
+    MaxY:=ceiling(MaxY);
+    fi;
+    if MaxX<>ceiling(MaxX):
+    MaxX:=ceiling(MaxX);
+    fi;
+    if MinX<0:
+    else:
+    MinX:=-1;
+    fi;
+    if MaxX<1:
+    MaxX:=1;
+    fi;
+    if MaxY<1:
+    MaxY:=1;
+    fi;
+    %
+    path cadreexterieur;
+    cadreexterieur=(((MinX)*X.u*cm,(MinY-1)*Y.u*cm)--((MaxX)*X.u*cm,(MinY-1)*Y.u*cm)--((MaxX)*X.u*cm,(MaxY+1)*Y.u*cm)--((MinX)*X.u*cm,(MaxY+1)*Y.u*cm)--cycle);
+    path SplineRecap[][],CourbeTotale[];
+    for r=1 upto 2:
+    for l=1 upto N[r]-1:
+    SplineRecap[r][l]=SplineCubique(xpart(Xn[r][l]),ypart(Xn[r][l]),xpart(Xn[r][l+1]),ypart(Xn[r][l+1]),ypart(Dn[r][l]),xpart(Dn[r][l+1]));
+    endfor;
+    CourbeTotale[r]=SplineRecap[r][1] for l=2 upto N[r]-1:..SplineRecap[r][l] endfor;
+    endfor;
+    draw CourbeTotale[1] withpen pencircle scaled Epaisseur withcolor CoulTrace;
+    draw CourbeTotale[2] withpen pencircle scaled Epaisseur dashed dashpattern(on4 off 2) withcolor CoulTrace;
+    %
+    if PointsCourbe:
+    for k=debutbalai upto finbalai:
+    fill cercles(Fn[1][k],0.5mm);
+    fill cercles(Fn[2][k],0.5mm);
+    endfor;
+    fi;
+    %
+    clip currentpicture to cadreexterieur;
+    picture RetiensCourbe;
+    RetiensCourbe=currentpicture;
+    currentpicture:=nullpicture;
+    for k=MinY step y.u until MaxY:
+    draw cm*((MinX)*X.u,k*Y.u)--cm*((MaxX)*X.u,k*Y.u) withcolor 0.75white;
+    endfor;
+    for k=MinX step x.u until MaxX:
+    draw cm*(k*X.u,(MinY-1)*Y.u)--cm*(k*X.u,(MaxY+1)*Y.u) withcolor 0.75white;
+    endfor;
+    drawarrow (0,(MinY-1)*Y.u*cm)--(0,(MaxY+1)*Y.u*cm);
+    drawarrow ((MinX)*X.u*cm,0)--((MaxX)*X.u*cm,0);
+    %
+    draw RetiensCourbe;
+    label.llft(btex O etex,(0,0));
+    dotlabel.bot(btex 1 etex,cm*X.u*(1,0));
+    dotlabel.lft(btex 1 etex,cm*Y.u*(0,1));
+    if Code:
+    EffectuerTraces;
+    fi;
+    trace cadreexterieur withcolor 0.75white;
+  \end{mplibcode}
+\fi
+}
+
+\def\MPSpline#1#2#3#4#5{%
+  % #1 la liste des points
+  % #2: pas en x
+  % #3: pas en y
+  % #4: unit\'e en x
+  % #5: unit\'e en y
+  \ifluatex
+    \mplibforcehmode
+  \begin{mplibcode}
+    \MPSplineCode;
+    
+    x.u:=#2;
+    y.u:=#3;
+    X.u:=#4;
+    Y.u:=#5;
+
+    pair Xn[],Fn[],Dn[];%Xn abscisse,ordonnée D : dérivé g,dérivée d
+    n=0;
+    for p_=#1:
+    n:=n+1;
+    if (n mod 2)=1:
+    Xn[(n div 2)+1]=p_;
+    Fn[(n div 2)+1]=cm*(X.u*xpart(p_),Y.u*ypart(p_));
+    else:
+    Dn[(n div 2)]=p_
+    fi;
+    endfor;
+    N:=n div 2;
+    MinX=999;
+    MaxX=-999;
+    MinY=999;
+    MaxY=-999;
+    if Prolonge:
+    debutbalai=2;
+    finbalai=N-1;
+    else:
+    debutbalai=1;
+    finbalai=N;
+    fi;
+    for k=debutbalai upto finbalai:
+    if xpart(Xn[k])<MinX:
+    MinX:=xpart(Xn[k]);
+    fi;
+    if xpart(Xn[k])>MaxX:
+    MaxX:=xpart(Xn[k]);
+    fi;
+    if ypart(Xn[k])<MinY:
+    MinY:=ypart(Xn[k]);
+    fi;
+    if ypart(Xn[k])>MaxY:
+    MaxY:=ypart(Xn[k]);
+    fi;
+    endfor;
+    if MaxY<1:
+    MaxY:=2;
+    fi;
+    if MinY>-1:
+    MinY:=-2;
+    fi;
+    if MinY<0:
+    if MinY<>ceiling(MinY):
+    MinY:=ceiling(MinY)-1;
+    fi;
+    fi;
+    if MinX<0:
+    if MinX<>ceiling(MinX):
+    MinX:=ceiling(MinX)-1;
+    fi;
+    fi;
+    if MaxY<>ceiling(MaxY):
+    MaxY:=ceiling(MaxY);
+    fi;
+    if MaxX<>ceiling(MaxX):
+    MaxX:=ceiling(MaxX);
+    fi;
+    if MinX<0:
+    else:
+    MinX:=-1;
+    fi;
+    if MaxX<1:
+    MaxX:=1;
+    fi;
+    if MaxY<1:
+    MaxY:=1;
+    fi;
+    %
+    path cadreexterieur;
+    cadreexterieur=(((MinX-1)*X.u*cm,(MinY-1)*Y.u*cm)--((MaxX+1)*X.u*cm,(MinY-1)*Y.u*cm)--((MaxX+1)*X.u*cm,(MaxY+1)*Y.u*cm)--((MinX-1)*X.u*cm,(MaxY+1)*Y.u*cm)--cycle);
+    path SplineRecap[],CourbeTotale;
+    for l=1 upto N-1:
+    SplineRecap[l]=SplineCubique(xpart(Xn[l]),ypart(Xn[l]),xpart(Xn[l+1]),ypart(Xn[l+1]),ypart(Dn[l]),xpart(Dn[l+1]));
+    endfor;
+    CourbeTotale=SplineRecap[1] for l=2 upto N-1:..SplineRecap[l] endfor;
+    draw CourbeTotale withpen pencircle scaled Epaisseur withcolor CoulTrace;
+    clip currentpicture to cadreexterieur;
+    picture RetiensCourbe;
+    RetiensCourbe=currentpicture;
+    currentpicture:=nullpicture;
+    for k=MinY-1 step y.u until MaxY+1:
+    draw cm*((MinX-1)*X.u,k*Y.u)--cm*((MaxX+1)*X.u,k*Y.u) withcolor 0.75white;
+    endfor;
+    for k=MinX-1 step x.u until MaxX+1:
+    draw cm*(k*X.u,(MinY-1)*Y.u)--cm*(k*X.u,(MaxY+1)*Y.u) withcolor 0.75white;
+    endfor;
+    if PointsCourbe:
+    for k=debutbalai upto finbalai:
+    fill cercles(Fn[k],0.5mm);
+    endfor;
+    fi;
+    drawarrow (0,(MinY-1)*Y.u*cm)--(0,(MaxY+1)*Y.u*cm);
+    drawarrow ((MinX-1)*X.u*cm,0)--((MaxX+1)*X.u*cm,0);
+    %
+    draw RetiensCourbe;
+    label.llft(btex O etex,(0,0));
+    dotlabel.bot(btex 1 etex,cm*X.u*(1,0));
+    dotlabel.lft(btex 1 etex,cm*Y.u*(0,1));
+    if Code:
+    EffectuerTraces;
+    fi;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={\MPSplineCode;}]    
+    x.u:=#2;
+    y.u:=#3;
+    X.u:=#4;
+    Y.u:=#5;
+
+    pair Xn[],Fn[],Dn[];%Xn abscisse,ordonnée D : dérivé g,dérivée d
+    n=0;
+    for p_=#1:
+    n:=n+1;
+    if (n mod 2)=1:
+    Xn[(n div 2)+1]=p_;
+    Fn[(n div 2)+1]=cm*(X.u*xpart(p_),Y.u*ypart(p_));
+    else:
+    Dn[(n div 2)]=p_
+    fi;
+    endfor;
+    N:=n div 2;
+    MinX=999;
+    MaxX=-999;
+    MinY=999;
+    MaxY=-999;
+    if Prolonge:
+    debutbalai=2;
+    finbalai=N-1;
+    else:
+    debutbalai=1;
+    finbalai=N;
+    fi;
+    for k=debutbalai upto finbalai:
+    if xpart(Xn[k])<MinX:
+    MinX:=xpart(Xn[k]);
+    fi;
+    if xpart(Xn[k])>MaxX:
+    MaxX:=xpart(Xn[k]);
+    fi;
+    if ypart(Xn[k])<MinY:
+    MinY:=ypart(Xn[k]);
+    fi;
+    if ypart(Xn[k])>MaxY:
+    MaxY:=ypart(Xn[k]);
+    fi;
+    endfor;
+    if MaxY<1:
+    MaxY:=2;
+    fi;
+    if MinY>-1:
+    MinY:=-2;
+    fi;
+    if MinY<0:
+    if MinY<>ceiling(MinY):
+    MinY:=ceiling(MinY)-1;
+    fi;
+    fi;
+    if MinX<0:
+    if MinX<>ceiling(MinX):
+    MinX:=ceiling(MinX)-1;
+    fi;
+    fi;
+    if MaxY<>ceiling(MaxY):
+    MaxY:=ceiling(MaxY);
+    fi;
+    if MaxX<>ceiling(MaxX):
+    MaxX:=ceiling(MaxX);
+    fi;
+    if MaxX<1:
+    MaxX:=1;
+    fi;
+    if MaxY<1:
+    MaxY:=1;
+    fi;
+    %
+    path cadreexterieur;
+    cadreexterieur=(((MinX-1)*X.u*cm,(MinY-1)*Y.u*cm)--((MaxX+1)*X.u*cm,(MinY-1)*Y.u*cm)--((MaxX+1)*X.u*cm,(MaxY+1)*Y.u*cm)--((MinX-1)*X.u*cm,(MaxY+1)*Y.u*cm)--cycle);
+    for l=1 upto N-1:
+    draw SplineCubique(xpart(Xn[l]),ypart(Xn[l]),xpart(Xn[l+1]),ypart(Xn[l+1]),ypart(Dn[l]),xpart(Dn[l+1])) withpen pencircle scaled Epaisseur withcolor CoulTrace;
+    endfor;
+    clip currentpicture to cadreexterieur;
+    picture RetiensCourbe;
+    RetiensCourbe=currentpicture;
+    currentpicture:=nullpicture;
+    for k=MinY-1 step y.u until MaxY+1:
+    draw cm*((MinX-1)*X.u,k*Y.u)--cm*((MaxX+1)*X.u,k*Y.u) withcolor 0.75white;
+    endfor;
+    for k=MinX-1 step x.u until MaxX+1:
+    draw cm*(k*X.u,(MinY-1)*Y.u)--cm*(k*X.u,(MaxY+1)*Y.u) withcolor 0.75white;
+    endfor;
+    if PointsCourbe:
+    for k=debutbalai upto finbalai:
+    fill cercles(Fn[k],0.5mm);
+    endfor;
+    fi;
+    drawarrow (0,(MinY-1)*Y.u*cm)--(0,(MaxY+1)*Y.u*cm);
+    drawarrow ((MinX-1)*X.u*cm,0)--((MaxX+1)*X.u*cm,0);
+    %
+    draw RetiensCourbe;
+    label.llft(btex O etex,(0,0));
+    dotlabel.bot(btex 1 etex,cm*X.u*(1,0));
+    dotlabel.lft(btex 1 etex,cm*Y.u*(0,1));
+    if Code:
+    EffectuerTraces;
+    fi;    
+  \end{mpost}
+  \fi%
+}%
+
+\def\PfCTraceMGCode{%
+  if \useKV[ClesFonction]{Dys}:
+  u:=2cm;
+  fi;
+  %
+  nbcourbe=\ListeDesFonctionslen;
+  % 
+  numeric borneinf[],bornesup[],pos[];
+  % 
+  vardef RetiensPos(text t)=
+  n:=0;
+  for p_=t:
+  n:=n+1;
+  pos[n]=p_;
+  endfor;
+  enddef;
+  % 
+  RetiensPos(\useKV[TraceG]{LabelC});
+  % 
+  vardef RetiensBorneInf(text t)=
+  borneinfmin=infinity;
+  n:=0;
+  for p_=t:
+  n:=n+1;
+  borneinf[n]=p_;
+  if borneinf[n]<borneinfmin:
+  borneinfmin:=borneinf[n]
+  fi;
+  endfor;
+  enddef;
+  % 
+  RetiensBorneInf(\useKV[TraceG]{Bornea});
+  % 
+  vardef RetiensBorneSup(text t)=
+  bornesupmax=-infinity;
+  n:=0;
+  for p_=t:
+  n:=n+1;
+  bornesup[n]=p_;
+  if bornesup[n]>bornesupmax:
+  bornesupmax:=bornesup[n]
+  fi;
+  endfor;
+  enddef;%
+  % 
+  RetiensBorneSup(\useKV[TraceG]{Borneb});
+  % 
+  nbpointsCourbe:=\useKV[TraceG]{NbPointsCourbe};
+  xmin=\useKV[TraceG]{Xmin};
+  xmax=\useKV[TraceG]{Xmax};
+  ymin=\useKV[TraceG]{Ymin};
+  ymax=\useKV[TraceG]{Ymax};
+  pasx=\useKV[TraceG]{Xstep};
+  pasy=\useKV[TraceG]{Ystep};
+  xu=u/\useKV[TraceG]{Xstep};
+  yu=u/\useKV[TraceG]{Ystep};
+  grillex=\useKV[TraceG]{PasGrilleX};
+  grilley=\useKV[TraceG]{PasGrilleY};
+  gradx=\useKV[TraceG]{PasGradX};
+  grady=\useKV[TraceG]{PasGradY};
+  Epaisseur:=\useKV[TraceG]{Epaisseur};
+  %
+  string LabelX,LabelY;
+  LabelX=\the\tokPfCLabelX;
+  LabelY=\the\tokPfCLabelY;
+  %
+  color colortrace[];
+  vardef RetiensCouleur(text t)=
+  n:=0;
+  for p_=t:
+  n:=n+1;
+  colortrace[n]=p_;
+  endfor;
+  enddef;
+  % 
+  RetiensCouleur(\useKV[TraceG]{CouleurTrace});
+  %
+  numeric styletrace[];
+  vardef RetiensStyle(text t)=
+  n:=0;
+  for p_=t:
+  n:=n+1;
+  styletrace[n]=p_;
+  endfor;
+  enddef;
+  %
+  RetiensStyle(\useKV[TraceG]{StyleTrace});
+  %
+  pair Origine,DecalageOrigine;
+  Origine=(xmin,ymin)+\useKV[TraceG]{Origine};
+  DecalageOrigine=\useKV[TraceG]{Origine};
+  %
+  boolean Grille,Vide,Graduations,Code,LegendeX,LegendeY,Millimetre,Tiret;
+  Grille=\useKV[TraceG]{Grille};
+  Tiret=\useKV[TraceG]{Tiret};
+  Millimetre=\useKV[TraceG]{Millimetre};
+  Vide=\useKV[TraceG]{Vide};
+  Graduations=\useKV[TraceG]{Graduations};
+  Code=\useKV[TraceG]{Code};
+  LegendeX=\useKV[TraceG]{LegendeX};
+  LegendeY=\useKV[TraceG]{LegendeY};
+  %
+  vardef sin(expr t) = sind(c*t) enddef;
+  vardef cos(expr t) = cosd(c*t) enddef;
+  vardef tan(expr t) = sin(t)/cos(t) enddef;
+  vardef exp(expr t) = e**t enddef;
+  vardef ch(expr x)=(exp(x)+exp(-x))/2 enddef;
+  vardef sh(expr x)=(exp(x)-exp(-x))/2 enddef;
+  vardef ln(expr t) = mlog(t)/256 enddef;
+  vardef arcsin(expr x)=%Définition mathématique en radian
+    pi*angle((sqrt(1-x**2),x))/180
+  enddef;
+  vardef arccos(expr x)=%Définition mathématique en radian
+    pi*angle((x,sqrt(1-x**2)))/180
+  enddef;
+  def enplace=
+    xscaled xu yscaled yu shifted (Origine*u)
+  enddef;
+  vardef placepoint(expr q,r)=
+   (q,r) enplace
+  enddef;
+  %
+  path Cb[];
+  %
+  vardef courbe[](expr a,b,nb)(text texte)=
+  path Courbe;
+  for i:=0 upto nb :
+  x@[i]:=(a+i*((b-a)/nb));
+  x:=x@[i];
+  y@[i]:=texte;
+  endfor ;
+  Cb@:=(x@.0*xu,y@.0*yu)
+  for i:=1 upto nb :
+  ..(x@[i]*xu,y@[i]*yu)
+  endfor;
+  Cb@:=Cb@ shifted (Origine*u);
+  Courbe=Cb@;
+  Courbe
+  enddef;
+  %
+  vardef DessineCourbes(text texto)=
+  n:=0;
+  for p_=texto:
+  n:=n+1;
+  if unknown styletrace[n]:
+  drawoptions();
+  else:
+  if styletrace[n]=1:
+  drawoptions(dashed evenly);
+  elseif styletrace[n]=2:
+  drawoptions(dashed withdots);
+  elseif styletrace[n]=3:
+  drawoptions(dashed dashpattern(on6 off3 on1.5 off3));
+  else:
+  drawoptions();
+  fi;
+  fi;
+  draw courbe[n](borneinf[n],bornesup[n],100)(scantokens p_) withpen (pencircle scaled Epaisseur) withcolor if unknown colortrace[n]:black else: colortrace[n] fi;
+  endfor;
+  enddef;
+  %
+  vardef NommeCourbes(text texto)=
+  nc:=0;
+  for p_=texto:
+  nc:=nc+1;
+  numeric tp;
+  if known pos[nc]:
+%  draw (0,0)--(50,nc*50);
+  tp=pos[nc]*length Cb[n];
+  pair PT,Tangente;
+  PT:=point (tp) of Cb[nc];
+  Tangente:=unitvector(direction tp of Cb[nc]);
+  label(TEX(p_) rotated angle(Tangente),PT+2mm*(Tangente rotated 90));
+  fi;
+  endfor;
+  enddef;
+  % 
+  vardef NommeCourbesPDF(text texto)=
+  n:=0;
+  for p_=texto:
+  n:=n+1;
+  numeric tp;
+  tp=pos[n]*length Cb[n];
+  pair PT,Tangente;
+  PT:=point (tp) of Cb[n];
+  Tangente:=unitvector(direction tp of Cb[n]);
+  label(LATEX(p_) rotated angle(Tangente),PT+2mm*(Tangente rotated 90));
+  endfor;
+  enddef;
+  %
+  vardef EffectuerTraces=
+  \useKV[TraceG]{Traces};
+  enddef;
+  %
+  vardef LegendeCourbe=
+  if LegendeX=true:
+  %label.ulft(btex \useKV[TraceG]{LabelX} etex,u*(xmax,ypart(Origine)));
+  label.ulft(TEX(LabelX),u*(xmax,ypart(Origine)));
+  fi;
+  if LegendeY=true:
+  % label.lrt(btex \useKV[TraceG]{LabelY} etex,u*(xpart(Origine),ymax));
+    label.lrt(TEX(LabelY),u*(xpart(Origine),ymax));
+  fi;
+  enddef;
+}%
+
+\NewDocumentCommand\TraceMultiGraphique{mm}{%
+  % #1 paramètres
+  % #2 Liste fonctions
+  \ifluatex%
+    \mplibforcehmode%
+  \begin{mplibcode}
+    \PfCTraceMGCode
+    color PfCOrange;
+    PfCOrange=(.75,.5,.25);
+    if Millimetre:
+    drawoptions(withpen pencircle scaled 0.25 withcolor 0.7[PfCOrange,white]);
+    for k=xpart(Origine) step 0.1 until (xmax+grillex):
+    trace u*(k,ymin-grilley)--u*(k,ymax+grilley);
+    endfor;
+    for k=xpart(Origine) step -0.1 until (xmin-grillex):
+    trace u*(k,ymin-grilley)--u*(k,ymax+grilley);
+    endfor;
+    for k=ypart(Origine) step 0.1 until (ymax+grilley):
+    trace u*(xmin-grillex,k)--u*(xmax+grillex,k);
+    endfor;
+    for k=ypart(Origine) step -0.1 until (ymin-grilley):
+    trace u*(xmin-grillex,k)--u*(xmax+grillex,k);
+    endfor;
+    drawoptions();
+    drawoptions(withpen pencircle scaled 0.675 withcolor 0.5[PfCOrange,white]);
+    for k=xpart(Origine) step 1 until (xmax+grillex):
+    trace u*(k,ymin-grilley)--u*(k,ymax+grilley);
+    endfor;
+    for k=xpart(Origine) step -1 until (xmin-grillex):
+    trace u*(k,ymin-grilley)--u*(k,ymax+grilley);
+    endfor;
+    for k=ypart(Origine) step 1 until (ymax+grilley):
+    trace u*(xmin-grillex,k)--u*(xmax+grillex,k);
+    endfor;
+    for k=ypart(Origine) step -1 until (ymin-grilley):
+    trace u*(xmin-grillex,k)--u*(xmax+grillex,k);
+    endfor;
+    drawoptions();
+    drawoptions(withpen pencircle scaled 1 withcolor 0.3[PfCOrange,white]);
+    for k=xpart(Origine) step 5 until (xmax+grillex):
+    trace u*(k,ymin-grilley)--u*(k,ymax+grilley);
+    endfor;
+    for k=xpart(Origine) step -5 until (xmin-grillex):
+    trace u*(k,ymin-grilley)--u*(k,ymax+grilley);
+    endfor;
+    for k=ypart(Origine) step 5 until (ymax+grilley):
+    trace u*(xmin-grillex,k)--u*(xmax+grillex,k);
+    endfor;
+    for k=ypart(Origine) step -5 until (ymin-grilley):
+    trace u*(xmin-grillex,k)--u*(xmax+grillex,k);
+    endfor;
+    drawoptions();
+    fi;
+    if Grille:
+    drawoptions(withcolor 0.75white);
+    for k=xpart(Origine) step grillex until (xmax+grillex):
+    trace u*(k,ymin-grilley)--u*(k,ymax+grilley);
+    endfor;
+    for k=xpart(Origine) step -grillex until (xmin-grillex):
+    trace u*(k,ymin-grilley)--u*(k,ymax+grilley);
+    endfor;
+    for k=ypart(Origine) step grilley until (ymax+grilley):
+    trace u*(xmin-grillex,k)--u*(xmax+grillex,k);
+    endfor;
+    for k=ypart(Origine) step -grilley until (ymin-grilley):
+    trace u*(xmin-grillex,k)--u*(xmax+grillex,k);
+    endfor;
+    drawoptions();
+    else:
+    grillex:=0;
+    grilley:=0;
+    fi;
+    if Graduations:
+    for k=gradx step gradx until (((xmax-xmin)-xpart(DecalageOrigine))*pasx):
+    if Tiret:
+    draw ((0,-0.5mm)--(0,0.5mm)) shifted placepoint(k,0);
+    label.bot(TEX("\num{"&decimal(k)&"}"),Origine*u+(k*xu,0));
+    else:
+    dotlabel.bot(TEX("\num{"&decimal(k)&"}"),Origine*u+(k*xu,0));
+    fi;
+    endfor;
+    for k=-gradx step -gradx until (xpart(-DecalageOrigine)*pasx):
+    if Tiret:
+    draw ((0,-0.5mm)--(0,0.5mm)) shifted placepoint(k,0);
+    label.bot(TEX("\num{"&decimal(k)&"}"),Origine*u+(k*xu,0));
+    else:
+    dotlabel.bot(TEX("\num{"&decimal(k)&"}"),Origine*u+(k*xu,0));
+    fi;
+    endfor;
+    for k=grady step grady until (((ymax-ymin)-ypart(DecalageOrigine))*pasy):
+    if Tiret:
+    draw ((-0.5mm,0)--(0.5mm,0)) shifted placepoint(0,k);
+    label.lft(TEX("\num{"&decimal(k)&"}"),Origine*u+(0,k*yu));
+    else:
+    dotlabel.lft(TEX("\num{"&decimal(k)&"}"),Origine*u+(0,k*yu));
+    fi;
+    endfor;
+    for k=-grady step -grady until (ypart(-DecalageOrigine)*pasy):
+    if Tiret:
+    draw ((-0.5mm,0)--(0.5mm,0)) shifted placepoint(0,k);
+    label.lft(TEX("\num{"&decimal(k)&"}"),Origine*u+(0,k*yu));
+    else:
+    dotlabel.lft(TEX("\num{"&decimal(k)&"}"),Origine*u+(0,k*yu));
+    fi;
+    endfor;
+    fi;
+%     
+    drawoptions(withpen pencircle scaled(1));
+    drawarrow (u*(0,ymin-grilley)--u*(0,ymax+grilley)) shifted (u*(xpart(Origine),0));
+    drawarrow (u*(xmin-grillex,0)--u*(xmax+grillex,0)) shifted (u*(0,ypart(Origine)));
+    label.llft(btex 0 etex,u*Origine);
+    drawoptions();
+    if Vide:
+    if Grille:
+    clip currentpicture to polygone(u*(xmin-grillex,ymin-grilley),u*(xmax+grillex,ymin-grilley),u*(xmax+grillex,ymax+grilley),u*(xmin-grillex,ymax+grilley));
+    draw polygone(u*(xmin-grillex,ymin-grilley),u*(xmax+grillex,ymin-grilley),u*(xmax+grillex,ymax+grilley),u*(xmin-grillex,ymax+grilley)) withcolor 0.75white;
+    else:
+    clip currentpicture to polygone(u*(xmin,ymin),u*(xmax,ymin),u*(xmax,ymax),u*(xmin,ymax));
+    fi;
+    else:
+    DessineCourbes(#1);
+    NommeCourbes(#2);
+    clip currentpicture to polygone(u*(xmin-grillex,ymin-grilley),u*(xmax+grillex,ymin-grilley),u*(xmax+grillex,ymax+grilley),u*(xmin-grillex,ymax+grilley));
+    if Grille:
+    %clip currentpicture to polygone(u*(xmin-grillex,ymin-grilley),u*(xmax+grillex,ymin-grilley),u*(xmax+grillex,ymax+grilley),u*(xmin-grillex,ymax+grilley));
+    draw polygone(u*(xmin-grillex,ymin-grilley),u*(xmax+grillex,ymin-grilley),u*(xmax+grillex,ymax+grilley),u*(xmin-grillex,ymax+grilley)) withcolor 0.75white;
+    else:
+    %clip currentpicture to polygone(u*(xmin,ymin),u*(xmax,ymin),u*(xmax,ymax),u*(xmin,ymax));
+    fi;
+    % 
+    if Code:
+    EffectuerTraces;
+    fi;
+    fi;
+    LegendeCourbe;
+  \end{mplibcode}
+  \else%
+    \begin{mpost}[mpsettings={\PfCTraceMGCode}]
+      color PfCOrange;
+    PfCOrange=(.75,.5,.25);
+    if Millimetre:
+    drawoptions(withpen pencircle scaled 0.25 withcolor 0.7[PfCOrange,white]);
+    for k=xpart(Origine) step 0.1 until (xmax+grillex):
+    trace u*(k,ymin-grilley)--u*(k,ymax+grilley);
+    endfor;
+    for k=xpart(Origine) step -0.1 until (xmin-grillex):
+    trace u*(k,ymin-grilley)--u*(k,ymax+grilley);
+    endfor;
+    for k=ypart(Origine) step 0.1 until (ymax+grilley):
+    trace u*(xmin-grillex,k)--u*(xmax+grillex,k);
+    endfor;
+    for k=ypart(Origine) step -0.1 until (ymin-grilley):
+    trace u*(xmin-grillex,k)--u*(xmax+grillex,k);
+    endfor;
+    drawoptions();
+    drawoptions(withpen pencircle scaled 0.675 withcolor 0.5[PfCOrange,white]);
+    for k=xpart(Origine) step 1 until (xmax+grillex):
+    trace u*(k,ymin-grilley)--u*(k,ymax+grilley);
+    endfor;
+    for k=xpart(Origine) step -1 until (xmin-grillex):
+    trace u*(k,ymin-grilley)--u*(k,ymax+grilley);
+    endfor;
+    for k=ypart(Origine) step 1 until (ymax+grilley):
+    trace u*(xmin-grillex,k)--u*(xmax+grillex,k);
+    endfor;
+    for k=ypart(Origine) step -1 until (ymin-grilley):
+    trace u*(xmin-grillex,k)--u*(xmax+grillex,k);
+    endfor;
+    drawoptions();
+    drawoptions(withpen pencircle scaled 1 withcolor 0.3[PfCOrange,white]);
+    for k=xpart(Origine) step 5 until (xmax+grillex):
+    trace u*(k,ymin-grilley)--u*(k,ymax+grilley);
+    endfor;
+    for k=xpart(Origine) step -5 until (xmin-grillex):
+    trace u*(k,ymin-grilley)--u*(k,ymax+grilley);
+    endfor;
+    for k=ypart(Origine) step 5 until (ymax+grilley):
+    trace u*(xmin-grillex,k)--u*(xmax+grillex,k);
+    endfor;
+    for k=ypart(Origine) step -5 until (ymin-grilley):
+    trace u*(xmin-grillex,k)--u*(xmax+grillex,k);
+    endfor;
+    drawoptions();
+    fi;
+    if Grille:
+    drawoptions(withcolor 0.75white);
+    for k=xpart(Origine) step grillex until xmax:
+    trace u*(k,ymin)--u*(k,ymax);
+    endfor;
+    for k=xpart(Origine) step -grillex until xmin:
+    trace u*(k,ymin)--u*(k,ymax);
+    endfor;
+    for k=ypart(Origine) step grilley until ymax:
+    trace u*(xmin,k)--u*(xmax,k);
+    endfor;
+    for k=ypart(Origine) step -grilley until ymin:
+    trace u*(xmin,k)--u*(xmax,k);
+    endfor;
+    drawoptions();
+    fi;
+    if Graduations:
+    for k=gradx step gradx until bornesupmax:%xmax*gradx/grillex:
+    dotlabel.bot(LATEX("\num{"&decimal(k)&"}"),(k*xu+xpart(Origine*cm),ypart(Origine*cm)));
+    endfor;
+    for k=-gradx step -gradx until borneinfmin:%xmin*gradx/grillex:
+    dotlabel.bot(LATEX("\num{"&decimal(k)&"}"),(k*xu+xpart(Origine*cm),ypart(Origine*cm)));
+    endfor;
+    for k=grady step grady until ymax*grady/grilley:
+    dotlabel.lft(LATEX("\num{"&decimal(k)&"}"),(xpart(Origine*cm),k*yu+ypart(Origine*cm)));
+    endfor;
+    for k=-grady step -grady until ymin*grady/grilley:
+    dotlabel.lft(LATEX("\num{"&decimal(k)&"}"),(xpart(Origine*cm),k*yu+ypart(Origine*cm)));
+    endfor;
+    fi;
+%     
+    drawoptions(withpen pencircle scaled(1));
+    drawarrow (u*(0,ymin)--u*(0,ymax)) shifted (u*(xpart(Origine),0));
+    drawarrow (u*(xmin,0)--u*(xmax,0)) shifted (u*(0,ypart(Origine)));
+    label.llft(btex 0 etex,u*Origine);
+    drawoptions();
+    if Vide:
+    clip currentpicture to polygone(u*(xmin,ymin),u*(xmax,ymin),u*(xmax,ymax),u*(xmin,ymax));
+    else:
+    DessineCourbes(#1);
+    NommeCourbesPDF(#2);
+    clip currentpicture to polygone(u*(xmin,ymin),u*(xmax,ymin),u*(xmax,ymax),u*(xmin,ymax));
+    if Code:
+    EffectuerTraces;
+    fi;
+    fi;
+    LegendeCourbe;
+  \end{mpost}
+  \fi%
+}%
+
+\def\MPCourbeNew#1{%#2#3#4#5#6{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    x.u:=\useKV[ClesFonction]{PasX};
+    y.u:=\useKV[ClesFonction]{PasY};
+    X.u:=\useKV[ClesFonction]{UniteX};
+    Y.u:=\useKV[ClesFonction]{UniteY};
+    Epaisseur:=\useKV[ClesFonction]{Epaisseur};
+    
+    boolean Prolonge,Tangentes,PointsCourbe,Codes;
+    Prolonge=\useKV[ClesFonction]{Prolonge};
+    Tangentes=\useKV[ClesFonction]{Tangentes};
+    PointsCourbe=\useKV[ClesFonction]{PointsCourbe};
+    Codes=\useKV[ClesFonction]{Codes};
+
+    color CouleurTrace;
+    CouleurTrace=\useKV[ClesFonction]{CouleurTrace};
+
+    def enplace=
+    xscaled X.u yscaled Y.u
+    enddef;
+
+    vardef placepoint(expr q,r)=
+    (q,r)*cm enplace
+    enddef;
+    
+    numeric dirav[],dirap[];
+    pair Fn[],Gn[];
+    n=0;
+    if Tangentes:
+    for p_=#1:
+    if (n mod 3)=0:
+    dirav[n div 3]=p_;
+    fi;
+    if (n mod 3)=1:
+    Gn[n div 3]=p_;
+    Fn[n div 3]=cm*(X.u*xpart(p_),Y.u*ypart(p_));
+    fi;
+    if (n mod 3)=2:
+    dirap[n div 3]=p_;
+    fi;
+    n:=n+1;
+    endfor;
+    N:=(n-1) div 3;
+    else:
+    for p_=#1:
+    Gn[n]=p_;
+    Fn[n]=cm*(X.u*xpart(p_),Y.u*ypart(p_));
+    n:=n+1;
+    endfor;
+    N:=(n-1);
+    fi;
+    MinX=999;
+    MaxX=-999;
+    MinY=999;
+    MaxY=-999;
+    for k=0 upto N:
+    if xpart(Gn[k])<MinX:
+    MinX:=xpart(Gn[k]);
+    fi;
+    if xpart(Gn[k])>MaxX:
+    MaxX:=xpart(Gn[k]);
+    fi;
+    if ypart(Gn[k])<MinY:
+    MinY:=ypart(Gn[k]);
+    fi;
+    if ypart(Gn[k])>MaxY:
+    MaxY:=ypart(Gn[k]);
+    fi;
+    endfor;
+    if MinY<0:
+    if MinY<>ceiling(MinY):
+    MinY:=ceiling(MinY)-1;
+    fi;
+    fi;
+    if MinY>0:
+    MinY:=0;
+    fi;
+    if MinX<0:
+    if MinX<>ceiling(MinX):
+    MinX:=ceiling(MinX)-1;
+    fi;
+    fi;
+    if MaxY<>ceiling(MaxY):
+    MaxY:=ceiling(MaxY);
+    fi;
+    if MaxX<>ceiling(MaxX):
+    MaxX:=ceiling(MaxX);
+    fi;
+    if MaxX<1:
+    MaxX:=1;
+    fi;
+    if MaxY<1:
+    MaxY:=1;
+    fi;
+    if Prolonge:
+    for k=MinY-1 step y.u until MaxY+1:
+    draw cm*((MinX)*X.u,k*Y.u)--cm*((MaxX)*X.u,k*Y.u) withcolor 0.75white;
+    endfor;
+    for k=MinX step x.u until MaxX:
+    draw cm*(k*X.u,(MinY-1)*Y.u)--cm*(k*X.u,(MaxY+1)*Y.u) withcolor 0.75white;
+    endfor;
+    else:
+    for k=MinY-1 step y.u until MaxY+1:
+    draw cm*((MinX-1)*X.u,k*Y.u)--cm*((MaxX+1)*X.u,k*Y.u) withcolor 0.75white;
+    endfor;
+    for k=MinX-1 step x.u until MaxX+1:
+    draw cm*(k*X.u,(MinY-1)*Y.u)--cm*(k*X.u,(MaxY+1)*Y.u) withcolor 0.75white;
+    endfor;
+    fi;
+    if Prolonge:    
+    drawarrow (0,(MinY-1)*Y.u*cm)--(0,(MaxY+1)*Y.u*cm);
+    drawarrow ((MinX)*X.u*cm,0)--((MaxX)*X.u*cm,0);
+    else:
+    drawarrow (0,(MinY-1)*Y.u*cm)--(0*cm,(MaxY+1)*Y.u*cm);
+    drawarrow ((MinX-1)*X.u*cm,0*cm)--((MaxX+1)*X.u*cm,0*cm);
+    fi;
+    label.llft(btex O etex,(0,0));
+    dotlabel.bot(btex 1 etex,cm*X.u*(1,0));
+    dotlabel.lft(btex 1 etex,cm*Y.u*(0,1));
+    draw if Tangentes:
+    Fn[0]{dir dirap[0]}
+    for k=1 upto (N-1):
+    ..{dir dirav[k]}Fn[k]{dir dirap[k]}
+    endfor
+    ..{dir dirav[N]}Fn[N]
+    else:
+    Fn[0]
+    for k=1 upto N:
+    ..Fn[k]
+    endfor fi withpen pencircle scaled Epaisseur withcolor CouleurTrace;
+    if PointsCourbe:
+    if Prolonge:
+    for k=1 upto N-1:
+    fill cercles(Fn[k],0.5mm);
+    endfor;
+    else:
+    for k=0 upto N:
+    fill cercles(Fn[k],0.5mm);
+    endfor;
+    fi;
+    fi;
+    if Codes:
+    \useKV[ClesFonction]{Traces};
+    fi;
+  \end{mplibcode}
+  \else%
+  \begin{mpost}[mpsettings={%
+      x.u:=\useKV[ClesFonction]{PasX};y.u:=\useKV[ClesFonction]{PasY};
+      X.u:=\useKV[ClesFonction]{UniteX};Y.u:=\useKV[ClesFonction]{UniteY};
+      Epaisseur:=\useKV[ClesFonction]{Epaisseur};
+      boolean Prolonge,Tangentes,PointsCourbe,Codes;
+      Prolonge=\useKV[ClesFonction]{Prolonge};
+      Tangentes=\useKV[ClesFonction]{Tangentes};
+      PointsCourbe=\useKV[ClesFonction]{PointsCourbe};
+      Codes=\useKV[ClesFonction]{Codes};
+      color CouleurTrace;
+      CouleurTrace=\useKV[ClesFonction]{CouleurTrace};
+      }]
+      def enplace=
+      xscaled X.u yscaled Y.u
+      enddef;
+      vardef placepoint(expr q,r)=
+      (q,r)*cm enplace
+      enddef;
+    numeric dirav[],dirap[];
+    pair Fn[],Gn[];
+    n=0;
+    if Tangentes:
+    for p_=#1:
+    if (n mod 3)=0:
+    dirav[n div 3]=p_;
+    fi;
+    if (n mod 3)=1:
+    Gn[n div 3]=p_;
+    Fn[n div 3]=cm*(X.u*xpart(p_),Y.u*ypart(p_));
+    fi;
+    if (n mod 3)=2:
+    dirap[n div 3]=p_;
+    fi;
+    n:=n+1;
+    endfor;
+    N:=(n-1) div 3;
+    else:
+    for p_=#1:
+    Gn[n]=p_;
+    Fn[n]=cm*(X.u*xpart(p_),Y.u*ypart(p_));
+    n:=n+1;
+    endfor;
+    N:=(n-1);
+    fi;
+    MinX=999;
+    MaxX=-999;
+    MinY=999;
+    MaxY=-999;
+    for k=0 upto N:
+    if xpart(Gn[k])<MinX:
+    MinX:=xpart(Gn[k]);
+    fi;
+    if xpart(Gn[k])>MaxX:
+    MaxX:=xpart(Gn[k]);
+    fi;
+    if ypart(Gn[k])<MinY:
+    MinY:=ypart(Gn[k]);
+    fi;
+    if ypart(Gn[k])>MaxY:
+    MaxY:=ypart(Gn[k]);
+    fi;
+    endfor;
+    if MinY<0:
+    if MinY<>ceiling(MinY):
+    MinY:=ceiling(MinY)-1;
+    fi;
+    fi;
+    if MinY>0:
+    MinY:=0;
+    fi;
+    if MinX<0:
+    if MinX<>ceiling(MinX):
+    MinX:=ceiling(MinX)-1;
+    fi;
+    fi;
+    if MaxY<>ceiling(MaxY):
+    MaxY:=ceiling(MaxY);
+    fi;
+    if MaxX<>ceiling(MaxX):
+    MaxX:=ceiling(MaxX);
+    fi;
+    if MaxX<1:
+    MaxX:=1;
+    fi;
+    if MaxY<1:
+    MaxY:=1;
+    fi;
+    if Prolonge:
+    for k=MinY-1 step y.u until MaxY+1:
+    draw cm*((MinX)*X.u,k*Y.u)--cm*((MaxX)*X.u,k*Y.u) withcolor 0.75white;
+    endfor;
+    for k=MinX step x.u until MaxX:
+    draw cm*(k*X.u,(MinY-1)*Y.u)--cm*(k*X.u,(MaxY+1)*Y.u) withcolor 0.75white;
+    endfor;
+    else:
+    for k=MinY-1 step y.u until MaxY+1:
+    draw cm*((MinX-1)*X.u,k*Y.u)--cm*((MaxX+1)*X.u,k*Y.u) withcolor 0.75white;
+    endfor;
+    for k=MinX-1 step x.u until MaxX+1:
+    draw cm*(k*X.u,(MinY-1)*Y.u)--cm*(k*X.u,(MaxY+1)*Y.u) withcolor 0.75white;
+    endfor;
+    fi;
+    if Prolonge:    
+    drawarrow (0,(MinY-1)*Y.u*cm)--(0,(MaxY+1)*Y.u*cm);
+    drawarrow ((MinX)*X.u*cm,0)--((MaxX)*X.u*cm,0);
+    else:
+    drawarrow (0,(MinY-1)*Y.u*cm)--(0*cm,(MaxY+1)*Y.u*cm);
+    drawarrow ((MinX-1)*X.u*cm,0*cm)--((MaxX+1)*X.u*cm,0*cm);
+    fi;
+    label.llft(btex O etex,(0,0));
+    dotlabel.bot(btex 1 etex,cm*X.u*(1,0));
+    dotlabel.lft(btex 1 etex,cm*Y.u*(0,1));
+    draw if Tangentes:
+    Fn[0]{dir dirap[0]}
+    for k=1 upto (N-1):
+    ..{dir dirav[k]}Fn[k]{dir dirap[k]}
+    endfor
+    ..{dir dirav[N]}Fn[N]
+    else:
+    Fn[0]
+    for k=1 upto N:
+    ..Fn[k]
+    endfor fi withpen pencircle scaled Epaisseur withcolor CouleurTrace;
+    if PointsCourbe:
+    if Prolonge:
+    for k=1 upto N-1:
+    fill cercles(Fn[k],0.5mm);
+    endfor;
+    else:
+    for k=0 upto N:
+    fill cercles(Fn[k],0.5mm);
+    endfor;
+    fi;
+    fi;
+  \end{mpost}
+  \fi%
+}%
+
+\def\MPCatmull#1#2#3#4#5{%
+  % #1 la liste des points
+  % #2: pas en x
+  % #3: pas en y
+  % #4: unit\'e en x
+  % #5: unit\'e en y
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    boolean PointsCourbe;
+    PointsCourbe=\useKV[ClesFonction]{PointsCourbe};
+
+    boolean Code;
+    Code=\useKV[ClesFonction]{Codes};
+        
+    x.u:=#2;
+    y.u:=#3;
+    X.u:=#4;
+    Y.u:=#5;
+
+    def enplace=
+    xscaled X.u yscaled Y.u
+    enddef;
+
+    vardef placepoint(expr q,r)=
+    (q,r)*cm enplace
+    enddef;
+    
+    pair Fn[],Gn[];
+    n=0;
+    for p_=#1:
+    Gn[n]=p_;
+    Fn[n]=cm*(X.u*xpart(p_),Y.u*ypart(p_));
+    n:=n+1;
+    endfor;
+    N:=(n-1);
+    MinX=999;
+    MaxX=-999;
+    MinY=999;
+    MaxY=-999;
+    debutbalai=0;
+    finbalai=N;
+    if \useKV[ClesFonction]{Prolonge}:
+    debutbalai:=2;
+    finbalai:=N-2;
+    fi;
+    for k=debutbalai upto finbalai:
+    if xpart(Gn[k])<MinX:
+    MinX:=xpart(Gn[k]);
+    fi;
+    if xpart(Gn[k])>MaxX:
+    MaxX:=xpart(Gn[k]);
+    fi;
+    if ypart(Gn[k])<MinY:
+    MinY:=ypart(Gn[k]);
+    fi;
+    if ypart(Gn[k])>MaxY:
+    MaxY:=ypart(Gn[k]);
+    fi;
+    endfor;
+    if MaxY<1:
+    MaxY:=2;
+    fi;
+    if MinY>-1:
+    MinY:=-2;
+    fi;
+    if MinY<0:
+    if MinY<>ceiling(MinY):
+    MinY:=ceiling(MinY)-1;
+    fi;
+    fi;
+    if MinX<0:
+    if MinX<>ceiling(MinX):
+    MinX:=ceiling(MinX)-1;
+    fi;
+    fi;
+    if MaxY<>ceiling(MaxY):
+    MaxY:=ceiling(MaxY);
+    fi;
+    if MaxX<>ceiling(MaxX):
+    MaxX:=ceiling(MaxX);
+    fi;
+    if MaxX<1:
+    MaxX:=1;
+    fi;
+    if MaxY<1:
+    MaxY:=1;
+    fi;
+    %
+    path cadreexterieur;
+    cadreexterieur=(((MinX-1)*X.u*cm,(MinY-1)*Y.u*cm)--((MaxX+1)*X.u*cm,(MinY-1)*Y.u*cm)--((MaxX+1)*X.u*cm,(MaxY+1)*Y.u*cm)--((MinX-1)*X.u*cm,(MaxY+1)*Y.u*cm)--cycle);
+    draw Fn[1]
+    for k=2 upto N-1:
+    ..{dir angle(Fn[k+1]-Fn[k-1])}Fn[k]{dir angle(Fn[k+1]-Fn[k-1])}
+    endfor withpen pencircle scaled \useKV[ClesFonction]{Epaisseur} withcolor \useKV[ClesFonction]{Couleur};
+    clip currentpicture to cadreexterieur;
+    picture RetiensCourbe;
+    RetiensCourbe=currentpicture;
+    currentpicture:=nullpicture;
+    for k=MinY-1 step y.u until MaxY+1:
+    draw cm*((MinX-1)*X.u,k*Y.u)--cm*((MaxX+1)*X.u,k*Y.u) withcolor 0.75white;
+    endfor;
+    for k=MinX-1 step x.u until MaxX+1:
+    draw cm*(k*X.u,(MinY-1)*Y.u)--cm*(k*X.u,(MaxY+1)*Y.u) withcolor 0.75white;
+    endfor;
+    if PointsCourbe:
+    for k=debutbalai upto finbalai:
+    fill cercles(Fn[k],0.5mm);
+    endfor;
+    fi;
+    drawarrow (0,(MinY-1)*Y.u*cm)--(0,(MaxY+1)*Y.u*cm);
+    drawarrow ((MinX-1)*X.u*cm,0)--((MaxX+1)*X.u*cm,0);
+    %
+    draw RetiensCourbe;
+    label.llft(btex O etex,(0,0));
+    dotlabel.bot(btex 1 etex,cm*X.u*(1,0));
+    dotlabel.lft(btex 1 etex,cm*Y.u*(0,1));
+    if Code:
+    \useKV[ClesFonction]{Traces};
+    fi;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={numeric Epaisseur; Epaisseur=\useKV[ClesFonction]{Epaisseur}; color CouleurCourbe; CouleurCourbe=\useKV[ClesFonction]{Couleur};boolean PointsCourbe;PointsCourbe=\useKV[ClesFonction]{PointsCourbe};}]
+        x.u:=#2;
+    y.u:=#3;
+    X.u:=#4;
+    Y.u:=#5;
+
+    pair Fn[],Gn[];
+    n=0;
+    for p_=#1:
+    Gn[n]=p_;
+    Fn[n]=cm*(X.u*xpart(p_),Y.u*ypart(p_));
+    n:=n+1;
+    endfor;
+    N:=(n-1);
+    MinX=999;
+    MaxX=-999;
+    MinY=999;
+    MaxY=-999;
+    debutbalai=0;
+    finbalai=N;
+    if \useKV[ClesFonction]{Prolonge}:
+    debutbalai:=2;
+    finbalai:=N-2;
+    fi;
+    for k=debutbalai upto finbalai:
+    if xpart(Gn[k])<MinX:
+    MinX:=xpart(Gn[k]);
+    fi;
+    if xpart(Gn[k])>MaxX:
+    MaxX:=xpart(Gn[k]);
+    fi;
+    if ypart(Gn[k])<MinY:
+    MinY:=ypart(Gn[k]);
+    fi;
+    if ypart(Gn[k])>MaxY:
+    MaxY:=ypart(Gn[k]);
+    fi;
+    endfor;
+    if MaxY<1:
+    MaxY:=2;
+    fi;
+    if MinY>-1:
+    MinY:=-2;
+    fi;
+    if MinY<0:
+    if MinY<>ceiling(MinY):
+    MinY:=ceiling(MinY)-1;
+    fi;
+    fi;
+    if MinX<0:
+    if MinX<>ceiling(MinX):
+    MinX:=ceiling(MinX)-1;
+    fi;
+    fi;
+    if MaxY<>ceiling(MaxY):
+    MaxY:=ceiling(MaxY);
+    fi;
+    if MaxX<>ceiling(MaxX):
+    MaxX:=ceiling(MaxX);
+    fi;
+    if MaxX<1:
+    MaxX:=1;
+    fi;
+    if MaxY<1:
+    MaxY:=1;
+    fi;
+    %
+    path cadreexterieur;
+    cadreexterieur=(((MinX-1)*X.u*cm,(MinY-1)*Y.u*cm)--((MaxX+1)*X.u*cm,(MinY-1)*Y.u*cm)--((MaxX+1)*X.u*cm,(MaxY+1)*Y.u*cm)--((MinX-1)*X.u*cm,(MaxY+1)*Y.u*cm)--cycle);
+    draw Fn[1]
+    for k=2 upto N-1:
+    ..{dir angle(Fn[k+1]-Fn[k-1])}Fn[k]{dir angle(Fn[k+1]-Fn[k-1])}
+    endfor withpen pencircle scaled \useKV[ClesFonction]{Epaisseur} withcolor \useKV[ClesFonction]{Couleur};
+    clip currentpicture to cadreexterieur;
+    picture RetiensCourbe;
+    RetiensCourbe=currentpicture;
+    currentpicture:=nullpicture;
+    for k=MinY-1 step y.u until MaxY+1:
+    draw cm*((MinX-1)*X.u,k*Y.u)--cm*((MaxX+1)*X.u,k*Y.u) withcolor 0.75white;
+    endfor;
+    for k=MinX-1 step x.u until MaxX+1:
+    draw cm*(k*X.u,(MinY-1)*Y.u)--cm*(k*X.u,(MaxY+1)*Y.u) withcolor 0.75white;
+    endfor;
+    if PointsCourbe:
+    for k=debutbalai upto finbalai:
+    fill cercles(Fn[k],0.5mm);
+    endfor;
+    fi;
+    drawarrow (0,(MinY-1)*Y.u*cm)--(0,(MaxY+1)*Y.u*cm);
+    drawarrow ((MinX-1)*X.u*cm,0)--((MaxX+1)*X.u*cm,0);
+    %
+    draw RetiensCourbe;
+    label.llft(btex O etex,(0,0));
+    dotlabel.bot(btex 1 etex,cm*X.u*(1,0));
+    dotlabel.lft(btex 1 etex,cm*Y.u*(0,1));
+  \end{mpost}
+  \fi
+}%
+
+\def\buildtabfonction{%
+  \[%
+    \begin{array}{|>{\columncolor{gray!15}}c|*{\number\numexpr\ListeFonctionlen}{>{\centering\arraybackslash}p{\useKV[ClesFonction]{Largeur}}|}}%
+      \hline%
+      \useKV[ClesFonction]{Variable}\xintFor* ##1 in {\xintSeq {1}{\ListeFonctionlen}}\do{&\num{\ListeFonction[##1]}}\\
+      \hline%
+      \useKV[ClesFonction]{Nom}(\useKV[ClesFonction]{Variable})\xintFor* ##1 in {\xintSeq {1}{\ListeFonctionlen}}\do{&\ifboolKV[ClesFonction]{Vide}{}{\StrSubstitute{\useKV[ClesFonction]{Calcul}}{\useKV[ClesFonction]{Variable}}{(\ListeFonction[##1])}[\tempab]\num{\fpeval{\tempab}}}}%
+      \\\hline
+    \end{array}%
+  \]%
+}%

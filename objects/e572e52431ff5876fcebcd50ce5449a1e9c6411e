@@ -1,0 +1,48 @@
+% Optional comments
+\_codedecl \unibidilua {Unicode Bidi Algorithm for OpTeX <0.1, 2025-01-19>}
+
+\_initunifonts
+\_directlua{require('unibidi-lua.lua')}
+
+\_endcode
+
+This package is still in early phase, and the interface
+might still change.
+The requirements are the \LuaTeX/ engine,
+and the `luaotfload` font loader.
+
+\def\key #1:{{\bf #1:}\hskip1em\ignorespaces}
+Currently there is only only one macro, `\unibidilua`,
+which accepts a key-value pairs separated by a space.
+The macro accepts three keyword:
+\begitems \style O
+* \key enable: This key adds unibidi-lua's process function to the
+   `pre_shaping_filter` callback. It does not accept a value.
+* \key disable: This key removes unibidi-lua's process function from the
+   `pre_shaping_filter` callback. It does not accept a value.
+* \key fences: This key accepts a boolean value. It allows to disable or
+   enable step N0 of the UAX9 algorithm.
+\enditems
+
+To use the package, as with other packages, you can do `\load[unibidi-lua]`, `\usepackage{unibidi-lua}` or `\input unibidi-lua`
+if you are using \OpTeX, \LaTeX or Plain respectively. The process function 
+is added to the `pre_shaping_filter` when you load the package.
+
+\_doc
+\verbchar`
+%  optex -jobname unibidi-lua-doc '\docgen unibidi-lua'
+\load [doc]
+\overfullrule=0pt
+\tit Unicode Bidi Algorithm Implementation for \OpTeX, \LaTeX, and Plain
+\hfill Version: 0.1, 2025-01-19 \par
+\centerline{\it Udi Fogiel, 2025}
+\parindent0pt\parskip5pt\parfillskip=20ptplus1fill
+The unibidi-lua LuTeX packge is an implementation of the \ulink[https://www.unicode.org/reports/tr9/]
+{Unicode Annex \#9} for \OpTeX, \LaTeX/ and Plain \LuaTeX/ formats. It allows to typeset
+bidirectional documents without the need of a special markup.
+
+\printdoctail unibidi-lua.opm % prints the documentation written after \_endcode
+\bye
+\_cod
+
+\endinput

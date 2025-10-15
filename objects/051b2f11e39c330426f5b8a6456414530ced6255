@@ -1,0 +1,893 @@
+% -*- sentence-end-double-space: t -*-
+\documentclass[a4paper,svgnames,dvipsnames,dvipdfmx]{article}
+\usepackage{geometry}
+\usepackage{shortvrb}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{polexpr}
+\usepackage{hyperref}
+\usepackage{bookmark}
+% \usepackage{amsmath}
+\usepackage{framed}
+\usepackage{newtxtext,newtxmath}
+\title{\pkg{polexpr} root localization examples}
+\author{Jean-François Burnol}
+\date{To access the reference documentation:\\
+% faut-il vraiment le ./ ?
+      \texttt{texdoc} \href{run:./polexpr.html}{polexpr.html}}
+%\usepackage{parskip}
+\MakeShortVerb{\|}
+
+% Note 25 juin 2021 et 8 janvier 2022 pour polexpr-examples.tex
+%
+% Ceci est extrait quasi verbatim de xint.dtx
+%
+% Le code est pour LaTeX, pas pour Plain TeX.
+% Prévu pour latex+dvipdfmx, et j'ai supprimé ajouts spécifiques pour
+% pdflatex/xetex/lualatex en ce qui concerne les couleurs et polices.
+%
+% Regarding latex+dvipdfmx, a document with many more usage
+% of everbatim* could run into color stack overflow problems
+% Refer to xint.dtx for how this problem is avoided there
+% via direct usage of \special rather than \color in the
+% \everbatimxprehook
+
+% verbatim macros and environments
+% ================================
+%
+% June 2013, then October 2014.
+% -----------------------------
+%
+\makeatletter
+\catcode`_ 11
+% some of my verbatim environments do not make the space active (\lverb e.g.). Then
+% \do@noligs must be modified, \char`#1 must be followed by a space token, else,
+% the `#1 expansion will swallow one space.
+\def\do@noligs #1{%
+  \catcode`#1\active
+  \begingroup
+     \lccode`~`#1\relax
+     \lowercase{%
+  \endgroup\def~{\leavevmode\kern\z@\char`#1 }}%
+}
+% \lowast
+% Pas forcément adapté à toutes les polices
+\def\lowast{\raisebox{-.25\height}{*}}
+\catcode`* 13
+\def\makestarlowast {\let*\lowast\catcode`\*\active}%
+\catcode`* 12
+
+
+%--- straight quotes, added (finally...) Nov 2, 2014
+%--- obsolete with use of newtxtt 1.05, late 2014
+\begingroup\makeatletter
+  \catcode`\'\active
+  \catcode`\`\active
+\@firstofone {\endgroup
+  \def\makequotesstraight{% assumes textcomp package
+% à propos textcomp est automatique avec pdflatex depuis Février 2020
+     \let`\textasciigrave
+     \let'\textquotesingle
+     \catcode39\active
+     \catcode96\active }%
+}
+
+% \verb
+% =====
+% Initially, June 2013, then Sep 9, 2014, and Oct 9-12 2014
+%
+% pour les short verb |...|
+
+\def\MicroFont{\ttfamily\makestarlowast\makequotesstraight}% default
+\def\verb
+{%
+  \relax \ifmmode\else\leavevmode\null\fi
+  \bgroup
+  \let\do\@makeother \dospecials
+  \@ifstar{\@sverb}% unused
+          {\MicroFont
+           \catcode 32 10 \endlinechar 32 % allows to fetch across line breaks
+           \frenchspacing
+           \@@jfverb}%
+}%
+% Note (Oct 12, 2014): in the improbable situation a newlinechar is
+% found in the ##1, \scantokens will convert this to an end of line in
+% its "write" phase, which will be then ignored in its "read" phase due
+% to \endlinechar-1. This also avoids possible creation of \par which
+% would defeat \@@jfverb@@. Thus it is good.
+\def\@@jfverb #1{%
+   \ifcat\noexpand#1\noexpand~\catcode`#1\active\fi
+% No problem with the EOL for the line where the short verb delimiter stands.
+   \def\next ##1#1{%
+            \@vobeyspaces\everyeof{\relax}\endlinechar\m@ne
+            \expandafter\@@jfverb_a\scantokens\expandafter{##1}}%
+% hack with \@empty to prevent brace stripping if catcodes have been
+% frozen earlier, like in footnotes.
+   \next \@empty
+}
+% We don't want a \discretionary at the very start.
+% But then an empty argument is forbidden!
+\def\@@jfverb_a #1{#1\@@jfverb_b }
+
+\def\@@jfverb_b #1{\ifx\relax #1%
+        \egroup
+      \else
+% \penalty\z@, or rather (Oct 11, 2014) but I then adjust the textwidth
+% precisely:
+      \discretionary{\copy\SoftWrapIcon}{}{}%
+        #1\expandafter\@@jfverb_b\fi
+}
+% \SoftWrapIcon box for line-breaking using discretionaries
+% =========================================================
+\DeclareFontFamily{U}{MdSymbolC}{}
+\DeclareFontShape {U}{MdSymbolC}{m}{n}{<-> MdSymbolC-Regular}{}
+\newbox\SoftWrapIcon
+% Emacs/AUCTeX uses very strange comment-like highlighting for \usefont{U}...
+\def\SetSoftWrapIcon{%
+    \global\setbox\SoftWrapIcon\hb@xt@\z@
+    {\hb@xt@\fontdimen2\font
+        {\hss{\color{verbsoftwrapiconcolor}%
+              \usefont{U}{MdSymbolC}{m}{n}\char"97}\hss}%
+     \hss}%
+   }
+\AtBeginDocument {{\ttfamily\SetSoftWrapIcon}}%
+
+\catcode`_ 8
+\makeatother
+
+% everbatim environment
+% =====================
+
+% October 13-14, 2014
+% Verbatim with an \everypar hook, mainly to have background color, followed by
+% execution of the contents (not limited by a group-scope)
+
+\makeatletter
+\catcode`_ 11
+
+\def\everbatim {\s@everbatim\@everbatim }
+%! ancienne méthode sans doute motivé par possibilité code ferme un groupe?
+%! \@namedef{everbatim*}{\s@everbatim\@everbatimx\expandafter
+%!                       {\the\newlinechar}}
+\@namedef{everbatim*}{\s@everbatim\@everbatimx }
+
+% Note 25 juin 2021
+% On ne peut pas emboîter un everbatim à l'intérieur d'un everbatim
+% ou un everbatim* à l'intérieur d'un everbatim*...
+\def\s@everbatim {%
+%     \ineverbtrue
+     \everbatimtop % put there size changes
+       \topsep    \z@skip
+       \partopsep \z@skip
+       \itemsep   \z@skip
+       \parsep    \z@skip
+       \parskip   \z@skip
+       \lineskip  \z@skip
+     \let\do\@makeother \dospecials
+     \let\do\do@noligs  \verbatim@nolig@list
+     \makestarlowast
+     \makequotesstraight
+     \everbatimhook
+     \trivlist
+       \@topsepadd \z@skip
+       \item\relax
+       \leftskip   \@totalleftmargin
+       \rightskip  \z@skip
+       \parindent  \z@
+       \parfillskip\@flushglue
+       \parskip    \z@skip
+       \@@par
+       \def\par{\leavevmode\null\@@par\pagebreak[1]}%
+       \everypar\expandafter{\the\everypar \unpenalty
+                \everbatimeverypar
+                \everypar \expandafter{\the\everypar\everbatimeverypar}%
+       }%
+       \obeylines \@vobeyspaces
+}
+\def\everbatimtop {\MacroFont\small}% default
+\let\everbatimhook\empty
+\def\everbatimeverypar{\strut
+                   {\everbatimbgcolorcmd\vrule\@width\linewidth }%
+                   \kern-\linewidth
+                   \kern\everbatimindent }
+\let\everbatimbgcolorcmd\empty
+\def\everbatimindent {\z@}
+
+\begingroup
+\lccode`X 13
+\catcode`X \active
+\lccode`Y `* % this is because of \makestarlowast.
+% I have to think whether this is useful: obviously if I were to provide
+% everbatim and everbatim*  in a package I wouldn't do that.
+\catcode`Y  \active
+\catcode`| 0 \catcode`[ 1 \catcode`] 2 \catcode`* 12
+\catcode`{ 12 \catcode`} 12 |catcode`\\ 12
+|lowercase[|endgroup% both freezes catcodes and converts X to active ^^M
+|def|@everbatim #1X#2\end{everbatim}%
+  [#2|end[everbatim]|everbatimbottom ]
+|def|@everbatimx #1X#2\end{everbatimY}]%
+  {#2\end{everbatim*}%
+% refactored 2022/01/11, rather than passing \newlinechar value
+% as was done formerly via everbatim* (see above) and fetching it here as #1  
+% it is thus assumed executed contents will not terminate a scope
+     \edef\everbatimrestorenewlinechar{\newlinechar\the\newlinechar\relax}%
+     \newlinechar 13
+% refactored 2022/01/11:
+% attention, \parskip set to zero for execution of contents
+% reason: avoid extra space if everbatim* is in an \item of a list
+% between verbatim and output of execution, if it starts a paragraph
+% \vskip-\parskip would be no good in case contents create a display
+     \edef\everbatimrestoreparskip{\parskip\the\parskip}%
+     \parskip\z@skip
+% execution as LaTeX code of contents
+     \everbatimxprehook
+     \scantokens {#2}%
+     \everbatimrestorenewlinechar
+     \everbatimrestoreparskip
+     \everbatimxposthook
+}%
+% L'espace venant du endofline final mis par \scantokens sera inhibé si #3 se
+% termine par un % ou un \x, etc...
+
+\let\everbatimbottom\empty
+
+\def\endeverbatim  {\if@newlist \leavevmode\fi\endtrivlist }
+\@namedef{endeverbatim*}{\endeverbatim}
+% \@namedef{endeverbatim*}{\endeverbatim\aftergroup\everbatimundoparskip}
+% \def\everbatimundoparskip{\vbox{}\kern-\baselineskip\kern-\parskip}
+% \let\everbatimundoparskip\empty
+
+% rationale: we do not want a group
+% see xint.dtx for better way avoiding colorstack overflow problem
+% with latex+dvipdfmx
+\def\everbatimxprehook {\colorlet{everbsavedcolor}{.}%
+                        \everbatimxfgcolorcmd}%
+\let\everbatimxfgcolorcmd\empty % default
+                       
+\def\everbatimxposthook {\color{everbsavedcolor}}
+
+\catcode`_ 8
+\makeatother
+
+\newcommand\pkg[2][]{\if\relax\detokenize{#1}\relax
+                       \href{https://www.ctan.org/pkg/#2}{#2}%
+                     \else
+                       \href{https://www.ctan.org/pkg/#1}{#2}%
+                     \fi
+                    }
+
+% Colors for \verb and everbatim
+% \MacroFont and \MicroFont
+% font size in verbatim blocks
+
+% \verb
+%\colorlet{verbcolor}{DarkCyan}
+\colorlet{verbcolor}{Maroon}
+\colorlet{verbsoftwrapiconcolor}{DarkBlue}
+\def\MicroFont{\ttfamily\color{verbcolor}
+               \makestarlowast\makequotesstraight}%
+
+% everbatim/everbatim*
+\def\everbatimtop{\MacroFont\small}
+% the \small is not in \MacroFont in case of a document with macrocode (doc.sty)
+% and some customization is desired
+%\colorlet{everbatimfgcolor}{Olive}
+\colorlet{everbatimfgcolor}{DarkBlue}
+\def\MacroFont{\ttfamily\color{everbatimfgcolor}}
+
+%\colorlet{everbatimbgcolor}{WhiteSmoke}
+%\colorlet{everbatimbgcolor}{Ivory}
+\colorlet{everbatimbgcolor}{Beige}
+\def\everbatimbgcolorcmd{\color{everbatimbgcolor}}
+
+%\colorlet{everbatimxfgcolor}{MidnightBlue}
+%\colorlet{everbatimxfgcolor}{OliveDrab}
+\colorlet{everbatimxfgcolor}{Maroon}
+\def\everbatimxfgcolorcmd{\color{everbatimxfgcolor}}
+
+% Notice that \macrocode uses \macro@font which stores the \MacroFont meaning
+% in force at \begin{document}. But doc.sty's verbatim uses current \MacroFont
+% not the meaning at \begin{document}. Comprenne qui pourra...
+
+\begin{document}
+\maketitle
+
+
+The package provides a parser |\poldef| of algebraic polynomial
+expressions.
+
+Once defined, a polynomial is usable by its name either as a numerical
+function in |\xintexpr/\xinteval|, or for additional polynomial
+definitions, or as argument to the package macros.
+
+%   The localization of
+% real roots to arbitrary precision as well as the determination of all
+% rational roots is implemented via such macros.
+
+% Since release |0.8|, polexpr extends the \pkg{xintexpr}
+% syntax to recognize
+% polynomials as a new variable type (and not only as functions).
+% Functionality which previously was implemented via macros such as the
+% computation of a greatest common divisor is now available directly in
+% |\xintexpr|, |\xinteval| or |\poldef| via infix or functional
+% syntax.
+
+This document illustrates root localization via usage of macros such as
+|\PolToSturm| and |\PolSturmIsolateZeros| which implement the
+\href{https://en.wikipedia.org/wiki/Sturm%27s_theorem}{Sturm theorem}:
+\begin{itemize}
+\item Root localization based on
+  \href{https://en.wikipedia.org/wiki/Sturm%27s_theorem}{Sturm theorem} was
+  added at release |0.4| (2018/02/16).
+\item Ability to find all rational roots was added at release |0.7.2|
+  (2018/12/09).
+\end{itemize}
+As of |0.8| (2021/03/29), \pkg{polexpr} is usable with Plain \TeX\ and not
+only with \LaTeX. The examples here use most of the time a syntax which works
+with both.
+
+Copying-pasting from |pdf| the example source may lose formatting.
+Formerly, they were included verbatim in the |html| documentation.  Here
+they are both rendered verbatim and got executed during the \LaTeX\ run
+which created this |pdf| file, with the output shown after the source code.
+
+% Perhaps future releases will implement other approaches, which are known
+% to be generically computationally more efficient, at least in high
+% degrees, than the \href{https://en.wikipedia.org/wiki/Sturm%27s_theorem}{Sturm theorem} based approach.  This is not
+% immediate priority though (perhaps support of multivariate polynomials
+% would be more important feature; or localization of complex roots).
+
+Regarding how polynomial coefficients are printed on the typeset page by
+|\PolTypeset|:
+\begin{itemize}\def\everbatimtop {\MacroFont}% sans le \small
+\item The default for |\PolTypesetOne| is to use |\xintTeXsignedFrac| with
+  \LaTeX, |\xintTeXsignedOver| with Plain.  See the \pkg{xintexpr}
+  documentation for a description of what these macros do.  A sensible
+  definition is: 
+\begin{everbatim}
+  \def\PolTypesetOne#1{\PolDecToString{\xintREZ{#1}}}%
+\end{everbatim}
+% le \smallskip est ennuyeux ici
+  It means to use decimal notation, with perhaps a trailing denominator if the
+  argument is a fraction, and will suppress trailing zeros after the decimal
+  mark.
+
+\item
+  As these are expandable macros, they are usable to redefine
+  |\PolToExprCmd| as well:
+\begin{everbatim}
+  \def\PolToExprCmd#1{\PolDecToString{\xintREZ{#1}}}%
+\end{everbatim}
+% le \smallskip est ennuyeux ici
+  This will customize the output of |\PolToExpr| (which a priori is
+  destined for writes to external files but may also be used on the typeset
+  page).
+\end{itemize}
+
+With |\xintverbosetrue| in the \TeX\ source extra information relative
+to the internal data manipulated by the macros will be written to the |.log|
+file.
+
+\begin{framed}
+  Package macros related to root localization create (user-level) new
+  polynomials, or numeric variables, via a naming scheme using the given
+  |<sturmname>| as prefix. It is thus advisable to keep this
+  |<sturmname>| name-space separate from the one used to name polynomial or
+  scalar variables.
+\end{framed}
+
+\begin{framed}
+  Regrettably all examples here use the condemnable |\PolToSturm{f}{f}|
+  practice which means that internally defined polynomials will use as prefix
+  the original polynomial name.  This merge of namespaces may cause
+  overwriting previously defined data and may lead to hard-to-debug problems.
+\end{framed}
+
+
+\section{A first example}
+
+In this example the polynomial is square-free.
+\begin{everbatim*}
+  \poldef f(x) := x^7 - x^6 - 2x + 1;
+%
+  \PolToSturm{f}{f}
+  \PolSturmIsolateZeros{f}
+  The \PolTypeset{f} polynomial has \PolSturmNbOfIsolatedZeros{f} distinct real
+  roots which are located in the following intervals:
+  \PolPrintIntervals{f}
+\end{everbatim*}
+
+\begin{everbatim*}
+  Here is the second root with ten more decimal digits:
+  \PolRefineInterval[10]{f}{2}
+  $$\PolSturmIsolatedZeroLeft{f}{2}<Z_2<\PolSturmIsolatedZeroRight{f}{2}$$
+\end{everbatim*}
+
+\begin{everbatim*}
+  And here is the first root with twenty digits after decimal mark:
+  \PolEnsureIntervalLength{f}{1}{-20}
+  $$\PolSturmIsolatedZeroLeft{f}{1}<Z_1<\PolSturmIsolatedZeroRight{f}{1}$$
+\end{everbatim*}
+
+\begin{everbatim*}
+  The first element of the Sturm chain has degree $\PolDegree{f_0}$. As
+  this is the original degreee $\PolDegree{f}$ we know that $f$ is square free.
+  Its derivative is up to a constant \PolTypeset{f_1} (in this example
+  it is identical with it).
+  \PolToSturm{f_1}{f_1}\PolSturmIsolateZeros{f_1}%
+  The derivative has \PolSturmNbOfIsolatedZeros{f_1} distinct real
+  roots:
+  \PolPrintIntervals[W]{f_1}%
+  \PolEnsureIntervalLengths{f_1}{-10}%
+  Here they are with ten digits after decimal mark:
+  \PolPrintIntervals[W]{f_1}
+\end{everbatim*}
+
+\begin{everbatim*}
+  \PolDiff{f_1}{f''}
+  \PolToSturm{f''}{f''}
+  \PolSturmIsolateZeros{f''}
+  The second derivative is \PolTypeset{f''}.
+  It has \PolSturmNbOfIsolatedZeros{f''} distinct real
+  roots:
+  \PolPrintIntervals[X]{f''}%
+  Here is the positive one with 20 digits after decimal mark:
+  \PolEnsureIntervalLength{f''}{2}{-20}%
+  $$X_2 = \PolSturmIsolatedZeroLeft{f''}{2}\dots$$
+\end{everbatim*}
+%The more mathematically advanced among our dear readers will be able
+%  to give the exact value for $X_2$!
+
+\section{A degree four polynomial with nearby roots}
+
+
+Notice that this example is a bit outdated as |0.7| release has
+added |\PolSturmIsolateZeros**{<sturmname>}| which would find exactly
+the roots. The steps here retain their interest when one is interested
+in finding isolating intervals for example to prepare some demonstration
+of dichotomy method.
+
+
+\begin{everbatim*}
+  \PolDef{Q}{(x-1.050001)(x-1.105001)(x-1.110501)(x-1.111051)}
+  \PolTypeset{Q}
+  \PolToSturm{Q}{Q} % it is allowed to use same prefix for Sturm chain
+  \PolSturmIsolateZeros{Q}
+  \PolPrintIntervals{Q}
+\end{everbatim*}
+
+\begin{everbatim*}
+  \PolRefineInterval*{Q}{1}
+  \PolRefineInterval*{Q}{2}
+  \PolRefineInterval*{Q}{3}
+  \PolRefineInterval*{Q}{4}
+  \PolPrintIntervals{Q}
+\end{everbatim*}
+
+\begin{everbatim*}
+  \PolEnsureIntervalLengths{Q}{-6}
+  \PolPrintIntervals{Q}
+  % finds here all roots exactly
+\end{everbatim*}
+
+\section{The degree nine polynomial with 0.99, 0.999, 0.9999 as triple roots}
+
+Define a user command (\pkg[xint]{xinttools} is loaded automatically by
+\pkg{polexpr}):
+
+\begin{everbatim*}
+  \def\showmultiplicities#1{% #1 = "sturmname"
+  \xintFor* ##1 in {\xintSeq{1}{\PolSturmNbOfIsolatedZeros{#1}}}\do{%
+      The multiplicity is \PolSturmIsolatedZeroMultiplicity{#1}{##1}
+      \PolSturmIfZeroExactlyKnown{#1}{##1}%
+      {at the root $x=\PolSturmIsolatedZeroLeft{#1}{##1}$}
+      {for the root such that
+      $\PolSturmIsolatedZeroLeft{#1}{##1}<x<\PolSturmIsolatedZeroRight{#1}{##1}$}
+      \par
+  }}%
+\end{everbatim*}
+
+\begin{everbatim*}
+  \PolDef{f}{(x-0.99)^3(x-0.999)^3(x-0.9999)^3}
+  \def\PolTypesetOne#1{\PolDecToString{\xintREZ{#1}}}
+  \PolTypeset{f}\par
+\end{everbatim*}
+
+\begin{everbatim*}
+  \PolToSturm{f}{f}% it is allowed to use "polname" as "sturmname" too
+  \PolSturmIsolateZerosAndGetMultiplicities{f}% use the "sturmname" here
+  % or \PolSturmIsolateZeros*{f} which is exactly the same, but shorter..
+
+  \showmultiplicities{f}
+\end{everbatim*}
+% In this example, the output will look like this (but using math mode)::
+
+%   x^9 - 8.9667x^8 + 35.73400293x^7 - 83.070418400109x^6 + 124.143648875193123x^5
+%   - 123.683070924326075877x^4 + 82.149260397553075617891x^3 
+%   - 35.07602992699900159127007x^2 + 8.7364078733314648368671733x
+%   - 0.967100824643585986488103299
+
+%   The multiplicity is 3 at the root x = 0.99
+%   The multiplicity is 3 at the root x = 0.999
+%   The multiplicity is 3 at the root x = 0.9999
+
+% On first pass, these rational roots were found (due to their relative
+% magnitudes, using |\PolSturmIsolateZeros**| was not needed here). But
+% multiplicity computation works also with (decimal) roots not yet
+% identified or with non-decimal or irrational roots.
+
+It is fun to modify only a tiny bit the polynomial and see if polexpr
+survives:
+
+\begin{everbatim*}
+  \PolDef{g}{f(x)+1e-27}
+  \PolTypeset{g}\par
+  \PolToSturm{g}{g}
+  \PolSturmIsolateZeros*{g}
+
+  \showmultiplicities{g}
+\end{everbatim*}
+% This produces::
+
+%   x^9 - 8.9667x^8 + 35.73400293x^7 - 83.070418400109x^6 + 124.143648875193123x^5
+%   - 123.683070924326075877x^4 + 82.149260397553075617891x^3 
+%   - 35.07602992699900159127007x^2 + 8.7364078733314648368671733x
+%   - 0.967100824643585986488103298
+
+%   The multiplicity is 1 for the root such that 0.98 < x < 0.99
+%   The multiplicity is 1 for the root such that 0.9991 < x < 0.9992
+%   The multiplicity is 1 for the root such that 0.9997 < x < 0.9998
+
+This means that the multiplicity-3 roots each became a real and a pair of
+complex ones. Let's see them better:
+
+\begin{everbatim*}
+  \PolEnsureIntervalLengths{g}{-10}
+
+  \showmultiplicities{g}
+\end{everbatim*}
+% which produces::
+
+%   The multiplicity is 1 for the root such that 0.9899888032 < x < 0.9899888033
+%   The multiplicity is 1 for the root such that 0.9991447980 < x < 0.9991447981
+%   The multiplicity is 1 for the root such that 0.9997663986 < x < 0.9997663987
+
+\section{A degree five polynomial with three rational roots}
+
+\begin{everbatim*}
+  \poldef Q(x) :=  1581755751184441 x^5
+                 -14907697165025339 x^4
+                 +48415668972339336 x^3
+                 -63952057791306264 x^2
+                 +46833913221154895 x
+                 -49044360626280925;
+
+  \PolToSturm{Q}{Q}
+    \def\PolTypesetCmdPrefix#1{\allowbreak\xintiiifSgn{#1}{}{+}{+}}%
+    $Q_0(x) = \PolTypeset{Q_0}$
+  \PolSturmIsolateZeros**{Q}
+  \PolPrintIntervals{Q}
+
+  $Q_{norr}(x) = \PolTypeset{Q_norr}$
+\end{everbatim*}
+
+Here, all real roots are rational. Let's get their decimal expansion too:
+\begin{everbatim*}
+\begingroup
+  % print decimal expansion of the found roots
+  \def\PolPrintIntervalsPrintExactZero
+              {\xintTrunc{20}{\PolPrintIntervalsTheLeftEndPoint}\dots}
+  \PolPrintIntervals{Q}
+\endgroup % we localized the modified \PolPrintIntervalsPrintExactZero
+\end{everbatim*}
+
+
+  % Z_1 = 3.14159265358107777120...
+  % Z_2 = 3.14159265358979340254...
+  % Z_3 = 3.14159292035398230088...
+
+\section{A Mignotte type polynomial}
+
+
+\begin{everbatim*}
+  \PolDef{P}{x^10 - (10x-1)^2}%
+  \PolTypeset{P}              % prints it in expanded form
+  \PolToSturm{P}{P}           % we can use same prefix for Sturm chain
+  \PolSturmIsolateZeros{P}    % finds 4 real roots
+  This polynomial has \PolSturmNbOfIsolatedZeros{P} distinct real roots:
+  \PolPrintIntervals{P}%
+\end{everbatim*}
+Let us refine the second and third intervals to separate the corresponding
+roots:
+\begin{everbatim*}
+  \PolRefineInterval*{P}{2}% will refine to 0.0999990 < Z_2 < 0.0999991
+  \PolRefineInterval*{P}{3}% will refine to 0.100001 < Z_3 < 0.100002
+  \PolPrintIntervals{P}%
+\end{everbatim*}
+Let us now get to know all roots with 10 digits after decimal mark:
+\begin{everbatim*}
+  \PolEnsureIntervalLengths{P}{-10}%
+  \PolPrintIntervals{P}% now all roots are known 10 decimal digits after mark
+\end{everbatim*}
+Finally, we display 20 digits of the second root:
+\begin{everbatim*}
+  \PolEnsureIntervalLength{P}{2}{-20}% makes Z_2 known with 20 digits after mark
+  $$\PolSturmIsolatedZeroLeft{P}{2}<Z_2<\PolSturmIsolatedZeroRight{P}{2}$$
+\end{everbatim*}
+% The last line produces::
+
+%   0.09999900004999650028 < Z_2 < 0.09999900004999650029
+
+\section{The Wilkinson polynomial}
+
+
+See \url{https://en.wikipedia.org/wiki/Wilkinson%27s_polynomial}.
+
+
+\begin{everbatim*}
+  %\xintverbosetrue % for the curious...
+
+  \poldef f(x) := mul((x - i), i = 1..20);
+
+  \def\PolTypesetCmdPrefix#1{\allowbreak\xintiiifSgn{#1}{}{+}{+}}%
+  \def\PolTypesetOne#1{\xintDecToString{#1}}%
+
+  \noindent\PolTypeset{f}
+
+  \PolToSturm{f}{f}
+  \PolSturmIsolateZeros{f}
+  \PolPrintIntervals{f}
+  % \vfill\eject
+
+  % This page is commented out because it takes about 30s on a 2GHz CPU
+  % \poldef g(x) := f(x) - 2**{-23} x**19;
+
+  % \PolToSturm{g}{g}
+  % \noindent\PolTypeset{g_0}% integer coefficient primitive polynomial
+
+  % \PolSturmIsolateZeros{g}
+  % \PolEnsureIntervalLengths{g}{-10}
+
+  % \PolPrintIntervals*{g}
+\end{everbatim*}
+
+The first polynomial
+%
+%   f(x) = x**20
+%   - 210 x**19
+%   + 20615 x**18
+%   - 1256850 x**17
+%   + 53327946 x**16
+%   - 1672280820 x**15
+%   + 40171771630 x**14
+%   - 756111184500 x**13
+%   + 11310276995381 x**12
+%   - 135585182899530 x**11
+%   + 1307535010540395 x**10
+%   - 10142299865511450 x**9
+%   + 63030812099294896 x**8
+%   - 311333643161390640 x**7
+%   + 1206647803780373360 x**6
+%   - 3599979517947607200 x**5
+%   + 8037811822645051776 x**4
+%   - 12870931245150988800 x**3
+%   + 13803759753640704000 x**2
+%   - 8752948036761600000 x
+%   + 2432902008176640000
+%
+is handled fast enough, but the modified one |f(x) -
+2**-23 x**19| takes about 20x longer.
+
+Its Sturm chain polynomials
+have integer coefficients with up to 321 digits, whereas (surprisingly
+perhaps) those of the Sturm chain polynomials derived from |f| never
+have more than 21 digits ...
+
+Once the Sturm chain is computed and the zeros isolated, obtaining their
+decimal digits is relatively faster. Here are the ten real roots of
+|f(x) - 2**-23 x**19| which would be computed by the commented-out code above:
+\begin{everbatim}
+  Z_1 = 0.9999999999...
+  Z_2 = 2.0000000000...
+  Z_3 = 2.9999999999...
+  Z_4 = 4.0000000002...
+  Z_5 = 4.9999999275...
+  Z_6 = 6.0000069439...
+  Z_7 = 6.9996972339...
+  Z_8 = 8.0072676034...
+  Z_9 = 8.9172502485...
+  Z_10 = 20.8469081014...
+\end{everbatim}
+
+\section{The second Wilkinson polynomial}
+
+
+\begin{everbatim*}
+  \poldef f(x) := mul(x - 2^-i, i = 1..20);
+
+  %\PolTypeset{f}
+
+  \PolToSturm{f}{f}
+  \PolSturmIsolateZeros**{f}
+  \PolPrintIntervals{f}
+\end{everbatim*}
+
+This takes more time than the polynomial with 1, 2, .., 20 as roots but
+less than the latter modified by the |2**-23| tiny change to one of its
+coefficient.
+
+% Here is the output (with release 0.7.2)::
+
+%   Z_1  = 0.00000095367431640625
+%   Z_2  = 0.0000019073486328125
+%   Z_3  = 0.000003814697265625
+%   Z_4  = 0.00000762939453125
+%   Z_5  = 0.0000152587890625
+%   Z_6  = 0.000030517578125
+%   Z_7  = 0.00006103515625
+%   Z_8  = 0.0001220703125
+%   Z_9  = 1/4096
+%   Z_10 = 1/2048
+%   Z_11 = 1/1024
+%   Z_12 = 1/512
+%   Z_13 = 1/256
+%   Z_14 = 1/128
+%   Z_15 = 0.015625
+%   Z_16 = 0.03125
+%   Z_17 = 0.0625
+%   Z_18 = 0.125
+%   Z_19 = 0.25
+%   Z_20 = 0.5
+
+There is some incoherence in output format which has its source in the
+fact that some roots are found in branches which can only find decimal
+roots, whereas some are found in branches which could find general
+fractions and they use |\xintIrr| before storage of the found root.
+This may evolve in future.
+
+
+\section{The degree 41 polynomial with -2, -1.9, -1.8, ..., 0, 0.1, ..., 1.9, 2 as roots}
+
+
+
+\begin{everbatim*}
+  \PolDef{P}{mul((x-i*1e-1), i=-20..20)}% i/10 is same but less efficient
+\end{everbatim*}
+In the defining expression we could have used |i/10| but this gives
+less efficient internal form for the coefficients (the |10|'s end up
+in denominators).
+
+\begin{everbatim*}
+\begingroup
+  \def\PolToExprCmd#1{\PolDecToString{\xintREZ{#1}}}
+  \def\PolToExprTermPrefix#1{\newline\xintiiifSgn{#1}{}{+}{+}}
+  \def\PolToExprTimes{${}\cdot{}$}
+\ttfamily
+\PolToExpr{P}
+\endgroup
+\end{everbatim*}
+  % x^41
+  % -28.7*x^39
+  % +375.7117*x^37
+  % -2975.11006*x^35
+  % +15935.28150578*x^33
+  % -61167.527674162*x^31
+  % +173944.259366417394*x^29
+  % -373686.963560544648*x^27
+  % +613012.0665016658846445*x^25
+  % -771182.31133138163125495*x^23
+  % +743263.86672885754888959569*x^21
+  % -545609.076599482896371978698*x^19
+  % +301748.325708943677229642930528*x^17
+  % -123655.8987669450434698869844544*x^15
+  % +36666.1782054884005855608205864192*x^13
+  % -7607.85821367459445649518380016128*x^11
+  % +1053.15135918687298508885950223794176*x^9
+  % -90.6380005918141132650786081964032*x^7
+  % +4.33701563847327366842552218288128*x^5
+  % -0.0944770968420804735498178265088*x^3
+  % +0.00059190121813899276854174416896*x
+
+which shows coefficients with up to 36 significant digits...
+
+Stress test: not a hard challenge to \pkg{xint} + \pkg{polexpr}, but be a bit
+patient!
+
+\begin{everbatim*}
+  \PolDef{P}{mul((x-i*1e-1), i=-20..20)}%
+  \PolToSturm{P}{S}           % dutifully computes S_0, ..., S_{41}
+  % the [1] optional argument limits the search to interval (-10,10)
+  \PolSturmIsolateZeros[1]{S} % finds *exactly* (but a bit slowly) all 41 roots!
+  \PolPrintIntervals{S}       % nice, isn't it?
+% Unfortunately \PolPrintIntervals uses a non-breakable array environment
+% But see next section on how to customize \PolPrintIntervals and let it
+% allow pagebreaks
+\end{everbatim*}
+
+\begin{quote}
+  Release |0.5| has \emph{experimental} addition of optional argument |E| to
+  |\PolSturmIsolateZeros|. It instructs to search roots only in interval
+  |(-10^E, 10^E)|. Important: the extremities are \emph{assumed to not be roots}.
+  In this example, the |[1]| in |\PolSturmIsolateZeros[1]{S}| gives some speed
+  gain; without it, it turns out in this case that \pkg{polexpr} would have
+  started with |(-10^6, 10^6)| interval.
+
+  Please note that this feature may be removed or modified.
+\end{quote}
+
+\section{Roots of a Chebyshev polynomial}
+
+
+\begin{everbatim*}
+  \poldef T_0(x) := 1;
+  \poldef T_1(x) := x;
+  \catcode`@ 11
+  \count@ 2
+  \xintloop
+    \poldef T_\the\count@(x) :=
+            2x*T_\the\numexpr\count@-1\relax
+             - T_\the\numexpr\count@-2\relax;
+  \ifnum\count@<15
+  \advance\count@ 1
+  \repeat
+  \catcode`@ 12
+
+  $$T_{15} = \PolTypeset[X]{T_15}$$
+  \PolToSturm{T_15}{T_15}
+  \PolSturmIsolateZeros*{T_15}% "*" as we will want to confirm multiplicity one
+  % takes time (each next decimal digit is obtained by dichotomy)
+  \PolEnsureIntervalLengths{T_15}{-20}% ensure 20 decimal digits for each root
+\end{everbatim*}
+
+Here is now an example of customization.  Indeed
+|\PolPrintIntervals| default uses |array| and thus does not allow page breaks.
+And it uses |Left < Z < Right| as presentation of roots and we would like here
+rather |Z = decimal expansion...|.
+\begin{everbatim*}
+% 0.8.6 adds an internal patch which would allow usage of amsmath environments
+% like this:
+% \def\PolPrintIntervalsBeginEnv{\begin{align*}}
+% \def\PolPrintIntervalsEndEnv{\end{align*}}
+% (the problem was that align evaluates twice its contents so global variables
+%  need a reset at the end of first pass, which is what 0.8.6 took care of)
+%
+% Let's simply do this:
+\def\PolPrintIntervalsBeginEnv{\begingroup\leftskip3cm\relax}
+\def\PolPrintIntervalsEndEnv{\par\endgroup}
+%
+% The rows are separated by \PolPrintIntervalsRowSeparator which defaults to \\
+% with LaTeX and \cr with Plain. (prior to 0.8.6 it was hardcoded)
+\def\PolPrintIntervalsRowSeparator{\\[\jot]}
+% And we enter math mode manually at each row, copying pasting from package
+% defaults with some added mathon/mathoff:
+\def\PolPrintIntervalsKnownRoot{%
+   $\PolPrintIntervalsPrintMultiplicity\quad
+   \PolPrintIntervalsTheVar_{\PolPrintIntervalsTheIndex}=%
+   \PolPrintIntervalsPrintExactZero
+   $
+}%
+\def\PolPrintIntervalsUnknownRoot{%
+   $\PolPrintIntervalsPrintMultiplicity\quad
+   \xintifSgn{\PolPrintIntervalsTheLeftEndPoint}%
+     {\xintifSgn{\PolPrintIntervalsTheRightEndPoint}
+       {\PolPrintIntervalsTheVar_{\PolPrintIntervalsTheIndex}=%
+        \PolPrintIntervalsPrintRightEndPoint\dots}%
+      {0>\PolPrintIntervalsTheVar_{\PolPrintIntervalsTheIndex}>%
+        \PolPrintIntervalsPrintLeftEndPoint}%
+      {\impossibleA}}%
+    {\xintifSgn{\PolPrintIntervalsTheRightEndPoint}
+      {\impossibleB}%
+      {\impossibleC}%
+      {0<\PolPrintIntervalsTheVar_{\PolPrintIntervalsTheIndex}<%
+        \PolPrintIntervalsPrintRightEndPoint}}%
+    {\xintifSgn{\PolPrintIntervalsTheRightEndPoint}
+      {\impossibleD}%
+      {\impossibleE}%
+      {\PolPrintIntervalsTheVar_{\PolPrintIntervalsTheIndex}=%
+        \PolPrintIntervalsPrintLeftEndPoint\dots}}%
+   $
+}%
+\PolPrintIntervals{T_15}
+\end{everbatim*}
+\end{document}
+

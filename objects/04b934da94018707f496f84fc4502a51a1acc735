@@ -1,0 +1,362 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2018 - 2021 by ChairX
+%
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either
+% version 1.3 of this license or (at your option) any later
+% version.  The latest version of this license is in:
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of
+% LaTeX version 2005/12/01 or later.
+%
+% This file contains the documentation of all differential geometry related macros .
+%
+% Macros have to be described by (delete the first %)
+% \DescribeMacro{\macro}
+% Description and usage of the macro.
+%
+% The description will appear in the usage
+% part of the documentation. Use \subsubsection{} etc. for structuring.
+%
+% The implementation of the macros defined here has to be written in
+% chairxmathDiffgeo.dtx
+%\fi
+%
+%\subsubsection{General Macros in Differential Geometry} \label{sec:Doc_GeneralMacrosDiffGeo}
+%
+% \DescribeMacro{\Lie}
+% Lie derivative |\Lie_X f|: $\Lie_X f$
+%
+% \DescribeMacro{\Schouten}
+% Schouten bracket |\Schouten{X,Y}|: $\Schouten{X, Y}$.
+%
+% \DescribeMacro{\Forms}
+% Differential forms |\Forms(M)|: $\Forms(M)$
+%
+% \DescribeMacro{\ZdR}
+% DeRham cocycles |\ZdR(M, \mathbb{C})|: $\ZdR(M, \mathbb{C})$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\BdR}
+% DeRham coboundaries |\BdR(M, \mathbb{C})|: $\BdR(M, \mathbb{C})$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\HdR}
+% DeRham cohomology |\HdR(M, \mathbb{C})|: $\HdR(M, \mathbb{C})$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\Diffeo}
+% Diffeomorphism group |\Diffeo(M)|: $\Diffeo(M)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\Diffop}
+% Differential operators |\Diffop(M)|: $\Diffop(M)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\loc}
+% To be used as an index |M_\loc|: $M_\loc$ \\
+% Uses |scriptfont|.
+%
+% \DescribeMacro{\germ}
+% Germs of functions |\germ_p(f)|: $\germ_p(f)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\prol}
+% Prolongation map |\prol(f)|: $\prol(f)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\NRbracket}
+% Nijenhuis-Richardson bracket |\NRbracket{a, b}|: $\NRbracket{a, b}$ \\
+% Uses |scriptfont|.
+%
+% \DescribeMacro{\FNbracket}
+% Fröhlicher-Nijenhuis bracket |\FNbracket{a, b}|: $\FNbracket{a, b}$ \\
+% Uses |scriptfont|.
+%
+% \DescribeMacro{\Manifolds}
+% The category of manifolds |\Manifolds|: $\Manifolds$ \\
+% Uses |categorynamefont|
+%
+%\subsubsection{Lie Groups and Principal Fiber Bundles}
+%
+% \DescribeMacro{\lefttriv}
+% Left trivialization |\lefttriv|: $\lefttriv$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\righttriv}
+% Right trivialization |\righttriv|: $\righttriv$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\Gau}
+% Gauge group |\Gau(P)|: $\Gau(P)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\Conn}
+% Connection one-forms |\Conn(P)|: $\Conn(P)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\ratio}
+% Ratio map of principal fiber bundle |\ratio(u, v)|: $\ratio(u, v)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\Parallel}
+% Parallel transport |\Parallel_{0 \to 1, \gamma}(v)|: $\Parallel_{0 \to 1, \gamma}(v)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\CE}
+% Chevalley-Eilenberg as index |C_\CE|: $C_\CE$ \\
+% Uses |scriptfont|.
+%
+% \DescribeMacro{\HCE}
+% Chevalley-Eilenberg cohomology |\HCE(\liealg{g})|: $\HCE(\liealg{g})$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\fund}
+% Trivialization by fundamental vector fields |\fund|: $\fund$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\Universal}
+% Universal enveloping algebra |\Universal{\liealg{g}}|: $\Universal(\liealg{g})$\\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\BCH}
+% BCH as small index |\sigma_\BCH|: $\sigma_\BCH$\\
+% Uses |scriptfont|.
+%
+% \DescribeMacro{\LieGroups}
+% The category of Lie groups |\LieGroups|: $\LieGroups$ \\
+% Uses |categorynamefont|.
+%
+% \DescribeMacro{\Principal}
+% The category of principal bundles |\Principal|: $\Principal$ \\
+% Uses |categorynamefont|.
+%
+% \DescribeMacro{\GPrincipal}
+% The category of $G$-principal bundles |\GPrincipal|: $\GPrincipal$ \\
+% or with optional structure group |\GPrincipal[H]|: $\GPrincipal[H]$ \\
+% Uses |categorynamefont|.
+%
+% \DescribeMacro{\Fiber}
+% The category of fiber bundles |\Fiber|: $\Fiber$
+% Uses |categorynamefont|.
+%
+% \DescribeMacro{\FFiber}
+% The category of fiber bundles with typical fiber |\FFiber|:
+% $\FFiber$ \\
+% or with specified typical fiber |\FFiber[X]|: $\FFiber[X]$ \\
+% Uses |categorynamefont|.
+%
+% \DescribeMacro{\Pin}
+% The pin group |\Pin(q, p)|: $\Pin(p, q)$ \\
+% Uses |groupfont|.
+%
+% \DescribeMacro{\Spin}
+% The spin group |\Spin(q, p)|: $\Spin(p, q)$ \\
+% Uses |groupfont|.
+%
+%\subsubsection{(Pseudo-) Riemannian Geometry}
+%
+% \DescribeMacro{\nablaLC}
+% Levi-Civita covariant derivative |\nablaLC_X Y|: $\nablaLC_X Y$ \\
+% Uses |scriptfont|.
+%
+% \DescribeMacro{\Laplace}
+% Laplace operator |\Laplace f|: $\Laplace f$
+%
+% \DescribeMacro{\dAlembert}
+% D'Alembert operator |\dAlembert u|: $\dAlembert u$
+%
+% \DescribeMacro{\feynman}
+% Feynman slash notation |\feynman{D} = \feynman{A} + \feynman{\partial}|: 
+% $\feynman{D} = \feynman{A} + \feynman{\partial}$
+%
+% \DescribeMacro{\Dirac}
+% Dirac operator |\Dirac u|: $\Dirac u$
+%
+% \DescribeMacro{\rotation}
+% Rotation (i.e. curl) of a vector field |\rotation(X)|: $\rotation(X)$. Not to be confused with $\textrm{grün}(X)$. \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\curl}
+% Curl of a vector field |\curl \vec{X}|: $\curl \vec{X}$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\divergence}
+% Divergence of a vector field |\divergence(X)|: $\divergence(X)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\gradient}
+% Gradient of a function |\gradient f|: $\gradient f$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\Tor}
+% Torsion of a covariant derivative |\Tor (X, Y)|: $\Tor (X, Y)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\Ric}
+% Ricci curvature |\Ric (X, Y)|: $\Ric (X, Y)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\scal}
+% Scalar curvature |\scal|: $\scal$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\Riem}
+% The set of Riemannian metrics (linear and on manifolds) |\Riem(M)|: $\Riem(M)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\Hessian}
+% Hessian of a function |\Hessian(f) \in \Secinfty(\Sym^2T^*M)|: $\Hessian(f) \in \Secinfty(\Sym^2T^*M)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\hodge}
+% Hodge star operator |\alpha \mapsto \hodge\alpha|: $\alpha \mapsto \hodge\alpha$
+%
+%\subsubsection{Complex Geometry}
+%
+% \DescribeMacro{\Nijenhuis}
+% Nijenhuis operator |\Nijenhuis(X, Y)|: $\Nijenhuis(X, Y)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\del}
+% Dolbeault operator |\del \omega|: $\del \omega$
+%
+% \DescribeMacro{\delbar}
+% CC of Dolbeault operator |\delbar\alpha|: $\delbar\alpha$
+%
+% \DescribeMacro{\FS}
+% Fubini Study as very small index |\omega_\FS|: $\omega_\FS$ \\
+% Uses |scriptfont|.
+%
+%\subsubsection{Vector Bundles}
+%
+% \DescribeMacro{\Lift}
+% Generic lift of something |\nabla^\Lift|: $\nabla^\Lift$ \\
+% Uses |scriptfont|.
+%
+% \DescribeMacro{\ver}
+% Vertical lift |X^\ver|: $X^\ver$ \\
+% Uses |scriptfont|.
+%
+% \DescribeMacro{\hor}
+% Horizontal lift |X^\hor|: $X^\hor$ \\
+% Uses |scriptfont|.
+%
+% \DescribeMacro{\Ver}
+% Vertical subbundle |\Ver(E)|: $\Ver(E)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\Hor}
+% Horizontal subbundle |\Hor(E)|: $\Hor(E)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\Sec}
+% $C^k$-sections |\Sec(E)|: $\Sec(E)$ and |\Sec[2](E)|: $\Sec[2](E)$
+%
+% \DescribeMacro{\Secinfty}
+% Smooth sections |\Secinfty(E)|: $\Secinfty(E)$
+%
+% \DescribeMacro{\HolSec}
+% Holomorphic sections |\HolSec(U, E)|: $\HolSec(U, E)$ \\
+% Uses |scriptfont|.
+%
+% \DescribeMacro{\SymD}
+% Symmetrized covariant derivative |\SymD^n f|: $\SymD^n f$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\Densities}
+% Densities of a vector bundle of rank $n$ or specific rank |\Densities TM|: $\Densities TM$
+% and |\Densities[k]^\alpha E|: $\Densities[k]^\alpha E$.
+%
+% \DescribeMacro{\MeasurableSections}
+% Measurable sections |\MeasurableSections(E)|: $\MeasurableSections(E)$ \\
+% Uses |spacefont|.
+%
+% \DescribeMacro{\IntpSections}
+% $p$-Integrable Sections |\IntpSections(\Densities T^*M)|: $\IntpSections(\Densities T^*M)$
+% or with optional argument |\IntpSections[q](\Densities T^*M)|: $\IntpSections[q](\Densities T^*M)$.
+%
+% \DescribeMacro{\IntegrableSections}
+% Integrable sections |\IntegrableSections(\Densities T^*M)|: $\IntegrableSections(\Densities T^*M)$
+%
+% \DescribeMacro{\Translation}
+% Fiber translations |\Translation_A|: $\Translation_A$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\frames}
+% Font for local frames |\frames{e}_1, \ldots, \frames{e}_k|: $\frames{e}_1, \ldots, \frames{e}_k$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\Frames}
+% Frame bundle of a vector bundle |\Frames(E) \longrightarrow M|:\\
+% $\Frames(E) \longrightarrow M$ \\
+% Uses |operatorfont|.
+%
+%\DescribeMacro{\FDiff}
+% Fiber derivative |\FDiff L|: $\FDiff L$ \\
+% Uses |operatorfont|.
+%
+%\subsubsection{Symplectic and Poisson Geometry}
+%
+% \DescribeMacro{\Sympl}
+% Symplectomorphism group |\Sympl(M, \omega)|: $\Sympl(M, \omega)$ \\
+% Uses |groupfont|.
+%
+% \DescribeMacro{\Jacobiator}
+% Jacobiator |\Jacobiator|: $\Jacobiator$
+% and |\Jacobiator[\nu]|: $\Jacobiator[\nu]$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\red}
+% Reduced as an index |M_\red|: $M_\red$ \\
+% Uses |scriptfont|.
+%
+% \DescribeMacro{\Hess}
+% Hess map |\Hess|: $\Hess(\nabla)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\KKS}
+% KKS as tiny index |\{f, g\}_\KKS|: $\{f, g\}_\KKS$ \\
+% Uses |scriptfont|.
+%
+% \DescribeMacro{\Courant}
+% Courant bracket |\Courant{a, b}|: $\Courant{a, b}$ \\
+% Uses |scriptfont|.
+%
+% \DescribeMacro{\Dorfman}
+% Dorfman bracket |\Dorfman{(x, \xi), (y, \eta)}|:
+% $\Dorfman{(x, \xi), (y, \eta)}$ \\
+% Uses |scriptfont|
+%
+% \DescribeMacro{\Dir}
+% (Linear) Dirac structures |\Dir(V)|: $\Dir(V)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\Forward}
+% Forward map |\Forward(\phi)|: $\Forward(\phi)$ 
+%
+% \DescribeMacro{\Backward}
+% Backward map |\Backward(\phi)|: $\Backward(\phi)$ 
+%
+% \DescribeMacro{\Tangent}
+% Generalized tangent bundle/map |\Tangent M|: $\Tangent M$ 
+%
+% \DescribeMacro{\MWreduction}
+% Marsden-Weinstein reduction |M \MWreduction G|: $M \MWreduction G$ 
+%
+% \DescribeMacro{\Mon}
+% Monodromy groupoid |\Mon(M)|: $\Mon(M)$ \\
+% Uses |operatorfont|.
+%
+% \DescribeMacro{\Hol}
+% Holonomy groupoid |\Hol(M)|: $\Hol(M)$ \\
+% Uses |operatorfont|.
+%
+% \endinput
+% Local Variables:
+% mode: doctex
+% TeX-master: "nchairx"
+% End:

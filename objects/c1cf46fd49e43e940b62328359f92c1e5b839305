@@ -1,0 +1,731 @@
+% \iffalse meta-comment
+%
+%% File: xtemplate.dtx
+%
+% Copyright (C) 1999 Frank Mittelbach, Chris Rowley, David Carlisle
+%           (C) 2004-2010 Frank Mittelbach, The LaTeX Project
+%           (C) 2011-2024 The LaTeX Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+% This file is part of the "l3packages bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/latex3
+%
+% for those people who are interested.
+%
+%<*driver>
+\documentclass[full]{l3doc}
+\usepackage{amstext}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \title{^^A
+%   The \pkg{xtemplate} package\\ Prototype document functions^^A
+% }
+%
+% \author{^^A
+%  The \LaTeX{} Project\thanks
+%    {^^A
+%      E-mail:
+%        \href{mailto:latex-team@latex-project.org}
+%          {latex-team@latex-project.org}^^A
+%    }^^A
+% }
+%
+% \date{Released 2024-08-16}
+%
+% \maketitle
+%
+% \begin{documentation}
+%
+% There are three broad \enquote{layers} between putting down ideas into
+% a source file and ending up with a typeset document. These layers of
+% document writing are
+% \begin{enumerate}
+%   \item authoring of the text with mark-up;
+%   \item document layout design;
+%   \item implementation (with \TeX{} programming) of the design.
+% \end{enumerate}
+% We write the text as an author, and we see the visual output of the design
+% after the document is generated; the \TeX{} implementation in the middle is
+% the glue between the two.
+%
+% \LaTeX{}'s greatest success has been to standardise a system of mark-up that
+% balances the trade-off between ease of reading and ease of writing to suit
+% almost all forms of technical writing. It's
+% other original strength was a good background in typographical design; while
+% the standard \LaTeXe{} classes look somewhat dated now in terms of their
+% visual design, their typography is generally sound. (Barring the occasional
+% minor faults.)
+%
+% However, \LaTeXe{} has always lacked a standard approach to customising
+% the visual design of a document. Changing the looks of the standard classes
+% involved either:
+% \begin{itemize}
+%   \item Creating a new version of the implementation code of the class and
+%     editing it.
+%   \item Loading one of the many packages to customise certain elements of
+%     the standard classes.
+%   \item Loading a completely different document class, such as
+%     \cls{KOMA-Script} or \cls{memoir}, that allows easy customisation.
+% \end{itemize}
+% All three of these approaches have their drawbacks and learning curves.
+%
+% The idea behind \pkg{xtemplate} is to cleanly separate the three layers
+% introduced at the beginning of this section, so that document authors who
+% are not programmers can easily change the design of their documents.
+% \pkg{xtemplate} also makes it easier for \LaTeX{} programmers to provide
+% their own customisations on top of a pre-existing class.
+%
+% \section{What is a document?}
+%
+% Besides the textual content of the words themselves, the source file
+% of a document contains mark-up elements that add structure to the
+% document. These elements include sectional divisions, figure/table
+% captions, lists of various sorts, theorems/proofs, and so on.
+% The list will be different for every document that can be written.
+%
+% Each element can be represented logically without worrying about the
+% formatting, with mark-up such as \cs{section}, \cs{caption},
+% |\begin{enumerate}| and so on. The output of each one of these
+% document elements will be a typeset representation of the information
+% marked up, and the visual arrangement and design of these elements
+% can vary widely in producing a variety of desired outcomes.
+%
+% For each type of document element, there may be design variations that
+% contain the same sort of information but present it in slightly
+% different ways. For example, the difference between a numbered and an
+% unnumbered section, \cs{section} and |\section*|, or the difference
+% between an itemised list or an enumerated list.
+%
+% There are three distinct layers in the definition of
+% \enquote{a document} at this level
+% \begin{enumerate}
+%   \item semantic elements such as the ideas of sections and lists;
+%   \item a set of design solutions for representing these elements
+%     visually;
+%   \item specific variations for these designs that represent the
+%     elements in the document.
+% \end{enumerate}
+% In the parlance of the template system, these are called object types,
+% templates, and instances, and they are discussed below in sections
+% \ref{sec:objects}, \ref{sec:templates}, and~\ref{sec:instances},
+% respectively.
+%
+% \section {Objects, templates, and instances}
+%
+% By formally declaring documents to be composed of mark-up elements
+% grouped into objects, which are interpreted and typeset with a set of
+% templates, each of which has one or more instances with which to
+% compose each and every semantic unit of the text, we can cleanly
+% separate the components of document construction.
+%
+% All of the structures provided by the template system are global,
+% and do not respect \TeX{} grouping.
+%
+% \section{Object types}
+% \label{sec:objects}
+%
+% An \emph{object type} (sometimes just \enquote{object}) is an
+% abstract idea of a document element that takes a fixed number of
+% arguments corresponding to the information from the document author
+% that it is representing. A sectioning object, for example, might take
+% three inputs: \enquote{title}, \enquote{short title}, and
+% \enquote{label}.
+%
+% Any given document class will define which object types are to be
+% used in the document, and any template of a given object type can be
+% used to generate an instance for the object. (Of course, different
+% templates will produce different typeset representations, but the
+% underlying content will be the same.)
+%
+% \begin{function}{\DeclareObjectType}
+%   \begin{syntax}
+%     \cs{DeclareObjectType} \Arg{object type} \Arg{no. of args}
+%   \end{syntax}
+%  This function defines an \meta{object type} taking
+%  \meta{number of arguments}, where the \meta{object type} is an
+%  abstraction as discussed above. For example,
+%   \begin{verbatim}
+%     \DeclareObjectType{sectioning}{3}
+%   \end{verbatim}
+%  creates an object type \enquote{sectioning}, where each use of that
+%  object type will need three arguments.
+% \end{function}
+%
+% \section{Templates}
+% \label{sec:templates}
+%
+% A \emph{template} is a generalised design solution for representing
+% the information of a specified object type. Templates that do the same
+% thing, but in different ways, are grouped together by their object type
+% and given separate names. There are two important parts to a template:
+% \begin{itemize}
+%   \item the parameters it takes to vary the design it is producing;
+%   \item the implementation of the design.
+% \end{itemize}
+% As a document author or designer does not care about the
+% implementation but rather only the interface to the template, these two
+% aspects of the template definition are split into two independent
+% declarations, \cs{DeclareTemplateInterface} and
+% \cs{DeclareTemplateCode}.
+%
+% \begin{function}{\DeclareTemplateInterface}
+%   \begin{syntax}
+%     \cs{DeclareTemplateInterface}
+%     ~~\Arg{object type} \Arg{template} \Arg{no.~of args}
+%     ~~\Arg{key list}
+%   \end{syntax}
+%   A \meta{template} interface is declared for a particular
+%   \meta{object type}, where the \meta{number of arguments} must
+%   agree with the object type declaration. The interface itself is
+%   defined by the \meta{key list}, which is itself a key--value list
+%   taking a specialized format:
+%   \begin{quotation}
+%     \obeylines
+%     \noindent
+%      \meta{key1}~":"~\meta{key type1}~","
+%      \meta{key2}~":"~\meta{key type2}~","
+%      \meta{key3}~":"~\meta{key type3}~"="~\meta{default3}~","
+%      \meta{key4}~":"~\meta{key type4}~"="~\meta{default4}~","
+%      \ldots
+%    \end{quotation}
+%   Each \meta{key} name should consist of \textsc{ascii} characters,
+%   with the exception of |,|, |=| and \verb*| |. The recommended form
+%   for key names is to use lower case letters, with dashes to separate
+%   out different parts. Spaces are ignored in key names, so they can be
+%   included or missed out at will. Each \meta{key} must have a
+%   \meta{key type}, which defined the type of input that the \meta{key}
+%   requires. A full list of key types is given in
+%   Table~\ref{tab:key-types}.  Each key may have a \meta{default}
+%   value, which will be used in by the template if the \meta{key} is
+%   not set explicitly. The \meta{default} should be of the correct
+%   form to be accepted by the \meta{key type} of the \meta{key}: this
+%   is not checked by the code.
+% \end{function}
+%
+%   \begin{table}
+%     \centering
+%     \begin{tabular}{>{\ttfamily}ll}
+%       \toprule
+%       \multicolumn{1}{l}{Key-type} & Description of input \\
+%       \midrule
+%       boolean    & \texttt{true} or \texttt{false}            \\
+%       choice\Arg{choices}
+%         & A list of pre-defined \meta{choices} \\
+%       commalist  & A comma-separated list                        \\
+%       function\Arg{$N$}
+%         & A function definition with $N$ arguments
+%          ($N$ from $0$ to $9$) \\
+%       instance\Arg{name}
+%         & An instance of type \meta{name} \\
+%       integer    & An integer or integer expression            \\
+%       length     & A fixed length                              \\
+%       muskip     & A math length with shrink and stretch components \\
+%       real       & A real (floating point) value               \\
+%       skip       & A length with shrink and stretch components \\
+%       tokenlist  & A token list: any text or commands          \\
+%       \bottomrule
+%     \end{tabular}
+%     \caption{Key-types for defining template interfaces with
+%       \cs{DeclareTemplateInterface}.}
+%     \label{tab:key-types}
+%   \end{table}
+%
+% \begin{function}{\KeyValue}
+%   \begin{syntax}
+%     \cs{KeyValue} \Arg{key name}
+%   \end{syntax}
+%   There are occasions where the default (or value) for one key
+%   should be taken from another. The \cs{KeyValue} function can be
+%   used to transfer this information without needing to know the
+%   internal implementation of the key:
+%   \begin{verbatim}
+%     \DeclareTemplateInterface { object } { template } { no. of args }
+%       {
+%         key-name-1 : key-type = value ,
+%         key-name-2 : key-type = \KeyValue { key-name-1 },
+%         ...
+%       }
+%   \end{verbatim}
+% \end{function}
+%
+% \begin{function}{\DeclareTemplateCode}
+%   \begin{syntax}
+%     \cs{DeclareTemplateCode}
+%     ~~\Arg{object type} \Arg{template} \Arg{no.~of args}
+%     ~~\Arg{key bindings} \Arg{code}
+%   \end{syntax}
+%   The relationship between a templates keys and the internal
+%   implementation is created using the \cs{DeclareTemplateCode}
+%   function. As with \cs{DeclareTemplateInterface}, the
+%   \meta{template} name is given along with the \meta{object type}
+%   and \meta{number of arguments} required. The \meta{key bindings}
+%   argument is a key--value list which specifies the relationship
+%   between each \meta{key} of the template interface with an
+%   underlying\meta{variable}.
+%
+%   \begin{quotation}
+%     \obeylines
+%     \noindent
+%     \meta{key1}~"="~\meta{variable1},
+%     \meta{key2}~"="~\meta{variable2},
+%     \meta{key3}~"="~global~\meta{variable3},
+%     \meta{key4}~"="~global~\meta{variable4},
+%     \ldots
+%   \end{quotation}
+%   With the exception of the choice, code and function key types,
+%   the \meta{variable} here should be the name of an existing
+%   \LaTeX3 register. As illustrated, the key word \enquote{global}
+%   may be included in the listing to indicate that the \meta{variable}
+%   should be assigned globally. A full list of variable bindings is
+%   given in Table~\ref{tab:key-vars}.
+%
+%   The \meta{code} argument of \cs{DeclareTemplateCode} is used
+%   as the replacement text for the template when it is used, either
+%   directly or as an instance. This may therefore accept arguments
+%   |#1|, |#2|, \emph{etc}.~as detailed by the \meta{number of arguments}
+%   taken by the object type.
+% \end{function}
+%
+%   \begin{table}
+%     \centering
+%     \begin{tabular}{>{\ttfamily}ll}
+%       \toprule
+%       \multicolumn{1}{l}{Key-type} & Description of binding \\
+%       \midrule
+%       boolean    & Boolean variable, \emph{e.g}.~\cs{l_tmpa_bool}      \\
+%       choice
+%         & List of choice implementations
+%         (see Section~\ref{sec:choices-key}) \\
+%       commalist  & Comma list, \emph{e.g}.~\cs{l_tmpa_clist}           \\
+%       function
+%         & Function taking $N$ arguments, \emph{e.g}.~\cs{use_i:nn}     \\
+%       instance \\
+%       integer    & Integer variable, \emph{e.g}.~\cs{l_tmpa_int}       \\
+%       length     & Dimension variable, \emph{e.g}.~\cs{l_tmpa_dim}     \\
+%       muskip     & Muskip variable, \emph{e.g}.~\cs{l_tmpa_muskip}     \\
+%       real       & Floating-point variable, \emph{e.g}.~\cs{l_tmpa_fp} \\
+%       skip       & Skip variable, \emph{e.g}.~\cs{l_tmpa_skip}         \\
+%       tokenlist  & Token list variable, \emph{e.g}.~\cs{l_tmpa_tl}     \\
+%       \bottomrule
+%     \end{tabular}
+%     \caption{Bindings required for different key types when defining
+%       template implementations with \cs{DeclareTemplateCode}. Apart
+%       from \texttt{code}, \texttt{choice} and \texttt{function}
+%       all of these accept the key word \texttt{global} to carry
+%       out a global assignment.}
+%     \label{tab:key-vars}
+%   \end{table}
+%
+% \begin{function}{\AssignTemplateKeys}
+%   \begin{syntax}
+%     \cs{AssignTemplateKeys}
+%   \end{syntax}
+%   In the final argument of \cs{DeclareTemplateCode} the assignment of
+%   keys defined by the template may be delayed by including the command
+%   \cs{AssignTemplateKeys}. If this is \emph{not} present, keys are assigned
+%   immediately before the template code. If \cs{AssignTemplateKeys} is
+%   present, assignment is delayed until this point. Note that the
+%   command must be \emph{directly} present in the code, not placed
+%   within a nested command/macro.
+% \end{function}
+%
+% \section{Multiple choices}
+% \label{sec:choices-key}
+%
+% The \texttt{choice} key type implements multiple choice input. At the
+% interface level, only the list of valid choices is needed:
+% \begin{verbatim}
+%   \DeclareTemplateInterface { foo } { bar } { 0 }
+%     { key-name : choice { A, B, C } }
+% \end{verbatim}
+% where the choices are given as a comma-list (which must therefore
+% be wrapped in braces). A default value can also be given:
+% \begin{verbatim}
+%   \DeclareTemplateInterface { foo } { bar } { 0 }
+%     { key-name : choice { A, B, C } = A }
+% \end{verbatim}
+%
+% At the implementation level, each choice is associated with code,
+% using a nested key--value list.
+% \begin{verbatim}
+%   \DeclareTemplateCode { foo } { bar } { 0 }
+%     {
+%       key-name =
+%         {
+%           A = Code-A ,
+%           B = Code-B ,
+%           C = Code-C
+%         }
+%      }
+%      { ... }
+% \end{verbatim}
+% The two choice lists should match, but in the implementation a
+% special \texttt{unknown} choice is also available. This can be used
+% to ignore values and implement an \enquote{else} branch:
+% \begin{verbatim}
+%   \DeclareTemplateCode { foo } { bar } { 0 }
+%     {
+%       key-name =
+%         {
+%           A       = Code-A ,
+%           B       = Code-B ,
+%           C       = Code-C ,
+%           unknown = Else-code
+%         }
+%      }
+%      { ... }
+% \end{verbatim}
+% The \texttt{unknown} entry must be the last one given, and should
+% \emph{not} be listed in the interface part of the template.
+%
+% For keys which accept the values \texttt{true} and \texttt{false}
+% both the boolean and choice key types can be used. As template
+% interfaces are intended to prompt clarity at the design level, the
+% boolean key type should be favoured, with the choice type reserved
+% for keys which take arbitrary values.
+%
+% \section{Instances}
+% \label{sec:instances}
+%
+% After a template is defined it still needs to be put to use. The
+% parameters that it expects need to be defined before it can be used in
+% a document. Every time a template has parameters given to it, an
+% \emph{instance} is created, and this is the code that ends up in the
+% document to perform the typesetting of whatever pieces of information
+% are input into it.
+%
+% For example, a template might say \enquote{here is a section with or
+% without a number that might be centred or left aligned and print its
+% contents in a certain font of a certain size, with a bit of a gap
+% before and after it} whereas an instance declares \enquote{this is a
+% section with a number, which is centred and set in $12\,\text{pt}$
+% italic with a $10\,\text{pt}$ skip before and a
+% $12\,\text{pt}$ skip after it}. Therefore, an instance is just a
+% frozen version of a template with specific settings as chosen by the
+% designer.
+%
+% \begin{function}{\DeclareInstance}
+%   \begin{syntax}
+%     \cs{DeclareInstance}
+%     ~~\Arg{object type} \Arg{instance} \Arg{template} \Arg{parameters}
+%   \end{syntax}
+%   This function uses a \meta{template} for an \meta{object type}
+%   to create an \meta{instance}. The \meta{instance} will be set
+%   up using the \meta{parameters}, which will set some of the
+%   \meta{keys} in the \meta{template}.
+%
+%   As a practical example, consider an object type for document sections
+%   (which might include chapters, parts, sections, \emph{etc}.), which
+%   is called \texttt{sectioning}. One possible template for this
+%   object type might be called \texttt{basic}, and one instance of this
+%   template would be a numbered section. The instance declaration might
+%   read:
+%   \begin{verbatim}
+%     \DeclareInstance { sectioning } { section-num } { basic }
+%       {
+%         numbered      = true ,
+%         justification = center ,
+%         font          =\normalsize\itshape ,
+%         before-skip   = 10pt ,
+%         after-skip    = 12pt ,
+%       }
+%   \end{verbatim}
+%   Of course, the key names here are entirely imaginary, but illustrate
+%   the general idea of fixing some settings.
+% \end{function}
+%
+% \begin{function}{\IfInstanceExistT, \IfInstanceExistF, \IfInstanceExistTF}
+%   \begin{syntax}
+%     \cs{IfInstanceExistTF} \Arg{object type} \Arg{instance} \Arg{true code} \Arg{false code}
+%   \end{syntax}
+%   Tests if the named \meta{instance} of a \meta{object type} exists, and
+%   then inserts the appropriate code into the input stream.
+% \end{function}
+%
+% \begin{function}{\DeclareInstanceCopy}
+%   \begin{syntax}
+%     \cs{DeclareInstanceCopy}
+%     ~~\Arg{object type} \Arg{instance2} \Arg{instance1}
+%   \end{syntax}
+%   Copies the \meta{values} for \meta{instance1} for an
+%   \meta{object type} to \meta{instance2}.
+% \end{function}
+%
+% \section{Document interface}
+%
+% After the instances have been chosen, document commands must be
+% declared to use those instances in the document. \cs{UseInstance}
+% calls instances directly, and this command should be used internally
+% in document-level mark-up.
+%
+% \begin{function}{\UseInstance}
+%   \begin{syntax}
+%     \cs{UseInstance}
+%     ~~\Arg{object type} \Arg{instance} \meta{arguments}
+%   \end{syntax}
+%   Uses an \meta{instance} of the \meta{object type}, which will require
+%   \meta{arguments} as determined by the number specified for the
+%   \meta{object type}. The \meta{instance} must have been declared
+%   before it can be used, otherwise an error is raised.
+% \end{function}
+%
+% \begin{function}{\UseTemplate}
+%   \begin{syntax}
+%     \cs{UseTemplate} \Arg{object type} \Arg{template}
+%     ~~\Arg{settings} \meta{arguments}
+%   \end{syntax}
+%   Uses the \meta{template} of the specified \meta{object type},
+%   applying the \meta{settings} and absorbing \meta{arguments} as
+%   detailed by the \meta{object type} declaration. This in effect
+%   is the same as creating an instance using \cs{DeclareInstance}
+%   and immediately using it with \cs{UseInstance}, but without the
+%   instance having any further existence. It is therefore useful where
+%   a template needs to be used once.
+%
+%   This function can also be used as the argument to \texttt{instance}
+%   key types:
+%   \begin{verbatim}
+%     \DeclareInstance { object } { template } { instance }
+%       {
+%         instance-key =
+%           \UseTemplate { object2 } { template2 } { <settings> }
+%       }
+%   \end{verbatim}
+% \end{function}
+%
+% \section{Changing existing definitions}
+%
+% Template parameters may be assigned specific defaults for instances
+% to use if the instance declaration doesn't explicit set those
+% parameters. In some cases, the document designer will wish to edit
+% these defaults to allow them to \enquote{cascade} to the instances.
+% The alternative would be to set each parameter identically for each
+% instance declaration, a tedious and error-prone process.
+%
+% \begin{function}{\EditTemplateDefaults}
+%   \begin{syntax}
+%     \cs{EditTemplateDefaults}
+%     ~~\Arg{object type} \Arg{template} \Arg{new defaults}
+%   \end{syntax}
+%   Edits the \meta{defaults} for a \meta{template} for an
+%   \meta{object type}. The \meta{new defaults}, given as a key--value
+%   list, replace the existing defaults for the \meta{template}. This
+%   means that the change will apply to instances declared after the
+%   editing, but that instances which have already been created are
+%   unaffected.
+% \end{function}
+%
+% \begin{function}{\EditInstance}
+%   \begin{syntax}
+%     \cs{EditInstance}
+%     ~~\Arg{object type} \Arg{instance} \Arg{new values}
+%   \end{syntax}
+%   Edits the \meta{values} for an \meta{instance} for an
+%   \meta{object type}. The \meta{new values}, given as a key--value
+%   list, replace the existing values for the \meta{instance}. This
+%   function is complementary to \cs{EditTemplateDefaults}:
+%   \cs{EditInstance} changes a single instance while leaving the
+%   template untouched.
+% \end{function}
+%
+% \section{When template parameters should be frozen}
+%
+% A class designer may be inheriting templates declared by someone else,
+% either third-party code or the \LaTeX{} kernel itself. Sometimes these
+% templates will be overly general for the purposes of the document.
+% The user should be able to customise parts of the template instances,
+% but otherwise be restricted to only those parameters allowed by the
+% designer.
+%
+% \begin{function}{\DeclareRestrictedTemplate}
+%   \begin{syntax}
+%     \cs{DeclareRestrictedTemplate}
+%     ~~\Arg{object type} \Arg{parent template} \Arg{new template}
+%     ~~\Arg{parameters}
+%   \end{syntax}
+%   Creates a copy of the \meta{parent template} for the
+%   \meta{object type} called \meta{new template}. The key--value list
+%   of \meta{parameters} applies in the \meta{new template} and cannot
+%   be changed when creating an instance.
+% \end{function}
+%
+% \section{\emph{Ad hoc} adjustment of templates}
+%
+% \begin{function}{\SetTemplateKeys}
+%   \begin{syntax}
+%    \cs{SetTemplateKeys} \Arg{object type} \Arg{template} \Arg{keyvals}
+%   \end{syntax}
+%   At point of use it may be useful to apply changed to individual instances.
+%   This is supported as each template key is made available for adjustment
+%   using \cs{SetTemplateKeys}.
+% \end{function}
+%
+% For example, after
+% \begin{verbatim}
+%   \DeclareObjectType{MyObj}{0}
+%   \DeclareTemplateInterface{MyObj}{TemplateA}{0}
+%     {
+%       akey: tokenlist  ,
+%       bkey: function{2}
+%     }
+%   \DeclareTemplateCode{MyObj}{TemplateA}{0}
+%     {
+%       akey = SomeTokens ,
+%       bkey = \func:nn ,
+%     }
+% \end{verbatim}
+% the template keys could be adjusted in an \emph{ad hoc} fashion using
+% \begin{verbatim}
+%   \SetTemplateKeys{MyObj}{TemplateA}
+%     {
+%       akey = OtherTokens ,
+%       bkey = \AltFunc:nn
+%     }
+% \end{verbatim}
+%
+% \section{Getting information about templates and instances}
+%
+% \begin{function}{\ShowInstanceValues}
+%   \begin{syntax}
+%    \cs{ShowInstanceValues} \Arg{object type} \Arg{instance}
+%   \end{syntax}
+%   Shows the \meta{values} for an \meta{instance} of the given
+%   \meta{object type} at the terminal.
+% \end{function}
+%
+% \begin{function}{\ShowTemplateCode}
+%   \begin{syntax}
+%     \cs{ShowTemplateCode} \Arg{object type} \Arg{template}
+%   \end{syntax}
+%   Shows the \meta{code} of a \meta{template} for an \meta{object type}
+%   in the terminal.
+% \end{function}
+%
+% \begin{function}{\ShowTemplateDefaults}
+%   \begin{syntax}
+%     \cs{ShowTemplateDefaults} \Arg{object type} \Arg{template}
+%   \end{syntax}
+%   Shows the \meta{default} values of a \meta{template} for an
+%   \meta{object type} in the terminal.
+% \end{function}
+%
+% \begin{function}{\ShowTemplateInterface}
+%   \begin{syntax}
+%     \cs{ShowTemplateInterface} \Arg{object type} \Arg{template}
+%   \end{syntax}
+%  Shows the \meta{keys} and associated \meta{key types} of a
+%   \meta{template} for an \meta{object type} in the terminal.
+% \end{function}
+%
+% \begin{function}{\ShowTemplateVariables}
+%   \begin{syntax}
+%     \cs{ShowTemplateVariables} \Arg{object type} \Arg{template}
+%   \end{syntax}
+%   Shows the \meta{variables} and associated \meta{keys} of a
+%   \meta{template} for an \meta{object type} in the terminal. Note that
+%   \texttt{code} and \texttt{choice} keys do not map directly to variables
+%   but to arbitrary code. For \texttt{choice} keys, each valid choice
+%   is shown as a separate entry in the list, with the key name and choice
+%   separated by a space, for example
+%   \begin{verbatim}
+%     Template 'example' of object type 'example' has variable mapping:
+%     >  demo unknown  =>  \def \demo {?}
+%     >  demo c  =>  \def \demo {c}
+%     >  demo b  =>  \def \demo {b}
+%     >  demo a  =>  \def \demo {a}.
+%   \end{verbatim}
+%   would be shown for a choice key \texttt{demo} with valid choices
+%   \texttt{a}, \texttt{b} and \texttt{c}, plus code for an \texttt{unknown}
+%   branch.
+% \end{function}
+%
+% \section{Collections}
+%
+% The implementation of templates includes a concept termed
+% \enquote{collections}. The idea is that by activating a collection, a
+% set of instances can rapidly be set up. An example use case would be
+% collections for \texttt{frontmatter}, \texttt{mainmatter} and
+% \texttt{backmatter} in a book. This mechanism is currently implemented
+% by the commands \cs{DeclareCollectionInstance}, \cs{EditCollectionInstance}
+% and \cs{UseCollection}. However, while the idea of switchable instances is
+% a useful one, the team feel that collections are not the correct way to
+% achieve this, at least with the current approach. As such, the collection
+% functions should be regarded as deprecated: they remain available to support
+% existing code, but will be removed when a better mechanism is developed.
+%
+%
+% \begin{function}{\ShowCollectionInstanceValues}
+%   \begin{syntax}
+%    \cs{ShowInstanceValues} \Arg{collection} \Arg{object type} \Arg{instance}
+%   \end{syntax}
+%   Shows the \meta{values} for an \meta{instance} within
+%   a \meta{collection} of the given \meta{object type} at the terminal.
+%   As for other collection commands, this should be regarded as deprecated.
+% \end{function}
+%
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{xtemplate} implementation}
+%
+%    \begin{macrocode}
+%<*package>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<@@=template>
+%    \end{macrocode}
+%
+% \begin{macro}{\DeclareRestrictedTemplate}
+% \begin{macro}{\DeclareObjectType}
+%   If the new kernel code is not loaded, hand over to the frozen version.
+%   Otherwise, make a couple of compatibility additions.
+%    \begin{macrocode}
+\@ifundefined{NewTemplateType}
+  {%
+    \input{xtemplate-2023-10-10.sty}%
+    \endinput
+  }
+  {%
+    \ProvidesExplPackage{xtemplate}{2024-08-16}{}
+      {L3 Experimental prototype document functions}
+    \long\protected\def\DeclareRestrictedTemplate#1#2#3#4{%
+      \DeclareTemplateCopy{#1}{#3}{#2}%
+      \EditTemplateDefaults{#1}{#3}{#4}%
+    }%
+    \let\IfInstanceExistT\IfInstanceExistsT
+    \let\IfInstanceExistF\IfInstanceExistsF
+    \let\IfInstanceExistTF\IfInstanceExistsTF
+  }
+\ExplSyntaxOn
+\cs_new_protected:Npn \DeclareObjectType #1#2
+  { \@@_declare_type:nn {#1} {#2} }
+\ExplSyntaxOff
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
+%
+%\end{implementation}
+%
+%\PrintIndex

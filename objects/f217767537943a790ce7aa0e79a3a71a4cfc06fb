@@ -1,0 +1,1453 @@
+% -*- coding: utf-8; time-stamp-pattern: "def\\\\dtxtimestamp{%02d-%02m-%:y at %02H:%02M:%02S %Z}" -*-
+% N.B.: this dtx file is NOT for use with \DocInput but only docstrip.
+% The latex source of the user manual isn't commented out.
+%<*none>
+\def\dtxtimestamp{29-09-2019 at 10:46:12 CEST}%
+%</none>
+%<*!readme&!install>
+%%
+%% Package: filecontentsdef
+%% Version: 1.5 (2019/09/29)
+%% License: LPPL 1.3c
+%% Copyright (C) 2016-2019 Jean-Francois Burnol <jfbu at free dot fr>
+%%
+%</!readme&!install>
+%<*none>
+\def\pkgname        {filecontentsdef}
+\def\pkgdate        {2019/09/29}
+\def\pkgdocdate     {2019/09/29}
+\def\pkgversion     {v1.5}
+\def\pkgdescription {filecontents + macro + verbatim (JFB)}
+\catcode`\^ 12 \iffalse
+%</none>
+%<*readme|install>
+<!-- -->
+
+    Source:  filecontentsdef.dtx (v1.5 2019/09/29)
+    Author:  Jean-Francois Burnol
+    Info:    filecontents + macro + verbatim
+    License: LPPL 1.3c
+    Copyright (C) 2016-2019 Jean-Francois Burnol.
+    <jfbu at free dot fr>
+
+%</readme|install>
+%<*readme>
+ABSTRACT
+========
+
+This lightweight LaTeX2e package provides an environment `filecontentsdef`
+which is like the `filecontents` environment of Scott Pakin's
+[filecontents] [1] package but in addition to the file creation stores the
+(verbatim) contents into a macro given as an additional argument (either as a
+control sequence or as a name).
+
+Displaying verbatim these contents is possible via `\filecontentsprint`,
+and executing them (if they represent LaTeX code) via `\filecontentsexec`.
+
+A variant environment `filecontentsdefmacro` stores the contents into a
+macro, but skips the save-to-a-file part.
+
+[1]: http://www.ctan.org/pkg/filecontents "filecontents package"
+
+CHANGE LOG
+==========
+
+v1.5 \[2019/09/29\]
+-------------------
+
+- `\filecontentsexec` does not forcefully reset `\newlinechar`
+  to its LaTeX default after execution.
+
+- `\FCD@` as prefix for internal non public macros.
+
+- drop usage of the legacy LaTeX mechanism which issued a warning
+  in case of a form feed or horizontal tabulation character in the
+  parsed contents.
+
+- make handling of the tabulation and form feed characters
+  customizable.
+
+- treat especially the case when the `\end{filecontents...}`
+  is not on a line of its own.
+
+- add `filecontentsdefstarred` (et al.) as alias for
+  `filecontentsdef*` (et al.) for easying up encapsulation in
+  wrapping environments.
+
+- breaking change: `filecontentsdef` and `filecontentsdefmacro`
+  define a macro obeying the local scope. Use `filecontentsgdef`,
+  resp. `filecontentsgdefmacro` for definitions with global scope.
+
+- make the name of the environment used by `\filecontentsprint`
+  customizable (it defaults to `verbatim`) and allow to pass options
+  to it; has been tested with `fancyvrb` and `minted`.
+
+- add `\filecontentsprintviascan` which allows to use verbatim-like
+  environment such as `listings` which are incompatible with
+  `\filecontentsprint`.
+
+v1.4 \[2019/04/20\]
+-------------------
+
+- backport 2018/04/01 LaTeX release change to filecontents environment
+  (`^^L` and `^^I` definitions).
+
+- add `filecontentsdefmacro` environment.
+
+- extend `filecontentsdef` and `filecontentsdefmacro` environments as
+  well as `\filecontentsprint` and `\filecontentsexec` macros to accept
+  indifferently either a control sequence or a name as argument.
+
+- refactor documentation, explain how to define wrapper environments.
+
+v1.2 \[2016/09/19\]
+-------------------
+
+Initial version.
+
+LICENSE
+=======
+
+This Work may be distributed and/or modified under the
+conditions of the LaTeX Project Public License 1.3c.
+This version of this license is in
+
+> <http://www.latex-project.org/lppl/lppl-1-3c.txt>
+
+and the latest version of this license is in
+
+> <http://www.latex-project.org/lppl.txt>
+
+and version 1.3 or later is part of all distributions of
+LaTeX version 2005/12/01 or later.
+
+The Author of this Work is:
+
+- Jean-Francois Burnol `<jfbu at free dot fr>`
+
+This Work consists of the main source file filecontentsdef.dtx and
+its derived files filecontentsdef.sty, filecontentsdef.pdf,
+filecontentsdef.dvi, README.md, INSTALL.md, README, INSTALL.
+%</readme>
+%<*install>
+INSTALLATION
+============
+
+Use your installation manager.
+
+Else, for manual installation:
+
+- To extract the package and at the same time produce the documentation,
+  execute latex thrice on `filecontentsdef.dtx` then `dvipdfmx` on the
+  `dvi` file.
+
+  To customize the PDF documentation (paper size, etc...): execute `etex`
+  once on `filecontentsdef.dtx` then follow instructions given inside the
+  extracted file `filecontentsdef.tex`.
+
+- To extract the package but not necessarily build the documentation:
+  run `etex` on `filecontentsdef.dtx`.
+
+Files should then be moved to appropriate locations:
+
+    filecontentsdef.sty -> TDS:tex/latex/filecontentsdef/
+    filecontentsdef.dtx -> TDS:source/latex/filecontentsdef/
+    filecontentsdef.pdf -> TDS:doc/latex/filecontentsdef/
+    README.md           -> TDS:doc/latex/filecontentsdef/
+    INSTALL.md          -> TDS:doc/latex/filecontentsdef/
+
+You can also place `filecontentsdef.sty` directly within the directory
+of the project using it.
+%</install>
+%<*tex>-------------------------------------------------------------------------
+\chardef\Withdvipdfmx 1 % replace 1 by 0 for using pdflatex
+\chardef\NoSourceCode 0 % replace 0 by 1 for the doc *without* the source code
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesFile {filecontentsdef.tex}[Driver for filecontentsdef documentation]%
+\PassOptionsToClass   {a4paper,fontsize=11pt,oneside}{scrdoc}
+\PassOptionsToPackage {english}{babel}
+\input filecontentsdef.dtx
+%%% Local Variables:
+%%% mode: latex
+%%% End:
+%</tex>-------------------------------------------------------------------------
+%<*none>------------------------------------------------------------------------
+\fi\catcode`\^ 7
+%
+\chardef\noetex 0
+\ifx\numexpr\undefined\chardef\noetex 1 \fi
+\ifnum\noetex=1 \chardef\extractfiles 0 % extract files, then stop
+\else
+    \ifx\ProvidesFile\undefined
+      \chardef\extractfiles 0 % etex etc.. on dtx, only file extraction.
+    \else % latex/pdflatex
+      \ifx\Withdvipdfmx\undefined
+        % latex/pdflatex on dtx
+        \chardef\extractfiles 1 % 1 = extract files and typeset manual, 2 = only typeset
+        \chardef\Withdvipdfmx 1 % 0 = pdflatex or latex+dvips, 1 = dvipdfmx
+        \chardef\NoSourceCode 0 % 0 =  include source code, 1 = do not
+        \NeedsTeXFormat {LaTeX2e}%
+        \PassOptionsToClass   {a4paper,fontsize=11pt,oneside}{scrdoc}%
+        \PassOptionsToPackage {english}{babel}%
+      \else % latex on tex
+        \chardef\extractfiles 2 % do not extract files, only typeset
+      \fi
+      \ProvidesFile{\pkgname.dtx}%
+        [\pkgname\space source and documentation (\dtxtimestamp)]%
+    \fi
+\fi
+\ifnum\extractfiles<2 % extract files
+\def\MessageDeFin{\newlinechar10 \let\Msg\message
+\Msg{********************************************************************^^J}%
+\Msg{*^^J}%
+\Msg{* To finish the installation you have to move the following^^J}%
+\Msg{* file into a directory searched by TeX:^^J}%
+\Msg{*^^J}%
+\Msg{*\space\space\space\space \pkgname.sty^^J}%
+\Msg{*^^J}%
+\Msg{* To produce the documentation with source code included run latex^^J}%
+\Msg{* thrice on file \pkgname.tex and then dvipdfmx on \pkgname.dvi^^J}%
+\Msg{*^^J}%
+\Msg{* Happy TeXing!^^J}%
+\Msg{*^^J}%
+\Msg{********************************************************************^^J}%
+}%
+\begingroup
+    \input docstrip.tex
+    \askforoverwritefalse
+    \def\pkgpreamble{\defaultpreamble^^J\MetaPrefix^^J%
+    \string\NeedsTeXFormat{LaTeX2e}^^J%
+    \string\ProvidesPackage{\pkgname}^^J%
+    \space[\pkgdate\space\pkgversion\space\pkgdescription]}%
+    \generate{\nopreamble\nopostamble
+    \file{README.md}{\from{\pkgname.dtx}{readme}}%
+    \file{INSTALL.md}{\from{\pkgname.dtx}{install}}%
+    \usepostamble\defaultpostamble
+    \file{\pkgname.tex}{\from{\pkgname.dtx}{tex}}%
+    \usepreamble\pkgpreamble
+    \file{\pkgname.sty}{\from{\pkgname.dtx}{package}}}%
+\endgroup
+\fi % end of file extraction (from etex/latex/pdflatex run)
+\ifnum\extractfiles=0 % tex/etex/xetex/etc files extracted, stop
+      \MessageDeFin\expandafter\end
+\fi
+% From this point on, run is necessarily with e-TeX.
+% Check if \MessageDeFin got defined, if yes put it at end of run.
+\ifdefined\MessageDeFin\AtEndDocument{\MessageDeFin}\fi
+%-------------------------------------------------------------------------------
+% START OF USER MANUAL TEX SOURCE
+\documentclass[abstract]{scrdoc}
+
+\ifnum\NoSourceCode=1 \OnlyDescription\fi
+
+\usepackage{ifpdf}
+\ifpdf\chardef\Withdvipdfmx 0 \fi
+
+\makeatletter
+\ifnum\Withdvipdfmx=1
+   \@for\@tempa:=hyperref,bookmark,graphicx,xcolor,pict2e\do
+            {\PassOptionsToPackage{dvipdfmx}\@tempa}
+   %
+   \PassOptionsToPackage{dvipdfm}{geometry}
+   \PassOptionsToPackage{bookmarks=true}{hyperref}
+   \PassOptionsToPackage{dvipdfmx-outline-open}{hyperref}
+   \PassOptionsToPackage{dvipdfmx-outline-open}{bookmark}
+   %
+   \def\pgfsysdriver{pgfsys-dvipdfm.def}
+\else
+   \PassOptionsToPackage{bookmarks=true}{hyperref}
+\fi
+   \let\original@check@percent\check@percent
+   \let\check@percent\relax
+\makeatother
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[hscale=0.66,vscale=0.75]{geometry}
+\pagestyle{headings}
+
+\def\MacroFont{\ttfamily\small\hyphenchar\font45 \baselineskip11pt\relax}
+\AtBeginDocument{\def\MacroFont{\ttfamily}}
+
+% ATTENTION: (avec doc.sty ou les classes scrdoc ou ltxdoc)
+%
+% - l'environnement macrocode se fait avec \macro@font qui est le
+% \MacroFont du \begin{document}.
+%
+% - les environnements verbatim utilisent le \MacroFont courant.
+%
+% - \verb utilise un \ttfamily !! et non pas \verbatim@font que l'on
+% peut customiser.
+%
+% - (9 mars 2015) il ne faut PAS commencer des macrocode directement après
+% un \section, il faut un paragraphe (par exemple un \indent\par)
+
+\usepackage{xspace}
+\usepackage[dvipsnames]{xcolor}
+
+\definecolor{joli}{RGB}{225,95,0}
+\definecolor{JOLI}{RGB}{225,95,0}
+
+\newcommand\fcdname{%
+  \texorpdfstring{{\color{joli}\ttfamily\bfseries \pkgname}}{\pkgname}\xspace}
+
+\DeclareRobustCommand\csa[1]{{\ttfamily\hyphenchar\font45 \char`\\ #1}}
+
+\newcommand\csh[1]{\texorpdfstring{\csa{#1}}{\textbackslash\detokenize{#1}}}
+
+\usepackage{babel}
+
+\usepackage[pdfencoding=pdfdoc]{hyperref}
+\hypersetup{%
+linktoc=all,%
+%% bookmarksdepth=3,%
+breaklinks=true,%
+colorlinks,%   
+linkcolor=OliveGreen,%RoyalBlue,%
+urlcolor=RoyalBlue,%OliveGreen,%
+pdfauthor={Jean-Fran\c cois Burnol},%
+pdftitle={The \pkgname\space package},%
+pdfsubject={\pkgdescription},%
+pdfkeywords={LaTeX, verbatim, macros},%
+pdfstartview=FitH,%
+pdfpagemode=UseOutlines}
+\usepackage{bookmark} 
+
+\usepackage[zerostyle=a,scaled=0.95,straightquotes]{newtxtt}
+\renewcommand\familydefault\sfdefault
+\frenchspacing
+
+\usepackage{framed}
+
+%\usepackage{varioref}
+
+%\usepackage{footnotehyper}
+
+\usepackage{filecontentsdef}
+
+\makeatletter
+% \hbox needed since change to \smash and other macros at LaTeX 2018/12/01
+\def\NewWith #1{\@bsphack
+    \vadjust{\vskip-\dp\strutbox
+             \hbox{\smash{\hbox to 0pt {\hss\color[named]{Thistle}%
+                        \normalfont\small\bfseries
+                        \hsize 2.5cm\rightskip.5cm minus.5cm
+                        \vtop{\noindent New with #1}\kern.25cm }}}%
+             \vskip\dp\strutbox }\strut\@esphack}
+\def\ChangedAt #1{\@bsphack
+    \vadjust{\vskip-\dp\strutbox
+             \hbox{\smash{\hbox to 0pt {\hss\color[named]{Thistle}%
+                        \normalfont\small\bfseries
+                        \hsize 2.5cm\rightskip.5cm minus.5cm
+                        \vtop{\noindent Changed at #1}\kern.25cm }}}%
+             \vskip\dp\strutbox }\strut\@esphack}
+\makeatother
+
+\begin{document}
+\rmfamily
+\thispagestyle{empty}
+
+\bookmark[named=FirstPage,level=1]{Title page}
+
+%\ttzfamily
+
+{%
+\normalfont\Large\parindent0pt \parfillskip 0pt\relax
+ \leftskip 2cm plus 1fil \rightskip 2cm plus 1fil
+ The \fcdname package\par
+}
+
+{\centering
+  \textsc{Jean-François Burnol}\par
+  \footnotesize
+  jfbu (at) free (dot) fr\par
+  Package version: \pkgversion\ (\pkgdate);
+            documentation date: \pkgdocdate.\par
+  {From source file \texttt{\pkgname.dtx (\dtxtimestamp)}}\par
+}
+
+\begin{abstract}
+  This lightweight LaTeX2e package provides an environment
+  |filecontentsdef| which is like the |filecontents|
+  environment of \textsc{Scott Pakin}'s
+  \href{https//ctan.org/pkg/filecontents}{filecontents} package but in
+  addition to the file creation stores the (verbatim) contents into a
+  macro given as an additional argument (either as a control sequence or
+  as a name).
+
+  Displaying verbatim these contents is possible via
+  |\filecontentsprint|, and executing them (if they represent LaTeX
+  code) via |\filecontentsexec|.
+
+  A variant environment |filecontentsdefmacro| stores the contents into
+  a macro, but skips the save-to-a-file part.
+
+  I developed this to display \TeX\ code verbatim in documentation
+  and simultaneously produce during the LaTeX run the corresponding
+  files in order to embed them in the PDF as \emph{file attachment
+    annotations} (via the services of \textsc{Scott Pakin}'s
+  further package
+  \href{https://ctan.org/pkg/attachfile}{attachfile}.)
+\end{abstract}
+
+\tableofcontents
+
+\section{Environments and macros}
+
+\subsection{\textcolor[named]{PineGreen}{\texttt{filecontentsdef}},
+            \textcolor[named]{PineGreen}{\texttt{filecontentsgdef}}}
+
+The |filecontentsdef| environment is like |filecontents| but
+requires a second argument. This argument will either be:
+\begin{itemize}
+\item a single control sequence token such as |\foo|,
+\item or anything else which then must after expansion be
+  usable as a macro \emph{name} (it will be handled via
+  |\csname...\endcsname| encapsulation).
+  For example \texttt{\string\myitemnumber\{3\}} can be used as argument and
+  it will then be expanded inside \texttt{\string\csname...\string\endcsname}
+  to construct a control sequence, whose name will possibly contain digits or
+  other characters of non-letter catcodes. A single active character is
+  allowed as long as its expansion is
+  \texttt{\string\csname...\string\endcsname} compatible; the character itself
+  will \emph{not} be assigned a new meaning.
+\end{itemize}
+
+Thus the syntax is either:
+\begin{verbatim}
+    \begin{filecontentsdef}{<filename>}{\foo}
+    ... arbitrary contents ...
+    \end{filecontentsdef}
+\end{verbatim}
+or:
+\begin{verbatim}
+    \begin{filecontentsdef}{<filename>}{(expanding to) macro name}
+    ... arbitrary contents ...
+    \end{filecontentsdef}
+\end{verbatim}
+
+The environment creates the file and stores its (verbatim) contents into its
+second argument |\foo| (or into the  macro |\<macro name>| with given name).
+
+\begin{framed}
+  Hint: if some |\foo| contains the \emph{name} of the macro to be defined, use
+  |\empty\foo| as argument, thus avoiding |\foo| itself to get overwritten by
+  the environment.
+\end{framed}
+
+\begin{enumerate}
+\item The starred variant |filecontentsdef*| acts like
+  |filecontents*| environment regarding the file contents, i.e.
+  it drops addition of a (\TeX) commented out header.
+\item |filecontentsdefstarred| is an alias for
+  |filecontentsdef*|.\NewWith{v1.5}
+\item The contents put into the macro are the same for the starred and
+  non-starred environments: neither contains a commented-out header.
+\item The scope of the macro definition is
+  \textbf{local}.\ChangedAt{v1.5}
+\item 
+  Use |filecontentsgdef| for a definition with global scope.\NewWith{v1.5}
+\item No check is done on whether the defined macro pre-existed.
+\item The macro holds a verbatim rendering of the contents, with active spaces
+  and active |^^M| tokens.
+\item The handling of the\NewWith{v1.5}
+  Form Feed and Tabulation characters can be, contrarily to the |filecontents|
+  treatment, customized. See \autoref{sec:tab}.
+\item Babel shorthands will be neutralized the same way they are when
+  encountered in a verbatim environment or in a |filecontents|
+  environment. Their action is reactivated if the macro (assuming the
+  contents represent \LaTeX\ code) gets later executed via
+  \csa{filecontentsexec}.
+\item The environment can be used either in the preamble or the body
+  of the document.
+\item The contents must not contain themselves a
+  \texttt{\string\end}|{filecontentsdef}| (or \texttt{\string\end}|{filecontentsdef*}| in the
+starred case).
+% problème avec Emacs/AUCTeX et |\end{...}| qui fait boguer le fontlock
+% bizarrement le deuxième ne pose pas de problème. 19 avril 2019.
+\end{enumerate}
+
+\begin{footnotesize}
+  Here are some additional relevant details:
+\begin{enumerate}
+\item the usual special characters are sanitized like they would be in a
+  verbatim environment,
+\item the space becomes the active character of ascii code |32|,
+\item the end of line is converted into the active character |^^M| (i.e. ascii
+  code |13|),
+\item see \autoref{sec:tab} for the handling of the horizontal tabulation
+  and form feed characters,
+\item the active bytes of ascii code between |128| and |255| (this is now
+  systematically the case with |inputenc+utf8| being default) are stored
+  into the produced macro ``as is'',
+\item the non-active bytes of ascii code between |128| and |255| are
+  stored into the produced macro with catcode letter.
+\end{enumerate}
+These last two items together mean that 8bit or UTF8-encoded characters will
+display as expected in a verbatim rendering, see \csa{filecontentsprint} next.
+\par
+\end{footnotesize}
+
+\subsection{\textcolor[named]{PineGreen}{\texttt{filecontentsdefmacro}},
+            \textcolor[named]{PineGreen}{\texttt{filecontentsgdefmacro}}}
+
+This environment
+\begin{verbatim}
+    \begin{filecontentsdefmacro}{\foo or macro name}
+    ... arbitrary contents ...
+    \end{filecontentsdefmacro}
+\end{verbatim}
+was added at |v1.4|. It is like |filecontentsdef| without the
+``save to file'' part... and has thus a sole mandatory argument which may be
+either a control sequence or a name (or material expanding to name), as
+previously described. The macro can then be either printed verbatim via
+\csa{filecontentsprint} or, if it consists of \LaTeX\ code, be executed in
+re-tokenized form via \csa{filecontentsexec}.
+
+Its name is thus a bit paradoxical but was chosen to share an existing prefix
+with the other package macros and environments.
+
+\subsection{\textcolor[named]{PineGreen}{\csh{filecontentsprint}},
+\textcolor[named]{PineGreen}{\csh{FCDprintenvname}},
+\textcolor[named]{PineGreen}{\csh{FCDprintenvoptions}}}
+
+
+\csa{filecontentsprint} has a
+unique mandatory argument which will be either:
+\begin{itemize}
+\item a single control sequence token (for example |\foo|),
+\item or anything else which then must after expansion be
+  usable as a macro \emph{name} (for example |macro|). It will be handled via
+  |\csname...\endcsname| encapsulation (see earlier explanations).%
+\end{itemize}
+The |\foo| must be of the type constructed by the environments
+|filecontentsdef| or |filecontentsdefmacro|. It will be then be printed exactly as
+\begingroup\makeatletter\def\x{\let\@xverbatim\relax
+       \verbatim
+\string\begin\string{verbatim\string}\par
+<contents of \string\foo>\par
+\string\end\string{verbatim\string}\par
+\endverbatim%
+\endgroup}\x
+would have done.
+
+This uses underneath the |verbatim| environment and has been
+  tested to be compatible with the standard |verbatim|, with the one from
+  package \href{http://www.ctan.org/pkg/doc}{doc} (classes |ltxdoc.cls|,
+  |scrdoc.cls|) and also with the one from package
+  \href{http://www.ctan.org/pkg/verbatim}{verbatim} (whose mechanism is quite
+  different from the one of the default |verbatim| environment.)
+
+\begin{framed}
+  Due to limitation of the |verbatim| environment, the
+  \texttt{\string\end}|{verbatim}| must not appear inside the contents... else
+  it will be misconstrued as ending the external |verbatim| environment itself
+  which is added by \csa{filecontentsprint}!
+
+  This limitation only
+  affects \csa{filecontentsprint}, not \csa{filecontentsexec}.
+\end{framed}
+
+The name of the used environment is held in macro
+\textcolor[named]{PineGreen}{\csa{FCDprintenvname}}.\NewWith{v1.5}
+Redefine it to modify the environment name from its default |verbatim|.
+
+Furthermore\NewWith{v1.5} the macro
+\textcolor[named]{PineGreen}{\csa{FCDprintenvoptions}} can be used to pass
+options to that environment.
+
+Here is a set-up using |fancyvrb| which I tested with success:
+\begin{verbatim}
+\documentclass{article}
+\usepackage{filecontentsdef}
+\usepackage{xcolor}
+\usepackage{fancyvrb}
+\usepackage{fvextra}
+
+% store tabs as active characters so they can be handled by fancyvrb
+{\catcode`\^^I=\active\gdef\FCDtabtomacro{\noexpand^^I}}
+
+% Use fancyvrb Verbatim environment
+\renewcommand*\FCDprintenvname{Verbatim}
+
+% with these options. This will be submitted to an \edef, so we
+% simply wrap in \unexpanded to avoid problems
+\renewcommand*\FCDprintenvoptions{%
+  \unexpanded{[fontsize=\scriptsize, highlightlines={1, 3-4},
+               numbers=both, showspaces, spacecolor=red,
+               showtabs, %tab=\rightarrowfill% incompatible with linebreaks?
+               breaklines,breakbefore=\\\space]}%
+}
+\begin{filecontentsdefmacro}{\testfancyvrb}
+some contents with long lines and tabs to test the options
+\end{filecontentsdefmacro}
+\end{verbatim}
+
+Here is now a set-up with |minted| which worked also (although the syntax
+highlighting was not handling correctly control sequences using the @ letter,
+but I am not knowledgeable enough in the Pygmentize library):
+
+\begin{verbatim}
+\documentclass{article}% needs shell-escape
+\usepackage{filecontentsdef}
+\usepackage{minted}
+\newminted{tex}{linenos}
+
+\renewcommand*\FCDprintenvname{texcode}
+
+\begin{filecontentsdefmacro}{\testminted}
+some TeX macros
+\end{filecontentsdefmacro}
+
+\begin{document}
+\filecontentsprint\testminted
+\end{document}
+\end{verbatim}
+
+\subsection{\textcolor[named]{PineGreen}{\csh{filecontentsprintviascan}}}
+
+It is not possible to use a |listings| environment via \csa{filecontentsprint}
+and \csa{FCDprintenv}, because |listings| has a special way to identify where
+it ends and this is incompatible with the \csa{filecontentsprint} approach.
+
+At |v1.5| 
+\csa{filecontentsprintviascan} is added\NewWith{v1.5} which is more powerful
+than \csa{filecontentsprint} as it should work not only with verbatim
+environments known to be compatible with \csa{filecontentsprint} but
+also with environments of the |listings| type. But this requires \eTeX{}
+\csa{scantokens} (it uses \csa{filecontentsexec}, see next).%
+%
+\footnote{I know that the \LaTeX{} kernel itself requires \eTeX{} for a few
+  years now, but \fcdname could have been installed on an old machine...}
+
+Here is an example of usage which worked for me (although the syntax
+highlighting, like the one from |minted|, was not fully satisfying):
+
+\begin{verbatim}
+\documentclass{article}
+\usepackage{filecontentsdef}
+\usepackage{xcolor}
+\usepackage{listings}
+\lstnewenvironment{latexverbatim}
+ {\lstset{
+     basicstyle=\small\ttfamily,
+     breaklines=true,
+     columns=fullflexible,
+     language=[LaTeX]TeX,
+     numbers=left,
+     numbersep=1em,
+     numberstyle=\tiny\color{gray},
+     keywordstyle=\color{red}}}{}
+
+\renewcommand*\FCDprintenvname{latexverbatim}
+
+\begin{document}
+
+\begin{filecontentsdefmacro}{\testlistings}
+\gdef\filecontentsprintviascan{\FCD@get\FCD@printviascan}%
+\gdef\FCD@printviascan#1{%
+   \toks@\expandafter{#1}%
+   \edef\FCD@envwithcontents{%
+        \noexpand\begin{\FCDprintenvname}\FCDprintenvoptions\noexpand^^M%
+        \the\toks@\@backslashchar end{\FCDprintenvname}\noexpand^^M}%
+   \FCD@exec\FCD@envwithcontents}%
+\end{filecontentsdefmacro}
+
+\filecontentsprintviascan\testlistings
+\end{document}
+\end{verbatim}
+
+\subsection{\textcolor[named]{PineGreen}{\csh{filecontentsexec}}}
+
+Although \fcdname itself generally does not require \eTeX, it provides as a
+convenience \csa{filecontentsexec} which
+does require it as it uses |\scantokens| to re-assign the current catcode
+regime to the verbatimized tokens stored into its mandatory argument. Again
+the mandatory argument may have one of the two forms described previously.
+
+And of course this assumes that the tokens provide legitimate \LaTeX\ code.
+
+\begin{footnotesize}
+  \textbf{TeX-hacker note:} No group is used in order to not create an extra
+  scoping of the executed macro contents.
+
+  \textbf{TeX-hacker note:} In the case of storage in a macro of some \LaTeX{}
+  contents, and re-parsing via |\filecontentsexec| which uses
+  |\scantokens|, the last line before the
+  \texttt{\string\end}|{filecontentsdef}|
+  or |\end{filecontentsdefmacro}| potentially generates an end of line
+  character, typically a space token (but this depends on the
+  \csa{endlinechar} valid at this location
+  setting). Such a space coming from the last end of line has no impact if
+  the \LaTeX{} contents get executed in vertical mode. In horizontal mode it
+  will be avoided if these contents end with a |%|
+  or also with some control sequence such as a |\relax| or
+  |\empty| (only if \csa{endlinechar} is standard).
+
+  At |v1.5|\NewWith{v1.5} a special convention is added that if the
+  \texttt{\string\end}|{filecontentsdef}| (or variants) stands on
+  the same line as the last line of the contents, rather than being on
+  a line of its own, then the stored contents will get postfixed with
+  an added \csa{empty} token. Thus execution via
+  \csa{filecontentsexec} in horizontal mode will not induce any ending
+  space token (assuming the \csa{endlinechar} is then at its standard
+  setting). This feature is to be used only with contents representing
+  \TeX{} macros, as the \csa{empty} makes sense only in that context.
+  This token will remain invisible in the PDF output from
+  \csa{filecontentsprint}.
+
+  No \csa{empty}
+  gets added to the last line of the exported file (if there is one).
+  The original |filecontents| environment issues a warning when there is
+  contents before the end of the environment on the same line, this warning is
+  now skipped.\ChangedAt{v1.5}
+
+  This extra \csa{empty}
+  added only under such special usage of the environment is not currently
+  customizable, but I can add such a feature if there is a user request.
+
+  \textbf{TeX-hacker note:} one should not think that using
+  \csa{filecontentsexec} with some stored material will behave like copying
+  pasting that material directly at that very location of the source code: for
+  example if the last line ends with a |%|
+  this does not mean that this will comment out what is next in the source
+  code on the same line after the \csa{filecontentsexec}! It is more analogous
+  to making first a macro definition with the contents and then execute that
+  macro. But it is not possible for some macro from inside these contents to
+  itself grab tokens coming next after the \csa{filecontentsexec}\csa{foo}
+  (moreover, \fcdname adds tokens of its own in order restore the
+  \csa{newlinechar}).
+
+
+\end{footnotesize}
+
+\subsection{\textcolor[named]{PineGreen}{\texttt{filecontentshere}}}
+
+This environment
+\begin{verbatim}
+    \begin{filecontentshere}{<filename>}
+    ... arbitrary contents ...
+    \end{filecontentshere}
+\end{verbatim}
+creates on the fly a file with these contents, and simultaneously
+it typesets them in a verbatim environment. It is a shortcut to doing
+\begin{verbatim}
+    \begin{filecontentsdef}{<filename>}{\filecontentsheremacro}
+    ... arbitrary contents ...
+    \end{filecontentsdef}
+\end{verbatim}
+and then immediately
+\begin{verbatim}
+    \filecontentsprint\filecontentsheremacro
+\end{verbatim}
+The |\filecontentsheremacro| is then available for usage as argument
+of |\filecontentsexec|. Since |v1.5| its definition has only
+local scope.
+\ChangedAt{v1.5}
+
+The environment has a starred variant 
+|filecontentshere*| (also |filecontentsherestarred|) which does the
+expected thing.
+
+For example
+\begin{verbatim}
+\begin{filecontentshere*}{\jobname.test}
+  \begin{framed}
+    \noindent 
+                We have coded this in \LaTeX: both
+      $E=mc^2$ (input as \verb|$E=mc^2$|)
+    and     $E=h\nu$  owe much    to \textsc{Albert Einstein}.
+  \end{framed}
+\end{filecontentshere*}
+\filecontentsexec\filecontentsheremacro
+\end{verbatim}
+will produce an external file with the above contents and have this
+effect in the document (verbatim framed then real framed):
+\begin{filecontentshere*}{\jobname.test}
+  \begin{framed}
+    \noindent 
+                We have coded this in \LaTeX: both
+      $E=mc^2$ (input as \verb|$E=mc^2$|)
+    and     $E=h\nu$  owe much    to \textsc{Albert Einstein}.
+  \end{framed}
+\end{filecontentshere*}
+\filecontentsexec\filecontentsheremacro
+
+\section{How to wrap usage of \texttt{filecontentsdef} in another
+  environment}
+
+Don't use the |\begin/\end| syntax but directly
+|\begingroup\filecontentsdef{..}{..}| and |\endfilecontentsdef\endgroup|.
+And these should come last, respectively first, in the definition of the
+begin, respectively end, part of the new environment.
+
+The extra |\begingroup...\endgroup| are mandatory with the
+\fcdname environments making a local scope definition.\ChangedAt{v1.5}
+
+For those creating global scope macros, |\begingroup...\endgroup|
+is recommended, as the \LaTeX{} state is not completely clean
+after |\endfilecontentsgdef| (et al.) execution. Thus it is
+better to have the extra |\begingroup...\endgroup| pair always
+(which are a part of the things added by the |\begin/\end| syntax).
+
+For wrapping the starred variant one needs to use
+|\csname filecontentsdef*\endcsname|, or make the definition with |*|
+having catcode letter. A simpler way is to use the alias ending
+in |...starred|.\NewWith{v1.5} Regarding the ending macro its
+name can drop the |*|, as the starred environments defined by the
+\fcdname package use the same ending macros as their non-starred
+variants.
+
+As exercise, let's imagine we want an environment which will be associated
+to some counter, will automatically increment it at each usage, and will
+use this counter to index the files and macros created on each
+invocation.
+Except if you know how to smuggle how a macro from an environment
+you probably want to use |filecontentsgdef| in order for the
+macro to have global scope.
+\begin{filecontentsdefmacro}{\pablo}
+\newcounter{pablo}
+\newenvironment{defexercise}
+   {\stepcounter{pablo}%
+    \begingroup
+    \filecontentsgdefstarred
+    {\jobname-ex\the\value{pablo}}{exercise-\the\value{pablo}}}%
+   {\endfilecontentsgdefstarred\endgroup}
+\newcommand{\printexercise}[1]{\filecontentsexec{exercise-\the\numexpr#1\relax}}
+\end{filecontentsdefmacro}
+\filecontentsprint\pablo
+\filecontentsexec\pablo
+
+We can then use it this way:
+\begin{filecontentsdefmacro}{\usepablo}
+\begin{defexercise}
+   Prove that \[x^n+y^n=z^n\]  is not solvable in positive integers if $n$ is at
+   most $-3$.\par  
+\end{defexercise}
+\begin{defexercise}
+   Refute the existence of black holes in less than 140 characters.\par 
+\end{defexercise}
+\begin{defexercise}
+  \def\NSA{NSA}%
+  Prove that factorization is easily done via probabilistic algorithms and
+  advance evidence from knowledge of the names of its employees in the
+  seventies that the \NSA\ has known that for 40 years.\par
+\end{defexercise}
+\begin{itemize}
+\item \printexercise{3}
+\item \printexercise{2} 
+\item \printexercise{1}
+\end{itemize}
+\end{filecontentsdefmacro}
+\filecontentsprint\usepablo
+
+This produces in the document:
+\filecontentsexec\usepablo
+Additionally, three small files were created containing the \LaTeX\ mark-up
+for each exercise.
+
+
+\section{How to customize handling of tabulation and form feed characters}
+\label{sec:tab}
+
+\LaTeX{} assigns catcode 10 by default to |^^I| meaning that it is handled by
+default as a space character:
+\begin{filecontentsdefmacro}{\coucou}
+\def\test{^^I}
+\ifx\test\space \textcolor{blue}{OK}\else \ERROR\fi
+\end{filecontentsdefmacro}
+\filecontentsprint\coucou
+\filecontentsexec\coucou
+
+But \fcdname like the original |filecontents| environment assigns active
+catcode to the tabulation character before parsing the contents. This allows
+special treatment.
+
+\begin{framed}
+  Attention that if input as |^^I| (in opposition to the real ascii character
+  of ascii code 9), it will end up simply as |^^I| in external file or macro,
+  because the caret loses its special meaning in the environment.
+
+  The discussion in this section about customizing \fcdname behaviour applies
+  only to a source with a real tabulation character, not one in \TeX{} notation
+  |^^I|.
+\end{framed}
+
+With
+|v1.5|, \fcdname diverges from original |filecontents| by adding the means to
+customize the handling of such tabulation character, rather than simply raising
+a warning and exporting it as a space like original |filecontents|. And also
+the handling of the form feed character can be customized.
+
+This is controlled via four control sequences whose default definitions are
+the following:\NewWith{v1.5}
+\begin{verbatim}
+\def\FCDtabtofile{ }%
+
+{\catcode32\active\gdef\FCDtabtomacro{\noexpand }}%
+
+\def\FCDformfeedtofile{^^J^^J}%
+
+{\catcode`\^^M\active\gdef\FCDformfeedtomacro{\noexpand^^M\noexpand^^M}}%
+\end{verbatim}
+
+Each of \csa{FCDtabtofile}, \csa{FCDtabtomacro},
+\csa{FCDformfeedtofile}, \csa{FCDformfeedtomacro} gets used via an
+expansion inside an \csa{edef}, hence the need for \csa{noexpand} in front
+of active characters. The |^^J| in \csa{FCDformfeedtofile} matches
+the default newline character (ascii code 10) of \LaTeX{} for
+exporting files. The active |^^M| is used for macro storage
+because this is the most suitable for verbatim printing via
+\csa{filecontentsprint} as typically in a verbatim environment end
+of lines get converted into such active |^^M| (which will create
+a |\par| token).
+
+If you want for example tabulation characters to get converted into four
+spaces, use:
+\begin{verbatim}
+\def\FCDtabtofile{\space\space\space\space}%
+{\catcode32\active\gdef\FCDtabtomacro{\noexpand \noexpand \noexpand \noexpand }}%
+\end{verbatim}
+I have here used for macro storage active spaces. The \csa{noexpand} are
+mandatory in such case, but they will disappear from stored contents in a
+macro. We could also have defined \csa{FCDtabtofile} as an alias to
+\csa{FCDtabtomacro} here because a non-expanding active space will simply give a
+space in the external file. Due to \TeX{} tokenization rules
+|\def\FCDtabtofile{    }| would be the same as with only one single space and
+thus we used |\space\space\space\space|.
+
+If you want an actual tabulation character stored to a file, use:
+\begin{verbatim}
+{\catcode`\^^I=12 \gdef\FCDtabtofile{^^I}}
+\def\FCDtabtomacro{TAB}
+\end{verbatim}
+The second line is for demonstration only as an example of how to store the
+tabulation character in a macro, use anything adequate to replace \texttt{TAB}
+as used here. For example you can store in it the actual tabulation (ascii code
+9) with catcode 12, via using rather |\let\FCDtabtomacro\FCDtabtofile| in the
+above. Or use some Unicode symbol and appropriate font configuration.
+
+Here is an example. This is rendered via |verbatim| which will treat the
+tabulation characters as spaces, but they are there in the original:
+\begin{verbatim}
+{\catcode`\^^I=12 \gdef\FCDtabtofile{^^I}}
+\let\FCDtabtomacro\FCDtabtofile
+\begin{filecontentshere}{\jobname-tab.test}
+Here is a tab	and then three in a row			.
+\end{filecontentshere}
+(we will see them in the PDF output via the glyph at slot 9 of the T1 encoding).
+\end{verbatim}
+Here is what the original produces indeed when executed:
+{\catcode`\^^I=12 \gdef\FCDtabtofile{^^I}}
+\let\FCDtabtomacro\FCDtabtofile
+\begin{filecontentshere}{\jobname-tab.test}
+Here is a tab	and then three in a row			.
+\end{filecontentshere}
+The way it looks in the PDF is due to our definition of \csa{FCDtabtomacro}
+which gives a catcode12 character of ascii code 9, and we use T1
+font-encoding. The exported file does contain on the other hand as promised a
+real tabulation character.
+
+\begin{footnotesize}
+  \begin{framed}
+    \LaTeX{} since 2018 uses by default |\usepackage[utf8]{inputenc}| and
+    almost all control characters are given active catcode. Exceptions: |^^@|
+    (illegal), |^^I| (treated as space), |^^J| (for some reason it gets catcode
+    12 and thus will if printed to PDF give the glyph at slot 10 of the font
+    encoding), and |^^M| (end of line).
+
+    Notice that such a control character which in the source gets input using
+    \TeX{} notation, for example |^^P|, causes no issue to \fcdname as the
+    caret |^| has lost its special catcode. Thus a |^^P| will be printed to
+    external file.
+
+    If one tries to use directly in the source the CTRL-P, an error will be
+    raised by \LaTeX{} triggered by the active character (\fcdname does not
+    sanitize catcodes in this ascii range, as original |filecontents|
+    environment does not either).
+
+    One can always reassign catcodes, thus you can set the catcode of |^^P| to
+    12 for example. However, when exporting such a control character with
+    catcode 11 or 12 to a file, pdflatex uses |^^| notation in the output.
+    There are three exceptions (with |pdflatex|): the horizontal tabulation (ascii code 9,
+    |^^I|), the line feed (ascii code 10, |^^J|), and vertical tabulation
+    (ascii code 11, |^^K|) are exported to the file as the corresponding ascii
+    characters (at least this is the case with \TeX Live). \emph{These
+      exceptions do not apply with} |xelatex|.
+
+    Thus we again end up with \TeX{} notation |^^P| in the exported file. To
+    get a literal CTRL-P, you need to set the catcode of |^^P| to 11 or 12, and
+    to run |pdflatex| with the |-8bit| option. With Xe\LaTeX, this would be
+    needed even for the horizontal tabulation CTRL-I. 
+  \end{framed}
+\end{footnotesize}
+
+\begin{footnotesize}
+
+\section{How to obtain customized verbatim in the output}
+
+Please refer first to the discussion of \csa{filecontentsprint} and
+\csa{filecontentsprintviascan} as it provides examples using |fancyvrb|,
+|minted|, or |listings| environments which may be what you are looking for.
+
+Here we make quick comments on alternatives to using \csa{filecontentsprint},
+and handling directly the contents via the configuration of active spaces and
+active end of lines.
+
+Here is
+some (non-\LaTeX) text snippet.
+\begin{verbatim}
+\begin{filecontentsdef}{\jobname.test2}{\testactive}
+v1.2 \[2016/09/19\]
+-------------------
+
+Initial version.
+
+test: éèàùÉÈÇÀÙÛÎåðñòóôõöœøùúûüýþßŸŽ§
+\end{filecontentsdef}
+\end{verbatim}
+
+We can expand \csa{testactive} directly inside the \LaTeX\ document, but must
+give some definitions to the active space token and the active |^^M| token
+like |verbatim| environment does.
+
+For a true verbatim printout \csa{obeyspaces} and \csa{obeylines} are not
+enough because spaces at start of lines will disappear, and multiple empty
+lines give multiple |\par|'s which collapse into a single one (hence no empty
+line can be observed in the output). The usual |verbatim| environment uses a
+special definition of |\par| which prevents the disappearance of empty lines,
+and for the spaces it has macro \csa{@vobeyspaces} which makes the spaces
+issue |\leavevmode| so they are not skipped at the start of lines. Let's
+define:
+\begin{verbatim}
+\makeatletter
+% this redefines active spaces, but does not make spaces active
+\def\niceactivespaces{\@vobeyspaces\catcode32=10\relax}% 
+\makeatother
+\begingroup
+% this redefines active end of lines, but does not make them active
+  \catcode`\^^M\active %
+  \gdef\niceactiveCRs{\def^^M{\leavevmode\par}}%
+\endgroup %
+\end{verbatim}
+
+Then we can issue something like:
+\begin{verbatim}
+{\setlength{\parindent}{2cm}\niceactivespaces\niceactiveCRs\testactive\par}
+\end{verbatim}
+This allows hyphenation and ligatures, which are usually inhibited in standard
+|verbatim|, and it does not switch to the monospace font. Here is what happens
+if we do all of the above, as a test:
+
+\def\testactive{testactive}
+\begin{filecontentsdefmacro}{\empty\testactive}
+v1.2 \[2016/09/19\]
+-------------------
+
+Initial version.
+
+test: éèàùÉÈÇÀÙÛÎåðñòóôõöœøùúûüýþßŸŽ§
+\end{filecontentsdefmacro}
+\makeatletter
+% this redefines active spaces, but does not make spaces active
+\def\niceactivespaces{\@vobeyspaces\catcode32=10\relax}% 
+\makeatother
+\begingroup
+% this redefines active end of lines, but does not make them active
+  \catcode`\^^M\active %
+  \gdef\niceactiveCRs{\def^^M{\leavevmode\par}}%
+\endgroup %
+{\setlength{\parindent}{2cm}\niceactivespaces\niceactiveCRs\testactive\par}
+We see indeed how the |---...--| gave rise to ligatures, and that the
+monospace font was not used. This was only to give an idea of how one can use
+the macros created by the |filecontentsdef| or |filecontentsdefmacro|
+environments for variant verbatim rendering. This technique can be used as
+workaround to the problem with \csa{filecontentsprint} that the contents can
+not contain \verb|\end{verbatim}|.
+
+\end{footnotesize}
+
+\section{Related packages}
+
+\begin{itemize}
+\item Scott~\textsc{Pakin}'s
+  \href{http://www.ctan.org/pkg/filecontents}{filecontents}. Notice that the
+  package functionality has been integrated into \LaTeX{} release dated
+  |2019/10/01|.
+\item Pablo~\textsc{González}'s
+  \href{http://www.ctan.org/pkg/scontents}{scontents}. Make sure your version
+  is at least |v1.3| as earlier ones had a dependency on \fcdname
+  and are broken by the changes coming with |filecontentsdef v1.5|.
+\end{itemize}
+
+
+\StopEventually{\end{document}}
+
+\clearpage
+
+\makeatletter
+    \let\check@percent\original@check@percent
+\makeatother
+
+\small
+
+\section{Implementation}
+
+See the \texttt{README.md} file for the \texttt{CHANGE LOG}.
+
+% \indent % !!!!!!!!!!!!!!!!! Lundi 09 mars 2015 à 09:32:22
+
+
+\makeatletter
+\begingroup
+\topsep\MacrocodeTopsep
+\trivlist\parskip\z@\item[]
+\macro@font
+\leftskip\@totalleftmargin  \advance\leftskip\MacroIndent
+\rightskip\z@  \parindent\z@  \parfillskip\@flushglue
+\global\@newlistfalse \global\@minipagefalse
+\ifcodeline@index
+  \everypar{\global\advance\c@CodelineNo\@ne
+  \llap{\theCodelineNo\ \hskip\@totalleftmargin}}%
+\fi
+\string\NeedsTeXFormat\string{LaTeX2e\string}[1999/12/01]\par
+\string\ProvidesPackage\string{\pkgname\string}\par
+\noindent\space [\pkgdate\space\pkgversion\space\pkgdescription]\par
+\nointerlineskip
+\global\@inlabelfalse
+\endtrivlist
+\endgroup
+\makeatother
+
+% The catcode hackery next is to avoid to have <*package> to be listed
+% in the commented source code...
+% (c) 2012/11/19 jf burnol ;-)
+
+\MakePercentIgnore
+
+%
+% \catcode`\<=0 \catcode`\>=11 \catcode`\*=11 \catcode`\/=11
+% \let</none>\relax
+% \def<*package>{\catcode`\<=12 \catcode`\>=12 \catcode`\*=12 \catcode`\/=12}
+%
+%</none>
+%<*package>
+%    \begin{macrocode}
+\let\FCD@global\global
+\begingroup
+\catcode`\^^M\active%
+%    \end{macrocode}
+% Attention that all end of lines must now get protected due to
+% the end of line character being active.
+%
+% The \LaTeX{} default for active |^^L| was \csa{outer} up to the |2017-01-01|
+% release (got modified in |{v2.3b}{2016/11/06}| version of |ltplain.dtx|).
+% But we must still handle that possibility for usage with older formats.
+%    \begin{macrocode}
+\catcode`\^^L\active\let^^L\relax%
+\catcode`\^^I\active%
+%    \end{macrocode}
+% \csa{FCD@main} is the core construct.
+%
+% Bulk of the code is still identical to the one in \textsc{Scott Pakin}'s
+% \href{http://www.ctan.org/pkg/filecontents}{filecontents} hence to the
+% original one in \LaTeX's sources regarding \csa{filec@ntents}, as
+% |filecontentsdef| was conceived as an extension of the original
+% |filecontents| environment, with the added feature of storing the
+% verbatimized contents in a \TeX{} macro, which can then be printed (verbatim)
+% or re-tokenized later via \csa{scantokens} and executed (if it represents
+% \LaTeX{} material). Starting with |v1.5| some renaming of internal macros
+% appears and the original coding is not only extended but starts being
+% modified at some places as well.
+%
+% |v1.4| adds \csa{filecontentsdefmacro} which does not write to a file.
+%
+% |v1.5| renames all internal macros to use |\FCD@| namespace prefix. This
+% applies here to \csa{FCD@main} whose name was still \csa{filec@ntentsdef} at
+% |v1.4|. The change also applies to the \csa{reserved@b} and \csa{reservec@c}.
+%
+% |v1.5| adds customizability of how tabulation and form feed characters are
+% handled either in file output or in macro storage.
+%
+% |v1.5| modifies |filecontentsdef| to only make a definition with local
+% scope. For this we must smuggle out of the environment both the name and the
+% meaning of the control sequence to define. We prepare for this a
+% \csa{FCD@defmacro} which gets executed via |\endfilecontentsdef| (and
+% variants). As \csa{FCD@defmacro} issues \csa{endgroup}, direct usage of
+% \csa{filecontentsdef} (not as environment) must be inside an explicit
+% \csa{begingroup}/\csa{endgroup} pair, mimicking the one which an environment
+% would insert.
+%
+% The |filecontentsgdef/filecontentsgdefmacro| environments do define
+% \csa{FCD@defmacro} but do not execute it.
+%    \begin{macrocode}
+\gdef\FCD@main#1#2{%
+  \def\FCD@defmacro%
+     {\toks@\expandafter{#2}%
+      \edef\x{\endgroup\def\noexpand#2{\the\toks@}%
+              \begingroup\def\noexpand\@currenvir{\@currenvir}}%
+      \x}%
+  \FCD@global\let#2\@empty%
+ \if@filesw%
+  \openin\@inputcheck#1 %
+  \ifeof\@inputcheck%
+    \@latex@warning@no@line%
+        {Writing file `\@currdir#1'}%
+  \else%
+    \@latex@warning@no@line%
+        {Overwriting file `\@currdir#1'}%
+  \fi%
+  \closein\@inputcheck%
+  \chardef\FCD@reserved@c15 %
+  \ch@ck7\FCD@reserved@c\write%
+  \immediate\openout\FCD@reserved@c#1\relax%
+  \if@tempswa%
+    \immediate\write\FCD@reserved@c{%
+      \@percentchar\@percentchar\space%
+          \expandafter\@gobble\string\LaTeX2e file `#1'^^J%
+      \@percentchar\@percentchar\space  generated by the %
+        `\@currenvir' \expandafter\@gobblefour\string\newenvironment^^J%
+      \@percentchar\@percentchar\space from source `\jobname' on %
+         \number\year/\two@digits\month/\two@digits\day.^^J%
+      \@percentchar\@percentchar}%
+  \fi%
+ \fi%
+  \let\do\@makeother\dospecials%
+%    \end{macrocode}
+% SP's |filecontents| sets here in the loop all catcodes to |11|, but we
+% need for correct rendering in verbatim that the constructed macro
+% stores active characters as active characters.
+%
+% We don't check for unusual active characters of ascii code |<128|
+% as this is not done by original or SP's |filecontents|. But if
+% present then they will expand similarly both in the |\write| and
+% in the construction of the macro.
+%    \begin{macrocode}
+  \count@=128\relax%
+  \loop%
+    \ifnum\catcode\count@=\active%
+          \lccode`~\count@%
+          \lowercase{\def~{\noexpand~}}%
+    \else%
+          \catcode\count@=11 %
+    \fi%
+    \advance\count@ by \@ne%
+    \ifnum\count@<\@cclvi%
+  \repeat%
+%    \end{macrocode}
+% The default active |^^L| was |\outer| up to |2017/01/01|.
+%    \begin{macrocode}
+  \let^^L\relax%
+  \edef\FCD@E{\@backslashchar end\string{\@currenvir\string}}%
+  \edef\FCD@reserved@b{\def\noexpand\FCD@reserved@b####1\FCD@E####2\FCD@E####3\relax}%
+%    \end{macrocode}
+% \csa{filecontentsdefmacro} sets \csa{if@filesw} to false.
+%    \begin{macrocode}
+  \FCD@reserved@b{%
+    \ifx\relax##3\relax%
+      \if@filesw%
+        \let^^L\FCDformfeedtofile%
+        \let^^I\FCDtabtofile%
+        \immediate\write\FCD@reserved@c{##1}%
+      \fi%
+%    \end{macrocode}
+% This is where the original |filecontents| is extended to store the
+% parsed material in a macro (in my very first hack I simply
+% patched it to redefine |\write| to also do the macro storage, but
+% considerations like the one relative to active characters due to
+% |inputenc| made me decide to re-write the whole thing, hence make
+% a new package.)
+%
+% Active characters were defined with a single |\noexpand| in the
+% loop, and this is enough because after each new line is processed
+% the characters it contains are protected from further expansion in
+% the |\xdef|'s. And the single |\noexpand| is enough also for the
+% |\write| done above.
+%    \begin{macrocode}
+      \toks@\expandafter{#2}%
+      \let^^L\FCDformfeedtomacro%
+      \let^^I\FCDtabtomacro%
+      \FCD@global\edef#2{\the\toks@##1\noexpand^^M}%
+    \else%
+      \edef^^M{\noexpand\end{\@currenvir}}%
+      \ifx\relax##1\relax%
+      \else%
+        \if@filesw%
+%    \end{macrocode}
+% |v1.5| suppresses the warning issued by |filecontents| environment
+% in such case.
+%    \begin{macrocode}
+          \let^^L\FCDformfeedtofile%
+          \let^^I\FCDtabtofile%
+          \immediate\write\FCD@reserved@c{##1}%
+        \fi%
+%    \end{macrocode}
+% In such case with the end of environment not being on a line of its own,
+% |v1.5| injects an extra |\empty| token at end of last line. Thus
+% usage in this form is restricted to contents representing \TeX{} macros.
+% We still need the final |^^M| for \csa{filecontentsprint} matters.
+%    \begin{macrocode}
+        \toks@\expandafter{#2}%
+        \let^^L\FCDformfeedtomacro%
+        \let^^I\FCDtabtomacro%
+        \FCD@global\edef#2{\the\toks@##1\noexpand\empty\noexpand^^M}%
+      \fi%
+      \ifx\relax##2\relax%
+      \else%
+         \@latex@warning{%
+           Ignoring text `##2' after \string\end{\@currenvir}}%
+      \fi%
+    \fi%
+    ^^M}%
+%    \end{macrocode}
+% |v1.4|: sync |^^L| and |^^I| with |2018/04/01| \LaTeX{} release.
+%
+% |v1.5|: drop the |^^L| and |^^I| \LaTeX{} definitions in favour of
+% \csa{FCDformfeedtomacro} etc...
+%    \begin{macrocode}
+  \catcode`\^^L\active%
+  \catcode`\^^I\active%
+  \catcode`\^^M\active%
+  \edef^^M##1^^M{\noexpand\FCD@reserved@b##1\FCD@E\FCD@E\relax}%
+%    \end{macrocode}
+% We need active space characters to be active in the produced macro.
+% We only need to protect them once from expansion. The definition
+% will work both for writing to a file and for storage into the macro.
+%    \begin{macrocode}
+  \catcode32\active\lccode`~32 \lowercase{\def~{\noexpand~}}%
+}%
+\gdef\FCDformfeedtofile{^^J^^J}%
+\gdef\FCDformfeedtomacro{\noexpand^^M\noexpand^^M}%
+\gdef\FCDtabtofile{ }%
+\catcode32\active\gdef\FCDtabtomacro{\noexpand }%
+\endgroup%
+%    \end{macrocode}
+% The |v1.4| macros accept a name as alternative to a macro. Empty or
+% ill-formed |#2| will break code. But |#2| can be using |\if|, |\else|,
+% |\fi| tokens, the whole thing will end up |\csname|-expanded. An active
+% character also will end up |\csname|-expanded. There is no check on
+% whether |#2| or |\csname#2\endcsname| is an existing macro.
+%
+% |v1.5| replaces \csa{@tempa,b} by \csa{FCD@tempa,b}. And its
+% \csa{FCD@get@aux} directly grabs |#2| rather than issuing \csa{@firstofone}.
+%    \begin{macrocode}
+\long\def\FCD@get@aux#1\FCD@get@aux#2{#2}%
+\def\FCD@get#1#2%
+{%
+  \def\FCD@tempa{#1}\def\FCD@tempb{{#2}}%
+  \expandafter\FCD@get@aux\@gobbletwo#2\FCD@get@aux
+  \@thirdofthree
+  \FCD@get@aux
+  {\ifcat\relax\noexpand#2\expandafter\@gobble\else\expandafter\@firstofone\fi}%
+  {\edef\FCD@tempb{{\expandafter\noexpand\csname#2\endcsname}}}%
+  \expandafter\FCD@tempa\FCD@tempb
+}%
+%    \end{macrocode}
+% |v1.4| adds \csa{filecontentsdefmacro}. I abuse the \csa{if@filesw} toggle as
+% there is no \csa{if@tempswb} available. No need for a starred version as
+% anyhow the commented-out header was not put into the macro by the existing
+% \csa{FCD@main} code. No need to reset the toggle as documentation explains
+% direct usage of the environment begin and end macros must be inside a 
+% |\begingroup\endgroup| pair.
+%
+% |v1.5| adds the ``starred''-named variants as aliases.
+%    \begin{macrocode}
+\begingroup
+\catcode`\*=11
+\gdef\filecontentsdef #1{\let\FCD@global\@empty
+                         \@tempswatrue\FCD@get{\FCD@main{#1}}}%
+\gdef\filecontentsdef*#1{\let\FCD@global\@empty
+                         \@tempswafalse\FCD@get{\FCD@main{#1}}}%
+\global\let\filecontentsdefstarred\filecontentsdef*
+\gdef\filecontentsgdef #1{\@tempswatrue\FCD@get{\FCD@main{#1}}}%
+\gdef\filecontentsgdef*#1{\@tempswafalse\FCD@get{\FCD@main{#1}}}%
+\global\let\filecontentsgdefstarred\filecontentsgdef*
+%    \end{macrocode}
+% |v1.5| can not use original \csa{endfilecontents} which makes reference to
+% \csa{reserved@c} whereas \fcdname now uses in its place \csa{FCD@reserved@c}.
+% Finally I drop altogether the bulk of this macro which issued a warning in
+% case of an encountered form feed or tabulation character.
+%
+% |v1.5| adds support for definitions with local scope so we must smuggle the
+% defined macro out of the environment. This is done via \csa{FCD@defmacro}
+% which is set-up via \csa{FCD@main}.
+%    \begin{macrocode}
+\gdef\endfilecontentsdef{\immediate\closeout\FCD@reserved@c\FCD@defmacro}%
+\global\let\endfilecontentsdef*\endfilecontentsdef
+\global\let\endfilecontentsdefstarred\endfilecontentsdef
+\gdef\endfilecontentsgdef{\immediate\closeout\FCD@reserved@c}%
+\global\let\endfilecontentsgdef*\endfilecontentsgdef
+\global\let\endfilecontentsgdefstarred\endfilecontentsgdef
+\gdef\filecontentsdefmacro{\let\FCD@global\@empty
+                           \@fileswfalse\FCD@get{\FCD@main{}}}%
+\gdef\endfilecontentsdefmacro{\FCD@defmacro}%
+\gdef\filecontentsgdefmacro{\@fileswfalse\FCD@get{\FCD@main{}}}%
+\global\let\endfilecontentsgdefmacro\relax
+\gdef\filecontentshere #1{\let\FCD@global\@empty
+                           \@tempswatrue\FCD@main{#1}\filecontentsheremacro}%
+\gdef\filecontentshere*#1{\let\FCD@global\@empty
+                           \@tempswafalse\FCD@main{#1}\filecontentsheremacro}%
+\global\let\filecontentsherestarred\filecontentshere*
+\gdef\endfilecontentshere{\endfilecontentsdef\aftergroup\FCD@here}%
+\global\let\endfilecontentshere*\endfilecontentshere
+\global\let\endfilecontentsherestarred\endfilecontentshere
+%    \end{macrocode}
+% Package |verbatim.sty| modifies the standard |verbatim| environment. For
+% both the original and the modified version we need to insert an active |^^M|
+% upfront, else an empty first line would not be obeyed. The |verbatim.sty|'s
+% |verbatim| needs that we feed it with the macro expanded once, as it uses
+% active end of lines as delimiters and they thus need to be immediately
+% visible. It also needs an active |^^M| after the |\end{verbatim}|. To avoid
+% to check at |\AtBeginDocument| if package |verbatim.sty| is loaded, we use a
+% slightly tricky common definition. The advantage is that this may help make
+% the code compatible with further packages (I have not looked for them)
+% modifying the |verbatim| environment. For better code readibility I use
+% |^^M%|'s rather than exploiting the active ends of lines here.
+%
+% |v1.5| adds \csa{FCDprintenvname} which holds the name of the environment to
+% be used. Initially configured to hold of course |verbatim|. And it also adds
+% \csa{FCDprintenvoptions}.
+%    \begin{macrocode}
+\gdef\filecontentsprint{\FCD@get\FCD@print}%
+\catcode`\^^M\active%
+\gdef\FCD@print #1{\let\FCD@print@EOL^^M\let^^M\relax%
+   \begingroup\toks@\expandafter{#1}%
+    \edef\x{\endgroup%
+        \noexpand\begin{\FCDprintenvname}\FCDprintenvoptions^^M%
+        \the\toks@\@backslashchar end\string{\FCDprintenvname\string}}%
+   \x^^M%
+   \FCD@print@resetEOL}%
+\gdef\FCD@print@resetEOL{\let^^M\FCD@print@EOL}%
+\gdef\filecontentsprintviascan{\FCD@get\FCD@printviascan}%
+%    \end{macrocode}
+% |v1.5| adds \csa{filecontentsprintviascan} which uses \csa{scantokens} to wrap
+% stored contents in a verbatim-like environment. This is needed for things
+% such as |listings| (it uses an active backslash at start of lines).
+% Attention to the \csa{scantokens} subtlety with \csa{end} which would become
+% |\end<space>| and then again |listings| would not recognize the ending
+% pattern.
+%    \begin{macrocode}
+\gdef\FCD@printviascan#1{%
+   \toks@\expandafter{#1}%
+   \edef\FCD@envwithcontents{%
+        \noexpand\begin{\FCDprintenvname}\FCDprintenvoptions\noexpand^^M%
+        \the\toks@\@backslashchar end{\FCDprintenvname}\noexpand^^M}%
+   \FCD@exec\FCD@envwithcontents}%
+\endgroup
+\def\FCDprintenvname{verbatim}%
+\let\FCDprintenvoptions\@empty
+\def\FCD@here{\FCD@print\filecontentsheremacro}%
+\def\filecontentsexec{\FCD@get\FCD@exec}%
+%    \end{macrocode}
+% |v1.5| restores \csa{newlinechar} to its prior value, rather than setting it
+% to the \LaTeX{} default (10).
+%    \begin{macrocode}
+\def\FCD@exec #1{\edef\FCD@newlinechar{\the\newlinechar}%
+    \newlinechar13 
+    \scantokens\expandafter{#1}\newlinechar\FCD@newlinechar\relax}%
+\endinput
+%    \end{macrocode}
+% \MakePercentComment
+\Finale
+%%
+%% End of file `filecontentsdef.dtx'.

@@ -1,0 +1,182 @@
+%%%
+% Geometrie
+%%%
+\def\filedateGeometrie{2025/05/28}%
+\def\fileversionGeometrie{0.1a}%
+\message{-- \filedateGeometrie\space v\fileversionGeometrie}%
+%
+\setKVdefault[Geometrie]{CoinBG={(0,0)},CoinHD={(10u,10u)},TypeTrace="Instruments",Clip,Cadres=false,Epaisseur=1,Pointilles=false,Ombre=false,Couleur=black,Ecart=2,ModeleCouleur=5,Cadre={}}%
+\defKV[Geometrie]{Cadre=\ifempty{#1}{}{\setKV[Geometrie]{Cadres}\setKV[Geometrie]{Clip=false}}}%
+
+\ifluatex%
+\NewDocumentEnvironment{Geometrie}{o +b}{%
+  \useKVdefault[Geometrie]%
+  \setKV[Geometrie]{#1}%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    defaultcolormodel := \useKV[Geometrie]{ModeleCouleur};
+    
+     vardef rounded_corners expr p =
+     for i=1 upto length p:
+     subpath (i-15/16, i-1/16) of p ..
+     endfor cycle
+     enddef;
+    %
+    boolean Clip,Cadres,Pointilles,Ombre;
+    Clip=\useKV[Geometrie]{Clip};
+    Cadres=\useKV[Geometrie]{Cadres};
+    Pointilles=\useKV[Geometrie]{Pointilles};
+    Ombre=\useKV[Geometrie]{Ombre};
+    Epaisseur=\useKV[Geometrie]{Epaisseur};
+    bboxmargin:=\useKV[Geometrie]{Ecart};
+    color CouleurCadre;
+    CouleurCadre=\useKV[Geometrie]{Couleur};
+    pair Coinbg,Coinhd;
+    if Clip:
+    Coinbg=\useKV[Geometrie]{CoinBG};
+    Coinhd=\useKV[Geometrie]{CoinHD};
+    else:
+    Coinbg=(-1000,-1000);
+    Coinhd=(1000,1000);
+    fi;
+    if \useKV[Geometrie]{TypeTrace}="Instruments":
+    typetrace:="normal";
+    elseif \useKV[Geometrie]{TypeTrace}="MainLevee":
+    typetrace:="mainlevee";
+    elseif \useKV[Geometrie]{TypeTrace}="Espace":
+    typetrace:="3D";
+    typerepre:="persp";
+    elseif \useKV[Geometrie]{TypeTrace}="Schema":
+    input PfCSketch;
+    sketchypaths;
+    fi;
+    xa:=xpart(Coinbg);
+    xb:=xpart(Coinhd);
+    ya:=ypart(Coinbg);
+    yb:=ypart(Coinhd);
+    feuille(xa,ya,xb,yb);
+    _tfig:=if (xb-xa)>(yb-ya): (xb-xa) else: (yb-ya) fi;
+    _tfig:=2*_tfig;
+    #2%
+    %%
+    if Cadres:
+    string Cadre;
+    Cadre=\useKV[Geometrie]{Cadre};
+
+    picture P; P = currentpicture;
+
+    if Cadre<>"aucun":
+    if Cadre="rectangle":
+      if Ombre:
+        fill bbox P shifted (3,-3) withcolor 3/4[CouleurCadre,white];
+        unfill bbox P;
+      fi;
+      if Pointilles:
+        drawoptions(dashed evenly withpen pencircle scaled Epaisseur withcolor CouleurCadre;);
+      else:
+        drawoptions(withpen pencircle scaled Epaisseur withcolor CouleurCadre;);
+      fi;
+      draw bbox P;
+      drawoptions();
+      draw P;
+    else:
+      if Ombre:
+        fill rounded_corners bbox P shifted (3,-3) withcolor 3/4[CouleurCadre,white];
+        unfill rounded_corners bbox P;
+      fi;
+      if Pointilles:
+        drawoptions(dashed evenly withpen pencircle scaled Epaisseur withcolor CouleurCadre;);
+      else:
+        drawoptions(withpen pencircle scaled Epaisseur withcolor CouleurCadre;);
+      fi;
+      draw rounded_corners bbox P;
+      drawoptions();
+      draw P;
+      fi;
+      fi;
+      fi;
+  \end{mplibcode}%
+}{}%
+\else
+\NewDocumentEnvironment{Geometrie}{o +b}{%
+  \useKVdefault[Geometrie]%
+  \setKV[Geometrie]{#1}%
+  \begin{mpost}[mpsettings={%
+      vardef rounded_corners expr p =
+     for i=1 upto length p:
+     subpath (i-15/16, i-1/16) of p ..
+     endfor cycle
+     enddef;
+    %
+    boolean Clip,Cadres,Pointilles,Ombre;
+    Clip=\useKV[Geometrie]{Clip};
+    Cadres=\useKV[Geometrie]{Cadres};
+    Pointilles=\useKV[Geometrie]{Pointilles};
+    Ombre=\useKV[Geometrie]{Ombre};
+    Epaisseur=\useKV[Geometrie]{Epaisseur};
+    bboxmargin:=\useKV[Geometrie]{Ecart};
+    color CouleurCadre;
+    CouleurCadre=\useKV[Geometrie]{Couleur};
+      pair Coinbg,Coinhd;
+      Coinbg=\useKV[Geometrie]{CoinBG};
+      Coinhd=\useKV[Geometrie]{CoinHD};
+      if \useKV[Geometrie]{TypeTrace}="Instruments":
+      typetrace:="normal";
+      elseif \useKV[Geometrie]{TypeTrace}="MainLevee":
+      typetrace:="mainlevee";
+      elseif \useKV[Geometrie]{TypeTrace}="Espace":
+      typetrace:="3D";
+      typerepre:="persp";
+      elseif \useKV[Geometrie]{TypeTrace}="Schema":
+      input PfCSketch;
+      sketchypaths;
+      fi;}
+    ]%
+    xa:=xpart(Coinbg);
+    xb:=xpart(Coinhd);;
+    ya:=ypart(Coinbg);
+    yb:=ypart(Coinhd);
+    feuille(xa,ya,xb,yb);
+    _tfig:=if (xb-xa)>(yb-ya): (xb-xa) else: (yb-ya) fi;
+    _tfig:=2*_tfig;
+    #2%
+        %%
+    if Cadres:
+    string Cadre;
+    Cadre=\useKV[Geometrie]{Cadre};
+
+    picture P; P = currentpicture;
+
+    if Cadre<>"aucun":
+    if Cadre="rectangle":
+      if Ombre:
+        fill bbox P shifted (3,-3) withcolor 3/4[CouleurCadre,white];
+        unfill bbox P;
+      fi;
+      if Pointilles:
+        drawoptions(dashed evenly withpen pencircle scaled Epaisseur withcolor CouleurCadre;);
+      else:
+        drawoptions(withpen pencircle scaled Epaisseur withcolor CouleurCadre;);
+      fi;
+      draw bbox P;
+      drawoptions();
+      draw P;
+    else:
+      if Ombre:
+        fill rounded_corners bbox P shifted (3,-3) withcolor 3/4[CouleurCadre,white];
+        unfill rounded_corners bbox P;
+      fi;
+      if Pointilles:
+        drawoptions(dashed evenly withpen pencircle scaled Epaisseur withcolor CouleurCadre;);
+      else:
+        drawoptions(withpen pencircle scaled Epaisseur withcolor CouleurCadre;);
+      fi;
+      draw rounded_corners bbox P;
+      drawoptions();
+      draw P;
+      fi;
+      fi;
+      fi;
+  \end{mpost}%
+}{}%
+\fi%

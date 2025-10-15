@@ -1,0 +1,568 @@
+%%%
+% Le th\'eor\`eme de Pythagore
+%%%
+\def\filedatePythagore{2025/05/26}%
+\def\fileversionPythagore{0.1a}%
+\message{-- \filedatePythagore\space v\fileversionPythagore}%
+%
+\setKVdefault[ClesPythagore]{Exact=false,AvantRacine=false,Racine=false,Entier=false,Egalite=false,Precision=2,Soustraction=false,Figure=false,FigureSeule=false,Angle=0,Echelle=1cm,Reciproque=false,ReciColonnes=false,Faible=false,Unite=cm,EnchaineA=false,EnchaineB=false,EnchaineC=false,Perso=false,AllPerso=false,SansMots=false,Decalage=5mm,ModeleCouleur=5,ValeurA={},ValeurB={},ValeurC={},Dys=false}%
+\defKV[ClesPythagore]{%
+  ValeurA=\ifempty{#1}{}{\setKV[ClesPythagore]{EnchaineA}},%
+  ValeurB=\ifempty{#1}{}{\setKV[ClesPythagore]{EnchaineB}},%
+  ValeurC=\ifempty{#1}{}{\setKV[ClesPythagore]{EnchaineC}}%
+}%\defKV[ClesPythagore]{ValeurB=\ifempty{#1}{}{\setKV[ClesPythagore]{EnchaineB}}}%
+%\defKV[ClesPythagore]{ValeurC=\ifempty{#1}{}{\setKV[ClesPythagore]{EnchaineC}}}%
+
+\setsepchar[*]{,*/}%
+\readlist*\ListePythagoreCoteEntier{13/84/85,14/48/50,15/20/25,15/36/39,16/30/34,16/63/65,18/24/30,18/80/82,20/21/29,20/48/52,21/28/35,21/72/75,24/32/40,24/45/51,24/70/74,25/60/65,27/36/45,28/45/53,28/96/100,30/40/50,30/72/78,32/60/68,33/44/55,33/56/65,35/84/91,36/48/60,36/77/85,39/52/65,39/80/89,40/42/58,40/75/85,42/56/70,45/60/75,48/55/73,48/64/80,51/68/85,54/72/90,57/76/95,60/63/87,60/80/100,65/72/97}%%d'après villement.gerard.free.fr%3/4/5}/{5/12/13}/{6/8/10}/{7/24/25}/{8/15/17}/{9/12/15}/{9/40/41}/{10/24/26}/{11/60/61}/{12/16/20}/{12/35/37}/
+\setsepchar{,}%
+
+% On d\'efinit les figures \`a utiliser
+\def\MPFigurePytha#1#2#3#4#5#6{%
+  % #1 Premier sommet
+  % #2 Sommet de l'angle droit
+  % #3 troisi\`eme sommet
+  % #4 1ere longueur
+  % #5 2eme longueur
+  % #6 angle de rotation de la figure
+  \ifluatex
+    \mplibforcehmode%
+    \begin{mplibcode}
+      defaultcolormodel := \useKV[ClesPythagore]{ModeleCouleur};
+
+      boolean Dys;
+      Dys=\useKV[ClesPythagore]{Dys};
+      
+    u:=\useKV[ClesPythagore]{Echelle};
+    pair A,B,C,O,D,E,F;%B est le sommet de l'angle droit
+    O=u*(2.5,2.5);
+    path cc;
+    cc=(fullcircle scaled 4u) shifted O;
+    % On place les points A,B,C sur le cercle de mani\`ere \`a faciliter la rotation de la figure
+    A=point(0.9*length cc) of cc;
+    B=A rotatedabout(O,-120);
+    C=2[A,O];
+    % On tourne pour \'eventuellement moins de lassitude :)
+    A:=A rotatedabout(O,#6);
+    B:=B rotatedabout(O,#6);
+    C:=C rotatedabout(O,#6);
+    % On d\'efinit l'angle droit
+    D-B=7*unitvector(C-B);
+    F-B=7*unitvector(A-B);
+    E-D=F-B;
+    draw A{dir(angle(B-A)+5)}..B{dir(angle(B-A)+5)};
+    draw B{dir(angle(C-B)+5)}..C{dir(angle(C-B)+5)};
+    draw C{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)};
+    draw D--E--F;
+    numeric decalage;
+    if Dys:
+    decalage=2*\useKV[ClesPythagore]{Decalage};
+    else:
+    decalage=\useKV[ClesPythagore]{Decalage};
+    fi;
+    if (#4<#5) or (#4=#5) :
+    if ypart(B)>ypart(O) :
+        label(btex \num{#4} etex,1/2[C,B]-decalage*(unitvector(A-B)));
+        label(btex \num{#5} etex,1/2[A,B]-decalage*(unitvector(C-B)));
+     else:
+        label(btex \num{#4} etex,1/2[C,B]-decalage*(unitvector(A-B)));
+        label(btex \num{#5} etex,1/2[A,B]-decalage*(unitvector(C-B)));
+     fi
+    else:
+      if ypart(B)>ypart(O) :
+        label(btex \num{#4} etex,1/2[C,A]-decalage*(unitvector(C-A) rotated 90));
+        label(btex \num{#5} etex,1/2[A,B]-decalage*(unitvector(C-B)));
+        else:
+        label(btex \num{#4} etex,1/2[A,C]+decalage*(unitvector(A-C)
+        rotated 90));
+        label(btex \num{#5} etex,1/2[A,B]-decalage*(unitvector(C-B)));
+      fi;
+    fi;
+    label(btex #3 etex,1.2[O,A]);
+    label(btex #2 etex,1.2[O,B]);
+    label(btex #1 etex,1.2[O,C]);
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={u:=\useKV[ClesPythagore]{Echelle};}]
+    pair A,B,C,O,D,E,F;%B est le sommet de l'angle droit
+    O=u*(2.5,2.5);
+    path cc;
+    cc=(fullcircle scaled 4u) shifted O;
+    % On place les points A,B,C sur le cercle de mani\`ere \`a faciliter la rotation de la figure
+    A=point(0.9*length cc) of cc;
+    B=A rotatedabout(O,-120);
+    C=2[A,O];
+    % On tourne pour \'eventuellement moins de lassitude :)
+    A:=A rotatedabout(O,#6);
+    B:=B rotatedabout(O,#6);
+    C:=C rotatedabout(O,#6);
+    % On d\'efinit l'angle droit
+    D-B=7*unitvector(C-B);
+    F-B=7*unitvector(A-B);
+    E-D=F-B;
+    draw A{dir(angle(B-A)+5)}..B{dir(angle(B-A)+5)};
+    draw B{dir(angle(C-B)+5)}..C{dir(angle(C-B)+5)};
+    draw C{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)};    
+    draw D--E--F;
+    numeric decalage;
+    decalage=3mm;
+    if (#4<#5) or (#4=#5) :
+    if ypart(B)>ypart(O) :
+        label(btex \num{#4} etex,1/2[C,B]-decalage*(unitvector(A-B)));
+        label(btex \num{#5} etex,1/2[A,B]-decalage*(unitvector(C-B)));
+     else:
+        label(btex \num{#4} etex,1/2[C,B]-decalage*(unitvector(A-B)));
+        label(btex \num{#5} etex,1/2[A,B]-decalage*(unitvector(C-B)));
+     fi
+    else:
+      if ypart(B)>ypart(O) :
+      label(btex \num{#4} etex,1/2[C,A]-decalage*(unitvector(C-A) rotated 90));
+        label(btex \num{#5} etex,1/2[A,B]-decalage*(unitvector(C-B)));
+        else:
+        label(btex \num{#4} etex,1/2[A,C]+decalage*(unitvector(A-C)
+        rotated 90));
+        label(btex \num{#5} etex,1/2[A,B]-decalage*(unitvector(C-B)));
+      fi;
+    fi;
+    label(btex #3 etex,1.2[O,A]);
+    label(btex #2 etex,1.2[O,B]);
+    label(btex #1 etex,1.2[O,C]);
+  \end{mpost}
+  \fi
+}%
+
+\def\MPFigureReciPytha#1#2#3#4#5#6#7{%
+  % #1 Premier sommet
+    % #2 Sommet de l'angle droit
+    % #3 troisi\`eme sommet
+    % #4 1ere longueur
+    % #5 2eme longueur
+    % #6 3eme longueur
+    % #7 angle de rotation de la figure
+  \ifluatex
+   \mplibforcehmode
+   \begin{mplibcode}
+     defaultcolormodel := \useKV[ClesPythagore]{ModeleCouleur};
+     u:=\useKV[ClesPythagore]{Echelle};
+     boolean Dys;
+     Dys=\useKV[ClesPythagore]{Dys};
+     decalage=if Dys:2* fi \useKV[ClesPythagore]{Decalage};
+    pair A,B,C,O,D,E,F;%B est le sommet de l'angle droit
+    O=u*(2.5,2.5);
+    path cc;
+    cc=(fullcircle scaled 4u) shifted O;
+    % On place les points A,B,C sur le cercle de mani\`ere \`a faciliter la rotation de la figure
+    A=point(0.8*length cc) of cc;
+    B=A rotatedabout(O,-100);
+    C=2[A,O];
+    % On tourne pour \'eventuellement moins de lassitude :)
+    A:=A rotatedabout(O,#7);
+    B:=B rotatedabout(O,#7);
+    C:=C rotatedabout(O,#7);
+    draw A{dir(angle(B-A)+5)}..B{dir(angle(B-A)+5)};
+    draw B{dir(angle(C-B)+5)}..C{dir(angle(C-B)+5)};
+    draw C{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)};    
+    label(TEX("\num{#4}"),O+decalage*(unitvector(O-B)));
+    label(TEX("\num{#6}"),1/2[C,B]+decalage*(unitvector(1/2[C,B]-O)));
+    label(TEX("\num{#5}"),1/2[A,B]+decalage*(unitvector(1/2[A,B]-O)));
+    label(TEX("#1"),1.2[O,A]);
+    label(TEX("#2"),1.2[O,B]);
+    label(TEX("#3"),1.2[O,C]);
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={u:=\useKV[ClesPythagore]{Echelle};decalage=\useKV[ClesPythagore]{Decalage};}]
+    pair A,B,C,O,D,E,F;%B est le sommet de l'angle droit
+    O=u*(2.5,2.5);
+    path cc;
+    cc=(fullcircle scaled 4u) shifted O;
+    % On place les points A,B,C sur le cercle de mani\`ere \`a faciliter la rotation de la figure
+    A=point(0.8*length cc) of cc;
+    B=A rotatedabout(O,-100);
+    C=2[A,O];
+    % On tourne pour \'eventuellement moins de lassitude :)
+    A:=A rotatedabout(O,#7);
+    B:=B rotatedabout(O,#7);
+    C:=C rotatedabout(O,#7);
+    draw A{dir(angle(B-A)+5)}..B{dir(angle(B-A)+5)};
+    draw B{dir(angle(C-B)+5)}..C{dir(angle(C-B)+5)};
+    draw C{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)};
+    numeric decalage;
+    decalage=3mm;
+    label(LATEX("\num{#4}"),O+decalage*(unitvector(O-B)));
+    label(LATEX("\num{#5}"),1/2[C,B]+decalage*(unitvector(1/2[C,B]-O)));
+    label(LATEX("\num{#6}"),1/2[A,B]+decalage*(unitvector(1/2[A,B]-O)));
+    label(btex #1 etex,1.2[O,A]);
+    label(btex #2 etex,1.2[O,B]);
+    label(btex #3 etex,1.2[O,C]);
+  \end{mpost}
+  \fi
+}%
+
+\def\MPFigurePythaSansMots#1#2#3#4#5#6{%
+  % #1 Premier sommet
+  % #2 Sommet de l'angle droit
+  % #3 troisi\`eme sommet
+  % #4 1ere longueur
+  % #5 2eme longueur
+  % #6 angle de rotation de la figure
+  \ifluatex
+   \mplibforcehmode
+   \begin{mplibcode}
+     defaultcolormodel := \useKV[ClesPythagore]{ModeleCouleur};
+     u:=\useKV[ClesPythagore]{Echelle};
+     boolean Dys;
+     Dys=\useKV[ClesPythagore]{Dys};
+     numeric decalage;
+     decalage=if Dys:2* fi \useKV[ClesPythagore]{Decalage};
+    pair A,B,C,O,D,E,F,L[],M[],N[];%B est le sommet de l'angle droit
+    O=u*(2.5,2.5);
+    path cc;
+    cc=(fullcircle scaled 4u) shifted O;
+    % On place les points A,B,C sur le cercle de mani\`ere \`a faciliter la rotation de la figure
+    A=point(0.9*length cc) of cc;
+    B=A rotatedabout(O,-120);
+    C=2[A,O];
+    % On tourne pour \'eventuellement moins de lassitude :)
+    A:=A rotatedabout(O,#6);
+    B:=B rotatedabout(O,#6);
+    C:=C rotatedabout(O,#6);
+    % On d\'efinit l'angle droit
+    D-B=7*unitvector(C-B);
+    F-B=7*unitvector(A-B);
+    E-D=F-B;
+    trace polygone(A,B,C);
+    draw D--E--F;
+    L1=rotation(B,A,90);
+    L2-L1=B-A;
+    trace chemin(A,L1,L2,B);
+    M1=rotation(C,B,90);
+    M2-M1=C-B;
+    trace chemin(B,M1,M2,C);
+    N1=rotation(A,C,90);
+    N2-N1=A-C;
+    trace chemin(C,N1,N2,A);    
+    if (#4<#5) or (#4=#5) :
+    if ypart(B)>ypart(O) :
+        label(btex \num{#4} etex,1/2[C,B]+decalage*(unitvector(A-B)));
+        label(btex \num{#5} etex,1/2[A,B]+decalage*(unitvector(C-B)));
+        label(TEX("\begin{tabular}{c}Aire\\$\num{#5}\times\num{#5}$\\$\num{\fpeval{#5*#5}}$\\\end{tabular}"),iso(A,L2));
+        label(TEX("\begin{tabular}{c}Aire\\$\num{#4}\times\num{#4}$\\$\num{\fpeval{#4*#4}}$\\\end{tabular}"),iso(B,M2));
+        label(TEX("\begin{tabular}{c}Aire\\$\num{\fpeval{#4*#4}}+\num{\fpeval{#5*#5}}$\\$\num{\fpeval{#4*#4+#5*#5}}$\\\end{tabular}"),iso(C,N2));
+     else:
+        label(btex \num{#4} etex,1/2[C,B]+decalage*(unitvector(A-B)));
+        label(btex \num{#5} etex,1/2[A,B]+decalage*(unitvector(C-B)));
+        label(TEX("\begin{tabular}{c}Aire\\$\num{#5}\times\num{#5}$\\$\num{\fpeval{#5*#5}}$\\\end{tabular}"),iso(A,L2));
+        label(TEX("\begin{tabular}{c}Aire\\$\num{#4}\times\num{#4}$\\$\num{\fpeval{#4*#4}}$\\\end{tabular}"),iso(B,M2));
+        label(TEX("\begin{tabular}{c}Aire\\$\num{\fpeval{#4*#4}}+\num{\fpeval{#5*#5}}$\\$\num{\fpeval{#4*#4+#5*#5}}$\\\end{tabular}"),iso(C,N2));
+        drawarrow 2/10[iso(A,L2),iso(C,N2)]--8/10[iso(A,L2),iso(C,N2)];
+        drawarrow 2/10[iso(B,M2),iso(C,N2)]--8/10[iso(B,M2),iso(C,N2)];
+     fi
+    else:
+      if ypart(B)>ypart(O) :
+        label(btex \num{#4} etex,1/2[C,A]-decalage*(unitvector(C-A) rotated 90));
+        label(btex \num{#5} etex,1/2[A,B]-decalage*(unitvector(C-B)));
+        label(TEX("\begin{tabular}{c}Aire\\$\num{#5}\times\num{#5}$\\$\num{\fpeval{#5*#5}}$\\\end{tabular}"),iso(A,L2));
+        label(TEX("\begin{tabular}{c}Aire\\$\num{#4}\times\num{#4}$\\$\num{\fpeval{#4*#4}}$\\\end{tabular}"),iso(C,N2));
+        label(TEX("\begin{tabular}{c}Aire\\$\num{\fpeval{#4*#4}}-\num{\fpeval{#5*#5}}$\\$\num{\fpeval{#4*#4-#5*#5}}$\\\end{tabular}"),iso(B,M2));
+        drawarrow 2/10[iso(A,L2),iso(B,M2)]--8/10[iso(A,L2),iso(B,M2)];
+        drawarrow 2/10[iso(C,N2),iso(B,M2)]--8/10[iso(C,N2),iso(B,M2)];
+        else:
+        label(btex \num{#4} etex,1/2[A,C]+decalage*(unitvector(A-C) rotated 90));
+        label(btex \num{#5} etex,1/2[A,B]-decalage*(unitvector(C-B)));
+        label(TEX("\begin{tabular}{c}Aire\\$\num{#5}\times\num{#5}$\\$\num{\fpeval{#5*#5}}$\\\end{tabular}"),iso(A,L2));
+        label(TEX("\begin{tabular}{c}Aire\\$\num{#4}\times\num{#4}$\\$\num{\fpeval{#4*#4}}$\\\end{tabular}"),iso(C,N2));
+        label(TEX("\begin{tabular}{c}Aire\\$\num{\fpeval{#4*#4}}-\num{\fpeval{#5*#5}}$\\$\num{\fpeval{#4*#4-#5*#5}}$\\\end{tabular}"),iso(B,M2));
+        drawarrow 2/10[iso(A,L2),iso(B,M2)]--8/10[iso(A,L2),iso(B,M2)];
+        drawarrow 2/10[iso(C,N2),iso(B,M2)]--8/10[iso(C,N2),iso(B,M2)];
+      fi;
+    fi;
+    label(btex #3 etex,1.2[O,A]);
+    label(btex #2 etex,1.2[O,B]);
+    label(btex #1 etex,1.2[O,C]);
+  \end{mplibcode}
+  \fi
+}%
+
+\newcommand\RedactionPythagore{}%
+\newcommand\RedactionReciPythagore{}%
+\newcommand\RedactionCalculsPythagore{}%
+\newcommand\RedactionCalculsReciPythagore{}%
+\newcommand\RedactionConclusionReciPythagore{}%
+
+\NewDocumentCommand\CalculsPythagore{o m m m m}{%
+  \xintifboolexpr{#3<#4 || #3==#4}{%\ifnum#3<#4%
+    \xdef\ResultatPytha{\fpeval{round(sqrt(#3^2+#4^2),\useKV[ClesPythagore]{Precision})}}%
+    \ifboolKV[ClesPythagore]{EnchaineA}{\xdef\PfCPythaVA{\useKV[ClesPythagore]{ValeurA}}}{\xdef\PfCPythaVA{\fpeval{#3^2}}}%
+    \ifboolKV[ClesPythagore]{EnchaineB}{\xdef\PfCPythaVB{\useKV[ClesPythagore]{ValeurB}}}{\xdef\PfCPythaVB{\fpeval{#4^2}}}%
+    \xdef\ResultatAttendu{\fpeval{\PfCPythaVA+\PfCPythaVB}}%
+    \xdef\ResultatApproche{\fpeval{round(sqrt(\ResultatAttendu),\useKV[ClesPythagore]{Precision})^2}}%
+    \begin{align*}
+      \NomA\NomC^2&=\NomA\NomB^2+\NomB\NomC^2\\
+      \NomA\NomC^2&=\ifboolKV[ClesPythagore]{EnchaineA}{\opcopy{\useKV[ClesPythagore]{ValeurA}}{a1}\opexport{a1}{\Aun}\num{\Aun}}{\opexport{A1}{\Aun}\num{\Aun}^2}+\ifboolKV[ClesPythagore]{EnchaineB}{\opcopy{\useKV[ClesPythagore]{ValeurB}}{a2}\opexport{a2}{\Adeux}\num{\Adeux}}{\opexport{A2}{\Adeux}\num{\Adeux}^2}\\
+      \NomA\NomC^2&=\ifboolKV[ClesPythagore]{EnchaineA}{\opexport{a1}{\Aun}\num{\Aun}}{\opmul*{A1}{A1}{a1}\opexport{a1}{\Aun}\num{\Aun}}+\ifboolKV[ClesPythagore]{EnchaineB}{\opexport{a2}{\Adeux}\num{\Adeux}}{\opmul*{A2}{A2}{a2}\opexport{a2}{\Adeux}\num{\Adeux}}\\
+      \NomA\NomC^2&=\opadd*{a1}{a2}{a3}\opexport{a3}{\Atrois}\num{\Atrois}%\\
+      \ifboolKV[ClesPythagore]{AvantRacine}{}{%
+         \ifboolKV[ClesPythagore]{Entier}{}{\\\NomA\NomC&=\sqrt{\opexport{a3}{\Atrois}\num{\Atrois}}\ifboolKV[ClesPythagore]{Racine}{~\si{\PfCPythaUnit}}{}}
+         \ifboolKV[ClesPythagore]{Racine}{}{\\\NomA\NomC&\IfStrEq{\ResultatApproche}{\ResultatAttendu}{=}{\approx}\opsqrt[maxdivstep=5]{a3}{a4}\opround{a4}{pres}{a4}\opunzero{a4}\opexport{a4}{\Aquatre}\SI{\Aquatre}{\PfCPythaUnit}}%\\
+      }
+    \end{align*}
+  }{%
+    \xdef\ResultatPytha{\fpeval{round(sqrt(#3^2-#4^2),\useKV[ClesPythagore]{Precision})}}%
+    \ifboolKV[ClesPythagore]{EnchaineC}{\xdef\PfCPythaVC{\useKV[ClesPythagore]{ValeurC}}}{\xdef\PfCPythaVC{\fpeval{#3^2}}}%
+    \ifboolKV[ClesPythagore]{EnchaineB}{\xdef\PfCPythaVB{\useKV[ClesPythagore]{ValeurB}}}{\xdef\PfCPythaVB{\fpeval{#4^2}}}%
+    \xdef\ResultatAttendu{\fpeval{\PfCPythaVC-\PfCPythaVB}}%
+    \xdef\ResultatApproche{\fpeval{round(sqrt(\ResultatAttendu),\useKV[ClesPythagore]{Precision})^2}}%
+    \ifboolKV[ClesPythagore]{Soustraction}{%
+      \begin{align*}
+        \NomA\NomB^2&=\NomA\NomC^2-\NomB\NomC^2\\
+        \NomA\NomB^2&=\ifboolKV[ClesPythagore]{EnchaineC}{\opcopy{\useKV[ClesPythagore]{ValeurC}}{a1}\opexport{a1}{\Aun}\num{\Aun}}{\opexport{A1}{\Aun}\num{\Aun}^2}-\ifboolKV[ClesPythagore]{EnchaineB}{\opcopy{\useKV[ClesPythagore]{ValeurB}}{a2}\opexport{a2}{\Adeux}\num{\Adeux}}{\opexport{A2}{\Adeux}\num{\Adeux}^2}\\
+        \NomA\NomB^2&=\ifboolKV[ClesPythagore]{EnchaineC}{\opcopy{\useKV[ClesPythagore]{ValeurC}}{a1}\opexport{a1}{\Aun}\num{\Aun}}{\opmul*{A1}{A1}{a1}\opexport{a1}{\Aun}\num{\Aun}}-\ifboolKV[ClesPythagore]{EnchaineB}{\opexport{a2}{\Adeux}\num{\Adeux}}{\opmul*{A2}{A2}{a2}\opexport{a2}{\Adeux}\num{\Adeux}}\\
+        \NomA\NomB^2&=\opsub*{a1}{a2}{a3}\opexport{a3}{\Atrois}\num{\Atrois}%\\
+        \ifboolKV[ClesPythagore]{AvantRacine}{}{%
+        \ifboolKV[ClesPythagore]{Entier}{}{\\\NomA\NomB&=\sqrt{\opexport{a3}{\Atrois}\num{\Atrois}}\ifboolKV[ClesPythagore]{Racine}{~\si{\PfCPythaUnit}}{}}
+        \ifboolKV[ClesPythagore]{Racine}{}{\\\NomA\NomB&\IfStrEq{\ResultatApproche}{\ResultatAttendu}{=}{\approx}\opsqrt[maxdivstep=5]{a3}{a4}\opround{a4}{pres}{a4}\opunzero{a4}\opexport{a4}{\Aquatre}\SI{\Aquatre}{\PfCPythaUnit}}%\\
+        }
+      \end{align*}
+    }{%
+      \begin{align*}
+        \NomA\NomC^2&=\NomA\NomB^2+\NomB\NomC^2\\
+        \ifboolKV[ClesPythagore]{EnchaineC}{\opcopy{\useKV[ClesPythagore]{ValeurC}}{a1}\opexport{a1}{\Aun}\num{\Aun}}{\opexport{A1}{\Aun}\num{\Aun}^2}&=\NomA\NomB^2+\ifboolKV[ClesPythagore]{EnchaineB}{\opcopy{\useKV[ClesPythagore]{ValeurB}}{a2}\opexport{a2}{\Adeux}\num{\Adeux}}{\opexport{A2}{\Adeux}\num{\Adeux}^2}\\
+        \ifboolKV[ClesPythagore]{EnchaineC}{\opcopy{\useKV[ClesPythagore]{ValeurC}}{a1}\opexport{a1}{\Aun}\num{\Aun}}{\opmul*{A1}{A1}{a1}\opexport{a1}{\Aun}\num{\Aun}}&=\NomA\NomB^2+\ifboolKV[ClesPythagore]{EnchaineB}{\opexport{a2}{\Adeux}\num{\Adeux}}{\opmul*{A2}{A2}{a2}\opexport{a2}{\Adeux}\num{\Adeux}}\\
+        \NomA\NomB^2&=\ifboolKV[ClesPythagore]{EnchaineC}{\opcopy{\useKV[ClesPythagore]{ValeurC}}{a1}\opexport{a1}{\Aun}\num{\Aun}}{\opmul*{A1}{A1}{a1}\opexport{a1}{\Aun}\num{\Aun}}-\ifboolKV[ClesPythagore]{EnchaineB}{\opexport{a2}{\Adeux}\num{\Adeux}}{\opmul*{A2}{A2}{a2}\opexport{a2}{\Adeux}\num{\Adeux}}\\
+        \NomA\NomB^2&=\opsub*{a1}{a2}{a3}\opexport{a3}{\Atrois}\num{\Atrois}%\\
+        \ifboolKV[ClesPythagore]{AvantRacine}{}{%
+        \ifboolKV[ClesPythagore]{Entier}{}{\\\NomA\NomB&=\sqrt{\opexport{a3}{\Atrois}\num{\Atrois}}\ifboolKV[ClesPythagore]{Racine}{~\si{\PfCPythaUnit}}{}}%
+        \ifboolKV[ClesPythagore]{Racine}{}{\\\NomA\NomB&\IfStrEq{\ResultatApproche}{\ResultatAttendu}{=}{\approx}\opsqrt[maxdivstep=5]{a3}{a4}\opround{a4}{pres}{a4}\opunzero{a4}\opexport{a4}{\Aquatre}\SI{\Aquatre}{\PfCPythaUnit}}%\\
+       }
+      \end{align*}
+    }%
+  }%\fi%
+}%
+
+\NewDocumentCommand\PfCCalculsReciPythagore{ommmm}{%
+  \ifboolKV[ClesPythagore]{ReciColonnes}{%
+    \[
+      \begin{array}{cccc|cccc}
+        &&\NomA\NomC^2&&&\NomA\NomB^2&+&\NomB\NomC^2\\
+        &&\ifboolKV[ClesPythagore]{EnchaineC}{%
+           \num{\useKV[ClesPythagore]{ValeurC}}%
+           \xdef\PfCRetiensReciHypo{\useKV[ClesPythagore]{ValeurC}}%
+           }{%
+           \num{#3}^2}&&&\ifboolKV[ClesPythagore]{EnchaineA}{\num{\useKV[ClesPythagore]{ValeurA}}}{\num{#4}^2}&+&\ifboolKV[ClesPythagore]{EnchaineB}{\num{\useKV[ClesPythagore]{ValeurB}}}{\num{#5}^2}\\
+        &&&&&\ifboolKV[ClesPythagore]{EnchaineA}{%Enchaine A
+              \ifboolKV[ClesPythagore]{EnchaineB}{%EnchaineB
+              }{%Pas Enchaine B
+              \num{\useKV[ClesPythagore]{ValeurA}}}}{%Pas EnchaineA
+              \num{\fpeval{#4*#4}}}&\ifboolKV[ClesPythagore]{EnchaineA}{\ifboolKV[ClesPythagore]{EnchaineB}{}{+}}{+}&\ifboolKV[ClesPythagore]{EnchaineB}{%Enchaine B
+              \ifboolKV[ClesPythagore]{EnchaineA}{%EnchaineA
+              }{%Pas Enchaine A
+              \num{\useKV[ClesPythagore]{ValeurB}}}}{%Pas EnchaineB
+              \num{\fpeval{#5*#5}}}\\
+        &&\ifboolKV[ClesPythagore]{EnchaineC}{}{%
+           \xdef\PfCRetiensReciHypo{\fpeval{#3*#3}}%
+           \num{\PfCRetiensReciHypo}
+           }&&&\multicolumn{3}{c}{%
+                \ifboolKV[ClesPythagore]{EnchaineA}{%Enchaine A
+                \ifboolKV[ClesPythagore]{EnchaineB}{%EnchaineB
+                \xdef\PfCRetiensReciSomme{\fpeval{\useKV[ClesPythagore]{ValeurA}+\useKV[ClesPythagore]{ValeurB}}}%
+              }{%Pas Enchaine B
+                \xdef\PfCRetiensReciSomme{\fpeval{\useKV[ClesPythagore]{ValeurA}+#5*#5}}%
+                }}{%Pas EnchaineA
+                \ifboolKV[ClesPythagore]{EnchaineB}{
+                \xdef\PfCRetiensReciSomme{\fpeval{\useKV[ClesPythagore]{ValeurB}+#4*#4}}%
+                }{%
+                \xdef\PfCRetiensReciSomme{\fpeval{#4*#4+#5*#5}}%
+                }
+                }
+                \num{\PfCRetiensReciSomme}%
+                }\\
+      \end{array}
+    \]
+  }{%
+    \[\left.
+        \begin{array}{l}
+          \NomA\NomC^2=\ifboolKV[ClesPythagore]{EnchaineC}{%
+          \num{\useKV[ClesPythagore]{ValeurC}}%
+          \xdef\PfCRetiensReciHypo{\useKV[ClesPythagore]{ValeurC}}%
+          }{%
+          \num{#3}^2=\num{\fpeval{#3*#3}}
+          \xdef\PfCRetiensReciHypo{\fpeval{#3*#3}}%
+          }\\
+           \NomA\NomB^2+\NomB\NomC^2=\ifboolKV[ClesPythagore]{EnchaineA}{\num{\useKV[ClesPythagore]{ValeurA}}}{\num{#4}^2}+\ifboolKV[ClesPythagore]{EnchaineB}{\num{\useKV[ClesPythagore]{ValeurB}}}{\num{#5}^2}=
+          \ifboolKV[ClesPythagore]{EnchaineA}{%Enchaine A
+          \ifboolKV[ClesPythagore]{EnchaineB}{%Enchaine B
+          \xdef\PfCRetiensReciSomme{\fpeval{\useKV[ClesPythagore]{ValeurA}+\useKV[ClesPythagore]{ValeurB}}}%
+          \num{\PfCRetiensReciSomme}%
+          }{% PasEnchaine B
+          \num{\useKV[ClesPythagore]{ValeurA}}+\num{\fpeval{#5*#5}}=%
+          \xdef\PfCRetiensReciSomme{\fpeval{\useKV[ClesPythagore]{ValeurA}+#5*#5}}%
+          \num{\PfCRetiensReciSomme}%
+          }
+          }{%Pas Enchaine A
+          \num{\fpeval{#4*#4}}+
+          \ifboolKV[ClesPythagore]{EnchaineB}{%Enchaine B
+          \num{\useKV[ClesPythagore]{ValeurB}}=\xdef\PfCRetiensReciSomme{\fpeval{\useKV[ClesPythagore]{ValeurB}+#4*#4}}%
+          \num{\PfCRetiensReciSomme}%
+          }{%Pas Enchaine B
+          \num{\fpeval{#5*#5}}=\xdef\PfCRetiensReciSomme{\fpeval{#5*#5+#4*#4}}%
+          \num{\PfCRetiensReciSomme}%
+          }
+          }
+        \end{array}
+      \right\}\xintifboolexpr{\PfCRetiensReciHypo==\PfCRetiensReciSomme}{\NomA\NomC^2=\NomA\NomB^2+\NomB\NomC^2}{\NomA\NomC^2\not=\NomA\NomB^2+\NomB\NomC^2}%
+    \]
+  }%
+}%
+
+% \newcommand\Pythagore[5][]{%
+\NewDocumentCommand\Pythagore{o m m m m}{%
+  % #1 Param\`etres sous forme de cl\'es
+  % #2 Nom "complet" du triangle : ABC par exemple
+  % #3 Premi\`ere longueur
+  % #4 Deuxi\`eme longueur
+  % #5 Troisi\`eme longueur (\'eventuellement vide)
+  \useKVdefault[ClesPythagore]%
+  \setKV[ClesPythagore]{#1}%
+  \ifPfCPfMScratchDys\relax\setKV[BandeNum]{Dys}\fi%
+  \DeclareSIUnit{\PfCPythaUnit}{\useKV[ClesPythagore]{Unite}}%
+  \ifboolKV[ClesPythagore]{Reciproque}{%
+    % On retient les noms des sommets
+    \StrMid{#2}{1}{1}[\NomA]%
+    \StrMid{#2}{2}{2}[\NomB]%
+    \StrMid{#2}{3}{3}[\NomC]%
+    \xdef\NomTriangle{\NomA\NomB\NomC}%
+    % on stocke les valeurs donn\'ees
+    \opcopy{#3}{A1}%
+    \opcopy{#4}{A2}%
+    \opcopy{#5}{A3}%
+    \xdef\GrandCote{#3}%
+    \xdef\PetitCote{#4}%
+    \xdef\MoyenCote{#5}%
+    % On trace une figure ou pas ?
+    \ifboolKV[ClesPythagore]{FigureSeule}{%
+      \MPFigureReciPytha{\NomA}{\NomB}{\NomC}{#3}{#4}{#5}{\useKV[ClesPythagore]{Angle}}%
+    }{%
+      \ifboolKV[ClesPythagore]{Figure}{%Utilisation obligatoire de l'option --shell-escape de la compilation
+        \begin{multicols}{2}
+          {\em La figure est donn\'ee \`a titre indicatif.}%
+          \[\MPFigureReciPytha{\NomA}{\NomB}{\NomC}{#3}{#4}{#5}{\useKV[ClesPythagore]{Angle}}\]%
+          \par\columnbreak\par%
+          \ifboolKV[ClesPythagore]{AllPerso}{%
+            \RedactionReciPythagore%
+            \RedactionCalculsReciPythagore%
+            \RedactionConclusionReciPythagore%
+          }{%
+            % on r\'edige
+            \ifboolKV[ClesPythagore]{Perso}{%
+              \RedactionReciPythagore%
+            }{%
+            Dans le triangle $#2$, $[\NomA\NomC]$ est le plus grand c\^ot\'e.%
+            }%
+            \PfCCalculsReciPythagore[#1]{#2}{#3}{#4}{#5}%
+            \ifboolKV[ClesPythagore]{Egalite}{%
+              \xintifboolexpr{\PfCRetiensReciHypo==\PfCRetiensReciSomme}{%
+                Comme $\NomA\NomC^2=\NomA\NomB^2+\NomB\NomC^2$, alors l'\'egalit\'e de Pythagore est v\'erifi\'ee. Donc le triangle $#2$ est rectangle en $\NomB$.}{%
+                Comme $\NomA\NomC^2\not=\NomA\NomB^2+\NomB\NomC^2$, alors l'\'egalit\'e de Pythagore n'est pas v\'erifi\'ee. Donc le triangle $#2$ n'est pas rectangle.
+              }%
+            }{%
+              \xintifboolexpr{\PfCRetiensReciHypo==\PfCRetiensReciSomme}{%
+                Comme $\NomA\NomC^2=\NomA\NomB^2+\NomB\NomC^2$, alors le triangle $#2$ est rectangle en $\NomB$ d'apr\`es la r\'eciproque du th\'eor\`eme de Pythagore.}{%
+                Comme $\NomA\NomC^2\not=\NomA\NomB^2+\NomB\NomC^2$, alors le
+                triangle $#2$ n'est pas rectangle\ifboolKV[ClesPythagore]{Faible}{.}{ d'apr\`es la contrapos\'ee du th\'eor\`eme de Pythagore.}
+              }%
+            }%            
+          }%
+        \end{multicols}
+      }{%
+        \ifboolKV[ClesPythagore]{AllPerso}{%
+          \RedactionReciPythagore%
+          \RedactionCalculsReciPythagore%
+          \RedactionConclusionReciPythagore%
+        }{%
+          \ifboolKV[ClesPythagore]{Perso}{\RedactionReciPythagore}{%
+            Dans le triangle $#2$, $[\NomA\NomC]$ est le plus grand c\^ot\'e.%
+          }%
+          \PfCCalculsReciPythagore[#1]{#2}{#3}{#4}{#5}%
+          \ifboolKV[ClesPythagore]{Egalite}{%
+            \xintifboolexpr{\PfCRetiensReciHypo==\PfCRetiensReciSomme}{%
+              Comme $\NomA\NomC^2=\NomA\NomB^2+\NomB\NomC^2$, alors l'\'egalit\'e de Pythagore est v\'erifi\'ee. Donc le triangle $#2$ est rectangle en $\NomB$.}{%
+              Comme $\NomA\NomC^2\not=\NomA\NomB^2+\NomB\NomC^2$, alors l'\'egalit\'e de Pythagore n'est pas v\'erifi\'ee. Donc le triangle $#2$ n'est pas rectangle.
+            }%
+          }{%
+            \xintifboolexpr{\PfCRetiensReciHypo==\PfCRetiensReciSomme}{%
+              Comme $\NomA\NomC^2=\NomA\NomB^2+\NomB\NomC^2$, alors le triangle $#2$ est rectangle en $\NomB$ d'apr\`es la r\'eciproque du th\'eor\`eme de Pythagore.}{%
+              Comme $\NomA\NomC^2\not=\NomA\NomB^2+\NomB\NomC^2$, alors le
+              triangle $#2$ n'est pas rectangle\ifboolKV[ClesPythagore]{Faible}{.}{ d'apr\`es la contrapos\'ee du th\'eor\`eme de Pythagore.}
+            }%
+          }%
+        }%
+      }%
+    }%
+  }{%
+    % [xlop] param\`etres de calcul
+    \opcopy{#3}{A1}%
+    \opcopy{#4}{A2}%
+    \opcopy{\useKV[ClesPythagore]{Precision}}{pres}%
+    \xintifboolexpr{#3<#4 || #3==#4}{%
+      \xdef\PetitCote{#3}%
+      \xdef\MoyenCote{#4}%
+      \xdef\GrandCote{}%
+    }{%
+      \xdef\GrandCote{#3}%
+      \xdef\MoyenCote{#4}%
+      \xdef\PetitCote{}% Pour la personnalisation
+    }%
+    % On retient les noms des sommets
+    \StrMid{#2}{1}{1}[\NomA]%
+    \StrMid{#2}{2}{2}[\NomB]%
+    \StrMid{#2}{3}{3}[\NomC]%
+    \xdef\NomTriangle{\NomA\NomB\NomC}%
+    \xdef\NomAngleDroit{\NomB}%
+    \xdef\NomSommetA{\NomA}%
+    \xdef\NomSommetC{\NomC}%
+    % On trace une figure ou pas ?
+    \ifboolKV[ClesPythagore]{FigureSeule}{%
+      \xintifboolexpr{#3<#4 || #3==#4}{%
+        \xdef\ResultatPytha{\fpeval{round(sqrt(#3^2+#4^2),\useKV[ClesPythagore]{Precision})}}%
+      }{%
+        \xdef\ResultatPytha{\fpeval{round(sqrt(#3^2-#4^2),\useKV[ClesPythagore]{Precision})}}%
+      }%
+      \MPFigurePytha{\NomA}{\NomB}{\NomC}{#3}{#4}{\useKV[ClesPythagore]{Angle}}%
+    }{%
+      \ifboolKV[ClesPythagore]{Figure}{%
+        \begin{multicols}{2}%
+          {\em La figure est donn\'ee \`a titre indicatif.}%
+          \[\MPFigurePytha{\NomA}{\NomB}{\NomC}{#3}{#4}{\useKV[ClesPythagore]{Angle}}\]
+          \par\columnbreak\par%
+          % On d\'emarre la r\'esolution
+          \ifboolKV[ClesPythagore]{AllPerso}{%
+            \RedactionPythagore%
+            \RedactionCalculsPythagore%
+          }{%
+            \ifboolKV[ClesPythagore]{Perso}{%
+              \RedactionCalculsPythagore%
+            }{%
+              \ifboolKV[ClesPythagore]{Egalite}{Comme le triangle $#2$ est rectangle en $\NomB$, alors l'\'egalit\'e de Pythagore est v\'erifi\'ee :}{Dans le triangle $#2$ rectangle en $\NomB$, le th\'eor\`eme de Pythagore permet d'\'ecrire :%
+              }%
+            }%
+            \CalculsPythagore[#1]{#2}{#3}{#4}{}
+          }%
+        \end{multicols}
+      }{%
+        % On d\'emarre la r\'esolution
+        \ifboolKV[ClesPythagore]{SansMots}{%
+         \MPFigurePythaSansMots{\NomA}{\NomB}{\NomC}{#3}{#4}{\useKV[ClesPythagore]{Angle}}%
+        }{%
+          \ifboolKV[ClesPythagore]{AllPerso}{%
+            \RedactionPythagore%
+            \RedactionCalculsPythagore%
+          }{%
+            \ifboolKV[ClesPythagore]{Perso}{\RedactionPythagore}{\ifboolKV[ClesPythagore]{Egalite}{Comme le triangle $#2$ est rectangle en $\NomB$, alors l'\'egalit\'e de Pythagore est v\'erifi\'ee :}{Dans le triangle $#2$ rectangle en $\NomB$, le th\'eor\`eme de Pythagore permet d'\'ecrire :%
+              }}%
+            \CalculsPythagore[#1]{#2}{#3}{#4}{}%
+          }%
+        }%
+      }%
+    }%
+  }%
+}%

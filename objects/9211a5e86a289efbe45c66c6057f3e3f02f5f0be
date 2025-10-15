@@ -1,0 +1,2762 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2024 by Mario Fantini <ing.mariofantini@gmail.com>
+% ---------------------------------------------------------
+% 
+% This work may be distributed and/or modified under the 
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in:
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of LaTeX 
+% version 2005/12/01 or later.
+%
+% This work has the LPPL maintenance status 'maintained'.
+% 
+% The Current Maintainer of this work is Mario Fantini.
+%
+% This work consists of the files isphysicalmath.dtx and isphysicalmath.ins
+% and the derived file isphysicalmath.sty.
+%
+% \fi
+%
+% \iffalse
+%<*driver>
+\ProvidesFile{isphysicalmath.dtx}
+%</driver>
+%<package>\NeedsTeXFormat{LaTeX2e}[2005/12/01]
+%<package>\ProvidesPackage{isphysicalmath}
+%<*package>
+[2024/12/27 v2.0.0 .dtx isphysicalmath file]
+%</package>
+%<package>\RequirePackage{xstring}
+%<package>%
+%<package>% Notation section:
+%<package>% option [dc]: changes dots in commas (\ispmc), or commas in dots (\ispmrc).
+%<package>\DeclareOption{dc}{
+%<package>\def\ispmc#1.#2{{#1,#2}}
+%<package>\def\ispmrc#1,#2{{#1.#2}}
+%<package>}
+%<package>%
+%<package>\ExecuteOptions{dc}
+%<package>%
+%<package>% command \ispmcomma: scientific international notation for thousands and their multiples.
+%<package>\newcommand{\ispmcomma}[1]{%
+%<package>\StrLen{#1}[\temp]%
+%<package>\ifnum\temp=4%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\unoq,\dueq\treq\quattroq%
+%<package>\fi%
+%<package>\ifnum\temp=5%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>\unoq\dueq,\treq\quattroq\cinqueq%
+%<package>\fi%
+%<package>\ifnum\temp=6%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>\StrChar{#1}{6}[\seiq]%
+%<package>\unoq\dueq\treq,\quattroq\cinqueq\seiq%
+%<package>\fi%
+%<package>\ifnum\temp=7%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>\StrChar{#1}{6}[\seiq]%
+%<package>\StrChar{#1}{7}[\setteq]%
+%<package>\unoq,\dueq\treq\quattroq,\cinqueq\seiq\setteq%
+%<package>\fi%
+%<package>\ifnum\temp=8%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>\StrChar{#1}{6}[\seiq]%
+%<package>\StrChar{#1}{7}[\setteq]%
+%<package>\StrChar{#1}{8}[\ottoq]%
+%<package>\unoq\dueq,\treq\quattroq\cinqueq,\seiq\setteq\ottoq%
+%<package>\fi%
+%<package>\ifnum\temp=9%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>\StrChar{#1}{6}[\seiq]%
+%<package>\StrChar{#1}{7}[\setteq]%
+%<package>\StrChar{#1}{8}[\ottoq]%
+%<package>\StrChar{#1}{9}[\noveq]%
+%<package>\unoq\dueq\treq,\quattroq\cinqueq\seiq,\setteq\ottoq\noveq%
+%<package>\fi%
+%<package>}
+%<package>%
+%<package>%
+%<package>% Formatting section:
+%<package>% a small space between value and measurement unit
+%<package>\newcommand{\ispms}{\,}
+%<package>% normal text rendering for first measurement unit
+%<package>\newcommand{\ispmntone}[1]{\textnormal{#1}}
+%<package>% jolly: the default setting consists in --- a $0.15\ispmone{mm}$ of space
+%<package>% and normal text rendering for a generic 'entity'.
+%<package>% If you are a developer, you can modify it when and how you want.
+%<package>\newcommand{\ispm}[1]{\hspace{0.15mm}\textnormal{#1}}
+%<package>% normal text rendering for first and second measurement units
+%<package>\newcommand{\ispmnttwo}[2]{\textnormal{#1}\textnormal{#2}}
+%<package>% space between first and second measurement units
+%<package>\newcommand{\ispmss}{\hspace{0.15mm}}
+%<package>% \ispm if you have only a measurement unit
+%<package>% e.g. $F = 20 \ispmone{N}$
+%<package>\newcommand{\ispmone}{\ispms\ispmntone}
+%<package>% \ispm if you have two measurement units
+%<package>% e.g. $L = 20 \ispmtwo{N}{m}$
+%<package>\newcommand{\ispmtwo}[2]{\ispms\ispmnttwo\ispmss{#1}\ispmnttwo\ispmss{#2}}
+%<package>% ispm if you have three measurement units
+%<package>% e.g. $V = 8 \ispmtwo{m}{m}\ispmthird{m}$
+%<package>\newcommand{\ispmthird}[1]{\ispmss\ispm{#1}}
+%<package>% and so on until ninth measurement unit
+%<package>\newcommand{\ispmfourth}[1]{\ispmss\ispm{#1}}
+%<package>\newcommand{\ispmfifth}[1]{\ispmss\ispm{#1}}
+%<package>\newcommand{\ispmsixth}[1]{\ispmss\ispm{#1}}
+%<package>\newcommand{\ispmseventh}[1]{\ispmss\ispm{#1}}
+%<package>\newcommand{\ispmeighth}[1]{\ispmss\ispm{#1}}
+%<package>\newcommand{\ispmninth}[1]{\ispmss\ispm{#1}}
+%<package>% If you don't want numerical order, you could use generic \ispmn command
+%<package>\newcommand{\ispmn}[1]{\ispmss\ispm{#1}}
+%<package>
+%<package>
+%<package>%% Delete digits after dot
+%<package>\DeclareOption{flushpostdot}{
+%<package>% e.g. \ispmflushpd 1.2 = 1
+%<package>\def\ispmflushpd#1.#2{{#1}}
+%<package>}
+%<package>\ExecuteOptions{flushpostdot}
+%<package>
+%<package>
+%<package>%% Potenze del numero dieci
+%<package>\newcommand{\ispmpl}{(}
+%<package>\newcommand{\ispmpr}{)}
+%<package>\newcommand{\ispmten}{10}
+%<package>\newcommand{\ispmtenf}{\ispmpl\ispmten\ispmpr}
+%<package>
+%<package>%% Esponenti positivi con la prima cifra "leading": numeri interi
+%<package>% commentato perché limitante, quello per i numeri reali è invece completo (universale)
+%<package>%\newcommand{\ispmdexpp}[1]{%
+%<package>%\StrLen{#1}[\temp]%
+%<package>%\ifnum\temp=2%
+%<package>%\StrChar{#1}{1}[\unoq]%
+%<package>%\StrChar{#1}{2}[\dueq]%
+%<package>%\ispmpl{\unoq}.{\dueq}\ispmpr\ispmtenf%
+%<package>%\fi%
+%<package>%\ifnum\temp=3%
+%<package>%\StrChar{#1}{1}[\unoq]%
+%<package>%\StrChar{#1}{2}[\dueq]%
+%<package>%\StrChar{#1}{3}[\treq]%
+%<package>%\ispmpl{\unoq}.{\dueq}{\treq}\ispmpr\ispmtenf$^2$%
+%<package>%\fi%
+%<package>%\ifnum\temp=4%
+%<package>%\StrChar{#1}{1}[\unoq]%
+%<package>%\StrChar{#1}{2}[\dueq]%
+%<package>%\StrChar{#1}{3}[\treq]%
+%<package>%\StrChar{#1}{4}[\quattroq]%
+%<package>%\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}\ispmpr\ispmtenf$^3$%
+%<package>%\fi%
+%<package>%\ifnum\temp=5%
+%<package>%\StrChar{#1}{1}[\unoq]%
+%<package>%\StrChar{#1}{2}[\dueq]%
+%<package>%\StrChar{#1}{3}[\treq]%
+%<package>%\StrChar{#1}{4}[\quattroq]%
+%<package>%\StrChar{#1}{5}[\cinqueq]%
+%<package>%\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}{\cinqueq}\ispmpr\ispmtenf$^4$%
+%<package>%\fi%
+%<package>%\ifnum\temp=6%
+%<package>%\StrChar{#1}{1}[\unoq]%
+%<package>%\StrChar{#1}{2}[\dueq]%
+%<package>%\StrChar{#1}{3}[\treq]%
+%<package>%\StrChar{#1}{4}[\quattroq]%
+%<package>%\StrChar{#1}{5}[\cinqueq]%
+%<package>%\StrChar{#1}{6}[\seiq]%
+%<package>%\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}{\cinqueq}{\seiq}\ispmpr\ispmtenf$^5$%
+%<package>%\fi%
+%<package>%\ifnum\temp=7%
+%<package>%\StrChar{#1}{1}[\unoq]%
+%<package>%\StrChar{#1}{2}[\dueq]%
+%<package>%\StrChar{#1}{3}[\treq]%
+%<package>%\StrChar{#1}{4}[\quattroq]%
+%<package>%\StrChar{#1}{5}[\cinqueq]%
+%<package>%\StrChar{#1}{6}[\seiq]%
+%<package>%\StrChar{#1}{7}[\setteq]%
+%<package>%\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}{\cinqueq}{\seiq}{\setteq}\ispmpr\ispmtenf$^6$%
+%<package>%\fi%
+%<package>%\ifnum\temp=8%
+%<package>%\StrChar{#1}{1}[\unoq]%
+%<package>%\StrChar{#1}{2}[\dueq]%
+%<package>%\StrChar{#1}{3}[\treq]%
+%<package>%\StrChar{#1}{4}[\quattroq]%
+%<package>%\StrChar{#1}{5}[\cinqueq]%
+%<package>%\StrChar{#1}{6}[\seiq]%
+%<package>%\StrChar{#1}{7}[\setteq]%
+%<package>%\StrChar{#1}{8}[\ottoq]%
+%<package>%\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}{\cinqueq}{\seiq}{\setteq}{\ottoq}\ispmpr\ispmtenf$^7$%
+%<package>%\fi%
+%<package>%\ifnum\temp=9%
+%<package>%\StrChar{#1}{1}[\unoq]%
+%<package>%\StrChar{#1}{2}[\dueq]%
+%<package>%\StrChar{#1}{3}[\treq]%
+%<package>%\StrChar{#1}{4}[\quattroq]%
+%<package>%\StrChar{#1}{5}[\cinqueq]%
+%<package>%\StrChar{#1}{6}[\seiq]%
+%<package>%\StrChar{#1}{7}[\setteq]%
+%<package>%\StrChar{#1}{8}[\ottoq]%
+%<package>%\StrChar{#1}{9}[\noveq]%
+%<package>%\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}{\cinqueq}{\seiq}{\setteq}{\ottoq}{\noveq}\ispmpr\ispmtenf$^8$%
+%<package>%\fi%
+%<package>%}
+%<package>%
+%<package>%% Esponenti positivi Reali con la prima cifra "leading"
+%<package>\newcommand{\ispmdexpp}[1]{%
+%<package>%
+%<package>%% Two digits, two arguments
+%<package>\StrLen{#1}[\temp]%
+%<package>\ifnum\temp=2%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\ispmpl{\unoq}.{\dueq}\ispmpr\ispmtenf%
+%<package>\fi%
+%<package>%
+%<package>% Three arguments
+%<package>\ifnum\temp=3%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>% if A.1
+%<package>\ifx\dueq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% Two digits, three arguments \\
+%<package>% if A.1.1
+%<package>\if\dueq.
+%<package>\unoq\dueq\treq%
+%<package>% else A.1.1
+%<package>\else 
+%<package>% Three digits, three arguments \\
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}\ispmpr\ispmtenf$^2$%
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi%
+%<package>%
+%<package>%
+%<package>% if A
+%<package>\ifnum\temp=4%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>% if A.1
+%<package>\ifx\dueq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\dueq.
+%<package>\unoq\dueq\treq\quattroq%
+%<package>% else A.1.1
+%<package>\else
+%<package>% if A.1.1.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1
+%<package>\if\treq.
+%<package>\ispmpl{\unoq}.{\dueq}{\quattroq}\ispmpr\ispmtenf%
+%<package>% else A.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}\ispmpr\ispmtenf$^3$%
+%<package>% fi A.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi%
+%<package>%
+%<package>% if A
+%<package>\ifnum\temp=5%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>% if A.1
+%<package>\ifx\dueq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\dueq.
+%<package>\unoq\dueq\treq\quattroq\cinqueq%
+%<package>% else A.1.1
+%<package>\else
+%<package>% if A.1.1.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1
+%<package>\if\treq.
+%<package>% 12.3 -> 1.23(10)
+%<package>\ispmpl{\unoq}.{\dueq}{\quattroq}\ispmpr\ispmtenf%
+%<package>% else A.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1
+%<package>\ifx\quattroq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1
+%<package>\if\quattroq.
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}{\cinqueq}\ispmpr\ispmtenf$^2$%
+%<package>% else A.1.1.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}{\cinqueq}\ispmpr\ispmtenf$^4$%
+%<package>% fi A.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi
+%<package>%
+%<package>\ifnum\temp=6%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>\StrChar{#1}{6}[\seiq]%
+%<package>% if A.1
+%<package>\ifx\dueq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\dueq.
+%<package>\unoq\dueq\treq\quattroq\cinqueq\seiq%
+%<package>% else A.1.1
+%<package>\else
+%<package>% if A.1.1.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1
+%<package>\if\treq.
+%<package>% 12.3 -> 1.23(10)
+%<package>\ispmpl{\unoq}.{\dueq}{\quattroq}\ispmpr\ispmtenf%
+%<package>% else A.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1
+%<package>\ifx\quattroq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1
+%<package>\if\quattroq.
+%<package>%123.4 -> 1.234(10)^2
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}{\cinqueq}\ispmpr\ispmtenf$^2$%
+%<package>% else A.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1
+%<package>\ifx\cinqueq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1.1
+%<package>\if\cinqueq.
+%<package>%1234.5 -> 1.2345(10)^3
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}{\seiq}\ispmpr\ispmtenf$^3$%
+%<package>% else A.1.1.1.1.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}{\cinqueq}{\seiq}\ispmpr\ispmtenf$^5$%
+%<package>% fi A.1.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi%
+%<package>%
+%<package>%
+%<package>% if A
+%<package>\ifnum\temp=7%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>\StrChar{#1}{6}[\seiq]%
+%<package>\StrChar{#1}{7}[\setteq]%
+%<package>% if A.1
+%<package>\ifx\dueq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\dueq.
+%<package>\unoq\dueq\treq\quattroq\cinqueq\seiq\setteq%
+%<package>% else A.1.1
+%<package>\else
+%<package>% if A.1.1.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1
+%<package>\if\treq.
+%<package>% 12.3 -> 1.23(10)
+%<package>\ispmpl{\unoq}.{\dueq}{\quattroq}\ispmpr\ispmtenf%
+%<package>% else A.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1
+%<package>\ifx\quattroq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1
+%<package>\if\quattroq.
+%<package>%123.4 -> 1.234(10)^2
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}{\cinqueq}\ispmpr\ispmtenf$^2$%
+%<package>% else A.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1
+%<package>\ifx\cinqueq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1.1
+%<package>\if\cinqueq.
+%<package>%1234.5 -> 1.2345(10)^3
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}{\seiq}\ispmpr\ispmtenf$^3$%
+%<package>% else A.1.1.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1.1.1
+%<package>\if\seiq.
+%<package>%12345.6 -> 1.23456(10)^4
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}{\cinqueq}{\setteq}\ispmpr\ispmtenf$^4$%
+%<package>% else A.1.1.1.1.1.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}{\cinqueq}{\seiq}{\setteq}\ispmpr\ispmtenf$^6$%
+%<package>% fi A.1.1.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi%
+%<package>%
+%<package>%
+%<package>% if A
+%<package>\ifnum\temp=8%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>\StrChar{#1}{6}[\seiq]%
+%<package>\StrChar{#1}{7}[\setteq]%
+%<package>\StrChar{#1}{8}[\ottoq]%
+%<package>% if A.1
+%<package>\ifx\dueq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\dueq.
+%<package>\unoq\dueq\treq\quattroq\cinqueq\seiq\setteq\ottoq%
+%<package>% else A.1.1
+%<package>\else
+%<package>% if A.1.1.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1
+%<package>\if\treq.
+%<package>% 12.3 -> 1.23(10)
+%<package>\ispmpl{\unoq}.{\dueq}{\quattroq}\ispmpr\ispmtenf%
+%<package>% else A.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1
+%<package>\ifx\quattroq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1
+%<package>\if\quattroq.
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}{\cinqueq}\ispmpr\ispmtenf$^2$%
+%<package>% else A.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1
+%<package>\ifx\cinqueq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1.1
+%<package>\if\cinqueq.
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}{\seiq}\ispmpr\ispmtenf$^3$%
+%<package>% else A.1.1.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1.1.1
+%<package>\if\seiq.
+%<package>%12345.6 -> 1.23456(10)^4
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}{\cinqueq}{\setteq}\ispmpr\ispmtenf$^4$%
+%<package>% else A.1.1.1.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1.1.1.1
+%<package>\if\setteq.
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}{\cinqueq}{\seiq}{\ottoq}\ispmpr\ispmtenf$^5$%
+%<package>% else A.1.1.1.1.1.1.1.1.1.1 
+%<package>\else
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}{\cinqueq}{\seiq}{\setteq}{\ottoq}\ispmpr\ispmtenf$^7$%
+%<package>% fi A.1.1.1.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi%
+%<package>%
+%<package>%
+%<package>% if A
+%<package>\ifnum\temp=9%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>\StrChar{#1}{6}[\seiq]%
+%<package>\StrChar{#1}{7}[\setteq]%
+%<package>\StrChar{#1}{8}[\ottoq]%
+%<package>\StrChar{#1}{9}[\noveq]%
+%<package>% if A.1
+%<package>\ifx\dueq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\dueq.
+%<package>\unoq\dueq\treq\quattroq\cinqueq\seiq\setteq\ottoq\noveq%
+%<package>% else A.1.1
+%<package>\else
+%<package>% if A.1.1.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1
+%<package>\if\treq.
+%<package>% 12.3 -> 1.23(10)
+%<package>\ispmpl{\unoq}.{\dueq}{\quattroq}\ispmpr\ispmtenf%
+%<package>% else A.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1
+%<package>\ifx\quattroq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1
+%<package>\if\quattroq.
+%<package>%123.4 -> 1.234(10)^2
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}{\cinqueq}\ispmpr\ispmtenf$^2$%
+%<package>% else A.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1
+%<package>\ifx\cinqueq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1.1
+%<package>\if\cinqueq.
+%<package>%1234.5 -> 1.2345(10)^3
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}{\seiq}\ispmpr\ispmtenf$^3$%
+%<package>% else A.1.1.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1.1.1
+%<package>\if\seiq.
+%<package>%12345.6 -> 1.23456(10)^4
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}{\cinqueq}{\setteq}\ispmpr\ispmtenf$^4$%
+%<package>% else A.1.1.1.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1.1.1.1
+%<package>\if\setteq.
+%<package>%123456.7 -> 1.234567(10)^5
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}{\cinqueq}{\seiq}{\ottoq}\ispmpr\ispmtenf$^5$%
+%<package>% else A.1.1.1.1.1.1.1.1.1.1 
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1.1.1.1.1
+%<package>\if\ottoq.
+%<package>%1234567.8 -> 1.2345678(10)^6
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}{\cinqueq}{\seiq}{\setteq}{\noveq}\ispmpr\ispmtenf$^6$%
+%<package>% else A.1.1.1.1.1.1.1.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\unoq}.{\dueq}{\treq}{\quattroq}{\cinqueq}{\seiq}{\setteq}{\ottoq}{\noveq}\ispmpr\ispmtenf$^8$%
+%<package>% fi A.1.1.1.1.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi%
+%<package>%
+%<package>}
+%<package>%
+%<package>%
+%<package>%
+%<package>%% Esponenti positivi Reali con la prima cifra "leading", quelle a dx invece troncate
+%<package>\newcommand{\ispmdexppt}[1]{%
+%<package>%
+%<package>%% Two digits, two arguments
+%<package>\StrLen{#1}[\temp]%
+%<package>\ifnum\temp=2%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf%
+%<package>\fi%
+%<package>%
+%<package>% Three arguments
+%<package>\ifnum\temp=3%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>% if A.1
+%<package>\ifx\dueq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% Two digits, three arguments \\
+%<package>% if A.1.1
+%<package>\if\dueq.
+%<package>\unoq%
+%<package>% else A.1.1
+%<package>\else 
+%<package>% Three digits, three arguments \\
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^2$%
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi%
+%<package>%
+%<package>%
+%<package>% if A
+%<package>\ifnum\temp=4%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>% if A.1
+%<package>\ifx\dueq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\dueq.
+%<package>\unoq%
+%<package>% else A.1.1
+%<package>\else
+%<package>% if A.1.1.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1
+%<package>\if\treq.
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf%
+%<package>% else A.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^3$%
+%<package>% fi A.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi%
+%<package>%
+%<package>% if A
+%<package>\ifnum\temp=5%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>% if A.1
+%<package>\ifx\dueq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\dueq.
+%<package>\unoq%
+%<package>% else A.1.1
+%<package>\else
+%<package>% if A.1.1.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1
+%<package>\if\treq.
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf%
+%<package>% else A.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1
+%<package>\ifx\quattroq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1
+%<package>\if\quattroq.
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^2$%
+%<package>% else A.1.1.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^4$%
+%<package>% fi A.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi
+%<package>%
+%<package>\ifnum\temp=6%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>\StrChar{#1}{6}[\seiq]%
+%<package>% if A.1
+%<package>\ifx\dueq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\dueq.
+%<package>\unoq%
+%<package>% else A.1.1
+%<package>\else
+%<package>% if A.1.1.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1
+%<package>\if\treq.
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf%
+%<package>% else A.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1
+%<package>\ifx\quattroq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1
+%<package>\if\quattroq.
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^2$%
+%<package>% else A.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1
+%<package>\ifx\cinqueq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1.1
+%<package>\if\cinqueq.
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^3$%
+%<package>% else A.1.1.1.1.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^5$%
+%<package>% fi A.1.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi%
+%<package>%
+%<package>%
+%<package>% if A
+%<package>\ifnum\temp=7%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>\StrChar{#1}{6}[\seiq]%
+%<package>\StrChar{#1}{7}[\setteq]%
+%<package>% if A.1
+%<package>\ifx\dueq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\dueq.
+%<package>\unoq%
+%<package>% else A.1.1
+%<package>\else
+%<package>% if A.1.1.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1
+%<package>\if\treq.
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf%
+%<package>% else A.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1
+%<package>\ifx\quattroq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1
+%<package>\if\quattroq.
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^2$%
+%<package>% else A.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1
+%<package>\ifx\cinqueq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1.1
+%<package>\if\cinqueq.
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^3$%
+%<package>% else A.1.1.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1.1.1
+%<package>\if\seiq.
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^4$%
+%<package>% else A.1.1.1.1.1.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^6$%
+%<package>% fi A.1.1.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi%
+%<package>%
+%<package>%
+%<package>% if A
+%<package>\ifnum\temp=8%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>\StrChar{#1}{6}[\seiq]%
+%<package>\StrChar{#1}{7}[\setteq]%
+%<package>\StrChar{#1}{8}[\ottoq]%
+%<package>% if A.1
+%<package>\ifx\dueq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\dueq.
+%<package>\unoq%
+%<package>% else A.1.1
+%<package>\else
+%<package>% if A.1.1.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1
+%<package>\if\treq.
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf%
+%<package>% else A.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1
+%<package>\ifx\quattroq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1
+%<package>\if\quattroq.
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^2$%
+%<package>% else A.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1
+%<package>\ifx\cinqueq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1.1
+%<package>\if\cinqueq.
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^3$%
+%<package>% else A.1.1.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1.1.1
+%<package>\if\seiq.
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^4$%
+%<package>% else A.1.1.1.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1.1.1.1
+%<package>\if\setteq.
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^5$%
+%<package>% else A.1.1.1.1.1.1.1.1.1.1 
+%<package>\else
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^7$%
+%<package>% fi A.1.1.1.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi%
+%<package>%
+%<package>%
+%<package>% if A
+%<package>\ifnum\temp=9%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>\StrChar{#1}{6}[\seiq]%
+%<package>\StrChar{#1}{7}[\setteq]%
+%<package>\StrChar{#1}{8}[\ottoq]%
+%<package>\StrChar{#1}{9}[\noveq]%
+%<package>% if A.1
+%<package>\ifx\dueq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\dueq.
+%<package>\unoq%
+%<package>% else A.1.1
+%<package>\else
+%<package>% if A.1.1.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1
+%<package>\if\treq.
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf%
+%<package>% else A.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1
+%<package>\ifx\quattroq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1
+%<package>\if\quattroq.
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^2$%
+%<package>% else A.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1
+%<package>\ifx\cinqueq\undefined
+%<package>indefinito
+%<package>% else A.1.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1.1
+%<package>\if\cinqueq.
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^3$%
+%<package>% else A.1.1.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1.1.1
+%<package>\if\seiq.
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^4$%
+%<package>% else A.1.1.1.1.1.1.1.1.1
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1.1.1.1
+%<package>\if\setteq.
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^5$%
+%<package>% else A.1.1.1.1.1.1.1.1.1.1 
+%<package>\else
+%<package>% if A.1.1.1.1.1.1.1.1.1.1.1
+%<package>\if\ottoq.
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^6$%
+%<package>% else A.1.1.1.1.1.1.1.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\unoq}\ispmpr\ispmtenf$^8$%
+%<package>% fi A.1.1.1.1.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1.1
+%<package>\fi
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi%
+%<package>%
+%<package>}
+%<package>
+%<package>%% Esponenti positivi con la prima cifra "leading", cifre troncate a dx
+%<package>% Commentato perché limitante, quello per i numeri reali invece è completo (universale).
+%<package>%\newcommand{\ispmdexppt}[1]{%
+%<package>%\StrLen{#1}[\temp]%
+%<package>%\ifnum\temp=2%
+%<package>%\StrChar{#1}{1}[\unoq]%
+%<package>%\StrChar{#1}{2}[\dueq]%
+%<package>%\ispmpl{\unoq}\ispmpr\ispmtenf%
+%<package>%\fi%
+%<package>%\ifnum\temp=3%
+%<package>%\StrChar{#1}{1}[\unoq]%
+%<package>%\StrChar{#1}{2}[\dueq]%
+%<package>%\StrChar{#1}{3}[\treq]%
+%<package>%\ispmpl{\unoq}\ispmpr\ispmtenf$^2$%
+%<package>%\fi%
+%<package>%\ifnum\temp=4%
+%<package>%\StrChar{#1}{1}[\unoq]%
+%<package>%\StrChar{#1}{2}[\dueq]%
+%<package>%\StrChar{#1}{3}[\treq]%
+%<package>%\StrChar{#1}{4}[\quattroq]%
+%<package>%\ispmpl{\unoq}\ispmpr\ispmtenf$^3$%
+%<package>%\fi%
+%<package>%\ifnum\temp=5%
+%<package>%\StrChar{#1}{1}[\unoq]%
+%<package>%\StrChar{#1}{2}[\dueq]%
+%<package>%\StrChar{#1}{3}[\treq]%
+%<package>%\StrChar{#1}{4}[\quattroq]%
+%<package>%\StrChar{#1}{5}[\cinqueq]%
+%<package>%\ispmpl{\unoq}\ispmpr\ispmtenf$^4$%
+%<package>%\fi%
+%<package>%\ifnum\temp=6%
+%<package>%\StrChar{#1}{1}[\unoq]%
+%<package>%\StrChar{#1}{2}[\dueq]%
+%<package>%\StrChar{#1}{3}[\treq]%
+%<package>%\StrChar{#1}{4}[\quattroq]%
+%<package>%\StrChar{#1}{5}[\cinqueq]%
+%<package>%\StrChar{#1}{6}[\seiq]%
+%<package>%\ispmpl{\unoq}\ispmpr\ispmtenf$^5$%
+%<package>%\fi%
+%<package>%\ifnum\temp=7%
+%<package>%\StrChar{#1}{1}[\unoq]%
+%<package>%\StrChar{#1}{2}[\dueq]%
+%<package>%\StrChar{#1}{3}[\treq]%
+%<package>%\StrChar{#1}{4}[\quattroq]%
+%<package>%\StrChar{#1}{5}[\cinqueq]%
+%<package>%\StrChar{#1}{6}[\seiq]%
+%<package>%\StrChar{#1}{7}[\setteq]%
+%<package>%\ispmpl{\unoq}\ispmpr\ispmtenf$^6$%
+%<package>%\fi%
+%<package>%\ifnum\temp=8%
+%<package>%\StrChar{#1}{1}[\unoq]%
+%<package>%\StrChar{#1}{2}[\dueq]%
+%<package>%\StrChar{#1}{3}[\treq]%
+%<package>%\StrChar{#1}{4}[\quattroq]%
+%<package>%\StrChar{#1}{5}[\cinqueq]%
+%<package>%\StrChar{#1}{6}[\seiq]%
+%<package>%\StrChar{#1}{7}[\setteq]%
+%<package>%\StrChar{#1}{8}[\ottoq]%
+%<package>%\ispmpl{\unoq}\ispmpr\ispmtenf$^7$%
+%<package>%\fi%
+%<package>%\ifnum\temp=9%
+%<package>%\StrChar{#1}{1}[\unoq]%
+%<package>%\StrChar{#1}{2}[\dueq]%
+%<package>%\StrChar{#1}{3}[\treq]%
+%<package>%\StrChar{#1}{4}[\quattroq]%
+%<package>%\StrChar{#1}{5}[\cinqueq]%
+%<package>%\StrChar{#1}{6}[\seiq]%
+%<package>%\StrChar{#1}{7}[\setteq]%
+%<package>%\StrChar{#1}{8}[\ottoq]%
+%<package>%\StrChar{#1}{9}[\noveq]%
+%<package>%\ispmpl{\unoq}\ispmpr\ispmtenf$^8$%
+%<package>%\fi%
+%<package>%}
+%<package>
+%<package>%% Esponenti negativi di numeri razionali (che si risolvono in numeri non interi)
+%<package>% senza cifre troncate a dx del punto
+%<package>\newcommand{\ispmdexpm}[1]{%
+%<package>\StrLen{#1}[\temp]%
+%<package>%% Inizio con 3 perché il punto è considerato argomento,
+%<package>% quindi e.g. 0.1 ha tre argomenti.
+%<package>\ifnum\temp=3%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\ispmpl{\treq}\ispmpr\ispmtenf$^{-1}$%
+%<package>\fi%
+%<package>\ifnum\temp=4%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>\else
+%<package>  \if\treq0
+%<package>\ispmpl{\quattroq}\ispmpr\ispmtenf$^{-2}$%
+%<package>    \else
+%<package>\ispmpl{\treq.\quattroq}\ispmpr\ispmtenf$^{-1}$%
+%<package>  \fi
+%<package>\fi
+%<package>\fi%
+%<package>% if A
+%<package>\ifnum\temp=5%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>% if A.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\treq0
+%<package>% if A.1.1.1
+%<package>\if\quattroq0
+%<package>\ispmpl{\cinqueq}\ispmpr\ispmtenf$^{-3}$%
+%<package>% else A.1.1.1
+%<package>\else
+%<package>\ispmpl{\quattroq.\cinqueq}\ispmpr\ispmtenf$^{-2}$%
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% else A.1.1
+%<package>\else
+%<package>\ispmpl{\treq.\quattroq\cinqueq}\ispmpr\ispmtenf$^{-1}$%
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi
+%<package>%
+%<package>% 
+%<package>% if A
+%<package>\ifnum\temp=6%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>\StrChar{#1}{6}[\seiq]%
+%<package>% if A.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\treq0
+%<package>% if A.1.1.1
+%<package>\if\quattroq0
+%<package>% if A.1.1.1.1
+%<package>\if\cinqueq0
+%<package>\ispmpl{\seiq}\ispmpr\ispmtenf$^{-4}$%
+%<package>% else A.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\cinqueq.\seiq}\ispmpr\ispmtenf$^{-3}$%
+%<package>% fi A.1.1.1.1
+%<package>\fi
+%<package>% else A.1.1.1
+%<package>\else
+%<package>\ispmpl{\quattroq.\cinqueq\seiq}\ispmpr\ispmtenf$^{-2}$%
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% else A.1.1
+%<package>\else
+%<package>\ispmpl{\treq.\quattroq\cinqueq\seiq}\ispmpr\ispmtenf$^{-1}$%
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi
+%<package>%
+%<package>%
+%<package>% if A
+%<package>\ifnum\temp=7%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>\StrChar{#1}{6}[\seiq]%
+%<package>\StrChar{#1}{7}[\setteq]%
+%<package>% if A.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\treq0
+%<package>% if A.1.1.1
+%<package>\if\quattroq0
+%<package>% if A.1.1.1.1
+%<package>\if\cinqueq0
+%<package>% if A.1.1.1.1.1
+%<package>\if\seiq0
+%<package>\ispmpl{\setteq}\ispmpr\ispmtenf$^{-5}$%
+%<package>% else A.1.1.1.1.1
+%<package>\else 
+%<package>\ispmpl{\seiq.\setteq}\ispmpr\ispmtenf$^{-4}$%
+%<package>% fi A.1.1.1.1.1
+%<package>\fi
+%<package>% else A.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\cinqueq.\seiq\setteq}\ispmpr\ispmtenf$^{-3}$%
+%<package>% fi A.1.1.1.1
+%<package>\fi
+%<package>% else A.1.1.1
+%<package>\else
+%<package>\ispmpl{\quattroq.\cinqueq\seiq\setteq}\ispmpr\ispmtenf$^{-2}$%
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% else A.1.1
+%<package>\else
+%<package>\ispmpl{\treq.\quattroq\cinqueq\seiq\setteq}\ispmpr\ispmtenf$^{-1}$%
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi
+%<package>%
+%<package>%
+%<package>% if A
+%<package>\ifnum\temp=8%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>\StrChar{#1}{6}[\seiq]%
+%<package>\StrChar{#1}{7}[\setteq]%
+%<package>\StrChar{#1}{8}[\ottoq]%
+%<package>% if A.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\treq0
+%<package>% if A.1.1.1
+%<package>\if\quattroq0
+%<package>% if A.1.1.1.1
+%<package>\if\cinqueq0
+%<package>% if A.1.1.1.1.1
+%<package>\if\seiq0
+%<package>% if A.1.1.1.1.1.1
+%<package>\if\setteq0
+%<package>\ispmpl{\ottoq}\ispmpr\ispmtenf$^{-6}$%
+%<package>% else A.1.1.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\setteq.\ottoq}\ispmpr\ispmtenf$^{-5}$%
+%<package>% fi A.1.1.1.1.1.1
+%<package>\fi
+%<package>% else A.1.1.1.1.1
+%<package>\else 
+%<package>\ispmpl{\seiq.\setteq\ottoq}\ispmpr\ispmtenf$^{-4}$%
+%<package>% fi A.1.1.1.1.1
+%<package>\fi
+%<package>% else A.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\cinqueq.\seiq\setteq\ottoq}\ispmpr\ispmtenf$^{-3}$%
+%<package>% fi A.1.1.1.1
+%<package>\fi
+%<package>% else A.1.1.1
+%<package>\else
+%<package>\ispmpl{\quattroq.\cinqueq\seiq\setteq\ottoq}\ispmpr\ispmtenf$^{-2}$%
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% else A.1.1
+%<package>\else
+%<package>\ispmpl{\treq.\quattroq\cinqueq\seiq\setteq\ottoq}\ispmpr\ispmtenf$^{-1}$%
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi
+%<package>%
+%<package>%
+%<package>% if A
+%<package>\ifnum\temp=9%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>\StrChar{#1}{6}[\seiq]%
+%<package>\StrChar{#1}{7}[\setteq]%
+%<package>\StrChar{#1}{8}[\ottoq]%
+%<package>\StrChar{#1}{9}[\noveq]%
+%<package>% if A.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\treq0
+%<package>% if A.1.1.1
+%<package>\if\quattroq0
+%<package>% if A.1.1.1.1
+%<package>\if\cinqueq0
+%<package>% if A.1.1.1.1.1
+%<package>\if\seiq0
+%<package>% if A.1.1.1.1.1.1
+%<package>\if\setteq0
+%<package>% if A.1.1.1.1.1.1.1
+%<package>\if\ottoq0
+%<package>\ispmpl{\noveq}\ispmpr\ispmtenf$^{-7}$%
+%<package>% else A.1.1.1.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\ottoq.\noveq}\ispmpr\ispmtenf$^{-6}$%
+%<package>% if A.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% else A.1.1.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\setteq.\ottoq\noveq}\ispmpr\ispmtenf$^{-5}$%
+%<package>% fi A.1.1.1.1.1.1
+%<package>\fi
+%<package>% else A.1.1.1.1.1
+%<package>\else 
+%<package>\ispmpl{\seiq.\setteq\ottoq\noveq}\ispmpr\ispmtenf$^{-4}$%
+%<package>% fi A.1.1.1.1.1
+%<package>\fi
+%<package>% else A.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\cinqueq.\seiq\setteq\ottoq\noveq}\ispmpr\ispmtenf$^{-3}$%
+%<package>% fi A.1.1.1.1
+%<package>\fi
+%<package>% else A.1.1.1
+%<package>\else
+%<package>\ispmpl{\quattroq.\cinqueq\seiq\setteq\ottoq\noveq}\ispmpr\ispmtenf$^{-2}$%
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% else A.1.1
+%<package>\else
+%<package>\ispmpl{\treq.\quattroq\cinqueq\seiq\setteq\ottoq\noveq}\ispmpr\ispmtenf$^{-1}$%
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi
+%<package>%
+%<package>}
+%<package>%
+%<package>% Esponenti negativi di numeri razionali (che si risolvono in numeri non interi), con cifre troncate a dx del punto
+%<package>\newcommand{\ispmdexpmt}[1]{%
+%<package>\StrLen{#1}[\temp]%
+%<package>%% Inizio con 3 perché il punto è considerato argomento,
+%<package>% quindi e.g. 0.1 ha tre argomenti.
+%<package>\ifnum\temp=3%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\ispmpl{\treq}\ispmpr\ispmtenf$^{-1}$%
+%<package>\fi%
+%<package>\ifnum\temp=4%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>\else
+%<package>  \if\treq0
+%<package>\ispmpl{\quattroq}\ispmpr\ispmtenf$^{-2}$%
+%<package>    \else
+%<package>\ispmpl{\treq}\ispmpr\ispmtenf$^{-1}$%
+%<package>  \fi
+%<package>\fi
+%<package>\fi%
+%<package>% if A
+%<package>\ifnum\temp=5%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>% if A.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\treq0
+%<package>% if A.1.1.1
+%<package>\if\quattroq0
+%<package>\ispmpl{\cinqueq}\ispmpr\ispmtenf$^{-3}$%
+%<package>% else A.1.1.1
+%<package>\else
+%<package>\ispmpl{\quattroq}\ispmpr\ispmtenf$^{-2}$%
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% else A.1.1
+%<package>\else
+%<package>\ispmpl{\treq}\ispmpr\ispmtenf$^{-1}$%
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi
+%<package>%
+%<package>% 
+%<package>% if A
+%<package>\ifnum\temp=6%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>\StrChar{#1}{6}[\seiq]%
+%<package>% if A.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\treq0
+%<package>% if A.1.1.1
+%<package>\if\quattroq0
+%<package>% if A.1.1.1.1
+%<package>\if\cinqueq0
+%<package>\ispmpl{\seiq}\ispmpr\ispmtenf$^{-4}$%
+%<package>% else A.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\cinqueq}\ispmpr\ispmtenf$^{-3}$%
+%<package>% fi A.1.1.1.1
+%<package>\fi
+%<package>% else A.1.1.1
+%<package>\else
+%<package>\ispmpl{\quattroq}\ispmpr\ispmtenf$^{-2}$%
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% else A.1.1
+%<package>\else
+%<package>\ispmpl{\treq}\ispmpr\ispmtenf$^{-1}$%
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi
+%<package>%
+%<package>%
+%<package>% if A
+%<package>\ifnum\temp=7%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>\StrChar{#1}{6}[\seiq]%
+%<package>\StrChar{#1}{7}[\setteq]%
+%<package>% if A.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\treq0
+%<package>% if A.1.1.1
+%<package>\if\quattroq0
+%<package>% if A.1.1.1.1
+%<package>\if\cinqueq0
+%<package>% if A.1.1.1.1.1
+%<package>\if\seiq0
+%<package>\ispmpl{\setteq}\ispmpr\ispmtenf$^{-5}$%
+%<package>% else A.1.1.1.1.1
+%<package>\else 
+%<package>\ispmpl{\seiq}\ispmpr\ispmtenf$^{-4}$%
+%<package>% fi A.1.1.1.1.1
+%<package>\fi
+%<package>% else A.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\cinqueq}\ispmpr\ispmtenf$^{-3}$%
+%<package>% fi A.1.1.1.1
+%<package>\fi
+%<package>% else A.1.1.1
+%<package>\else
+%<package>\ispmpl{\quattroq}\ispmpr\ispmtenf$^{-2}$%
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% else A.1.1
+%<package>\else
+%<package>\ispmpl{\treq}\ispmpr\ispmtenf$^{-1}$%
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi
+%<package>%
+%<package>%
+%<package>% if A
+%<package>\ifnum\temp=8%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>\StrChar{#1}{6}[\seiq]%
+%<package>\StrChar{#1}{7}[\setteq]%
+%<package>\StrChar{#1}{8}[\ottoq]%
+%<package>% if A.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\treq0
+%<package>% if A.1.1.1
+%<package>\if\quattroq0
+%<package>% if A.1.1.1.1
+%<package>\if\cinqueq0
+%<package>% if A.1.1.1.1.1
+%<package>\if\seiq0
+%<package>% if A.1.1.1.1.1.1
+%<package>\if\setteq0
+%<package>\ispmpl{\ottoq}\ispmpr\ispmtenf$^{-6}$%
+%<package>% else A.1.1.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\setteq}\ispmpr\ispmtenf$^{-5}$%
+%<package>% fi A.1.1.1.1.1.1
+%<package>\fi
+%<package>% else A.1.1.1.1.1
+%<package>\else 
+%<package>\ispmpl{\seiq}\ispmpr\ispmtenf$^{-4}$%
+%<package>% fi A.1.1.1.1.1
+%<package>\fi
+%<package>% else A.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\cinqueq}\ispmpr\ispmtenf$^{-3}$%
+%<package>% fi A.1.1.1.1
+%<package>\fi
+%<package>% else A.1.1.1
+%<package>\else
+%<package>\ispmpl{\quattroq}\ispmpr\ispmtenf$^{-2}$%
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% else A.1.1
+%<package>\else
+%<package>\ispmpl{\treq}\ispmpr\ispmtenf$^{-1}$%
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi
+%<package>%
+%<package>%
+%<package>% if A
+%<package>\ifnum\temp=9%
+%<package>\StrChar{#1}{1}[\unoq]%
+%<package>\StrChar{#1}{2}[\dueq]%
+%<package>\StrChar{#1}{3}[\treq]%
+%<package>\StrChar{#1}{4}[\quattroq]%
+%<package>\StrChar{#1}{5}[\cinqueq]%
+%<package>\StrChar{#1}{6}[\seiq]%
+%<package>\StrChar{#1}{7}[\setteq]%
+%<package>\StrChar{#1}{8}[\ottoq]%
+%<package>\StrChar{#1}{9}[\noveq]%
+%<package>% if A.1
+%<package>\ifx\treq\undefined
+%<package>indefinito
+%<package>% else A.1
+%<package>\else
+%<package>% if A.1.1
+%<package>\if\treq0
+%<package>% if A.1.1.1
+%<package>\if\quattroq0
+%<package>% if A.1.1.1.1
+%<package>\if\cinqueq0
+%<package>% if A.1.1.1.1.1
+%<package>\if\seiq0
+%<package>% if A.1.1.1.1.1.1
+%<package>\if\setteq0
+%<package>% if A.1.1.1.1.1.1.1
+%<package>\if\ottoq0
+%<package>\ispmpl{\noveq}\ispmpr\ispmtenf$^{-7}$%
+%<package>% else A.1.1.1.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\ottoq}\ispmpr\ispmtenf$^{-6}$%
+%<package>% if A.1.1.1.1.1.1.1
+%<package>\fi
+%<package>% else A.1.1.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\setteq}\ispmpr\ispmtenf$^{-5}$%
+%<package>% fi A.1.1.1.1.1.1
+%<package>\fi
+%<package>% else A.1.1.1.1.1
+%<package>\else 
+%<package>\ispmpl{\seiq}\ispmpr\ispmtenf$^{-4}$%
+%<package>% fi A.1.1.1.1.1
+%<package>\fi
+%<package>% else A.1.1.1.1
+%<package>\else
+%<package>\ispmpl{\cinqueq}\ispmpr\ispmtenf$^{-3}$%
+%<package>% fi A.1.1.1.1
+%<package>\fi
+%<package>% else A.1.1.1
+%<package>\else
+%<package>\ispmpl{\quattroq}\ispmpr\ispmtenf$^{-2}$%
+%<package>% fi A.1.1.1
+%<package>\fi
+%<package>% else A.1.1
+%<package>\else
+%<package>\ispmpl{\treq}\ispmpr\ispmtenf$^{-1}$%
+%<package>% fi A.1.1
+%<package>\fi
+%<package>% fi A.1
+%<package>\fi
+%<package>% fi A
+%<package>\fi
+%<package>%
+%<package>}
+%<package>\ProcessOptions\relax
+%<*driver>
+\documentclass{ltxdoc}
+\usepackage{isphysicalmath}[2024/12/27]
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern} 
+\usepackage{hyperref}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\makeindex
+\def\indice{%
+\renewcommand*\contentsname{General index}%
+\tableofcontents%
+\clearpage}
+
+\EnableCrossrefs         
+\CodelineIndex
+\RecordChanges
+\begin{document}
+  \DocInput{isphysicalmath.dtx}
+  \PrintChanges
+\end{document}
+%</driver>
+% \fi
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+%
+%
+%\changes{v2.0.0}{2024/12/27}{third version}
+%
+%\indice
+%
+%\GetFileInfo{isphysicalmath.dtx}
+%
+%\title{The \textsf{isphysicalmath} package\thanks{This document
+%corresponds to  \textsf{isphysicalmath}~\fileversion, dated \filedate.}}
+%\author{Mario Fantini \\ \texttt{ing.mariofantini@gmail.com}}
+%
+%\maketitle
+%
+%\begin{abstract}
+%This package helps user to write mathematical and  physical formulas
+%-- their numerical values, their measurement units, their factors, their
+%dimensions -- in a 
+%scientific way (international mainly), by an elegant formatting and notation.
+%\end{abstract}
+%\section{Introduction}
+%The name \textsl{isphysicalmath} means: Physics is Math's daughter. 
+%
+%\LaTeX{} is a powerful language, but to take advantage of it, to respect 
+%its quality and to observe the discipline of matters that \LaTeX{} interacts with---it
+%requires some devices.
+%
+%If you are interested in math and physics, here comes \textsl{isphysicalmath} inside \LaTeX{}
+%as far as international scientific notation and formatting of formulas,
+% quantities, numerical values, factors, dimensions, measurement units. \\
+%
+%I respect Donald Knuth limit of nine arguments. I know that is possible to break this limit,
+%but I prefer to respect Knuth's limit for pureness reasons. 
+%\section{Conventions}
+%To have a clear doc text, I'll not refer to physical quantities
+%dimensions every times; for them, the measurement units 
+%\textsl{isphysicalmath} acting is valid too.
+%
+%\textit{hp.} stands for \textsl{hypothesis}, \textit{th.} stands for \textsl{thesis}.
+%
+%\section{Dependencies}
+%\label{sec:dependencies}
+%\textsl{isphysicalmath} has \textsl{xstring} package dependency, but you don't need to specify it
+%in your document preamble.
+%
+%Internally,  it uses standard \LaTeX{} built-in commands like: \texttt{\textbackslash textnormal},
+%\texttt{\textbackslash hspace\{\}}, \texttt{\textbackslash ,}, etc.;
+% however, it performs its activity in complex math environment too.
+%\newpage
+%\section{Usage}
+%\subsection{Formatting}
+%\label{sec:usage}
+%\DescribeMacro{\ispm}
+%
+%\textit{hp.} It is a jolly command.
+%The default setting consists in --- a $0.15\ispmone{mm}$ of space  and normal text rendering for a generic ``entity''.
+%In other words  <\texttt{\textbackslash textnormal}> and <0.15mm> are the values of \texttt{\textbackslash ispm}
+% ``variable''. So, if you are a developer  you can modify this ``variable'' how and when you want.
+% I use it for  generic ``entities''.  \\
+%\textit{th.} Default setting: normal text rendering for a generic ``entity''.\\
+%|\ispm|\marg{generic ``entity'' in place of argument}  \\ \\
+%
+%\DescribeMacro{\ispmone}
+%
+%\textit{hp.} You have only a measurement unit. \\
+%\textit{th.} Horizontal space between measurement unit
+%and numerical value,
+%and normal text rendering for the measurement unit.\\
+%|\ispmone|\marg{measurement unit in place of  argument}  \\ \\
+% \DescribeMacro{\ispmtwo}
+%
+%\textit{hp.} You have two measurement units. \\
+%\textit{th.} Horizontal space between the first measurement unit
+%and numerical value, horizontal space  between the first measurement unit 
+%and second measurement unit; normal text rendering for both measurement units.\\
+%|\ispmtwo|\marg{the first measurement unit in place of the I argument}\marg{second
+%measurement unit in place of II argument}  \\ \\
+%\DescribeMacro{\ispmthird}
+%
+%\textit{hp.} You have three measurement units. \\
+%\textit{th.} Horizontal space between the first measurement unit
+%and numerical value, horizontal space between the first
+%measurement unit and the second %measurement unit, horizontal space between
+%the second measurement unit and  third measurement unit; normal text 
+%rendering for all the measurement units.\\
+%|\ispmtwo|\marg{the first measurement unit in place of the I argument}\marg{the second 
+%measurement unit in place of the II argument}%
+%|\ispmthird|\marg{third measurement unit in place of III argument} \\ 
+% Or, e.g. if you have a fraction [see `In-depth formatting' 
+%(\autoref{subsec:inDepthFormatting})]:\\
+%|\ispmone|\marg{the first measurement unit in place of the I argument (numerator)}
+%|\ispmone|\marg{the second %measurement unit in place of the II argument (denominator)}
+%|\ispmthird|\marg{third measurement unit in place of III argument} \\ \\
+%
+%\DescribeMacro{ ~\ } And so on until ninth measurement unit, having: \\
+%\DescribeMacro{\ispmfourth}\\
+%\DescribeMacro{\ispmfifth} \\
+%\DescribeMacro{\ispmsixth}\\
+%\DescribeMacro{\ispmseventh} \\
+%\DescribeMacro{\ispmeighth} \\
+%\DescribeMacro{\ispmninth} ~\ \\ \\
+%\DescribeMacro{\ispmn} 
+%
+%If you don't want to follow a numerical order, useful in some cases to have the visual control and
+%in complex environments always, you can use this command. 
+%
+%\textit{hp.} You have three measurement units. \\
+%\textit{th.} Horizontal space between the first measurement unit
+%and numerical value, horizontal space between the first
+%measurement unit and the second %measurement unit, horizontal space between
+%the second measurement unit and  third measurement unit; normal text 
+%rendering for all the measurement units.\\
+%|\ispmtwo|\marg{the first measurement unit in place of the I argument}\marg{the second 
+%measurement unit in place of the II argument}
+%|\ispmn|\marg{third measurement unit in place of III argument} \\ 
+% Or, e.g. if you have a fraction [see `In-depth formatting' 
+%(\autoref{subsec:inDepthFormatting})]:\\
+%|\ispmone|\marg{the first measurement unit in place of the I argument (numerator)}
+%|\ispmn|\marg{the second measurement unit in place of the II argument (denominator)}
+%|\ispmn|\marg{third measurement unit in place of III argument} \\
+% aka:  \\
+%|\ispmn|\marg{the first measurement unit in place of the I argument (numerator)}
+%|\ispmn|\marg{the second measurement unit in place of the II argument (denominator)}
+%|\ispmn|\marg{third measurement unit in place of III argument} \\\\
+%
+%
+%\subsection{Notation}
+%
+%\DescribeMacro{\ispmdexpp}
+%
+%It concerns rendering of a number as it multiplied by number ten raised to positive exponents of power,
+%within real numbers field.
+%The order sees first digit as leading digit, without truncated digits on the right of it. \\ 
+%|\ispmdexpp|\marg{number to render} \\ \\
+%
+%\DescribeMacro{\ispmdexppt}
+%
+%It's about rendering of a number as it multiplied by number ten raised to positive exponents of power,
+%within real numbers field.
+%The order sees first digit as leading digit, with truncated digits on the right of it. \\
+%|\ispmdexppt|\marg{number to render} \\ \\
+%
+%\DescribeMacro{\ispmdexpm}
+%
+%It concerns rendering of a number as it multiplied by number ten raised to negative exponents of power,
+%within real numbers field. 
+%The order sees first digit as leading digit, without truncated digits on the right of it. \\
+%|\ispmdexpm|\marg{number to render} \\ \\
+%
+%\DescribeMacro{\ispmdexpmt}
+%
+%It concerns rendering of a number as it multiplied by number ten raised to negative exponents of power,
+%within real numbers field. 
+%The order sees first digit as leading digit, with truncated digits on the right of it. \\
+%|\ispmdexpmt|\marg{number to render}  
+%
+%\textbf{Option} \textit{flushpostdot} \\ \\
+%$\forall x,y,\ldots,+\infty \in \mathbb{R}$:\\ 
+%|\ispmflushpd| \meta{x.y}  \\
+%It deletes all digits that are after dot. \\ \\
+%
+%\textbf{Option} \textit{dc} \\ \\
+%$\forall x,y,\ldots,+\infty \in \mathbb{R}$:\\ 
+%|\ispmc| \meta{x.y}  \\
+%It changes commas in dots. \\ \\
+%
+%$\forall x,y,\ldots,+\infty \in \mathbb{Z}$:\\ 
+%|\ispmrc| \meta{x,y}  \\
+%It changes dots in commas. \\ \\
+%
+%\section{In-depth usage}
+%\subsection{In-depth formatting}
+%\label{subsec:inDepthFormatting}
+% \textsl{isphysicalmath} formatting commands, inside mathematical environments, can be joined or detached to previous term;
+%while, outside mathematical environments, \textsl{isphysicalmath} commands must be joined to previous term. \\ \\
+%	\textsl{isphysicalmath} automatical settings:
+%	\begin{itemize}
+%		\item a small space between numerical value and first
+%			measurement unit, <<first>> if there are others.
+%		\item 0.15\ispmone{mm}  between two or three 
+%			measurement units, or between  measurement units and their factors.
+%		\item Normal text for measurement unit.
+%	\end{itemize}
+%
+%\begin{description}
+%	\item [Without \textsl{isphysicalmath}] ~\ \\
+%		\begin{itemize}
+%			\item Without mathematical environment:  
+%			\begin{center}
+%				F = 1 N
+%			\end{center}
+%I don't like this style, and it has not a logical meaning.
+%		        \item By mathematical environment: \\
+%\[F = 1 N\]
+%
+%I don't like this style, and it has not a logical meaning.
+%
+%The code:
+%\begin{verbatim}
+%\[ F = 1 N \]
+%\end{verbatim}
+%\end{itemize}
+%
+%
+%\item [By \textsl{isphysicalmath}] ~\ \\
+%	\begin{itemize}
+%		\item With one measurement unit.
+%
+%	\[F = 1 \ispmone{N}\]
+%	\[P = 1 \ispmone{bar}\]
+%
+%	The code: 
+%\begin{center}
+%\begin{verbatim}
+%\[
+%F = 1 \ispmone{N}  
+%\]
+%\[P = 1 \ispmone{bar}\]
+%\end{verbatim}
+%\end{center}
+%
+%\item With two measurement units (a).
+%
+%	\[L = 1 \ispmtwo{N}{m}\]
+%
+%The code: 
+%\begin{center}
+%\begin{verbatim}
+%\[
+%	L = 1 \ispmtwo{N}{m}  
+%\]
+%\end{verbatim}
+%\end{center}
+%
+%\item With two measurement units and a factor for the last unit. 
+%\[L = 1 \ispmtwo{N}{mm}\ispmthird{(10$^{-3}$)}\]
+%
+%The code: 
+%\begin{center}
+%\begin{verbatim}
+%\[
+%	L = 1 \ispmtwo{N}{mm}\ispmthird{(10$^{-3}$)}  
+%\]
+%\end{verbatim}
+%\end{center}
+%
+%\item With three measurement units.
+%
+%	\[V = 8 \ispmtwo{m}{m}\ispmthird{m}\]
+%
+%The code: 
+%\begin{center}
+%\begin{verbatim}
+%\[
+%V = 8 \ispmtwo{m}{m}\ispmthird{m} 
+%\]
+%\end{verbatim}
+%\end{center}
+%
+%\item With a  declared additional inner \texttt{\textbackslash textnormal}, with inner 
+%	\texttt{\textbackslash tiny} environment, 
+%	and with inner mathematical environment (a).
+%	\[
+%		m = \gamma V = 1 \frac{\ispmone{kg}}
+%		{\ispmone{m$^{\textnormal{\tiny 3}}$}}
+%		\ispmthird{m$^3$}
+%\]
+%
+%The code: 
+%\begin{center}
+%\begin{verbatim}
+%\[
+%m = \gamma V = 1 \frac{\ispmone{kg}}
+%{\ispmone{m$^{\textnormal{\tiny 3}}$}}\ispmthird{m$^3$}
+%\]
+%\end{verbatim}
+%\end{center}
+%
+%\item With inner mathematical environment (b).
+%	\[
+%		m = \gamma V = 1 \frac{\ispmone{kg}}
+%		{\ispmone{m$^3$}}\ispmthird{m$^3$}
+%	\]
+%The code: 
+%\begin{center}
+%\begin{verbatim}
+%\[
+%m = \gamma V = 1 \frac{\ispmone{kg}}
+%{\ispmone{m$^3$}}\ispmthird{m$^3$}
+%\]
+%\end{verbatim}
+%\end{center}
+%
+%\item  With inner mathematical environment (c) and 
+%	\texttt{\textbackslash large}, \texttt{\textbackslash normalsize} environments.
+%\[
+%	m = \gamma V = 1 \textnormal{\large$\frac{\ispmone{kg}}
+%	{\ispmone{m$^3$}}$}\textnormal{\normalsize\ispmthird{m$^3$}}
+%\]
+%The code: 
+%\begin{center}
+%\begin{verbatim}
+%\[
+%m = \gamma V = 1 \large\frac{\ispmone{kg}}
+%{\ispmone{m$^3$}}\normalsize\ispmthird{m$^3$}
+%\]
+%\end{verbatim}
+%\end{center}
+%
+%\item With inner mathematical environments (d).
+%
+%The following is a  trascendental physical example, but it  could be useful like
+%material for some mathematical needs; however, this case demonstrates
+%\LaTeX{} power and \textsl{isphysicalmath}.
+%
+%	\[u = 7  \ispmtwo{$\alpha$m}{$\beta$m$^2$}
+%		\ispmthird{$\delta$s}
+%	\]
+%The code: 
+%\begin{center}
+%\begin{verbatim}
+%\[
+%u = 7  \ispmtwo{$\alpha$m}{$\beta$m$^2$}
+%		\ispmthird{$\delta$s}
+%\]
+%\end{verbatim}
+%\end{center}
+%
+%\item With inner mathematical environments (e).
+%
+%\[
+%P_p = (V_{cls})(\gamma_{cls}) = (29.6\ispmone{m$^3$})\Big(25\frac{\ispmone{kN}}{\ispmone{m$^3$}}\Big) = 740 \ispmone{kN}
+%\]
+%
+%The code: 
+%\begin{center}
+%\begin{verbatim}
+%\[
+%P_p = (V_{cls})(\gamma_{cls}) = (29.6\ispmone{m$^3$})
+%\Big(25\frac{\ispmone{kN}}
+%{\ispmone{m$^3$}}\Big) = 740 \ispmone{kN}
+%\]
+%\end{verbatim}
+%\end{center}
+%
+%\item About physical quantities dimensions.
+%
+%e.g.
+%\[
+%F = m a \equiv \ispmtwo{[M]}{[L]}\ispmthird{[T]$^{-2}$}
+%\]
+%The code: 
+%\begin{center}
+%\begin{verbatim}
+%F = m a \equiv \ispmtwo{[M]}{[L]}\ispmthird{[T]$^{-2}$}
+%\end{verbatim}
+%\end{center}
+%
+%\item Final example.
+%
+%e.g.
+%\[1\ispmtwo{a}{b}\ispmthird{c}\ispmfourth{d}\ispmfifth{e}\ispmsixth{f}\ispmseventh{g}\ispmeighth{h}\ispmninth{i}\] 
+%\[1\ispmone{a}\ispmn{b}\ispmn{c}\ispmn{d}\ispmn{e}\ispmn{f}\ispmn{g}\ispmn{h}\ispmn{i}\]
+%\[1\ispmn{a}\ispmn{b}\ispmn{c}\ispmn{d}\ispmn{e}\ispmn{f}\ispmn{g}\ispmn{h}\ispmn{i}\]
+%The code: 
+%\begin{center}
+%\begin{verbatim}
+%\[1\ispmtwo{a}{b}\ispmthird{c}\ispmfourth{d}\ispmfifth{e}
+%\ispmsixth{f}\ispmseventh{g}\ispmeighth{h}\ispmninth{i}\]
+%
+%\[1\ispmone{a}\ispmn{b}\ispmn{c}\ispmn{d}\ispmn{e}
+%\ispmn{f}\ispmn{g}\ispmn{h}\ispmn{i}\]
+%
+%\[1\ispmn{a}\ispmn{b}\ispmn{c}\ispmn{d}\ispmn{e}
+%\ispmn{f}\ispmn{g}\ispmn{h}\ispmn{i}\]
+%\end{verbatim}
+%\end{center}
+%
+%\end{itemize}
+%\end{description}
+%
+%\subsection{In-depth notation}
+%\label{subsec:in-depthNotation}
+%\subsubsection{command \textbackslash ispmcomma}
+%\label{subsubsec:commandComma}
+%It adds comma after every three digits, according to international
+%scientific notation. It is independent of \textsl{dc},  option but
+%compatible with it.
+%
+%$\forall a,b,c,d,e,f,g,h,i \in \mathbb{Z}$ [0,9]: 
+%\begin{center}
+%	\ispmcomma{100000000} \\
+%	\ispmcomma{100000000}.00\\
+%	\ispmcomma{10000000}.00 \\
+%	\ispmcomma{1000000}.00 \\
+%	\ispmcomma{100000}.00 \\
+%	\ispmcomma{10000}.00 \\
+%	\ispmcomma{1000}.00
+%\end{center}
+%
+%The code: 
+%\begin{center}
+%\begin{verbatim}
+%\ispmcomma{100000000} \\
+%\ispmcomma{100000000}.00 \\
+%\ispmcomma{10000000}.00 \\
+%\ispmcomma{1000000}.00 \\
+%\ispmcomma{100000}.00 \\
+%\ispmcomma{10000}.00 \\
+%\ispmcomma{1000}.00
+%\end{verbatim}
+%\end{center}
+%
+%\newpage
+%
+%\subsubsection{Rendering by positive exponents of number ten powers}
+%Rendering of a number as it multiplied by number ten raised to positive exponents of power.
+%
+%\paragraph{By first digit as leading digit, without truncated digits on the right of it} ~\ \\
+%
+%\textsc{Two arguments} \\
+%
+%Two digits, two arguments: \\
+%input: \texttt{\textbackslash{}ispmdexpp\{12\}} \\
+%output: \ispmdexpp{12} \\
+%
+%Inside mathematical environment: \\
+%input: \texttt{\$F = \textbackslash{}ispmdexpp\{12\} \textbackslash{}ispmone\{N\}\$} \\
+%output: $F = \ispmdexpp{12} \ispmone{N}$\\
+%And so on for other \texttt{\textbackslash{}ispmdexp$^{\ast}$} commands. \\ 
+%
+%\textsc{Three arguments} \\
+%
+%Two digits, three arguments: \\
+%input: \texttt{\textbackslash{}ispmdexpp\{1.2\}} \\
+%output: \ispmdexpp{1.2} \\
+%
+%Three digits, three arguments: \\
+%input: \texttt{\textbackslash{}ispmdexpp\{123\}} \\
+%output: \ispmdexpp{123} \\ 
+%
+%\textsc{Four arguments} \\
+%
+%Three digits, four arguments: \\
+%\texttt{\textbackslash{}ispmdexpp\{1.23\}} \\
+%\ispmdexpp{1.23} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{12.3\}} \\
+%\ispmdexpp{12.3} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{1234\}} \\
+%\ispmdexpp{1234}  \\
+%
+%\textsc{Five arguments} \\
+%
+%Four digits, five arguments: \\
+%\texttt{\textbackslash{}ispmdexpp\{1.234\}} \\
+%\ispmdexpp{1.234} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{12.34\}} \\
+%\ispmdexpp{12.34} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{123.4\}} \\
+%\ispmdexpp{123.4} \\
+%
+%Five digits, five arguments: \\
+%\texttt{\textbackslash{}ispmdexpp\{12345\}} \\
+%\ispmdexpp{12345} \\
+%
+%\textsc{Six arguments} \\
+%
+%Five digits, six arguments: \\
+%\texttt{\textbackslash{}ispmdexpp\{1.2345\}} \\
+%\ispmdexpp{1.2345} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{12.345\}} \\
+%\ispmdexpp{12.345} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{123.45\}} \\
+%\ispmdexpp{123.45} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{1234.5\}} \\
+%\ispmdexpp{1234.5} \\
+%
+%Six digits, six arguments: \\
+%\texttt{\textbackslash{}ispmdexpp\{123456\}} \\
+%\ispmdexpp{123456} \\ 
+%
+%\textsc{Seven arguments} \\
+%
+%Six digits, seven arguments: \\
+%\texttt{\textbackslash{}ispmdexpp\{1.23456\}} \\
+%\ispmdexpp{1.23456} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{12.3456\}} \\
+%\ispmdexpp{12.3456} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{123.456\}} \\
+%\ispmdexpp{123.456} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{1234.56\}} \\
+%\ispmdexpp{1234.56} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{12345.6\}} \\
+%\ispmdexpp{12345.6} \\
+%
+%Seven digits, seven arguments: \\
+%\texttt{\textbackslash{}ispmdexpp\{1234567\}} \\
+%\ispmdexpp{1234567} \\ 
+%
+%\newpage
+%
+%\textsc{Eight arguments} \\
+%
+%Seven digits, eight arguments: \\
+%\texttt{\textbackslash{}ispmdexpp\{1.234567\}} \\
+%\ispmdexpp{1.234567} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{12.34567\}} \\
+%\ispmdexpp{12.34567} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{123.4567\}} \\
+%\ispmdexpp{123.4567} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{1234.567\}} \\
+%\ispmdexpp{1234.567} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{12345.67\}} \\
+%\ispmdexpp{12345.67} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{123456.7\}} \\
+%\ispmdexpp{123456.7} \\
+%
+%Eight digits, eight arguments: \\
+%\texttt{\textbackslash{}ispmdexpp\{12345678\}} \\
+%\ispmdexpp{12345678} \\ 
+%
+%\textsc{Nine arguments} \\
+%
+%Eight digits, nine arguments: \\
+%\texttt{\textbackslash{}ispmdexpp\{1.2345678\}} \\
+%\ispmdexpp{1.2345678} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{12.345678\}} \\
+%\ispmdexpp{12.345678} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{123.45678\}} \\
+%\ispmdexpp{123.45678} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{1234.5678\}} \\
+%\ispmdexpp{1234.5678} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{12345.678\}} \\
+%\ispmdexpp{12345.678} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{123456.78\}} \\
+%\ispmdexpp{123456.78} \\\\
+%\texttt{\textbackslash{}ispmdexpp\{1234567.8\}} \\
+%\ispmdexpp{1234567.8} \\
+%
+%\newpage
+%
+%Nine digits, nine arguments: \\
+%\texttt{\textbackslash{}ispmdexpp\{123456789\}} \\
+%\ispmdexpp{123456789} \\ \\ 
+%
+%\paragraph{By first digit as leading digit, with truncated digits on the right of it} ~\ \\
+%
+%\textsc{Two arguments} \\
+%
+%Two digits, two arguments: \\
+%\texttt{\textbackslash{}ispmdexppt\{12\}} \\
+%\ispmdexppt{12} \\ 
+%
+%\textsc{Three arguments} \\
+%
+%Two digits, three arguments: \\
+%\texttt{\textbackslash{}ispmdexppt\{1.2\}} \\
+%\ispmdexppt{1.2} \\
+%
+%Three digits, three arguments: \\
+%\texttt{\textbackslash{}ispmdexppt\{123\}} \\
+%\ispmdexppt{123} \\ 
+%
+%\textsc{Four arguments} \\
+%
+%Three digits, four arguments: \\
+%\texttt{\textbackslash{}ispmdexppt\{1.23\}} \\
+%\ispmdexppt{1.23} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{12.3\}} \\
+%\ispmdexppt{12.3} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{1234\}} \\
+%\ispmdexppt{1234}  \\
+%
+%\textsc{Five arguments} \\
+%
+%Four digits, five arguments: \\
+%\texttt{\textbackslash{}ispmdexppt\{1.234\}} \\
+%\ispmdexppt{1.234} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{12.34\}} \\
+%\ispmdexppt{12.34} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{123.4\}} \\
+%\ispmdexppt{123.4} \\
+%
+%\newpage
+%
+%Five digits, five arguments: \\
+%\texttt{\textbackslash{}ispmdexppt\{12345\}} \\
+%\ispmdexppt{12345} \\
+%
+%\textsc{Six arguments} \\
+%
+%Five digits, six arguments: \\
+%\texttt{\textbackslash{}ispmdexppt\{1.2345\}} \\
+%\ispmdexppt{1.2345} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{12.345\}} \\
+%\ispmdexppt{12.345} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{123.45\}} \\
+%\ispmdexppt{123.45} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{1234.5\}} \\
+%\ispmdexppt{1234.5} \\
+%
+%Six digits, six arguments: \\
+%\texttt{\textbackslash{}ispmdexppt\{123456\}} \\
+%\ispmdexppt{123456} \\ 
+%
+%\textsc{Seven arguments} \\
+%
+%Six digits, seven arguments: \\
+%\texttt{\textbackslash{}ispmdexppt\{1.23456\}} \\
+%\ispmdexppt{1.23456} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{12.3456\}} \\
+%\ispmdexppt{12.3456} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{123.456\}} \\
+%\ispmdexppt{123.456} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{1234.56\}} \\
+%\ispmdexppt{1234.56} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{12345.6\}} \\
+%\ispmdexppt{12345.6} \\
+%
+%Seven digits, seven arguments: \\
+%\texttt{\textbackslash{}ispmdexppt\{1234567\}} \\
+%\ispmdexppt{1234567} \\ 
+%
+%\textsc{Eight arguments} \\
+%
+%Seven digits, eight arguments: \\
+%\texttt{\textbackslash{}ispmdexppt\{1.234567\}} \\
+%\ispmdexppt{1.234567} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{12.34567\}} \\
+%\ispmdexppt{12.34567} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{123.4567\}} \\
+%\ispmdexppt{123.4567} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{1234.567\}} \\
+%\ispmdexppt{1234.567} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{12345.67\}} \\
+%\ispmdexppt{12345.67} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{123456.7\}} \\
+%\ispmdexppt{123456.7} \\
+%
+%Eight digits, eight arguments: \\
+%\texttt{\textbackslash{}ispmdexppt\{12345678\}} \\
+%\ispmdexppt{12345678} \\ 
+%
+%\textsc{Nine arguments} \\
+%
+%Eight digits, nine arguments: \\
+%\texttt{\textbackslash{}ispmdexppt\{1.2345678\}} \\
+%\ispmdexppt{1.2345678} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{12.345678\}} \\
+%\ispmdexppt{12.345678} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{123.45678\}} \\
+%\ispmdexppt{123.45678} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{1234.5678\}} \\
+%\ispmdexppt{1234.5678} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{12345.678\}} \\
+%\ispmdexppt{12345.678} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{123456.78\}} \\
+%\ispmdexpp{123456.78} \\\\
+%\texttt{\textbackslash{}ispmdexppt\{1234567.8\}} \\
+%\ispmdexppt{1234567.8} \\
+%
+%Nine digits, nine arguments: \\
+%\texttt{\textbackslash{}ispmdexppt\{123456789\}} \\
+%\ispmdexppt{123456789} \\ \\ 
+%
+%
+%%\subsubsection{Rendering by negative exponents of number ten powers}
+%Rendering of a number as it multiplied by number ten raised to negative exponents of power.
+%\paragraph{By first digit as leading digit, without truncated digits on the right of it} ~\ \\
+%
+%\textsc{One digit after dot}  \\
+%\texttt{\textbackslash{}ispmdexpm\{0.1\}}\\
+%\ispmdexpm{0.1} \\
+%
+%\textsc{Two digits after dot} \\
+%\texttt{\textbackslash{}ispmdexpm\{0.12\}}\\
+%\ispmdexpm{0.12} \\ \\
+%\texttt{\textbackslash{}ispmdexpm\{0.01\}}\\
+%\ispmdexpm{0.01} \\ \\
+%\texttt{\textbackslash{}ispmdexpm\{0.10\}}\\
+%\ispmdexpm{0.10} \\
+%
+%\textsc{Three digits after dot} \\
+%\texttt{\textbackslash{}ispmdexpm\{0.123\}}\\
+%\ispmdexpm{0.123} \\ \\
+%\texttt{\textbackslash{}ispmdexpm\{0.012\}}\\
+%\ispmdexpm{0.012} \\ \\
+%\texttt{\textbackslash{}ispmdexpm\{0.001\}}\\
+%\ispmdexpm{0.001} \\
+%
+%\textsc{Four digits after dot} \\
+%\texttt{\textbackslash{}ispmdexpm\{0.1234\}}\\
+%\ispmdexpm{0.1234} \\ \\
+%\texttt{\textbackslash{}ispmdexpm\{0.0123\}}\\
+%\ispmdexpm{0.0123} \\ \\
+%\texttt{\textbackslash{}ispmdexpm\{0.0012\}}\\
+%\ispmdexpm{0.0012} \\ \\
+%\texttt{\textbackslash{}ispmdexpm\{0.0001\}}\\
+%\ispmdexpm{0.0001} \\
+%
+%\textsc{Five digits after dot} \\
+%\texttt{\textbackslash{}ispmdexpm\{0.12345\}}\\
+%\ispmdexpm{0.12345} \\ \\
+%\texttt{\textbackslash{}ispmdexpm\{0.01234\}}\\
+%\ispmdexpm{0.01234} \\ \\
+%\texttt{\textbackslash{}ispmdexpm\{0.00123\}}\\
+%\ispmdexpm{0.00123} \\ \\
+%\texttt{\textbackslash{}ispmdexpm\{0.00012\}}\\
+%\ispmdexpm{0.00012} \\ \\
+%\texttt{\textbackslash{}ispmdexpm\{0.00001\}}\\
+%\ispmdexpm{0.00001} \\
+%
+%\textsc{Six digits after dot} \\
+%\texttt{\textbackslash{}ispmdexpm\{0.123456\}}\\
+%\ispmdexpm{0.123456} \\ \\
+%\texttt{\textbackslash{}ispmdexpm\{0.012345\}}\\
+%\ispmdexpm{0.012345} \\ \\
+%\texttt{\textbackslash{}ispmdexpm\{0.001234\}}\\
+%\ispmdexpm{0.001234} \\ \\
+%\texttt{\textbackslash{}ispmdexpm\{0.000123\}}\\
+%\ispmdexpm{0.000123} \\ \\
+%\texttt{\textbackslash{}ispmdexpm\{0.000012\}}\\
+%\ispmdexpm{0.000012} \\ \\
+%\texttt{\textbackslash{}ispmdexpm\{0.000001\}}\\
+%\ispmdexpm{0.000001} \\
+%
+%\textsc{Seven digits after dot} \\
+%\texttt{\textbackslash{}ispmdexpm\{0.1234567\}}\\
+%\ispmdexpm{0.1234567} \\\\
+%\texttt{\textbackslash{}ispmdexpm\{0.0123456\}}\\
+%\ispmdexpm{0.0123456} \\\\
+%\texttt{\textbackslash{}ispmdexpm\{0.0012345\}}\\
+%\ispmdexpm{0.0012345} \\\\
+%\texttt{\textbackslash{}ispmdexpm\{0.0001234\}}\\
+%\ispmdexpm{0.0001234} \\\\
+%\texttt{\textbackslash{}ispmdexpm\{0.0000123\}}\\
+%\ispmdexpm{0.0000123} \\\\
+%\texttt{\textbackslash{}ispmdexpm\{0.0000012\}}\\
+%\ispmdexpm{0.0000012} \\ \\
+%\texttt{\textbackslash{}ispmdexpm\{0.0000001\}}\\
+%\ispmdexpm{0.0000001}
+%
+%\paragraph{By first digit as leading digit, with truncated digits on the right of it} ~\ \\
+%
+%\textsc{One digit after dot}  \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.1\}}\\
+%\ispmdexpmt{0.1} \\
+%
+%\textsc{Two digits after dot} \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.12\}}\\
+%\ispmdexpmt{0.12} \\ \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.01\}}\\
+%\ispmdexpmt{0.01} \\ \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.10\}}\\
+%\ispmdexpmt{0.10} \\
+%
+%\textsc{Three digits after dot} \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.123\}}\\
+%\ispmdexpmt{0.123} \\ \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.012\}}\\
+%\ispmdexpmt{0.012} \\ \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.001\}}\\
+%\ispmdexpmt{0.001} \\
+%
+%\textsc{Four digits after dot} \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.1234\}}\\
+%\ispmdexpmt{0.1234} \\ \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.0123\}}\\
+%\ispmdexpmt{0.0123} \\ \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.0012\}}\\
+%\ispmdexpmt{0.0012} \\ \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.0001\}}\\
+%\ispmdexpmt{0.0001} \\
+%
+%\textsc{Five digits after dot} \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.12345\}}\\
+%\ispmdexpmt{0.12345} \\ \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.01234\}}\\
+%\ispmdexpmt{0.01234} \\ \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.00123\}}\\
+%\ispmdexpmt{0.00123} \\ \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.00012\}}\\
+%\ispmdexpmt{0.00012} \\ \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.00001\}}\\
+%\ispmdexpmt{0.00001} \\
+%
+%\textsc{Six digits after dot} \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.123456\}}\\
+%\ispmdexpmt{0.123456} \\ \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.012345\}}\\
+%\ispmdexpmt{0.012345} \\ \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.001234\}}\\
+%\ispmdexpmt{0.001234} \\ \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.000123\}}\\
+%\ispmdexpmt{0.000123} \\ \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.000012\}}\\
+%\ispmdexpmt{0.000012} \\ \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.000001\}}\\
+%\ispmdexpmt{0.000001} \\
+%
+%\textsc{Seven digits after dot} \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.1234567\}}\\
+%\ispmdexpmt{0.1234567} \\\\
+%\texttt{\textbackslash{}ispmdexpmt\{0.0123456\}}\\
+%\ispmdexpmt{0.0123456} \\\\
+%\texttt{\textbackslash{}ispmdexpmt\{0.0012345\}}\\
+%\ispmdexpmt{0.0012345} \\\\
+%\texttt{\textbackslash{}ispmdexpmt\{0.0001234\}}\\
+%\ispmdexpmt{0.0001234} \\\\
+%\texttt{\textbackslash{}ispmdexpmt\{0.0000123\}}\\
+%\ispmdexpmt{0.0000123} \\\\
+%\texttt{\textbackslash{}ispmdexpmt\{0.0000012\}}\\
+%\ispmdexpmt{0.0000012} \\
+%\texttt{\textbackslash{}ispmdexpmt\{0.0000001\}}\\
+%\ispmdexpmt{0.0000001}
+%
+%\subsubsection{option `flushpostdot'}
+%\textsl{Usage}: \texttt{\textbackslash usepackage[flushpostdot]\{isphysicalmath\}} \\
+%
+%Outside mathematical environment:\\
+%\texttt{\textbackslash{}ispmflushpd 12.3} \\
+%\ispmflushpd 12.3 \\ \\
+%Inside mathematical environment:\\
+%\texttt{\$\textbackslash{}ispmflushpd 12.3\$} \\ 
+%$\ispmflushpd 12.3$
+%
+%
+%\subsubsection{option `dc'}
+%\label{subsubsec:optionDc}
+%\textsl{Usage}: \texttt{\textbackslash usepackage[dc]\{isphysicalmath\}} \\ 
+%
+%The code of this option is not mine, it already exists in \LaTeX{} literature, 
+% I discovered it in \tiny\url{https://en.wikibooks.org/wiki/LaTeX}\normalsize. \\
+%
+%This option by \texttt{\textbackslash ispmc} changes dots in commas. It is useful for some users who don't 
+%use scientific international notation. It is convenient for users who 
+%respect scientific international notation, so they change dots
+%in commas to select thousands and not to express numbers under the unit. \\
+%
+%e.g.
+%\begin{center}
+%	1.234 becomes 1,234
+%\end{center}
+%The code: 
+%\begin{center}
+%\begin{verbatim}
+%\ispmc 1.234
+%\end{verbatim}
+%\end{center}
+%~\ \\
+%This option by \texttt{\textbackslash ispmrc} changes commas in dots. It is useful for some users who want to 
+%use scientific international notation. It is convenient for users who 
+%respect scientific international notation, so they change commas
+%in dots to express numbers under the unit. \\
+%
+%e.g.
+%\begin{center}
+%	1,234 becomes 1.234
+%\end{center}
+%The code: 
+%\begin{center}
+%\begin{verbatim}
+%\ispmrc 1,234
+%\end{verbatim}
+%\end{center}
+%
+%\section{isphysicalmath url}%
+%Package home URL: 
+%\tiny \url{https://ctan.org/pkg/isphysicalmath} \normalsize
+%
+%\section{Copyright}
+%Copyright \copyright{} 2024 by Mario Fantini <ing.mariofantini@gmail.com>.
+%
+%This file may be distributed and/or modified under the conditions of
+%the \LaTeX{} Project Public License, either version 1.3 of this license
+%or (at your option) any later version.  The latest version of this
+%license is in: \\
+%\tiny \url{http://www.latex-project.org/lppl.txt} \normalsize \\
+%and version 1.3 or later is part of all distributions of  \LaTeX{} version
+%2005/12/01 or later.
+%
+% This work has the LPPL maintenance status `maintained'. 
+% 
+% The Current Maintainer of this work is Mario Fantini.
+%
+% This work consists of the files isphysicalmath.dtx and isphysicalmath.ins
+% and the derived file isphysicalmath.sty.
+%\section{Change history}
+%\subsection{v1.0.0}
+%2023.09.18 First version.
+%\subsection{v1.1.0}
+%2024.01.03 Following improvements have been brought:
+%\begin{enumerate}
+%\item \autoref{sec:dependencies} changed.
+%\item URL \tiny \url{https://ctan.org/pkg/isphysicalmath} \normalsize specified.
+%\item Original  \textsl{comma} option changed in command, and new \textsl{comma} option \texttt{\textbackslash ispmc}  added.
+%\item Example added in \autoref{subsec:inDepthFormatting}.
+%\item Doc \textsl{dc} option improved in \autoref{sec:usage}.
+%\item \textsl{dc} option changed in \texttt{\textbackslash ispmc}.
+%\item \textsl{dc} option improved adding \texttt{\textbackslash ispmrc} to change commas in dots.
+%\item Doc \textsl{comma} option improved in \autoref{sec:usage}.
+%\item Doc \textsl{comma} option changed in \autoref{subsec:in-depthNotation}.
+%\item Option \textsl{comma} improved, now the goal is reached by a single command.
+%\item Option \textsl{comma} changed.
+%\item \autoref{subsubsec:commandComma} added.
+%\item Following commands added:
+%\begin{itemize}
+%	\item \texttt{\textbackslash ispmfourth};
+%	\item \texttt{\textbackslash ispmfifth};
+%	\item \texttt{\textbackslash ispmsixth};
+%\item \texttt{\textbackslash ispmseventh};
+%\item \texttt{\textbackslash ispmeighth};
+%\item \texttt{\textbackslash ispmninth};
+%\item \texttt{\textbackslash ispmn}.
+%\end{itemize}
+%\item Example `With inner mathematical environments (e)' added in \autoref{subsec:inDepthFormatting}.
+%\item Example `Final example' added in \autoref{subsec:inDepthFormatting}.
+%\item \autoref{subsubsec:optionDc} changed. 
+%\item \texttt{\textbackslash ispm} command changed, so \autoref{sec:usage} changed.
+%\item `About physical quantities dimensions' (\autoref{subsec:inDepthFormatting}) improved.
+%\item Clarified in \autoref{subsec:inDepthFormatting} when to join or to detach formatting commands to previous term.
+%\item Year of the copyright modified.
+%\item README.md:
+%\begin{itemize}
+%\item Year of the copyright modified.
+%\item `Change History' added.
+%\item `URL' modified.
+%\item `Documentation' modified.
+%\item `Dependencies' modified.
+%\item `Build the documentation' removed.
+%\item `Build isphysicalmath.sty' removed.
+%\end{itemize}
+%\end{enumerate}
+%
+%\subsection{v2.0.0}
+%2024.12.24 Following corrections, improvements and new features have been brought:
+%\begin{enumerate}
+%\item I have corrected some distraction mistakes. However, perfect operation of \textsl{isphysicalmath} was guarenteed
+% before these corrections too.
+%\item I have removed \textit{comma option}.
+%\item I have changed the order of \textit{options} in the documentation index.
+%\item I have added the following new features:
+%\begin{itemize}
+%\item \texttt{\textbackslash ispmdexpp} command;
+%\item \texttt{\textbackslash ispmdexppt} command;
+%\item \texttt{\textbackslash ispmdexpm} command;
+%\item \texttt{flushpostdot} option.
+%\end{itemize}
+%\item I have changed my e-mail contact.
+%\end{enumerate}
+% \Finale
+\endinput

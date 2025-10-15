@@ -1,0 +1,1113 @@
+%%%
+% Distributivit\'e
+%%%
+\def\filedateDistributivite{2025/05/28}%
+\def\fileversionDistributivite{0.1a}%
+\message{-- \filedateDistributivite\space v\fileversionDistributivite}%
+% https://tex.stackexchange.com/questions/168972/draw-arrows-to-show-multiplication-pattern-distributive-property/169278?noredirect=1 
+\newcommand\Tikzmark[1]{%
+  \tikz[remember picture,baseline,inner sep=0pt]{%
+    \node[name=Distri-\theNbDistri,anchor=base] {${#1}$};}%
+  \stepcounter{NbDistri}%
+}%
+
+\newcommand\DrawArrow{%
+  \begin{tikzpicture}[overlay,remember picture]
+    \draw[-stealth,out=50,in=140,DCFlechesh,transform canvas={yshift=2pt}] (Distri-0.north) to (Distri-2.north);
+    \draw[-stealth,out=50,in=140,DCFlechesh!50,transform canvas={yshift=2pt}] (Distri-0.north) to (Distri-3.north);
+    \draw[-stealth,out=-50,in=-140,DCFlechesb,transform canvas={yshift=-2pt}] (Distri-1.south) to (Distri-2.south);
+    \draw[-stealth,out=-50,in=-140,DCFlechesb!50,transform canvas={yshift=-2pt}] (Distri-1.south) to (Distri-3.south);
+  \end{tikzpicture}%
+}%
+
+\newcommand\DrawArrowSimple[1]{%
+  \begin{tikzpicture}[overlay,remember picture]
+    \draw[-stealth,out=50,in=140,DCFlechesh,transform canvas={yshift=2pt}] (Distri-#1.north) to (Distri-2.north);
+    \draw[-stealth,out=50,in=140,DCFlechesh!50,transform canvas={yshift=2pt}] (Distri-#1.north) to (Distri-3.north);
+  \end{tikzpicture}%
+}%
+
+\newcommand\DrawArrowSimpleRenverse[1]{%
+  \begin{tikzpicture}[overlay,remember picture]
+    \draw[-stealth,out=140,in=50,DCFlechesh,transform canvas={yshift=2pt}] (Distri-#1.north) to (Distri-0.north);
+    \draw[-stealth,out=140,in=50,DCFlechesh!50,transform canvas={yshift=2pt}] (Distri-#1.north) to (Distri-1.north);
+  \end{tikzpicture}%
+}%
+
+\newcounter{NbDistri}%
+\setcounter{NbDistri}{0}%
+
+\newcounter{NbCalculDistri}%Pour compter combien de distributivit\'e il
+% y a dans un "seul calcul".
+\setcounter{NbCalculDistri}{1}
+
+\setKVdefault[ClesDistributivite]{Cours=false,Etape=1,Lettre=x,Lettrea=a,Lettreb=b,Lettrec=c,Lettred=d,Fleches=false,AideMul=false,Reduction=false,AideAdda=false,AideAddb=false,CouleurAide=red,CouleurFH=blue,CouleurFB=red,Somme=false,Difference=false,RAZ=false,Oppose=false,All=false,NomExpression=A,Fin=4,Numerique=false,Remarquable=false,Echange=0,Tuile=false,Vide=false,Reperes=false,Impression=false,Tableau=false,CouleurReduction={}}%,AideAdd=false:inutile ?
+\defKV[ClesDistributivite]{CouleurReduction=\ifempty{#1}{}{\colorlet{DCReduction}{#1}\setKV[ClesDistributivite]{Reduction}}}%
+%
+\newcommand\Tuile[4]{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}%
+    boolean Vide,Reperes,Print;
+    Vide=\useKV[ClesDistributivite]{Vide};
+    Reperes=\useKV[ClesDistributivite]{Reperes};
+    Print=\useKV[ClesDistributivite]{Impression};
+    pair _CoinTuilev;
+    _CoinTuilev=(0,0);
+    numeric largeur,longueur,ecart;
+    largeur=0.75;
+    longueur=sqrt(3);
+    ecart=0.6;
+    pair _CoinTuileh;
+    _CoinTuileh=u*(largeur+ecart,ecart);
+    vardef tuilev(expr LL,ll,nb,col)(text t)=
+    save $; picture $;
+    save TT; picture TT;
+    TT=image(
+    path cc;
+    cc=polygone((0,0),u*(LL,0),u*(LL,-ll),u*(0,-ll));
+    if Print=false:
+    fill cc withcolor col;
+    fi;
+    trace cc;
+    label(TEX(t),iso((0,0),u*(LL,0),u*(LL,-ll),u*(0,-ll)));
+    );
+    $=image(
+    for k=0 upto nb-1:
+    trace TT shifted(_CoinTuilev+k*u*(0,-ll));
+    endfor;
+    _CoinTuilev:=_CoinTuilev shifted(nb*u*(0,-ll));
+    );
+    $
+    enddef;
+    vardef tuileh(expr LL,ll,nb,col)(text t)=
+    save $; picture $;
+    picture TT;
+    TT=image(
+    path cc;
+    cc=polygone((0,0),u*(LL,0),u*(LL,ll),u*(0,ll));
+    if Print=false:
+    fill cc withcolor col;
+    fi;
+    trace cc;
+    label(TEX(t),iso((0,0),u*(LL,0),u*(LL,ll),u*(0,ll)));
+    );
+    $=image(
+    for k=0 upto nb-1:
+    trace TT shifted(_CoinTuileh+k*u*(LL,0));
+    endfor;
+    _CoinTuileh:=_CoinTuileh shifted(nb*u*(LL,0));
+    );
+    $
+    enddef;
+    color ColorLetter,ColorLetterPos,ColorLetterNeg,ColorNum,ColorNumPos,ColorNumNeg,ColorCarrePos,ColorCarreNeg;
+    ColorLetter=LightGreen;
+    ColorLetterPos=ColorLetter;
+    ColorLetterNeg=Tomato;
+    ColorNum=Orange;
+    ColorNumPos=ColorNum;
+    ColorNumNeg=Tomato;
+    ColorCarrePos:=LightBlue;
+    ColorCarreNeg:=Tomato;
+    if #1<0:
+    ColorLetter:=Tomato;
+    trace tuilev(largeur,longueur,abs(#1),ColorLetter)("$-x$");
+    else:
+    ColorLetter:=LightGreen;
+    trace tuilev(largeur,longueur,abs(#1),ColorLetter)("$x$");
+    fi;
+    if #2<0:
+    ColorNum:=Tomato;
+    trace tuilev(largeur,largeur,abs(#2),ColorNum)("$-1$");
+    else:
+    ColorNum:=Orange;
+    trace tuilev(largeur,largeur,abs(#2),ColorNum)("$1$");
+    fi;
+    if #3<0:
+    ColorLetter:=Tomato;
+    trace tuileh(longueur,largeur,abs(#3),ColorLetter)("$-x$");
+    else:
+    ColorLetter:=LightGreen;
+    trace tuileh(longueur,largeur,abs(#3),ColorLetter)("$x$");
+    fi;
+    if #4<0:
+    ColorNum:=Tomato;
+    trace tuileh(largeur,largeur,abs(#4),ColorNum)("$-1$");
+    else:
+    ColorNum:=Orange;
+    trace tuileh(largeur,largeur,abs(#4),ColorNum)("$1$");
+    fi;
+    trace u*(largeur+ecart/2,largeur+ecart)--((largeur+ecart/2)*u,ypart(_CoinTuilev)) withpen pencircle scaled2;
+    trace u*(0,ecart/2)--(xpart(_CoinTuileh),u*(ecart/2)) withpen pencircle scaled2;
+    drawarrow u*(largeur/2,ecart/2){dir90}..{dir0}u*(largeur+ecart/2,largeur/2+ecart) withpen pencircle scaled2;
+    labeloffset:=labeloffset*2;
+    label.ulft(TEX("$\times$"),iso(u*(largeur/2,ecart/2),u*(largeur+ecart/2,largeur/2+ecart)));
+    labeloffset:=labeloffset/2;
+    if Vide:
+    if Reperes:
+    %%%%
+    %% tuile a*c
+    if #1*#3<>0:
+    for k=0 upto (abs(#3)-1):
+    for l=0 upto (abs(#1)-1):
+    path titi;
+    titi=polygone((0,0),u*(longueur,0),u*(longueur,-longueur),u*(0,-longueur)) shifted (u*(largeur+ecart,0)+(u*(k*longueur,-l*longueur)));
+    trace titi withcolor 0.6white;
+    endfor;
+    endfor;
+    fi;
+    %tuile a*d
+    if #1*#4<>0:
+    for k=0 upto (abs(#4)-1):
+    for l=0 upto (abs(#1)-1):
+    path titi;
+    titi=polygone((0,0),u*(largeur,0),u*(largeur,-longueur),u*(0,-longueur)) shifted (u*(largeur+ecart+abs(#3)*longueur,0)+(u*(k*largeur,-l*longueur)));
+    trace titi withcolor 0.6white;
+    endfor;
+    endfor;
+    fi;
+    %tuile b*c
+    if #2*#3<>0:
+    for k=0 upto (abs(#3)-1):
+    for l=0 upto (abs(#2)-1):
+    path titi;
+    titi=polygone((0,0),u*(longueur,0),u*(longueur,-largeur),u*(0,-largeur)) shifted (u*(largeur+ecart,-abs(#1)*longueur)+(u*(k*longueur,-l*largeur)));
+    trace titi withcolor 0.6white;
+    endfor;
+    endfor;
+    fi;
+    %tuile b*d
+    if #2*#4<>0:
+    for k=0 upto (abs(#4)-1):
+    for l=0 upto (abs(#2)-1):
+    path titi;
+    titi=polygone((0,0),u*(largeur,0),u*(largeur,-largeur),u*(0,-largeur)) shifted (u*(largeur+ecart+abs(#3)*longueur,-abs(#1)*longueur)+(u*(k*largeur,-l*largeur)));
+    trace titi withcolor 0.6white;
+    endfor;
+    endfor;
+    fi;
+    fi;
+    %%%
+    else:
+    %% tuile a*c
+    if #1*#3<>0:
+    for k=0 upto (abs(#3)-1):
+    for l=0 upto (abs(#1)-1):
+    path titi;
+    titi=polygone((0,0),u*(longueur,0),u*(longueur,-longueur),u*(0,-longueur)) shifted (u*(largeur+ecart,0)+(u*(k*longueur,-l*longueur)));
+    if Print=false:
+    fill titi withcolor if #1*#3>0:ColorCarrePos else: ColorCarreNeg fi;
+    fi;
+    trace titi;
+    if #1*#3>0:
+    label(TEX("$x^2$"),iso((0,0),u*(longueur,0),u*(longueur,-longueur),u*(0,-longueur)) shifted (u*(largeur+ecart,0)+(u*(k*longueur,-l*longueur))));
+    else:
+    label(TEX("$-x^2$"),iso((0,0),u*(longueur,0),u*(longueur,-longueur),u*(0,-longueur)) shifted (u*(largeur+ecart,0)+(u*(k*longueur,-l*longueur))));
+    fi;
+    endfor;
+    endfor;
+    fi;
+    %tuile a*d
+    if #1*#4<>0:
+    for k=0 upto (abs(#4)-1):
+    for l=0 upto (abs(#1)-1):
+    path titi;
+    titi=polygone((0,0),u*(largeur,0),u*(largeur,-longueur),u*(0,-longueur)) shifted (u*(largeur+ecart+abs(#3)*longueur,0)+(u*(k*largeur,-l*longueur)));
+    if Print=false:
+    fill titi withcolor if #1*#4>0:ColorLetterPos else: ColorLetterNeg fi;
+    fi;
+    trace titi;
+    if #1*#4>0:
+    label(TEX("$x$"),iso((0,0),u*(largeur,0),u*(largeur,-longueur),u*(0,-longueur)) shifted (u*(largeur+ecart+abs(#3)*longueur,0)+(u*(k*largeur,-l*longueur))));
+    else:
+    label(TEX("$-x$"),iso((0,0),u*(largeur,0),u*(largeur,-longueur),u*(0,-longueur)) shifted (u*(largeur+ecart+abs(#3)*longueur,0)+(u*(k*largeur,-l*longueur))));
+    fi;
+    endfor;
+    endfor;
+    fi;
+    %tuile b*c
+    if #2*#3<>0:
+    for k=0 upto (abs(#3)-1):
+    for l=0 upto (abs(#2)-1):
+    path titi;
+    titi=polygone((0,0),u*(longueur,0),u*(longueur,-largeur),u*(0,-largeur)) shifted (u*(largeur+ecart,-abs(#1)*longueur)+(u*(k*longueur,-l*largeur)));
+    if Print=false:
+    fill titi withcolor if #2*#3>0:ColorLetterPos else: ColorLetterNeg fi;
+    fi;
+    trace titi;
+    if #2*#3>0:
+    label(TEX("$x$"),iso((0,0),u*(longueur,0),u*(longueur,-largeur),u*(0,-largeur)) shifted (u*(largeur+ecart,-abs(#1)*longueur)+(u*(k*longueur,-l*largeur))));
+    else:
+    label(TEX("$-x$"),iso((0,0),u*(longueur,0),u*(longueur,-largeur),u*(0,-largeur)) shifted (u*(largeur+ecart,-abs(#1)*longueur)+(u*(k*longueur,-l*largeur))));
+    fi;
+    endfor;
+    endfor;
+    fi;
+    %tuile b*d
+    if #2*#4<>0:
+    for k=0 upto (abs(#4)-1):
+    for l=0 upto (abs(#2)-1):
+    path titi;
+    titi=polygone((0,0),u*(largeur,0),u*(largeur,-largeur),u*(0,-largeur)) shifted (u*(largeur+ecart+abs(#3)*longueur,-abs(#1)*longueur)+(u*(k*largeur,-l*largeur)));
+    if Print=false:
+    fill titi withcolor if #2*#4>0:ColorNumPos else: ColorNumNeg fi;
+    fi;
+    trace titi;
+    if #2*#4>0:
+    label(TEX("$1$"),iso((0,0),u*(largeur,0),u*(largeur,-largeur),u*(0,-largeur)) shifted (u*(largeur+ecart+abs(#3)*longueur,-abs(#1)*longueur)+(u*(k*largeur,-l*largeur))));
+    else:
+    label(TEX("$-1$"),iso((0,0),u*(largeur,0),u*(largeur,-largeur),u*(0,-largeur)) shifted (u*(largeur+ecart+abs(#3)*longueur,-abs(#1)*longueur)+(u*(k*largeur,-l*largeur))));
+    fi;
+    endfor;
+    endfor;
+    fi;
+    fi;
+  \end{mplibcode}%
+  \else%
+  \begin{mpost}[mpsettings={boolean Vide,Print; Vide=\useKV[ClesDistributivite]{Vide}; Print=\useKV[ClesDistributivite]{Impression};}]
+    pair _CoinTuilev;
+    _CoinTuilev=(0,0);
+    numeric largeur,longueur,ecart;
+    largeur=0.75;
+    longueur=sqrt(3);
+    ecart=0.6;
+    pair _CoinTuileh;
+    _CoinTuileh=u*(largeur+ecart,ecart);
+    vardef tuilev(expr LL,ll,nb,col)(text t)=
+    save $; picture $;
+    save TT; picture TT;
+    TT=image(
+    path cc;
+    cc=polygone((0,0),u*(LL,0),u*(LL,-ll),u*(0,-ll));
+    if Print=false:
+    fill cc withcolor col;
+    fi;
+    trace cc;
+    label(LATEX(t),iso((0,0),u*(LL,0),u*(LL,-ll),u*(0,-ll)));
+    );
+    $=image(
+    for k=0 upto nb-1:
+    trace TT shifted(_CoinTuilev+k*u*(0,-ll));
+    endfor;
+    _CoinTuilev:=_CoinTuilev shifted(nb*u*(0,-ll));
+    );
+    $
+    enddef;
+    vardef tuileh(expr LL,ll,nb,col)(text t)=
+    save $; picture $;
+    picture TT;
+    TT=image(
+    path cc;
+    cc=polygone((0,0),u*(LL,0),u*(LL,ll),u*(0,ll));
+    if Print=false:
+    fill cc withcolor col;
+    fi;
+    trace cc;
+    label(LATEX(t),iso((0,0),u*(LL,0),u*(LL,ll),u*(0,ll)));
+    );
+    $=image(
+    for k=0 upto nb-1:
+    trace TT shifted(_CoinTuileh+k*u*(LL,0));
+    endfor;
+    _CoinTuileh:=_CoinTuileh shifted(nb*u*(LL,0));
+    );
+    $
+    enddef;
+    color ColorLetter,ColorLetterPos,ColorLetterNeg,ColorNum,ColorNumPos,ColorNumNeg,ColorCarrePos,ColorCarreNeg;
+    ColorLetter=LightGreen;
+    ColorLetterPos=ColorLetter;
+    ColorLetterNeg=Tomato;
+    ColorNum=Orange;
+    ColorNumPos=ColorNum;
+    ColorNumNeg=Tomato;
+    ColorCarrePos:=LightBlue;
+    ColorCarreNeg:=Tomato;
+    if #1<0:
+    ColorLetter:=Tomato;
+    trace tuilev(largeur,longueur,abs(#1),ColorLetter)("$-x$");
+    else:
+    ColorLetter:=LightGreen;
+    trace tuilev(largeur,longueur,abs(#1),ColorLetter)("$x$");
+    fi;
+    if #2<0:
+    ColorNum:=Tomato;
+    trace tuilev(largeur,largeur,abs(#2),ColorNum)("$-1$");
+    else:
+    ColorNum:=Orange;
+    trace tuilev(largeur,largeur,abs(#2),ColorNum)("$1$");
+    fi;
+    if #3<0:
+    ColorLetter:=Tomato;
+    trace tuileh(longueur,largeur,abs(#3),ColorLetter)("$-x$");
+    else:
+    ColorLetter:=LightGreen;
+    trace tuileh(longueur,largeur,abs(#3),ColorLetter)("$x$");
+    fi;
+    if #4<0:
+    ColorNum:=Tomato;
+    trace tuileh(largeur,largeur,abs(#4),ColorNum)("$-1$");
+    else:
+    ColorNum:=Orange;
+    trace tuileh(largeur,largeur,abs(#4),ColorNum)("$1$");
+    fi;
+    trace u*(largeur+ecart/2,largeur+ecart)--((largeur+ecart/2)*u,ypart(_CoinTuilev)) withpen pencircle scaled2;
+    trace u*(0,ecart/2)--(xpart(_CoinTuileh),u*(ecart/2)) withpen pencircle scaled2;
+    drawarrow u*(largeur/2,ecart/2){dir90}..{dir0}u*(largeur+ecart/2,largeur/2+ecart) withpen pencircle scaled2;
+    labeloffset:=labeloffset*2;
+    label.ulft(LATEX("$\times$"),iso(u*(largeur/2,ecart/2),u*(largeur+ecart/2,largeur/2+ecart)));
+    labeloffset:=labeloffset/2;
+    if Vide=false:
+    %% tuile a*c
+    if #1*#3<>0:
+    for k=0 upto (abs(#3)-1):
+    for l=0 upto (abs(#1)-1):
+    path titi;
+    titi=polygone((0,0),u*(longueur,0),u*(longueur,-longueur),u*(0,-longueur)) shifted (u*(largeur+ecart,0)+(u*(k*longueur,-l*longueur)));
+    if Print=false:
+    fill titi withcolor if #1*#3>0:ColorCarrePos else: ColorCarreNeg fi;
+    fi;
+    trace titi;
+    if #1*#3>0:
+    label(LATEX("$x^2$"),iso((0,0),u*(longueur,0),u*(longueur,-longueur),u*(0,-longueur)) shifted (u*(largeur+ecart,0)+(u*(k*longueur,-l*longueur))));
+    else:
+    label(LATEX("$-x^2$"),iso((0,0),u*(longueur,0),u*(longueur,-longueur),u*(0,-longueur)) shifted (u*(largeur+ecart,0)+(u*(k*longueur,-l*longueur))));
+    fi;
+    endfor;
+    endfor;
+    fi;
+    %tuile a*d
+    if #1*#4<>0:
+    for k=0 upto (abs(#4)-1):
+    for l=0 upto (abs(#1)-1):
+    path titi;
+    titi=polygone((0,0),u*(largeur,0),u*(largeur,-longueur),u*(0,-longueur)) shifted (u*(largeur+ecart+abs(#3)*longueur,0)+(u*(k*largeur,-l*longueur)));
+    if Print=false:
+    fill titi withcolor if #1*#4>0:ColorLetterPos else: ColorLetterNeg fi;
+    fi;
+    trace titi;
+    if #1*#4>0:
+    label(LATEX("$x$"),iso((0,0),u*(largeur,0),u*(largeur,-longueur),u*(0,-longueur)) shifted (u*(largeur+ecart+abs(#3)*longueur,0)+(u*(k*largeur,-l*longueur))));
+    else:
+    label(LATEX("$-x$"),iso((0,0),u*(largeur,0),u*(largeur,-longueur),u*(0,-longueur)) shifted (u*(largeur+ecart+abs(#3)*longueur,0)+(u*(k*largeur,-l*longueur))));
+    fi;
+    endfor;
+    endfor;
+    fi;
+    %tuile b*c
+    if #2*#3<>0:
+    for k=0 upto (abs(#3)-1):
+    for l=0 upto (abs(#2)-1):
+    path titi;
+    titi=polygone((0,0),u*(longueur,0),u*(longueur,-largeur),u*(0,-largeur)) shifted (u*(largeur+ecart,-abs(#1)*longueur)+(u*(k*longueur,-l*largeur)));
+    if Print=false:
+    fill titi withcolor if #2*#3>0:ColorLetterPos else: ColorLetterNeg fi;
+    fi;
+    trace titi;
+    if #2*#3>0:
+    label(LATEX("$x$"),iso((0,0),u*(longueur,0),u*(longueur,-largeur),u*(0,-largeur)) shifted (u*(largeur+ecart,-abs(#1)*longueur)+(u*(k*longueur,-l*largeur))));
+    else:
+    label(LATEX("$-x$"),iso((0,0),u*(longueur,0),u*(longueur,-largeur),u*(0,-largeur)) shifted (u*(largeur+ecart,-abs(#1)*longueur)+(u*(k*longueur,-l*largeur))));
+    fi;
+    endfor;
+    endfor;
+    fi;
+    %tuile b*d
+    if #2*#4<>0:
+    for k=0 upto (abs(#4)-1):
+    for l=0 upto (abs(#2)-1):
+    path titi;
+    titi=polygone((0,0),u*(largeur,0),u*(largeur,-largeur),u*(0,-largeur)) shifted (u*(largeur+ecart+abs(#3)*longueur,-abs(#1)*longueur)+(u*(k*largeur,-l*largeur)));
+    if Print=false:
+    fill titi withcolor if #2*#4>0:ColorNumPos else: ColorNumNeg fi;
+    fi;
+    trace titi;
+    if #2*#4>0:
+    label(LATEX("$1$"),iso((0,0),u*(largeur,0),u*(largeur,-largeur),u*(0,-largeur)) shifted (u*(largeur+ecart+abs(#3)*longueur,-abs(#1)*longueur)+(u*(k*largeur,-l*largeur))));
+    else:
+    label(LATEX("$-1$"),iso((0,0),u*(largeur,0),u*(largeur,-largeur),u*(0,-largeur)) shifted (u*(largeur+ecart+abs(#3)*longueur,-abs(#1)*longueur)+(u*(k*largeur,-l*largeur))));
+    fi;
+    endfor;
+    endfor;
+    fi;
+    fi;
+  \end{mpost}
+  \fi%
+}%
+
+\NewDocumentCommand\Affichage{sommm}{%
+  \setKV[ClesDistributivite]{#2}%On lit les arguments optionnels
+  \def\LETTRE{\useKV[ClesDistributivite]{Lettre}}%
+  \ensuremath{%
+%    \xintifboolexpr{\fpeval{#3}==0 'and' \fpeval{#4}==0 'and' \fpeval{#5}==0}{0}{%
+      % partie du x^2
+      \xintifboolexpr{#3==0}{}{\xintifboolexpr{#3==1}{}{\xintifboolexpr{#3==-1}{-}{\num{#3}}}\IfBooleanT{#1}{\times}\LETTRE^2}%
+      % partie du x
+      \xintifboolexpr{#4==0}{}{\xintifboolexpr{#4>0}{\xintifboolexpr{#3==0}{}{+}\xintifboolexpr{#4==1}{}{\num{#4}}}{%
+          \xintifboolexpr{#3==0}{\xintifboolexpr{#4==-1}{-}{\num{#4}}}{\xintifboolexpr{#4==-1}{-}{-\num{\fpeval{abs(#4)}}}}%
+        }\IfBooleanT{#1}{\times}\LETTRE}%
+      % partie du nombre
+      \xintifboolexpr{#5==0}{}{\xintifboolexpr{#5>0}{\xintifboolexpr{#3==0}{\xintifboolexpr{#4==0}{}{+}}{+}\num{#5}}{%
+          \xintifboolexpr{#3==0}{\xintifboolexpr{#4==0}{\num{#5}}{-\num{\fpeval{abs(#5)}}}}{-\num{\fpeval{abs(#5)}}}}}%
+      % 
+%    }%
+  }%
+}%
+
+\xdef\SommeA{0}%
+\xdef\SommeB{0}%
+\xdef\SommeC{0}%
+
+\newcommand\Distri[5][]{%
+  \colorlet{DCReduction}{black}%
+  \useKVdefault[ClesDistributivite]%obligatoire car la macro n'est pas dans un groupe.
+  \setKV[ClesDistributivite]{#1}%On lit les arguments optionnels
+  \ifboolKV[ClesDistributivite]{RAZ}{\xdef\SommeA{0}\xdef\SommeB{0}\xdef\SommeC{0}%
+    \setcounter{NbCalculDistri}{0}%
+  }{}%
+  \colorlet{DCAide}{\useKV[ClesDistributivite]{CouleurAide}}%
+%  \colorlet{DCReduction}{\useKV[ClesDistributivite]{CouleurReduction}}%
+  \colorlet{DCFlechesh}{\useKV[ClesDistributivite]{CouleurFH}}%
+  \colorlet{DCFlechesb}{\useKV[ClesDistributivite]{CouleurFB}}%
+  \ifboolKV[ClesDistributivite]{Cours}{%
+    \ensuremath{%
+      \xintifboolexpr{#2==0}{%
+      }{\xintifboolexpr{#3==0}{}{(}}\xintifboolexpr{#2==0}{\Tikzmark{}}{\Tikzmark{\useKV[ClesDistributivite]{Lettrea}}}%
+      \ifboolKV[ClesDistributivite]{AideAdda}{\mathcolor{DCAide}{+(}\mathcolor{black}{}}{}%
+      \xintifboolexpr{#3==0}{\Tikzmark{}}{\xintifboolexpr{#3>0}{\xintifboolexpr{#2==0}{}{+}}{\xintifboolexpr{#3<0}{-}{}}\Tikzmark{\useKV[ClesDistributivite]{Lettreb}}}%
+      \ifboolKV[ClesDistributivite]{AideAdda}{\mathcolor{DCAide}{)}\mathcolor{black}{}}{}%
+      \xintifboolexpr{#2==0}{}{\xintifboolexpr{#3==0}{}{)}}%
+      % 
+      \ifboolKV[ClesDistributivite]{AideMul}{\times}{}%on aide dans le cas double
+      \xdef\Multi{\fpeval{#4*#5}}%affichage auto si (a+b)xk
+      % 
+      \xintifboolexpr{\Multi==0}{\times%
+        \xintifboolexpr{#4<0}{(}{\xintifboolexpr{#5<0}{(}{}}}{(}%
+      \Tikzmark{\useKV[ClesDistributivite]{Lettrec}}%
+      \ifboolKV[ClesDistributivite]{AideAddb}{\mathcolor{DCAide}{+(}\mathcolor{black}{}}{}%
+      \xintifboolexpr{#5>0}{\xintifboolexpr{#4==0}{}{+}}{\xintifboolexpr{#5<0}{\xintifboolexpr{#4==0}{{-}}{-}}{}}\Tikzmark{\useKV[ClesDistributivite]{Lettred}}%
+      \ifboolKV[ClesDistributivite]{AideAddb}{\mathcolor{DCAide}{)}\mathcolor{black}{}}{}%
+      \xintifboolexpr{\Multi==0}{%
+        \xintifboolexpr{#4<0}{)}{\xintifboolexpr{#5<0}{)}{}}}{)}%
+      %
+      =%
+      %
+      \xdef\Multi{\fpeval{#2*#4}}%
+      \xintifboolexpr{\Multi==0}{}{%
+        \xintifboolexpr{#2<0}{(-}{}\useKV[ClesDistributivite]{Lettrea}\xintifboolexpr{#2<0}{)}{}\times\xintifboolexpr{#4<0}{(-}{}\useKV[ClesDistributivite]{Lettrec}\xintifboolexpr{#4<0}{)}{}%
+      }%
+      \xdef\Multij{\fpeval{#2*#5}}%
+      \xintifboolexpr{\Multij==0}{}{%
+        \xintifboolexpr{\Multi==0}{}{+}%
+        \xintifboolexpr{#2<0}{(-}{}\useKV[ClesDistributivite]{Lettrea}\xintifboolexpr{#2<0}{)}{}\times\xintifboolexpr{#5<0}{(-}{}\useKV[ClesDistributivite]{Lettred}\xintifboolexpr{#5<0}{)}{}%
+      }%
+      \xdef\Multik{\fpeval{#3*#4}}%
+      \xintifboolexpr{\Multik==0}{}{%
+        \xintifboolexpr{\Multi==0}{}{+}%
+        \xintifboolexpr{#3<0}{(-}{}\useKV[ClesDistributivite]{Lettreb}\xintifboolexpr{#3<0}{)}{}\times\xintifboolexpr{#4<0}{(-}{}\useKV[ClesDistributivite]{Lettrec}\xintifboolexpr{#4<0}{)}{}%
+      }%
+      \xdef\Multil{\fpeval{#3*#5}}%
+      \xintifboolexpr{\Multil==0}{}{+%
+        \xintifboolexpr{#3<0}{(-}{}\useKV[ClesDistributivite]{Lettreb}\xintifboolexpr{#3<0}{)}{}\times\xintifboolexpr{#5<0}{(-}{}\useKV[ClesDistributivite]{Lettred}\xintifboolexpr{#5<0}{)}{}%
+      }%
+      % Fleches
+      \ifboolKV[ClesDistributivite]{Fleches}{%
+        \xdef\Multi{\fpeval{#2*#3*#4*#5}}%
+        \xintifboolexpr{\Multi==0}{%
+          \xdef\Multij{\fpeval{#2*#3}}%\relax
+          \xintifboolexpr{\Multij==0}{\xintifboolexpr{#2==0}{\DrawArrowSimple{1}
+            }{\DrawArrowSimple{0}}}{\xintifboolexpr{#4==0}{\DrawArrowSimpleRenverse{3}}{\DrawArrowSimpleRenverse{2}}}%
+        }{%
+          \DrawArrow%
+        }%
+      }{}\setcounter{NbDistri}{0}%
+    }%
+  }{%
+    \ifboolKV[ClesDistributivite]{Tuile}{%
+      \Tuile{#2}{#3}{#4}{#5}%
+    }{%
+      \ifboolKV[ClesDistributivite]{Tableau}{%
+        \DistriTableau[#1]{#2}{#3}{#4}{#5}%
+      }{%
+        \ensuremath{%
+          \xintifboolexpr{\useKV[ClesDistributivite]{Echange}>0}{%
+            \DistriEchange[#1]{#2}{#3}{#4}{#5}%
+          }{%
+            \ifboolKV[ClesDistributivite]{Remarquable}{%
+              \ifboolKV[ClesDistributivite]{Numerique}{%
+                \ifx\bla#4\bla%
+                \xintifboolexpr{#3>0}{%
+                  \num{\fpeval{#2+#3}}^2=(\num{#2}+\num{#3})^2=\num{#2}^2+2\times\num{#2}\times\num{#3}+\num{#3}^2=\num{\fpeval{#2*#2}}+\num{\fpeval{2*#2*#3}}+\num{\fpeval{#3*#3}}=\num{\fpeval{(#2+#3)**2}}
+                }{%
+                  \num{\fpeval{#2+#3}}^2=(\num{#2}\num{#3})^2=\num{#2}^2-2\times\num{#2}\times\num{\fpeval{-#3}}+\num{\fpeval{-#3}}^2=\num{\fpeval{#2*#2}}-\num{\fpeval{2*#2*abs(#3)}}+\num{\fpeval{#3*#3}}=\num{\fpeval{(#2-abs(#3))**2}}
+                }%
+                \else%
+                \num{\fpeval{#2+#3}}\times\num{\fpeval{#4+#5}}=(\num{#2}+\num{#3})\times(\num{#4}\num{#5})=\num{#2}^2-\num{#3}^2=\num{\fpeval{#2*#2}}-\num{\fpeval{#3*#3}}=\num{\fpeval{(#2+#3)*(#2-#3)}}
+                \fi%
+              }{%
+              \xintifboolexpr{\useKV[ClesDistributivite]{Etape}==1}{%
+                \ifx\bla#4\bla(\Affichage{0}{#2}{#3})^2\else(\Affichage{0}{#2}{#3})(\Affichage{0}{#4}{#5})\fi%
+              }{}%
+              \xintifboolexpr{\useKV[ClesDistributivite]{Etape}==2}{\ifx\bla#4\bla\xintifboolexpr{#3>0}{\xintifboolexpr{#2==1}{}{(\num{#2}}\useKV[ClesDistributivite]{Lettre}\xintifboolexpr{#2==1}{}{)}^2+2\times\xintifboolexpr{#2==1}{}{\num{#2}}\useKV[ClesDistributivite]{Lettre}\times\num{#3}+\num{#3}^2}{\xintifboolexpr{#2==1}{}{(\num{#2}}\useKV[ClesDistributivite]{Lettre}\xintifboolexpr{#2==1}{}{)}^2-2\times\xintifboolexpr{#2==1}{}{\num{#2}}\useKV[ClesDistributivite]{Lettre}\times\num{\fpeval{0-#3}}+\num{\fpeval{0-#3}}^2}\else\xintifboolexpr{#2==1}{}{(\num{#2}}\useKV[ClesDistributivite]{Lettre}\xintifboolexpr{#2==1}{}{)}^2-\num{#3}^2\fi}{}
+              \xintifboolexpr{\useKV[ClesDistributivite]{Etape}==3}{%
+                \xintifboolexpr{\theNbCalculDistri>1}{\setcounter{NbCalculDistri}{0}}{}%
+                \stepcounter{NbCalculDistri}%
+                \ifx\bla#4\bla%
+                \xdef\Multi{\fpeval{#2*#2}}%
+                \xdef\Multij{\fpeval{#2*#3}}%
+                \xdef\Multik{\fpeval{#3*#2}}%
+                \xdef\Multil{\fpeval{#3*#3}}%
+                %% ils sont red\'efinis pour pouvoir envisager la somme de deux
+                %% expressions \`a d\'evelopper
+                \xdef\Multim{\fpeval{#2*#3+#3*#2}}%
+                \ifboolKV[ClesDistributivite]{Oppose}{%
+                  \xdef\Multi{\fpeval{-\Multi}}%
+                  \xdef\Multim{\fpeval{-\Multim}}%
+                  \xdef\Multil{\fpeval{-\Multil}}%
+                  \xintifboolexpr{\Multi==0}{}{\xintifboolexpr{\Multi<0}{(}{}\Affichage{\Multi}{0}{0}\xintifboolexpr{\Multi<0}{)}{}}%
+                  \xintifboolexpr{\Multim==0}{}{\xintifboolexpr{\Multim>0}{+}{+(}\Affichage{0}{\Multim}{0}\xintifboolexpr{\Multim<0}{)}{}}%
+                  \xintifboolexpr{\Multil==0}{}{\xintifboolexpr{\Multil>0}{+}{+(}\Affichage{0}{0}{\Multil}\xintifboolexpr{\Multil<0}{)}{}}%
+                }{%
+                  \Affichage{\Multi}{\Multim}{\Multil}%
+                }
+                \ifboolKV[ClesDistributivite]{Somme}{\xdef\SommeA{\fpeval{\SommeA+#2*#2}}\xdef\SommeB{\fpeval{\SommeB+#2*#3+#3*#2}}\xdef\SommeC{\fpeval{\SommeC+#3*#3}}}{}%
+                \ifboolKV[ClesDistributivite]{Difference}{\xdef\SommeA{\fpeval{\SommeA-#2*#2}}\xdef\SommeB{\fpeval{\SommeB-#2*#3-#3*#2}}\xdef\SommeC{\fpeval{\SommeC-#3*#3}}}{}%
+                \else%
+                \xdef\Multi{\fpeval{#2*#4}}%
+                \xdef\Multij{\fpeval{#2*#5}}%
+                \xdef\Multik{\fpeval{#3*#4}}%
+                \xdef\Multil{\fpeval{#3*#5}}%
+                %% ils sont red\'efinis pour pouvoir envisager la somme de deux
+                %% expressions \`a d\'evelopper
+                \xdef\Multim{\fpeval{#2*#5+#3*#4}}%
+                \ifboolKV[ClesDistributivite]{Oppose}{%
+                  \xdef\Multi{\fpeval{-\Multi}}%
+                  \xdef\Multim{\fpeval{-\Multim}}%
+                  \xdef\Multil{\fpeval{-\Multil}}%
+                  \xintifboolexpr{\Multi==0}{}{\xintifboolexpr{\Multi<0}{(}{}\Affichage{\Multi}{0}{0}\xintifboolexpr{\Multi<0}{)}{}}%
+                  \xintifboolexpr{\Multim==0}{}{\xintifboolexpr{\Multim>0}{+}{+(}\Affichage{0}{\Multim}{0}\xintifboolexpr{\Multim<0}{)}{}}%
+                  \xintifboolexpr{\Multil==0}{}{\xintifboolexpr{\Multil>0}{+}{+(}\Affichage{0}{0}{\Multil}\xintifboolexpr{\Multil<0}{)}{}}%
+                }{%
+                  \Affichage{\Multi}{\Multim}{\Multil}%
+                }
+                \ifboolKV[ClesDistributivite]{Somme}{\xdef\SommeA{\fpeval{\SommeA+#2*#4}}\xdef\SommeB{\fpeval{\SommeB+#2*#5+#3*#4}}\xdef\SommeC{\fpeval{\SommeC+#3*#5}}}{}%
+                \ifboolKV[ClesDistributivite]{Difference}{\xdef\SommeA{\fpeval{\SommeA-#2*#4}}\xdef\SommeB{\fpeval{\SommeB-#2*#5-#3*#4}}\xdef\SommeC{\fpeval{\SommeC-#3*#5}}}{}%
+                \fi%
+              }{}%
+              % fin Remarquable
+            }%
+            }{%
+              \ifboolKV[ClesDistributivite]{Numerique}{%
+                \xintifboolexpr{\useKV[ClesDistributivite]{Etape}==0}{%
+                  % \num{\fpeval{#2+#3}}\times\num{\fpeval{#4+#5}}\multido{\i=2+1}{4}{=\Distri[Numerique,Etape=\i]{#2}{#3}{#4}{#5}}%
+                  \num{\fpeval{#2+#3}}\times\num{\fpeval{#4+#5}}\xintFor* ##1 in{\xintSeq{2}{4}}\do{=\Distri[Numerique,Etape=##1]{#2}{#3}{#4}{#5}}%
+                }{%
+                  \xintifboolexpr{\useKV[ClesDistributivite]{Etape}==-1}{%
+                    % \Distri[Numerique,Etape=3]{#2}{#3}{#4}{#5}\multido{\i=2+-1}{2}{=\Distri[Numerique,Etape=\i]{#2}{#3}{#4}{#5}}=\num{\fpeval{(#2+#3)*(#4+#5)}}%
+                    \Distri[Numerique,Etape=3]{#2}{#3}{#4}{#5}\xintFor* ##1 in{\xintSeq{2}{0}}\do{=\Distri[Numerique,Etape=##1]{#2}{#3}{#4}{#5}}=\num{\fpeval{(#2+#3)*(#4+#5)}}%
+                  }{%
+                    \xintifboolexpr{\useKV[ClesDistributivite]{Etape}==1}{\num{\fpeval{#2+#3}}\times\num{\fpeval{#4+#5}}}{}%
+                    \xintifboolexpr{\useKV[ClesDistributivite]{Etape}==2}{\num{\fpeval{#2+#3}}\times(\num{#4}\xintifboolexpr{#5>0}{+}{-}\num{\fpeval{abs(#5)}})}{}%
+                    \xintifboolexpr{\useKV[ClesDistributivite]{Etape}==3}{\num{#3}\times\num{#4}\xintifboolexpr{#5>0}{+}{-}\num{#3}\times\num{\fpeval{abs(#5)}}}{}%
+                    \xintifboolexpr{\useKV[ClesDistributivite]{Etape}==4}{\num{\fpeval{#3*#4}}\xintifboolexpr{#5>0}{+}{-}\num{\fpeval{abs(#3*#5)}}}{}%
+                    \xintifboolexpr{\useKV[ClesDistributivite]{Etape}==5}{\num{\fpeval{#3*#4+#3*#5}}}{}%
+                  }%
+                }%
+              }{%
+                \ifboolKV[ClesDistributivite]{All}{%
+                  \xdef\NomLettre{\useKV[ClesDistributivite]{NomExpression}}%
+                  \xdef\NomFin{\useKV[ClesDistributivite]{Fin}}%
+                  \xdef\NomVariable{\useKV[ClesDistributivite]{Lettre}}%
+                  \xintFor* ##1 in {\xintSeq {1}{\useKV[ClesDistributivite]{Fin}-1}}\do
+                  {\NomLettre&=\Distri[Etape=##1,Lettre=\NomVariable]{#2}{#3}{#4}{#5}\\}%
+                  \NomLettre&=\Distri[Etape=\NomFin,Lettre=\NomVariable]{#2}{#3}{#4}{#5}%
+                }{%
+                  % Etape 1
+                  \xintifboolexpr{\useKV[ClesDistributivite]{Etape}==1}{%
+                    %cpt=\theNbCalculDistri%
+                    \xintifboolexpr{#2==0}{}{\xintifboolexpr{#3==0}{}{(}}\Tikzmark{\Affichage[#1]{0}{#2}{0}}%
+                    \ifboolKV[ClesDistributivite]{AideAdda}{\mathcolor{DCAide}{+(}\mathcolor{black}{}}{}%
+                      %A
+                      \xintifboolexpr{#3>0}{
+                        \xintifboolexpr{#2==0}{}{+}
+                      }{
+                        \xintifboolexpr{#3<0}{\xintifboolexpr{#2==0}{{-}}{-}}{}
+                      }\Tikzmark{\Affichage[#1]{0}{0}{\fpeval{abs(#3)}}}%B%
+                    \ifboolKV[ClesDistributivite]{AideAdda}{\mathcolor{DCAide}{)}\mathcolor{black}{}}{}%
+                      \xintifboolexpr{#2==0}{}{\xintifboolexpr{#3==0}{}{)}}%
+                    %
+                    \ifboolKV[ClesDistributivite]{AideMul}{\times}{}%on aide dans le cas double
+                    \xdef\Multi{\fpeval{#4*#5}}%affichage auto si (a+b)xk
+                    % 
+                    \xintifboolexpr{\Multi==0}{\times%
+                      \xintifboolexpr{#4<0}{(}{\xintifboolexpr{#5<0}{(}{}}}{(}%
+                    \Tikzmark{\Affichage[#1]{0}{#4}{0}}%
+                    \ifboolKV[ClesDistributivite]{AideAddb}{\mathcolor{DCAide}{+(}\mathcolor{black}{}}{}%
+                    \xintifboolexpr{#5>0}{\xintifboolexpr{#4==0}{}{+}}{\xintifboolexpr{#5<0}{\xintifboolexpr{#4==0}{{-}}{-}}{}}\Tikzmark{\Affichage[#1]{0}{0}{\fpeval{abs(#5)}}}%
+                    \ifboolKV[ClesDistributivite]{AideAddb}{\mathcolor{DCAide}{)}\mathcolor{black}{}}{}%
+                    \xintifboolexpr{\Multi==0}{%
+                      \xintifboolexpr{#4<0}{)}{\xintifboolexpr{#5<0}{)}{}}}{)}%
+                    \ifboolKV[ClesDistributivite]{Fleches}{%
+                      \xdef\Multi{\fpeval{#2*#3*#4*#5}}%
+                      \xintifboolexpr{\Multi==0}{%
+                        \xdef\Multij{\fpeval{#2*#3}}%\relax
+                        \xintifboolexpr{\Multij==0}{\xintifboolexpr{#2==0}{\DrawArrowSimple{1}}{\DrawArrowSimple{0}}}{\xintifboolexpr{#4==0}{\DrawArrowSimpleRenverse{3}}{\DrawArrowSimpleRenverse{2}}}%
+                      }{%
+                        \DrawArrow%
+                      }%
+                    }{}\setcounter{NbDistri}{0}%
+                  }{}%
+                  % Etape 2
+                  \xintifboolexpr{\useKV[ClesDistributivite]{Etape}==2}{%
+                    %cpt=\theNbCalculDistri%
+                    \xdef\Multi{\fpeval{#2*#4}}%
+                    \xintifboolexpr{\Multi==0}{}{%
+                      \xintifboolexpr{#2<0}{(}{}\Affichage[#1]{0}{#2}{0}\xintifboolexpr{#2<0}{)}{}\times\xintifboolexpr{#4<0}{(}{}\Affichage[#1]{0}{#4}{0}\xintifboolexpr{#4<0}{)}{}%
+                    }
+                    \xdef\Multij{\fpeval{#2*#5}}%
+                    \xintifboolexpr{\Multij==0}{}{%
+                      \xintifboolexpr{\Multi==0}{}{+}%
+                      \xintifboolexpr{#2<0}{(}{}\Affichage[#1]{0}{#2}{0}\xintifboolexpr{#2<0}{)}{}\times\xintifboolexpr{#5<0}{(}{}\Affichage[#1]{0}{0}{#5}\xintifboolexpr{#5<0}{)}{}%
+                    }%
+                    \xdef\Multik{\fpeval{#3*#4}}%
+                    \xintifboolexpr{\Multik==0}{}{%
+                      \xintifboolexpr{\Multi==0}{}{+}%
+                      \xintifboolexpr{#3<0}{(}{}\Affichage[#1]{0}{0}{#3}\xintifboolexpr{#3<0}{)}{}\times\xintifboolexpr{#4<0}{(}{}\Affichage[#1]{0}{#4}{0}\xintifboolexpr{#4<0}{)}{}%
+                    }%
+                    \xdef\Multil{\fpeval{#3*#5}}%
+                    \xintifboolexpr{\Multil==0}{}{+%
+                      \xintifboolexpr{#3<0}{(}{}\Affichage[#1]{0}{0}{#3}\xintifboolexpr{#3<0}{)}{}\times\xintifboolexpr{#5<0}{(}{}\Affichage[#1]{0}{0}{#5}\xintifboolexpr{#5<0}{)}{}%
+                    }%
+                  }{}%
+                  % Etape 3
+                  \xintifboolexpr{\useKV[ClesDistributivite]{Etape}==3}{%
+                    %cpt=\theNbCalculDistri%
+                    \stepcounter{NbCalculDistri}%
+                    %--cpt=\theNbCalculDistri%
+                    \xdef\Multi{\fpeval{#2*#4}}%
+                    \xdef\Multij{\fpeval{#2*#5}}%
+                    \xdef\Multik{\fpeval{#3*#4}}%
+                    \xdef\Multil{\fpeval{#3*#5}}%
+                    %% ils sont red\'efinis pour pouvoir envisager la somme de deux
+                    %% expressions \`a d\'evelopper
+                    \xintifboolexpr{\theNbCalculDistri>1}{\xintifboolexpr{\Multi<0}{(\Affichage{\Multi}{0}{0})}{\Affichage{\Multi}{0}{0}}}{\Affichage{\Multi}{0}{0}}%
+                    \ifboolKV[ClesDistributivite]{Reduction}{\mathunderline{DCReduction}{%
+                        \xintifboolexpr{\Multij==0}{}{\xintifboolexpr{\Multi==0}{}{{}+}\xintifboolexpr{\Multij<0}{(}{}\Affichage{0}{\Multij}{0}\xintifboolexpr{\Multij<0}{)}{}}%
+                        \xintifboolexpr{\Multik==0}{}{\xintifboolexpr{\Multil==0}{\xintifboolexpr{#2==0}{}{+}}{+}\xintifboolexpr{\Multik<0}{(}{}\Affichage{0}{\Multik}{0}\xintifboolexpr{\Multik<0}{)}{}}%
+                      }%
+                    }{%
+                      \xintifboolexpr{\Multij==0}{}{\xintifboolexpr{\Multi==0}{}{+}\xintifboolexpr{\Multij<0}{(}{}\Affichage{0}{\Multij}{0}\xintifboolexpr{\Multij<0}{)}{}}%
+                      \xintifboolexpr{\Multik==0}{}{\xintifboolexpr{\Multil==0}{\xintifboolexpr{#2==0}{}{+}}{\xintifboolexpr{#2==0}{}{+}}\xintifboolexpr{\Multik<0}{(}{}\Affichage{0}{\Multik}{0}\xintifboolexpr{\Multik<0}{)}{}}%
+                    }%
+                    \xintifboolexpr{\Multil==0}{}{+}\xintifboolexpr{\Multil<0}{(}{}\Affichage{0}{0}{\Multil}\xintifboolexpr{\Multil<0}{)}{}%
+                    \ifboolKV[ClesDistributivite]{Somme}{\xdef\SommeA{\fpeval{\SommeA+#2*#4}}\xdef\SommeB{\fpeval{\SommeB+#2*#5+#3*#4}}\xdef\SommeC{\fpeval{\SommeC+#3*#5}}}{}%
+                    \ifboolKV[ClesDistributivite]{Difference}{\xdef\SommeA{\fpeval{\SommeA-#2*#4}}\xdef\SommeB{\fpeval{\SommeB-#2*#5-#3*#4}}\xdef\SommeC{\fpeval{\SommeC-#3*#5}}}{}%
+                  }{}%
+                  % Etape 4
+                  \xintifboolexpr{\useKV[ClesDistributivite]{Etape}==4}{%
+                    %cpt=\theNbCalculDistri%
+                    \xdef\Multi{\fpeval{#2*#4}}%
+                    \xdef\Multij{\fpeval{#2*#5}}%
+                    \xdef\Multik{\fpeval{#3*#4}}%
+                    \xdef\Multil{\fpeval{#3*#5}}%
+                    %% ils sont red\'efinis pour pouvoir envisager la somme de deux
+                    %% expressions \`a d\'evelopper
+                    \xdef\Multim{\fpeval{#2*#5+#3*#4}}%
+                    \xintifboolexpr{\theNbCalculDistri>1}{\setcounter{NbCalculDistri}{0}}{}%
+                    \stepcounter{NbCalculDistri}%
+                    \ifboolKV[ClesDistributivite]{Oppose}{%
+                      \xdef\Multi{\fpeval{-\Multi}}%
+                      \xdef\Multim{\fpeval{-\Multim}}%
+                      \xdef\Multil{\fpeval{-\Multil}}%
+                      \xintifboolexpr{\Multi==0}{}{\xintifboolexpr{\Multi<0}{(}{}\Affichage{\Multi}{0}{0}\xintifboolexpr{\Multi<0}{)}{}}%
+                      \xintifboolexpr{\Multim==0}{}{\xintifboolexpr{\Multim>0}{+}{+(}\Affichage{0}{\Multim}{0}\xintifboolexpr{\Multim<0}{)}{}}%
+                      \xintifboolexpr{\Multil==0}{}{\xintifboolexpr{\Multil>0}{+}{+(}\Affichage{0}{0}{\Multil}\xintifboolexpr{\Multil<0}{)}{}}%
+                    }{%
+                      \xintifboolexpr{\theNbCalculDistri>1}{\xintifboolexpr{\Multi<0}{(\Affichage{\Multi}{0}{0})}{\Affichage{\Multi}{0}{0}}}{\Affichage{\Multi}{0}{0}}%
+                      \xintifboolexpr{\Multim==0}{}{%
+                        \xintifboolexpr{\Multim>0}{\ifnum\fpeval{abs(\Multi)}>0\relax{}+\fi\Affichage{0}{\Multim}{0}}{-\Affichage{0}{\fpeval{-\Multim}}{0}}%
+                      }%
+                      \xintifboolexpr{\Multil==0}{}{\xintifboolexpr{\Multil<0}{-\Affichage{0}{0}{\fpeval{-\Multil}}}{+\Affichage{0}{0}{\Multil}}}%
+                    }
+                    \ifboolKV[ClesDistributivite]{Somme}{\xdef\SommeA{\fpeval{\SommeA+#2*#4}}\xdef\SommeB{\fpeval{\SommeB+#2*#5+#3*#4}}\xdef\SommeC{\fpeval{\SommeC+#3*#5}}}{}%
+                    \ifboolKV[ClesDistributivite]{Difference}{\xdef\SommeA{\fpeval{\SommeA-#2*#4}}\xdef\SommeB{\fpeval{\SommeB-#2*#5-#3*#4}}\xdef\SommeC{\fpeval{\SommeC-#3*#5}}}{}%
+                  }{}%
+                }%
+              }%
+            }%
+          }%
+        }%
+      }%
+    }%
+  }%
+}%
+
+\newcommand\DistriTableau[5][]{%
+  \useKVdefault[ClesDistributivite]%
+  \setKV[ClesDistributivite]{#1}%
+  \ensuremath{%
+    \begin{array}{|>{\columncolor{gray!15}}c|c|c|}
+      \hline
+      \rowcolor{gray!15}\times&\Affichage[#1]{0}{#4}{0}&\Affichage[#1]{0}{0}{#5}\\
+      \hline
+      \xintifboolexpr{#2==0}{}{\Affichage[#1]{0}{#2}{0}&\Affichage[#1]{\fpeval{#2*#4}}{0}{0}&\xintifboolexpr{\fpeval{#2*#5}>0}{+}{}\Affichage[#1]{0}{\fpeval{#2*#5}}{0}\\
+      \hline}%
+      \xintifboolexpr{#3==0}{}{\xintifboolexpr{#3>0}{+}{}\Affichage[#1]{0}{0}{#3}&\xintifboolexpr{\fpeval{#3*#4}>0}{+}{}\Affichage[#1]{0}{\fpeval{#3*#4}}{0}&\xintifboolexpr{\fpeval{#3*#5}>0}{+}{}\Affichage[#1]{0}{0}{\fpeval{#3*#5}}\\
+      \hline}
+    \end{array}
+  }%
+}%
+
+\newcommand\Resultat[1][]{%
+  \setKV[ClesDistributivite]{#1}%On lit les arguments optionnels
+  \ensuremath{%
+    \Affichage{\SommeA}{\SommeB}{\SommeC}
+  }%
+}
+
+\newcommand\AffichageEchange[4][]{%
+  \setKV[ClesDistributivite]{#1}%On lit les arguments optionnels
+  \def\LETTRE{\useKV[ClesDistributivite]{Lettre}}%
+  \ensuremath{%
+    % partie du nombre
+    \xintifboolexpr{#2==0}{}{\num{#2}}%
+    % partie du x
+    \xintifboolexpr{#3==0}{}{\xintifboolexpr{#3>0}{\xintifboolexpr{#2==0}{}{+}\xintifboolexpr{#3==1}{}{\num{#3}}}{%
+        \xintifboolexpr{#2==0}{\xintifboolexpr{#3==-1}{-}{\num{#3}}}{\xintifboolexpr{#3==-1}{-}{-\num{\fpeval{abs(#3)}}}}
+      }\LETTRE}%
+    % partie du x^2
+    \xintifboolexpr{#4==0}{}{%
+      \xintifboolexpr{#4>0}{%
+        \xintifboolexpr{#2==0}{%
+          \xintifboolexpr{#3==0}{%
+          }{+}%
+        }{+}%
+        \xintifboolexpr{#4==1}{}{\num{#4}%
+        }%
+      }{%
+        \xintifboolexpr{#2==0}{%
+          \xintifboolexpr{#3==0}{%
+            \num{#4}%
+          }{-\num{\fpeval{abs(#4)%
+              }%
+            }%
+          }%
+        }{%
+          \xintifboolexpr{#4==-1}{-}{-\num{\fpeval{abs(#4)}}}}}%
+      \LETTRE^2}%
+  }%
+}%
+
+\newcommand\DistriEchange[5][]{%
+  \colorlet{DCReduction}{black}
+  \ensuremath{%
+    \useKVdefault[ClesDistributivite]%
+    \setKV[ClesDistributivite]{#1}%
+    \ifboolKV[ClesDistributivite]{RAZ}{\xdef\SommeA{0}\xdef\SommeB{0}\xdef\SommeC{0}%
+      \setcounter{NbCalculDistri}{0}%
+    }{}%
+    \colorlet{DCAide}{\useKV[ClesDistributivite]{CouleurAide}}%
+%    \colorlet{DCReduction}{\useKV[ClesDistributivite]{CouleurReduction}}%
+    \colorlet{DCFlechesh}{\useKV[ClesDistributivite]{CouleurFH}}%
+    \colorlet{DCFlechesb}{\useKV[ClesDistributivite]{CouleurFB}}%
+    \ifboolKV[ClesDistributivite]{Remarquable}{%
+      \xintifboolexpr{\useKV[ClesDistributivite]{Etape}==1}{\ifx\bla#4\bla(\AffichageEchange{#2}{#3}{0})^2\else(\AffichageEchange{#2}{#3}{0})(\AffichageEchange{#4}{#5}{0})\fi
+      }{}
+      \xintifboolexpr{\useKV[ClesDistributivite]{Etape}==2}{%
+        \ifx\bla#4\bla\xintifboolexpr{#3>0}{%
+          \num{#2}^2+2\times\num{#2}\times\xintifboolexpr{#3==1}{}{\num{#3}}\useKV[ClesDistributivite]{Lettre}+
+          \xintifboolexpr{#3==1}{}{(\num{#3}}\useKV[ClesDistributivite]{Lettre}\xintifboolexpr{#3==1}{}{)}^2%
+        }{%
+          \num{#2}^2-2\times\num{#2}\times\xintifboolexpr{#3==-1}{}{\num{\fpeval{0-#3}}}\useKV[ClesDistributivite]{Lettre}+
+          \xintifboolexpr{#3==-1}{}{(\num{\fpeval{0-#3}}}\useKV[ClesDistributivite]{Lettre}\xintifboolexpr{#3==-1}{}{)}^2%
+        }%
+        \else\num{#2}^2-\xintifboolexpr{#3==1}{}{(\num{#3}}\useKV[ClesDistributivite]{Lettre}\xintifboolexpr{#3==1}{}{)}^2%
+        \fi%
+      }{}
+      \xintifboolexpr{\useKV[ClesDistributivite]{Etape}==3}{%
+        \xintifboolexpr{\theNbCalculDistri>1}{\setcounter{NbCalculDistri}{0}}{}%
+        \stepcounter{NbCalculDistri}%
+        \ifx\bla#4\bla%
+        \xdef\Multi{\fpeval{#2*#2}}%
+        \xdef\Multij{\fpeval{#2*#3}}%
+        \xdef\Multik{\fpeval{#3*#2}}%
+        \xdef\Multil{\fpeval{#3*#3}}%
+        %% ils sont red\'efinis pour pouvoir envisager la somme de deux
+        %% expressions \`a d\'evelopper
+        \xdef\Multim{\fpeval{#2*#3+#3*#2}}%
+        \ifboolKV[ClesDistributivite]{Oppose}{%
+          \xdef\Multi{\fpeval{-\Multi}}%
+          \xdef\Multim{\fpeval{-\Multim}}%
+          \xdef\Multil{\fpeval{-\Multil}}%
+          \xintifboolexpr{\Multi==0}{}{\xintifboolexpr{\Multi<0}{(}{}\AffichageEchange{\Multi}{0}{0}\xintifboolexpr{\Multi<0}{)}{}}%
+          \xintifboolexpr{\Multim==0}{}{\xintifboolexpr{\Multim>0}{+}{+(}\AffichageEchange{0}{\Multim}{0}\xintifboolexpr{\Multim<0}{)}{}}%
+          \xintifboolexpr{\Multil==0}{}{\xintifboolexpr{\Multil>0}{+}{+(}\AffichageEchange{0}{0}{\Multil}\xintifboolexpr{\Multil<0}{)}{}}%
+        }{%
+          \AffichageEchange{\Multi}{\Multim}{\Multil}%
+        }
+        \ifboolKV[ClesDistributivite]{Somme}{\xdef\SommeA{\fpeval{\SommeA+#3*#3}}\xdef\SommeB{\fpeval{\SommeB+#2*#3+#3*#2}}\xdef\SommeC{\fpeval{\SommeC+#2*#2}}}{}%
+        \ifboolKV[ClesDistributivite]{Difference}{\xdef\SommeA{\fpeval{\SommeA-#3*#3}}\xdef\SommeB{\fpeval{\SommeB-#2*#3-#3*#2}}\xdef\SommeC{\fpeval{\SommeC-#2*#2}}}{}%
+        \else%
+        \xdef\Multi{\fpeval{#2*#4}}%
+        \xdef\Multij{\fpeval{#2*#5}}%
+        \xdef\Multik{\fpeval{#3*#4}}%
+        \xdef\Multil{\fpeval{#3*#5}}%
+        %% ils sont red\'efinis pour pouvoir envisager la somme de deux
+        %% expressions \`a d\'evelopper
+        \xdef\Multim{\fpeval{#2*#5+#3*#4}}%
+        \ifboolKV[ClesDistributivite]{Oppose}{%
+          \xdef\Multi{\fpeval{-\Multi}}%
+          \xdef\Multim{\fpeval{-\Multim}}%
+          \xdef\Multil{\fpeval{-\Multil}}%
+          \xintifboolexpr{\Multi==0}{}{\xintifboolexpr{\Multi<0}{(}{}\AffichageEchange{\Multi}{0}{0}\xintifboolexpr{\Multi<0}{)}{}}%
+          \xintifboolexpr{\Multim==0}{}{\xintifboolexpr{\Multim>0}{+}{+(}\AffichageEchange{0}{\Multim}{0}\xintifboolexpr{\Multim<0}{)}{}}%
+          \xintifboolexpr{\Multil==0}{}{\xintifboolexpr{\Multil>0}{+}{+(}\AffichageEchange{0}{0}{\Multil}\xintifboolexpr{\Multil<0}{)}{}}%
+        }{%
+          \AffichageEchange{\Multi}{\Multim}{\Multil}%
+        }
+        % \`a faire
+        \ifboolKV[ClesDistributivite]{Somme}{\xdef\SommeA{\fpeval{\SommeA+#3*#5}}\xdef\SommeB{\fpeval{\SommeB+#2*#5+#3*#4}}\xdef\SommeC{\fpeval{\SommeC+#2*#4}}}{}%
+        \ifboolKV[ClesDistributivite]{Difference}{\xdef\SommeA{\fpeval{\SommeA-#3*#5}}\xdef\SommeB{\fpeval{\SommeB-#2*#5-#3*#4}}\xdef\SommeC{\fpeval{\SommeC-#2*#4}}}{}%
+        % 
+        \fi%
+      }{}%
+    }{%
+      \ifboolKV[ClesDistributivite]{Numerique}{%
+      }{%
+        \ifboolKV[ClesDistributivite]{All}{%
+           \xdef\NomLettre{\useKV[ClesDistributivite]{NomExpression}}%
+           \xdef\NomFin{\useKV[ClesDistributivite]{Fin}}%
+           \xdef\ValeurEchange{\useKV[ClesDistributivite]{Echange}}
+           \xintFor* ##1 in {\xintSeq {1}{\useKV[ClesDistributivite]{Fin}-1}}\do
+           {\NomLettre&=\DistriEchange[Echange=\ValeurEchange,Etape=##1]{#2}{#3}{#4}{#5}\\}%
+           \NomLettre&=\DistriEchange[Echange=\ValeurEchange,Etape=\NomFin]{#2}{#3}{#4}{#5}%
+        }{%
+          % Etape 1
+          \xintifboolexpr{\useKV[ClesDistributivite]{Etape}==1}{%
+            \xintifboolexpr{\useKV[ClesDistributivite]{Echange}==1||\useKV[ClesDistributivite]{Echange}==3}{%
+              \xintifboolexpr{#2==0}{%
+              }{\xintifboolexpr{#3==0}{%
+                }{(}}\Tikzmark{\Affichage[#1]{0}{0}{#2}}%
+              \ifboolKV[ClesDistributivite]{AideAdda}{\mathcolor{DCAide}{+(}\mathcolor{black}{}}{}%
+              \xintifboolexpr{#3>0}{\xintifboolexpr{#2==0}{}{+}}{\xintifboolexpr{#3<0}{-}{}}\Tikzmark{\Affichage[#1]{0}{\fpeval{abs(#3)}}{0}}%
+              \ifboolKV[ClesDistributivite]{AideAdda}{\mathcolor{DCAide}{)}\mathcolor{black}{}}{}%
+              \xintifboolexpr{#2==0}{%
+              }{\xintifboolexpr{#3==0}{%
+                }{)}}%
+            }{
+              \xintifboolexpr{#2==0}{%
+              }{\xintifboolexpr{#3==0}{%
+                }{(}}\Tikzmark{\Affichage[#1]{0}{#2}{0}}%
+              \ifboolKV[ClesDistributivite]{AideAdda}{\mathcolor{DCAide}{+(}\mathcolor{black}{}}{}%
+              \xintifboolexpr{#3>0}{\xintifboolexpr{#2==0}{}{+}}{\xintifboolexpr{#3<0}{-}{}}\Tikzmark{\Affichage[#1]{0}{0}{\fpeval{abs(#3)}}}%
+              \ifboolKV[ClesDistributivite]{AideAdda}{\mathcolor{DCAide}{)}\mathcolor{black}{}}{}%
+              \xintifboolexpr{#2==0}{%
+              }{\xintifboolexpr{#3==0}{%
+                }{)}}%
+            }%
+            % 
+            \ifboolKV[ClesDistributivite]{AideMul}{\times}{}%on aide dans le cas double
+            \xdef\Multi{\fpeval{#4*#5}}%affichage auto si (a+b)xk
+            % 
+            \xintifboolexpr{\useKV[ClesDistributivite]{Echange}==2||\useKV[ClesDistributivite]{Echange}==3}{%
+              \xintifboolexpr{\Multi==0}{\times%
+                \xintifboolexpr{#4<0}{(}{\xintifboolexpr{#5<0}{(}{}}}{(}%
+              \Tikzmark{\AffichageEchange[#1]{#4}{0}{0}}%
+              \ifboolKV[ClesDistributivite]{AideAddb}{\mathcolor{DCAide}{+(}\mathcolor{black}{}}{}%
+              \xintifboolexpr{#5>0}{\xintifboolexpr{#4==0}{}{+}}{\xintifboolexpr{#5<0}{-}{}}\Tikzmark{\AffichageEchange[#1]{0}{\fpeval{abs(#5)}}{0}}%
+              \ifboolKV[ClesDistributivite]{AideAddb}{\mathcolor{DCAide}{)}\mathcolor{black}{}}{}%
+              \xintifboolexpr{\Multi==0}{%
+                \xintifboolexpr{#4<0}{)}{\xintifboolexpr{#5<0}{)}{}}}{)}%
+            }{%
+              \xintifboolexpr{\Multi==0}{\times%
+                \xintifboolexpr{#4<0}{(}{\xintifboolexpr{#5<0}{(}{}}}{(}%
+              \Tikzmark{\Affichage[#1]{0}{#4}{0}}%
+              \ifboolKV[ClesDistributivite]{AideAddb}{\mathcolor{DCAide}{+(}\mathcolor{black}{}}{}%
+              \xintifboolexpr{#5>0}{\xintifboolexpr{#4==0}{}{+}}{\xintifboolexpr{#5<0}{\xintifboolexpr{#4==0}{{-}}{-}}{}}\Tikzmark{\Affichage[#1]{0}{0}{\fpeval{abs(#5)}}}%
+              \ifboolKV[ClesDistributivite]{AideAddb}{\mathcolor{DCAide}{)}\mathcolor{black}{}}{}%
+              \xintifboolexpr{\Multi==0}{%
+                \xintifboolexpr{#4<0}{)}{\xintifboolexpr{#5<0}{)}{}}}{)}%
+            }%
+             \ifboolKV[ClesDistributivite]{Fleches}{%
+             \xdef\Multi{\fpeval{#2*#3*#4*#5}}%
+             \xintifboolexpr{\Multi==0}{%
+             \xdef\Multij{\fpeval{#2*#3}}%\relax
+             \xintifboolexpr{\Multij==0}{\xintifboolexpr{#2==0}{\DrawArrowSimple{1}}{\DrawArrowSimple{0}}}{\xintifboolexpr{#4==0}{\DrawArrowSimpleRenverse{3}}{\DrawArrowSimpleRenverse{2}}}
+             }{%
+               \DrawArrow
+             }%
+             }{}\setcounter{NbDistri}{0}%
+          }{}%
+          % Etape 2
+          \xintifboolexpr{\useKV[ClesDistributivite]{Etape}==2}{%
+            \xintifboolexpr{\useKV[ClesDistributivite]{Echange}==1}{%
+              \xdef\Multi{\fpeval{#2*#4}}%
+              \xintifboolexpr{\Multi==0}{}{%
+                \xintifboolexpr{#2<0}{(}{}\AffichageEchange[#1]{#2}{0}{0}\xintifboolexpr{#2<0}{)}{}\times\xintifboolexpr{#4<0}{(}{}\Affichage[#1]{0}{#4}{0}\xintifboolexpr{#4<0}{)}{}%
+              }%
+              \xdef\Multij{\fpeval{#2*#5}}%
+              \xintifboolexpr{\Multij==0}{}{%
+                \xintifboolexpr{\Multi==0}{}{+}%
+                \xintifboolexpr{#2<0}{(}{}\AffichageEchange[#1]{#2}{0}{0}\xintifboolexpr{#2<0}{)}{}\times\xintifboolexpr{#5<0}{(}{}\Affichage[#1]{0}{0}{#5}\xintifboolexpr{#5<0}{)}{}%
+              }%
+              \xdef\Multik{\fpeval{#3*#4}}%
+              \xintifboolexpr{\Multik==0}{}{%
+                \xintifboolexpr{\Multi==0}{}{+}%
+                \xintifboolexpr{#3<0}{(}{}\AffichageEchange[#1]{0}{#3}{0}\xintifboolexpr{#3<0}{)}{}\times\xintifboolexpr{#4<0}{(}{}\Affichage[#1]{0}{#4}{0}\xintifboolexpr{#4<0}{)}{}%
+              }%
+              \xdef\Multil{\fpeval{#3*#5}}%
+              \xintifboolexpr{\Multil==0}{}{+%
+                \xintifboolexpr{#3<0}{(}{}\AffichageEchange[#1]{0}{#3}{0}\xintifboolexpr{#3<0}{)}{}\times\xintifboolexpr{#5<0}{(}{}\Affichage[#1]{0}{0}{#5}\xintifboolexpr{#5<0}{)}{}%
+              }%
+            }{}%
+            \xintifboolexpr{\useKV[ClesDistributivite]{Echange}==2}{%
+              \xdef\Multi{\fpeval{#2*#4}}%
+              \xintifboolexpr{\Multi==0}{}{%
+                \xintifboolexpr{#2<0}{(}{}\Affichage[#1]{0}{#2}{0}\xintifboolexpr{#2<0}{)}{}\times\xintifboolexpr{#4<0}{(}{}\AffichageEchange[#1]{#4}{0}{0}\xintifboolexpr{#4<0}{)}{}%
+              }%
+              \xdef\Multij{\fpeval{#2*#5}}%
+              \xintifboolexpr{\Multij==0}{}{%
+                \xintifboolexpr{\Multi==0}{}{+}%
+                \xintifboolexpr{#2<0}{(}{}\Affichage[#1]{0}{#2}{0}\xintifboolexpr{#2<0}{)}{}\times\xintifboolexpr{#5<0}{(}{}\AffichageEchange[#1]{0}{#5}{0}\xintifboolexpr{#5<0}{)}{}%
+              }%
+              \xdef\Multik{\fpeval{#3*#4}}%
+              \xintifboolexpr{\Multik==0}{}{%
+                \xintifboolexpr{\Multi==0}{}{+}%
+                \xintifboolexpr{#3<0}{(}{}\Affichage[#1]{0}{0}{#3}\xintifboolexpr{#3<0}{)}{}\times\xintifboolexpr{#4<0}{(}{}\AffichageEchange[#1]{#4}{0}{0}\xintifboolexpr{#4<0}{)}{}%
+              }%
+              \xdef\Multil{\fpeval{#3*#5}}%
+              \xintifboolexpr{\Multil==0}{}{+%
+                \xintifboolexpr{#3<0}{(}{}\Affichage[#1]{0}{0}{#3}\xintifboolexpr{#3<0}{)}{}\times\xintifboolexpr{#5<0}{(}{}\AffichageEchange[#1]{0}{#5}{0}\xintifboolexpr{#5<0}{)}{}%
+              }%
+            }{}%
+            \xintifboolexpr{\useKV[ClesDistributivite]{Echange}==3}{%
+              \xdef\Multi{\fpeval{#2*#4}}%
+              \xintifboolexpr{\Multi==0}{}{%
+                \xintifboolexpr{#2<0}{(}{}\AffichageEchange[#1]{#2}{0}{0}\xintifboolexpr{#2<0}{)}{}\times\xintifboolexpr{#4<0}{(}{}\AffichageEchange[#1]{#4}{0}{0}\xintifboolexpr{#4<0}{)}{}%
+              }%
+              \xdef\Multij{\fpeval{#2*#5}}%
+              \xintifboolexpr{\Multij==0}{}{%
+                \xintifboolexpr{\Multi==0}{}{+}%
+                \xintifboolexpr{#2<0}{(}{}\AffichageEchange[#1]{#2}{0}{0}\xintifboolexpr{#2<0}{)}{}\times\xintifboolexpr{#5<0}{(}{}\AffichageEchange[#1]{0}{#5}{0}\xintifboolexpr{#5<0}{)}{}%
+              }%
+              \xdef\Multik{\fpeval{#3*#4}}%
+              \xintifboolexpr{\Multik==0}{}{%
+                \xintifboolexpr{\Multi==0}{}{+}%
+                \xintifboolexpr{#3<0}{(}{}\AffichageEchange[#1]{0}{#3}{0}\xintifboolexpr{#3<0}{)}{}\times\xintifboolexpr{#4<0}{(}{}\AffichageEchange[#1]{#4}{0}{0}\xintifboolexpr{#4<0}{)}{}%
+              }%
+              \xdef\Multil{\fpeval{#3*#5}}%
+              \xintifboolexpr{\Multil==0}{}{+%
+                \xintifboolexpr{#3<0}{(}{}\AffichageEchange[#1]{0}{#3}{0}\xintifboolexpr{#3<0}{)}{}\times\xintifboolexpr{#5<0}{(}{}\AffichageEchange[#1]{0}{#5}{0}\xintifboolexpr{#5<0}{)}{}%
+              }%
+            }{}
+          }{}          
+          % Etape 3
+          \xintifboolexpr{\useKV[ClesDistributivite]{Etape}==3}{%
+            \stepcounter{NbCalculDistri}%
+            \xdef\Multi{\fpeval{#2*#4}}%
+            \xdef\Multij{\fpeval{#2*#5}}%
+            \xdef\Multik{\fpeval{#3*#4}}%
+            \xdef\Multil{\fpeval{#3*#5}}%
+            %% ils sont red\'efinis pour pouvoir envisager la somme de deux
+            %% expressions \`a d\'evelopper
+            \xintifboolexpr{\useKV[ClesDistributivite]{Echange}==1}{%
+            \xintifboolexpr{\theNbCalculDistri>1}{\xintifboolexpr{\Multi<0}{(\AffichageEchange{0}{\Multi}{0})}{\AffichageEchange{0}{\Multi}{0}}}{\AffichageEchange{0}{\Multi}{0}}%
+              \xintifboolexpr{\Multij==0}{}{\xintifboolexpr{\Multi==0}{}{+}\xintifboolexpr{\Multij<0}{(}{}\AffichageEchange{\Multij}{0}{0}\xintifboolexpr{\Multij<0}{)}{}}%
+              \xintifboolexpr{\Multik==0}{}{\xintifboolexpr{\Multil==0}{\xintifboolexpr{#2=0}{}{+}}{+}\xintifboolexpr{\Multik<0}{(}{}\AffichageEchange{0}{0}{\Multik}\xintifboolexpr{\Multik<0}{)}{}}%
+              \xintifboolexpr{\Multil==0}{}{+}\xintifboolexpr{\Multil<0}{(}{}\AffichageEchange{0}{\Multil}{0}\xintifboolexpr{\Multil<0}{)}{}%
+              \xdef\Multim{\fpeval{#2*#4+#3*#5}}%            
+              \ifboolKV[ClesDistributivite]{Somme}{\xdef\SommeA{\fpeval{\SommeA+\Multik}}\xdef\SommeB{\fpeval{\SommeB+\Multim}}\xdef\SommeC{\fpeval{\SommeC+\Multij}}}{}%
+              \ifboolKV[ClesDistributivite]{Difference}{\xdef\SommeA{\fpeval{\SommeA-\Multik}}\xdef\SommeB{\fpeval{\SommeB-\Multim}}\xdef\SommeC{\fpeval{\SommeC-\Multij}}}{}%            
+            }{}%
+            \xintifboolexpr{\useKV[ClesDistributivite]{Echange}==2}{%
+            \xintifboolexpr{\theNbCalculDistri>1}{\xintifboolexpr{\Multi<0}{(\AffichageEchange{0}{\Multi}{0})}{\AffichageEchange{0}{\Multi}{0}}}{\AffichageEchange{0}{\Multi}{0}}%
+              \xintifboolexpr{\Multij==0}{}{\xintifboolexpr{\Multi==0}{}{+}\xintifboolexpr{\Multij<0}{(}{}\AffichageEchange{0}{0}{\Multij}\xintifboolexpr{\Multij<0}{)}{}}%
+              \xintifboolexpr{\Multik==0}{}{\xintifboolexpr{\Multil==0}{\xintifboolexpr{#2==0}{}{+}}{+}\xintifboolexpr{\Multik<0}{(}{}\AffichageEchange{\Multik}{0}{0}\xintifboolexpr{\Multik<0}{)}{}}%
+              \xintifboolexpr{\Multil==0}{}{+}\xintifboolexpr{\Multil<0}{(}{}\AffichageEchange{0}{\Multil}{0}\xintifboolexpr{\Multil<0}{)}{}%
+              \xdef\Multim{\fpeval{#2*#4+#3*#5}}%
+              \ifboolKV[ClesDistributivite]{Somme}{\xdef\SommeA{\fpeval{\SommeA+\Multij}}\xdef\SommeB{\fpeval{\SommeB+\Multim}}\xdef\SommeC{\fpeval{\SommeC+\Multik}}}{}%
+              \ifboolKV[ClesDistributivite]{Difference}{\xdef\SommeA{\fpeval{\SommeA-\Multij}}\xdef\SommeB{\fpeval{\SommeB-\Multim}}\xdef\SommeC{\fpeval{\SommeC-\Multik}}}{}%
+            }{}%
+            \xintifboolexpr{\useKV[ClesDistributivite]{Echange}==3}{%
+            \xintifboolexpr{\theNbCalculDistri>1}{\xintifboolexpr{\Multi<0}{(\AffichageEchange{\Multi}{0}{0})}{\AffichageEchange{\Multi}{0}{0}}}{\AffichageEchange{\Multi}{0}{0}}%
+              \xintifboolexpr{\Multij==0}{}{\xintifboolexpr{\Multi==0}{}{+}\xintifboolexpr{\Multij<0}{(}{}\AffichageEchange{0}{\Multij}{0}\xintifboolexpr{\Multij<0}{)}{}}%
+              \xintifboolexpr{\Multik==0}{}{\xintifboolexpr{\Multil==0}{\xintifboolexpr{#2==0}{}{+}}{+}\xintifboolexpr{\Multik<0}{(}{}\AffichageEchange{0}{\Multik}{0}\xintifboolexpr{\Multik<0}{)}{}}%
+              \xintifboolexpr{\Multil==0}{}{+}\xintifboolexpr{\Multil<0}{(}{}\AffichageEchange{0}{0}{\Multil}\xintifboolexpr{\Multil<0}{)}{}%
+              \xdef\Multim{\fpeval{#2*#5+#3*#4}}%
+              \ifboolKV[ClesDistributivite]{Somme}{\xdef\SommeA{\fpeval{\SommeA+\Multil}}\xdef\SommeB{\fpeval{\SommeB+\Multim}}\xdef\SommeC{\fpeval{\SommeC+\Multi}}}{}%
+              \ifboolKV[ClesDistributivite]{Difference}{\xdef\SommeA{\fpeval{\SommeA-\Multil}}\xdef\SommeB{\fpeval{\SommeB-\Multim}}\xdef\SommeC{\fpeval{\SommeC-\Multi}}}{}%
+            }{}%
+          }{}%fin etape3
+          % Etape 4
+          \xintifboolexpr{\useKV[ClesDistributivite]{Etape}==4}{%
+            \xdef\Multi{\fpeval{#2*#4}}%
+            \xdef\Multij{\fpeval{#2*#5}}%
+            \xdef\Multik{\fpeval{#3*#4}}%
+            \xdef\Multil{\fpeval{#3*#5}}%
+            %% ils sont red\'efinis pour pouvoir envisager la somme de deux
+            %% expressions \`a d\'evelopper
+            % \xintifboolexpr{\theNbCalculDistri>1}{\setcounter{NbCalculDistri}{0}}{}%
+            %\stepcounter{NbCalculDistri}%
+            \xintifboolexpr{\useKV[ClesDistributivite]{Echange}==1}{%
+              \xdef\Multim{\fpeval{#2*#4+#3*#5}}%
+              \ifboolKV[ClesDistributivite]{Oppose}{%
+                \xdef\Multiko{\fpeval{-\Multik}}%
+                \xdef\Multimo{\fpeval{-\Multim}}%
+                \xdef\Multijo{\fpeval{-\Multij}}%
+                 \xintifboolexpr{\Multiko==0}{}{\xintifboolexpr{\Multiko<0}{(}{}\Affichage{\Multiko}{0}{0}\xintifboolexpr{\Multiko<0}{)}{}}%
+                 \xintifboolexpr{\Multimo==0}{}{\xintifboolexpr{\Multimo>0}{+}{+(}\Affichage{0}{\Multimo}{0}\xintifboolexpr{\Multimo<0}{)}{}}%
+                 \xintifboolexpr{\Multijo==0}{}{\xintifboolexpr{\Multijo>0}{+}{+(}\Affichage{0}{0}{\Multijo}\xintifboolexpr{\Multijo<0}{)}{}}%
+              }{%
+                \xintifboolexpr{\theNbCalculDistri>1}{\xintifboolexpr{\Multik<0}{(\Affichage{\Multik}{0}{0})}{\Affichage{\Multik}{0}{0}}}{\Affichage{\Multik}{0}{0}}%
+              \xintifboolexpr{\Multim==0}{}{%
+                \xintifboolexpr{\Multim>0}{+\Affichage{0}{\Multim}{0}}{-\Affichage{0}{\fpeval{-\Multim}}{0}}%
+              }%
+              \xintifboolexpr{\Multij==0}{}{\xintifboolexpr{\Multij<0}{-\Affichage{0}{0}{\fpeval{-\Multij}}}{+\Affichage{0}{0}{\Multij}}}%
+              }%
+               \ifboolKV[ClesDistributivite]{Somme}{\xdef\SommeA{\fpeval{\SommeA+\Multik}}\xdef\SommeB{\fpeval{\SommeB+\Multim}}\xdef\SommeC{\fpeval{\SommeC+\Multij}}}{}%
+               \ifboolKV[ClesDistributivite]{Difference}{\xdef\SommeA{\fpeval{\SommeA-\Multik}}\xdef\SommeB{\fpeval{\SommeB-\Multim}}\xdef\SommeC{\fpeval{\SommeC-\Multij}}}{}%
+            }{}%
+            \xintifboolexpr{\useKV[ClesDistributivite]{Echange}==2}{%
+              \xdef\Multim{\fpeval{#2*#4+#3*#5}}%
+              \ifboolKV[ClesDistributivite]{Oppose}{%
+                \xdef\Multijo{\fpeval{-\Multij}}%
+                \xdef\Multimo{\fpeval{-\Multim}}%
+                \xdef\Multiko{\fpeval{-\Multik}}%
+                 \xintifboolexpr{\Multijo==0}{}{\xintifboolexpr{\Multijo<0}{(}{}\Affichage{\Multijo}{0}{0}\xintifboolexpr{\Multijo<0}{)}{}}%
+                 \xintifboolexpr{\Multimo==0}{}{\xintifboolexpr{\Multimo>0}{+}{+(}\Affichage{0}{\Multimo}{0}\xintifboolexpr{\Multimo<0}{)}{}}%
+                 \xintifboolexpr{\Multiko==0}{}{\xintifboolexpr{\Multiko>0}{+}{+(}\Affichage{0}{0}{\Multiko}\xintifboolexpr{\Multiko<0}{)}{}}%
+              }{%
+                \xintifboolexpr{\theNbCalculDistri>1}{\xintifboolexpr{\Multij<0}{%%%%%%%%%%%%%%%%%%%%%
+                    (\Affichage{\Multij}{0}{0})}{\Affichage{\Multij}{0}{0}}}{\Affichage{\Multij}{0}{0}}%
+              \xintifboolexpr{\Multim==0}{}{%
+                \xintifboolexpr{\Multim>0}{+\Affichage{0}{\Multim}{0}}{-\Affichage{0}{\fpeval{-\Multim}}{0}}%
+              }%
+              \xintifboolexpr{\Multik==0}{}{\xintifboolexpr{\Multik<0}{-\Affichage{0}{0}{\fpeval{-\Multik}}}{+\Affichage{0}{0}{\Multik}}}%
+              }%
+               \ifboolKV[ClesDistributivite]{Somme}{\xdef\SommeA{\fpeval{\SommeA+\Multij}}\xdef\SommeB{\fpeval{\SommeB+\Multim}}\xdef\SommeC{\fpeval{\SommeC+\Multik}}}{}%
+               \ifboolKV[ClesDistributivite]{Difference}{\xdef\SommeA{\fpeval{\SommeA-\Multij}}\xdef\SommeB{\fpeval{\SommeB-\Multim}}\xdef\SommeC{\fpeval{\SommeC-\Multik}}}{}%
+            }{}%
+            \xintifboolexpr{\useKV[ClesDistributivite]{Echange}==3}{%
+              \xdef\Multim{\fpeval{#2*#5+#3*#4}}%
+              \ifboolKV[ClesDistributivite]{Oppose}{%
+                \xdef\Multilo{\fpeval{-\Multil}}%
+                \xdef\Multimo{\fpeval{-\Multim}}%
+                \xdef\Multio{\fpeval{-\Multi}}%
+                 \xintifboolexpr{\Multilo==0}{}{\xintifboolexpr{\Multilo<0}{(}{}\Affichage{\Multilo}{0}{0}\xintifboolexpr{\Multilo<0}{)}{}}%
+                 \xintifboolexpr{\Multimo==0}{}{\xintifboolexpr{\Multimo>0}{+}{+(}\Affichage{0}{\Multimo}{0}\xintifboolexpr{\Multimo<0}{)}{}}%
+                 \xintifboolexpr{\Multio==0}{}{\xintifboolexpr{\Multio>0}{+}{+(}\Affichage{0}{0}{\Multio}\xintifboolexpr{\Multio<0}{)}{}}%
+               }{%
+                \xintifboolexpr{\theNbCalculDistri>1}{\xintifboolexpr{\Multil<0}{(\Affichage{\Multil}{0}{0})}{\Affichage{\Multil}{0}{0}}}{\Affichage{\Multil}{0}{0}}%
+              \xintifboolexpr{\Multim==0}{}{%
+                \xintifboolexpr{\Multim>0}{+\Affichage{0}{\Multim}{0}}{-\Affichage{0}{\fpeval{-\Multim}}{0}}%
+              }%
+              \xintifboolexpr{\Multi==0}{}{\xintifboolexpr{\Multi<0}{-\Affichage{0}{0}{\fpeval{-\Multi}}}{+\Affichage{0}{0}{\Multi}}}%
+              }
+               \ifboolKV[ClesDistributivite]{Somme}{\xdef\SommeA{\fpeval{\SommeA+\Multil}}\xdef\SommeB{\fpeval{\SommeB+\Multim}}\xdef\SommeC{\fpeval{\SommeC+\Multi}}}{}%
+               \ifboolKV[ClesDistributivite]{Difference}{\xdef\SommeA{\fpeval{\SommeA-\Multil}}\xdef\SommeB{\fpeval{\SommeB-\Multim}}\xdef\SommeC{\fpeval{\SommeC-\Multi}}}{}%
+            }{}%
+          }{}%
+        }%
+      }%
+    }%
+  }%
+}%

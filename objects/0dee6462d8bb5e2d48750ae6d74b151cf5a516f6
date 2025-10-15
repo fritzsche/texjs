@@ -1,0 +1,1833 @@
+%%
+%% This is file `accursius.bbx',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% biblatex-accursius.dtx  (with options: `accursius-bbx')
+%% ---------------------------------------
+%% 
+%% Francesco Contini, The accursius style,
+%% Cagliari 2024
+%% 
+%% Copyright (C) 2024 Francesco Contini
+%% 
+%% The work consists of the README.md, the
+%% biblatex-accursius.dtx and the derived:
+%%         - accursius.bbx,
+%%         - accursius.cbx,
+%%         - italian-accursius.lbx,
+%%         - english-accursius.lbx,
+%%         - french-accursius.lbx,
+%%         - accursius.bib,
+%%         - biblatex-accursius.pdf.
+%%     The .pdf derived file refers to the
+%% preamble from the .dtx source and repro
+%% duces its text.
+%%     The work may be distributed and mod
+%% ified under the conditions of the LaTeX
+%% Project Public License either v. 1.3 of
+%% the license or at your option any later
+%% version. For the latest version of this
+%% license see the url below.  V. 1.3c and
+%% following are part of all distributions
+%% of LaTeX version 2008 or later.
+%%     The product has got the LPPL mainte
+%% nance status `maintained'.
+%%     The current maintainer of this work
+%% is Francesco Contini. To claim and feed
+%% back or to get a clarification email me
+%% to cicciocontini [at] outlook [dot] it.
+%% 
+%% https://www.latex-project.org/lppl.txt
+%% 
+%% ---------------------------------------
+\ProvidesFile{accursius.bbx}
+\RequireBiber[3]
+\RequireBibliographyStyle{ext-verbose-trad1}
+
+\DeclareLanguageMapping{italian}{italian-accursius}
+\DeclareLanguageMapping{english}{english-accursius}
+\DeclareLanguageMapping{french}{french-accursius}
+
+\DeclareBiblatexOption{global,type,entry}[boolean]
+    {itapunctuation}[true]{%
+        \renewcommand{\newunitpunct}{\addcomma\space}
+        \renewrobustcmd*{\bibinitdelim}{}
+        \renewcommand{\subtitlepunct}{\adddot\space}
+        \renewcommand{\intitlepunct}{\addspace}
+        \renewcommand{\jourvoldelim}{\newunitpunct}
+        \renewcommand{\jourserdelim}{\newunitpunct}
+        \renewcommand{\volnumdelim}{\newunitpunct}}
+
+\ExecuteBibliographyOptions{itapunctuation=true,
+                            sorting=accursius,
+                            citetracker=context,
+                            ibidtracker=constrict,
+                            idemtracker=constrict,
+                            loccittracker=context,
+                            opcittracker=context}
+
+\DeclareFieldFormat[article,inbook,
+    incollection,inproceedings,patent,
+    thesis,unpublished]{title}%
+    {\mkbibemph{#1}}%
+\DeclareFieldFormat[article,inbook,
+    incollection,inproceedings,patent,
+    thesis,unpublished]{citetitle}%
+    {\mkbibemph{#1}}%
+\DeclareFieldFormat[inreference]{title}{%
+    s\adddot v\adddotspace \mkbibemph{#1}}
+\DeclareFieldFormat[inreference]{citetitle}{%
+    s\adddot v\adddotspace \mkbibemph{#1}}
+\DeclareFieldFormat[itprov]{title}{#1}
+\DeclareFieldFormat[itprov]{citetitle}{#1}
+
+\DeclareFieldFormat{volume}%
+    {\bibstring{volume}~{%
+    \scshape\romannumeral#1}}
+\DeclareFieldFormat[article]{volume}%
+    {\bibstring{volume}~{%
+    \scshape\romannumeral#1}}
+\DeclareFieldFormat{part}%
+    {\bibstring{part}~{%
+    \scshape\romannumeral#1}}
+\DeclareFieldFormat[article]{part}%
+    {\bibstring{part}~{%
+    \scshape\romannumeral#1}}
+\DeclareFieldFormat{number}%
+    {\bibstring{number}~#1}
+\DeclareFieldFormat[article]{number}%
+    {\bibstring{number}~#1}
+
+\newtoggle{bbx:nourlinrunning}
+\DeclareBiblatexOption{global,type,entry}[boolean]
+    {nourlinrunning}[true]{%
+    \settoggle{bbx:nourlinrunning}{#1}}
+\ExecuteBibliographyOptions{nourlinrunning=true}
+\renewbibmacro*{doi+eprint+url}{%
+    \ifboolexpr{test {\ifbibliography}%
+                or
+                (not togl{bbx:nourlinrunning}%
+                 or
+                 test {\ifentrytype{online}})}%
+        {\ifboolexpr{togl {bbx:doi}%
+                     and
+                     not test {\iffieldxref{doi}}}%
+            {\printfield{doi}}%
+            {}%
+            \newunit\newblock%
+            \ifboolexpr{togl {bbx:eprint}%
+                        and
+                        not test {\iffieldxref{eprint}}}%
+                {\usebibmacro{eprint}}%
+                {}%
+            \newunit\newblock%
+            \ifboolexpr{togl {bbx:url}%
+                        and
+                        not test {\iffieldxref{url}}}%
+                {\usebibmacro{url+urldate}}%
+                {}}%
+        {}}
+
+\setcounter{biburllcpenalty}{100}
+\setcounter{biburlucpenalty}{200}
+\setcounter{biburlnumpenalty}{100}
+
+\newtoggle{bbx:authoryearstyle}
+\DeclareBiblatexOption{global,type,entry}[boolean]
+    {authoryearstyle}[true]{%
+        \settoggle{bbx:authoryearstyle}{#1}
+        \settoggle{bbx:iusshorthand}{true}
+        \settoggle{cbx:authoryearstyle}{true}
+        \ExecuteBibliographyOptions{labeldateparts,
+            innamebeforetitle=true,
+            sorting=nyt,pagetracker,innameidem,mergedate}
+        \renewbibmacro*{date}{%
+        \usebibmacro{bbx:ifmergeddate}%
+            {}%
+            {\printdate}}
+        \providebibmacro*{date+extradate}{%
+                \iffieldundef{labelyear}%
+                    {}%
+                    {\printtext{%
+                        \iflabeldateisdate%
+                            {\printfield{issue}%
+                                \setunit*{\addspace}%
+                                \printdateextra}%
+                            {\printlabeldateextra}}}}
+        \providebibmacro*{date+extrayear}{%
+            \blx@warning{bibmacro 'date+extrayear'
+                is deprecated.\MessageBreak
+                Please use 'date+extradate'.
+                \MessageBreak Using
+                'date+extradate' instead}%
+            \usebibmacro{date+extradate}}}
+
+\providebibmacro*{bbx:ifmergeddate}{\@secondoftwo}
+\DeclareBiblatexOption{global,type,entry}[string]{mergedate}[true]{%
+    \ifcsdef{bbx@opt@mergedate@#1}
+        {\csuse{bbx@opt@mergedate@#1}}
+        {\PackageError{biblatex}
+            {Invalid option 'mergedate=#1'}
+            {Valid values are 'maximum', 'compact', 'basic', 'minimum',\MessageBreak
+            'true' (=compact), and 'false'.}}}
+
+\def\bbx@opt@mergedate@true{\bbx@opt@mergedate@compact}
+\def\bbx@opt@mergedate@maximum{%
+    \renewbibmacro*{date+extradate}{%
+        \iffieldundef{labelyear}%
+            {}%
+            {\printtext{%
+                \iflabeldateisdate%
+                    {\printfield{issue}%
+                        \setunit*{\addspace}%
+                        \printdateextra}%
+                    {\printlabeldateextra}}}}}
+
+\def\bbx@opt@mergedate@compact{%
+    \renewbibmacro*{date+extradate}{%
+        \iffieldundef{labelyear}%
+            {}%
+            {\printtext{%
+                \iflabeldateisdate%
+                    {\printdateextra}%
+                    {\printlabeldateextra}}}}%
+    \renewbibmacro*{bbx:ifmergeddate}{\iflabeldateisdate}%
+    \renewbibmacro*{issue+date}{%
+        \ifboolexpr{test {\usebibmacro{bbx:ifmergeddate}}%
+                    and
+                    test {\iffieldundef{issue}}}%
+            {}%
+            {\printtext{%
+                \printfield{issue}%
+                \setunit*{\addspace}%
+                \usebibmacro{bbx:ifmergeddate}%
+                    {}%
+                    {\printdate}}}%
+                    \newunit}}
+
+\def\bbx@opt@mergedate@basic{%
+    \renewbibmacro*{date+extradate}{%
+        \iffieldundef{labelyear}%
+            {}%
+            {\printtext{\printlabeldateextra}}}%
+    \renewbibmacro*{bbx:ifmergeddate}{%
+        \ifboolexpr{test {\iflabeldateisdate}%
+                    and
+                    not test {\ifdateshavedifferentprecision{label}{}}}}%
+    \renewbibmacro*{issue+date}{%
+        \ifboolexpr{test {\usebibmacro{bbx:ifmergeddate}}%
+                    and
+                    test {\iffieldundef{issue}}}%
+            {}%
+            {\printtext{%
+                \printfield{issue}%
+                \setunit*{\addspace}%
+                \printdate}}%
+                \newunit}}
+
+\def\bbx@opt@mergedate@minimum{%
+    \renewbibmacro*{date+extradate}{%
+        \iffieldundef{labelyear}%
+            {}%
+            {\printtext{\printlabeldateextra}}}%
+    \renewbibmacro*{bbx:ifmergeddate}{%
+        \ifboolexpr{test {\iflabeldateisdate}%
+                    and
+                    not test {\ifdateshavedifferentprecision{label}{}}%
+                    and
+                    test {\iffieldundef{extradate}}}}%
+    \renewbibmacro*{issue+date}{%
+        \ifboolexpr{test {\usebibmacro{bbx:ifmergeddate}}%
+                    and
+                    test {\iffieldundef{issue}}}%
+            {}%
+            {\printtext{%
+                \printfield{issue}%
+                \setunit*{\addspace}%
+                \printdate}}%
+                \newunit}}
+
+\def\bbx@opt@mergedate@false{%
+    \renewbibmacro*{date+extradate}{%
+        \iffieldundef{labelyear}%
+            {}%
+            {\printtext{\printlabeldateextra}}}%
+    \renewbibmacro*{bbx:ifmergeddate}{\@secondoftwo}%
+    \renewbibmacro*{issue+date}{%
+        \printtext{%
+        \printfield{issue}%
+        \setunit*{\addspace}%
+        \usebibmacro{date}}%
+        \newunit}}
+
+\renewbibmacro*{issue+date}{%
+    \usebibmacro{bbx:ifmergeddate}
+        {}
+        {\printtext[parens]{%
+            \printfield{issue}%
+            \setunit*{\addspace}%
+            \printdate}}}
+\renewbibmacro*{date}{%
+    \iftoggle{bbx:authoryearstyle}%
+        {\usebibmacro{bbx:ifmergeddate}%
+            {}%
+            {\printdate}}%
+        {\printdate}}
+
+\providebibmacro{date+extradate}{}
+
+\newbibmacro*{bbx:labelyear}{%
+    \setunit{\printdelim{nameyeardelim}}%
+    \usebibmacro{date+extradate}}
+
+\ExecuteBibliographyOptions{uniquename=full}
+
+\newtoggle{bbx:scauthor}
+\DeclareBiblatexOption{global,type,entry}[boolean]
+    {scauthor}[true]{\settoggle{bbx:scauthor}{#1}}
+\ExecuteBibliographyOptions{scauthor=true}
+
+\newrobustcmd*{\mkbibsc}[1]{\textsc{#1}}
+\DeclareFieldFormat{mkbibsc}{\mkbibsc{#1}}
+\newrobustcmd*{\mkidem}[1]{%
+    \iftoggle{bbx:scauthor}%
+        {{\scshape#1}}%
+        {#1}}
+
+\newbibmacro*{bbx:scname}{%
+    \renewcommand\mkbibnamefamily[1]{\mkbibsc{##1}}%
+    \renewcommand\mkbibnamegiven[1]{\mkbibsc{##1}}%
+    \renewcommand\mkbibnameprefix[1]{\mkbibsc{##1}}%
+    \renewcommand\mkbibnamesuffix[1]{\mkbibsc{##1}}}
+
+\DeclareNameFormat{name:accursius}{%
+    \ifnumequal{\value{uniquename}}{2}%
+        {\usebibmacro{name:given-family}%
+            {\namepartfamily}%
+            {\namepartgiven}%
+            {\namepartprefix}%
+            {\namepartsuffix}}%
+        {\usebibmacro{name:given-family}%
+            {\namepartfamily}%
+            {\namepartgiveni}%
+            {\namepartprefix}%
+            {\namepartsuffix}}%
+    \usebibmacro{name:andothers}}
+\DeclareNameAlias{default}{name:accursius}
+\DeclareNameAlias{theauthor}{theauthornotrev}
+\DeclareBiblatexOption{global,type,entry}[boolean]
+    {revname}[true]{%
+    \DeclareNameAlias{theauthor}{theauthorrev}}
+
+\DeclareNameFormat{theauthorrev}{%
+    \iftoggle{bbx:scauthor}%
+        {\usebibmacro{bbx:scname}}%
+        {}%
+    \ifnumequal{\value{listcount}}{1}%
+        {\ifnumequal{\value{uniquename}}{2}%
+            {\usebibmacro{name:family-given}%
+                {\namepartfamily}%
+                {\namepartgiven}%
+                {\namepartprefix}%
+                {\namepartsuffix}}
+            {\usebibmacro{name:family-given}%
+                {\namepartfamily}%
+                {\namepartgiveni}%
+                {\namepartprefix}%
+                {\namepartsuffix}}%
+            \ifboolexpr{test {\ifdefvoid\namepartgiven}%
+                        and
+                        test {\ifdefvoid\namepartprefix}}%
+                {}%
+                {\usebibmacro{name:revsdelim}}}%
+        {\ifnumequal{\value{uniquename}}{2}%
+            {\usebibmacro{name:given-family}%
+                {\namepartfamily}%
+                {\namepartgiven}%
+                {\namepartprefix}%
+                {\namepartsuffix}}
+            {\usebibmacro{name:given-family}%
+                {\namepartfamily}%
+                {\namepartgiveni}%
+                {\namepartprefix}%
+                {\namepartsuffix}}}%
+        \usebibmacro{name:andothers}}
+
+\DeclareNameFormat{theauthornotrev}{%
+    \iftoggle{bbx:scauthor}%
+        {\usebibmacro{bbx:scname}}%
+        {}%
+    \ifnumequal{\value{uniquename}}{2}%
+        {\usebibmacro{name:given-family}%
+            {\namepartfamily}%
+            {\namepartgiven}%
+            {\namepartprefix}%
+            {\namepartsuffix}}%
+        {\usebibmacro{name:given-family}%
+            {\namepartfamily}%
+            {\namepartgiveni}%
+            {\namepartprefix}%
+            {\namepartsuffix}}%
+    \usebibmacro{name:andothers}}
+
+\DeclareNameAlias{author}{theauthor}
+\DeclareNameAlias{editor}{theauthor}
+
+\DeclareNameFormat{labelname}{%
+    \iftoggle{bbx:scauthor}%
+        {\usebibmacro{bbx:scname}}%
+        {}%
+    \ifnumequal{\value{uniquename}}{2}%
+        {\usebibmacro{name:given-family}%
+            {\namepartfamily}%
+            {\namepartgiven}%
+            {\namepartprefix}%
+            {\namepartsuffix}}%
+        {\ifnumequal{\value{uniquename}}{1}%
+            {\usebibmacro{name:given-family}%
+                {\namepartfamily}%
+                {\namepartgiveni}%
+                {\namepartprefix}%
+                {\namepartsuffix}}%
+            {\usebibmacro{name:family}%
+                {\namepartfamily}%
+                {\namepartgiven}%
+                {\namepartprefix}%
+                {\namepartsuffix}}}%
+    \usebibmacro{name:andothers}}
+
+\DeclareNameFormat{labeltextname}{%
+    {\usebibmacro{name:given-family}%
+        {\namepartfamily}%
+        {\namepartgiven}%
+        {\namepartprefix}%
+        {\namepartsuffix}%
+    \usebibmacro{name:andothers}}}
+
+\renewbibmacro*{byauthor}{%
+    \ifboolexpr{test \ifuseauthor%
+                or
+                test {\ifnameundef{author}}}%
+        {}%
+        {\usebibmacro{bytypestrg}{author}{author}%
+            \setunit{\addspace}%
+            \printnames[byauthor]{author}}}
+
+\renewbibmacro*{byeditor}{%
+    \ifnameundef{editor}%
+        {}%
+        {\usebibmacro{bytypestrg}{editor}{editor}%
+            \setunit{\addspace}%
+            \printnames[byeditor]{editor}%
+            \newunit}%
+    \usebibmacro{byeditorx}}
+
+\DeclareDelimFormat{editortypedelim}{\addspace}
+
+\renewbibmacro*{bbx:editor}[1]{%
+    \ifboolexpr{test \ifuseeditor%
+                and
+                not test {\ifnameundef{editor}}}%
+        {\usebibmacro{bbx:dashcheck}%
+            {\bibnamedash%
+                \printtext[parens]{\usebibmacro{#1}}%
+                \setunit{\addspace}\newblock}%
+            {\printnames{editor}%
+                \setunit{\printdelim{editortypedelim}}%
+                \usebibmacro{bbx:savehash}%
+                \printtext[parens]{\usebibmacro{#1}}}%
+            \clearname{editor}}%
+        {\global\undef\bbx@lasthash}}
+
+\renewbibmacro*{editor+othersstrg}{%
+    \iffieldundef{editortype}%
+        {\ifboolexpr{test {\ifnumgreater{\value{editor}}{1}}%
+                     or
+                     test {\ifandothers{editor}}}%
+            {\def\abx@tempa{editors}}%
+            {\def\abx@tempa{editor}}}%
+        {\ifboolexpr{test {\ifnumgreater{\value{editor}}{1}}%
+                     or
+                     test {\ifandothers{editor}}}%
+            {\edef\abx@tempa{\thefield{editortype}s}}%
+            {\edef\abx@tempa{\thefield{editortype}}}}%
+    \let\abx@tempb=\empty
+    \ifnamesequal{editor}{translator}%
+        {\appto\abx@tempa{tr}%
+            \appto\abx@tempb{\clearname{translator}}}%
+        {}%
+    \ifnamesequal{editor}{commentator}%
+        {\appto\abx@tempa{co}%
+            \appto\abx@tempb{\clearname{commentator}}}%
+        {\ifnamesequal{editor}{annotator}%
+            {\appto\abx@tempa{an}%
+                \appto\abx@tempb{\clearname{annotator}}}%
+            {}}%
+    \ifnamesequal{editor}{introduction}%
+        {\appto\abx@tempa{in}%
+            \appto\abx@tempb{\clearname{introduction}}}%
+        {\ifnamesequal{editor}{foreword}%
+            {\appto\abx@tempa{fo}%
+                \appto\abx@tempb{\clearname{foreword}}}%
+            {\ifnamesequal{editor}{afterword}%
+                {\appto\abx@tempa{af}%
+                    \appto\abx@tempb{\clearname{afterword}}}%
+                {}}}%
+    \ifbibxstring{\abx@tempa}%
+        {\printtext[editortype]{%
+            \biblstring{\abx@tempa\thefield{gender}}}\abx@tempb}%
+        {\usebibmacro{editorstrg}}}
+
+\renewbibmacro*{bybookauthor}{%
+    \ifnamesequal{author}{bookauthor}%
+        {\iftoggle{bbx:innameidem}%
+            {\bibstring[\mkidem]{idem\thefield{gender}}}%
+            {}}%
+        {\printnames{bookauthor}}}
+
+\renewbibmacro*{bbx:in:editor}[1]{%
+    \ifboolexpr{test \ifuseeditor%
+                and
+                not test {\ifnameundef{editor}}}%
+        {\ifboolexpr{togl {bbx:innameidem}%
+                     and
+                     test {\bbx@ineditoridem}}%
+            {\bibstring[\mkidem]{idem\thefield{gender}}}%
+            {\ifboolexpr{togl {bbx:innamebeforetitle}%
+                         and
+                         not test {\iffieldundef{crossref}}}%
+                {\printnames[editor]{editor}}%
+                {\printnames[ineditor]{editor}}}%
+            \setunit{\printdelim{editortypedelim}}%
+            \printtext[parens]{\usebibmacro{#1}}%
+            \iftoggle{bbx:authoryearstyle}%
+                {\setunit{\printdelim{nameyeardelim}}%
+                \iffieldundef{crossref}%
+                    {\usebibmacro{date}}%
+                    {\entrydata*{\thefield{crossref}}{%
+                    \csuse{extblx@hook@xrefcite}%
+                    \printtext[bbx@xrefcite]{%
+                    \usebibmacro{date+extradate}}}}}%
+                {}%
+            \clearname{editor}}%
+        {}}
+
+\renewbibmacro*{name:andothers}{%
+    \ifboolexpr{test {\ifnumequal{\value{listcount}}{\value{liststop}}}%
+                and
+                test \ifmorenames}%
+        {\ifnumgreater{\value{liststop}}{1}%
+            {\finalandcomma}%
+            {}%
+            \printdelim{andothersdelim}\bibstring[\mkbibemph]{andothers}}
+        {}}
+\newtoggle{bbx:authortypeparens}
+\DeclareBiblatexOption{global,type,entry}[boolean]
+    {authortypeparens}[true]{%
+        \settoggle{bbx:authortypeparens}{#1}%
+        \DeclareDelimFormat{authortypedelim}{\addspace}}
+\ExecuteBibliographyOptions{authortypeparens=false}
+\renewbibmacro*{authorstrg}{%
+    \iffieldundef{authortype}%
+        {}%
+        {\ifboolexpr{togl {bbx:authortypeparens}}%
+            {\printtext[parens]{%
+                \ifbibxstring{by\thefield{authortype}}%
+                    {\biblstring{by\thefield{authortype}}}%
+                    {\ifbibxstring{\thefield{authortype}}%
+                        {\biblstring{\thefield{authortype}}}%
+                        {\thefield{authortype}}}}}%
+            {\printtext[authortype]{%
+                \ifbibxstring{\thefield{authortype}}%
+                    {\ifboolexpr{test {\ifnumgreater{\value{author}}{1}}%
+                                    or
+                                    test {\ifandothers{author}}}%
+                            {\bibstring{\thefield{authortype}s}}%
+                            {\bibstring{\thefield{authortype}}}}%
+                    {\thefield{authortype}}}}}}
+
+\renewbibmacro*{title}{%
+    \ifboolexpr{test {\iffieldundef{title}}%
+                and
+                test {\iffieldundef{subtitle}}}%
+        {}%
+        {\printtext[title]{%
+            \printfield[titlecase:title]{title}%
+            \setunit{\subtitlepunct}%
+            \printfield[titlecase:title]{subtitle}}%
+            \setunit{\titleaddonpunct}}%
+            \printfield{titleaddon}}
+
+\DeclareDatamodelFields[type=field,datatype=integer]{tome}
+\DeclareDatamodelEntryfields{tome}
+\DeclareFieldFormat{tome}%
+    {\bibsstring{tome}~{%
+        \scshape\romannumeral#1}}
+\newbibmacro{bookfrac}{%
+    \printfield{volume}%
+    \newunit%
+    \printfield{tome}%
+    \newunit%
+    \printfield{part}}
+
+\DeclareDatamodelFields[type=field,datatype=integer]{section}
+\DeclareDatamodelEntryfields{section}
+\DeclareFieldFormat{section}%
+    {\bibsstring{section}~{%
+        \scshape\romannumeral#1}}
+\newbibmacro{jourfrac}{%
+    \printfield{part}%
+    \newunit%
+    \printfield{section}}
+
+\renewbibmacro*{barevolume+volumes}{%
+    \iffieldundef{maintitle}%
+        {\usebibmacro{bookfrac}}%
+        {}%
+    \newunit%
+    \printfield{volumes}}
+
+\renewbibmacro*{maintitle+title}{%
+    \iftoggle{bbx:maintitleaftertitle}%
+        {}%
+        {\iffieldsequal{maintitle}{title}%
+            {\clearfield{maintitle}%
+                \clearfield{mainsubtitle}%
+                \clearfield{maintitleaddon}}%
+            {\iffieldundef{maintitle}%
+                {}%
+                {\usebibmacro{maintitle}%
+                    \newunit\newblock%
+                    \ifboolexpr{test {\iffieldundef{volume}}%
+                                and
+                                test {\iffieldundef{tome}}%
+                                and
+                                test {\iffieldundef{part}}}%
+                        {}%
+                        {\usebibmacro{bookfrac}%
+                            \setunit{\addcolon\space}}}}}%
+    \usebibmacro{title}%
+    \iftoggle{bbx:maintitleaftertitle}%
+        {\iffieldsequal{maintitle}{title}%
+            {\clearfield{maintitle}%
+                \clearfield{mainsubtitle}%
+                \clearfield{maintitleaddon}}%
+            {\iffieldundef{maintitle}%
+                {}%
+                {\newunit%
+                    \ifboolexpr{test {\iffieldundef{volume}}%
+                                and
+                                test {\iffieldundef{tome}}%
+                                and
+                                test {\iffieldundef{part}}}%
+                        {}%
+                        {\usebibmacro{bookfrac}%
+                            \setunit{\addspace}%
+                            \bibstring{ofseries}%
+                            \setunit{\addspace}}%
+                    \usebibmacro{maintitle}}}}%
+        {}%
+    \newunit}
+
+\renewbibmacro*{maintitle+booktitle}{%
+    \iftoggle{bbx:maintitleaftertitle}%
+        {}%
+        {\iffieldundef{maintitle}%
+            {}%
+            {\usebibmacro{maintitle}%
+                \newunit\newblock%
+                \ifboolexpr{test {\iffieldundef{volume}}%
+                            and
+                            test {\iffieldundef{tome}}%
+                            and
+                            test {\iffieldundef{part}}}%
+                    {}%
+                    {\usebibmacro{bookfrac}%
+                        \setunit{\addcolon\space}}}}%
+    \usebibmacro{booktitle}%
+    \iftoggle{bbx:maintitleaftertitle}%
+        {\iffieldundef{maintitle}%
+            {}%
+            {\newunit%
+                \ifboolexpr{test {\iffieldundef{volume}}%
+                            and
+                            test {\iffieldundef{tome}}%
+                            and
+                            test {\iffieldundef{part}}}%
+                    {}%
+                    {\usebibmacro{bookfrac}%
+                        \setunit{\addspace}%
+                        \bibstring{ofseries}%
+                        \setunit{\addspace}}%
+                \usebibmacro{maintitle}}}%
+        {}%
+    \newunit}
+
+\DeclareBiblatexOption{global,type,entry}[boolean]
+    {editionroman}[true]{%
+    \DeclareFieldFormat{edition}%
+        {\bibstring{edition}~{%
+            \scshape\romannumeral\thefield{edition}}}}
+\ExecuteBibliographyOptions{editionroman=true}
+
+\renewcommand{\sernumdelim}{\newunitpunct}
+\DeclareFieldFormat{series}{\mkbibquote{#1}}
+
+\DeclareSourcemap{\maps[datatype=bibtex]{\map{%
+    \step[fieldsource=director,fieldtarget=namec]}}}
+
+\DeclareDatamodelFields[type=field,datatype=literal]{serdirector}
+\DeclareDatamodelEntryfields{serdirector}
+
+\renewbibmacro*{series+number}{%
+    \iffieldundef{series}%
+        {}%
+        {\usebibmacro{in:}}%
+    \printfield{series}%
+    \setunit*{\sernumdelim}%
+    \ifnameundef{namec}%
+        {}%
+        {\iffieldundef{serdirector}%
+            {\bibstring{director}}%
+            {\ifbibxstring{\thefield{serdirector}}%
+                {\ifboolexpr{test {\ifnumgreater{\value{serdirector}}{1}}%
+                             or
+                             test {\ifandothers{serdirector}}}%
+                    {\bibstring{\thefield{serdirector}s}}
+                    {\bibstring{\thefield{serdirector}}}}%
+                {\thefield{serdirector}}}%
+            \setunit{\addspace}%
+            \printnames{namec}}%
+    \setunit*{\sernumdelim}%
+    \printfield{number}%
+    \newunit}
+
+\newcommand{\bbx@publocformat}{}
+\DeclareBibliographyOption{publocformat}[publocyear]{%
+    \renewcommand{\bbx@publocformat}{#1}}
+\ExecuteBibliographyOptions{publocformat}
+
+\renewbibmacro*{publisher+location+date}{%
+    \ifdefstring{\bbx@publocformat}{locpubyear}%
+        {\printlist{location}%
+            \newunit%
+            \printlist{publisher}%
+            \newunit%
+            \usebibmacro{date}}%
+        {\ifdefstring{\bbx@publocformat}{loccolonpub}%
+            {\printlist{location}%
+                \setunit*{\addcolon\space}%
+                \printlist{publisher}%
+                \newunit%
+                \usebibmacro{date}}%
+            {\printlist{publisher}%
+                \newunit%
+                \printlist{location}%
+                \setunit*{\addspace}%
+                \usebibmacro{date}}}%
+    \newunit}
+
+\renewbibmacro*{list:andothers}{%
+    \ifboolexpr{test {\ifnumequal{\value{listcount}}{\value{liststop}}}%
+                and
+                test \ifmoreitems}%
+        {\ifnumgreater{\value{liststop}}{1}%
+            {\finalandcomma}%
+            {}%
+            \printdelim{andmoredelim}\bibstring[\mkbibemph]{andmore}}%
+        {}}
+
+\newcommand{\bbx@jourvolnumdate}{}
+\DeclareBibliographyOption{jourvolnumdate}[allcommas]{%
+    \renewcommand{\bbx@jourvolnumdate}{#1}}
+\ExecuteBibliographyOptions{jourvolnumdate}
+
+\renewbibmacro*{volume+number+eid}{%
+    \ifdefstring{\bbx@jourvolnumdate}{numslashdate}%
+        {\printfield{volume}%
+            \setunit*{\volnumdelim}%
+            \newunit%
+            \iffieldundef{number}%
+                {}%
+                {\printfield{number}%
+                    \setunit{\addslash}}%
+            \printfield{year}%
+            \setunit{\bibeidpunct}%
+            \printfield{eid}}%
+        {\printfield{volume}%
+            \setunit*{\volnumdelim}%
+            \printfield{number}%
+            \setunit{\bibeidpunct}%
+            \printfield{eid}}}
+
+\renewbibmacro*{issue+date}{%
+    \ifdefstring{\bbx@jourvolnumdate}{numslashdate}%
+        {\printfield[parens]{issue}}%
+        {}%
+    \ifdefstring{\bbx@jourvolnumdate}{allcommas}%
+        {\printfield{issue}%
+            \newunit%
+            \usebibmacro{date}}%
+        {}%
+    \ifdefstring{\bbx@jourvolnumdate}{biblatex}%
+        {\ifboolexpr{test {\iffieldundef{issue}}%
+                     and
+                     test {\iffieldundef{year}}}%
+            {}%
+            {\printtext[parens]{%
+                \printfield{issue}%
+                \setunit*{\addspace}%
+                \usebibmacro{date}}}}%
+        {}%
+    \newunit}
+
+\renewbibmacro*{journal+issuetitle}{%
+    \usebibmacro{journal}%
+    \newunit%
+    \printfield{series}%
+    \newunit%
+    \usebibmacro{volume+number+eid}%
+    \newunit%
+    \usebibmacro{issue+date}
+    \setunit{\addcolon\space}%
+    \usebibmacro{issue}%
+    \newunit%
+    \usebibmacro{jourfrac}%
+    \newunit}
+
+\newbibmacro{journal+editor+id}{%
+    \usebibmacro{journal+issuetitle}%
+    \newunit%
+    \usebibmacro{byeditor+others}%
+    \newunit%
+    \usebibmacro{note+pages}%
+    \newunit\newblock%
+    \usebibmacro{issn}%
+    \newunit\newblock%
+    \usebibmacro{doi+eprint+url}%
+    \newunit\newblock%
+    \usebibmacro{addendum+pubstate}}
+
+\newtoggle{bbx:shortjournal}
+\DeclareBiblatexOption{global,type,entry}[boolean]
+    {shortjournal}[true]{%
+    \settoggle{bbx:shortjournal}{#1}}
+\ExecuteBibliographyOptions{shortjournal=true}
+
+\DeclareFieldFormat{journaltitle}%
+    {\mkbibquote{#1\isdot}}
+
+\renewbibmacro*{journal}{%
+    \ifboolexpr{test {\iffieldundef{journaltitle}}%
+                and
+                test {\iffieldundef{journalsubtitle}}}%
+        {}%
+        {\ifboolexpr{not test {\iffieldundef{shortjournal}}%
+                     and
+                     togl {bbx:shortjournal}}%
+            {\printtext[journaltitle]{%
+                \printfield{shortjournal}}}%
+            {\printtext[journaltitle]{%
+                \printfield[titlecase]{journaltitle}%
+                \setunit{\subtitlepunct}%
+                \printfield[titlecase]{journalsubtitle}}%
+                \newunit%
+                \printfield{journaltitleaddon}}}}
+
+\DeclareBibliographyDriver{shortjournal}{%
+    \printfield{journaltitle}}
+
+\defbibcheck{shortjournal}{%
+    \iffieldundef{shortjournal}%
+        {\skipentry}%
+        {\iffieldundef{journaltitle}%
+            {\skipentry}%
+            {\ifcsdef{sjcheck@\therefsection
+            -\strfield{shortjournal}=\strfield{journaltitle}}
+                {\skipentry}%
+                {\savefieldcs{journaltitle}%
+                    {sjcheck@\therefsection
+                    -\strfield{shortjournal}=\strfield{journaltitle}}}}}}
+\AtBeginBiblist{shortjournal}{%
+    \DeclareFieldFormat{journaltitle}{\mkbibemph{#1}}}
+
+\DeclareBibliographyDriver{article}{%
+    \usebibmacro{introcite:plain}%
+    \usebibmacro{bibindex}%
+    \usebibmacro{begentry}%
+    \usebibmacro{author/translator+others}%
+    \iftoggle{bbx:authoryearstyle}%
+        {\usebibmacro{bbx:labelyear}%
+        \newunit\newblock}%
+        {\setunit{\printdelim{nametitledelim}}\newblock}%
+    \usebibmacro*{title}%
+    \newunit%
+    \usebibmacro{language}%
+    \newunit\newblock%
+    \usebibmacro{byauthor}%
+    \newunit\newblock%
+    \usebibmacro{bytranslator+others}%
+    \newunit\newblock%
+    \usebibmacro{version}%
+    \newunit\newblock%
+    \iftoggle{bbx:articlein}{\usebibmacro{in:}}{}%
+    \usebibmacro{journal+editor+id}%
+    \setunit{\bibpagerefpunct}\newblock%
+    \usebibmacro{pageref}%
+    \newunit\newblock%
+    \iftoggle{bbx:related}%
+        {\usebibmacro{related:init}%
+            \usebibmacro{related}}%
+        {}%
+    \usebibmacro{finentry}}
+
+\DeclareBibliographyDriver{book}{%
+    \usebibmacro{introcite:plain}%
+    \usebibmacro{bibindex}%
+    \usebibmacro{begentry}%
+    \usebibmacro{author/editor+others/translator+others}%
+    \iftoggle{bbx:authoryearstyle}%
+        {\usebibmacro{bbx:labelyear}%
+        \newunit\newblock}%
+        {\setunit{\printdelim{nametitledelim}}\newblock}%
+    \usebibmacro{maintitle+title}%
+    \newunit%
+    \usebibmacro{language}%
+    \newunit\newblock%
+    \usebibmacro{byauthor}%
+    \newunit\newblock%
+    \usebibmacro{thebook}%
+    \setunit{\bibpagerefpunct}\newblock%
+    \usebibmacro{pageref}%
+    \newunit\newblock%
+    \iftoggle{bbx:related}%
+        {\usebibmacro{related:init}%
+            \usebibmacro{related}}%
+        {}%
+    \usebibmacro{finentry}}
+
+\newbibmacro{thebook}{%
+    \usebibmacro{byeditor+others}%
+    \newunit\newblock%
+    \printfield{edition}%
+    \newunit%
+    \usebibmacro{barevolume+volumes}%
+    \newunit\newblock%
+    \usebibmacro{series+number}%
+    \newunit\newblock%
+    \printfield{note}%
+    \newunit\newblock%
+    \printlist{organization}%
+    \newunit%
+    \usebibmacro{publisher+location+date}%
+    \newunit\newblock%
+    \usebibmacro{chapter+pages}%
+    \newunit%
+    \printfield{pagetotal}%
+    \newunit\newblock%
+    \usebibmacro{isbn}%
+    \newunit\newblock%
+    \usebibmacro{doi+eprint+url}%
+    \newunit\newblock%
+    \usebibmacro{addendum+pubstate}}
+
+\DeclareBibliographyDriver{booklet}{%
+    \usebibmacro{introcite:plain}%
+    \usebibmacro{bibindex}%
+    \usebibmacro{begentry}%
+    \usebibmacro{author/editor+others/translator+others}%
+    \iftoggle{bbx:authoryearstyle}%
+        {\usebibmacro{bbx:labelyear}%
+        \newunit\newblock}%
+        {\setunit{\printdelim{nametitledelim}}\newblock}%
+    \usebibmacro{title}%
+    \newunit%
+    \printlist{language}%
+    \newunit\newblock%
+    \usebibmacro{byauthor}%
+    \newunit\newblock%
+    \usebibmacro{byeditor+others}%
+    \newunit\newblock%
+    \printfield{howpublished}%
+    \newunit\newblock%
+    \printfield{type}%
+    \newunit\newblock%
+    \printfield{note}%
+    \newunit\newblock%
+    \usebibmacro{location+date}%
+    \newunit\newblock%
+    \usebibmacro{chapter+pages}%
+    \newunit%
+    \printfield{pagetotal}%
+    \newunit\newblock%
+    \usebibmacro{doi+eprint+url}%
+    \newunit\newblock%
+    \usebibmacro{addendum+pubstate}%
+    \setunit{\bibpagerefpunct}\newblock%
+    \usebibmacro{pageref}%
+    \newunit\newblock%
+    \iftoggle{bbx:related}%
+        {\usebibmacro{related:init}%
+            \usebibmacro{related}}%
+        {}%
+    \usebibmacro{finentry}}
+
+\DeclareBibliographyDriver{inbook}{%
+    \usebibmacro{introcite:plain}%
+    \usebibmacro{bibindex}%
+    \usebibmacro{begentry}%
+    \usebibmacro{author/translator+others}%
+    \iftoggle{bbx:authoryearstyle}%
+        {\usebibmacro{bbx:labelyear}%
+        \newunit\newblock}%
+        {\setunit{\printdelim{nametitledelim}}\newblock}%
+    \usebibmacro{title}%
+    \newunit%
+    \usebibmacro{language}%
+    \newunit\newblock%
+    \usebibmacro{byauthor}%
+    \newunit\newblock%
+    \usebibmacro{in:}%
+    \usebibmacro{crosscite}{inbook:parent}%
+    \newunit\newblock%
+    \usebibmacro{chapter+pages}%
+    \newunit\newblock%
+    \usebibmacro{isbn}%
+    \newunit\newblock%
+    \usebibmacro{doi+eprint+url}%
+    \newunit\newblock%
+    \usebibmacro{addendum+pubstate}%
+    \setunit{\bibpagerefpunct}\newblock%
+    \usebibmacro{pageref}%
+    \newunit\newblock%
+    \ifboolexpr{togl {bbx:related} and not test {\iffieldxref{related}}}%
+        {\usebibmacro{related:init}%
+            \usebibmacro{related}}%
+        {}%
+    \usebibmacro{finentry}}
+
+\renewbibmacro*{inbook:parent}{%
+    \usebibmacro{bybookauthor}%
+    \setunit{\printdelim{innametitledelim}}\newblock%
+    \usebibmacro{maintitle+booktitle}%
+    \newunit\newblock%
+    \usebibmacro{byeditor+others}%
+    \newunit\newblock%
+    \usebibmacro{edition}%
+    \newunit%
+    \usebibmacro{barevolume+volumes}%
+    \newunit\newblock%
+    \usebibmacro{series+number}%
+    \newunit\newblock%
+    \usebibmacro{note}%
+    \newunit\newblock%
+    \usebibmacro{publisher+location+date}}
+
+\DeclareBibliographyDriver{collection}{%
+    \usebibmacro{introcite:plain}%
+    \usebibmacro{bibindex}%
+    \usebibmacro{begentry}%
+    \usebibmacro{editor+others}%
+    \iftoggle{bbx:authoryearstyle}%
+        {\usebibmacro{bbx:labelyear}%
+        \newunit\newblock}%
+        {\setunit{\printdelim{nametitledelim}}\newblock}%
+    \usebibmacro{maintitle+title}%
+    \newunit%
+    \usebibmacro{language}%
+    \newunit\newblock%
+    \usebibmacro{thebook}%
+    \setunit{\bibpagerefpunct}\newblock%
+    \usebibmacro{pageref}%
+    \newunit\newblock%
+    \iftoggle{bbx:related}%
+        {\usebibmacro{related:init}%
+            \usebibmacro{related}}%
+        {}%
+    \usebibmacro{finentry}}
+
+\DeclareBibliographyDriver{incollection}{%
+    \usebibmacro{introcite:plain}%
+    \usebibmacro{bibindex}%
+    \usebibmacro{begentry}%
+    \usebibmacro{author/translator+others}%
+    \iftoggle{bbx:authoryearstyle}%
+        {\usebibmacro{bbx:labelyear}%
+        \newunit\newblock}%
+        {\setunit{\printdelim{nametitledelim}}\newblock}%
+    \usebibmacro{title}%
+    \newunit%
+    \usebibmacro{language}%
+    \newunit\newblock%
+    \usebibmacro{byauthor}%
+    \newunit\newblock%
+    \usebibmacro{in:}%
+    \usebibmacro{crosscite}{incollection:parent}%
+    \newunit\newblock%
+    \usebibmacro{chapter+pages}%
+    \newunit\newblock%
+    \usebibmacro{isbn}%
+    \newunit\newblock%
+    \usebibmacro{doi+eprint+url}%
+    \newunit\newblock%
+    \usebibmacro{addendum+pubstate}%
+    \setunit{\bibpagerefpunct}\newblock%
+    \usebibmacro{pageref}%
+    \newunit\newblock%
+    \ifboolexpr{togl {bbx:related} and not test {\iffieldxref{related}}}
+        {\usebibmacro{related:init}%
+            \usebibmacro{related}}%
+        {}%
+    \usebibmacro{finentry}}
+
+\renewbibmacro*{incollection:parent}{%
+    \ifboolexpr{togl {bbx:innamebeforetitle}%
+                and
+                not test {\iffieldundef{crossref}}}%
+        {\DeclareNameAlias{editor}{labelname}%
+            \usebibmacro{in:editor+others}%
+            \newunit\newblock%
+            \iftoggle{bbx:authoryearstyle}%
+                {}%
+                {\printfield{booktitle}%
+                \newunit%
+                \printtext[bibhyperref]{%
+                \bibstring{opcit}}}}%
+        {}%
+    \ifboolexpr{togl {bbx:innamebeforetitle}%
+                and
+                not test {\iffieldundef{crossref}}}%
+        {}%
+        {\setunit{\printdelim{innametitledelim}}\newblock%
+            \usebibmacro{maintitle+booktitle}%
+            \newunit\newblock%
+            \usebibmacro{byeditor+others}%
+            \newunit\newblock%
+            \usebibmacro{edition}%
+            \newunit%
+            \usebibmacro{barevolume+volumes}%
+            \newunit\newblock%
+            \usebibmacro{series+number}%
+            \newunit\newblock%
+            \usebibmacro{note}%
+            \newunit\newblock%
+            \usebibmacro{publisher+location+date}}}
+
+\DeclareBibliographyDriver{proceedings}{%
+    \usebibmacro{introcite:plain}%
+    \usebibmacro{bibindex}%
+    \usebibmacro{begentry}%
+    \usebibmacro{editor+others}%
+    \iftoggle{bbx:authoryearstyle}%
+        {\usebibmacro{bbx:labelyear}%
+        \newunit\newblock}%
+        {\setunit{\printdelim{nametitledelim}}\newblock}%
+    \usebibmacro{maintitle+title}%
+    \newunit%
+    \usebibmacro{language}%
+    \newunit\newblock%
+    \usebibmacro{event+venue+date}%
+    \newunit\newblock%
+    \usebibmacro{thebook}%
+    \setunit{\bibpagerefpunct}\newblock%
+    \usebibmacro{pageref}%
+    \newunit\newblock%
+    \iftoggle{bbx:related}%
+        {\usebibmacro{related:init}%
+            \usebibmacro{related}}%
+        {}%
+    \usebibmacro{finentry}}
+
+\DeclareBibliographyDriver{inproceedings}{%
+    \usebibmacro{introcite:plain}%
+    \usebibmacro{bibindex}%
+    \usebibmacro{begentry}%
+    \usebibmacro{author/translator+others}%
+    \iftoggle{bbx:authoryearstyle}%
+        {\usebibmacro{bbx:labelyear}%
+        \newunit\newblock}%
+        {\setunit{\printdelim{nametitledelim}}\newblock}%
+    \usebibmacro{title}%
+    \newunit%
+    \usebibmacro{language}%
+    \newunit\newblock%
+    \usebibmacro{byauthor}%
+    \newunit\newblock%
+    \usebibmacro{in:}%
+    \usebibmacro{crosscite}{inproceedings:parent}%
+    \newunit\newblock%
+    \usebibmacro{chapter+pages}%
+    \newunit\newblock%
+    \usebibmacro{isbn}%
+    \newunit\newblock%
+    \usebibmacro{doi+eprint+url}%
+    \newunit\newblock%
+    \usebibmacro{addendum+pubstate}%
+    \setunit{\bibpagerefpunct}\newblock%
+    \usebibmacro{pageref}%
+    \newunit\newblock%
+    \ifboolexpr{togl {bbx:related} and not test {\iffieldxref{related}}}%
+        {\usebibmacro{related:init}%
+            \usebibmacro{related}}%
+        {}%
+    \usebibmacro{finentry}}
+
+\renewbibmacro*{inproceedings:parent}{%
+    \ifboolexpr{togl {bbx:innamebeforetitle}%
+                and
+                not test {\iffieldundef{crossref}}}%
+        {\DeclareNameAlias{editor}{labelname}%
+            \usebibmacro{in:editor+others}%
+            \newunit\newblock%
+            \iftoggle{bbx:authoryearstyle}%
+                {}%
+                {\printfield{booktitle}%
+                    \newunit%
+                    \printtext[bibhyperref]{%
+                    \bibstring{opcit}}}}%
+        {}%
+    \ifboolexpr{togl {bbx:innamebeforetitle}%
+                and
+                not test {\iffieldundef{crossref}}}%
+        {}%
+        {\setunit{\printdelim{innametitledelim}}\newblock%
+            \usebibmacro{maintitle+booktitle}%
+            \newunit\newblock%
+            \usebibmacro{event+venue+date}%
+            \newunit\newblock%
+            \usebibmacro{byeditor+others}%
+            \newunit\newblock%
+            \usebibmacro{edition}%
+            \newunit%
+            \usebibmacro{barevolume+volumes}%
+            \newunit\newblock%
+            \usebibmacro{series+number}%
+            \newunit\newblock%
+            \usebibmacro{note}%
+            \newunit\newblock%
+            \printlist{organization}%
+            \newunit%
+            \usebibmacro{publisher+location+date}}}
+
+\DeclareBibliographyDriver{manual}{%
+    \usebibmacro{introcite:plain}%
+    \usebibmacro{bibindex}%
+    \usebibmacro{begentry}%
+    \usebibmacro{author/editor}%
+    \iftoggle{bbx:authoryearstyle}%
+        {\usebibmacro{bbx:labelyear}%
+        \newunit\newblock}%
+        {\setunit{\printdelim{nametitledelim}}\newblock}%
+    \usebibmacro{title}%
+    \newunit%
+    \printlist{language}%
+    \newunit\newblock%
+    \usebibmacro{byauthor}%
+    \newunit\newblock%
+    \usebibmacro{byeditor}%
+    \newunit\newblock%
+    \printfield{edition}%
+    \newunit\newblock%
+    \usebibmacro{series+number}%
+    \newunit\newblock%
+    \printfield{type}%
+    \newunit%
+    \printfield{version}%
+    \newunit%
+    \printfield{note}%
+    \newunit\newblock%
+    \printlist{organization}%
+    \newunit%
+    \usebibmacro{publisher+location+date}%
+    \newunit\newblock%
+    \usebibmacro{chapter+pages}%
+    \newunit%
+    \printfield{pagetotal}%
+    \newunit\newblock%
+    \usebibmacro{isbn}%
+    \newunit\newblock%
+    \usebibmacro{doi+eprint+url}%
+    \newunit\newblock%
+    \usebibmacro{addendum+pubstate}%
+    \setunit{\bibpagerefpunct}\newblock%
+    \usebibmacro{pageref}%
+    \newunit\newblock%
+    \iftoggle{bbx:related}%
+        {\usebibmacro{related:init}%
+            \usebibmacro{related}}%
+        {}%
+    \usebibmacro{finentry}}
+
+\DeclareSortingTemplate{accursius}{
+    \sort{\field{presort}}
+    \sort[final]{\field{sortkey}}
+    \sort{%
+        \field{sortname}
+        \field{author}
+        \field{editor}
+        \field{translator}
+        \field{sorttitle}
+        \field{title}}
+    \sort{%
+        \field{sortyear}
+        \field{year}}
+    \sort{\field{month}}
+    \sort{\field{day}}
+    \sort{%
+        \field{volume}
+        \literal{0}}
+    \sort{%
+        \field{sorttitle}
+        \field{title}}}
+
+\DeclareSortingTemplate{chronoiuris}{
+    \sort{\field{presort}}
+    \sort[direction=ascending]{%
+        \field{origyear}
+        \field{origmonth}
+        \field{origday}}
+    \sort[direction=ascending]{%
+        \field[padside=left,padwidth=10]{nprov}}
+    \sort[direction=ascending]{%
+        \field{kindprov}}
+    \sort[direction=ascending]{%
+        \field{sortyear}
+        \field{year}
+        \field{month}
+        \field{day}}}
+\DeclareSortingTemplate{authoriuris}{
+    \sort{\field{presort}}
+    \sort[direction=ascending]{%
+        \field{institution}}
+    \sort[direction=ascending]{%
+        \field{institutionspec}}
+    \sort[direction=descending]{%
+        \field{jchamber}}
+    \sort[direction=ascending]{%
+        \field{origyear}
+        \field{origmonth}
+        \field{origday}}
+    \sort[direction=ascending]{%
+        \field[padside=left,padwidth=10]{nprov}}
+    \sort[direction=ascending]{%
+        \field{kindprov}}
+    \sort[direction=ascending]{%
+        \field{sortyear}
+        \field{year}
+        \field{month}
+        \field{day}}}
+
+\DeclareRefcontext{accursiusdef}{sorting=accursius}
+\DeclareRefcontext{authoriuris}{sorting=authoriuris}
+\DeclareRefcontext{chronoiuris}{sorting=chronoiuris}
+
+\newtoggle{bbx:noportal}
+    \DeclareBibliographyOption{noportal}[true]{%
+        \settoggle{bbx:noportal}{#1}}
+\newtoggle{bbx:iusminimal}
+    \DeclareBibliographyOption{iusminimal}[true]{%
+        \settoggle{bbx:iusminimal}{#1}%
+        \settoggle{bbx:noportal}{true}}
+\newtoggle{bbx:iusshorthand}
+    \DeclareBibliographyOption{iusshorthand}[true]{%
+        \settoggle{bbx:iusshorthand}{#1}%
+        \settoggle{bbx:iusminimal}{true}}
+
+\DeclareDelimFormat{iusunitdelim}{\newunitpunct}
+
+\DeclareDatamodelFields[type=field,datatype=literal]{textprovtitle}
+    \DeclareDatamodelEntryfields{textprovtitle}
+
+\DeclareDatamodelFields[type=field,datatype=literal]{codification}
+    \DeclareDatamodelEntryfields{codification}
+\DeclareDatamodelFields[type=field,datatype=literal]{attachedstring}
+    \DeclareDatamodelEntryfields{attachedstring}
+\newbibmacro*{codification}{%
+    \ifboolexpr{not test {\iffieldundef{codification}}}%
+        {\printfield{codification}%
+            \setunit{\iusunitdelim}\newblock%
+            \iffieldundef{attachedstring}%
+                {\bibsstring{attachedto}}%
+                {\printfield{attachedstring}}%
+            \setunit*{\addspace}\newblock}%
+        {}}
+\DeclareListFormat[itprov,notetopro]{institution}{%
+    \usebibmacro{list:delim}{#1}%
+    \iftoggle{bbx:scauthor}%
+        {\textsc{#1}}%
+        {#1}%
+    \isdot%
+    \usebibmacro{list:andothers}}
+\DeclareListFormat[itprov,notetoprov]{textinstitution}{%
+    \usebibmacro{list:delim}{#1}%
+    #1\isdot%
+    \usebibmacro{list:andothers}}
+\DeclareSourcemap{\maps[datatype=bibtex]{\map{%
+    \pertype{itprov}\pertype{notetoprov}
+    \step[fieldsource=shortinstitution,fieldtarget=listc]}}}
+\DeclareDatamodelFields[type=field,datatype=literal]{institutionspec}
+    \DeclareDatamodelEntryfields{institutionspec}
+\DeclareDatamodelFields[type=field,datatype=literal]{institutionnationality}
+    \DeclareDatamodelEntryfields{institutionnationality}
+\DeclareDatamodelFields[type=field,datatype=literal]{institutionaddon}
+    \DeclareDatamodelEntryfields{institutionaddon}
+\DeclareDatamodelFields[type=field,datatype=literal]{jchamber}
+    \DeclareDatamodelEntryfields{jchamber}
+    \DeclareFieldFormat{jchamber}{\ifinteger{#1}%
+        {\bibsstring{jchamber}~{\scshape\romannumeral#1}}%
+        {#1}}
+\DeclareSourcemap{\maps[datatype=bibtex]{\map{%
+    \step[fieldsource=institutionmember,fieldtarget=namea]}}}
+\newbibmacro*{thestate}{%
+    \iflistundef{listc}%
+        {\printlist{institution}}%
+        {\printlist[institution]{listc}}%
+    \setunit{\addspace}%
+    \printfield{institutionspec}%
+    \setunit{\addspace}%
+    \printfield[parens]{institutionnationality}%
+    \setunit{\iusunitdelim}%
+    \printfield{jchamber}%
+    \setunit{\iusunitdelim}%
+    \printfield{institutionaddon}%
+    \setunit{\iusunitdelim}%
+    \printnames[default]{namea}%
+    \clearlist{institution}}
+
+\DeclareDatamodelFields[type=field,datatype=literal]{kindprov}
+    \DeclareDatamodelEntryfields{kindprov}
+
+\DeclareDatamodelFields[type=field,datatype=integer]{nprov}
+    \DeclareDatamodelEntryfields{nprov}
+    \DeclareFieldFormat{nprov}{#1}
+    \DeclareFieldFormat{stringandnprov}{\bibsstring{number}~#1}
+\DeclareDatamodelFields[type=field,datatype=integer]{neli}
+    \DeclareDatamodelEntryfields{neli}
+    \DeclareFieldFormat{neli}{#1}
+\DeclareDatamodelFields[type=field,datatype=literal]{eueli}
+    \DeclareDatamodelEntryfields{eueli}
+\DeclareLabeldate[itprov]{%
+    \field{origdate}
+    \field{origyear}
+    \field{date}
+    \field{year}
+    \field{urldate}
+    \field{eventdate}
+    \literal{nodate}}
+\DeclareExtradate{%
+    \scope{%
+        \field{labelyear}
+        \field{year}}
+    \scope{\field{origyear}}}
+\newbibmacro*{theprovid}{%
+    \ifboolexpr{not test {\iffieldundef{neli}}}%
+        {\iffieldundef{eueli}%
+            {\bibstring[\mkbibparens]{euelistring}}%
+            {}%
+            \setunit{\addspace}%
+            \printfield{origyear}%
+            \setunit{\addslash}%
+            \printfield{neli}%
+            \ifboolexpr{not test {\iffieldundef{eueli}}}%
+                {\setunit{\addslash}%
+                    \printfield{eueli}}%
+                {}%
+            \setunit{\addspace}%
+            \bibstring{ofdate}%
+            \setunit{\addspace}%
+            \printorigdate}%
+        {\printorigdate%
+            \setunit{\iusunitdelim}%
+            \printfield[stringandnprov]{nprov}}}
+\DeclareListFormat[itprov,notetopro]{ofeuinstitution}{%
+    \usebibmacro{list:delim}{#1}%
+    \bibstring{ofeuinstitution}~{#1\isdot}%
+    \usebibmacro{list:andothers}}
+\DeclareListFormat[itprov,notetopro]{ofeucommission}{%
+    \usebibmacro{list:delim}{#1}%
+    \bibstring{ofeucommission}~{#1\isdot}%
+    \usebibmacro{list:andothers}}
+
+\newbibmacro*{ofeulegislator}{%
+    \ifboolexpr{not test {\iflanguage{english}}}%
+        {\iffieldequalstr{institution}{commission}%
+            {\printlist[ofeucommission]{institution}}%
+            {\iflistundef{listc}%
+                {\printlist[ofeuinstitution]{institution}}%
+                {\printlist[ofeuinstitution]{listc}}}%
+                \clearlist{institution}}%
+        {}}
+
+\DeclareDatamodelFields[type=field,datatype=literal]{provtitle}
+    \DeclareDatamodelEntryfields{provtitle}
+\DeclareDatamodelFields[type=field,datatype=literal]{provindtitle}
+    \DeclareDatamodelEntryfields{provindtitle}
+\DeclareDatamodelFields[type=field,datatype=literal]{titleparties}
+    \DeclareDatamodelEntryfields{titleparties}
+\DeclareDatamodelFields[type=field,datatype=literal]{shorttitleparties}
+    \DeclareDatamodelEntryfields{shorttitleparties}
+\DeclareDatamodelFields[type=field,datatype=integer]{neucase}
+    \DeclareDatamodelEntryfields{neucase}
+\DeclareDatamodelFields[type=field,datatype=integer]{yeareucase}
+    \DeclareDatamodelEntryfields{yeareucase}
+\DeclareDatamodelFields[type=field,datatype=integer]{necli}
+    \DeclareDatamodelEntryfields{necli}
+\DeclareDatamodelFields[type=field,datatype=literal]{eueclistring}
+    \DeclareDatamodelEntryfields{eueclistring}
+\DeclareDatamodelFields[type=field,datatype=literal]{courteclistring}
+    \DeclareDatamodelEntryfields{necli}
+
+\DeclareFieldFormat{provtitle}{\mkbibquote{#1}\isdot}
+\DeclareFieldFormat{neucase}{\bibstring{eucase}-#1}
+
+\newbibmacro*{theprovsubject}{%
+    \printfield{provtitle}%
+    \setunit{\iusunitdelim}\newblock%
+    \printfield{titleparties}%
+    \setunit{\iusunitdelim}\newblock%
+    \iftoggle{bbx:iusminimal}%
+        {\ifboolexpr{not test {\iffieldundef{neli}}%
+                     and
+                     not test {\iffieldundef{textprovtitle}}}%
+            {\setunit{\addspace}%
+                \printfield{textprovtitle}}%
+            {}}%
+        {\printfield{provindtitle}%
+            \ifboolexpr{not test {\iffieldundef{neli}}%
+                        and
+                        not test {\iffieldundef{textprovtitle}}}%
+                {\setunit{\addspace}%
+                    \printfield[parens]{textprovtitle}}%
+                {}}%
+    \setunit{\iusunitdelim}\newblock%
+    \iffieldundef{neucase}%
+        {}%
+        {\printfield{neucase}%
+            \setunit{\addslash}%
+            \printfield{yeareucase}}}
+
+\newbibmacro*{provecli}{%
+    \iffieldundef{necli}%
+        {}%
+        {\printfield{eueclistring}%
+            \setunit{\addcolon}%
+            \printfield{courteclistring}%
+            \setunit{\addcolon}%
+            \printfield{origyear}%
+            \setunit{\addcolon}%
+            \printfield{necli}}}
+
+\DeclareDatamodelFields[type=field,datatype=literal]{parties}
+    \DeclareDatamodelEntryfields{parties}
+
+\DeclareSourcemap{\maps[datatype=bibtex]{
+    \map{
+        \pertype{itprov}
+        \step[fieldsource=noteby,fieldtarget=nameb]}
+    \map{
+        \pertype{notetoprov}
+        \step[fieldsource=noteby,fieldtarget=author]}}}
+\newbibmacro*{theprovinfos}{%
+    \iffieldundef{parties}%
+        {}%
+        {\printfield{parties}}%
+    \newunit\newblock%
+    \ifnameundef{nameb}%
+        {}
+        {\bibstring{withnoteby}%
+            \setunit{\addspace}%
+            \printnames[withannotator]{nameb}}}
+
+\DeclareDatamodelFields[type=field,datatype=literal]{ofbull}
+    \DeclareDatamodelEntryfields{ofbull}
+\DeclareDatamodelFields[type=field,datatype=literal]{ofbullseries}
+    \DeclareDatamodelEntryfields{ofbullseries}
+\DeclareDatamodelFields[type=field,datatype=integer]{ofbullnum}
+    \DeclareDatamodelEntryfields{ofbullnum}
+\DeclareDatamodelFields[type=field,datatype=literal]{ofportal}
+    \DeclareDatamodelEntryfields{ofportal}
+\newbibmacro{on:}{%
+    \bibstring{on}%
+    \printunit{\intitlepunct}}
+\DeclareFieldFormat{ofbullnum}{\bibsstring{number}~#1}
+\DeclareDatamodelFields[type=field,datatype=literal]{ojeuseries}
+    \DeclareDatamodelEntryfields{ojeuseries}
+
+\newtoggle{bbx:noportalurlinrunning}
+\newtoggle{bbx:absolutelynoportalurl}
+\DeclareBiblatexOption{global,type,entry}[boolean]
+    {noportalurlinrunning}[true]{%
+    \settoggle{bbx:noportalurlinrunning}{#1}}
+\DeclareBiblatexOption{global,type,entry}[boolean]
+    {absolutelynoportalurl}[true]{%
+    \settoggle{bbx:absolutelynoportalurl}{#1}}
+\ExecuteBibliographyOptions{noportalurlinrunning=true,
+                            absolutelynoportalurl=false}
+\newbibmacro*{theprovsource}{%
+    \ifboolexpr{not test {\iffieldundef{ofbull}}%
+                or
+                not test {\iffieldundef{journaltitle}}%
+                or
+                not test {\iffieldundef{booktitle}}}%
+        {\ifboolexpr{test {\iffieldundef{ofportal}}%
+                     or
+                     togl {bbx:noportal}}%
+            {\usebibmacro{in:}}%
+            {}}%
+        {}%
+    \ifboolexpr{not test {\iffieldundef{ofportal}}%
+                and
+                not togl {bbx:noportal}}%
+        {\usebibmacro{on:}}%
+        {}%
+    \ifboolexpr{not test {\iffieldundef{ofbull}}%
+                and
+                test {\iffieldundef{ofportal}}}%
+        {\printfield{ofbull}%
+            \newunit%
+            \iffieldundef{ojeuseries}%
+                {\printfield{ofbullseries}%
+                    \newunit%
+                    \usebibmacro{date}%
+                    \newunit%
+                    \printfield{ofbullnum}}%
+                {\setunit{\addspace}%
+                    \printfield{ojeuseries}%
+                    \setunit{\addspace}%
+                    \printfield[default]{ofbullnum}%
+                    \newunit%
+                    \usebibmacro{date}}%
+            \newunit\newblock%
+            \usebibmacro{chapter+pages}%
+            \newunit\newblock%
+            \ifboolexpr{togl {bbx:iusminimal}%
+                        or
+                        not test {\ifbibliography}}%
+                {}%
+                {\usebibmacro{url}}%
+            \newunit\newblock%
+            \usebibmacro{addendum+pubstate}}%
+        {}%
+    \ifboolexpr{not test {\iffieldundef{ofportal}}%
+                and
+                not togl {bbx:noportal}}%
+        {\printfield{ofportal}%
+            \newunit\newblock%
+            \ifboolexpr{(togl {bbx:noportalurlinrunning}%
+                         and
+                         not test {\ifbibliography})%
+                        or
+                        togl {bbx:absolutelynoportalurl}}%
+                    {}%
+                    {\usebibmacro{url}}}%
+        {}%
+    \ifboolexpr{not test {\iffieldundef{journaltitle}}%
+                and
+                test {\iffieldundef{ofportal}}}%
+        {\usebibmacro{journal+editor+id}}%
+        {}%
+    \ifboolexpr{not test {\iffieldundef{booktitle}}%
+                and
+                test {\iffieldundef{ofportal}}}%
+        {\ifboolexpr{togl {bbx:innamebeforetitle}%
+                     and
+                     not test {\iffieldundef{crossref}}}%
+            {\DeclareNameAlias{editor}{labelname}%
+                \usebibmacro{in:editor+others}%
+                \newunit\newblock%
+                \iftoggle{bbx:authoryearstyle}%
+                    {}%
+                    {\printfield{booktitle}%
+                        \newunit%
+                        \bibstring{opcit}%
+                        \newunit%
+                        \usebibmacro{bookfrac}%
+                        \newunit%
+                        \usebibmacro{chapter+pages}}}%
+            {}%
+               \ifboolexpr{togl {bbx:innamebeforetitle}%
+                           and
+                           not test {\iffieldundef{crossref}}}%
+                   {}%
+                   {\setunit{\printdelim{innametitledelim}}\newblock%
+                       \usebibmacro{maintitle+booktitle}%
+                       \newunit\newblock%
+                       \usebibmacro{byeditor+others}%
+                       \newunit\newblock%
+                       \printfield{edition}%
+                       \newunit%
+                       \usebibmacro{barevolume+volumes}%
+                       \newunit\newblock%
+                       \usebibmacro{series+number}%
+                       \newunit\newblock%
+                       \printfield{note}%
+                       \newunit\newblock%
+                       \printlist{organization}%
+                       \newunit%
+                       \usebibmacro{publisher+location+date}%
+                       \ifdefstring{\bbx@publocformat}{none}%
+                           {\setunit{\addspace}}%
+                           {}%
+                       \ifdefstring{\bbx@publocformat}{publocyear}%
+                           {\setunit{\addspace}}%
+                           {}%
+                       \ifdefstring{\bbx@publocformat}{locpubyear}%
+                           {\newunit}%
+                           {}%
+                       \ifdefstring{\bbx@publocformat}{loccolonpub}%
+                           {\newunit}%
+                           {}%
+                       \iftoggle{bbx:authoryearstyle}%
+                           {\iftoggle{bbx:innamebeforetitle}%
+                               {}%
+                               {\clearfield{extradate}}%
+                               \usebibmacro{date+extradate}}%
+                           {}
+                       \newunit\newblock%
+                       \usebibmacro{chapter+pages}%
+                       \newunit%
+                       \printfield{pagetotal}%
+                       \newunit\newblock%
+                       \usebibmacro{isbn}%
+                       \newunit\newblock%
+                       \usebibmacro{doi+eprint+url}%
+                       \newunit\newblock%
+                       \usebibmacro{addendum+pubstate}}}%
+        {}}
+
+\DeclareDataInheritance{collection}{itprov}{%
+    \inherit{title}{booktitle}
+    \inherit{subtitle}{booksubtitle}
+    \inherit{titleaddon}{booktitleaddon}
+    \noinherit{shorttitle}
+    \noinherit{sorttitle}
+    \noinherit{indextitle}
+    \noinherit{indexsorttitle}}
+
+\DeclareLabeltitle[itprov]{%
+    \field{textprovtitle}%
+    \field{codification}%
+    \field{shorttitleparties}%
+    \field{titleparties}}
+
+\DeclareBibliographyDriver{itprov}{%
+    \usebibmacro{introcite:plain}%
+    \usebibmacro{bibindex}%
+    \usebibmacro{begentry}%
+    \usebibmacro{codification}%
+    \ifboolexpr{not test {\iffieldundef{neli}}%
+                or
+                test {\iflistundef{institution}}}%
+        {}%
+        {\usebibmacro{thestate}%
+        \setunit{\iusunitdelim}\newblock}%
+    \ifboolexpr{test {\iffieldequalstr{institution}{commission}}%
+                and
+                test {\iflanguage{english}}}%
+        {\printlist{institution}%
+            \setunit{\addspace}}%
+        {}%
+    \iffieldundef{neli}%
+        {\printfield{kindprov}}%
+        {\bibsentence\printfield{kindprov}}%
+    \setunit*{\addspace}%
+    \usebibmacro{theprovid}%
+    \ifboolexpr{not test {\iffieldundef{neli}}}%
+        {\setunit{\addspace}%
+            \usebibmacro{ofeulegislator}}%
+        {}%
+    \setunit{\iusunitdelim}\newblock%
+    \usebibmacro{theprovsubject}%
+    \setunit{\iusunitdelim}\newblock%
+    \usebibmacro{provecli}%
+    \setunit{\iusunitdelim}\newblock%
+    \iftoggle{bbx:iusminimal}%
+        {}%
+        {\usebibmacro{theprovinfos}}%
+    \setunit{\iusunitdelim}\newblock%
+    \usebibmacro{theprovsource}%
+    \setunit{\bibpagerefpunct}\newblock%
+    \usebibmacro{pageref}%
+    \newunit\newblock%
+    \iftoggle{bbx:related}%
+        {\usebibmacro{related:init}%
+            \usebibmacro{related}}%
+        {}%
+    \usebibmacro{finentry}}
+
+\newbibmacro{notetoprov:noteby}{%
+    \usebibmacro{author}%
+    \clearname{author}%
+    \clearname{nameb}%
+    \iftoggle{bbx:authoryearstyle}%
+        {\setunit{\printdelim{nameyeardelim}}%
+            \usebibmacro{date+extradate}%
+            \newunit\newblock}%
+        {\setunit{\printdelim{nametitledelim}}\newblock}%
+    \iffieldundef{title}%
+        {}%
+        {\usebibmacro{title}}%
+    \setunit{\iusunitdelim}\newblock%
+    \biblstring{noteto}%
+    \setunit{\addspace}\newblock}
+
+\DeclareBibliographyDriver{notetoprov}{%
+    \usebibmacro{introcite:plain}%
+    \usebibmacro{bibindex}%
+    \usebibmacro{begentry}%
+    \usebibmacro{notetoprov:noteby}%
+    \usebibmacro{codification}%
+    \ifboolexpr{not test {\iffieldundef{neli}}%
+                or
+                test {\iflistundef{institution}}}%
+        {}%
+        {\usebibmacro{thestate}%
+        \setunit{\iusunitdelim}\newblock}%
+    \ifboolexpr{test {\iffieldequalstr{institution}{commission}}%
+                and
+                test {\iflanguage{english}}}%
+        {\printlist{institution}%
+            \setunit{\addspace}}%
+        {}%
+    \iffieldundef{neli}%
+        {\printfield{kindprov}}%
+        {\bibsentence\printfield{kindprov}}%
+    \setunit*{\addspace}%
+    \usebibmacro{theprovid}%
+    \ifboolexpr{not test {\iffieldundef{neli}}}%
+        {\setunit{\addspace}%
+            \usebibmacro{ofeulegislator}}%
+        {}%
+    \setunit{\iusunitdelim}\newblock%
+    \usebibmacro{theprovsubject}%
+    \setunit{\iusunitdelim}\newblock%
+    \usebibmacro{provecli}%
+    \setunit{\iusunitdelim}\newblock%
+    \iftoggle{bbx:iusminimal}%
+        {}%
+        {\usebibmacro{theprovinfos}}%
+    \setunit{\iusunitdelim}\newblock%
+    \usebibmacro{theprovsource}%
+    \setunit{\bibpagerefpunct}\newblock%
+    \usebibmacro{pageref}%
+    \newunit\newblock%
+    \iftoggle{bbx:related}%
+        {\usebibmacro{related:init}%
+            \usebibmacro{related}}%
+        {}%
+    \usebibmacro{finentry}}
+%% ---------------------------------------
+%% 
+%% Francesco Contini, The accursius style,
+%% Cagliari 2024
+%% 
+%% Copyright (C) 2024 Francesco Contini,
+%% Cagliari (Sardinia). Availability under
+%% the LaTeX Project Public License. Email
+%% to cicciocontini [at] outlook [dot] it.
+%% 
+%% ---------------------------------------
+%%
+%% End of file `accursius.bbx'.

@@ -1,0 +1,887 @@
+% \iffalse meta-comment
+% Copyright (C) 2022 by Martin Vassor
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either
+% version 1.3 of this license or (at your option) any later
+% version. The latest version of this license is in:
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of
+% LaTeX version 2005/12/01 or later.
+% 
+% \fi
+
+% \iffalse
+%<package> \NeedsTeXFormat{LaTeX2e}
+%<package> \ProvidesPackage{messagepassing}[2023/12/13 v1.2 A package to draw message passing diagrams]
+%<package> \RequirePackage{tikz}
+%<package> \usetikzlibrary{quotes, calc, arrows.meta}
+%<package> \RequirePackage{xparse}
+%<package> \RequirePackage{float}
+% 
+
+%<*driver>
+\documentclass{ltxdoc}
+\usepackage{messagepassing}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xspace}
+\usepackage[super]{nth}
+\usepackage{subcaption}
+\usepackage{listings}
+\lstset{
+	language=[LaTeX]{TeX},
+}
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+\begin{document}
+  \DocInput{messagepassing.dtx}
+\end{document}
+%</driver>
+% \fi
+
+% \CheckSum{0}
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+%
+% \changes{v1.2}{2023/12/13}{Add optional display names in processes and message node options}
+% \changes{v1.1}{2022/07/20}{Consistent spelling of "colour"}
+% \changes{v1.0}{2022/02/18}{Initial version for publication}
+%
+% \GetFileInfo{messagepassing.sty}
+%
+% \title{The \textsf{messagepassing} package\thanks{This document
+%   corresponds to \textsf{messagepassing}~\fileversion,
+%   dated \filedate.}}
+% \author{Martin Vassor\\ \texttt{bromind+ctan@gresille.org}}
+%
+%
+% \maketitle
+% \tableofcontents
+% \newcommand{\TikZ}{Ti\textit{k}Z\xspace}
+
+% \section{Introduction}
+% This package provides an environment and associated macros to easily draw
+% message passing diagrams. For instance, Execution.~\ref{mp:ex1} shows the capabilities offered
+% by the package.
+%
+% \begin{messagepassing}[][An example of message passing][h][mp:ex1]
+% 	\newprocesswithlength{p}{9}
+% 	\newprocesswithlength{q}{9}
+% 	\newprocesswithlength{r}{5}
+% 	\crash{r}{5}{k}
+% 
+% 	\checkpoint{p}{0}{c_p^0}
+% 	\checkpoint{q}{0}{c_q^0}
+% 	\checkpoint{r}{0}{c_r^0}
+% 	\checkpoint{p}{4}{c_p^1}
+% 
+% 	\stateinterval{p}{0}{si_p^0}
+% 	\stateinterval{q}{0}{si_q^0}
+% 	\stateinterval{r}{0}{si_r^0}
+% 
+% 	\sendwithstateinterval{p}{1}{q}{2}{si_q^1}
+% 	\sendwithstateinterval{r}{3}{q}{4}{si_q^2}
+% 	\sendwithstateintervalandname{q}{5}{p}{6}{si_p^1}{\(m\)}
+% 	\sendoutofband{q}{5}{r}{6}{\(m_\mathrm{copy}\)}
+% 	\stateinterval{r}{6}{si_r^0}
+% 	\restart{r}{6}{3}
+% 
+% 	\annotate{r}{8}{restart}
+% 	\annotatexplicit{p}{8}{\(1+1=2\)}{note}
+% 
+% 	\colouredbox{p}{q}{7}{9}{Protocol}
+% 
+% 	\drawtimeline{9}
+% \end{messagepassing}
+
+%
+% \section{Usage}
+% \subsection{Loading the package}
+% The package accepts two options: \verb+vertical+ and \verb+annotatevertical+.
+% If the former is set, executions will be drawn with time going from top to
+% bottom, instead of from left to right. Doing so, almost all
+% labels\footnote{Annotations are not rotated, unless explicitly asked.} are
+% rotated as well. If, \emph{in addition}, \verb+annotatevertical+ is set, then
+% annotations (including names of colouredboxes) are rotated as well.
+
+% \subsection{Basic usage}
+% \subsubsection{Creating a diagram.}
+
+% \DescribeEnv{messagepassing} A diagram can easily be created using the
+% |messagepassing| environment. The syntax is:
+% |\begin{messagepassing}| \oarg{tikz} \oarg{caption} \oarg{placement}
+% \oarg{label}.
+% The first optional argument (\emph{tikz}) contains arguments that are passed
+% to the underlying tikz environment. The second argument (\emph{caption}) has
+% two effect: if set, it turns the diagram into a floating figure, and the
+% content of the argument is the caption of the floating figure. The third
+% argument (\emph{placement}) is the placement option of the figure, the default
+% is |p|. Finally, the fourth option (\emph{label}) is the label used to
+% reference the figure.
+% 
+% For instance, the diagram in Figure~\ref{mp:ex1} is created with the following
+% commands:
+% \begin{verbatim}
+% \begin{messagepassing}[][An example of message passing][h][mp:ex1]
+% % ...
+% \end{messagepassing}
+% \end{verbatim}
+
+% \paragraph{Setting up the diagram.}
+% When created, the diagram is empty. Before actually writing the message
+% exchanges, we have to set up a few things: set whether we want a timeline (and
+% if it is the case, of which length), and set the number of processes with
+% their names, etc.
+% \subparagraph{Creating a new process.}
+% Each process is characterised by its name. 
+% \DescribeMacro{\newprocess} The simplest macro to create a new process is then
+% |\newprocess| \marg{name} \oarg{display name}, where \marg{name} is the name
+% of the process (resp. \(p\), \(q\), and \(r\) in Figure~\ref{mp:ex1}). If
+% \oarg{display name} is provided, it is used as the name when rendering the
+% figure, while \marg{name} is used internally to refer to the process. This
+% allows you to use names that can not be used internally (e.g.\ with maths or
+% things like that).
+%
+% In addition, we often draw a horizontal\footnote{By default, the line is vertical if
+% the option |vertical| is used.} line that represent the running process.
+% Although this line can be manually
+% added\footnote{|processlength|\marg{process}\marg{length}
+% creates a line of length \emph{length} for process \emph{process}.}, we also
+% provide a simple macro that performs both actions:
+% \DescribeMacro{\newprocesswithlength}
+% |\newprocesswithlength|\marg{name}\oarg{display name}\marg{length}.
+%
+% An other alternative is to name the state in which the process starts (in
+% Fig~\ref{mp:ex1}, we call those states \(si\) as \emph{state intervals}).
+% Again, this can be achieved using individual commands, but we also provide
+% \DescribeMacro{\newprocesswithstateinterval}
+% |\newprocesswithstateinterval|\marg{name}\oarg{display name}\marg{state name}.
+% 
+% Finally, an other way to create a process is to create a process that
+% (eventually) fails, which is represented by the process' line terminating
+% early with a cross. For that, we provide \DescribeMacro{\newprocesswithcrash}
+% |\newprocesswithcrash|\marg{name}\oarg{display name}\marg{length}\marg{crash coordinate name}.
+% The first arguments are similar to |\newprocesswithlength|, and the last one
+% is used to provide a name for the coordinate where the crash occurs. This name
+% can later be used to place nodes.
+%
+% Of course, we can imagine other combinations (e.g. a process with a length and
+% a state interval). We do not provide individual commands for each combination,
+% but the can be easily achieved using separate commands.
+%
+% As an example, the processes of Fig.~\ref{mp:ex1} are created as follows.
+% \begin{verbatim}
+% 	\newprocesswithlength{p}{9}
+% 	\newprocesswithlength{q}{9}
+% 	\newprocesswithlength{r}{5}
+% \end{verbatim}
+%
+% \subparagraph{Setting up a timeline.}
+% An other setup action consists in setting up (if wanted) the timeline. Notice
+% that this can be done \emph{at any place} in the diagram. To do so, simply use
+% the command \DescribeMacro{\drawtimeline}|\drawtimeline|\marg{length}, where
+% \emph{length} is the length of the desired timeline.
+
+% \subsubsection{Populating the run.}
+% Now that we have some processes, we have to populate the diagram with some
+% actions.
+%
+% \paragraph{Basic message.}
+% The most basic action is to send a message. For that, we provide the command
+% \DescribeMacro{\send} |\send|\marg{sender}\marg{send
+% time}\marg{receiver}\marg{receive time}. The sender and receiver are
+% identified with their names, and the sending and receiving times are given
+% according to their timestamp\footnote{Notice that nothing prevents sending
+% messages in the past, simply set a receiving time before the sending time.}.
+%
+% For instance, in Figure~\ref{fig:ex_msg}, we use |\send{p}{1}{q}{2}|.
+%
+% In addition, we can label the arrow with the message that is sent with
+% \DescribeMacro{\sendwithname} 
+% |\sendwithname|\marg{sender}\marg{send time}\marg{receiver}\marg{receive
+% time}\marg{label}\oarg{label options}. The \marg{label} contains the label
+% that should be displayed. The package provides default positioning options for
+% the label, which should be acceptable for most cases. Those positioning
+% options can be overridden by \oarg{label options}, which should be \TikZ node
+% options.
+%
+% Finally, we sometimes distinguish \emph{out-of-band} messages, e.g. messages
+% that do not carry informations, but that are for instance used for metadata,
+% etc.. We provide the macro
+% \DescribeMacro{\sendoutofband}|\sendoutofband|\marg{sender}\marg{send time}\marg{receiver}\marg{receive
+% time}\marg{label}\oarg{label options}, which behaves similarly to |\sendwithname|, but prints the
+% message in an other colour.
+%
+% \begin{figure}
+% \centering
+% \begin{minipage}{.35\textwidth}
+% \begin{messagepassing}
+% \newprocesswithlength{p}{4}
+% \newprocesswithlength{q}{4}
+% \send{p}{1}{q}{2}
+% \sendwithname{p}{2}{q}{3}{msg}
+% \end{messagepassing}
+% \end{minipage}
+% ~
+% \begin{minipage}{.60\textwidth}
+% \iffalse
+%<*example>
+% \fi
+% \begin{lstlisting}
+\begin{messagepassing}
+	\newprocesswithlength{p}{4}
+	\newprocesswithlength{q}{4}
+	\send{p}{1}{q}{2}
+	\sendwithname{p}{2}{q}{3}{msg}
+\end{messagepassing}
+\end{lstlisting}
+% \iffalse
+%</example>
+% \fi
+% \end{minipage}
+% \caption{A very simple protocol with a single message exchanged.}
+% \label{fig:ex_msg}
+% \end{figure}
+%
+%
+
+% \paragraph{Process crash and restore.}
+% The crash of a process can be represented using
+% \DescribeMacro{\crash}
+% |\crash|\marg{process name}\marg{time}\marg{crash name}. The argument \emph{process name}
+% is the name of the process that crashes, and \emph{crash name} is used to give
+% a name to the crash. Naming the crash is useful for coordinates (see below).
+% Finally, \emph{time} specifies when the crash occurs. Notice that this does
+% not modify the timeline: it simply adds a crash token at the specified
+% coordinate. This means that (i) then timeline has to stop at the crash's time;
+% and (ii) it has to be restarted after. To stop the timeline, simply take the
+% crash into account when setting the initial timeline. To restart the timeline,
+% we provide the command
+% \DescribeMacro{\restart}|\restart|\marg{name}\marg{date}\marg{duration}.
+% \emph{name} specifies which process is to be restarted; \emph{date} specifies
+% when the process should be restarted, and \emph{duration} specifies how long
+% the process shoud be alive (i.e. what is the length of the timeline) after the
+% restart.
+% \begin{figure}
+% \centering
+% \begin{minipage}{.35\textwidth}
+% \begin{messagepassing}
+% \newprocesswithlength{p}{4}
+% \newprocesswithlength{q}{2}
+% \send{p}{1}{q}{2}
+% \crash{q}{2}{crash}
+% \restart{q}{3}{1}
+% \end{messagepassing}
+% \end{minipage}
+% ~
+% \begin{minipage}{.60\textwidth}
+% \iffalse
+%<*example>
+% \fi
+% \begin{lstlisting}
+ \begin{messagepassing}
+ \newprocesswithlength{p}{4}
+ \newprocesswithlength{q}{2}
+ \send{p}{1}{q}{2}
+ \crash{q}{2}{crash}
+ \restart{q}{3}{1}
+ \end{messagepassing}
+\end{lstlisting}
+% \iffalse
+%</example>
+% \fi
+% \end{minipage}
+% \caption{A protocol with a crashed process.}
+% \end{figure}
+%
+
+% \paragraph{Tokens on the run}
+% 
+% The package also proposes two kinds of tokens that can be added on protocols'
+% lines. The first one is a \emph{checkpoint} (i.e. a state that is saved
+% somewhere) and the second is used to denote the begining of a \emph{state
+% interval} (a state interval denotes a period in which a process only performs
+% deterministic events). The former are denoted with a small black rectangle,
+% while the later is denoted with a vertical line. Although those two tokens are
+% intended for the usage mentionned above, we encourage users to use them for
+% other usages if need be.
+%
+% A checkpoint can be added with
+% \DescribeMacro{\checkpoint}|\checkpoint|\marg{process}\marg{time}\marg{name},
+% where \emph{process} is the name of the process which takes a checkpoint,
+% \emph{time} is the time at which the checkpoint is taken, and \emph{name}
+% is the name of the checkpoint, that is printed next to it, and can be used as
+% a coordinate. Notice that the name is printed in a math environment, as we
+% expect most checkpoints names to be indexed, e.g.\(c_1\), \(c_2\), etc.
+% To have more control on the printed name, or if the proposed name is not a
+% valid coordinate name, we offer a variant
+% \DescribeMacro{\checkpointspecial}|\checkpointspecial|\marg{process}\marg{time}\marg{name}\marg{label},
+% where \emph{name} is the name of the coordinate of the checkpoint, and
+% \emph{label} is the label to be printed. Notice that, in that case, the label
+% is printed as is, i.e. not typeset as maths.
+
+%
+% A state interval can be added similarly with the command
+% \DescribeMacro{\stateinterval}|\stateinterval|
+% \marg{process}\marg{time}\marg{name}. 
+% 
+% For the sake of completeness, if you need the name of the coordinate and the
+% displayed label to be different (e.g. if the label can not be the name of a
+% coordinate, for whatever reason), we also provide the command
+% \DescribeMacro{\stateintervalspecial}
+% |\stateintervalspecial|\marg{process}\marg{time}\marg{name}\marg{label}, in
+% which \emph{name} is the name of the created coordinate, and \emph{label} is
+% the label attached to the state interval.
+
+% \begin{figure}
+% \centering
+% \begin{minipage}{.35\textwidth}
+% \begin{messagepassing}
+% \newprocesswithlength{q}{2}
+% \checkpoint{q}{1}{c_1}
+% \crash{q}{2}{crash}
+% \restart{q}{3}{1}
+% \end{messagepassing}
+% \end{minipage}
+% ~
+% \begin{minipage}{.60\textwidth}
+% \iffalse
+%<*example>
+% \fi
+% \begin{lstlisting}
+ \begin{messagepassing}
+ \newprocesswithlength{q}{2}
+ \checkpoint{q}{1}{c_1}
+ \crash{q}{2}{crash}
+ \restart{q}{3}{1}
+ \end{messagepassing}
+\end{lstlisting}
+% \iffalse
+%</example>
+% \fi
+% \end{minipage}
+% \caption{A protocol with a checkpoint.}
+% \end{figure}
+
+% \paragraph{Grey boxes}
+% 
+% In Execution~\ref{mp:ex1}, we created a light-red box between processes \(p\)
+% and \(q\), from time \(7\) to \(9\), to indicate that they perform a given
+% protocol that we don't detail further. We call such boxes (which can be used for a lot
+% of other purposes) \emph{colouredboxes}, and they
+% can be added with \DescribeMacro{\colouredbox} |\colouredbox|\marg{first
+% process}\marg{second process}\marg{start time}\marg{end time}\marg{label}.
+% This creates a box that spans between \emph{first process} and \emph{second
+% process}, from \emph{start time} to \emph{end time}, with the label
+% \emph{label} printed.
+%
+% Notice that there are no technical restrictions to adding messages on top of a
+% box, typically to highlight a specific part of a larger execution.
+
+% \paragraph{Annotations}
+% Finally, it is possible to add annotations on the diagram. To do so, we
+% provide the macro
+% \DescribeMacro{\annotate}|\annotate|\marg{process}\marg{time}\marg{text} which
+% adds an annotation with \emph{text} over the timeline of the given
+% \emph{process} at time \emph{time}. This also creates a coordinate at the
+% annotation time, which name is the content of the annotation (i.e.\
+% \emph{text}). If \emph{text} is not a valid coordinate name, then the
+% alternative \DescribeMacro{\annotatexplicit}
+% |\annotatexplicit|\marg{process}\marg{time}\marg{text}\marg{name} behaves
+% similarly, except that the coordinate name is explicitly given in argument
+% \emph{name}.
+ 
+% \subsubsection{Combined commands}
+% The above commands are sufficient to use all primitives offered by the
+% package. In addition, we provide a lot of \emph{combined commands}, which, as
+% the name suggest, have the effect of multiple \emph{simple} commands.
+%
+% \begin{itemize}
+% \item |\newprocesswithlength|\marg{name}\marg{lifetime}: combination of
+% |\newprocess|\marg{name} and |\processlength|\marg{name}\marg{lifetime}
+% \item |\newprocesswithstateinterval|\marg{process name}\marg{state interval
+% name}: combination of |\newprocess|\marg{process name} and
+% |\stateinterval|\marg{process name}\marg{0}\marg{state interval name}
+% \item |\newprocesswithcrash|\marg{process name}\marg{crash time}\marg{crash
+% name}: creates a process \emph{process name} that runs until \emph{crash
+% time}. The crash is named \emph{crash name}.
+% \item |\sendwithstateinterval|\marg{sender}\marg{send
+% time}\marg{receiver}\marg{receive time}\marg{si name}: combines |\send| and
+% |\stateinterval|.
+% \item |\sendwithstateintervalandname|\marg{sender}\marg{send
+% time}\marg{receiver}\marg{receive time}\marg{si name}\marg{message name}:
+% combines |\sendwithname| and |\stateinterval|
+% \end{itemize}
+
+% \subsection{Advanced usage}
+% \subsubsection{Customising colours}
+%
+% Two parts of the package use colours: colouredboxes and out-of-band messages. By
+% default both are shades of red. We provide commands to change that if desired.
+%
+% \DescribeMacro{\colouredboxcolour}|\colouredboxcolour|\marg{colour} changes the colour
+% used for colouredboxes. Notice that this sets both the background colour (which is
+% a light variant of the provided colour) and the text colour (which uses the
+% provided colour).
+%
+% \DescribeMacro{\oobcolour}|\oobcolour|\marg{colour} changes the colour used for
+% out-of-band messages.
+%
+% \subsubsection{Coordinates}
+% 
+% \paragraph{\TikZ coordinates.}
+% Message passing diagrams are drawn using \TikZ, which means that one can add
+% arbitrary commands to a diagram. In addition, the package defines useful
+% coordinates to refer to. Execution~\ref{mp:ex2} shows the \TikZ coordinate plan
+% overlayed on top of Execution~\ref{mp:ex1}.
+%
+% On \TikZ \(y\)-axis processes are instanciated one unit apart from each other,
+% in their declaration order.
+% To keep the coordinate system simple, processes expand in the negative (e.g.
+% the first process declared is at coordinate \((0, -1)\), the second at \((0,
+% -2)\), etc.).
+% 
+% The \TikZ \(x\)-axis corresponds to the time axis of the diagram. Therefore,
+% e.g. coordinate \((3, -4)\) corresponds to the \nth{3} time step of the
+% \nth{4} process.
+%
+% \paragraph{Named coordinates.}
+% In addition to explicit coordinates explained above, the package names most of
+% the points of interest in the diagram.
+%
+% \subparagraph{Coordinates of processes.}
+% At each process declaration, a coordinate named after the name of the process
+% is created. The coordinate corresponds to the beginning of the corresponding
+% process' timeline (for instance, in Execution~\ref{mp:ex2}, we show coordinate
+% \((\texttt{q})\), that corresponds to the process \(q\)).
+%
+% \subparagraph{Coordinate of states intervals (resp. checkpoints, resp. crashes).}
+% Similarly to processes, each state interval (resp. checkpoint, resp. crashes) creates a
+% coordinate, named after the name of the state interval (resp. checkpoint,
+% resp. crashes), is created. The coordinates refers to the place of the state
+% interval (resp. checkpoint, resp. crashes). For instance, in
+% Execution~\ref{mp:ex2}, we show the coordinates \((\texttt{si\_q\^{}1})\),
+% \((\texttt{c\_p\^{}1})\) and \((\texttt{k})\), that respectively correspond to the state interval
+% \(si_q^1\), the checkpoint \(c_p^1\) and the crash\footnote{The names of
+% crashes are not printed on the figure, although they are internally defined.} \(k\).
+%
+% \subparagraph{Coordinates of annotations.}
+% When an annotation is created, a coordinate is created at the same place, on
+% the process' timeline\footnote{Notice that, using the explicit variant of |annotate|
+% (|annotatexplicit|), the name of the annotation has to be explicitly given.}
+% For instance, in Execution~\ref{mp:ex1}, the annotation \(1+1=2\) is created
+% with the explicit name ``\texttt{note}''. We show the corresponding coordinate in
+% Execution~\ref{mp:ex2}.
+% 
+%
+% \begin{messagepassing}[][Showing \TikZ coordinates][h][mp:ex2]
+% 	\newprocesswithlength{p}{9}
+% 	\newprocesswithlength{q}{9}
+% 	\newprocesswithlength{r}{5}
+% 	\crash{r}{5}{k}
+% 
+% 	\checkpoint{p}{0}{c_p^0}
+% 	\checkpoint{q}{0}{c_q^0}
+% 	\checkpoint{r}{0}{c_r^0}
+% 	\checkpoint{p}{4}{c_p^1}
+% 
+% 	\stateinterval{p}{0}{si_p^0}
+% 	\stateinterval{q}{0}{si_q^0}
+% 	\stateinterval{r}{0}{si_r^0}
+% 
+% 	\sendwithstateinterval{p}{1}{q}{2}{si_q^1}
+% 	\sendwithstateinterval{r}{3}{q}{4}{si_q^2}
+% 	\sendwithstateintervalandname{q}{5}{p}{6}{si_p^1}{\(m\)}
+% 	\sendoutofband{q}{5}{r}{6}{\(m_\mathrm{copy}\)}
+% 	\stateinterval{r}{6}{si_r^0}
+% 	\restart{r}{6}{3}
+% 
+% 	\annotate{r}{8}{restart}
+% 	\annotatexplicit{p}{8}{\(1+1=2\)}{note}
+% 
+% 	\colouredbox{p}{q}{7}{9}{Protocol}
+% 	\drawtimeline{9}
+% 
+%
+%	\fill[fill=white, opacity=0.8] (-1, 0) rectangle (10, -5);
+%
+%	\draw[dotted, gray] (-1,0) grid (10,-5);
+%	\draw[->, thick, red] (0, 0) -- (1, 0) node [anchor=south, text=black] {\((1, 0)\)};
+%	\draw[->, thick, red] (0, 0) -- (0, -1) node [anchor=east, text=black] {\((0, -1)\)};
+%
+%	\draw[fill] (q) circle [radius=.5mm];
+%	\node[anchor=east] at (q) {\((\texttt{q})\)};
+%
+%	\draw[fill] (si_q^1) circle [radius=.5mm];
+%	\node[anchor=east] at (si_q^1) {\((\texttt{si\_q\^{}1})\)};
+%
+%	\draw[fill] (c_p^1) circle [radius=.5mm];
+%	\node[anchor=east] at (c_p^1) {\((\texttt{c\_p\^{}1})\)};
+%
+%	\draw[fill] (k) circle [radius=.5mm];
+%	\node[anchor=east] at (k) {\((\texttt{k})\)};
+%
+%	\draw[fill] (note) circle [radius=.5mm];
+%	\node[anchor=east] at (note) {\((\texttt{note})\)};
+%
+% \end{messagepassing}
+
+% \StopEventually{}
+%
+% \section{Implementation}
+
+%    \begin{macrocode}
+\newcounter{processnb}
+\setcounter{processnb}{0}
+\newcounter{maxtime}
+
+\pgfdeclarelayer{background}
+\pgfsetlayers{background,main}
+
+\newfloat{float_messagepassing}{t b h p}{.mp}
+\floatname{float_messagepassing}{Execution}
+
+\newif\ifmp@vertical\mp@verticalfalse
+\DeclareOption{vertical}{
+	\mp@verticaltrue
+}
+\newif\ifmp@annotatevertical\mp@annotateverticalfalse
+\DeclareOption{annotatevertical}{
+	\mp@annotateverticaltrue
+}
+\ProcessOptions\relax
+
+\ifmp@vertical
+	\newcommand{\mp@processnameanchor}{south}
+	\newcommand{\mp@timeticksanchor}{east}
+	\newcommand{\mp@messagelabelanchor}{south}
+	\newcommand{\mp@stateintervalanchor}{north west}
+	\newcommand{\mp@checkpointanchor}{east}
+	\newcommand{\mp@verticalrotation}{270}
+	\ifmp@annotatevertical
+	\newcommand{\mp@annotaterotation}{270}
+	\else
+	\newcommand{\mp@annotaterotation}{0}
+	\fi
+\else
+	\newcommand{\mp@processnameanchor}{east}
+	\newcommand{\mp@timeticksanchor}{north}
+	\newcommand{\mp@messagelabelanchor}{west}
+	\newcommand{\mp@stateintervalanchor}{south west}
+	\newcommand{\mp@checkpointanchor}{north}
+	\newcommand{\mp@verticalrotation}{0}
+	\newcommand{\mp@annotaterotation}{0}
+\fi
+
+\newcommand{\mp@oobcolour}{red}
+\newcommand{\oobcolour}[1]{
+	\renewcommand\mp@oobcolour{#1}
+}
+
+\newcommand{\mp@colouredboxcolour}{red}
+\newcommand{\colouredboxcolour}[1]{
+	\renewcommand\mp@colouredboxcolour{#1}
+}
+
+\newif\iftimeline
+%    \end{macrocode}
+% 
+
+%\begin{environment}{messagepassing}
+%    \begin{macrocode}
+\ExplSyntaxOn
+%% 1st argument: tikz arguments
+%% 2nd argument: Float caption (turns in floating)
+%% 3rd argument: Float placement (`p` by default)
+%% 4th argument: Float label
+	\NewDocumentEnvironment{messagepassing} {o o o o}
+	{
+		\timelinefalse
+		\setcounter{processnb}{0}
+		\IfNoValueTF{#2} {
+		}{
+			\IfNoValueTF{#3}{
+				\begin{float_messagepassing}[p]
+			} {
+				\begin{float_messagepassing}[#3]
+			}
+			\begin{center}
+		}
+			\IfNoValueTF{#1}{
+				\begin{tikzpicture}[rotate=\mp@verticalrotation]
+			} {
+				\begin{tikzpicture}[rotate=\mp@verticalrotation, #1]
+			}
+	}{
+		%% Draw timeline if boolean is true
+		\iftimeline
+		\begin{pgfonlayer}{background}
+			\setcounter{maxtime}{\@maxtime}
+			\addtocounter{maxtime}{-1}
+			\coordinate (maxtime) at (\@maxtime, 0);
+
+			\addtocounter{processnb}{1}
+			\coordinate (timeline) at (0, -\value{processnb});
+			\draw (timeline) node [anchor=\mp@processnameanchor] {{\it time}};
+			\draw[->] (timeline) -- ($(timeline) + (maxtime)$);
+			\foreach \i in {0,...,\value{maxtime}} {
+				\draw ($(timeline) + (\i, 0) + (0, 0.1)$) -- ($(timeline) + (\i, 0) + (0, -0.1)$) node [anchor=\mp@timeticksanchor] {$\i$};
+			}
+		\end{pgfonlayer}
+		\else
+		\fi
+		\end{tikzpicture}
+		\IfNoValueTF{#2} {
+			\linebreak
+		} {
+			\end{center}
+			\caption{#2}
+				\IfNoValueTF{#4} {
+				}{
+					\label{#4}
+				}
+			\end{float_messagepassing}
+		}
+	}
+\ExplSyntaxOff
+%    \end{macrocode}
+% \end{environment}
+% 
+%    \begin{macrocode}
+%% #1: name
+%% #2: display name
+\NewDocumentCommand{\newprocess}{m o}{
+	\addtocounter{processnb}{1}
+	\coordinate (#1) at (0, -\value{processnb});
+	\draw (#1) node[anchor=\mp@processnameanchor] {\IfValueTF{#2}{#2}{$#1$}};
+}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+%% #1: name
+%% #2: display name
+%% #3: width
+\NewDocumentCommand{\newprocesswithlength}{m o m}{
+	\newprocess{#1}[#2]
+	\processlength{#1}{#3}
+}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+%% #1: name
+%% #2: display name
+%% #3: state interval name
+\NewDocumentCommand{\newprocesswithstateinterval}{m o m}{
+	\newprocess{#1}[#2]
+	\stateinterval{#1}{0}{#3}
+}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+%% #1: name
+%% #2: display name
+%% #3: width
+%% #4: crash name
+\NewDocumentCommand{\newprocesswithcrash}{m o m m}{
+	\newprocess{#1}[#2]{#3}
+	\crash{#1}{#3}{#4}
+}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+%% #1: sender's name
+%% #2: send date
+%% #3: receiver's name
+%% #4: receive date
+\newcommand{\send}[4]{
+	\draw[->] (#1) +(#2, 0) -- ($ (#3) +(#4, 0) $);
+}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+%% #1: sender's name
+%% #2: send date
+%% #3: receiver's name
+%% #4: receive date
+%% #5: message name
+%% #6: message name display options
+\NewDocumentCommand{\sendwithname}{m m m m m o}{
+	\IfValueTF{#6}{
+		\draw[->] (#1) +(#2, 0) -- ($ (#3) +(#4, 0) $) node[anchor=\mp@messagelabelanchor, pos=0.3, #6] {#5};
+	}{
+		\draw[->] (#1) +(#2, 0) -- ($ (#3) +(#4, 0) $) node[anchor=\mp@messagelabelanchor, pos=0.3] {#5};
+	}
+}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+%% #1: process name
+%% #2: process width
+\newcommand{\processlength}[2]{
+	\draw (#1) -- +(#2, 0);
+}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+%% #1: sender's name
+%% #2: send date
+%% #3: receiver's name
+%% #4: receive date
+%% #5: state interval name
+\newcommand{\sendwithstateinterval}[5] {
+	\send{#1}{#2}{#3}{#4}
+	\stateinterval{#3}{#4}{#5}
+}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+%% #1: sender's name
+%% #2: send date
+%% #3: receiver's name
+%% #4: receive date
+%% #5: state interval name
+%% #6: message name
+%% #7: message name display options
+\NewDocumentCommand{\sendwithstateintervalandname}{m m m m m m o} {
+	\sendwithname{#1}{#2}{#3}{#4}{#6}[#7]
+	\stateinterval{#3}{#4}{#5}
+}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+%% #1: sender's name
+%% #2: send date
+%% #3: receiver's name
+%% #4: receive date
+%% #5: OoB message name
+%% #6: OoB message name display options
+\NewDocumentCommand{\sendoutofband}{m m m m m o}{
+	\IfValueTF{#6}{
+		\draw[->, color=\mp@oobcolour] (#1) +(#2, 0) -- ($ (#3) +(#4, 0) $) node[anchor=\mp@messagelabelanchor, pos=0.3, #6] {#5};
+	}{
+		\draw[->, color=\mp@oobcolour] (#1) +(#2, 0) -- ($ (#3) +(#4, 0) $) node[anchor=\mp@messagelabelanchor, pos=0.3] {#5};
+	}
+}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+%% #1: process's name
+%% #2: state interval date
+%% #3: state interval name
+\newcommand{\stateinterval}[3] {
+	\stateintervalspecial{#1}{#2}{#3}{#3}
+}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+%% #1: process's name
+%% #2: state interval date
+%% #3: coordinate name
+%% #4: state interval label
+\newcommand{\stateintervalspecial}[4] {
+	\coordinate (#3) at ($ (#1) +(#2, 0) $);
+	\draw (#3) + (0, 0.1) -- +(0, -0.1) node[anchor=\mp@stateintervalanchor] {$#4$};
+}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+%% #1: process's name
+%% #2: checkpoint date
+%% #3: checkpoint name
+\newcommand{\checkpoint}[3]{
+	\coordinate (#3) at ($ (#1) + (#2, 0) $);
+	\fill (#3) + (-0.05, 0.1) rectangle +(0.05, -0.1);
+	\draw (#3) + (0, -0.1) node[anchor=\mp@checkpointanchor] {$#3$};
+}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%% #1: process's name
+%% #2: checkpoint date
+%% #3: checkpoint coordinate name
+%% #4: checkpoint label
+\newcommand{\checkpointspecial}[4]{
+	\coordinate (#3) at ($ (#1) + (#2, 0) $);
+	\fill (#3) + (-0.05, 0.1) rectangle +(0.05, -0.1);
+	\draw (#3) + (0, -0.1) node[anchor=\mp@checkpointanchor] {#4};
+}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+%% #1: process's name
+%% #2: crash date
+%% #3: crash name
+\newcommand{\crash}[3]{
+	\coordinate (#3) at ($ (#1) + (#2, 0) $);
+	\draw (#3) + (-0.1, -0.1) -- +(0.1, 0.1);
+	\draw (#3) + (0.1, -0.1) -- +(-0.1, 0.1);
+}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+%% #1: process's name
+%% #2: restart date
+%% #3: restart length
+\newcommand{\restart}[3]{
+	\draw (#1) + (#2, 0) --  ($ (#1) + (#2, 0) + (#3, 0) $);
+}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+%% #1: first process's name
+%% #2: second process's name
+%% #3: begining of the grey box
+%% #4: end of the grey box
+%% #5: caption
+\newcommand{\colouredbox}[5]{
+	\begin{pgfonlayer}{background}
+	\fill[color=\mp@colouredboxcolour!20] ($(#1) + (#3, 0)$) rectangle ($(#2) + (#4, 0)$) node[midway, color = \mp@colouredboxcolour, rotate=\mp@annotaterotation]{#5};
+	\end{pgfonlayer}
+}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+%% #1: Timeline length
+\newcommand{\drawtimeline}[1]{
+	\timelinetrue
+	\def\@maxtime{#1}
+}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+%% #1: process's name
+%% #2: annotation date
+%% #3: annotation
+\newcommand{\annotate}[3]{
+	\annotatexplicit{#1}{#2}{#3}{#3}
+}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+%% Same than annotate, but with the coordinate name provided explicitly
+%% #1: process's name
+%% #2: annotation date
+%% #3: annotation
+%% #4: coordinate name
+\newcommand{\annotatexplicit}[4]{
+	\coordinate (#4) at ($ (#1) +(#2, 0.1) $);
+	\draw (#4) node[rotate=\mp@annotaterotation, anchor=south] {#3};
+}
+%    \end{macrocode}

@@ -1,0 +1,216 @@
+%%%
+% Colorilude
+%%%
+\def\filedateColorilude{2024/08/04}%
+\def\fileversionColorilude{0.1}%
+\message{-- \filedateColorilude\space v\fileversionColorilude}%
+%
+\setKVdefault[Colorilude]{Largeur=10,Lignes=10,Legende=false,Coef=0.6,Solution=false,CartonReponse=false,Resultats=false}
+
+\newcommand\dispogpfc[3][]{%
+  \setbox1=\hbox{#2}%
+  \setbox2=\hbox{#3}%
+  \begin{minipage}{\wd2}%
+    #3%
+  \end{minipage}%
+  \quad%
+  \begin{minipage}{\wd1}%
+    #2%
+  \end{minipage}%
+}%
+
+\newcommand\TraceEchiquierColorilude{%
+  \ifluatex
+  \begin{mplibcode}
+    pair A,B,C,D;%pour la grille
+    A=(0,0);
+    B-A=u*\useKV[Colorilude]{Coef}*(\useKV[Colorilude]{Largeur},0);
+    C-B=u*\useKV[Colorilude]{Coef}*(0,-\useKV[Colorilude]{Lignes});
+    D-C=A-B;
+    nblargeur=\useKV[Colorilude]{Largeur};
+    nblignes=\useKV[Colorilude]{Lignes};
+    for k=1 upto nblargeur-1:
+    draw (k/nblargeur)[A,B]--(k/nblargeur)[D,C];
+    endfor;
+    for k=1 upto nblignes-1:
+    draw (k/nblignes)[A,D]--(k/nblignes)[B,C];
+    endfor;
+    draw polygone(A,B,C,D) withpen pensquare scaled 1.5;
+    if \useKV[Colorilude]{Legende}:
+    label.lrt(btex \tiny d'après APMEP etex rotated 90,B);
+    fi;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={boolean Legende;
+      Legende=\useKV[Colorilude]{Legende};
+      nblargeur:=\useKV[Colorilude]{Largeur};
+      nblignes:=\useKV[Colorilude]{Lignes};
+      coef:=\useKV[Colorilude]{Coef};}]
+    pair A,B,C,D;%pour la grille
+    A=(0,0);
+    B-A=u*coef*(nblargeur,0);
+    C-B=u*coef*(0,-nblignes);
+    D-C=A-B;
+    for k=1 upto nblargeur-1:
+    draw (k/nblargeur)[A,B]--(k/nblargeur)[D,C];
+    endfor;
+    for k=1 upto nblignes-1:
+    draw (k/nblignes)[A,D]--(k/nblignes)[B,C];
+    endfor;
+    draw polygone(A,B,C,D) withpen pensquare scaled 1.5;
+    if Legende:
+    label.lrt(\btex \tiny d'après APMEP etex rotated 90,B);
+    fi;
+  \end{mpost}
+  \fi
+}%
+
+\newcommand\TraceEchiquierColoreColorilude{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    pair A,B,C,D;%pour la grille
+    A=(0,0);
+    B-A=u*\useKV[Colorilude]{Coef}*(\useKV[Colorilude]{Largeur},0);
+    C-B=u*\useKV[Colorilude]{Coef}*(0,-\useKV[Colorilude]{Lignes});
+    D-C=A-B;
+    numeric nblargeur,nblignes;
+    nblargeur:=\useKV[Colorilude]{Largeur};
+    nblignes:=\useKV[Colorilude]{Lignes};
+    % on récupère les données de coloriage
+    numeric n;
+    n:=0;
+    numeric nbCases[];
+    color ColorSucc[];
+    for p_=\the\toklisteremplissage:
+    n:=n+1;
+    if (n mod 2)=0:
+    nbCases[n div 2]:=p_;
+    else:
+    ColorSucc[n div 2]:=p_;
+    fi;
+    endfor;
+    % on colorie :)
+    numeric NBCASES;
+    NBCASES:=0;
+    for l=1 upto (n div 2):
+    fill ((unitsquare xscaled (\useKV[Colorilude]{Coef}*u*nbCases[l]) yscaled (\useKV[Colorilude]{Coef}*u)) shifted(\useKV[Colorilude]{Coef}*u*(NBCASES mod nblargeur,-1-(NBCASES div nblargeur)))) withcolor ColorSucc[l-1];
+    NBCASES:=NBCASES+nbCases[l];
+    endfor;
+    % on trace le quadrillage
+    for k=1 upto nblargeur-1:
+    draw (k/nblargeur)[A,B]--(k/nblargeur)[D,C];
+    endfor;
+    for k=1 upto nblignes-1:
+    draw (k/nblignes)[A,D]--(k/nblignes)[B,C];
+    endfor;
+    draw polygone(A,B,C,D) withpen pensquare scaled 1.5;
+    if \useKV[Colorilude]{Legende}:
+    label.lrt(btex \tiny d'après APMEP etex rotated 90,B);
+    fi;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={boolean Legende;
+      Legende=\useKV[Colorilude]{Legende};
+      nblargeur:=\useKV[Colorilude]{Largeur};
+      nblignes:=\useKV[Colorilude]{Lignes};
+      coef:=\useKV[Colorilude]{Coef};
+      numeric n;
+      n:=0;
+      numeric nbCases[];
+      color ColorSucc[];
+      for p_=\the\toklisteremplissage:
+      n:=n+1;
+      if (n mod 2)=0:
+      nbCases[n div 2]:=p_;
+      else:
+      ColorSucc[n div 2]:=p_;
+      fi;
+      endfor;
+    }]
+    pair A,B,C,D;%pour la grille
+    A=(0,0);
+    B-A=u*coef*(nblargeur,0);
+    C-B=u*coef*(0,-nblignes);
+    D-C=A-B;
+    % on colorie :)
+    numeric NBCASES;
+    NBCASES:=0;
+    for l=1 upto (n div 2):
+    fill ((unitsquare xscaled (coef*u*nbCases[l]) yscaled (coef*u)) shifted(coef*u*(NBCASES mod nblargeur,-1-(NBCASES div nblargeur)))) withcolor ColorSucc[l-1];
+    NBCASES:=NBCASES+nbCases[l];
+    endfor;
+    % on trace le quadrillage
+    for k=1 upto nblargeur-1:
+    draw (k/nblargeur)[A,B]--(k/nblargeur)[D,C];
+    endfor;
+    for k=1 upto nblignes-1:
+    draw (k/nblignes)[A,D]--(k/nblignes)[B,C];
+    endfor;
+    draw polygone(A,B,C,D) withpen pensquare scaled 1.5;
+    if Legende:
+    label.lrt(\btex \tiny d'après APMEP etex rotated 90,B);
+    fi;
+  \end{mpost}
+  \fi
+}%
+
+\newtoks\toklisteremplissage%
+\toklisteremplissage{}%
+\def\UpdateRemplissage#1\nil{\addtotok\toklisteremplissage{#1,}}%
+
+\newcommand\ColoriludeEnonce{%
+Pour chaque ligne de la grille, colorie de gauche à droite, de la
+couleur indiquée, le nombre de cases donné par le résultat du calcul.
+}%
+
+\newcommand\ColoriludeListeCouleur[1]{%
+  \setsepchar{ }%
+  \readlist\ListeColoriludeCouleurs{#1}%
+  \foreachitem\compteur\in\ListeColoriludeCouleurs{%
+     \ifodd\compteurcnt\fbox{\begin{minipage}{1em}\centering\text{\ttfamily\bfseries\compteur}\end{minipage}}~\else\compteur\quad\fi%
+  }%
+}%
+
+\newcommand\Colorilude[2][]{%
+  \useKVdefault[Colorilude]%
+  \setKV[Colorilude]{#1}%
+  \setsepchar{\\/ }%
+  \readlist\ListeColorilude{#2}%
+  \ifboolKV[Colorilude]{Solution}{%
+    \toklisteremplissage{}%
+    \foreachitem\compteur\in\ListeColorilude{%
+      \foreachitem\couleur\in\ListeColorilude[\compteurcnt]{%
+        \expandafter\UpdateRemplissage\couleur\nil}%
+    }%
+    \TraceEchiquierColoreColorilude%
+  }{%
+    \dispogpfc{%
+      \TraceEchiquierColorilude%
+    }{%
+      % On cherche le nombre max de colonnes
+      \xdef\ListeColoriludeMax{0}%
+      \xintFor* ##1 in {\xintSeq {1}{\ListeColoriludelen}}\do{%
+        \xintifboolexpr{\listlen\ListeColorilude[##1]>\ListeColoriludeMax}{%
+          \xdef\ListeColoriludeMax{\listlen\ListeColorilude[##1]}%
+        }{}%
+      }%
+      \setlength{\tabcolsep}{0.2\tabcolsep}%
+      \begin{NiceTabular}{*{\fpeval{\ListeColoriludeMax/2}}{rl}}%
+        \xintFor* ##1 in {\xintSeq {1}{\ListeColoriludelen}}\do{%
+          \xintifboolexpr{\listlen\ListeColorilude[##1]==\ListeColoriludeMax}{%
+            \xintFor* ##2 in {\xintSeq {1}{\listlen\ListeColorilude[##1]}}\do{%
+              \xintifForFirst{}{&~}\ifodd##2\fbox{\begin{minipage}{1em}\centering\text{\ttfamily\bfseries\ListeColorilude[##1,##2]}\end{minipage}}\ifboolKV[Colorilude]{Resultats}{\fbox{\begin{minipage}{1em}\centering\ttfamily\bfseries \phantom{R}\end{minipage}}}{}~\else\ifboolKV[Colorilude]{CartonReponse}{\pointilles[25pt]}{$\ListeColorilude[##1,##2]$}\fi%
+            }%
+          }{%
+            \xintFor* ##2 in {\xintSeq {1}{\listlen\ListeColorilude[##1]}}\do{%
+              \xintifForFirst{}{&~}\ifodd##2\fbox{\begin{minipage}{1em}\centering\text{\ttfamily\bfseries\ListeColorilude[##1,##2]}\end{minipage}}\ifboolKV[Colorilude]{Resultats}{\fbox{\begin{minipage}{1em}\centering\ttfamily\bfseries \phantom{R}\end{minipage}}}{}~\else\ifboolKV[Colorilude]{CartonReponse}{\pointilles[25pt]}{$\ListeColorilude[##1,##2]$}\fi%
+            }%
+            &\hbox to5pt{}&\Cdots%
+          }%
+          \\[0.5em]%
+        }%
+      \end{NiceTabular}%
+    }%
+  }%
+}%

@@ -1,0 +1,49 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2010-2014 by Ulrich M. Schwarz
+% Copyright (C) 2019      by Frank Mittelbach
+% Copyright (C) 2020-     by Yukai Chou
+%
+% This file may be distributed and/or modified under the conditions of
+% the LaTeX Project Public License, version 1.3c.
+% The license can be obtained from
+% http://www.latex-project.org/lppl/lppl-1-3c.txt
+%
+%\fi
+%
+%\iffalse (hide this from DocInput)
+%<*thmbox>
+%\fi
+% The \pkg{thmbox} package does something else: instead of having a separate
+% environment, we have to use a command different from
+% |\newtheorem| to get the boxed style. Fortunately,
+% \thmtools stores the command as |\thmt@theoremdefiner|, so we
+% can modify it. (One of the perks if extension writer and framework writer
+% are the same person.) So, in contrast to the previous example, this time
+% we need to do something before the actual |\newtheorem| is
+% called.
+%    \begin{macrocode}
+\define@key{thmdef}{thmbox}[L]{%
+  \thmt@trytwice{%
+    \let\oldproof=\proof
+    % backup \\proof, gh32
+    \expandafter\let\csname old\@backslashchar proof\expandafter\endcsname
+                    \csname    \@backslashchar proof\endcsname
+    \let\oldendproof=\endproof
+    \let\oldexample=\example
+    \let\oldendexample=\endexample
+    \RequirePackage[nothm]{thmbox}
+    \let\proof=\oldproof
+    % restore thmbox's change to \\proof, gh32
+    \expandafter\let\csname    \@backslashchar proof\expandafter\endcsname
+                    \csname old\@backslashchar proof\endcsname
+    \let\endproof=\oldendproof
+    \let\example=\oldexample
+    \let\endexample=\oldendexample
+    \def\thmt@theoremdefiner{\newboxtheorem[#1]}%
+  }{}%
+}%
+%    \end{macrocode}
+%\iffalse (hide this from DocInput)
+%</thmbox>
+%\fi

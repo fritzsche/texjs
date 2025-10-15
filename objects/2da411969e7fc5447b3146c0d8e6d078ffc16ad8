@@ -1,0 +1,58 @@
+%%%
+% Ecriture des nombres en lettres
+%%%
+\def\filedateEcrireLettres{2024/08/04}%
+\def\fileversionEcrireLettres{0.1}%
+\message{-- \filedateEcrireLettres\space v\fileversionEcrireLettres}%
+%
+\setKVdefault[ClesEcriture]{Math=false,Majuscule=false,E=false,Tradition=false,Zero=false}%
+
+\newcommand\EcriturePluriel[1]{%
+  \xintifboolexpr{#1 > 1}{s}{}%
+}%
+
+\newcommand\EcritureDecimale{%
+  \StrLen{\ListeEcriture[2]}[\LongueurDecimale]%
+  \xintifboolexpr{\LongueurDecimale == 6}{%
+    ~millionième\EcriturePluriel{\ListeEcriture[2]}%
+  }{\xintifboolexpr{\LongueurDecimale == 5}{%
+     ~cent-millième\EcriturePluriel{\ListeEcriture[2]}%
+    }{\xintifboolexpr{\LongueurDecimale == 4}{%
+        ~dix-millième\EcriturePluriel{\ListeEcriture[2]}%
+      }{\xintifboolexpr{\LongueurDecimale == 3}{%
+          ~millième\EcriturePluriel{\ListeEcriture[2]}%
+        }{\xintifboolexpr{\LongueurDecimale == 2}{%
+            ~centième\EcriturePluriel{\ListeEcriture[2]}%
+          }{\xintifboolexpr{\LongueurDecimale == 1}{%
+              ~dixième\EcriturePluriel{\ListeEcriture[2]}%
+            }{}%
+          }%
+        }%
+      }%
+    }%
+  }%
+}%
+
+\newcommand\Ecriture[2][]{%
+  \useKVdefault[ClesEcriture]%
+  \setKV[ClesEcriture]{#1}%
+  \ifboolKV[ClesEcriture]{Tradition}{%
+    \fmtcountsetoptions{french={dash or space=traditional}}%
+  }{%
+    \fmtcountsetoptions{french={dash or space=always}}%
+  }%
+  \setsepchar{.}%
+  \readlist*\ListeEcriture{#2}%
+  \xintifboolexpr{\ListeEcriturelen == 2}{%
+    \ifboolKV[ClesEcriture]{Majuscule}{%
+      \ifboolKV[ClesEcriture]{Zero}{}{\Numberstringnum{\ListeEcriture[1]}}\ifboolKV[ClesEcriture]{Math}{\ifboolKV[ClesEcriture]{Zero}{}{\ifboolKV[ClesEcriture]{E}{e}{}~unité\EcriturePluriel{\ListeEcriture[1]} et }}{\ifboolKV[ClesEcriture]{Tradition}{ virgule }{-virgule-}}\numberstringnum{\ListeEcriture[2]}\ifboolKV[ClesEcriture]{Math}{\EcritureDecimale}{}%
+    }{%
+      \ifboolKV[ClesEcriture]{Zero}{}{\numberstringnum{\ListeEcriture[1]}}\ifboolKV[ClesEcriture]{Math}{\ifboolKV[ClesEcriture]{Zero}{}{\ifboolKV[ClesEcriture]{E}{e}{}~unité\EcriturePluriel{\ListeEcriture[1]} et }}{\ifboolKV[ClesEcriture]{Tradition}{ virgule }{-virgule-}}\numberstringnum{\ListeEcriture[2]}\ifboolKV[ClesEcriture]{Math}{\EcritureDecimale}{}%
+    }}{%
+    \ifboolKV[ClesEcriture]{Majuscule}{%
+      \Numberstringnum{\ListeEcriture[1]}\ifboolKV[ClesEcriture]{Math}{\ifboolKV[ClesEcriture]{E}{e}{}~unité\EcriturePluriel{\ListeEcriture[1]}}{}%
+    }{%
+      \numberstringnum{\ListeEcriture[1]}\ifboolKV[ClesEcriture]{Math}{\ifboolKV[ClesEcriture]{E}{e}{}~unité\EcriturePluriel{\ListeEcriture[1]}}{}%
+    }%
+  }%
+}%

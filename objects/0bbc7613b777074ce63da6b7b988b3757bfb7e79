@@ -1,0 +1,5176 @@
+%%%
+% Visual Pattern
+%%%
+\def\filedatePattern{2025/06/30}%
+\def\fileversionPattern{0.1a}%
+\message{-- \filedatePattern\space v\fileversionPattern}%
+%
+\setKVdefault[Pattern]{Type=1,Etape=3,Base=carre,Basea=disque,Couleur={},Echelle={},Tableau=false,TableauV=false,Grille=false,Solution=false,CouleurSolution={},Calcul=false,Inverse=false,Formule=false,Litteral={},Resultat=false}
+
+\makeatletter
+\NewDocumentCommand\VisualPattern{o}{%
+  \useKVdefault[Pattern]%
+  \setKV[Pattern]{#1}%
+  \edef\PfM@NumType{\useKV[Pattern]{Type}}%
+  \edef\etape{1}%
+  \ifboolKV[Pattern]{Grille}{\edef\PfMRetiensEtape{\useKV[Pattern]{Etape}}\setKV[Pattern]{Tableau=false,TableauV=false}}{}%
+  \ifboolKV[Pattern]{Tableau}{%
+    \edef\PfM@NumEtapeTotal{\useKV[Pattern]{Etape}}%
+    \begin{tabular}{*{\PfM@NumEtapeTotal}{c}}
+      \xintFor* ##1 in{\xintSeq{1}{\useKV[Pattern]{Etape}}}\do{%
+      \ifcsname BuildPattern@\PfM@NumType\endcsname%
+      \setKV[Pattern]{Etape=##1}
+      \csname BuildPattern@\PfM@NumType\endcsname%
+      \fi%
+      \xintifForLast{\\}{&}
+                           }%\\
+      \xintFor* ##9 in{\xintSeq{1}{\PfM@NumEtapeTotal}}\do{%
+      Étape \num{##9}\xintifForLast{\\}{&}%\\
+      }%
+    \end{tabular}
+  }{%
+    \ifboolKV[Pattern]{TableauV}{%
+      \edef\PfM@NumEtapeTotal{\useKV[Pattern]{Etape}}%
+      \begin{tabular}{rc}
+        \xintFor* ##1 in{\xintSeq{1}{\useKV[Pattern]{Etape}}}\do{%
+        Étape \num{##1}&\\
+        &\ifcsname BuildPattern@\PfM@NumType\endcsname%
+        \setKV[Pattern]{Etape=##1}
+        \csname BuildPattern@\PfM@NumType\endcsname%
+        \fi%
+        \\
+        }%
+      \end{tabular}
+    }{%
+      \ifcsname BuildPattern@\PfM@NumType\endcsname%
+        \csname BuildPattern@\PfM@NumType\endcsname%
+      \fi%
+    }%
+  }%
+}%
+
+\expandafter\def\csname BuildPattern@1\endcsname{\BuildPatternUn{\useKV[Pattern]{Base}}}
+\expandafter\def\csname BuildPattern@1a\endcsname{\ifemptyKV[Pattern]{Echelle}{\BuildPatternUna}{\BuildPatternUna[\useKV[Pattern]{Echelle}]}}%
+\expandafter\def\csname BuildPattern@2\endcsname{\BuildPatternDeux}%
+\expandafter\def\csname BuildPattern@3\endcsname{\BuildPatternTroisa{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@4\endcsname{\BuildPatternQuatrea{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@5\endcsname{\BuildPatternCinqa{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@6\endcsname{\ifemptyKV[Pattern]{Echelle}{\BuildPatternSix}{\BuildPatternSix[\useKV[Pattern]{Echelle}]}}%
+\expandafter\def\csname BuildPattern@7\endcsname{\BuildPatternSepta{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@8\endcsname{\BuildPatternHuita{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@9\endcsname{\BuildPatternNeufa{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@10\endcsname{\BuildPatternDixa{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@11\endcsname{\BuildPatternOnzea{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@12\endcsname{\BuildPatternDouzea{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@13\endcsname{\BuildPatternTreizea{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@14\endcsname{\BuildPatternQuatorzea{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@15\endcsname{\BuildPatternQuinzea{\useKV[Pattern]{Base}}{\useKV[Pattern]{Basea}}}%
+\expandafter\def\csname BuildPattern@16\endcsname{\BuildPatternSeizea{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@17\endcsname{\BuildPatternDixSepta{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@18\endcsname{\BuildPatternDixHuita{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@19\endcsname{\BuildPatternDixNeufa{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@20\endcsname{\BuildPatternVingta{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@21\endcsname{\BuildPatternVingtEtUna{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@22\endcsname{\BuildPatternTreizea{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@23\endcsname{\BuildPatternVingtTroisa{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@24\endcsname{\BuildPatternVingtQuatrea{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@25\endcsname{\BuildPatternVingtCinqa{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@26\endcsname{\BuildPatternVingtSixa{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@27\endcsname{\BuildPatternVingtSepta{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@28\endcsname{\BuildPatternVingtHuit}%
+\expandafter\def\csname BuildPattern@29\endcsname{Pattern 29 non reproduit.}%
+\expandafter\def\csname BuildPattern@30\endcsname{\BuildPatternTrentea{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@31\endcsname{\BuildPatternTrenteEtUna{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@32\endcsname{\BuildPatternTrenteDeuxa{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@33\endcsname{\BuildPatternTrenteTroisa{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@34\endcsname{\BuildPatternTrenteQuatrea{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@35\endcsname{\BuildPatternTrenteCinq}%
+\expandafter\def\csname BuildPattern@36\endcsname{\BuildPatternTrenteSix}%
+\expandafter\def\csname BuildPattern@37\endcsname{\ifemptyKV[Pattern]{Echelle}{\BuildPatternTrenteSept}{\BuildPatternTrenteSept[\useKV[Pattern]{Echelle}]}}%
+\expandafter\def\csname BuildPattern@38\endcsname{\ifemptyKV[Pattern]{Echelle}{\BuildPatternSix}{\BuildPatternSix[\useKV[Pattern]{Echelle}]}}%
+\expandafter\def\csname BuildPattern@39\endcsname{\BuildPatternTrenteNeuf}%
+\expandafter\def\csname BuildPattern@40\endcsname{\BuildPatternQuarante}%
+\expandafter\def\csname BuildPattern@41\endcsname{Pattern 41 non reproduit.}%
+\expandafter\def\csname BuildPattern@42\endcsname{\ifemptyKV[Pattern]{Echelle}{\BuildPatternQuaranteDeux}{\BuildPatternQuaranteDeux[\useKV[Pattern]{Echelle}]}}%
+\expandafter\def\csname BuildPattern@43\endcsname{\BuildPatternQuaranteTroisa{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@44\endcsname{\BuildPatternQuaranteQuatrea{hexagonea}}%
+\expandafter\def\csname BuildPattern@45\endcsname{\BuildPatternQuaranteCinqa{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@46\endcsname{\BuildPatternQuaranteSix}%
+\expandafter\def\csname BuildPattern@47\endcsname{Pattern 47 non reproduit.}%
+\expandafter\def\csname BuildPattern@48\endcsname{\BuildPatternQuaranteHuit}%
+\expandafter\def\csname BuildPattern@49\endcsname{\BuildPatternQuaranteNeuf}%
+\expandafter\def\csname BuildPattern@50\endcsname{\BuildPatternCinquante}%
+\expandafter\def\csname BuildPattern@50a\endcsname{\BuildPatternCinquantea}%
+\expandafter\def\csname BuildPattern@50b\endcsname{\BuildPatternCinquanteb}%
+\expandafter\def\csname BuildPattern@50c\endcsname{\BuildPatternCinquantec}%
+\expandafter\def\csname BuildPattern@50d\endcsname{\BuildPatternCinquanted}%
+\expandafter\def\csname BuildPattern@50e\endcsname{\BuildPatternCinquantee}%
+\expandafter\def\csname BuildPattern@50f\endcsname{\BuildPatternCinquantef}%
+\expandafter\def\csname BuildPattern@50g\endcsname{\BuildPatternCinquanteg}%
+\expandafter\def\csname BuildPattern@51\endcsname{\BuildPatternCinquanteEtUna{hexagonea}}%
+\expandafter\def\csname BuildPattern@52\endcsname{\BuildPatternCinquanteDeux}%
+\expandafter\def\csname BuildPattern@53\endcsname{\ifemptyKV[Pattern]{Echelle}{\BuildPatternCinquanteTrois}{\BuildPatternCinquanteTrois[\useKV[Pattern]{Echelle}]}}%
+\expandafter\def\csname BuildPattern@54\endcsname{\ifemptyKV[Pattern]{Echelle}{\BuildPatternCinquanteQuatre}{\BuildPatternCinquanteQuatre[\useKV[Pattern]{Echelle}]}}%
+\expandafter\def\csname BuildPattern@55\endcsname{\ifemptyKV[Pattern]{Echelle}{\BuildPatternCinquanteCinq}{\BuildPatternCinquanteCinq[\useKV[Pattern]{Echelle}]}}%
+\expandafter\def\csname BuildPattern@56\endcsname{\ifemptyKV[Pattern]{Echelle}{\BuildPatternCinquanteSix}{\BuildPatternCinquanteSix[\useKV[Pattern]{Echelle}]}}%
+\expandafter\def\csname BuildPattern@56a\endcsname{\ifemptyKV[Pattern]{Echelle}{\BuildPatternCinquanteSixa}{\BuildPatternCinquanteSixa[\useKV[Pattern]{Echelle}]}}%
+\expandafter\def\csname BuildPattern@57\endcsname{\ifemptyKV[Pattern]{Echelle}{\BuildPatternCinquanteSept}{\BuildPatternCinquanteSept[\useKV[Pattern]{Echelle}]}}%
+\expandafter\def\csname BuildPattern@58\endcsname{\ifemptyKV[Pattern]{Echelle}{\BuildPatternCinquanteHuit}{\BuildPatternCinquanteHuit[\useKV[Pattern]{Echelle}]}}%
+\expandafter\def\csname BuildPattern@59\endcsname{\BuildPatternCinquanteNeufa{\useKV[Pattern]{Base}}{\useKV[Pattern]{Basea}}}%
+\expandafter\def\csname BuildPattern@60\endcsname{\BuildPatternSoixantea{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@61\endcsname{Pattern 61 non reproduit.}%
+\expandafter\def\csname BuildPattern@62\endcsname{Pattern 62 non reproduit.}%
+\expandafter\def\csname BuildPattern@63\endcsname{Pattern 63 non reproduit.}%
+\expandafter\def\csname BuildPattern@64\endcsname{Pattern 64 non reproduit.}%
+\expandafter\def\csname BuildPattern@65\endcsname{Pattern 65 non reproduit.}%
+\expandafter\def\csname BuildPattern@66\endcsname{\BuildPatternSoixanteSix}%
+\expandafter\def\csname BuildPattern@67\endcsname{Pattern 67 non reproduit.}%
+\expandafter\def\csname BuildPattern@68\endcsname{\BuildPatternSoixanteHuita{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@69\endcsname{\BuildPatternSoixanteNeufa{hexagonea}}%
+\expandafter\def\csname BuildPattern@70\endcsname{Pattern 70 non reproduit.}%
+\expandafter\def\csname BuildPattern@71\endcsname{Pattern 71 non reproduit.}%
+\expandafter\def\csname BuildPattern@72\endcsname{\BuildPatternSoixanteDouzea{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@73\endcsname{Pattern 73 non reproduit.}%
+\expandafter\def\csname BuildPattern@74\endcsname{Pattern 74 non reproduit.}%
+\expandafter\def\csname BuildPattern@75\endcsname{\BuildPatternSoixanteQuinzea{dot}}%
+\expandafter\def\csname BuildPattern@76\endcsname{\BuildPatternSoixanteSeizea{dot}}%
+\expandafter\def\csname BuildPattern@77\endcsname{\BuildPatternSoixanteDixSept}%
+\expandafter\def\csname BuildPattern@77a\endcsname{\ifemptyKV[Pattern]{Echelle}{\BuildPatternSoixanteDixSepta}{\BuildPatternSoixanteDixSepta[\useKV[Pattern]{Echelle}]}}%
+\expandafter\def\csname BuildPattern@77b\endcsname{\BuildPatternSoixanteDixSeptb}%
+\expandafter\def\csname BuildPattern@78\endcsname{\BuildPatternSoixanteDixHuit}%
+\expandafter\def\csname BuildPattern@78a\endcsname{\ifemptyKV[Pattern]{Echelle}{\BuildPatternSoixanteDixHuita}{\BuildPatternSoixanteDixHuita[\useKV[Pattern]{Echelle}]}}%
+\expandafter\def\csname BuildPattern@78b\endcsname{\BuildPatternSoixanteDixHuitb}%
+\expandafter\def\csname BuildPattern@79\endcsname{\BuildPatternSoixanteDixNeuf}%
+\expandafter\def\csname BuildPattern@80\endcsname{Pattern 80 non reproduit.}%
+\expandafter\def\csname BuildPattern@81\endcsname{Pattern 81 non reproduit.}%
+\expandafter\def\csname BuildPattern@82\endcsname{\BuildPatternQuatreVingtDeux}%
+\expandafter\def\csname BuildPattern@83\endcsname{\BuildPatternQuatreVingtTrois}%
+\expandafter\def\csname BuildPattern@84\endcsname{\BuildPatternQuatreVingtQuatre}%
+\expandafter\def\csname BuildPattern@85\endcsname{\BuildPatternQuatreVingtCinq{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@86\endcsname{\BuildPatternQuatreVingtSix{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@87\endcsname{\BuildPatternQuatreVingtSept{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@88\endcsname{\BuildPatternQuatreVingtHuit{\useKV[Pattern]{Base}}}%
+%Ajout du 3/7/25
+\expandafter\def\csname BuildPattern@89\endcsname{Pattern 89 non reproduit.}%
+\expandafter\def\csname BuildPattern@90\endcsname{\BuildPatternQuatreVingtDix{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@91\endcsname{\BuildPatternQuatreVingtOnze{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@92\endcsname{\BuildPatternQuatreVingtDouze{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@93\endcsname{\BuildPatternQuatreVingtTreize{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@94\endcsname{\BuildPatternQuatreVingtQuatorze{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@95\endcsname{\BuildPatternQuatreVingtQuinze{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@95a\endcsname{\BuildPatternQuatreVingtQuinzea{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@96\endcsname{\BuildPatternQuatreVingtSeize{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@97\endcsname{\BuildPatternQuatreVingtDixSept{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@98\endcsname{\BuildPatternQuatreVingtDixHuit}%
+\expandafter\def\csname BuildPattern@99\endcsname{\BuildPatternQuatreVingtDixNeuf}%
+\expandafter\def\csname BuildPattern@99a\endcsname{\BuildPatternQuatreVingtDixNeufa}%
+\expandafter\def\csname BuildPattern@100\endcsname{\BuildPatternCinquante}%
+\expandafter\def\csname BuildPattern@101\endcsname{\BuildPatternCentUn{\useKV[Pattern]{Base}}}%
+%\expandafter\def\csname BuildPattern@101*\endcsname{\BuildPatternCentUn*{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@102\endcsname{\BuildPatternCentDeux{\useKV[Pattern]{Base}}}%
+%\expandafter\def\csname BuildPattern@102*\endcsname{\BuildPatternCentDeux*{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@103\endcsname{\BuildPatternCentTrois{\useKV[Pattern]{Base}}}%
+%\expandafter\def\csname BuildPattern@103*\endcsname{\BuildPatternCentTrois*{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@104\endcsname{\BuildPatternCentQuatre{\useKV[Pattern]{Base}}}%
+%\expandafter\def\csname BuildPattern@104*\endcsname{\BuildPatternCentQuatre*{\useKV[Pattern]{Base}}}%
+\expandafter\def\csname BuildPattern@155\endcsname{\BuildPatternCentCinquanteCinq}%
+\expandafter\def\csname BuildPattern@156\endcsname{\BuildPatternCentCinquanteSix}%
+\expandafter\def\csname BuildPattern@254\endcsname{\BuildPatternDeuxCentCinquanteQuatre}%
+\expandafter\def\csname BuildPattern@284\endcsname{\BuildPatternDeuxCentQuatreVingtQuatre}%
+\makeatother
+
+%\setsepchar{,}\ignoreemptyitems
+%\readlist\ListePattern{1,1a,2,3,4,5,6,7,8,9,10,11,12,13,14,16,17,18,19,20,21,22,23}
+%\reademptyitems
+
+\def\BuildPatternCode{%
+  input PfCPattern;
+  %
+  u:=5mm;
+  %
+  Etape:=\useKV[Pattern]{Etape};
+  %
+  color CouleurFond;
+  \ifemptyKV[Pattern]{Couleur}{%
+    CouleurFond=LightSteelBlue;
+  }{%
+    CouleurFond=\useKV[Pattern]{Couleur};
+  }%
+  pair depla;
+  %
+  extra_endfig := "\ifemptyKV[Pattern]{Echelle}{}{picture Retiens;Retiens=currentpicture;currentpicture:=nullpicture;draw Retiens scaled \useKV[Pattern]{Echelle};}" & extra_endfig;
+}%
+%
+\def\BuildPatternCodeA#1{%
+  picture TestA;
+  if picture #1:
+    TestA=#1;
+  else:
+    TestA=image(label(TEX(#1),(0,0)););
+  fi;
+  if unknown larg:
+    larg:=(abs(lrcorner TestA-llcorner TestA));
+  fi;
+  if unknown haut:
+    haut:=(abs(urcorner TestA-lrcorner TestA));
+  fi;
+}%
+\def\BuildPatternCodeB{%
+  vardef AV=
+  save $; pair $;
+  $=Arela[rela-1]+u*(1,0);
+  $
+enddef;
+%
+vardef RE=
+  save $; pair $;
+  $=Arela[rela-1]+u*(-1,0);
+  $
+enddef;
+%
+vardef MO=
+  save $; pair $;
+  $=Arela[rela-1]+u*(0,1);
+  $
+enddef;
+%
+vardef DE=
+  save $; pair $;
+  $=Arela[rela-1]+u*(0,-1);
+  $
+enddef;
+%
+vardef polygonerela(text t)=
+  pair Arela[];
+  rela:=0;
+  for pliste=t:
+    rela:=rela+1;
+    if pair pliste:
+      Arela[rela]=pliste;
+    else:
+      Arela[rela]=scantokens(pliste);
+    fi;
+  endfor;
+  Arela[rela+1]:=Arela[1];
+  save $;path $;
+  $=Arela[1]--
+    for k=2 upto rela:
+      Arela[k]--
+    endfor
+  cycle;
+  $
+  enddef;
+  u:=5mm;
+  Etape:=\useKV[Pattern]{Etape};
+  path cc[];
+  trace grille(0.5) withcolor 0.8white;
+  color CouleurEtape,CouleurSol;
+  \ifemptyKV[Pattern]{Couleur}{CouleurEtape=Purple;}{CouleurEtape=\useKV[Pattern]{Couleur};}
+  \ifemptyKV[Pattern]{CouleurSolution}{CouleurSol=Evidence;}{CouleurSol=\useKV[Pattern]{CouleurSolution};}
+   %
+  extra_endfig := "\ifemptyKV[Pattern]{Echelle}{}{picture Retiens;Retiens=currentpicture;currentpicture:=nullpicture;draw Retiens scaled \useKV[Pattern]{Echelle};}" & extra_endfig;
+  }%
+\def\BuildPatternCodeC{%
+    u:=5mm;
+    pair Apat[],Cpat,Dpat;
+    %
+    vardef AffichageEtape(suffix pos)(expr nb,paspat,bpat,cpat)=
+      if nb<bpat:
+        label.pos(TEX("Étape "&decimal(nb+paspat)),cpat);
+      else:
+        if \useKV[Pattern]{Solution}:
+          label.pos(TEX("Étape "&decimal(nb+paspat)),cpat);
+        else:
+          label.pos(TEX("Étape "&decimal(nb+paspat)&" ?"),cpat);
+        fi;
+      fi;
+    enddef;
+    %
+  vardef AV=
+  save $; pair $;
+  $=Arela[rela-1]+u*(1,0);
+  $
+enddef;
+%
+vardef RE=
+  save $; pair $;
+  $=Arela[rela-1]+u*(-1,0);
+  $
+enddef;
+%
+vardef MO=
+  save $; pair $;
+  $=Arela[rela-1]+u*(0,1);
+  $
+enddef;
+%
+vardef DE=
+  save $; pair $;
+  $=Arela[rela-1]+u*(0,-1);
+  $
+enddef;
+%
+vardef polygonerela(text t)=
+  pair Arela[];
+  rela:=0;
+  for pliste=t:
+    rela:=rela+1;
+    if pair pliste:
+      Arela[rela]=pliste;
+    else:
+      Arela[rela]=scantokens(pliste);
+    fi;
+  endfor;
+  Arela[rela+1]:=Arela[1];
+  save $;path $;
+  $=Arela[1]--
+    for k=2 upto rela:
+      Arela[k]--
+    endfor
+  cycle;
+  $
+  enddef;
+  %
+  vardef GrillePattern=
+    Dpat=(urcorner currentpicture)+(u*(1,1));
+    currentpicture:=nullpicture;
+    k:=0;
+    forever:exitif xpart(k*(u,0))>xpart(Dpat);
+    trace ((0,0)--(0,ypart(Dpat))) shifted (k*(u,0)) withcolor 0.7white;
+    k:=k+1;
+    endfor;
+    k:=0;
+    forever:exitif ypart(k*(0,u))>ypart(Dpat);
+    trace ((0,0)--(xpart(Dpat),0)) shifted (k*(0,u)) withcolor 0.7white;
+    k:=k+1;
+    endfor;
+  enddef;
+  %
+  vardef AffichagePattern(expr patd,patf)=
+    for k=patd upto patf:
+      if k<patf:
+        fill cc[k] withcolor CouleurEtape withtransparency (1,0.35);
+        trace cc[k] withpen pencircle scaled 1.1 withcolor CouleurEtape;
+      else:
+        if \useKV[Pattern]{Solution}:
+          fill cc[k] withcolor CouleurSol withtransparency (1,0.35);
+          trace cc[k] withpen pencircle scaled 1.1 withcolor CouleurSol;
+        fi;
+      fi;
+    endfor;
+  enddef;
+  %
+  Etape:=\useKV[Pattern]{Etape};
+  path cc[];
+  color CouleurEtape,CouleurSol;
+  \ifemptyKV[Pattern]{Couleur}{CouleurEtape=Purple;}{CouleurEtape=\useKV[Pattern]{Couleur};}
+  \ifemptyKV[Pattern]{CouleurSolution}{CouleurSol=Evidence;}{CouleurSol=\useKV[Pattern]{CouleurSolution};}
+   %
+  extra_endfig := "\ifemptyKV[Pattern]{Echelle}{}{picture Retiens;Retiens=currentpicture;currentpicture:=nullpicture;draw Retiens scaled \useKV[Pattern]{Echelle};}" & extra_endfig;
+  }%
+\def\BuildPatternCodeIso{%
+  u:=2.5mm;
+  pair ptpattern[];
+    pair Apat,Bpat,Cpat,Dpat;
+    %
+    vardef GrillePatternIso=
+    coinbg:=(llcorner currentpicture)+(u*(-alpha,-0.5));
+    coinbd:=(lrcorner currentpicture)+(u*(alpha,-0.5));
+    coinhd:=(urcorner currentpicture)+(u*(alpha,0.5));
+    coinhg:=(ulcorner currentpicture)+(u*(-alpha,0.5));
+    currentpicture:=nullpicture;
+    k:=0;
+    forever:exitif ypart(k*(0,u))>ypart(coinhg);
+        trace ((coinbg+u*(-alpha,0))--(coinbg+u*(-alpha,0)+u*100*(alpha,0.5))) shifted (k*(0,u)) withcolor 0.7white;
+    k:=k+1;
+    endfor;
+    k:=0;
+    forever:exitif xpart(k*(u*alpha,0))>xpart(coinbd);
+    trace ((coinbg+u*(alpha,0))--(coinbg+u*(alpha,0)+u*100*(alpha,0.5))) shifted (k*(2*alpha*u,0)) withcolor 0.7white;
+    k:=k+1;
+    endfor;
+    k:=0;
+    forever:exitif ypart(k*(0,u))>ypart(coinhg);
+    trace ((coinbg+u*(alpha,0))--(coinbg+u*(alpha,0)+u*100*(alpha,-0.5))) shifted (k*(0,u)) withcolor 0.7white;
+    k:=k+1;
+    endfor;
+    k:=0;
+    forever:exitif xpart(k*(u*alpha,0))>xpart(2[coinbg,coinbd]);
+    trace ((coinbg+u*(-alpha,0))--(coinbg+u*(-alpha,0)+u*100*(-alpha,0.5))) shifted (k*(2*alpha*u,0)) withcolor 0.7white;
+    k:=k+1;
+    endfor;
+    %
+    clip currentpicture to polygone(coinbg,coinbd,coinhd,coinhg);
+  enddef;
+  %
+  vardef AffichagePattern(expr patd,patf)=
+    for k=patd upto patf:
+      if k<patf:
+         trace cc[k];
+      else:
+        if \useKV[Pattern]{Solution}:
+          trace cc[k];
+        fi;
+      fi;
+    endfor;
+  enddef;
+  %
+  Etape:=\useKV[Pattern]{Etape};
+  picture cc[];
+  color CouleurEtape,CouleurSol;
+  \ifemptyKV[Pattern]{Couleur}{CouleurEtape=Purple;}{CouleurEtape=\useKV[Pattern]{Couleur};}
+  \ifemptyKV[Pattern]{CouleurSolution}{CouleurSol=Evidence;}{CouleurSol=\useKV[Pattern]{CouleurSolution};}
+   % 
+   picture cadrecube,cadrecubesol,TypeCube;
+   pair A[];
+   alpha:=cosd(30);
+   beta:=sind(30);
+   A1=u*(0,2*(Etape+1)*beta);
+   A2-A1=u*(alpha,-beta);
+   A3-A2=u*(alpha,beta);
+   A4-A3=u*(0,2*beta);
+   A5-A4=u*(-alpha,beta);
+   A6-A5=u*(-alpha,-beta);
+   A7-A6=u*(alpha,-beta);
+   boolean Solution;
+   Solution=\useKV[Pattern]{Solution};
+   cadrecube=image(%
+     fill polygone(A1,A2,A3,A4,A5,A6) withcolor CouleurEtape;
+     drawoptions(withcolor 0.7white);
+     trace polygone(A1,A2,A3,A4,A5,A6);
+     trace A6--A7--A2;
+     trace A7--A4;
+     drawoptions();
+   );
+   cadrecubesol=image(%
+     fill polygone(A1,A2,A3,A4,A5,A6) withcolor CouleurSol;
+     drawoptions(withcolor 0.7white);
+     trace polygone(A1,A2,A3,A4,A5,A6);
+     trace A6--A7--A2;
+     trace A7--A4;
+     drawoptions();
+   );  
+   % 
+  extra_endfig := "\ifemptyKV[Pattern]{Echelle}{}{picture Retiens;Retiens=currentpicture;currentpicture:=nullpicture;draw Retiens scaled \useKV[Pattern]{Echelle};}" & extra_endfig;
+}%
+% 104
+\NewDocumentCommand\BuildPatternCentQuatre{m}{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,1);
+        for k=0 upto Etape-1:
+         cc[k]=polygonerela(Apat[k],"AV","AV","AV","MO","MO" for l=1 upto k:,"AV" endfor for l=0 upto 6+2*k:,"MO" endfor for l=0 upto 2+k:,"RE" endfor);
+          trace cc[k];
+          Apat[k+1]:=lrcorner cc[k]+(u*(2,0));
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+          AffichageEtape(lrt)(k,1,Etape-1,llcorner cc[k]);
+        endfor;
+      \end{Geometrie}
+    }{%
+      \begin{mplibcode}%
+        \BuildPatternCode
+        ecartcube:=1pt;
+        \BuildPatternCodeA{#1}
+        for k=0 upto Etape+1:
+          for l=0 upto 2*Etape+6:
+            if ((l>2*Etape+4) and (k>2)):
+            else:
+              trace TestA shifted(k*larg,-l*haut);
+            fi;
+          endfor;
+        endfor;
+      \end{mplibcode}%
+    }%
+  \fi%
+}%
+
+% 103
+\NewDocumentCommand\BuildPatternCentTrois{sm}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \IfBooleanTF{#1}{%
+      \edef\PfMRetiensEtape{\useKV[Pattern]{Etape}}%
+      \begin{Geometrie}[CoinHD={0.5*u*(3+0.5*((\PfMRetiensEtape+1) mod 2)+(4+4+\useKV[Pattern]{Etape}+1)*(\useKV[Pattern]{Etape}+1)/2,4+1+\useKV[Pattern]{Etape}+1)}]
+        \BuildPatternCodeB
+        pair A;
+        A=pp(1,1);
+        for k=0 upto Etape-1:
+        cc[k]=polygone(pp(0,0),pp(4+k,0),pp(4+k,4+k),pp(0,4+k)) shifted A;
+        fill cc[k] withcolor CouleurEtape withtransparency (1,0.25);
+        trace cc[k] withpen pencircle scaled 1.1 withcolor CouleurEtape;
+        label.lrt(TEX("Étape "&decimal(k+1)),llcorner cc[k]);
+        A:=lrcorner cc[k]+pp(1,0);
+        endfor;
+        if \useKV[Pattern]{Solution}:
+        for k=Etape upto Etape:
+        cc[k]=polygone(pp(0,0),pp(4+k,0),pp(4+k,4+k),pp(0,4+k)) shifted A;
+        fill cc[k] withcolor CouleurSol withtransparency (1,0.25);
+        trace cc[k] withpen pencircle scaled 1.1 withcolor CouleurSol;
+        label.lrt(TEX("Étape "&decimal(k+1)),llcorner cc[k]);
+        endfor;
+        else:
+        label.lrt(TEX("Étape "&decimal(Etape+1)&" ?"),A);
+        fi;
+      \end{Geometrie}
+    }{%
+      \begin{mplibcode}%
+        \BuildPatternCode
+        ecartcube:=1pt;
+        \BuildPatternCodeA{#2}
+        for k=0 upto Etape+2:
+          for l=0 upto Etape+2:
+            trace TestA shifted(k*larg,l*haut);
+          endfor;
+        endfor;
+      \end{mplibcode}%
+    }%
+  \fi%
+}%
+
+% 102
+\NewDocumentCommand\BuildPatternCentDeux{sm}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \IfBooleanTF{#1}{%
+      \edef\PfMRetiensEtape{\useKV[Pattern]{Etape}}%
+      \begin{Geometrie}[CoinHD={0.5*u*(4+0.5*((\PfMRetiensEtape+1) mod 2)+(2+\PfMRetiensEtape+1)*(\PfMRetiensEtape+1)/2,1+\useKV[Pattern]{Etape}+2)}]
+        \BuildPatternCodeB
+        pair A;
+        A=pp(4,1);
+        for k=0 upto Etape-1:
+          if k>0:
+            cc[k]=polygone(pp(0,0),pp(1+k,0),pp(1+k,k),pp(k,k),pp(k,k+1),pp(0,k+1)) shifted A;
+            fill cc[k] withcolor CouleurEtape withtransparency (1,0.35);
+            trace cc[k] withpen pencircle scaled 1.1 withcolor CouleurEtape;
+            label.lrt(TEX("Étape "&decimal(k+1)),llcorner cc[k]);
+            A:=lrcorner cc[k]+pp(1,0);
+          else:
+            label.lrt(TEX("Étape "&decimal(k+1)),pp(1,1));
+            label.urt(TEX("Rien"),pp(1,1));
+          fi;
+        endfor;
+        if \useKV[Pattern]{Solution}:
+          for k=Etape upto Etape:
+            cc[k]=polygone(pp(0,0),pp(1+k,0),pp(1+k,k),pp(k,k),pp(k,k+1),pp(0,k+1)) shifted A;
+            fill cc[k] withcolor CouleurSol withtransparency (1,0.35);
+            trace cc[k] withpen pencircle scaled 1.1 withcolor CouleurSol;
+            label.lrt(TEX("Étape "&decimal(k+1)),llcorner cc[k]);
+           endfor;
+        else:
+          label.lrt(TEX("Étape "&decimal(Etape+1)&" ?"),A);
+        fi;
+      \end{Geometrie}
+    }{%
+      \begin{mplibcode}%
+        \BuildPatternCode
+        ecartcube:=1pt;
+        \BuildPatternCodeA{#2}
+        for k=0 upto Etape-1:
+          for l=0 upto Etape-1:
+            if ((k=Etape-1) and (l=Etape-1)):
+            else:
+              trace TestA shifted(k*larg,l*haut);
+            fi;
+          endfor;
+        endfor;
+      \end{mplibcode}%
+    }%
+  \fi%
+}%
+
+% 101
+\NewDocumentCommand\BuildPatternCentUn{sm}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \IfBooleanTF{#1}{%
+      \edef\PfMRetiensEtape{\useKV[Pattern]{Etape}}%
+      \edef\PfMLargeurQuad{\fpeval{1+\PfMRetiensEtape+(3+\PfMRetiensEtape+1+2)*(\PfMRetiensEtape+1)/2}}%
+      \begin{Geometrie}[CoinHD={0.5*u*(((\PfMLargeurQuad div 2)+1)*2,1+\PfMRetiensEtape+2+2)}]
+        \BuildPatternCodeB
+        pair A;
+        A=pp(1,1+\PfMRetiensEtape+3);
+        for k=0 upto Etape-1:
+          cc[k]=polygone(pp(0,3+k),pp(0,2+k),pp(3+k,2+k),pp(3+k,3+k),pp(2+k,3+k),pp(2+k,0),pp(3+k,0),pp(3+k,1),pp(0,1),pp(0,0),pp(1,0),pp(1,3+k)) shifted (A-pp(0,3+k));
+          fill cc[k] withcolor CouleurEtape withtransparency (1,0.35);
+          trace cc[k] withpen pencircle scaled 1.1 withcolor CouleurEtape;
+          label.urt(TEX("Étape "&decimal(k+1)),ulcorner cc[k]);
+          A:=urcorner cc[k]+pp(1,0);
+        endfor;
+        if \useKV[Pattern]{Solution}:
+          for k=Etape upto Etape:
+            cc[k]=polygone(pp(0,3+k),pp(0,2+k),pp(3+k,2+k),pp(3+k,3+k),pp(2+k,3+k),pp(2+k,0),pp(3+k,0),pp(3+k,1),pp(0,1),pp(0,0),pp(1,0),pp(1,3+k)) shifted (A-pp(0,3+k));
+            fill cc[k] withcolor CouleurSol withtransparency (1,0.35);
+            trace cc[k] withpen pencircle scaled 1.1 withcolor CouleurSol;
+            label.urt(TEX("Étape "&decimal(k+1)),ulcorner cc[k]);
+           endfor;
+        else:
+          label.lrt(TEX("Étape "&decimal(Etape+1)&" ?"),A+pp(0,1));
+        fi;
+      \end{Geometrie}
+    }{%
+      \begin{mplibcode}%
+        \BuildPatternCode
+        ecartcube:=2pt;
+        \BuildPatternCodeA{#2}
+        for k=0 upto Etape-1:
+          for l=0 upto Etape-1:
+            trace TestA shifted(l*larg,k*haut);
+          endfor;
+        endfor;
+        trace TestA shifted(-larg,-haut);
+        trace TestA shifted(Etape*larg,-haut);
+        trace TestA shifted(Etape*larg,Etape*haut);
+        trace TestA shifted(-larg,Etape*haut);
+      \end{mplibcode}%
+    }%
+  \fi%
+}%
+
+% 99a
+\NewDocumentCommand\BuildPatternQuatreVingtDixNeufa{}{%
+  \ifluatex%
+    \mplibforcehmode
+    \begin{mplibcode}
+      Etape=\useKV[Pattern]{Etape};
+      %
+      input PfCLego;
+      %
+      \ifemptyKV[Pattern]{Echelle}{magnification:=0.25;}{%
+        magnification:=\useKV[Pattern]{Echelle};
+      }
+      lego_unit        :=magnification*0.8cm; % official
+      lego_height      :=1.2lego_unit;        % official
+      lego_plate_height:=0.4lego_unit;        % official
+      lego_thickness   :=1/6lego_unit;
+      lego_eps         :=1/20lego_unit;
+      lego_overshoot   :=lego_plate_height-lego_thickness;%0.2133lego_unit;
+      lego_diam        :=lego_unit-2lego_thickness;
+      lego_Diam        :=(sqrt 2)*lego_unit-lego_diam;
+      %
+      color CouleurBrique,CouleurBriqueA;
+      \ifemptyKV[Pattern]{Couleur}{CouleurBrique=LightSteelBlue;}{CouleurBrique=\useKV[Pattern]{Couleur};}%
+      %
+      Longueur=2;
+      Largeur=2;
+      %
+      euler(-20,10,15);
+      for k=Etape downto 1:
+        w:=k mod 2;
+        for l=-k+1 upto k-1:
+          TR:=(Longueur*l,0,1-k);
+          if (l mod 2)=w:CouleurBriqueA:=Cornsilk else: CouleurBriqueA:=CouleurBrique fi;
+          Lego_box(Longueur,Largeur,CouleurBriqueA);
+        endfor;
+      endfor;
+    \end{mplibcode}%
+  \fi%
+}%
+
+%99
+\NewDocumentCommand\BuildPatternQuatreVingtDixNeuf{}{%
+  \ifluatex%
+    \mplibforcehmode
+    \begin{mplibcode}
+      Etape:=\useKV[Pattern]{Etape};
+      input PfCSolid;
+
+      intensite:=1.5;
+      Ferme[0]:=false;
+      \ifemptyKV[Pattern]{Couleur}{outcolor:=LightSteelBlue;}{outcolor:=\useKV[Pattern]{Couleur};}%
+      incolor:=white;
+      nb:=1;subh:=1;
+      creux:=false;
+
+      Initialisation(2500,30,20,50);
+      Objetcube1("a=0.25");
+      nbobj:=1;
+      for k=2 upto Etape:
+        for l=-k+1 upto k-1:
+          TR:=a*(0,l,1-k);
+          nbobj:=nbobj+1;
+          ObjetDeplacement[nbobj](1);
+        endfor;
+      endfor;
+      DessineFusion;
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 98
+\NewDocumentCommand\BuildPatternQuatreVingtDixHuit{}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      Etape=\useKV[Pattern]{Etape};
+      color CouleurFond;
+      \ifemptyKV[Pattern]{Couleur}{CouleurFond=0.7white;}{CouleurFond=\useKV[Pattern]{Couleur};}
+      u:=5mm;
+      pair M[],A,B;
+      path cc[];
+      A=(0,0);
+      B-A=u*(4,0);
+      for k=1 upto Etape:
+        for l=1 step 2 until (2**k-1):
+        M[l]:=(l/(2**k))[A,B];
+        cc[l]:=cercles(M[l],abs(A-B)/(2**k));
+        if (k mod 2)=1:
+        fill cc[l] withcolor CouleurFond;
+        else:
+        fill cc[l] withcolor white;
+        fi;
+        trace cc[l];
+        endfor;
+      endfor;
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 97
+\NewDocumentCommand\BuildPatternQuatreVingtDixSept{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      for k=0 upto (2**Etape-1):
+        trace TestA shifted(0,k*haut);
+      endfor;
+      for k=0 upto 2:
+      trace TestA shifted(larg,k*haut);
+      endfor;
+      for k=0 upto Etape-1:
+        trace TestA shifted(2*larg,k*haut);
+      endfor;
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 96
+\NewDocumentCommand\BuildPatternQuatreVingtSeize{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      for k=0 upto Etape+1:
+        trace TestA shifted(0,k*haut);
+      endfor;
+      for k=1 upto Etape:
+        for l=0 upto 1:
+          trace TestA shifted(k*larg,l*haut);
+        endfor;
+      endfor;
+      for k=0 upto Etape+1:
+        trace TestA shifted((Etape+1)*larg,(1-k)*haut);
+      endfor;
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 95a
+\NewDocumentCommand\BuildPatternQuatreVingtQuinzea{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      for k=0 upto Etape:
+        trace TestA shifted(0,k*haut);
+      endfor;
+      for k=0 upto Etape:
+        trace TestA shifted(2*larg,k*haut);
+      endfor;
+      for k=0 upto Etape:
+        trace TestA shifted(larg,(k+Etape)*haut);
+      endfor;
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 95
+\NewDocumentCommand\BuildPatternQuatreVingtQuinze{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      for k=0 upto 2*Etape-1:
+        trace TestA shifted(0,k*haut);
+      endfor;
+      for k=0 upto 2*Etape-1:
+        trace TestA shifted(2*larg,k*haut);
+      endfor;
+      for k=0 upto Etape:
+        trace TestA shifted(larg,(k+2*Etape-1)*haut);
+      endfor;
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 94
+\NewDocumentCommand\BuildPatternQuatreVingtQuatorze{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      for k=0 upto Etape-1:
+        for l=Etape-1 downto k:
+          trace TestA shifted((Etape-1-l)*larg,k*haut);
+        endfor;
+      endfor;
+      trace TestA shifted(-larg,0);
+      trace TestA shifted(Etape*larg,0);
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 93
+\NewDocumentCommand\BuildPatternQuatreVingtTreize{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      for k=0 upto Etape-1:
+        for l=0 upto 2*Etape+1:
+          trace TestA shifted(k*larg,l*haut);
+        endfor;
+      endfor;
+      trace TestA shifted(-larg,haut);
+      trace TestA shifted(Etape*larg,haut);
+    \end{mplibcode}%
+  \fi%
+}%
+
+%92
+\NewDocumentCommand\BuildPatternQuatreVingtDouze{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=1pt;
+      \BuildPatternCodeA{#1}
+      for k=0 upto Etape-1:
+        for l=0 upto Etape-1:
+          if ((k=Etape-1) and (l>Etape-3)) or ((l=Etape-1) and (k>0)):
+          else:
+           trace TestA shifted(k*larg,l*haut);
+         fi;
+       endfor;
+      endfor;
+    \end{mplibcode}%
+  \fi%
+}%
+
+%91
+\NewDocumentCommand\BuildPatternQuatreVingtOnze{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=0;
+      \BuildPatternCodeA{#1}
+      for k=0 upto Etape-1:
+        trace TestA shifted(k*larg,0);
+      endfor;
+      for k=Etape upto 2*Etape:
+        for l=0 upto Etape:
+          trace TestA shifted(k*larg,l*haut);
+        endfor;
+      endfor;
+      for k=0 upto Etape:
+        trace TestA shifted((2*Etape+1+k)*larg,Etape*haut);
+      endfor;
+    \end{mplibcode}%
+  \fi%
+}%
+
+%90
+\NewDocumentCommand\BuildPatternQuatreVingtDix{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=0;
+      \BuildPatternCodeA{#1}
+      for k=0 downto -2:
+        trace TestA shifted (0,2*k*haut);
+      endfor;
+      for k=1 upto Etape:
+        for l=0 downto -1:
+          trace TestA shifted ((2*k-1)*larg,(2*l-1)*haut);
+        endfor;
+        for l=0 downto -2:
+          trace TestA shifted ((2*k*larg,2*l*haut));
+        endfor;
+      endfor;
+    \end{mplibcode}%
+  \fi%
+}%
+
+%88
+\NewDocumentCommand\BuildPatternQuatreVingtHuit{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      for k=0 upto Etape:
+        for l=0 upto Etape-1:
+          trace TestA shifted(k*larg,l*haut);
+        endfor;
+      endfor;
+    \end{mplibcode}%
+  \fi%
+}%
+
+%87
+\NewDocumentCommand\BuildPatternQuatreVingtSept{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      trace TestA;
+      for k=1 upto 3*(Etape-1):
+        trace TestA shifted((k-1)*(larg,0));
+      endfor;
+      for k=1 upto Etape-1:
+        for l=1 upto 3*(Etape-1)-k:
+          trace TestA shifted((l-1)*larg,k*haut);
+        endfor;
+      endfor;
+    \end{mplibcode}%
+  \fi%
+}%
+
+%86
+\NewDocumentCommand\BuildPatternQuatreVingtSix{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      for k=0 upto Etape+1:
+        for l=0 upto Etape+1:
+          trace TestA shifted(k*larg,l*haut);
+        endfor;
+      endfor;
+      for k=0 upto Etape:
+        for l=0 upto Etape:
+          trace TestA shifted((3+k)*larg,(3+l)*haut);
+        endfor;
+      endfor;
+    \end{mplibcode}%
+  \fi%
+}%
+
+%85
+\NewDocumentCommand\BuildPatternQuatreVingtCinq{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      for k=0 upto Etape:
+        for l=0 upto Etape:
+          trace TestA shifted(k*larg,l*haut);
+        endfor;
+      endfor;
+      for k=0 upto Etape-1:
+        for l=0 upto Etape-1:
+          trace TestA shifted((k+Etape)*larg,(l+Etape)*haut);
+        endfor;
+      endfor;
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 84
+\NewDocumentCommand\BuildPatternQuatreVingtQuatre{}{%
+  \ifluatex%
+    \mplibforcehmode
+    \begin{mplibcode}
+      Etape=\useKV[Pattern]{Etape};
+      %
+      input PfCLego;
+      %
+      \ifemptyKV[Pattern]{Echelle}{magnification:=0.25;}{%
+        magnification:=\useKV[Pattern]{Echelle};
+      }
+      lego_unit        :=magnification*0.8cm; % official
+      lego_height      :=1.2lego_unit;        % official
+      lego_plate_height:=0.4lego_unit;        % official
+      lego_thickness   :=1/6lego_unit;
+      lego_eps         :=1/20lego_unit;
+      lego_overshoot   :=lego_plate_height-lego_thickness;%0.2133lego_unit;
+      lego_diam        :=lego_unit-2lego_thickness;
+      lego_Diam        :=(sqrt 2)*lego_unit-lego_diam;
+      %
+      color CouleurBrique,CouleurBriqueA;
+      \ifemptyKV[Pattern]{Couleur}{CouleurBrique=LightSteelBlue;}{CouleurBrique=\useKV[Pattern]{Couleur};}%
+      %
+      Longueur=2;
+      Largeur=4;
+      %
+      euler(-20,10,15);
+      Lego_box(Longueur,Largeur,CouleurBrique);
+      for k=2 upto Etape:
+        if (k mod 2)=0:CouleurBriqueA:=Cornsilk else: CouleurBriqueA:=CouleurBrique fi;
+        TR:=(-k+1,0,k-1);
+        Lego_box(Longueur,Largeur,CouleurBriqueA);
+        TR:=(k-1,0,k-1);
+        Lego_box(Longueur,Largeur,CouleurBriqueA);
+      endfor;
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 83
+\NewDocumentCommand\BuildPatternQuatreVingtTrois{}{%
+  \ifluatex%
+    \mplibforcehmode
+    \begin{mplibcode}
+      Etape=\useKV[Pattern]{Etape};
+      %
+      input PfCLego;
+      %
+      \ifemptyKV[Pattern]{Echelle}{magnification:=0.25;}{%
+        magnification:=\useKV[Pattern]{Echelle};
+      }%
+      lego_unit        :=magnification*0.8cm; % official
+      lego_height      :=1.2lego_unit;        % official
+      lego_plate_height:=0.4lego_unit;        % official
+      lego_thickness   :=1/6lego_unit;
+      lego_eps         :=1/20lego_unit;
+      lego_overshoot   :=lego_plate_height-lego_thickness;%0.2133lego_unit;
+      lego_diam        :=lego_unit-2lego_thickness;
+      lego_Diam        :=(sqrt 2)*lego_unit-lego_diam;
+      %
+      color CouleurBrique,CouleurBriqueA;
+      \ifemptyKV[Pattern]{Couleur}{CouleurBrique=LightSteelBlue;}{CouleurBrique=\useKV[Pattern]{Couleur};}%
+      %
+      Longueur=2;
+      Largeur=4;
+      Longueura=4;
+      Largeura=2;
+%      %
+      euler(22,0,0);
+      for k=1 upto Etape:
+        if (k mod 2)=0:CouleurBriqueA:=Cornsilk else: CouleurBriqueA:=CouleurBrique fi;
+        TR:=(-2,1,2*(k-1));
+        Lego_box(Longueur,Largeur,CouleurBriqueA);
+        TR:=(2,1,2*(k-1));
+        Lego_box(Longueur,Largeur,CouleurBriqueA);
+        TR:=(0,0,2*k-1);
+        Lego_box(Longueura,Largeura,CouleurBriqueA);
+      endfor;
+    \end{mplibcode}%
+  \fi%
+}%
+
+%82
+\NewDocumentCommand\BuildPatternQuatreVingtDeux{}{%
+  \ifluatex%
+    \mplibforcehmode
+    \begin{mplibcode}
+      Etape=\useKV[Pattern]{Etape};
+
+      input PfCLego;
+      %
+      \ifemptyKV[Pattern]{Echelle}{magnification:=0.25;}{%
+        magnification:=\useKV[Pattern]{Echelle};
+      }%
+      lego_unit        :=magnification*0.8cm; % official
+      lego_height      :=1.2lego_unit;        % official
+      lego_plate_height:=0.4lego_unit;        % official
+      lego_thickness   :=1/6lego_unit;
+      lego_eps         :=1/20lego_unit;
+      lego_overshoot   :=lego_plate_height-lego_thickness;%0.2133lego_unit;
+      lego_diam        :=lego_unit-2lego_thickness;
+      lego_Diam        :=(sqrt 2)*lego_unit-lego_diam;
+      %
+      color CouleurBrique;
+      \ifemptyKV[Pattern]{Couleur}{CouleurBrique=LightSteelBlue;}{CouleurBrique=\useKV[Pattern]{Couleur};}%
+      %
+      Longueur=2;
+      Largeura=4;
+%      %
+      euler(-30,10,0);
+      for k=Etape downto 2:
+        TR:=(-k+1,0,-k+1);
+        Lego_box(Longueur,Largeura,CouleurBrique);
+        TR:=(k-1,0,-k+1);
+        Lego_box(Longueur,Largeura,CouleurBrique);
+      endfor;
+      TR:=(0,0,0);
+      Lego_box(Longueur,Largeura,CouleurBrique);
+    \end{mplibcode}%
+  \fi%
+}%
+
+%79
+\NewDocumentCommand\BuildPatternSoixanteDixNeuf{}{%
+  \ifluatex%
+    \mplibforcehmode
+    \begin{mplibcode}
+      Etape:=\useKV[Pattern]{Etape};
+      input PfCSolid;
+
+      intensite:=1.5;
+      Ferme[0]:=false;
+      \ifemptyKV[Pattern]{Couleur}{outcolor:=LightSteelBlue;}{outcolor:=\useKV[Pattern]{Couleur};}%
+      incolor:=white;
+      nb:=1;subh:=1;
+      creux:=false;
+
+      Initialisation(2500,30,20,50);
+      Objetcube1("a=0.25");
+      nbobj:=1;
+      Pro:=-1;
+      for k=2 upto Etape:
+        for l=0 upto k-1:
+          for p=0 upto k-1:
+            for q=0 upto k-1:
+              TR:=a*(l,p,Pro-q);
+              nbobj:=nbobj+1;
+              ObjetDeplacement[nbobj](1);
+            endfor;
+          endfor;
+        endfor;
+        Pro:=Pro-k;
+      endfor;
+      DessineFusion;
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 78b
+\NewDocumentCommand\BuildPatternSoixanteDixHuitb{O{1}}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      LargMax=2+Etape;
+      HautMax=3;
+      for k=-1 upto LargMax:
+        trace (u*(0,2)--u*(0,-HautMax)) shifted(u*(k,0)) withcolor 0.7white;
+      endfor;
+      for k=2 downto -HautMax:
+        trace (u*(-1,0)--u*(LargMax,0)) shifted(u*(0,k)) withcolor 0.7white;
+      endfor;
+      drawoptions(withpen pencircle scaled 1.1);
+      picture debut;
+      debut=image(
+      trace dot;
+      trace dot shifted(u*(1,1));
+      trace dot shifted(u*(0,-1));
+      trace dot shifted(u*(1,-2));
+      trace dot shifted(u*(0,-1));
+      trace dot shifted(u*(1,0));
+      trace dot shifted(u*(1,-1));
+      );
+      trace debut;
+      trace symetrie(debut,(0,0),(0,1)) shifted(u*(Etape+1,0));
+      %verticales
+      for k=1 upto Etape:
+      trace dot shifted(u*((1,1)+(k-1)*(1,0)));
+      trace dot shifted(u*((1,0)+(k-1)*(1,0)));
+      trace dot shifted(u*((1,-1)+(k-1)*(1,0)));
+      trace dot shifted(u*((1,-2)+(k-1)*(1,0)));
+      endfor;
+      drawoptions();
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 78a
+\NewDocumentCommand\BuildPatternSoixanteDixHuita{O{1}}{%
+  \ifluatex%
+    \begin{Allumettes}[Echelle=\fpeval{0.30*#1}]
+      Etape=\useKV[Pattern]{Etape};
+      LargMax=2+Etape;
+      HautMax=3;
+      for k=-1 upto LargMax:
+        trace (u*(0,2)--u*(0,-HautMax)) shifted(u*(k,0)) withcolor 0.7white;
+      endfor;
+      for k=2 downto -HautMax:
+        trace (u*(-1,0)--u*(LargMax,0)) shifted(u*(0,k)) withcolor 0.7white;
+      endfor;
+      drawoptions(withpen pencircle scaled 1.1);
+      picture debut;
+      debut=image(
+      trace Allu(0.10[(0,0),u*(1,1)],0.90[(0,0),u*(1,1)]);
+      trace Allu(0.10[u*(0,-1),u*(1,-2)],0.90[u*(0,-1),u*(1,-2)]);
+      trace Allu(0.10[(0,0),u*(0,-1)],0.90[(0,0),u*(0,-1)]);
+      trace Allu(0.10[(0,0),u*(1,0)],0.90[(0,0),u*(1,0)]);
+      trace Allu(0.10[u*(0,-1),u*(1,-1)],0.90[u*(0,-1),u*(1,-1)]);
+      );
+      trace debut;
+      trace symetrie(debut,(0,0),(0,1)) shifted(u*(Etape+1,0));
+      %verticales
+      for k=1 upto Etape:
+        trace Allu(0.10[u*(1,1),u*(1,0)],0.90[u*(1,1),u*(1,0)]) shifted(u*(k-1)*(1,0));
+        trace Allu(0.10[u*(1,0),u*(1,-1)],0.90[u*(1,0),u*(1,-1)]) shifted(u*(k-1)*(1,0));
+        trace Allu(0.10[u*(1,-1),u*(1,-2)],0.90[u*(1,-1),u*(1,-2)]) shifted(u*(k-1)*(1,0));
+      endfor;
+      %horizontales
+      for k=1 upto Etape-1:
+        trace Allu(0.10[u*(k,1),u*(k+1,1)],0.90[u*(k,1),u*(k+1,1)]);
+        trace Allu(0.10[u*(k,0),u*(k+1,0)],0.90[u*(k,0),u*(k+1,0)]);
+        trace Allu(0.10[u*(k,-1),u*(k+1,-1)],0.90[u*(k,-1),u*(k+1,-1)]);
+        trace Allu(0.10[u*(k,-2),u*(k+1,-2)],0.90[u*(k,-2),u*(k+1,-2)]);
+      endfor;
+      drawoptions();
+      \end{Allumettes}
+  \fi%
+}%
+
+% 78
+\NewDocumentCommand\BuildPatternSoixanteDixHuit{O{1}}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      LargMax=2+Etape;
+      HautMax=3;
+      for k=-1 upto LargMax:
+        trace (u*(0,2)--u*(0,-HautMax)) shifted(u*(k,0)) withcolor 0.7white;
+      endfor;
+      for k=2 downto -HautMax:
+        trace (u*(-1,0)--u*(LargMax,0)) shifted(u*(0,k)) withcolor 0.7white;
+      endfor;
+      drawoptions(withpen pencircle scaled 1.1);
+      picture debut;
+      debut=image(
+      trace 0.15[(0,0),u*(1,1)]--0.85[(0,0),u*(1,1)];
+      trace 0.15[u*(0,-1),u*(1,-2)]--0.85[u*(0,-1),u*(1,-2)];
+      trace 0.15[(0,0),u*(0,-1)]--0.85[(0,0),u*(0,-1)];
+      trace 0.15[(0,0),u*(1,0)]--0.85[(0,0),u*(1,0)];
+      trace 0.15[u*(0,-1),u*(1,-1)]--0.85[u*(0,-1),u*(1,-1)];
+      );
+      trace debut;
+      trace symetrie(debut,(0,0),(0,1)) shifted(u*(Etape+1,0));
+      %verticales
+      for k=1 upto Etape:
+        trace (0.15[u*(1,1),u*(1,0)]--0.85[u*(1,1),u*(1,0)]) shifted(u*(k-1)*(1,0));
+        trace (0.15[u*(1,0),u*(1,-1)]--0.85[u*(1,0),u*(1,-1)]) shifted(u*(k-1)*(1,0));
+        trace (0.15[u*(1,-1),u*(1,-2)]--0.85[u*(1,-1),u*(1,-2)]) shifted(u*(k-1)*(1,0));
+      endfor;
+      %horizontales
+      for k=1 upto Etape-1:
+        trace (0.15[u*(k,1),u*(k+1,1)]--0.85[u*(k,1),u*(k+1,1)]);
+        trace (0.15[u*(k,0),u*(k+1,0)]--0.85[u*(k,0),u*(k+1,0)]);
+        trace (0.15[u*(k,-1),u*(k+1,-1)]--0.85[u*(k,-1),u*(k+1,-1)]);
+        trace (0.15[u*(k,-2),u*(k+1,-2)]--0.85[u*(k,-2),u*(k+1,-2)]);
+      endfor;
+      drawoptions();
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 77b
+\NewDocumentCommand\BuildPatternSoixanteDixSeptb{}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      LargMax=2+Etape;
+      HautMax=2+Etape-1;
+      for k=-1 upto LargMax:
+        trace (u*(0,2)--u*(0,-HautMax)) shifted(u*(k,0)) withcolor 0.7white;
+      endfor;
+      for k=2 downto -HautMax:
+        trace (u*(-1,0)--u*(LargMax,0)) shifted(u*(0,k)) withcolor 0.7white;
+      endfor;
+      drawoptions(withpen pencircle scaled 1.1);
+      for k=0 upto Etape-1:
+        pair K;
+        K=u*(1+k/2,-k/2);
+        picture quart;
+        quart=image(
+        trace dot;
+        trace dot shifted(u*(1,1));
+        for l=1 upto k:
+        trace dot shifted(u*(0,-l+1));
+        trace dot shifted(u*(0,-l));
+        endfor;
+        );
+        trace rotation(quart,K,0);
+        trace rotation(quart,K,90);
+        trace rotation(quart,K,180);
+        trace rotation(quart,K,-90);
+      endfor;
+      drawoptions();
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 77a
+\NewDocumentCommand\BuildPatternSoixanteDixSepta{O{1}}{%
+  \ifluatex%
+    \begin{Allumettes}[Echelle=\fpeval{0.30*#1}]
+      Etape=\useKV[Pattern]{Etape};
+      LargMax=2+Etape;
+      HautMax=2+Etape-1;
+      for k=-1 upto LargMax:
+        trace (u*(0,2)--u*(0,-HautMax)) shifted(u*(k,0)) withcolor 0.7white;
+      endfor;
+      for k=2 downto -HautMax:
+        trace (u*(-1,0)--u*(LargMax,0)) shifted(u*(0,k)) withcolor 0.7white;
+      endfor;
+      drawoptions(withpen pencircle scaled 1.1);
+      for k=0 upto Etape-1:
+        pair K;
+        K=u*(1+k/2,-k/2);
+        picture quart;
+        quart=image(
+          trace Allu(0.15[(0,0),u*(1,1)],0.85[(0,0),u*(1,1)]);
+          for l=1 upto k:
+            trace Allu(0.15[u*(0,-l+1),u*(0,-l)],0.85[u*(0,-l+1),u*(0,-l)]);
+          endfor;
+          );
+        trace rotation(quart,K,0);
+        trace rotation(quart,K,90);
+        trace rotation(quart,K,180);
+        trace rotation(quart,K,-90);
+      endfor;
+      drawoptions();
+    \end{Allumettes}%
+  \fi%
+}%
+
+% 77
+\NewDocumentCommand\BuildPatternSoixanteDixSept{O{1}}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      LargMax=2+Etape;
+      HautMax=2+Etape-1;
+      for k=-1 upto LargMax:
+        trace (u*(0,2)--u*(0,-HautMax)) shifted(u*(k,0)) withcolor 0.7white;
+      endfor;
+      for k=2 downto -HautMax:
+        trace (u*(-1,0)--u*(LargMax,0)) shifted(u*(0,k)) withcolor 0.7white;
+      endfor;
+      drawoptions(withpen pencircle scaled 1.1);
+      for k=0 upto Etape-1:
+        pair K;
+        K=u*(1+k/2,-k/2);
+        picture quart;
+        quart=image(
+          trace 0.15[(0,0),u*(1,1)]--0.85[(0,0),u*(1,1)];
+          for l=1 upto k:
+            trace 0.15[u*(0,-l+1),u*(0,-l)]--0.85[u*(0,-l+1),u*(0,-l)];
+          endfor;
+          );
+        trace rotation(quart,K,0);
+        trace rotation(quart,K,90);
+        trace rotation(quart,K,180);
+        trace rotation(quart,K,-90);
+      endfor;
+      drawoptions();
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 76
+\NewDocumentCommand\BuildPatternSoixanteSeizea{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      LargMax=4+Etape;
+      HautMax=2*(Etape+1);
+      for k=0 upto LargMax:
+        trace ((0,0)--u*(0,HautMax)) shifted(u*(k,0)) withcolor 0.7white;
+      endfor;
+      for k=0 upto HautMax:
+        trace ((0,0)--u*(LargMax,0)) shifted(u*(0,k)) withcolor 0.7white;
+      endfor;
+      for k=1 upto Etape+2:
+        for l=1 upto Etape+1:
+        trace dot shifted(u*(k,l));
+        endfor;
+      endfor;
+      for l=1 upto Etape:
+      for k=l+1 upto Etape+2:
+        trace dot shifted(u*(k,Etape+l+1));
+      endfor;
+      endfor;
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 75
+\NewDocumentCommand\BuildPatternSoixanteQuinzea{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      LargMax=4+2*(Etape-1);
+      HautMax=2+Etape;
+      for k=0 upto LargMax:
+        trace ((0,0)--u*(0,HautMax)) shifted(u*(k,0)) withcolor 0.7white;
+      endfor;
+      for k=0 upto HautMax:
+        trace ((0,0)--u*(LargMax,0)) shifted(u*(0,k)) withcolor 0.7white;
+      endfor;
+      trace dot shifted(u*(LargMax div 2,HautMax-1));
+      for k=0 upto 2:
+        trace dot shifted(u*((LargMax div 2)-1+k,HautMax-2));
+      endfor;
+      for k=2 upto Etape:
+        trace dot shifted(u*((LargMax div 2)-k,HautMax-k-1));
+        trace dot shifted(u*((LargMax div 2)-k+1,HautMax-k-1));
+        trace dot shifted(u*((LargMax div 2)+k-1,HautMax-k-1));
+        trace dot shifted(u*((LargMax div 2)+k,HautMax-k-1));
+      endfor;
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 72
+\NewDocumentCommand\BuildPatternSoixanteDouzea{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      if picture #1:
+        CouleurFond:=white;
+        for k=0 upto 4*Etape:
+          for l=0 upto 4*Etape:
+            depla:=(k*larg,l*haut);
+            trace #1 shifted depla;
+          endfor;
+        endfor;
+        \ifemptyKV[Pattern]{Couleur}{%
+          CouleurFond:=Orange;
+        }{%
+          CouleurFond:=\useKV[Pattern]{Couleur};
+        }%
+        for k=0 upto Etape-1:
+          for l=0 upto Etape-1:
+          trace #1 shifted(k*larg,l*haut);
+          endfor;
+        endfor;
+        for k=3*Etape+1 upto 4*Etape:
+          for l=0 upto Etape-1:
+            trace #1 shifted(k*larg,l*haut);
+          endfor;
+        endfor;
+        for k=0 upto Etape-1:
+          for l=3*Etape+1 upto 4*Etape:
+            trace #1 shifted(k*larg,l*haut);
+          endfor;
+        endfor;
+        for k=3*Etape+1 upto 4*Etape:
+          for l=3*Etape+1 upto 4*Etape:
+            trace #1 shifted(k*larg,l*haut);
+          endfor;
+        endfor;
+        for k=Etape upto 3*Etape:
+          for l=Etape upto 3*Etape:
+            trace #1 shifted(k*larg,l*haut);
+          endfor;
+        endfor;
+      fi;
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 69
+\NewDocumentCommand\BuildPatternSoixanteNeufa{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      if picture #1:
+        for k=0 upto Etape-1:
+          for l=0 upto Etape-1:
+            depla:=(k*larg,l*haut);
+            trace #1 shifted depla;
+          endfor;
+        endfor;
+        for k=0 upto (Etape div 2)-1:
+          trace #1 shifted(Etape*larg,k*haut);
+        endfor;
+        if Etape mod 2=1:
+          trace demihexagonea  shifted(Etape*larg,(Etape div 2)*haut);
+        fi;
+      fi;
+    \end{mplibcode}%
+  \fi%
+}%
+%68
+\NewDocumentCommand\BuildPatternSoixanteHuita{m}{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,1);
+        for k=0 upto Etape:
+        cc[k]=polygonerela(Apat[k] for l=0 upto k+1:,"AV" endfor,"MO","MO" if k>0:for l=1 upto k:,"MO" endfor for l=0 upto k+1:,"RE" endfor for l=1 upto k:,"DE" endfor for l=0 upto k:,"AV" endfor else:,"RE" fi,"DE" for l=1 upto k+1:,"RE" endfor);
+          trace cc[k];
+          Apat[k+1]:=lrcorner cc[k]+u*(2,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape);
+        for k=0 upto Etape:
+          AffichageEtape(lrt)(k,1,Etape,llcorner cc[k]);
+        endfor;
+      \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=1pt;
+      \BuildPatternCodeA{#1}
+      trace TestA;
+      for k=1 upto Etape:
+        trace TestA shifted(-k*larg,0);
+        trace TestA shifted(0,k*haut);
+      endfor;
+      for p=1 upto Etape-1:
+        for l=2 upto Etape+1:
+          depla:=((1-l)*larg,(1+p)*haut);
+          trace TestA shifted depla;
+        endfor;
+      endfor;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+
+%66
+\NewDocumentCommand\BuildPatternSoixanteSix{}{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeIso
+        somme:=1;
+        for nbe=1 upto Etape+1:
+          ptpattern[nbe]:=u*(alpha*somme,(somme mod 2)*0.5);
+          if nbe=Etape+1:
+            TypeCube:=cadrecubesol;
+          else:
+            TypeCube:=cadrecube;
+          fi;
+          cc[nbe]=image(
+          for k=0 upto 1:
+            trace TypeCube shifted(ptpattern[nbe]+k*u*(alpha,-0.5)+u*(0,-1));%bas droite
+          endfor;
+          for l=1 upto 3:
+            for k=l upto nbe+1:%
+                  trace TypeCube shifted(ptpattern[nbe]+k*u*(alpha,-0.5)+(l-1)*u*(0,1));%bas droite
+                endfor;
+            endfor;
+          );
+          trace cc[nbe];
+          somme:=somme+2*nbe+1+3;
+        endfor;
+        GrillePatternIso;
+        AffichagePattern(1,Etape+1);
+      \end{Geometrie}
+    }{%
+    \mplibforcehmode
+    \begin{mplibcode}
+      Etape:=\useKV[Pattern]{Etape};
+      input PfCSolid;
+
+      intensite:=1.5;
+      Ferme[0]:=false;
+      \ifemptyKV[Pattern]{Couleur}{outcolor:=LightSteelBlue;}{outcolor:=\useKV[Pattern]{Couleur};}%
+      incolor:=white;
+      nb:=1;subh:=1;
+      creux:=true;
+
+      Initialisation(2500,30,20,50);
+      Objetcube1("a=0.25");
+      nbobj:=1;
+      nbobj:=nbobj+1;
+      TR:=a*(0,1,0);
+      ObjetDeplacement[nbobj](1);
+      for l=1 upto 3:
+      for k=1 upto Etape+2-l:
+          TR:=a*(0,k+l-1,l);
+          nbobj:=nbobj+1;
+          ObjetDeplacement[nbobj](1);
+        endfor;
+      endfor;
+      DessineFusion;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+
+%60
+\NewDocumentCommand\BuildPatternSoixantea{m}{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,1);
+        for k=0 upto Etape:
+        cc[k]=polygonerela(Apat[k] for l=0 upto k:,"AV" endfor for l=0 upto k:,"MO" endfor for l=0 upto k:,"MO" endfor ,"RE" for l=0 upto k:,"DE" endfor for l=1 upto k:,"RE" endfor);
+          trace cc[k];
+          Apat[k+1]:=lrcorner cc[k]+u*(2,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape);
+        for k=0 upto Etape:
+          AffichageEtape(lrt)(k,1,Etape,llcorner cc[k]);
+        endfor;
+      \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=1pt;
+      \BuildPatternCodeA{#1}
+      for k=0 upto Etape-1:
+        for l=0 upto Etape-1:
+          trace TestA shifted(k*larg,l*haut);
+        endfor;
+      endfor;
+      for l=0 upto Etape-1:
+        depla:=(Etape-1)*(larg,haut)+l*(0,haut);
+        trace TestA shifted depla;
+      endfor;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+
+%59
+\NewDocumentCommand\BuildPatternCinquanteNeufa{mm}{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \BuildPatternCode
+    bboxmargin:=0pt;
+    if picture #1:
+      trace #1;
+    else:
+      label(TEX(#1),(0,0));
+    fi;
+    if picture #2:
+      trace #2;
+    else:
+      label(TEX(#2),(0,0));
+    fi;
+    Largeur:=abs(lrcorner currentpicture-llcorner currentpicture);
+    Hauteur:=abs(urcorner currentpicture-lrcorner currentpicture);
+    currentpicture:=nullpicture;
+    depla:=(0,0);
+    if picture #1:
+      for k=0 upto Etape-1:
+        for l=0 upto Etape-1:
+          trace #1 shifted ((k*Largeur,l*Hauteur));
+        endfor;
+      endfor;
+    else:
+      for k=0 upto Etape-1:
+        for l=0 upto Etape-1:
+          label(TEX(#1),(k*Largeur,l*Hauteur));
+        endfor;
+      endfor;
+    fi;
+    if picture #2:
+      for k=-1 upto Etape:
+        trace #2 shifted ((k*Largeur,-Hauteur));
+        trace #2 shifted ((k*Largeur,Etape*Hauteur));
+      endfor;
+      for k=-1 upto Etape:
+        trace #2 shifted ((-Largeur,k*Hauteur));
+        trace #2 shifted ((Etape*Largeur,k*Hauteur));
+      endfor;
+    else:
+      for k=-1 upto Etape:
+        label(TEX(#2),(k*Largeur,-Hauteur));
+        label(TEX(#2),(k*Largeur,Etape*Hauteur));
+      endfor;
+      for k=-1 upto Etape:
+        label(TEX(#2),(-Largeur,k*Hauteur));
+        label(TEX(#2),(Etape*Largeur,k*Hauteur));
+      endfor;
+    fi;
+  \end{mplibcode}
+  \fi%
+}%
+
+%58
+\NewDocumentCommand\BuildPatternCinquanteHuit{O{1}}{%
+  \ifluatex%
+    \begin{Allumettes}[Echelle=\fpeval{0.30*#1}]
+      Etape=\useKV[Pattern]{Etape};
+      pair A[],B[];
+      A0=(0,0);
+      A1-A0=u*(1,0);
+      A2=rotation(A0,A1,-108);
+      A3=rotation(A1,A2,-108);
+      A4=rotation(A2,A3,-108);
+      picture TriEquiA,TriEquiB;
+      TriEquiA=image(
+      trace Allu(A0,A1);
+      trace Allu(A1,A2);
+      trace Allu(A2,A3);
+      trace Allu(A3,A4);
+      trace Allu(A4,A0);
+      );
+      TriEquiB=image(
+      trace Allu(A1,symetrie(A0,A1,A2));
+      trace Allu(symetrie(A0,A1,A2),symetrie(A4,A1,A2));
+      trace Allu(symetrie(A4,A1,A2),symetrie(A3,A1,A2));
+      trace Allu(symetrie(A3,A1,A2),A2);
+      );
+      for k=0 upto Etape-1:
+        if (k mod 2)=0:
+          trace TriEquiA shifted((k div 2)*(A1-A0+A2-A4));
+        else:
+          trace TriEquiB shifted((k div 2)*(A1-A0+A2-A4));
+        fi;
+      endfor;
+    \end{Allumettes}
+  \fi%
+}%
+
+%57
+\NewDocumentCommand\BuildPatternCinquanteSept{O{1}}{%
+  \ifluatex%
+    \begin{Allumettes}[Echelle=\fpeval{0.30*#1}]
+      Etape=\useKV[Pattern]{Etape};
+      pair A[],B[];
+      A0=(0,0);
+      B0=A0;
+      B1-B0=u*(0,1);
+      B2=rotation(B0,B1,90);
+      B3-B2=B0-B1;
+      A1=B1;
+      A2-A1=u*(-1,0);
+      A3-A0=A2-A1;
+      trace Allu(B0,B1);
+      trace Allu(B1,B2);
+      trace Allu(B2,B3);
+      trace Allu(B3,B0);
+      for k=0 upto Etape-2:
+        trace Allu(A3,A0) shifted(k*u*(-1,0));
+        trace Allu(A1,A2) shifted(k*u*(-1,0));
+        trace Allu(A2,A3) shifted(k*u*(-1,0));
+      endfor;
+    \end{Allumettes}
+  \fi%
+}%
+
+%56a
+\NewDocumentCommand\BuildPatternCinquanteSixa{O{1}}{%
+  \ifluatex%
+    \begin{Allumettes}[Echelle=\fpeval{0.30*#1}]
+      Etape=\useKV[Pattern]{Etape};
+      pair A[],B[];
+      A0=(0,0);
+      A1-A0=u*(1,0);
+      A2=rotation(A1,A0,60);
+      picture TriEquiA,TriEquiB;
+      TriEquiA=image(
+      trace Allu(A0,A1);
+      trace Allu(A2,A0);
+      );
+      TriEquiB=image(
+      trace Allu(A1,symetrie(A0,A1,A2));
+      trace Allu(symetrie(A0,A1,A2),A2);
+      );
+      trace Allu(A0,A2);
+      for k=0 upto Etape-2:
+        if (k mod 2)=0:
+          trace Allu(A0,A1) shifted((k div 2)*(A1-A0));
+        else:
+          trace Allu(symetrie(A0,A1,A2),A2) shifted((k div 2)*(A1-A0));
+        fi;
+      endfor;
+      if (Etape mod 2)=1:
+      trace Allu(A0,A1) shifted((Etape div 2)*u*(1,0));
+      trace Allu(A1,A2) shifted((Etape div 2)*u*(1,0));
+      else:
+      trace Allu(A1,symetrie(A0,A1,A2)) shifted(((Etape div 2)-1)*u*(1,0));
+      trace Allu(symetrie(A0,A1,A2),A2) shifted(((Etape div 2)-1)*u*(1,0));
+      fi;
+    \end{Allumettes}
+  \fi%
+}%
+
+%56
+\NewDocumentCommand\BuildPatternCinquanteSix{O{1}}{%
+  \ifluatex%
+    \begin{Allumettes}[Echelle=\fpeval{0.30*#1}]
+      Etape=\useKV[Pattern]{Etape};
+      pair A[],B[];
+      A0=(0,0);
+      A1-A0=u*(1,0);
+      A2=rotation(A1,A0,60);
+      picture TriEquiA,TriEquiB;
+      TriEquiA=image(
+      trace Allu(A0,A1);
+      trace Allu(A1,A2);
+      trace Allu(A2,A0);
+      );
+      TriEquiB=image(
+      trace Allu(A1,symetrie(A0,A1,A2));
+      trace Allu(symetrie(A0,A1,A2),A2);
+      );
+      for k=0 upto Etape-1:
+        if (k mod 2)=0:
+          trace TriEquiA shifted((k div 2)*(A1-A0));
+        else:
+          trace TriEquiB shifted((k div 2)*(A1-A0));
+        fi;
+      endfor;
+    \end{Allumettes}
+  \fi%
+}%
+
+%55
+\NewDocumentCommand\BuildPatternCinquanteCinq{O{1}}{%
+  \ifluatex%
+    \begin{Allumettes}[Echelle=\fpeval{0.30*#1}]
+      Etape=\useKV[Pattern]{Etape};
+      pair A[],B[],C[],D[],E[];
+      A0=(0,0);
+      B0=A0;
+      B1-B0=u*(0,1);
+      B2=rotation(B0,B1,108);
+      B3=rotation(B1,B2,108);
+      B4=rotation(B2,B3,108);
+      A1=B1;
+      A2-A1=u*(-1,0);
+      A3-A0=A2-A1;
+      trace Allu(B0,B1);
+      trace Allu(B1,B2);
+      trace Allu(B2,B3);
+      trace Allu(B3,B4);
+      trace Allu(B4,B0);
+      for k=0 upto Etape-1:
+      trace Allu(A3,A0) shifted(k*u*(-1,0));
+      trace Allu(A1,A2) shifted(k*u*(-1,0));
+      trace Allu(A2,A3) shifted(k*u*(-1,0));
+      endfor;
+    \end{Allumettes}%
+  \fi%
+}%
+
+%54
+\NewDocumentCommand\BuildPatternCinquanteQuatre{O{1}}{%
+  \ifluatex%
+    \begin{Allumettes}[Echelle=\fpeval{0.30*#1}]
+      Etape=\useKV[Pattern]{Etape};
+      pair A[],B[];
+      A0=(0,0);
+      B0=A0;
+      B1-B0=u*(0,1);
+      B2=rotation(B0,B1,90);
+      B3-B2=B0-B1;
+      A1=B1;
+      A2-A1=u*(-1,0);
+      A3-A0=A2-A1;
+      trace Allu(B0,B1);
+      trace Allu(B1,B2);
+      trace Allu(B2,B3);
+      trace Allu(B3,B0);
+      for k=0 upto Etape-1:
+        trace Allu(A3,A0) shifted(k*u*(-1,0));
+        trace Allu(A1,A2) shifted(k*u*(-1,0));
+        trace Allu(A2,A3) shifted(k*u*(-1,0));
+      endfor;
+    \end{Allumettes}
+  \fi%
+}%
+
+%53
+\NewDocumentCommand\BuildPatternCinquanteTrois{O{1}}{%
+  \ifluatex%
+    \begin{Allumettes}[Echelle=\fpeval{0.30*#1}]
+      Etape=\useKV[Pattern]{Etape};
+      pair A[],B[],C[],D[],E[];
+      A0=(0,0);
+      B0=A0;
+      B1-B0=u*(0,1);
+      B2=rotation(B0,B1,60);
+      A1=B1;
+      A2-A1=u*(-1,0);
+      A3-A0=A2-A1;
+      trace Allu(B0,B1);
+      trace Allu(B1,B2);
+      trace Allu(B2,B0);
+      for k=0 upto Etape-1:
+      trace Allu(A3,A0) shifted(k*u*(-1,0));
+      trace Allu(A1,A2) shifted(k*u*(-1,0));
+      trace Allu(A2,A3) shifted(k*u*(-1,0));
+      endfor;
+    \end{Allumettes}
+  \fi%
+}%
+
+%52
+\NewDocumentCommand\BuildPatternCinquanteDeux{}{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeIso
+        somme:=1;
+        for nbe=1 upto Etape+1:
+          ptpattern[nbe]:=u*(alpha*somme,(somme mod 2)*0.5);
+          if nbe=Etape+1:
+            TypeCube:=cadrecubesol;
+          else:
+            TypeCube:=cadrecube;
+          fi;
+          cc[nbe]=image(
+            for k=nbe downto 1:
+              for l=1 upto nbe-k:
+              trace TypeCube shifted(ptpattern[nbe]+k*u*(alpha,0.5)+(l-1)*u*(0,1));%haut droite
+              endfor;
+            endfor;
+            for k=nbe downto 1:
+              for l=1 upto nbe-k:
+               trace TypeCube shifted(ptpattern[nbe]+k*u*(-alpha,0.5)+(l-1)*u*(0,1));%haut gauche
+              endfor;
+            endfor;
+            for k=0 upto nbe:% downto 0:
+              for l=1 upto nbe-k:
+                trace TypeCube shifted(ptpattern[nbe]+k*u*(-alpha,-0.5)+(l-1)*u*(0,1));%bas gauche
+              endfor;
+            endfor;
+            for k=1 upto nbe:% downto 0:
+                for l=1 upto nbe-k:
+                  trace TypeCube shifted(ptpattern[nbe]+k*u*(alpha,-0.5)+(l-1)*u*(0,1));%bas droite
+                endfor;
+            endfor;
+          );
+          trace cc[nbe];
+          somme:=somme+2*nbe+1+3;
+        endfor;
+        GrillePatternIso;
+        AffichagePattern(1,Etape+1);
+      \end{Geometrie}
+    }{%
+    \mplibforcehmode
+    \begin{mplibcode}
+      Etape:=\useKV[Pattern]{Etape};
+      input PfCSolid;
+
+      intensite:=1.5;
+      Ferme[0]:=false;
+      \ifemptyKV[Pattern]{Couleur}{outcolor:=LightSteelBlue;}{outcolor:=\useKV[Pattern]{Couleur};}%
+      incolor:=white;
+      nb:=1;subh:=1;
+      creux:=true;
+
+      Initialisation(2500,30,20,50);
+      Objetcube0("a=0.25");
+      nbobj:=0;
+      for k=Etape downto 1:
+        for l=0 upto k:
+          TR:=a*(l,0,-k);
+          nbobj:=nbobj+1;
+          ObjetDeplacement[nbobj](0);
+          TR:=a*(-l,0,-k);
+          nbobj:=nbobj+1;
+          ObjetDeplacement[nbobj](0);
+          TR:=a*(0,l,-k);
+          nbobj:=nbobj+1;
+          ObjetDeplacement[nbobj](0);
+          TR:=a*(0,-l,-k);
+          nbobj:=nbobj+1;
+          ObjetDeplacement[nbobj](0);
+        endfor;
+      endfor;
+      TR:=a*(0,0,0);
+      nbobj:=nbobj+1;
+      ObjetDeplacement[nbobj](0);
+      DessineFusion;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+
+%51
+\NewDocumentCommand\BuildPatternCinquanteEtUna{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      if picture #1:
+        larg:=abs(lrcorner #1-llcorner #1);
+        picture maxihexa;
+        path cc;
+        cc=cercles((0,0),larg);
+        maxihexa=image(
+          trace #1;
+          trace #1 shifted (0.5*larg*(1.5,sqrt(3)/2));
+          trace #1 shifted (0.5*larg*(1.5,-sqrt(3)/2));
+          trace #1 shifted (larg*(1.5,0));
+        );
+        for l=0 upto Etape-1:
+          depla:=(l*1.5*larg,0);
+          trace maxihexa shifted depla;
+        endfor;
+      fi;
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 50g
+%d'après Troy Henderson
+\NewDocumentCommand\BuildPatternCinquanteg{}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}%
+      color CouleurFond;
+      \ifemptyKV[Pattern]{Couleur}{CouleurFond=0.8white;}{CouleurFond=\useKV[Pattern]{Couleur};}%
+        %
+        vardef gasket(expr t, s, ss, limit) =
+        if limit<2:
+        fill ss withcolor CouleurFond;
+        draw ss;
+        else:
+        save little_t; path little_t; little_t = t scaled s;
+        save little_s; path little_s; little_s = ss scaled s;
+        for i=1 upto length t:
+        gasket(little_t shifted (point i of t - point i of little_t), s, little_s shifted (point i of t - point i of little_t), limit-1);
+        endfor
+        fi
+        enddef;
+
+        Etape:=\useKV[Pattern]{Etape};
+        %
+        pair A,B,C;
+        B=(0,0);
+        C-B=(220,0);
+        A=rotation(C,B,-60);
+        trace polygone(A,B,C);
+        path T,S; T = for i = 1 upto 3: 220 up rotated (120i) -- endfor cycle;
+        S=A{dir90}..{dir60}2/3[A,C]{dir60}..{dir-90}(1/2[B,C]+(0,-5)){dir90}..{dir-60}2/3[A,B]{dir-60}..{dir-90}cycle;
+        gasket(T,1/2,S,Etape);
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 50f
+% D'après Vincent Pantaloni
+\NewDocumentCommand\BuildPatternCinquantef{}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}%
+      color CouleurFond;
+      \ifemptyKV[Pattern]{Couleur}{CouleurFond=0.8white;}{CouleurFond=\useKV[Pattern]{Couleur};}%
+      %
+      vardef sierpinski(expr Aa,Ba,Ca,n)=
+        if n>0:
+          sierpinski(Aa,1/2[Aa,Ba],1/2[Aa,Ca],n-1);
+          sierpinski(1/2[Aa,Ba],Ba,1/2[Ba,Ca],n-1);
+          sierpinski(1/2[Aa,Ca],1/2[Ba,Ca],Ca,n-1);
+        else:
+        trace Ca--2/3[Ca,Aa]{dir-80}..{dir90}(1/2[Aa,Ba]+(0,10/(Etape+1))){dir-90}..{dir80}2/3[Ca,Ba]--cycle withcolor CouleurFond;
+        fi;
+      enddef;
+      %
+      Etape:=\useKV[Pattern]{Etape};
+      %
+      u:=3cm;
+      pair A,B,C;
+      A=(0,0);
+      B-A=(u,0);
+      C=rotation(B,A,60);
+      sierpinski(A,B,C,Etape);
+      currentpicture:=rotation(currentpicture,iso(A,B,C),180);
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 50e
+% d'après Troy Henderson
+\NewDocumentCommand\BuildPatternCinquantee{}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}%
+      color CouleurFond;
+      \ifemptyKV[Pattern]{Couleur}{CouleurFond=0.8white;}{CouleurFond=\useKV[Pattern]{Couleur};}%
+        %
+        vardef gasket(expr t, s, limit) =
+        if limit<2:
+        fill t withcolor CouleurFond;
+        draw t;
+        else:
+        save little_t; path little_t; little_t = t scaled s;
+        for i=1 upto length t:
+        gasket(little_t shifted (point i of t - point i of little_t), s, limit-1);
+        endfor
+        fi;
+        enddef;
+        %
+        Etape:=\useKV[Pattern]{Etape};
+        %
+        path T; T = for i = 1 upto 5: 50 up rotated (144i) -- endfor cycle;
+        gasket(T,(3-sqrt(5))/2,Etape);
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 50d
+% d'après Troy Henderson
+\NewDocumentCommand\BuildPatternCinquanted{}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}%
+      color CouleurFond;
+      \ifemptyKV[Pattern]{Couleur}{CouleurFond=0.8white;}{CouleurFond=\useKV[Pattern]{Couleur};}%
+        %
+        vardef gasket(expr t, s, limit) =
+        if limit<2:
+        fill t withcolor CouleurFond;
+        draw t;
+        else:
+        save little_t; path little_t; little_t = t scaled s;
+        for i=1 upto length t:
+        gasket(little_t shifted (point i of t - point i of little_t), s, limit-1);
+        endfor
+        fi;
+        enddef;
+
+        Etape:=\useKV[Pattern]{Etape};
+        %
+        path T; T = for i = 1 upto 5: 50 up rotated (72i) -- endfor cycle;
+        gasket(T,(3-sqrt(5))/2,Etape);
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 50c
+% d'après Troy Henderson
+\NewDocumentCommand\BuildPatternCinquantec{}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}%
+      color CouleurFond;
+      \ifemptyKV[Pattern]{Couleur}{CouleurFond=0.8white;}{CouleurFond=\useKV[Pattern]{Couleur};}%
+        %
+        vardef gasket(expr t, s, limit) =
+        if limit<2:
+        fill t withcolor CouleurFond;
+        draw t;
+        else:
+        save little_t; path little_t; little_t = t scaled s;
+        for i=1 upto length t:
+        gasket(little_t shifted (point i of t - point i of little_t), s, limit-1);
+        endfor
+        fi;
+        enddef;
+
+        Etape:=\useKV[Pattern]{Etape};
+        %
+        path T; T = for i = 1 upto 6: 50 up rotated (60i) -- endfor cycle;
+        gasket(T, 1/3,Etape);
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 50b
+% d'après Vincent Pantaloni
+\NewDocumentCommand\BuildPatternCinquanteb{}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}%
+      color CouleurFond;
+      \ifemptyKV[Pattern]{Couleur}{CouleurFond=0.8white;}{CouleurFond=\useKV[Pattern]{Couleur};}%
+      %
+      vardef sierpinski(expr Aa,Ba,Ca,Da,n)=
+        if n>0:
+          sierpinski(Aa,1/3[Aa,Ba],1/3[Aa,Ca],1/3[Aa,Da],n-1);
+          sierpinski(1/3[Aa,Ba],1/3[Aa,Ca],1/3[Ba,Da],1/3[Ba,Aa],n-1);
+          sierpinski(2/3[Aa,Ba],Ba,1/3[Ba,Ca],1/3[Ba,Da],n-1);
+          sierpinski(1/3[Ba,Ca],2/3[Ba,Ca],2/3[Aa,Ca],1/3[Ba,Da],n-1);
+          sierpinski(2/3[Ba,Ca],Ca,1/3[Ca,Da],1/3[Ca,Aa],n-1);
+          sierpinski(1/3[Ca,Da],1/3[Ca,Aa],2/3[Ba,Da],2/3[Ca,Da],n-1);
+          sierpinski(2/3[Ba,Da],1/3[Da,Ca],Da,1/3[Da,Aa],n-1);
+          sierpinski(2/3[Ba,Da],1/3[Da,Aa],2/3[Da,Aa],1/3[Aa,Ca],n-1);
+        else:
+        fill Aa--Ba--Ca--Da--cycle withcolor CouleurFond;
+        trace Aa--Ba--Ca--Da--cycle;
+        fi;
+      enddef;
+      %
+      Etape:=\useKV[Pattern]{Etape};
+      %
+      u:=3cm;
+      pair A,B,C,D;
+      A=(0,0);
+      B-A=(u,0);
+      C=rotation(A,B,90);
+      D-C=A-B;
+      sierpinski(A,B,C,D,Etape);
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 50a
+% d'après Vincent Pantaloni
+\NewDocumentCommand\BuildPatternCinquantea{}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}%
+      color CouleurFond;
+      \ifemptyKV[Pattern]{Couleur}{CouleurFond=0.8white;}{CouleurFond=\useKV[Pattern]{Couleur};}%
+      %
+      vardef sierpinski(expr Aa,Ba,Ca,Da,n)=
+        if n>0:
+          sierpinski(Aa,1/3[Aa,Ba],1/3[Aa,Ca],1/3[Aa,Da],n-1);
+          sierpinski(2/3[Aa,Ba],Ba,1/3[Ba,Ca],1/3[Ba,Da],n-1);
+          sierpinski(2/3[Ba,Ca],Ca,1/3[Ca,Da],1/3[Ca,Aa],n-1);
+          sierpinski(2/3[Ba,Da],1/3[Da,Ca],Da,1/3[Da,Aa],n-1);
+        else:
+        fill Aa--Ba--Ca--Da--cycle withcolor CouleurFond;
+        trace Aa--Ba--Ca--Da--cycle;
+        fi;
+      enddef;
+      %
+      Etape:=\useKV[Pattern]{Etape};
+      %
+      u:=3cm;
+      pair A,B,C,D;
+      A=(0,0);
+      B-A=(u,0);
+      C=rotation(A,B,90);
+      D-C=A-B;
+      sierpinski(A,B,C,D,Etape);
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 50
+% d'après Vincent Pantaloni
+\NewDocumentCommand\BuildPatternCinquante{}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}%
+      color CouleurFond;
+      \ifemptyKV[Pattern]{Couleur}{CouleurFond=0.8white;}{CouleurFond=\useKV[Pattern]{Couleur};}%
+      %
+      vardef sierpinski(expr Aa,Ba,Ca,n)=
+        if n>0:
+          sierpinski(Aa,1/2[Aa,Ba],1/2[Aa,Ca],n-1);
+          sierpinski(1/2[Aa,Ba],Ba,1/2[Ba,Ca],n-1);
+          sierpinski(1/2[Aa,Ca],1/2[Ba,Ca],Ca,n-1);
+        else:
+        fill Aa--Ba--Ca--cycle withcolor CouleurFond;
+        trace Aa--Ba--Ca--cycle;
+        fi;
+      enddef;
+      %
+      Etape:=\useKV[Pattern]{Etape};
+      %
+      u:=3cm;
+      pair A,B,C;
+      A=(0,0);
+      B-A=(u,0);
+      C=rotation(B,A,60);
+      sierpinski(A,B,C,Etape);
+    \end{mplibcode}%
+  \fi%
+}%
+
+%49
+\NewDocumentCommand\BuildPatternQuaranteNeuf{}{
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeIso
+        somme:=1;
+        for nbe=0 upto Etape:
+          ptpattern[nbe]:=u*(somme,(somme mod 2)*0.5);
+          if nbe=Etape:
+            TypeCube:=cadrecubesol;
+          else:
+            TypeCube:=cadrecube;
+          fi;
+          cc[nbe]=image(
+          if nbe mod 2=0:
+            for k=0 upto (2**(nbe div 2))-1:
+              for l=0 upto (2**((nbe-1) div 2))-1:
+                trace TypeCube shifted(ptpattern[nbe]+k*u*(1,-0.5)+l*u*(0,1));
+              endfor;
+            endfor;
+          else:
+            for k=0 upto (2**((nbe-1) div 2))-1:
+              for l=0 upto (2**((nbe-1) div 2))-1:
+                trace TypeCube shifted(ptpattern[nbe]+k*u*(1,-0.5)+l*u*(0,1));
+              endfor;
+            endfor;
+          fi;
+          );
+          trace cc[nbe];
+          somme:=somme+nbe+2+1;
+        endfor;
+        GrillePatternIso;
+        AffichagePattern(0,Etape);
+      \end{Geometrie}
+    }{%
+      \mplibforcehmode
+      \begin{mplibcode}
+        Etape:=\useKV[Pattern]{Etape};
+        input PfCSolid;
+
+        intensite:=1.5;
+        Ferme[0]:=false;
+        \ifemptyKV[Pattern]{Couleur}{outcolor:=LightSteelBlue;}{outcolor:=\useKV[Pattern]{Couleur};}%
+        incolor:=white;
+        nb:=1;subh:=1;
+        creux:=false;
+        
+        Initialisation(2500,40,20,50);
+        Objetcube0("a=0.25");
+        nbobj:=0;
+        if (Etape mod 2)=0:
+          for k=0 upto (2**(Etape div 2))-1:
+            for l=0 upto (2**((Etape-1) div 2))-1:
+              nbobj:=nbobj+1;
+              TR:=0.25*(0,k,l);
+              ObjetDeplacement[nbobj](0);
+            endfor;
+          endfor;
+        else:
+          for k=0 upto (2**((Etape-1) div 2))-1:
+            for l=0 upto (2**((Etape-1) div 2))-1:
+              nbobj:=nbobj+1;
+              TR:=0.25*(0,k,l);
+              ObjetDeplacement[nbobj](0);
+            endfor;
+          endfor;
+        fi;
+        DessineFusion;
+      \end{mplibcode}%
+    }%
+  \fi%
+}%
+
+%48
+\NewDocumentCommand\BuildPatternQuaranteHuit{}{%
+  \ifluatex%
+        \ifboolKV[Pattern]{Grille}{%
+        \begin{Geometrie}[Cadre="aucun"]
+          \BuildPatternCodeIso
+          somme:=1;
+          for nbe=0 upto Etape:
+            ptpattern[nbe]:=u*(somme,if (somme mod 2)=0:0 else: -0.5 fi);
+            if nbe=Etape:
+            TypeCube:=cadrecubesol;
+            else:
+            TypeCube:=cadrecube;
+            fi;
+            cc[nbe]=image(
+            trace TypeCube shifted(ptpattern[nbe]);
+            for k=nbe downto 1:
+              trace TypeCube shifted(ptpattern[nbe]+k*u*(1,0.5));%haut droite
+            endfor;
+            %for k=nbe downto 1:
+            %  trace TypeCube shifted(ptpattern[nbe]+k*u*(-1,0.5));%haut gauche
+            %endfor;
+            %for k=1 upto nbe:% downto 0:
+            %  trace TypeCube shifted(ptpattern[nbe]+k*u*(-1,-0.5));%bas gauche
+            %endfor;
+            for k=1 upto nbe:% downto 0:
+              trace TypeCube shifted(ptpattern[nbe]+k*u*(1,-0.5));%bas droite
+            endfor;
+            for k=1 upto nbe:% downto 0:
+              trace TypeCube shifted(ptpattern[nbe]+k*u*(0,1));%haut
+              endfor;
+              );
+              trace cc[nbe];
+            somme:=somme+nbe+2+1;
+            endfor;
+            GrillePatternIso;
+            AffichagePattern(0,Etape);
+      \end{Geometrie}
+      }{%
+    \mplibforcehmode
+    \begin{mplibcode}
+      Etape:=\useKV[Pattern]{Etape};
+      input PfCSolid;
+
+      intensite:=1.5;
+      Ferme[0]:=false;
+      \ifemptyKV[Pattern]{Couleur}{outcolor:=LightSteelBlue;}{outcolor:=\useKV[Pattern]{Couleur};}%
+      incolor:=white;
+      nb:=1;subh:=1;
+      creux:=true;
+
+      Initialisation(2500,40,20,50);
+      Objetcube1("a=0.25");
+      nbobj:=1;
+      TR:=(0,a,0);
+      for k=0 upto Etape-2:
+        NBobj:=nbobj;
+        nbobj:=nbobj+1;
+        ObjetDeplacement[nbobj](NBobj);
+      endfor;
+      NBobj:=1;
+      TR:=(-a,0,0);
+      for k=0 upto Etape-2:
+        nbobj:=nbobj+1;
+        ObjetDeplacement[nbobj](NBobj);
+        NBobj:=nbobj;
+      endfor;
+      NBobj:=1;
+      TR:=(0,0,a);%
+      for k=0 upto Etape-2:
+        nbobj:=nbobj+1;
+        ObjetDeplacement[nbobj](NBobj);
+        NBobj:=nbobj;
+      endfor;
+      DessineFusion;
+    \end{mplibcode}
+    }%
+  \fi%
+}%
+
+%46
+\NewDocumentCommand\BuildPatternQuaranteSix{}{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+        \begin{Geometrie}[Cadre="aucun"]
+          \BuildPatternCodeIso
+          somme:=1;
+          for nbe=0 upto Etape:
+            ptpattern[nbe]:=u*(somme,if (somme mod 2)=0:-0.5 else: 0.5 fi);
+            if nbe=Etape:
+            TypeCube:=cadrecubesol;
+            else:
+            TypeCube:=cadrecube;
+            fi;
+            cc[nbe]=image(
+            trace TypeCube shifted(ptpattern[nbe]);
+            for k=nbe downto 1:
+              trace TypeCube shifted(ptpattern[nbe]+k*u*(1,0.5));%haut droite
+            endfor;
+            for k=nbe downto 1:
+              trace TypeCube shifted(ptpattern[nbe]+k*u*(-1,0.5));%haut gauche
+            endfor;
+            for k=1 upto nbe:% downto 0:
+              trace TypeCube shifted(ptpattern[nbe]+k*u*(-1,-0.5));%bas gauche
+            endfor;
+            for k=1 upto nbe:% downto 0:
+              trace TypeCube shifted(ptpattern[nbe]+k*u*(1,-0.5));%bas droite
+            endfor;
+            for k=1 upto nbe:% downto 0:
+              trace TypeCube shifted(ptpattern[nbe]+k*u*(0,1));%haut
+              endfor;
+              );
+              trace cc[nbe];
+            somme:=somme+2*nbe+1+3;
+            endfor;
+            GrillePatternIso;
+            AffichagePattern(0,Etape);
+      \end{Geometrie}
+      }{%
+        \mplibforcehmode
+    \begin{mplibcode}
+      Etape:=\useKV[Pattern]{Etape};
+      input PfCSolid;
+
+      intensite:=1.5;
+      Ferme[0]:=false;
+      \ifemptyKV[Pattern]{Couleur}{outcolor:=LightSteelBlue;}{outcolor:=\useKV[Pattern]{Couleur};}%
+      incolor:=white;
+      nb:=1;subh:=1;
+      creux:=true;
+
+      Initialisation(2500,40,20,50);
+      Objetcube1("a=0.25");
+      nbobj:=1;
+      TR:=(0,a,0);
+      for k=0 upto Etape-2:
+        NBobj:=nbobj;
+        nbobj:=nbobj+1;
+        ObjetDeplacement[nbobj](NBobj);
+      endfor;
+      NBobj:=1;
+      TR:=(0,-a,0);
+      for k=0 upto Etape-2:
+        nbobj:=nbobj+1;
+        ObjetDeplacement[nbobj](NBobj);
+        NBobj:=nbobj;
+      endfor;
+      NBobj:=1;
+      TR:=(a,0,0);
+      for k=0 upto Etape-2:
+        nbobj:=nbobj+1;
+        ObjetDeplacement[nbobj](NBobj);
+        NBobj:=nbobj;
+      endfor;
+      NBobj:=1;
+      TR:=(-a,0,0);
+      for k=0 upto Etape-2:
+        nbobj:=nbobj+1;
+        ObjetDeplacement[nbobj](NBobj);
+        NBobj:=nbobj;
+      endfor;
+      NBobj:=1;
+      TR:=(0,0,a);%
+      for k=0 upto Etape-2:
+        nbobj:=nbobj+1;
+        ObjetDeplacement[nbobj](NBobj);
+        NBobj:=nbobj;
+      endfor;
+      DessineFusion;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+
+%45
+\NewDocumentCommand\BuildPatternQuaranteCinqa{m}{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,1);
+        for k=0 upto Etape:
+        cc[k]=polygonerela(Apat[k] for l=0 upto k:,"AV" endfor ,"MO","AV","DE" for l=0 upto k:,"AV" endfor for l=0 upto k+1:,"MO" endfor for l=0 upto 2*(k+1):,"RE" endfor);
+          trace cc[k];
+          Apat[k+1]:=lrcorner cc[k]+u*(1,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape);
+        for k=0 upto Etape:
+          AffichageEtape(lrt)(k,1,Etape,llcorner cc[k]);
+        endfor;
+      \end{Geometrie}
+    }{%
+      \mplibforcehmode%
+      \begin{mplibcode}
+        \BuildPatternCode
+        if picture #1:
+          for k=0 upto (2*Etape):
+            for l=0 upto Etape:
+              if (k=Etape) and (l=0):
+              else:
+                trace #1 shifted(5mm*(k,l));
+              fi;
+            endfor;
+          endfor;
+        fi;
+      \end{mplibcode}%
+    }%
+  \fi%
+}%
+
+%44
+\NewDocumentCommand\BuildPatternQuaranteQuatrea{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      if picture #1:
+        larg:=abs(lrcorner #1-llcorner #1);
+        picture maxihexa;
+        path cc;
+        cc=cercles((0,0),larg);
+        maxihexa=image(
+          trace #1 shifted (0.5*larg*(1.5,sqrt(3)/2));
+          trace #1 shifted (0.5*larg*(1.5,-sqrt(3)/2));
+          trace #1 shifted (0.5*larg*(-1.5,sqrt(3)/2));
+          trace #1 shifted (0.5*larg*(-1.5,-sqrt(3)/2));
+          trace #1 shifted (0.5*larg*(0,sqrt(3)));
+          trace #1 shifted (0.5*larg*(0,-sqrt(3)));
+        );
+        for l=0 upto Etape-1:
+          depla:=(l*1.5*larg,0);
+          trace maxihexa shifted depla;
+        endfor;
+      fi;
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 43
+\NewDocumentCommand\BuildPatternQuaranteTroisa{m}{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,1);
+        for k=0 upto Etape:
+        cc[k]=polygonerela(Apat[k] for l=0 upto 3+k:,"AV" endfor ,"MO" for l=0 upto k+1:,"AV" endfor,"MO" for l=0 upto k+2:,"RE" endfor,"DE" for l=0 upto k+1:,"RE" endfor for l=0 upto k+2:,"MO" endfor,"RE");
+          trace cc[k];
+          Apat[k+1]:=lrcorner cc[k]+u*(1,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape);
+        for k=0 upto Etape:
+          AffichageEtape(lrt)(k,1,Etape,llcorner cc[k]);
+        endfor;
+      \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=0pt;
+      \BuildPatternCodeA{#1}
+      trace TestA;
+      for l=1 upto Etape+2:
+        depla:=(0,l*haut);
+        trace TestA shifted depla;
+        depla:=(l*larg,0);
+        trace TestA shifted depla;
+        depla:=(Etape+1)*(larg,0)+(l*larg,haut);
+        trace TestA shifted depla;
+      endfor;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+
+%42
+\NewDocumentCommand\BuildPatternQuaranteDeux{O{1}}{%
+  \ifluatex%
+    \begin{Allumettes}[Echelle=\fpeval{0.30*#1}]
+      Etape=\useKV[Pattern]{Etape};
+      pair A[],B[],C[],D[],E[];
+      A0=(0,0);
+      path cc;
+      cc=cercles(A0,u);
+      for k=0 upto 6:
+        B[k]=pointarc(cc,-30+k*60);
+      endfor;
+      picture UnitHexd,UnitHexi;
+      UnitHexd=image(
+      trace Allu(B1,B2);
+      trace Allu(B2,B3);
+      trace Allu(B3,B4);
+      trace Allu(B4,B5);
+      trace Allu(B5,B6);
+      );
+      UnitHexi=image(
+      trace Allu(B1,B2);
+      trace Allu(B2,B3);
+      trace Allu(B4,B5);
+      trace Allu(B5,B6);
+      );
+      currentpicture:=nullpicture;
+      trace UnitHexd;
+      for k=1 upto Etape-1:
+        trace UnitHexi shifted(2*k*(iso(B0,B1)-A0));
+      endfor;
+      trace Allu(B0,B1) shifted(2*(Etape-1)*(iso(B0,B1)-A0));
+    \end{Allumettes}%
+  \fi%
+}%
+
+%40
+\NewDocumentCommand\BuildPatternQuarante{}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      Etape:=\useKV[Pattern]{Etape};
+      input PfCSolid;
+
+      intensite:=1.5;
+      Ferme[0]:=false;
+      \ifemptyKV[Pattern]{Couleur}{outcolor:=white;}{outcolor:=\useKV[Pattern]{Couleur};}
+      incolor:=white;
+      nb:=1;subh:=1;
+      creux:=true;
+      %
+      Initialisation(2500,22,20,50);
+      Objetcube0("a=0.25");
+      nbobj:=0;
+      for k=0 upto Etape-1:
+      for l=0 upto Etape-1:
+      for p=0 upto Etape-1:
+      TR:=a*(k,l,p);
+      nbobj:=nbobj+1;
+      ObjetDeplacement[nbobj](0);
+      TR:=a*(k,l+2*Etape,p);
+      nbobj:=nbobj+1;
+      ObjetDeplacement[nbobj](0);
+      endfor;
+      endfor;
+      endfor;
+      for k=0 upto 3*Etape-1:
+        for l=0 upto Etape-1:
+          nbobj:=nbobj+1;
+         TR:=0.25*(l,k,-1);
+         ObjetDeplacement[nbobj](0);
+      endfor;
+      endfor;
+      DessineFusion;
+    \end{mplibcode}%
+  \fi%
+}%
+
+
+%39
+\NewDocumentCommand\BuildPatternTrenteNeuf{}{
+  \ifluatex%
+        \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[CoinHD={5*u*(0.5*(\useKV[Pattern]{Etape}*(\useKV[Pattern]{Etape}+1)/2),0.5*(\useKV[Pattern]{Etape}+2))}]
+        Etape:=\useKV[Pattern]{Etape};
+        color CouleurEtape,CouleurSol;
+        \ifemptyKV[Pattern]{Couleur}{CouleurEtape=Purple;}{CouleurEtape=\useKV[Pattern]{Couleur};}
+        \ifemptyKV[Pattern]{CouleurSolution}{CouleurSol=Evidence;}{CouleurSol=\useKV[Pattern]{CouleurSolution};}
+        u:=2.5mm;
+        trace papierisometriqueu withcolor 0.7white;
+        picture cadrecube,cadrecubesol;
+        pair A[];
+        A1=pp(0,2*(Etape+1)-1);
+        A2-A1=pp(1,-0.5);
+        A3-A2=pp(1,0.5);
+        A4-A3=pp(0,1);
+        A5-A4=pp(-1,0.5);
+        A6-A5=pp(-1,-0.5);
+        A7-A6=pp(1,-0.5);
+        boolean Solution;
+        Solution=\useKV[Pattern]{Solution};
+        cadrecube=image(%
+        fill polygone(A1,A2,A3,A4,A5,A6) withcolor CouleurEtape;
+        drawoptions(withcolor white);
+        trace polygone(A1,A2,A3,A4,A5,A6);
+        trace A6--A7--A2;
+        trace A7--A4;
+        drawoptions();
+        );
+        somme:=2;
+        for nbe=0 upto Etape-2:
+        for k=nbe downto 0:
+          for p=0 upto k:
+          for l=0 upto nbe:
+          trace cadrecube shifted(pp(somme,(somme mod 2)*0.5)+(l-1)*pp(1,-0.5)+p*pp(-1,-0.5)+(-k)*pp(0,1));
+          endfor;
+          endfor;
+        endfor;
+        somme:=somme+nbe+5;
+        endfor;
+        if Solution:
+        cadrecubesol=image(%
+        fill polygone(A1,A2,A3,A4,A5,A6) withcolor CouleurSol;
+        drawoptions(withcolor white);
+        trace polygone(A1,A2,A3,A4,A5,A6);
+        trace A6--A7--A2;
+        trace A7--A4;
+        drawoptions();
+        );
+        for nbe=Etape-1 upto Etape-1:
+        for k=nbe downto 0:
+          for p=0 upto k:
+          for l=0 upto nbe:
+          trace cadrecubesol shifted(pp(somme,(somme mod 2)*0.5)+(l-1)*pp(1,-0.5)+p*pp(-1,-0.5)+(-k)*pp(0,1));
+          endfor;
+          endfor;
+        endfor;
+        endfor;
+        fi;
+      \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      Etape:=\useKV[Pattern]{Etape};
+      input PfCSolid;
+
+      intensite:=1.5;
+      Ferme[0]:=false;
+      outcolor:=Orange;
+      incolor:=white;
+      nb:=1;subh:=1;
+      creux:=true;
+
+      Initialisation(2500,40,20,50);
+      Objetcube1("a=0.25");
+      nbobj:=1;
+      for k=0 upto Etape-1:%x
+      for l=0 upto Etape-1:%y
+      for m=Etape-1-l downto 0:%z
+      nbobj:=nbobj+1;
+      TR:=(k*a,l*a,m*a);
+      ObjetDeplacement[nbobj](1);
+      endfor;
+      endfor;
+      endfor;
+      DessineFusion;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+
+%37
+\NewDocumentCommand\BuildPatternTrenteSept{O{1}}{%
+  \ifluatex%
+    \begin{Allumettes}[Echelle=\fpeval{0.30*#1}]
+      Etape=\useKV[Pattern]{Etape};
+      pair A[],B[],C[],D[],E[];
+      A0=(0,0);
+      path cc;
+      cc=cercles(A0,u);
+      for k=0 upto 6:
+        B[k]=pointarc(cc,-30+k*60);
+      endfor;
+      picture UnitHexa;
+      UnitHexa=image(
+      trace Allu(B4,B5);
+      trace Allu(B5,B6);
+      trace Allu(B0,B1);
+      trace Allu(B1,B2);
+      trace Allu(B2,B3);
+      );
+      currentpicture:=nullpicture;
+      trace Allu(B3,B4);
+      for k=0 upto Etape-1:
+        trace UnitHexa shifted(2*k*(iso(B0,B1)-A0));
+      endfor;
+    \end{Allumettes}%
+  \fi%
+}%
+
+% 36
+\NewDocumentCommand\BuildPatternTrenteSix{}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      Etape:=\useKV[Pattern]{Etape};
+      %
+      input PfCSolid;
+      %
+      intensite:=1.5;
+      Ferme[0]:=false;
+      \ifemptyKV[Pattern]{Couleur}{outcolor:=LightSteelBlue;}{outcolor:=\useKV[Pattern]{Couleur};}
+      incolor:=white;
+      nb:=1;subh:=1;
+      creux:=true;
+      %
+      Initialisation(2500,22,20,50);
+      Objetpave0("L=1","H=0.2","P=0.2");
+      %Objetpave1("L=0.2","H=0.2","P=1");
+      nbobj:=0;
+      angz:=90;
+      for k=Etape downto 1:
+        TR:=0.2*(0,0,-k);
+        nbobj:=nbobj+1;
+        ObjetDeplacement[nbobj](0);
+      endfor;
+      for k=Etape downto 1:
+        TR:=0.2*(0,1,-k);
+        nbobj:=nbobj+1;
+        ObjetDeplacement[nbobj](0);
+      endfor;
+      for k=Etape downto 1:
+        TR:=0.2*(0,3,-k);
+        nbobj:=nbobj+1;
+        ObjetDeplacement[nbobj](0);
+      endfor;
+      for k=Etape downto 1:
+        TR:=0.2*(0,4,-k);
+        nbobj:=nbobj+1;
+        ObjetDeplacement[nbobj](0);
+      endfor;
+      angz:=0;
+      for k=4 downto 0:
+        nbobj:=nbobj+1;
+        TR:=0.2*(-k+2,2,0);
+        ObjetDeplacement[nbobj](0);
+      endfor;
+      % DessineFusion;
+      for k=1 upto nbobj:
+        AffichageObjet[k];
+      endfor;
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 35
+\NewDocumentCommand\BuildPatternTrenteCinq{}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      bboxmargin:=0pt;
+      larg:=abs(lrcorner kappla-llcorner kappla);
+      haut:=abs(urcorner kappla-lrcorner kappla);
+      trace kappla;
+      picture Pi;
+      Pi=image(
+      trace rotation(kappla,lrcorner kappla,-90);
+      trace rotation(kappla,lrcorner kappla,-90) shifted(larg-haut,0);
+      trace kappla shifted((larg,larg));
+      trace kappla shifted(2*larg,0);
+      );
+      for l=0 upto Etape-1:
+        trace Pi shifted(l*(2*larg,0));
+      endfor;
+    \end{mplibcode}%
+  \fi%
+}%
+
+% 34
+\NewDocumentCommand\BuildPatternTrenteQuatrea{m}{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,1);
+        for k=0 upto Etape:
+        cc[k]=polygonerela(Apat[k] for l=0 upto 2*(k+1)-1:,"AV" endfor for l=0 upto k:,"MO","RE" endfor for l=0 upto k:,"RE","DE" endfor);
+          trace cc[k];
+          Apat[k+1]:=lrcorner cc[k]+u*(1,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape);
+        for k=0 upto Etape:
+          AffichageEtape(lrt)(k,1,Etape,llcorner cc[k]);
+        endfor;
+      \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=0pt;
+      \BuildPatternCodeA{#1}
+      for l=1 upto Etape:
+        for k=0 upto 2*l-1:
+          depla:=((-l+k)*larg,-l*haut);
+          trace TestA shifted depla;
+        endfor;
+      endfor;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+
+% 33
+\NewDocumentCommand\BuildPatternTrenteTroisa{m}{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,\PfMRetiensEtape+2);
+        picture cc[];
+        for nbe=0 upto Etape-2:
+        path TestA;
+        pair depla;
+        cc[nbe]=image(
+        TestA:=polygonerela(Apat[nbe],"DE","AV","MO");
+        fill TestA withcolor if nbe<Etape:CouleurEtape else:CouleurSol fi withtransparency(1,0.35);
+        trace TestA withpen pencircle scaled 1.1 withcolor if nbe<Etape:CouleurEtape else:CouleurSol fi;
+        for l=1 upto nbe:
+          for k=-l upto l:
+            if (k mod 2)=(l mod 2):
+              depla:=u*(k,l);
+              fill (TestA shifted depla) withcolor if k<Etape:CouleurEtape else:CouleurSol fi withtransparency(1,0.35);
+              trace TestA shifted depla withpen pencircle scaled 1.1 withcolor if k<Etape:CouleurEtape else:CouleurSol fi;
+              depla:=u*(k,-l);
+              fill (TestA shifted depla) withcolor if k<Etape:CouleurEtape else:CouleurSol fi withtransparency(1,0.35);
+              trace TestA shifted depla withpen pencircle scaled 1.1 withcolor if k<Etape:CouleurEtape else:CouleurSol fi;
+            fi;
+          endfor;
+        endfor;
+        );
+        trace cc[nbe];
+        Apat[nbe+1]:=Apat[nbe]+u*(2*nbe+4,0);
+        endfor;
+        GrillePattern;
+        for k=0 upto Etape-1:
+          if k<Etape-1:
+            trace cc[k] withpen pencircle scaled 1.1 withcolor CouleurEtape;
+          else:
+            if \useKV[Pattern]{Solution}:
+              trace cc[k] withpen pencircle scaled 1.1 withcolor CouleurSol;
+            fi;
+          fi;
+        endfor;
+        for k=0 upto Etape-1:
+          AffichageEtape(urt)(k,1,Etape,(xpart(ulcorner cc[k]),ypart(ulcorner cc[Etape])));
+        endfor;
+      \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=0pt;
+      \BuildPatternCodeA{#1}
+      trace TestA;
+      for l=1 upto Etape-1:
+        for k=-l upto l:
+          if (k mod 2)=(l mod 2):
+            depla:=(k*larg,l*haut);
+            trace TestA shifted depla;
+            depla:=(k*larg,-l*haut);
+            trace TestA shifted depla;
+          fi;
+        endfor;
+      endfor;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+
+% 32
+\NewDocumentCommand\BuildPatternTrenteDeuxa{m}{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,\PfMRetiensEtape+3);
+        for k=0 upto Etape-1:
+        cc[k]=polygonerela(Apat[k] for l=0 upto k+1:,"DE" endfor for l=0 upto k:,"AV" endfor for l=0 upto k+1:,"MO" endfor);
+          trace cc[k];
+          Apat[k+1]:=urcorner cc[k]+u*(2,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+          AffichageEtape(urt)(k,1,Etape,ulcorner cc[k]);
+        endfor;
+      \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=0pt;
+      \BuildPatternCodeA{#1}
+      for l=0 upto Etape-1:
+        for k=0 upto Etape:
+          depla:=(l*larg,k*haut);
+          trace TestA shifted depla;
+        endfor;
+      endfor;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+
+% 31
+\NewDocumentCommand\BuildPatternTrenteEtUna{m}{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,2);
+        for k=0 upto Etape-1:
+        cc[k]=polygonerela(Apat[k],"AV","DE" for l=0 upto k:,"AV" endfor ,"MO","AV","MO","RE","MO" for l=0 upto k:,"RE" endfor,"DE","RE");
+          trace cc[k];
+          Apat[k+1]:=lrcorner cc[k]+u*(1,1);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+          AffichageEtape(lrt)(k,1,Etape,llcorner cc[k]);
+        endfor;
+      \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=0pt;
+      \BuildPatternCodeA{#1}
+      for l=0 upto Etape-1:
+        for k=0 upto 2:
+          depla:=(l*larg,k*haut);
+          trace TestA shifted depla;
+        endfor;
+      endfor;
+      depla:=(-larg,haut);
+      trace TestA shifted depla;
+      depla:=(Etape*larg,haut);
+      trace TestA shifted depla;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+
+% 30
+\NewDocumentCommand\BuildPatternTrentea{m}{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}%
+    \BuildPatternCode
+    ecartcube:=5pt;
+    picture Cle;
+    \BuildPatternCodeA{#1}
+    if (Etape mod 2)=0:
+      depla:=(0,0.5*haut)+(Etape div 2)*(0,haut);
+      for k=0 upto Etape-1:
+        for l=0 upto Etape-1:
+          if (k*l)<>(Etape-1)*(Etape-1):
+            draw TestA shifted(depla+(-k*larg,l*haut));
+            draw TestA shifted(symetrie(depla+(-k*larg,l*haut),(0,0)));
+          fi;
+        endfor;
+      endfor;
+      for k=0 upto ((Etape div 2)-1):
+        draw TestA shifted((0,0.5*haut)+k*(0,haut));
+        draw TestA shifted(symetrie((0,haut*0.5)+k*(0,haut),(0,0)));
+      endfor;
+    else:
+      depla:=(0,0)+((Etape div 2)+1)*(0,haut);
+      for k=0 upto Etape-1:
+        for l=0 upto Etape-1:
+          if (k*l)<>(Etape-1)*(Etape-1):
+            draw TestA shifted(depla+(-k*larg,l*haut));
+            draw TestA shifted(symetrie(depla+(-k*larg,l*haut),(0,0)));
+          fi;
+        endfor;
+      endfor;
+      for k=1 upto (Etape div 2):
+        draw TestA shifted(k*(0,haut));
+        draw TestA shifted(symetrie(k*(0,haut),(0,0)));
+      endfor;
+      draw TestA;
+    fi;
+    Cle=currentpicture;
+    currentpicture:=nullpicture;
+    draw rotation(Cle,(0,0),40);
+  \end{mplibcode}
+  \fi%
+}%
+
+% 28
+\NewDocumentCommand\BuildPatternVingtHuit{}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      Etape:=\useKV[Pattern]{Etape};
+      %
+      input PfCSolid;
+      %
+      intensite:=1.5;
+      Ferme[0]:=false;
+      \ifemptyKV[Pattern]{Couleur}{outcolor:=LightSteelBlue;}{outcolor:=\useKV[Pattern]{Couleur};}
+      incolor:=white;
+      nb:=1;subh:=1;
+      creux:=true;
+      %
+      Initialisation(2500,40,20,50);
+      Objetcube0("a=0.25");
+      nbobj:=0;
+      for k=0 upto Etape-1:
+        for l=0 upto Etape-1:
+          nbobj:=nbobj+1;
+          TR:=0.25*(k,l,0);
+          ObjetDeplacement[nbobj](0);
+        endfor;
+      endfor;
+      for l=1 upto Etape-1:
+        for k=0 upto Etape-1:
+          TR:=0.25*(k,0,l);
+          nbobj:=nbobj+1;
+          ObjetDeplacement[nbobj](1);
+        endfor;
+        for k=0 upto Etape-1:
+          TR:=0.25*(0,k,l);
+          nbobj:=nbobj+1;
+          ObjetDeplacement[nbobj](1);
+        endfor;
+      endfor;
+      DessineFusion;
+    \end{mplibcode}
+  \fi%
+}%
+
+% 27
+\NewDocumentCommand\BuildPatternVingtSepta{m}{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,1);
+        for k=0 upto Etape-1:
+        cc[k]=polygonerela(Apat[k] for l=0 upto 2*(k+1)-1:,"AV" endfor ,"MO" for l=0 upto k:,"RE" endfor for l=1 upto k:,"MO" endfor for l=0 upto k:,"RE" endfor);
+          trace cc[k];
+          Apat[k+1]:=lrcorner cc[k]+u*(2,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+          AffichageEtape(lrt)(k,1,Etape,llcorner cc[k]);
+        endfor;
+      \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      for l=0 upto Etape-1:
+        for k=0 upto Etape-1:
+          depla:=(l*larg,k*haut);
+          trace TestA shifted depla;
+        endfor;
+      endfor;
+      for l=0 upto Etape-1:
+        depla:=((Etape+l)*larg,0);
+        trace TestA shifted depla;
+      endfor;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+
+% 26
+\NewDocumentCommand\BuildPatternVingtSixa{m}{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,\PfMRetiensEtape+3);
+        for k=0 upto Etape-1:
+        cc[k]=polygonerela(Apat[k] for l=0 upto k:,"DE" endfor if k>0: ,"DE" for l=1 upto k:,"AV" endfor ,"MO","AV" for l=0 upto k-1:,"MO" endfor for l=0 upto k-1:,"AV" endfor ,"MO" else: ,"AV","MO","RE" fi);
+          trace cc[k];
+          Apat[k+1]:=urcorner cc[k]+u*(2,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+          AffichageEtape(urt)(k,1,Etape,ulcorner cc[k]);
+        endfor;
+      \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      for l=0 upto Etape-1:
+        for k=0 upto Etape-1:
+          trace TestA shifted(l*larg,-k*haut);
+        endfor;
+      endfor;
+      %
+      trace TestA shifted(Etape*(larg,0));
+      trace TestA shifted(Etape*(0,-haut));
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+
+% 25
+\NewDocumentCommand\BuildPatternVingtCinqa{m}{%
+    \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{carré,carrés,de carrés}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{3+\useKV[Pattern]{Etape}*2}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+    \ifboolKV[Pattern]{Calcul}{%
+      \ifboolKV[Pattern]{Inverse}{%
+          On doit réussir à trouver le nombre entier tel :
+        \begin{center}
+          \ProgCalcul*[SansCalcul]{?,*2 +3,? \num{\PfMCalculNbMotif}}
+        \end{center}
+        Donc on remonte le programme de calcul :
+        \begin{center}
+          \ProgCalcul*[Direct=false]{\useKV[Pattern]{Etape},*2 ++3}
+        \end{center}
+        L'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+      }{%
+        \num{\PfMCalculNbMotif} \PfCDescriptionMotif[2]. En effet, le motif se décompose en un rectangle de 3 \PfCDescriptionMotif[2] et de \num{\useKV[Pattern]{Etape}} rectangles de 2 \PfCDescriptionMotif[2]%
+      }%
+    }{%
+      \ifboolKV[Pattern]{Formule}{%
+        On remarque que le motif est composé de « étape » rectangles de 2 \PfCDescriptionMotif[3] et d'un rectangle de largeur 1 et de longueur 3.\par
+        Le nombre \PfCDescriptionMotif[3] se calcule sous la forme :\[\text{« étape »}\times2+3.\]
+        \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+          \[2\times e+3.\]
+      }%
+    }{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,1);
+        for k=0 upto Etape-1:
+          cc[k]=polygonerela(Apat[k] for l=0 upto k+2:,"AV" endfor ,"MO","RE","RE" if k>0:,"MO" for l=1 upto k:,"RE" endfor ,"MO","RE" else: ,"MO","MO","RE" fi);
+          trace cc[k];
+          Apat[k+1]:=lrcorner cc[k]+u*(1,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+          AffichageEtape(lrt)(k,1,Etape,llcorner cc[k]);
+        endfor;
+      \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      trace TestA;
+      for l=1 upto Etape+1:
+        depla:=l*(larg,0);
+        trace TestA shifted depla;
+      endfor;
+      for l=0 upto Etape-1:
+        depla:=(l*larg,haut);
+        trace TestA shifted depla;
+      endfor;
+      trace TestA shifted(0,2*haut);
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+}%
+}%
+}%
+
+%24
+\NewDocumentCommand\BuildPatternVingtQuatrea{m}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{carré,carrés,de carrés}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{3+\useKV[Pattern]{Etape}*2}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+    \ifboolKV[Pattern]{Calcul}{%
+      \ifboolKV[Pattern]{Inverse}{%
+          On doit réussir à trouver le nombre entier tel :
+        \begin{center}
+          \ProgCalcul*[SansCalcul]{?,*2 +3,? \num{\PfMCalculNbMotif}}
+        \end{center}
+        Donc on remonte le programme de calcul :
+        \begin{center}
+          \ProgCalcul*[Direct=false]{\useKV[Pattern]{Etape},*2 ++3}
+        \end{center}
+        L'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+      }{%
+        \num{\PfMCalculNbMotif} \PfCDescriptionMotif[2]. En effet, le motif se décompose en un rectangle de 3 \PfCDescriptionMotif[2] et de \num{\useKV[Pattern]{Etape}} rectangles de 2 \PfCDescriptionMotif[2]%
+      }%
+    }{%
+      \ifboolKV[Pattern]{Formule}{%
+        On remarque que le motif est composé d'un rectangle de longueur « étape » et de largeur 2 et d'un rectangle de largeur 1 et de longueur 3.
+        Le nombre \PfCDescriptionMotif[3] se calcule sous la forme :\[\text{« étape »}\times2+3.\]
+        \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+          \[2\times e+3.\]
+      }%
+    }{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,1);
+        for k=0 upto Etape-1:
+        cc[k]=polygonerela(Apat[k] for l=0 upto k+1:,"AV" endfor ,"MO","MO" for l=0 upto k:,"RE" endfor ,"MO","RE");
+          trace cc[k];
+          Apat[k+1]:=lrcorner cc[k]+u*(1,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+          AffichageEtape(lrt)(k,1,Etape,llcorner cc[k]);
+        endfor;
+      \end{Geometrie}
+    }{%
+  \mplibforcehmode%
+  \begin{mplibcode}%
+    \BuildPatternCode
+    ecartcube:=2pt;
+    \BuildPatternCodeA{#1}
+    for k=0 upto Etape+1:
+      for l=0 upto 1:
+        trace TestA shifted(k*larg,l*haut);
+      endfor;
+    endfor;
+    trace TestA shifted(0,2*haut);
+  \end{mplibcode}%
+  }%
+  \fi%
+}%
+}%
+}%
+}%
+
+% 23
+\NewDocumentCommand\BuildPatternVingtTroisa{m}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{carré,carrés,de carrés}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{1+\useKV[Pattern]{Etape}*2+\useKV[Pattern]{Etape}**3}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+    \ifboolKV[Pattern]{Calcul}{%
+      \ifboolKV[Pattern]{Inverse}{%
+        On doit réussir à trouver le nombre entier tel :
+        \[1+?+?\times3\times?=\num{\PfMCalculNbMotif}.\]
+        Après essais successifs, l'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+      }{%
+        \num{\PfMCalculNbMotif} \PfCDescriptionMotif[2]. Le motif 4 peut se décomposer ainsi :
+        \begin{center}
+          \begin{Geometrie}[Cadre="aucun"]
+            \BuildPatternCodeC
+            u:=3mm;
+            Apat[0]=u*(1,1);
+            for k=3 upto 3:
+            cc[k]=polygonerela(Apat[0] for l=0 upto k+2:,"AV" endfor ,"MO","RE" for l=1 upto 2*k+1:,"MO" endfor ,"RE" for l=2 upto k*k:,"MO" endfor for l=0 upto k:,"RE" endfor);
+            trace cc[k];
+            %Apat[k+1]:=lrcorner cc[k]+u*(1,0);
+            endfor;
+            GrillePattern;
+            for k=4 upto 4:
+            cc[1]:=polygonerela(Apat[0] for l=0 upto k-1:,"AV" endfor for l=0 upto 3*k:,"MO" endfor ,for l=0 upto k-1:,"RE" endfor);
+            cc[2]:=polygonerela(lrcorner cc[1] ,"AV" for l=0 upto 2*k:,"MO" endfor ,"RE");
+            cc[3]:=polygonerela(lrcorner cc[2],"AV","MO","RE");
+            fill cc[1] withcolor CouleurEtape withtransparency(1,0.35);
+            trace cc[1];
+            fill cc[2] withcolor 0.5[CouleurEtape,CouleurSol] withtransparency(1,0.35);
+            trace cc[2];
+            fill cc[3] withcolor CouleurSol withtransparency(1,0.35);
+            trace cc[3];
+            endfor;
+      \end{Geometrie}
+        \end{center}
+        Le motif est donc composé d'un rectangle de largeur \num{\useKV[Pattern]{Etape}} et d'une longueur égale à \num{\fpeval{3*\useKV[Pattern]{Etape}}} ; d'un rectangle de largeur 1 et de longueur \num{\fpeval{2*\useKV[Pattern]{Etape}}} et d'un \PfCDescriptionMotif[1]%
+      }%
+    }{%
+      \ifboolKV[Pattern]{Formule}{%
+        On remarque que le motif est composé d'un rectangle de largeur « étape » et de longueur $\text{« étape »}\times\text{« étape »}$; d'un rectangle de largeur 1 et de longueur $2\times\text{« étape »}$ et d'un \PfCDescriptionMotif[1].\par
+        Le nombre \PfCDescriptionMotif[3] se calcule sous la forme :\[\text{« étape »}\times\text{« étape »}\times\text{« étape »}+2\times\text{« étape »}+1).\]
+        \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+          \[e\times e\times e+2\times e+1\text{ ou }e^3+2e+1.\]
+      }%
+    }{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,1);
+        for k=0 upto Etape-1:
+        cc[k]=if k=0:polygonerela(Apat[k] for l=0 upto k+2:,"AV" endfor ,"MO","RE","MO","RE","DE","RE");
+        else:polygonerela(Apat[k] for l=0 upto k+2:,"AV" endfor ,"MO","RE" for l=1 upto 2*k+1:,"MO" endfor ,"RE" for l=2 upto k*k:,"MO" endfor for l=0 upto k:,"RE" endfor);fi;
+          trace cc[k];
+          Apat[k+1]:=lrcorner cc[k]+u*(1,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+          AffichageEtape(lrt)(k,1,Etape,llcorner cc[k]);
+        endfor;
+      \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      for l=0 upto Etape-1:
+        for k=1 upto Etape*Etape:
+          trace TestA shifted(l*larg,(k-1)*haut);
+        endfor;
+      endfor;
+      %
+      depla:=Etape*(larg,0);
+      for l=0 upto 2*Etape-1:
+        trace TestA shifted(depla+(0,l*haut));
+      endfor;
+      %
+      depla:=(Etape+1)*(larg,0);
+      trace TestA shifted depla;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+}%
+}%
+}%
+% 21
+\NewDocumentCommand\BuildPatternVingtEtUna{m}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{carré,carrés,de carrés}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{2+\useKV[Pattern]{Etape}*2*\useKV[Pattern]{Etape}}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+    \ifboolKV[Pattern]{Calcul}{%
+      \ifboolKV[Pattern]{Inverse}{%
+        On doit réussir à trouver le nombre entier tel :
+        \[2+?\times2\times?=\num{\PfMCalculNbMotif}.\]
+        Après essais successifs, l'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+      }{%
+        \num{\PfMCalculNbMotif} \PfCDescriptionMotif[2].
+        \begin{center}
+          \begin{Geometrie}[Cadre="aucun"]
+          \BuildPatternCodeC
+          u:=2.5mm;
+        Apat[0]=u*(1,1);
+        for k=Etape-1 upto Etape-1:
+          cc[k]=polygonerela(Apat[0] for l=0 upto k:,"AV" endfor ,"AV","MO","MO","RE" for l=1 upto 2*k:,"MO" endfor for l=0 upto k:,"RE" endfor);
+          trace cc[k];
+          Apat[k+1]:=lrcorner cc[k]+u*(1,0);
+        endfor;
+        GrillePattern;
+        cc[1]=polygonerela(Apat[0] for l=0 upto Etape-1:,"AV" endfor for l=1 upto 2*(Etape-1):,"MO" endfor for l=0 upto Etape-1:,"RE" endfor);
+        fill cc[1] withcolor CouleurEtape withtransparency(1,0.35);
+        trace cc[1];
+        cc2:=polygonerela(lrcorner cc[1],"AV","MO","MO","RE");
+        fill cc[2] withcolor CouleurSol withtransparency(1,0.35);
+        trace cc[2];
+      \end{Geometrie}
+        \end{center}
+        En effet, le motif est composé d'un rectangle de largeur \num{\useKV[Pattern]{Etape}} et d'une longueur égale à \num{\fpeval{2*\useKV[Pattern]{Etape}}} auquel on ajoute 2 \PfCDescriptionMotif[2]%
+      }%
+    }{%
+      \ifboolKV[Pattern]{Formule}{%
+        On remarque que le motif est composé d'un rectangle de largeur « étape » et de longueur $2\times\text{« étape »}$ auquel on ajoute 2 \PfCDescriptionMotif[2].
+        Le nombre \PfCDescriptionMotif[3] se calcule sous la forme :\[\text{« étape »}\times(2\times\text{« étape »}+1).\]
+        \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+          \[e\times(2\times e+1).\]
+      }%
+    }{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,1);
+        for k=0 upto Etape-1:
+          cc[k]=polygonerela(Apat[k] for l=0 upto k:,"AV" endfor ,"AV","MO","MO","RE" for l=1 upto 2*k:,"MO" endfor for l=0 upto k:,"RE" endfor);
+          trace cc[k];
+          Apat[k+1]:=lrcorner cc[k]+u*(1,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+          AffichageEtape(lrt)(k,1,Etape,llcorner cc[k]);
+        endfor;
+      \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      for l=0 upto Etape-1:
+        for k=1 upto 2*Etape:
+          trace TestA shifted(l*larg,k*haut);
+        endfor;
+      endfor;
+      for k=1 upto 2:
+        trace TestA shifted(Etape*larg,k*haut);
+      endfor;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+}%
+}%
+}%
+
+% 20
+\NewDocumentCommand\BuildPatternVingta{m}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{carré,carrés,de carrés}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{\useKV[Pattern]{Etape}*(2*\useKV[Pattern]{Etape}+1)}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+    \ifboolKV[Pattern]{Calcul}{%
+      \ifboolKV[Pattern]{Inverse}{%
+        On doit réussir à trouver le nombre entier tel :
+        \[?\times (2\times?+1)=\num{\PfMCalculNbMotif}.\]
+        Après essais successifs, l'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+      }{%
+        \num{\PfMCalculNbMotif} \PfCDescriptionMotif[2]. En effet, le motif est composé d'un rectangle de largeur \num{\useKV[Pattern]{Etape}} et d'une longueur égale à \num{\fpeval{2*\useKV[Pattern]{Etape}+1}}%
+      }%
+    }{%
+      \ifboolKV[Pattern]{Formule}{%
+          On remarque que le motif est composé d'un rectangle de largeur « étape » et de longueur $2\times\text{« étape »}+1$.
+          Le nombre \PfCDescriptionMotif[3] se calcule sous la forme :\[\text{« étape »}\times(2\times\text{« étape »}+1).\]
+      \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+          \[e\times(2\times e+1).\]
+      }%
+    }{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+        \setKV[Pattern]{Echelle=0.7}%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,1);
+        for k=0 upto Etape-1:
+          cc[k]=polygonerela(Apat[k] for l=0 upto 2*(k+1):,"AV" endfor for l=0 upto k:,"MO" endfor for l=0 upto 2*(k+1):,"RE" endfor);
+          trace cc[k];
+          Apat[k+1]:=lrcorner cc[k]+u*(1,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+          AffichageEtape(lrt)(k,1,Etape,llcorner cc[k]);
+        endfor;
+      \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      for l=0 upto Etape-1:
+        for k=0 upto Etape+1:
+          trace TestA shifted(k*larg,l*haut);
+        endfor;
+      endfor;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+}%
+}%
+}%
+
+%19
+\NewDocumentCommand\BuildPatternDixNeufa{m}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{carré,carrés,de carrés}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{\useKV[Pattern]{Etape}*(2+\useKV[Pattern]{Etape})+2}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+    \ifboolKV[Pattern]{Calcul}{%
+      \ifboolKV[Pattern]{Inverse}{%
+        On doit réussir à trouver le nombre entier tel :
+        \[?\times (?+1)+2=\num{\PfMCalculNbMotif}.\]
+    L'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+      }{%
+        \num{\PfMCalculNbMotif} \PfCDescriptionMotif[2]. En effet, le motif est composé d'un rectangle de largeur \num{\useKV[Pattern]{Etape}} et d'une longueur égale à \num{\fpeval{2+\useKV[Pattern]{Etape}}} auquel on ajoute 2 \PfCDescriptionMotif[2]%
+      }%
+    }{%
+      \ifboolKV[Pattern]{Formule}{%
+          On remarque que le motif est composé d'un rectangle de largeur « étape » et de longueur $\text{« étape »}+2$; auquel on ajoute 2.\par
+          Le nombre \PfCDescriptionMotif[3] se calcule sous la forme :\[\text{« étape »}\times(\text{« étape »}+2)+2.\]
+      \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+          \[e\times(e+2)+2.\]
+      }%
+    }{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,2);
+        for k=0 upto Etape-1:
+          cc[k]=polygonerela(Apat[k] ,"AV","DE","AV","MO" for l=0 upto k:,"AV" endfor for l=0 upto k:,"MO" endfor for l=0 upto k:,"RE" endfor ,"MO" ,"RE", "DE", "RE");
+          trace cc[k];
+          Apat[k+1]:=lrcorner cc[k]+u*(1,1);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+          AffichageEtape(lrt)(k,1,Etape,llcorner cc[k]);
+        endfor;
+      \end{Geometrie}
+    }{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \BuildPatternCode
+    ecartcube:=2pt;
+    \BuildPatternCodeA{#1}
+    for k=0 upto Etape+1:
+      for l=0 upto Etape-1:
+        depla:=(k*larg,l*haut);
+        trace TestA shifted depla;
+      endfor;
+    endfor;
+    trace TestA shifted(larg,-haut);
+    trace TestA shifted(larg,Etape*haut);
+  \end{mplibcode}%
+  }%
+  \fi%
+}%
+}%
+}%
+}%
+
+%18
+\NewDocumentCommand\BuildPatternDixHuita{m}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{carré,carrés,de carrés}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{3*\useKV[Pattern]{Etape}}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+    \ifboolKV[Pattern]{Calcul}{%
+      \ifboolKV[Pattern]{Inverse}{%
+        On doit réussir à trouver le nombre entier tel :
+        \[3\times ?=\num{\PfMCalculNbMotif}.\]
+    L'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+      }{%
+        \num{\PfMCalculNbMotif} \PfCDescriptionMotif[2]. En effet, le motif est composé de 3 \PfCDescriptionMotif[2] reproduits \num{\useKV[Pattern]{Etape}} fois%
+      }%
+    }{%
+      \ifboolKV[Pattern]{Formule}{%
+          On remarque que le même motif est répété « étape » fois.\par
+          Le nombre \PfCDescriptionMotif[3] se calcule sous la forme :\[3\times\text{« étape »}.\]
+      \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+        \[3\times e.\]
+      }%
+    }{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,\PfMRetiensEtape+2);
+        for k=0 upto Etape-1:
+          cc[k]=polygonerela(Apat[k] for l=0 upto k:,"DE","AV","AV" endfor ,"MO","RE" for l=1 upto k:,"MO","RE","RE" endfor ,"MO","RE");
+          trace cc[k];
+          Apat[k+1]:=urcorner cc[k]+u*(1,-1);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+          AffichageEtape(urt)(k,1,Etape,ulcorner cc[k]);
+        endfor;
+      \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      for k=0 upto Etape-1:
+        depla:=(0,0)+k*(2*larg,-haut);
+        for l=0 upto k:
+          trace TestA shifted depla;
+          trace TestA shifted (depla+(0,-haut));
+          trace TestA shifted (depla+(larg,-haut));
+        endfor;
+      endfor;
+    \end{mplibcode}%
+    }
+  \fi%
+}%
+}%
+}%
+}%
+
+%17
+\NewDocumentCommand\BuildPatternDixSepta{m}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{carré,carrés,de carrés}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{1+3*\useKV[Pattern]{Etape}}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+    \ifboolKV[Pattern]{Calcul}{%
+      \ifboolKV[Pattern]{Inverse}{%
+          On doit réussir à trouver le nombre entier tel :
+        \begin{center}
+          \ProgCalcul*[SansCalcul]{?,*3 +1,? \num{\PfMCalculNbMotif}}
+        \end{center}
+        Donc on remonte le programme de calcul :
+        \begin{center}
+          \ProgCalcul*[Direct=false]{\useKV[Pattern]{Etape},*3 ++1}
+        \end{center}
+        L'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+      }{%
+        \num{\PfMCalculNbMotif} \PfCDescriptionMotif[2]. En effet, le motif est composé de trois fois \num{\useKV[Pattern]{Etape}} \PfCDescriptionMotif[2] auxquels il faut ajouter 1 \PfCDescriptionMotif[1]%
+      }%
+    }{%
+      \ifboolKV[Pattern]{Formule}{%
+          On considère le \PfCDescriptionMotif[1] « central ». On remarque qu'à chaque étape on ajoute 3 carrés.\par
+          Le nombre \PfCDescriptionMotif[3] se calcule sous la forme :\[1+3\times\text{« étape »}.\]
+      \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+        \[1+3\times e.\]
+      }%
+    }{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+        \setKV[Pattern]{Echelle=0.75}%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,1);
+        for k=0 upto Etape-1:
+          cc[k]=polygonerela(Apat[k] for l=0 upto 2*(k+1):,"AV" endfor ,"MO" for l=0 upto k:,"RE" endfor for l=0 upto k:,"MO" endfor ,"RE" for l=0 upto k:,"DE" endfor for l=0 upto k:,"RE" endfor);
+          trace cc[k];
+          Apat[k+1]:=lrcorner cc[k]+u*(2,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+          AffichageEtape(lrt)(k,1,Etape,llcorner cc[k]);
+        endfor;
+      \end{Geometrie}%
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      trace TestA;
+      for l=1 upto Etape:
+        depla:=l*(larg,0);
+        trace TestA shifted depla;
+        depla:=l*(-larg,0);
+        trace TestA shifted depla;
+        depla:=l*(0,haut);
+        trace TestA shifted depla;
+      endfor;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+}%
+}%
+}%
+
+%16
+\NewDocumentCommand\BuildPatternSeizea{m}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{carré,carrés,de carrés}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{((1+2*\useKV[Pattern]{Etape}-1)/2)**2}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+    \ifboolKV[Pattern]{Calcul}{%
+      \ifboolKV[Pattern]{Inverse}{%
+        On doit réussir à trouver le nombre entier tel :
+        \[1+3+5+\dots=\num{\PfMCalculNbMotif}.\]
+    Après essais successifs, l'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+      }{%
+        \num{\PfMCalculNbMotif} \PfCDescriptionMotif[2]. En effet, le motif est composé de :
+        \[1+3+5+\dots+\num{\fpeval{2*\useKV[Pattern]{Etape}+1}}~\text{\PfCDescriptionMotif[2]}\]
+        soit \num{\PfMCalculNbMotif} \PfCDescriptionMotif[2]%
+      }%
+    }{%
+      \ifboolKV[Pattern]{Formule}{%
+          On remarque que les lignes comportent un nombre impair \PfCDescriptionMotif[3] et que la dernière ligne est composée  d'un nombre \PfCDescriptionMotif[3] égal à $2\times\text{« étape »}-1$.\par
+          Le nombre \PfCDescriptionMotif[3] se calcule sous la forme :\[1+3+5+\dots+2\times\text{« étape »}-1.\]
+      \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+        \[1+3+5+\dots+2\times e-1.\]
+      }%
+    }{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,1);
+        for k=0 upto Etape-1:
+          cc[k]=polygonerela(Apat[k] for l=0 upto 2*(k+1)-2:,"AV" endfor for l=0 upto k:,"MO","RE" endfor for l=1 upto k:,"DE","RE" endfor);
+          trace cc[k];
+          Apat[k+1]:=lrcorner cc[k]+u*(2,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+          AffichageEtape(lrt)(k,1,Etape,llcorner cc[k]);
+        endfor;
+      \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      for l=1 upto Etape:
+        for p=1 upto 2*(l-1)+1:
+          depla:=(larg*(p-l),-haut*(l-1));
+          trace TestA shifted depla;
+        endfor;
+      endfor;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+}%
+}%
+}%
+
+%15
+\NewDocumentCommand\BuildPatternQuinzea{mm}{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \BuildPatternCode
+    bboxmargin:=0pt;
+    ecartcube:=2pt;
+    if picture #1:
+      trace #1;
+    else:
+      label(TEX(#1),(0,0));
+    fi;
+    if picture #2:
+      trace #2;
+    else:
+      label(TEX(#2),(0,0));
+    fi;
+    Largeur:=abs(lrcorner currentpicture-llcorner currentpicture);
+    Hauteur:=abs(urcorner currentpicture-lrcorner currentpicture);
+    currentpicture:=nullpicture;
+    if picture #1:
+      trace #1;
+    else:
+      label(TEX(#1),(0,0));
+    fi;
+    depla:=(0,0);
+    for k=1 upto Etape:
+      if picture #1:
+        trace #1 shifted (depla+(Largeur,Hauteur));
+        trace #1 shifted (depla+(Largeur,-Hauteur));
+        trace #1 shifted (depla+(2*Largeur,0));
+      else:
+        label(TEX(#1),depla+(Largeur,Hauteur));
+        label(TEX(#1),depla+(Largeur,-Hauteur));
+        label(TEX(#1),depla+(2*Largeur,0));
+      fi;
+      depla:=depla+(Largeur,0);
+            if picture #2:
+        trace #2 shifted depla;
+      else:
+        label(TEX(#2),depla);
+      fi;
+      depla:=depla+(Largeur,0);
+    endfor;
+  \end{mplibcode}
+  \fi%
+}%
+
+%14
+\NewDocumentCommand\BuildPatternQuatorzea{m}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{carré,carrés,de carrés}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{1+6*\useKV[Pattern]{Etape}}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+    \ifboolKV[Pattern]{Calcul}{%
+      \ifboolKV[Pattern]{Inverse}{%
+        On doit réussir à trouver le nombre entier tel :
+        \begin{center}
+          \ProgCalcul*[SansCalcul]{?,*6 +1,? \num{\PfMCalculNbMotif}}
+        \end{center}
+        Donc on remonte le programme de calcul :
+        \begin{center}
+          \ProgCalcul*[Direct=false]{\useKV[Pattern]{Etape},*6 ++1}
+        \end{center}
+        L'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+      }{%
+        \num{\PfMCalculNbMotif} \PfCDescriptionMotif[2]. En effet, le motif est composé d'un rectangle de longueur 6 et de largeur 8 auquel on ajoute 1 \PfCDescriptionMotif[1]%
+      }%
+    }{%
+      \ifboolKV[Pattern]{Formule}{%
+          Le nombre \PfCDescriptionMotif[3] se calcule sous la forme :\[6\times\text{« étape »}+1.\]%
+      \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+        \[6\times\useKV[Pattern]{Litteral}+1.\]
+      }%
+    }{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,1);
+        for k=0 upto Etape-1:
+          cc[k]=polygonerela(Apat[k] for l=0 upto 5:,"AV" endfor for l=0 upto k:,"MO" endfor for l=0 upto 4:,"RE" endfor,"MO","RE");
+          trace cc[k];
+          Apat[k+1]:=lrcorner cc[k]+u*(1,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+        AffichageEtape(lrt)(k,1,Etape-1,llcorner cc[k]);
+        endfor;
+      \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      for l=0 upto Etape-1:
+        for m=0 upto 5:
+          depla:=(-m*larg,l*haut);
+          trace TestA shifted depla;
+        endfor;
+      endfor;
+      depla:=(-5*larg,Etape*haut);
+      trace TestA shifted depla;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+}%
+}%
+}%
+% 13
+\NewDocumentCommand\BuildPatternTreizea{m}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{carré,carrés,de carrés}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{(\useKV[Pattern]{Etape}+1)*\useKV[Pattern]{Etape}/2}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+    \ifboolKV[Pattern]{Calcul}{%
+      \ifboolKV[Pattern]{Inverse}{%
+          Il faut trouver un nombre tel que
+        \[1+2+\dots=\num{\PfMCalculNbMotif}.\]
+        Par essais successifs, on trouve que l'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+      }{%
+        \num{\PfMCalculNbMotif} \PfCDescriptionMotif[2]. En effet, le nombre de  \PfCDescriptionMotif[2] est:
+      \[1+2+3+\dots+\num{\useKV[Pattern]{Etape}}\]
+      soit \num{\PfMCalculNbMotif} \PfCDescriptionMotif[2]%
+      }%
+    }{%
+      \ifboolKV[Pattern]{Formule}{%
+          Le nombre \PfCDescriptionMotif[3] se calcule sous la forme :\[1+(1+2+3+\dots+\text{« étape »}).\]%
+      \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+        \[1+(1+2+3+\dots+\useKV[Pattern]{Litteral}).\]
+      }%
+    }{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,1);
+        for k=0 upto Etape-1:
+          cc[k]=polygonerela(Apat[k] for l=0 upto k:,"AV" endfor for l=0 upto k:,"MO","RE" endfor);
+          trace cc[k];
+          Apat[k+1]:=lrcorner cc[k]+u*(2,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+        AffichageEtape(lrt)(k,1,Etape-1,llcorner cc[k]);
+        endfor;
+        \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      for l=1 upto Etape:
+        for p=Etape downto l:
+          depla:=(larg*(Etape-p+1),haut*(l-1));
+          trace TestA shifted depla;
+        endfor;
+      endfor;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+}%
+}%
+}%
+%12
+\NewDocumentCommand\BuildPatternDouzea{m}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{carré,carrés,de carrés}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{(\useKV[Pattern]{Etape}+1)*(\useKV[Pattern]{Etape}+1)}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+    \ifboolKV[Pattern]{Calcul}{%
+      \ifboolKV[Pattern]{Inverse}{%
+          On doit trouver le nombre dont le produit par lui-même est égal à \PfMCalculNbMotif.\par Par essais successifs, l'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+      }{%
+        \num{\PfMCalculNbMotif} \PfCDescriptionMotif[1]\ifnum\PfMCalculNbMotif>1\relax s\fi. En effet, le motif est un carré de côté \num{\fpeval{\useKV[Pattern]{Etape}+1}} \PfCDescriptionMotif[2]%
+      }%
+    }{%
+      \ifboolKV[Pattern]{Formule}{%
+          On remarque que chaque motif est un carré de côté $\text{« étape »}+1$.
+        \par Le nombre de \PfCDescriptionMotif[2] se calcule sous la forme :\[(\text{« étape »}+1)\times(\text{« étape »}+1).\]%
+        \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+          \[(\useKV[Pattern]{Litteral}+1)\times(\useKV[Pattern]{Litteral}+1).\]
+      }%
+    }{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,1);
+        for k=0 upto Etape-1:
+          cc[k]=polygonerela(Apat[k] for l=0 upto k+1:,"AV" endfor for l=0 upto k+1:,"MO" endfor for l=0 upto k+1:,"RE" endfor for l=0 upto k+1:,"DE" endfor);
+          trace cc[k];
+          Apat[k+1]:=(point(0) of cc[k])+u*(k+1+2,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+        AffichageEtape(lrt)(k,1,Etape-1,llcorner cc[k]);
+        endfor;
+        \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      %
+      for l=1 upto Etape+1:
+        for p=1 upto Etape+1:
+          depla:=(p*larg,l*haut);
+          trace TestA shifted depla;
+        endfor;
+      endfor;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+}%
+}%
+}%
+% 11
+\NewDocumentCommand\BuildPatternOnzea{m}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{carré,carrés,de carrés}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{1+2*(\useKV[Pattern]{Etape}-1)}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+    \ifboolKV[Pattern]{Calcul}{%
+      \ifboolKV[Pattern]{Inverse}{%
+          On doit réussir à trouver le nombre entier tel :
+        \begin{center}
+          \ProgCalcul*[SansCalcul]{?,-1 *2 +1,? ? \num{\PfMCalculNbMotif}}
+        \end{center}
+        Donc on remonte le programme de calcul :
+        \begin{center}
+          \ProgCalcul*[Direct=false]{\useKV[Pattern]{Etape},-1 *2 ++1}
+        \end{center}
+        L'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+      }{%
+        \num{\PfMCalculNbMotif} \PfCDescriptionMotif[1]\ifnum\PfMCalculNbMotif>1\relax s\fi. En effet, il y a 1 \PfCDescriptionMotif[1] de l'étape 1 et \num{\fpeval{\useKV[Pattern]{Etape}-1}} fois 2 carrés%
+      }%
+    }{%
+      \ifboolKV[Pattern]{Formule}{%
+          On remarque que chaque motif est constitué du \PfCDescriptionMotif[1] de l'étape 1 et 2 \PfCDescriptionMotif[2] sont ajoutés à chaque étape {\em à partir de la deuxième étape}.
+        \par Le nombre de \PfCDescriptionMotif[2] se calcule sous la forme :\[2\times(\text{« étape »}-1)+1.\]%
+        \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+          \[2\times(\useKV[Pattern]{Litteral}-1)+1.\]
+      }%
+    }{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,\PfMRetiensEtape+1);
+        for k=0 upto Etape-1:
+          cc[k]=polygonerela(Apat[k] for l=0 upto k:,"AV" endfor,"MO" for l=0 upto k-1:,"RE" endfor for l=0 upto k-1:,"MO" endfor,"RE");
+          trace cc[k];
+          Apat[k+1]:=(point(0) of cc[k])+u*(k+1+2,-1);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+        AffichageEtape(lrt)(k,1,Etape-1,llcorner cc[k]);
+        endfor;
+        \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      trace TestA;
+      for l=1 upto Etape:
+        depla:=l*(larg,0);
+        trace TestA shifted depla;
+        depla:=l*(0,haut);
+        trace TestA shifted depla;
+      endfor;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+}%
+}%
+}%
+% 10
+\NewDocumentCommand\BuildPatternDixa{m}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{carré,carrés,de carrés}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{1+2*(\useKV[Pattern]{Etape}-1)}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+    \ifboolKV[Pattern]{Calcul}{%
+      \ifboolKV[Pattern]{Inverse}{%
+          On doit réussir à trouver le nombre entier tel :
+        \begin{center}
+          \ProgCalcul*[SansCalcul]{?,-1 *2 +1,? ? \num{\PfMCalculNbMotif}}
+        \end{center}
+        Donc on remonte le programme de calcul :
+        \begin{center}
+          \ProgCalcul*[Direct=false]{\useKV[Pattern]{Etape},-1 *2 ++1}
+        \end{center}
+        L'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+      }{%
+        \num{\PfMCalculNbMotif} \PfCDescriptionMotif[1]\ifnum\PfMCalculNbMotif>1\relax s\fi. En effet, il y a 1 \PfCDescriptionMotif[1] de l'étape 1 et \num{\fpeval{\useKV[Pattern]{Etape}-1}} fois 2 carrés%
+      }%
+    }{%
+      \ifboolKV[Pattern]{Formule}{%
+          On remarque que chaque motif est constitué du \PfCDescriptionMotif[1] de l'étape 1 et 2 \PfCDescriptionMotif[2] sont ajoutés à chaque étape {\em à partir de la deuxième étape}.
+        \par Le nombre de \PfCDescriptionMotif[2] se calcule sous la forme :\[2\times(\text{« étape »}-1)+1.\]%
+        \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+          \[2\times(\useKV[Pattern]{Litteral}-1)+1.\]
+      }%
+    }{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,2);
+        for k=0 upto Etape-1:
+          cc[k]=polygonerela(Apat[k] ,"AV","MO","RE" for l=1 upto k:,"RE" endfor if k>0:,"DE","DE" fi for l=1 upto k:,"AV" endfor);
+          trace cc[k];
+          Apat[k+1]:=(point(0) of cc[k])+u*(k+2+2,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+        AffichageEtape(lrt)(k,1,Etape-1,llcorner cc[k]);
+        endfor;
+        \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      %
+      for p=1 upto Etape:
+        depla:=(larg*(p-1),0);
+        trace TestA shifted depla;
+      endfor;
+      for p=1 upto Etape-1:
+        depla:=(larg*(p-1),-haut);
+        trace TestA shifted depla;
+      endfor;
+    \end{mplibcode}%
+  \fi%
+  }%
+}%
+}%
+}%
+}%
+% 9
+\NewDocumentCommand\BuildPatternNeufa{m}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{carré,carrés,de carrés}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{6+3*(\useKV[Pattern]{Etape}-1)}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+    \ifboolKV[Pattern]{Calcul}{%
+        \ifboolKV[Pattern]{Inverse}{%
+            On doit réussir à trouver le nombre entier tel :
+        \begin{center}
+          \ProgCalcul*[SansCalcul]{?,*3 +6,? \num{\PfMCalculNbMotif}}
+        \end{center}
+        Donc on remonte le programme de calcul :
+        \begin{center}
+          \ProgCalcul*[Direct=false]{\useKV[Pattern]{Etape},*3 ++6}
+        \end{center}
+        L'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+      }{%
+        \num{\PfMCalculNbMotif} \PfCDescriptionMotif[1]\ifnum\PfMCalculNbMotif>1\relax s\fi. En effet, il y a les 6 carrés de l'étape 1 et \num{\fpeval{\useKV[Pattern]{Etape}-1}} fois 3 carrés%
+      }%
+    }{%
+      \ifboolKV[Pattern]{Formule}{%
+          On remarque que chaque motif est constitué « de l'escalier » de l'étape 1 et 3 \PfCDescriptionMotif[2] sont ajoutés à chaque étape {\em à partir de la deuxième étape}.
+        \par Le nombre de \PfCDescriptionMotif[2] se calcule sous la forme :\[3\times(\text{« étape »}-1)+6.\]%
+        \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+          \[3\times(\useKV[Pattern]{Litteral}-1)+6.\]
+      }%
+    }{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[1]=u*(1,1);
+        for k=1 upto Etape:
+          cc[k]=polygonerela(Apat[k] for l=0 upto k+1:,"AV" endfor for l=0 upto 2:,"MO","RE" endfor for l=1 upto k-1:,"RE" endfor for l=0 upto 2:,"DE" endfor);
+          trace cc[k];
+          Apat[k+1]:=(point(0) of cc[k])+u*(k+1+2,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(1,Etape);
+        for k=1 upto Etape:
+        AffichageEtape(lrt)(k,0,Etape,llcorner cc[k]);
+        endfor;
+      \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      %
+      for l=1 upto 3:
+        for p=Etape+2 downto l:
+          depla:=(larg*(Etape-p+1),haut*(l-1));
+          trace TestA shifted depla;
+        endfor;
+      endfor;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+}%
+}%
+}%
+
+% 8
+\NewDocumentCommand\BuildPatternHuita{m}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{carré,carrés,de carrés}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{1+(\useKV[Pattern]{Etape}+1)*\useKV[Pattern]{Etape}/2}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+    \ifboolKV[Pattern]{Calcul}{%
+      \ifboolKV[Pattern]{Inverse}{%
+          Il faut trouver un nombre tel que
+        \[1+(1+2+\dots)=\num{\PfMCalculNbMotif}.\]
+        Par essais successifs, on trouve que l'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+      }{%
+        \num{\PfMCalculNbMotif} \PfCDescriptionMotif[1]\ifnum\PfMCalculNbMotif>1\relax s\fi. En effet, il y a :
+      \[1+2+3+\dots+\num{\useKV[Pattern]{Etape}}=\num{\fpeval{\useKV[Pattern]{Etape}*(\useKV[Pattern]{Etape}+1)/2}}~\text{\PfCDescriptionMotif[2]}\]
+      et 1 \PfCDescriptionMotif[1]%
+      }%
+    }{%
+      \ifboolKV[Pattern]{Formule}{%
+          Le nombre \PfCDescriptionMotif[3] se calcule sous la forme :\[1+(1+2+3+\dots+\text{« étape »}).\]%
+      \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+        \[1+(1+2+3+\dots+\useKV[Pattern]{Litteral}).\]
+      }%
+    }{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[1]=u*(1,1);
+        for k=1 upto Etape:
+        cc[k]=polygonerela(Apat[k] for l=0 upto k:,"AV" endfor,"MO","RE","RE" for l=1 upto k-1:,"MO","RE" endfor for l=0 upto k-1:,"DE" endfor);
+          trace cc[k];
+          Apat[k+1]:=(point(0) of cc[k])+u*(k+1+2,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(1,Etape);
+        for k=1 upto Etape:
+        AffichageEtape(lrt)(k,0,Etape,llcorner cc[k]);
+        endfor;
+        \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      %
+      for l=0 upto Etape:
+        depla:=(larg*(l-1),0);
+        trace TestA shifted depla;
+      endfor;
+      for l=Etape downto 2:
+        for p=l downto 2:
+          depla:=(larg*(l-p-1),haut*(Etape-l+1));
+          trace TestA shifted depla;
+        endfor;
+      endfor;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+}%
+}%
+}%
+
+% 7
+\NewDocumentCommand\BuildPatternSepta{m}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{carré,carrés,de carrés}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{2*(\useKV[Pattern]{Etape}-1)+3}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+    \ifboolKV[Pattern]{Calcul}{%
+      \ifboolKV[Pattern]{Inverse}{%
+        On doit réussir à trouver le nombre entier tel :
+        \begin{center}
+          \ProgCalcul*[SansCalcul]{?,-1 *2 +3,? ? \num{\PfMCalculNbMotif}}
+        \end{center}
+        Donc on remonte le programme de calcul :
+        \begin{center}
+          \ProgCalcul*[Direct=false]{\useKV[Pattern]{Etape},-1 *2 ++3}
+        \end{center}
+        L'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+      }{%
+        $2\times(\num{\useKV[Pattern]{Etape}}-1)+3$~\PfCDescriptionMotif[1]\ifnum\PfMCalculNbMotif>1\relax s\fi{} soit \num{\PfMCalculNbMotif} \PfCDescriptionMotif[1]\ifnum\PfMCalculNbMotif>1\relax s\fi%
+      }%
+    }{%
+      \ifboolKV[Pattern]{Formule}{%
+        On remarque que chaque motif est constitué d'une barre de trois carrés et 2 \PfCDescriptionMotif[2] sont ajoutés à chaque étape {\em à partir de la deuxième étape}.
+        \par Le nombre de \PfCDescriptionMotif[2] se calcule sous la forme :\[2\times(\text{« étape »}-1)+3.\]%
+        \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+          \[2\times(\useKV[Pattern]{Litteral}+1)+3.\]
+      }%
+    }{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[1]=u*(1,1);
+        for k=1 upto Etape:
+        cc[k]=polygonerela(Apat[k] for l=1 upto 3:,"AV" endfor,"MO","RE", for l=1 upto k-1:,"MO" endfor for l=0 upto 1:,"RE" endfor for l=0 upto k-1:,"DE" endfor);
+          trace cc[k];
+          Apat[k+1]:=(point(0) of cc[k])+u*(5,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(1,Etape);
+        for k=1 upto Etape:
+          AffichageEtape(lrt)(k,0,Etape,llcorner cc[k]);
+        endfor;
+        \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      %
+      depla:=(larg,0);
+      trace TestA;
+      trace TestA shifted depla;
+      trace TestA shifted (2*depla);
+      for l=2 upto Etape:
+        depla:=(0,haut*(l-1));
+        trace TestA shifted depla;
+        trace TestA shifted (depla+(larg,0));
+      endfor;
+    \end{mplibcode}%
+    }
+  \fi%
+}%
+}%
+}%
+}%
+
+%6
+\NewDocumentCommand\BuildPatternSix{O{1}}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{allumette,allumettes,d'allumettes}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{3*(\useKV[Pattern]{Etape}+1)*\useKV[Pattern]{Etape}/2}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+  \ifboolKV[Pattern]{Calcul}{%
+    \ifboolKV[Pattern]{Inverse}{%
+        Il faut trouver un nombre tel que
+        \[3\times(1+2+\dots)=\num{\PfMCalculNbMotif}.\]
+        Par essais successifs, on trouve que l'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+    }{%
+      \num{\PfMCalculNbMotif} \PfCDescriptionMotif[1]\ifnum\PfMCalculNbMotif>1\relax s\fi. En effet, il y a :
+      \[1+2+3+\dots+\num{\useKV[Pattern]{Etape}}=\num{\fpeval{\useKV[Pattern]{Etape}*(\useKV[Pattern]{Etape}+1)/2}}~\text{triangles}\]
+      et il y a 3 allumettes par triangle%
+    }%
+  }{%
+    \ifboolKV[Pattern]{Formule}{Le nombre \PfCDescriptionMotif[3] se calcule sous la forme :\[3\times(1+2+3+\dots+\text{« étape »}).\]%
+      \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+        \[3\times(1+2+3+\dots+\useKV[Pattern]{Litteral}).\]
+      }%
+    }{%
+  \ifluatex%
+    \begin{Allumettes}[Echelle=\fpeval{0.30*#1}]
+      Etape=\useKV[Pattern]{Etape};
+      pair A[],B[],C[],D[],E[];
+      A0=(0,0);
+      B0-A0=u*(1,0);
+      C0=rotation(B0,A0,60);
+      picture UnitTriangle;
+      UnitTriangle=image(
+      trace Allu(A0,B0);
+      trace Allu(B0,C0);
+      trace Allu(C0,A0);
+      );
+      currentpicture:=nullpicture;
+      for k=0 upto Etape-1:
+      for l=0 upto k:
+      trace UnitTriangle shifted(A0+k*(B0-A0)+l*(C0-B0));
+      endfor;
+      endfor;
+    \end{Allumettes}
+  \fi%
+}%
+}%
+}%
+}%
+%5
+\NewDocumentCommand\BuildPatternCinqa{m}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{carré,carrés,de carrés}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{2*\useKV[Pattern]{Etape}*(\useKV[Pattern]{Etape}+1)+3}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+    \ifboolKV[Pattern]{Calcul}{%
+      \ifboolKV[Pattern]{Inverse}{%
+        On doit réussir à trouver le nombre entier tel :
+        \begin{center}
+          \ProgCalcul*[SansCalcul]{?,*\fpeval{\useKV[Pattern]{Etape}+1} *2 +3,? ? \num{\PfMCalculNbMotif}}
+        \end{center}
+        Donc on remonte le programme de calcul :
+        \begin{center}
+          \ProgCalcul*[Direct=false]{\useKV[Pattern]{Etape},*\fpeval{\useKV[Pattern]{Etape}+1} *2 ++3}
+        \end{center}
+        L'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+      }{%
+        $2\times\num{\useKV[Pattern]{Etape}}\num{\fpeval{\useKV[Pattern]{Etape}+1}}+2$~\PfCDescriptionMotif[1]\ifnum\PfMCalculNbMotif>1\relax s\fi{} soit \num{\PfMCalculNbMotif} \PfCDescriptionMotif[1]\ifnum\PfMCalculNbMotif>1\relax s\fi%
+      }%
+    }{%
+      \ifboolKV[Pattern]{Formule}{%
+        On remarque que chaque motif est constitué de deux rectangles identiques de longueur $\text{« etape »}+1$ et de largeur $\text{« etape »}$ et 3 \PfCDescriptionMotif[2] sont ajoutés à chaque étape :
+        \begin{center}
+          \begin{Geometrie}[Cadre="aucun"]
+            \BuildPatternCodeC
+        Apat[Etape]=u*(5,Etape);
+        for k=Etape upto Etape:
+        cc[k]=polygonerela(Apat[k],"AV","MO" for l=1 upto k-1:,"AV" endfor for l=0 upto k:,"MO" endfor for l=0 upto k:,"RE" endfor ,"DE","AV" for l=0 upto k-1:,"DE" endfor for l=0 upto k-1:,"RE" endfor ,"MO","RE" for l=0 upto k:,"DE" endfor for l=0 upto k:,"AV" endfor for l=1 upto k-1:,"MO" endfor);
+          trace cc[k];
+          Apat[k+1]:=(point(0) of cc[k])+u*(2+k+k+1,0);
+        endfor;
+        GrillePattern;
+        trace cc[Etape];
+        Apat[1]:=u*(1,1);
+        for k=Etape upto Etape:
+        cc[1]:=polygonerela(Apat[1],for l=0 upto k:,"AV" endfor for l=0 upto k-1:,"MO" endfor for l=0 upto k:,"RE" endfor);
+        Apat[2]:=urcorner cc[1];
+        cc[2]:=polygonerela(Apat[2],for l=0 upto k-1:,"AV" endfor for l=0 upto k:,"MO" endfor for l=0 upto k-1:,"RE" endfor);
+        Apat[3]:=ulcorner cc[1];
+        cc[3]:=polygonerela(Apat[3],"AV","MO","RE");
+        Apat[4]:=urcorner cc[1];
+        cc[4]:=polygonerela(Apat[4],"DE","AV","MO");
+        Apat[5]:=ulcorner cc[2];
+        cc[5]:=polygonerela(Apat[5],"RE","DE","AV");
+        endfor;
+        for k=1 upto 2:
+        fill cc[k] withcolor CouleurEtape withtransparency(1,0.35);
+        endfor;
+        for k=3 upto 5:
+        fill cc[k] withcolor CouleurSol withtransparency(1,0.35);
+        endfor;
+        for k=1 upto 5:
+        trace cc[k];
+        endfor;
+        \end{Geometrie}
+        \end{center}
+        Le nombre de \PfCDescriptionMotif[2] se calcule sous la forme :\[2\times\text{« étape »}\times(\text{« étape »}+1)+3.\]%
+      \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+        \[2\times\useKV[Pattern]{Litteral}\times(\times\useKV[Pattern]{Litteral}+1)+3.\]
+      }%
+    }{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+        \setKV[Pattern]{Echelle=0.7}
+        \begin{Geometrie}[Cadre="aucun"]
+          \BuildPatternCodeC
+        Apat[1]=u*(3,\PfMRetiensEtape+1);
+        for k=1 upto Etape:
+        cc[k]=polygonerela(Apat[k],"AV","MO" for l=1 upto k-1:,"AV" endfor for l=0 upto k:,"MO" endfor for l=0 upto k:,"RE" endfor ,"DE","AV" for l=0 upto k-1:,"DE" endfor for l=0 upto k-1:,"RE" endfor ,"MO","RE" for l=0 upto k:,"DE" endfor for l=0 upto k:,"AV" endfor for l=1 upto k-1:,"MO" endfor);
+          trace cc[k];
+          Apat[k+1]:=(point(0) of cc[k])+u*(2+k+k+1,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(1,Etape);
+        for k=1 upto Etape:
+          AffichageEtape(lrt)(k,0,Etape,llcorner cc[k]);
+        endfor;
+        \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      %
+      k=Etape-1;
+      trace TestA;
+      for l=0 upto k:
+        for m=1 upto k+2:
+          depla:=(larg*l,haut*m);
+          trace TestA shifted depla;
+          trace TestA shifted symetrie(depla,(0,0),(-1,1));
+        endfor;
+      endfor;
+      depla:=(-larg,haut*(k+2));
+      trace TestA shifted depla;
+      trace TestA shifted symetrie(depla,(0,0),(-1,1));
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+}%
+}%
+}%
+
+%4
+\NewDocumentCommand\BuildPatternQuatrea{m}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{carré,carrés,de carrés}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{4*\useKV[Pattern]{Etape}+1}}%
+  \ifboolKV[Pattern]{Resultat}{%
+      \num{\PfMCalculNbMotif}%
+      }{%
+  \ifboolKV[Pattern]{Calcul}{%
+    \ifboolKV[Pattern]{Inverse}{%
+        On doit réussir à trouver le nombre entier tel :
+          \begin{center}
+            \ProgCalcul*[SansCalcul]{?,*4 +1,? \num{\PfMCalculNbMotif}}
+          \end{center}
+          Donc on remonte le programme de calcul :
+          \begin{center}
+            \ProgCalcul*[Direct=false]{\useKV[Pattern]{Etape},*4 ++1}
+          \end{center}
+          L'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+    }{%
+      $4\times\num{\useKV[Pattern]{Etape}}+1$~\PfCDescriptionMotif[1]\ifnum\PfMCalculNbMotif>1\relax s\fi{} soit \num{\PfMCalculNbMotif} \PfCDescriptionMotif[1]\ifnum\PfMCalculNbMotif>1\relax s\fi%
+    }%
+  }{%
+    \ifboolKV[Pattern]{Formule}{On remarque que chaque motif est constitué d'un \PfCDescriptionMotif[2] central et 4 \PfCDescriptionMotif[2] sont ajoutés à chaque étape. Le nombre de \PfCDescriptionMotif[2] se calcule sous la forme :\[1+\text{« étape »}\times4.\]%
+      \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+        \[4\useKV[Pattern]{Litteral}+1.\]
+      }%
+    }{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+                \setKV[Pattern]{Echelle=0.7}%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(3,\PfMRetiensEtape+2);
+        for k=0 upto Etape-1:
+          cc[k]=polygonerela(Apat[k] for l=0 upto k:,"DE","AV" endfor for l=0 upto k:,"MO","RE" endfor ,"MO" for l=0 upto k:,"AV","MO" endfor for l=0 upto k:,"RE","DE" endfor ,"RE" for l=0 upto k:,"MO","RE" endfor for l=0 upto k:,"DE","AV" endfor, "DE" for l=0 upto k:,"RE","DE" endfor for l=0 upto k:,"AV","MO" endfor);
+          trace cc[k];
+          Apat[k+1]:=(point(0) of cc[k])+u*(2+k+3+k,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+          AffichageEtape(lrt)(k,1,Etape,llcorner cc[k]);
+        endfor;
+        \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      %
+      trace TestA;
+      for l=1 upto Etape:
+        for p=1 upto l:
+          depla:=p*(larg,haut);
+          trace TestA shifted depla;
+          depla:=p*(larg,-haut);
+          trace TestA shifted depla;
+          depla:=p*(-larg,-haut);
+          trace TestA shifted depla;
+          depla:=p*(-larg,haut);
+          trace TestA shifted depla;
+        endfor;
+      endfor;
+    \end{mplibcode}%
+    }%
+  \fi%
+}%
+}%
+}%
+}%
+
+%3
+\NewDocumentCommand\BuildPatternTroisa{m}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{carré,carrés,de carrés}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{\useKV[Pattern]{Etape}*(\useKV[Pattern]{Etape}+1)/2}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+    \ifboolKV[Pattern]{Calcul}{%
+      \ifboolKV[Pattern]{Inverse}{%
+        On doit réussir à trouver le nombre entier tel :
+        \[1+2+\dots=\num{\PfMCalculNbMotif}.\]
+      Par essais successifs, l'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+    }{%
+      $1+2+3+\dots+\num{\useKV[Pattern]{Etape}}$~\PfCDescriptionMotif[1]\ifnum\PfMCalculNbMotif>1\relax s\fi{} soit \num{\PfMCalculNbMotif} \PfCDescriptionMotif[1]\ifnum\PfMCalculNbMotif>1\relax s\fi%
+    }%
+  }{%
+    \ifboolKV[Pattern]{Formule}{%
+        On double le motif pour observer la situation suivante :
+        \begin{center}
+          \begin{Geometrie}[Cadre="aucun"]
+            \BuildPatternCodeC
+            Apat[0]=u*(1,1);
+            for k=0 upto Etape:
+              cc[k]=(u*(0,k+2)--u*(0,0)--u*(k+2,0) for l=1 upto k+2:--u*(k+3-l,0+l)--u*(k+2-l,0+l) endfor--cycle) shifted (Apat[k]-u*(0,0));
+              trace cc[k];
+              Apat[k+1]:=lrcorner cc[k]+u*(2,0);
+            endfor;
+            GrillePattern;
+            for k=0 upto Etape:
+            fill cc[k] withcolor CouleurEtape withtransparency(1,0.35);
+              fill (symetrie(cc[k],iso(lrcorner cc[k],ulcorner cc[k])) shifted(u*(1,0))) withcolor CouleurSol withtransparency(1,0.35);
+              trace cc[k];
+              trace symetrie(cc[k],iso(lrcorner cc[k],ulcorner cc[k])) shifted(u*(1,0));
+            endfor;
+        \end{Geometrie}
+      \end{center}
+      À chaque fois, un rectangle de longueur $\text{« étape »}+1$ et de largeur « étape  ». Donc la formule pour déterminer le nombre \PfCDescriptionMotif[3] est :
+      \[(\text{« étape »}+1)\times\text{« étape »}\div2.\]
+      \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+        \[(\useKV[Pattern]{Litteral}+1)\times\useKV[Pattern]{Litteral}\div2.\]
+      }%
+    }{%
+  \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,1);
+        for k=0 upto Etape-1:
+          cc[k]=(u*(0,k+2)--u*(0,0)--u*(k+2,0) for l=1 upto k+2:--u*(k+3-l,0+l)--u*(k+2-l,0+l) endfor--cycle) shifted (Apat[k]-u*(0,0));
+          trace cc[k];
+          Apat[k+1]:=lrcorner cc[k]+u*(2,0);
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+          AffichageEtape(lrt)(k,1,Etape,llcorner cc[k]);
+        endfor;
+        \end{Geometrie}
+    }{%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      \BuildPatternCode
+      ecartcube:=2pt;
+      \BuildPatternCodeA{#1}
+      for l=1 upto Etape+1:
+        for p=Etape+1 downto l:
+          depla:=(larg*(Etape-p+1),haut*(l-1));
+          trace TestA shifted depla;
+        endfor;
+      endfor;
+    \end{mplibcode}%
+    }
+  \fi%
+}%
+}%
+}%
+}%
+
+%2
+\NewDocumentCommand\BuildPatternDeux{}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{cube,cubes,de cubes}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{2*\useKV[Pattern]{Etape}-1}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+    \ifboolKV[Pattern]{Calcul}{%
+      \ifboolKV[Pattern]{Inverse}{%
+          On doit réussir à trouver le nombre entier tel :
+          \begin{center}
+            \ProgCalcul*[SansCalcul]{?,*2 -1,? \num{\PfMCalculNbMotif}}
+          \end{center}
+          Donc on remonte le programme de calcul :
+          \begin{center}
+            \ProgCalcul*[Direct=false]{\useKV[Pattern]{Etape},*2 -1}
+          \end{center}
+          L'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+    }{%
+    \num{\PfMCalculNbMotif} \PfCDescriptionMotif[1]\ifnum\PfMCalculNbMotif>1\relax s\fi. En effet, il y a une ligne horizontale de \num{\useKV[Pattern]{Etape}}~\PfCDescriptionMotif[1]\ifnum\useKV[Pattern]{Etape}>1\relax s\fi{} et une ligne verticale de \num{\fpeval{\useKV[Pattern]{Etape}-1}}~\PfCDescriptionMotif[1]\ifnum\fpeval{\useKV[Pattern]{Etape}-1}>1\relax s\fi%
+    }%
+  }{%
+    \ifboolKV[Pattern]{Formule}{Le nombre \PfCDescriptionMotif[3] se calcule sous la forme :\[\text{« étape »}+\text{« étape »}-1.\]%
+      \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+        \[2\times\useKV[Pattern]{Litteral}-1.\]
+      }%
+    }{%
+  \ifluatex%
+    \mplibforcehmode%
+    \ifboolKV[Pattern]{Grille}{%
+       \begin{Geometrie}[Cadre="aucun"]
+         \BuildPatternCodeIso  
+        somme:=1;
+        for nbe=1 upto Etape:
+          ptpattern[nbe]:=u*(alpha*somme,(somme mod 2)*beta);%+beta*somme);
+          if nbe=Etape:
+            TypeCube:=cadrecubesol;
+          else:
+            TypeCube:=cadrecube;
+          fi;
+          cc[nbe]=image(
+          for k=1 upto nbe:
+            trace TypeCube shifted(ptpattern[nbe]+k*u*(alpha,-beta));
+            endfor;
+          for k=2 upto nbe:
+            trace TypeCube shifted(ptpattern[nbe]+nbe*u*(alpha,-beta)+(k-1)*u*(0,1));
+          endfor;
+          );
+          trace cc[nbe];
+          somme:=somme+nbe+2;
+        endfor;
+        GrillePatternIso;
+        AffichagePattern(1,Etape);
+      \end{Geometrie}
+    }%
+    {%
+    \begin{mplibcode}
+      Etape:=\useKV[Pattern]{Etape};
+      %
+      input PfCSolid;
+      %
+      intensite:=1.5;
+      Ferme[0]:=false;
+      outcolor:=LightSteelBlue;
+      incolor:=white;
+      nb:=1;subh:=1;
+      creux:=true;
+      %
+      Initialisation(2500,40,20,50);
+      Objetcube0("a=0.25");
+      for k=1 upto Etape:
+        TR:=(0,2*k,0);
+        ObjetDeplacement1(0);
+        nbobj:=1;
+        for l=1 upto k-1:
+          TR:=(0,0.25*l,0);
+          nbobj:=nbobj+1;
+          ObjetDeplacement[nbobj](1);
+        endfor;
+        for l=1 upto k-1:
+          TR:=(0,0.25*(k-1),0.25*l);
+          nbobj:=nbobj+1;
+          ObjetDeplacement[nbobj](1);
+        endfor;
+      endfor;
+      DessineFusion;
+    \end{mplibcode}
+    }%
+  \fi%
+}%
+}%
+}%
+}%
+%1a
+\NewDocumentCommand\BuildPatternUna{O{1}}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{allumette,allumettes,d'allumettes}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{2*(\useKV[Pattern]{Etape}+1)*\useKV[Pattern]{Etape}}}%
+  \ifboolKV[Pattern]{Resultat}{%
+      \num{\PfMCalculNbMotif}%
+      }{%
+  \ifboolKV[Pattern]{Calcul}{%
+    \ifboolKV[Pattern]{Inverse}{%
+        Il faut trouver un nombre dont son produit par son suivant  est égal à
+        \[\num{\PfMCalculNbMotif}\div2=\num{\fpeval{\PfMCalculNbMotif/2}}.\]
+        Par essais successifs, on trouve que l'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+    }{%
+    \num{\PfMCalculNbMotif} \PfCDescriptionMotif[1]\ifnum\PfMCalculNbMotif>1\relax s\fi. En effet, il y a \num{\fpeval{\useKV[Pattern]{Etape}+1}} lignes horizontales de \num{\useKV[Pattern]{Etape}}~\PfCDescriptionMotif[1]\ifnum\useKV[Pattern]{Etape}>1\relax s\fi{} et \num{\fpeval{\useKV[Pattern]{Etape}+1}} lignes verticales de \num{\useKV[Pattern]{Etape}}~\PfCDescriptionMotif[1]\ifnum\useKV[Pattern]{Etape}>1\relax s\fi{} 
+    }%
+  }{%
+    \ifboolKV[Pattern]{Formule}{Le nombre \PfCDescriptionMotif[3] se calcule sous la forme :\[2\times(\text{« étape »}+1)\times\text{« étape »}.\]%
+      \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+        \[2\times(\useKV[Pattern]{Litteral}+1)\times\useKV[Pattern]{Litteral}.\]
+      }%
+    }{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{Allumettes}[Echelle=\fpeval{0.2*#1}]%
+      Etape=\useKV[Pattern]{Etape};
+      %
+      pair depla;
+      %
+      pair A[];
+      A0=(0,0);
+      A1-A0=u*(1,0);
+      A3-A0=u*(0,1);
+      A2-A1=A3-A0;
+      %
+      for l=0 upto Etape-1:
+        for p=0 upto Etape-1:
+          depla:=u*(p,l);
+          trace Allu(A0,A1) shifted depla;
+          trace Allu(A0,A3) shifted depla;
+          trace Allu(A1,A2) shifted depla;
+          trace Allu(A2,A3) shifted depla;
+        endfor;
+      endfor;
+    \end{Allumettes}%
+  \fi%
+}%
+}%
+}%
+}%
+%1
+\NewDocumentCommand\BuildPatternUn{m}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \greadlist*\PfCDescriptionMotif{carré,carrés,de carrés}%
+  \reademptyitems%
+  \edef\PfMCalculNbMotif{\fpeval{\useKV[Pattern]{Etape}*\useKV[Pattern]{Etape}}}%
+  \ifboolKV[Pattern]{Resultat}{%
+    \num{\PfMCalculNbMotif}%
+  }{%
+  \ifboolKV[Pattern]{Calcul}{%
+    \ifboolKV[Pattern]{Inverse}{%
+      Comme $\num{\useKV[Pattern]{Etape}}\times\num{\useKV[Pattern]{Etape}}=\num{\PfMCalculNbMotif}$ alors l'étape correspondante au motif cherché est l'étape \num{\useKV[Pattern]{Etape}}.%
+    }{%
+    $\num{\useKV[Pattern]{Etape}}\times\num{\useKV[Pattern]{Etape}}$~\PfCDescriptionMotif[1]\ifnum\PfMCalculNbMotif>1\relax s\fi{} soit \num{\PfMCalculNbMotif} \PfCDescriptionMotif[1]\ifnum\PfMCalculNbMotif>1\relax s\fi%
+    }%
+  }{%
+    \ifboolKV[Pattern]{Formule}{L'aire du motif se calcule sous la forme :\[\text{« étape »}\times\text{« étape »}.\]%
+      \ifemptyKV[Pattern]{Litteral}{}{Si on appelle $\useKV[Pattern]{Litteral}$ le numéro de l'étape alors la formule s'écrit :
+        \[\useKV[Pattern]{Litteral}\times\useKV[Pattern]{Litteral}\text{ ou }\useKV[Pattern]{Litteral}^2.\]
+      }%
+    }{%
+      \ifluatex%
+    \ifboolKV[Pattern]{Grille}{%
+      \begin{Geometrie}[Cadre="aucun"]
+        \BuildPatternCodeC
+        Apat[0]=u*(1,1);
+        for k=0 upto Etape-1:
+         cc[k]=polygone(u*(0,0),u*(k+1,0),u*(k+1,k+1),u*(0,k+1)) shifted (Apat[k]-u*(0,0));
+          trace cc[k];
+          Apat[k+1]:=lrcorner cc[k]+(u*(2,0));
+        endfor;
+        GrillePattern;
+        AffichagePattern(0,Etape-1);
+        for k=0 upto Etape-1:
+          AffichageEtape(lrt)(k,1,Etape-1,llcorner cc[k]);
+        endfor;
+      \end{Geometrie}
+    }{%
+      \mplibforcehmode%
+      \begin{mplibcode}%
+        \BuildPatternCode
+        ecartcube:=2pt;
+        \BuildPatternCodeA{#1}
+        %
+        for l=1 upto Etape:
+          for p=1 upto Etape:
+            depla:=(p*larg,l*haut);
+            trace TestA shifted depla;
+          endfor;
+        endfor;
+      \end{mplibcode}%
+    }%
+  \fi%
+}%
+}%
+}%
+}%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%284
+\NewDocumentCommand\BuildPatternDeuxCentQuatreVingtQuatre{}{
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      Etape:=\useKV[Pattern]{Etape};
+      input PfCSolid;
+
+      intensite:=1.5;
+      Ferme[0]:=false;
+      outcolor:=LightSteelBlue;
+      incolor:=white;
+      nb:=1;subh:=1;
+      creux:=true;
+
+      Initialisation(2500,40,20,50);
+      Objetcube1("a=0.25");
+      nbobj:=1;
+      TR:=(0,a,0);
+      %base
+      for k=1 upto 2:
+      NBobj:=nbobj;
+      nbobj:=nbobj+1;
+      ObjetDeplacement[nbobj](NBobj);
+      endfor;
+      % barre gauche
+      for k=1 upto Etape:
+      TR:=(0,0,k*a);
+      NBobj:=1;
+      nbobj:=nbobj+1;
+      ObjetDeplacement[nbobj](NBobj);
+      endfor;
+      %barre gauche
+      for k=1 upto Etape-1:
+      TR:=(0,2*a,k*a);
+      NBobj:=1;
+      nbobj:=nbobj+1;
+      ObjetDeplacement[nbobj](NBobj);
+      endfor;
+      DessineFusion;
+    \end{mplibcode}
+  \fi
+}%
+
+% 254
+\NewDocumentCommand\BuildPatternDeuxCentCinquanteQuatre{}{
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      Etape:=\useKV[Pattern]{Etape};
+      for k=0 upto Etape-1:
+      for l=0 upto Etape-1:
+      fill ((fullcircle scaled 4mm) shifted (5mm*(l,k))) withcolor LightSteelBlue;
+      trace ((fullcircle scaled 4mm) shifted (5mm*(l,k)));
+      endfor;
+      endfor;
+      fill ((fullcircle scaled 4mm) shifted (5mm*(0,-1))) withcolor LightSteelBlue;
+      trace ((fullcircle scaled 4mm) shifted (5mm*(0,-1)));
+      fill ((fullcircle scaled 4mm) shifted (5mm*(-1,0))) withcolor LightSteelBlue;
+      trace ((fullcircle scaled 4mm) shifted (5mm*(-1,0)));
+      fill ((fullcircle scaled 4mm) shifted (5mm*(0,Etape))) withcolor LightSteelBlue;
+      trace ((fullcircle scaled 4mm) shifted (5mm*(0,Etape)));
+    \end{mplibcode}
+  \fi
+}%
+
+%156
+\NewDocumentCommand\BuildPatternCentCinquanteSix{}{
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      Etape:=\useKV[Pattern]{Etape};
+      input PfCSolid;
+
+      intensite:=1.5;
+      Ferme[0]:=false;
+      outcolor:=LightSteelBlue;
+      incolor:=white;
+      nb:=1;subh:=1;
+      creux:=true;
+
+      Initialisation(2500,40,20,50);
+      Objetcube1("a=0.25");
+      nbobj:=1;
+      TR:=(0,a,0);
+      for k=1 upto Etape:
+      NBobj:=nbobj;
+      nbobj:=nbobj+1;
+      ObjetDeplacement[nbobj](NBobj);
+      endfor;
+      TR:=(0,0,-0.25);
+      for k=1 upto Etape:
+      NBobj:=nbobj;
+      nbobj:=nbobj+1;
+      ObjetDeplacement[nbobj](NBobj);
+      endfor;
+      TR:=(0,0.25,0);
+      for k=1 upto Etape:
+      NBobj:=nbobj;
+      nbobj:=nbobj+1;
+      ObjetDeplacement[nbobj](NBobj);
+      endfor;
+      %nbobj=4;
+      DessineFusion;
+    \end{mplibcode}
+  \fi
+}%
+
+%155
+\NewDocumentCommand\BuildPatternCentCinquanteCinq{}{
+  \ifluatex%
+    \mplibforcehmode
+    \begin{mplibcode}
+      Etape:=\useKV[Pattern]{Etape};
+      input PfCSolid;
+
+      intensite:=1.5;
+      Ferme[0]:=false;
+      outcolor:=LightSteelBlue;
+      incolor:=white;
+      nb:=1;subh:=1;
+      creux:=true;
+
+      Initialisation(2500,40,20,50);
+      angx:=-40;
+      Objetcube1("a=0.25");
+      angx:=0;
+      nbobj:=1;
+      TR:=(0,a*cosd(-40),a*sind(-40));
+      for k=0 upto Etape-2:
+      NBobj:=nbobj;
+      nbobj:=nbobj+1;
+      ObjetDeplacement[nbobj](NBobj);
+      endfor;
+      NBobj:=1;
+      TR:=(0,-a*cosd(-40),-a*sind(-40));
+      for k=0 upto Etape-2:
+      nbobj:=nbobj+1;
+      ObjetDeplacement[nbobj](NBobj);
+      NBobj:=nbobj;
+      endfor;
+      NBobj:=1;
+      TR:=(0,a*sind(-40),-a*cosd(-40));
+      for k=0 upto Etape-2:
+      nbobj:=nbobj+1;
+      ObjetDeplacement[nbobj](NBobj);
+      NBobj:=nbobj;
+      endfor;
+      NBobj:=1;
+      TR:=(0,-a*sind(-40),a*cosd(-40));
+      for k=0 upto Etape-2:
+      nbobj:=nbobj+1;
+      ObjetDeplacement[nbobj](NBobj);
+      NBobj:=nbobj;
+      endfor;
+      NBobj:=1;
+      TR:=(a,0,0);%
+      for k=0 upto Etape-2:
+      nbobj:=nbobj+1;
+      ObjetDeplacement[nbobj](NBobj);
+      NBobj:=nbobj;
+      endfor;
+      NBobj:=1;
+      TR:=(-a,0,0);
+      for k=0 upto Etape-2:
+      nbobj:=nbobj+1;
+      ObjetDeplacement[nbobj](NBobj);
+      NBobj:=nbobj;
+      endfor;
+      DessineFusion;
+    \end{mplibcode}
+  \fi%
+}%

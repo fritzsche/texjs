@@ -1,0 +1,478 @@
+%%%
+% Mulart
+%%%
+\def\filedateMulArt{2025/05/28}%
+\def\fileversionMulArt{0.1a}%
+\message{-- \filedateMulArt\space v\fileversionMulArt}%
+%
+\setKVdefault[TabMul]{Multiple=2,Cibles=false,Largeur=20pt,Couleurs=false,Graines=false,Operations=false,Enonce=false,SchemaEnonce=false,Couleur={},Graine={},Cible={}}%
+\defKV[TabMul]{%
+  Couleur=\ifempty{#1}{}{\setKV[TabMul]{Couleurs}},%
+  Graine=\ifempty{#1}{}{\setKV[TabMul]{Graines}\PfCGraineAlea{#1}},%
+  Cible=\ifempty{#1}{}{\setKV[TabMul]{Cibles}}%
+}%
+
+\newtoks\tokstabmul
+\newtoks\tokstabmulpdts
+\newtoks\tokstabmulnonpdts
+\newtoks\tokstabmulpdtscible
+\def\UpdatetoksTabMul#1\nil{\addtotok\tokstabmul{"#1",}}%
+\def\UpdatetoksTabMulPdts#1\nil{\addtotok\tokstabmulpdts{"#1",}}%
+\def\UpdatetoksTabMulNonPdts#1\nil{\addtotok\tokstabmulnonpdts{"#1",}}%
+\def\UpdatetoksTabMulPdtsCible#1\nil{\addtotok\tokstabmulpdtscible{"#1",}}%
+
+\NewDocumentCommand\TableauMultiplicatif{om}{%
+  \useKVdefault[TabMul]%
+  \setKV[TabMul]{#1}%
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\PfCListeTabMul{#2}%
+  \reademptyitems%
+  \StrLen{\PfCListeTabMul[1]}[\TailleTabMul]%
+  \tokstabmul{}%
+  \foreachitem\compteur\in\PfCListeTabMul{\expandafter\UpdatetoksTabMul\compteur\nil}%
+  \savecomparemode%
+  \comparestrict%
+  \ifboolKV[TabMul]{Cibles}{%
+    \tokstabmulpdtscible{}%
+    \xdef\PfCCompteurX{0}%
+    \xdef\PfCCompteurO{0}%
+    \xintFor* ##1 in {\xintSeq{1}{\PfCListeTabMullen}}\do{%
+      \xintFor* ##2 in {\xintSeq{1}{\TailleTabMul}}\do{%
+        \StrChar{\PfCListeTabMul[##1]}{##2}[\PfCLettre]%
+        \IfStrEq{\PfCLettre}{x}{%
+          \xdef\PfCCompteurX{\fpeval{\PfCCompteurX+1}}%
+        }{\IfStrEq{\PfCLettre}{o}{%
+            \xdef\PfCCompteurO{\fpeval{\PfCCompteurO+1}}%
+          }{}%
+        }%
+      }%
+    }%
+    \xdef\PfCFooRetiensCible{\useKV[TabMul]{Cible}}%
+    \readlist*\PfCListeDesNombresCibles{\PfCFooRetiensCible}%
+    \xintFor* ##2 in{\xintSeq{1}{\PfCListeDesNombresCibleslen}}\do{%
+      \PfCListeDiviseursInfDix{\PfCListeDesNombresCibles[##2]}%
+      \setsepchar{,}\ignoreemptyitems%
+      \readlist*\PfCTabMulDiviseursCible{\PfCListeDiviseursInfDixRetour}%
+      \xdef\PfCFooListePdtCible{$1\times\num{\PfCListeDesNombresCibles[##2]}$,$\num{\PfCListeDesNombresCibles[##2]}\times1$}%
+      \xintFor* ##1 in {\xintSeq{1}{\PfCNbDiviseurs}}\do{%
+        \xdef\PfCFooListePdtCible{\PfCFooListePdtCible,$\num{\PfCTabMulDiviseursCible[##1]}\times\num{\fpeval{\PfCListeDesNombresCibles[##2]/\PfCTabMulDiviseursCible[##1]}}$,$\num{\fpeval{\PfCListeDesNombresCibles[##2]/\PfCTabMulDiviseursCible[##1]}}\times\num{\PfCTabMulDiviseursCible[##1]}$}%
+      }%
+    }%
+    \ignoreemptyitems%
+    \readlist*\PfCListeProduitsCible{\PfCFooListePdtCible}%
+    \foreachitem\compteur\in\PfCListeProduitsCible{\expandafter\UpdatetoksTabMulPdtsCible\compteur\nil}%
+    \BuildTabMulCible{\the\tokstabmul}{\the\tokstabmulpdtscible}{\PfCFooRetiensCible}%
+  }{%
+    \ifboolKV[TabMul]{Operations}{%
+      \xdef\PfCTabMulListePdts{4,6,8,9,10,12,14,15,16,18,20,21,24,25,27,28,30,32,35,36,40,42,45,48,49,50,54,56,60,63,64,70,72,80,81,90,100}%37
+      \xdef\PfCTabMulListeNonPdts{2,3,5,7,11,13,17,19,22,23,26,29,31,33,34,37,38,39,41,43,44,46,47,51,52,53,55,57,58,59,61,62,65,66,67,68,69,71,73,74,75,76,77,78,79,82,83,84,85,86,87,88,89,91,92,93,94,95,96,97,98,99}%62
+      \xdef\PfCCompteurX{0}
+      \xdef\PfCCompteurO{0}
+      \xintFor* ##1 in {\xintSeq{1}{\PfCListeTabMullen}}\do{%
+        \xintFor* ##2 in {\xintSeq{1}{\TailleTabMul}}\do{%
+          \StrChar{\PfCListeTabMul[##1]}{##2}[\PfCLettre]%
+          \IfStrEq{\PfCLettre}{x}{%
+            \xdef\PfCCompteurX{\fpeval{\PfCCompteurX+1}}%
+          }{\IfStrEq{\PfCLettre}{o}{%
+              \xdef\PfCCompteurO{\fpeval{\PfCCompteurO+1}}%
+            }{}%
+          }%
+        }%
+      }%
+      \xdef\NombreRepetX{\fpeval{ceil(\PfCCompteurX/37)}}%
+      \xdef\NombreRepetO{\fpeval{ceil(\PfCCompteurO/62)}}%
+      \xdef\PfCTabMulListeFinalePdts{}%
+      \xdef\PfCTabMulListeFinaleNonPdts{}%
+      \xintFor* ##1 in {\xintSeq{1}{\NombreRepetX}}\do{%
+        \xdef\PfCTabMulListeFinalePdts{\PfCTabMulListeFinalePdts,\PfCTabMulListePdts}%
+      }%
+      \xintFor* ##1 in {\xintSeq{1}{\NombreRepetO}}\do{%
+        \xdef\PfCTabMulListeFinaleNonPdts{\PfCTabMulListeFinaleNonPdts,\PfCTabMulListeNonPdts}%
+      }%
+      \MelangeListe{\PfCTabMulListeFinalePdts}{\PfCCompteurX}%
+      \ignoreemptyitems%
+      \readlist*\PfCListeProduits{\faa}%
+      \MelangeListe{\PfCTabMulListeFinaleNonPdts}{\PfCCompteurO}%
+      \ignoreemptyitems%
+      \readlist*\PfCListeNonProduits{\faa}%
+      \ifboolKV[TabMul]{Enonce}{%
+        \begin{enumerate}
+          \xintFor* ##1 in {\xintSeq{1}{\PfCCompteurX}}\do{%
+            \PfCListeDiviseursInfDix{\PfCListeProduits[##1]}%
+            \ifnum\PfCNbDiviseurs>1\relax
+              \MelangeListe{\PfCListeDiviseursInfDixRetour}{1}%
+            \else%
+              \xdef\faa{\PfCListeDiviseursInfDixRetour}%
+            \fi%
+            \ignoreemptyitems%
+            \readlist*\PfCListeDiviseurChoisi{\faa}%
+          \item $\PfCListeDiviseurChoisi[1]\times\fpeval{\PfCListeProduits[##1]/\PfCListeDiviseurChoisi[1]}=$
+          }%
+        \end{enumerate}%
+      }{}%
+      \ifboolKV[TabMul]{SchemaEnonce}{%
+        \tokstabmulpdts{}%
+        \tokstabmulnonpdts{}%
+        \xdef\PfCFoo{\PfCListeProduits[1]}%
+        \xintFor* ##3 in {\xintSeq{2}{\PfCCompteurX}}\do{%
+          \xdef\PfCFoo{\PfCFoo,\PfCListeProduits[##3]}%
+        }%
+        \MelangeListe{\PfCFoo}{\PfCCompteurX}%
+        \ignoreemptyitems%
+        \readlist*\PfCListeProduits{\faa}%
+        \foreachitem\compteur\in\PfCListeProduits{\expandafter\UpdatetoksTabMulPdts\compteur\nil}%
+        \foreachitem\compteur\in\PfCListeNonProduits{\expandafter\UpdatetoksTabMulNonPdts\compteur\nil}%
+        \BuildTabMulEnonce{\the\tokstabmul}{\the\tokstabmulpdts}{\the\tokstabmulnonpdts}
+      }{}%%
+    }{%
+      \BuildTabMul{\the\tokstabmul}%
+    }%
+  }%
+  \restorecomparemode%
+  \reademptyitems%
+}%
+
+\NewDocumentCommand\PfCListeDiviseursInfDix{m}{%
+  \ifnum#1<10\relax%
+    \xdef\PfCLimiteDiv{#1}%
+  \else%
+    \xdef\PfCLimiteDiv{10}%
+  \fi%
+  \xdef\PfCListeDiviseursInfDixRetour{}%
+  \xdef\PfCNbDiviseurs{}%
+  \xintFor* ##2 in {\xintSeq{2}{\PfCLimiteDiv}}\do{%
+    \modulo{#1}{##2}\relax%
+    \ifnum\remainder=0\relax%
+      \xdef\PfCListeDiviseursInfDixRetour{\PfCListeDiviseursInfDixRetour ##2,}%
+      \xdef\PfCNbDiviseurs{\fpeval{\PfCNbDiviseurs+1}}%
+    \fi%
+  }%
+}%
+
+\def\TabMulCibleCode{%
+  NbCasesLarg=\TailleTabMul;
+  Largeur=\useKV[TabMul]{Largeur};
+  color CoulFond;
+  boolean Colore,Stop,Graines;
+  Colore=\useKV[TabMul]{Couleurs};
+  if Colore:
+    CoulFond=\useKV[TabMul]{Couleur};
+  fi;
+  Graines=\useKV[TabMul]{Graines};
+  if Graines:
+    randomseed:=\useKV[TabMul]{Graine};
+  fi;
+  vardef NombresCibles(text t)=
+    nbc=0;
+    for p_=t:
+      nbc:=nbc+1;
+    Cible[nbc]=p_;
+    endfor;
+  enddef;
+  % 
+  vardef LectureDesProduits(text t)=
+    string Sproduits[];
+    nbp=0;
+    for p_=t:
+      nbp:=nbp+1;
+      Sproduits[nbp]=p_;
+    endfor;
+  enddef;
+  %
+  vardef Remplissage(text t)=
+    pair M[][];
+    n=0;
+    for p_=t:
+      for k=0 upto NbCasesLarg-1:
+        l:=n mod NbCasesLarg;
+        h:=n div NbCasesLarg;
+        M[l][h]=Largeur*(l,-h);
+        if (substring(k,k+1) of p_)="x":
+          if Colore:
+            fill ((unitsquare scaled Largeur) shifted M[l][h]) withcolor CoulFond;
+          fi;
+          label(TEX(Sproduits[ceiling(uniformdeviate(nbp))]),M[l][h] shifted (Largeur*(0.5,0.5)));
+        elseif (substring(k,k+1) of p_)="X":
+          fill ((unitsquare scaled Largeur) shifted M[l][h]);
+        else:
+          Stop:=false;
+          forever:
+            basea:=ceiling(1+uniformdeviate(9));
+            baseb:=ceiling(1+uniformdeviate(9));
+            basec:=0;
+            for r=1 upto nbc:
+              if (basea*baseb)<>Cible[r]:
+                basec:=basec+1;
+              fi;
+            endfor;
+            if basec=nbc:
+              Stop:=true;
+            fi;
+          exitif Stop;
+          endfor;
+          label(TEX("$\num{"&decimal(basea)&"}\times\num{"&decimal(baseb)&"}$"),M[l][h] shifted (Largeur*(0.5,0.5)));
+        fi;
+        trace (unitsquare scaled Largeur) shifted M[l][h];
+        n:=n+1;
+      endfor;
+    endfor;
+  enddef;
+  %
+  vardef RemplissagePDF(text t)=
+    pair M[][];
+    n=0;
+    for p_=t:
+      for k=0 upto NbCasesLarg-1:
+        l:=n mod NbCasesLarg;
+        h:=n div NbCasesLarg;
+        M[l][h]=Largeur*(l,-h);
+        if (substring(k,k+1) of p_)="x":
+          if Colore:
+            fill ((unitsquare scaled Largeur) shifted M[l][h]) withcolor CoulFond;
+          fi;
+          label(LATEX(Sproduits[ceiling(uniformdeviate(nbp))]),M[l][h] shifted (Largeur*(0.5,0.5)));
+        elseif (substring(k,k+1) of p_)="X":
+          fill ((unitsquare scaled Largeur) shifted M[l][h]);
+        else:
+          Stop:=false;
+          forever:
+            basea:=ceiling(1+uniformdeviate(9));
+            baseb:=ceiling(1+uniformdeviate(9));
+            basec:=0;
+            for r=1 upto nbc:
+              if (basea*baseb)<>Cible[r]:
+                basec:=basec+1;
+              fi;
+            endfor;
+            if basec=nbc:
+              Stop:=true;
+            fi;
+          exitif Stop;
+          endfor;
+          label(LATEX("$\num{"&decimal(basea)&"}\times\num{"&decimal(baseb)&"}$"),M[l][h] shifted (Largeur*(0.5,0.5)));
+        fi;
+        trace (unitsquare scaled Largeur) shifted M[l][h];
+        n:=n+1;
+      endfor;
+    endfor;
+  enddef;
+}%
+
+\NewDocumentCommand\BuildTabMulCible{mmm}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \mplibnumbersystem{double}%
+    \begin{mplibcode}
+      \TabMulCibleCode
+      NombresCibles(#3);
+      LectureDesProduits(#2);
+      Remplissage(#1);
+    \end{mplibcode}%
+    \mplibnumbersystem{scaled}%
+  \else%
+    \begin{mpost}[mpsettings={\TabMulCibleCode}]
+      NombresCibles(#3);
+      LectureDesProduits(#2);
+      RemplissagePDF(#1);
+    \end{mpost}%
+  \fi%
+}%
+
+\def\TabMulCode{%
+  NbCasesLarg=\TailleTabMul;
+      Multiple=\useKV[TabMul]{Multiple};
+      Largeur=\useKV[TabMul]{Largeur};
+      color CoulFond;
+      boolean Colore,Stop,Graines;
+      Colore=\useKV[TabMul]{Couleurs};
+      if Colore:
+      CoulFond=\useKV[TabMul]{Couleur};
+      fi;
+      Graines=\useKV[TabMul]{Graines};
+      if Graines:
+      randomseed:=\useKV[TabMul]{Graine};
+      fi;
+      vardef Remplissage(text t)=
+      pair M[][];
+      n=0;
+      for p_=t:
+      for k=0 upto NbCasesLarg-1:
+      l:=n mod NbCasesLarg;
+      h:=n div NbCasesLarg;
+      M[l][h]=Largeur*(l,-h);
+      if (substring(k,k+1) of p_)="x":
+      if Colore:
+      fill ((unitsquare scaled Largeur) shifted M[l][h]) withcolor CoulFond;
+      fi;
+      label(TEX(decimal(Multiple*ceiling(uniformdeviate(9)+1))),M[l][h] shifted (Largeur*(0.5,0.5)));
+      elseif (substring(k,k+1) of p_)="X":
+      fill ((unitsquare scaled Largeur) shifted M[l][h]);
+      else:
+      Stop:=false;
+      forever:
+      base:=ceiling((1+uniformdeviate(9))*(1+uniformdeviate(9)));
+      if (base mod Multiple)>0:
+      Stop:=true;
+      fi;
+      exitif Stop;
+      endfor;
+      label(TEX(decimal(base)),M[l][h] shifted (Largeur*(0.5,0.5)));
+      fi;
+      trace (unitsquare scaled Largeur) shifted M[l][h];
+      n:=n+1;
+      endfor;
+      endfor;
+      enddef;
+      %
+      vardef RemplissagePDF(text t)=
+      pair M[][];
+      n=0;
+      for p_=t:
+      for k=0 upto NbCasesLarg-1:
+      l:=n mod NbCasesLarg;
+      h:=n div NbCasesLarg;
+      M[l][h]=Largeur*(l,-h);
+      if (substring(k,k+1) of p_)="x":
+      if Colore:
+      fill ((unitsquare scaled Largeur) shifted M[l][h]) withcolor CoulFond;
+      fi;
+      label(LATEX(decimal(Multiple*ceiling(uniformdeviate(9)+1))),M[l][h] shifted (Largeur*(0.5,0.5)));
+      elseif (substring(k,k+1) of p_)="X":
+      fill ((unitsquare scaled Largeur) shifted M[l][h]);
+      else:
+      Stop:=false;
+      forever:
+      base:=ceiling((1+uniformdeviate(9))*(1+uniformdeviate(9)));
+      if (base mod Multiple)>0:
+      Stop:=true;
+      fi;
+      exitif Stop;
+      endfor;
+      label(LATEX(decimal(base)),M[l][h] shifted (Largeur*(0.5,0.5)));
+      fi;
+      trace (unitsquare scaled Largeur) shifted M[l][h];
+      n:=n+1;
+      endfor;
+      endfor;
+      enddef;
+    }%
+    
+\NewDocumentCommand\BuildTabMul{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \mplibnumbersystem{double}%
+    \begin{mplibcode}
+      \TabMulCode
+      Remplissage(#1);
+    \end{mplibcode}%
+    \mplibnumbersystem{scaled}%
+  \else%
+    \begin{mpost}[mpsettings={\TabMulCode}]
+      Remplissage(#1);
+    \end{mpost}%
+  \fi%
+}%
+
+\def\TabMulEnonceCode{%
+  NbCasesLarg=\TailleTabMul;
+      Multiple=\useKV[TabMul]{Multiple};
+      Largeur=\useKV[TabMul]{Largeur};
+      color CoulFond;
+      boolean Colore,Stop;%,Graines;
+      Colore=\useKV[TabMul]{Couleurs};
+      if Colore:
+      CoulFond=\useKV[TabMul]{Couleur};
+      fi;
+      vardef Remplissage(text t)(text listepdt)(text listenonpdt)=
+      string pdt[],nonpdt[];
+      n:=0;
+      for p_=listepdt:
+      pdt[n]=p_;
+      n:=n+1;
+      endfor;
+      n:=0;
+      for p_=listenonpdt:
+      nonpdt[n]=p_;
+      n:=n+1;
+      endfor;
+      pair M[][];
+      n:=0;
+      nx=0;
+      no=0;
+      for p_=t:
+      for k=0 upto NbCasesLarg-1:
+      l:=n mod NbCasesLarg;
+      h:=n div NbCasesLarg;
+      M[l][h]=Largeur*(l,-h);
+      if (substring(k,k+1) of p_)="x":
+      if Colore:
+      fill ((unitsquare scaled Largeur) shifted M[l][h]) withcolor CoulFond;
+      fi;
+      label(TEX(pdt[nx]),M[l][h] shifted (Largeur*(0.5,0.5)));
+      nx:=nx+1;
+      elseif (substring(k,k+1) of p_)="X":
+      fill ((unitsquare scaled Largeur) shifted M[l][h]);
+      else:
+      label(TEX(nonpdt[no]),M[l][h] shifted (Largeur*(0.5,0.5)));
+      no:=no+1;
+      fi;
+      trace (unitsquare scaled Largeur) shifted M[l][h];
+      n:=n+1;
+      endfor;
+      endfor;
+      enddef;
+      vardef RemplissagePDF(text t)(text listepdt)(text listenonpdt)=
+      string pdt[],nonpdt[];
+      n:=0;
+      for p_=listepdt:
+      pdt[n]=p_;
+      n:=n+1;
+      endfor;
+      n:=0;
+      for p_=listenonpdt:
+      nonpdt[n]=p_;
+      n:=n+1;
+      endfor;
+      pair M[][];
+      n:=0;
+      nx=0;
+      no=0;
+      for p_=t:
+      for k=0 upto NbCasesLarg-1:
+      l:=n mod NbCasesLarg;
+      h:=n div NbCasesLarg;
+      M[l][h]=Largeur*(l,-h);
+      if (substring(k,k+1) of p_)="x":
+      if Colore:
+      fill ((unitsquare scaled Largeur) shifted M[l][h]) withcolor CoulFond;
+      fi;
+      label(TEX(pdt[nx]),M[l][h] shifted (Largeur*(0.5,0.5)));
+      nx:=nx+1;
+      elseif (substring(k,k+1) of p_)="X":
+      fill ((unitsquare scaled Largeur) shifted M[l][h]);
+      else:
+      label(TEX(nonpdt[no]),M[l][h] shifted (Largeur*(0.5,0.5)));
+      no:=no+1;
+      fi;
+      trace (unitsquare scaled Largeur) shifted M[l][h];
+      n:=n+1;
+      endfor;
+      endfor;
+      enddef;
+    }%
+
+\NewDocumentCommand\BuildTabMulEnonce{mmm}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \mplibnumbersystem{double}%
+    \begin{mplibcode}
+      \TabMulEnonceCode
+      Remplissage(#1)(#2)(#3);
+    \end{mplibcode}%
+    \mplibnumbersystem{scaled}%
+  \else%
+    \begin{mpost}[mpsettings={\TabMulEnonceCode}]
+      RemplissagePDF(#1)(#2)(#3);
+    \end{mpost}%
+  \fi%
+}%

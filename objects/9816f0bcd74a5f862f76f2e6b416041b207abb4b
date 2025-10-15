@@ -1,0 +1,25 @@
+!config
+# Arara, the cool TeX automation tool
+# Copyright (c) 2023, Island of TeX
+# All rights reserved.
+#
+# This rule is part of arara.
+identifier: mkdir
+name: Create subdirectory
+authors:
+- hackbaellchen
+- Island of TeX
+commands:
+- name: Create subdirectory
+  command: >
+    @{
+        toFile(target[0]).createDirectories();
+        return true;
+    }
+arguments:
+- identifier: target
+  flag: >
+    @{
+        return parameters.target;
+    }
+  required: true

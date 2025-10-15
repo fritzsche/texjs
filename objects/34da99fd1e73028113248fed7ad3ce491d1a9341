@@ -1,0 +1,34 @@
+%%%
+% D\'ecomposition de fractions
+%%%
+\def\filedateDecompFrac{2025/05/28}%
+\def\fileversionDecompFrac{0.1b}%
+\message{-- \filedateDecompFrac\space v\fileversionDecompFrac}%
+%
+\setKVdefault[CleDecompFra]{PE,PF,Fraction,Egal,Deno,Solution=false,Dots=20pt,Complete=false,Vide=false,Couleur={}}
+\defKV[CleDecompFra]{Couleur=\ifempty{#1}{}{\setKV[CleDecompFra]{Solution}\colorlet{PfCDecompFraCol}{#1}}}%
+%
+\NewDocumentCommand\DecompositionFraction{som}{%
+  \useKVdefault[CleDecompFra]%
+  \setKV[CleDecompFra]{#2}%
+  \ifboolKV[CleDecompFra]{Vide}{\setKV[CleDecompFra]{PE=false,PF=false,Deno=false}}{}%
+  \setlength{\PfCLgUnites}{\useKV[CleDecompFra]{Dots}}%
+  \ensuremath{%
+    \StrBefore{#3}{/}[\PfCnumera]%
+    \StrBehind{#3}{/}[\PfCdeno]%
+    \IfBooleanTF{#1}{%
+      \quotient{\PfCnumera}{\PfCdeno}%
+      \modulo{\PfCnumera}{\PfCdeno}%
+      \ifboolKV[CleDecompFra]{Complete}{\ifboolKV[CleDecompFra]{Fraction}{\tofrac{#3}}{\frac{\ifboolKV[CleDecompFra]{Solution}{\mathcolor{PfCDecompFraCol}{\num{\PfCnumera}}}{\pointilles[\PfCLgUnites]~}}{\ifboolKV[CleDecompFra]{Solution}{\mathcolor{PfCDecompFraCol}{\num{\PfCdeno}}}{\pointilles[\PfCLgUnites]~}}}\ifboolKV[CleDecompFra]{Egal}{=}{\ifboolKV[CleDecompFra]{Solution}{\mathcolor{PfCDecompFraCol}{=}}{\raisebox{0.25em}{\pointilles[\PfCLgUnites]}~}}}{}\ifboolKV[CleDecompFra]{PE}{\fpeval{\the\intquotient+1}}{\ifboolKV[CleDecompFra]{Solution}{\mathcolor{PfCDecompFraCol}{\fpeval{\the\intquotient+1}}}{\pointilles[\PfCLgUnites]~}}-\frac{\ifboolKV[CleDecompFra]{PF}{\fpeval{\PfCdeno-\the\remainder}}{\ifboolKV[CleDecompFra]{Solution}{\mathcolor{PfCDecompFraCol}{\fpeval{\PfCdeno-\the\remainder}}}{\pointilles[\PfCLgUnites]~}}}{\ifboolKV[CleDecompFra]{Deno}{\PfCdeno}{\ifboolKV[CleDecompFra]{Solution}{\mathcolor{PfCDecompFraCol}{\num{\PfCdeno}}}{\pointilles[\PfCLgUnites]~}}}
+    }{%
+      \ifnum\fpeval{\PfCnumera}>\fpeval{\PfCdeno}\relax
+        \quotient{\PfCnumera}{\PfCdeno}%
+        \modulo{\PfCnumera}{\PfCdeno}%
+        \ifboolKV[CleDecompFra]{Complete}{\ifboolKV[CleDecompFra]{Fraction}{\tofrac{#3}}{\frac{\ifboolKV[CleDecompFra]{Solution}{\mathcolor{PfCDecompFraCol}{\num{\PfCnumera}}}{\pointilles[\PfCLgUnites]~}}{\ifboolKV[CleDecompFra]{Solution}{\mathcolor{PfCDecompFraCol}{\num{\PfCdeno}}}{\pointilles[\PfCLgUnites]~}}}\ifboolKV[CleDecompFra]{Egal}{=}{\ifboolKV[CleDecompFra]{Solution}{\mathcolor{PfCDecompFraCol}{=}}{\raisebox{0.25em}{\pointilles[\PfCLgUnites]}~}}}{}\ifboolKV[CleDecompFra]{PE}{\the\intquotient}{\ifboolKV[CleDecompFra]{Solution}{\mathcolor{PfCDecompFraCol}{\the\intquotient}}{\pointilles[\PfCLgUnites]~}}+\frac{\ifboolKV[CleDecompFra]{PF}{\the\remainder}{\ifboolKV[CleDecompFra]{Solution}{\mathcolor{PfCDecompFraCol}{\the\remainder}}{\pointilles[\PfCLgUnites]~}}}{\ifboolKV[CleDecompFra]{Deno}{\PfCdeno}{\ifboolKV[CleDecompFra]{Solution}{\mathcolor{PfCDecompFraCol}{\num{\PfCdeno}}}{\pointilles[\PfCLgUnites]~}}}
+      \else
+        \mathcolor{Gray!50}{0+}\tofrac{#3}
+      \fi%
+    }%
+  }%
+}%
+

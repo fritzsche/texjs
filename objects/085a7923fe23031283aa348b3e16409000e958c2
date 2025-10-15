@@ -1,0 +1,89 @@
+%%%
+% Qui suis-je
+%%%
+\def\filedateQsuisuisje{2024/08/04}%
+\def\fileversionQsuisuisje{0.1}%
+\message{-- \filedateQsuisuisje\space v\fileversionQsuisuisje}%
+%
+\setKVdefault[Quisuisje]{Solution=false,Largeur=5mm,Colonnes=5,CodePerso=false,TexteA=Lettre,TexteB=R\'esultat du calcul}%
+
+\newcommand\QuisuisjeEnonce{%
+  Chaque lettre du mot à découvrir porte un numéro qui correspond à un
+  calcul à effectuer. Pour trouver les lettres de ce mot, tu dois donc
+  effectuer les calculs proposés. Les résultats que tu auras trouvés
+  te donneront, à l'aide du tableau de correspondance ci-dessous, les
+  lettres du mot.
+}%
+
+\newcommand\QuisuisjeTableau[2][]{%
+  \setKV[Quisuisje]{#1}%
+  \setsepchar[*]{§*/}\ignoreemptyitems%
+  \readlist*\ListeQuisuisje{#2}%
+  \begin{NiceTabular}{|l|*{\ListeQuisuisjelen}{m{\useKV[Quisuisje]{Largeur}}|}}%
+    \hline
+    \useKV[Quisuisje]{TexteA}\xintFor* ##1 in {\xintSeq {1}{\ListeQuisuisjelen}}\do{%
+      &\centering\arraybackslash\ListeQuisuisje[##1,1]
+    }\\
+    \hline
+    \useKV[Quisuisje]{TexteB}\xintFor* ##1 in {\xintSeq {1}{\ListeQuisuisjelen}}\do{%
+      &\centering\arraybackslash\ListeQuisuisje[##1,2]
+    }\\
+    \hline
+  \end{NiceTabular}%
+}%
+
+\newcommand\QuisuisjeCodePerso[3][]{%
+  \setKV[Quisuisje]{#1}%
+  \setsepchar{ }%
+  \readlist*\ListeQuisuisjeCode{#2}%
+  \readlist*\ListeQuisuisjeLettres{#3}%
+  \par\hfill%
+  \begin{NiceTabular}{|*{\ListeQuisuisjeLettreslen}{m{7mm}|}}
+    \hline
+    \xintFor* ##1 in {\xintSeq {1}{\ListeQuisuisjeLettreslen}}\do{%
+      \xintifForFirst{}{&}\ifboolKV[Quisuisje]{Solution}{\hfill\ListeQuisuisjeLettres[##1]}{\phantom{1}}
+    }\\
+    \xintFor* ##1 in {\xintSeq {1}{\ListeQuisuisjeLettreslen}}\do{%
+      \xintifForFirst{}{&}\tiny\ListeQuisuisjeCode[##1]%
+    }\\
+    \hline
+  \end{NiceTabular}%
+}%
+
+\newcommand\Quisuisje[3][]{%
+  \useKVdefault[Quisuisje]%
+  \setKV[Quisuisje]{#1}%
+  \ifboolKV[Quisuisje]{CodePerso}{}{%
+    \setsepchar{ }%
+    \readlist\ListeLettres{#3}%
+  }%
+  \setsepchar{§}%
+  \readlist\ListeCalculs{#2}%
+  \ifboolKV[Quisuisje]{CodePerso}{}{%
+    \par\hfill%
+    \begin{NiceTabular}{|*{\ListeLettreslen}{m{7mm}|}}
+      \hline
+      \xintFor* ##1 in {\xintSeq {1}{\ListeLettreslen}}\do{%
+        \xintifForFirst{}{&} \ifboolKV[Quisuisje]{Solution}{\hfill\ListeLettres[##1]}{\phantom{1}}
+      }\\
+      \xintFor* ##1 in {\xintSeq {1}{\ListeLettreslen}}\do{%
+        \xintifForFirst{}{&}\tiny\num{##1}%
+      }\\
+      \hline
+    \end{NiceTabular}%
+  }%
+  \par\bigskip\par
+  \ifboolKV[Quisuisje]{Solution}{}{%
+    \ifnum\fpeval{\useKV[Quisuisje]{Colonnes}}>1\relax
+      \begin{multicols}{\useKV[Quisuisje]{Colonnes}}%
+    \fi
+    \begin{enumerate}
+      \xintFor* ##1 in {\xintSeq {1}{\ListeCalculslen}}\do{%
+      \item\ListeCalculs[##1]
+      }
+    \end{enumerate}%
+    \ifnum\fpeval{\useKV[Quisuisje]{Colonnes}}>1\relax
+      \end{multicols}%
+    \fi
+  }%
+}%

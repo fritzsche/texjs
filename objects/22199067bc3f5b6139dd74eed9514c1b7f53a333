@@ -1,0 +1,505 @@
+%%%
+% Assemblages solides
+%%%
+\def\filedateAssemblageS{2024/08/04}%
+\def\fileversionAssemblageS{0.1}%
+\message{-- \filedateAssemblageS\space v\fileversionAssemblageS}%
+%
+\setKVdefault[Assemblage]{Phi=30,Theta=20,Distance=50,Anglez=0,Anglex=0,Largeur=1.5,Profondeur=0.75,Hauteur=1,RayonBoule=1,RayonCone=1,RayonCylindre=1,HauteurPrisme=1,HauteurPyramideA=1,HauteurPyramideB=1,HauteurConeA=1,HauteurConeB=1,HauteurCylindre=1,Cotes=3,Trace=false,Type=Pyramides,Traces={}}%
+\defKV[Assemblage]{Traces=\ifempty{#1}{}{\setKV[Assemblage]{Trace}}}%
+
+\NewDocumentCommand\AssemblageSolides{o}{%
+  \useKVdefault[Assemblage]%
+  \setKV[Assemblage]{#1}%
+  \IfStrEqCase{\useKV[Assemblage]{Type}}{%
+    {Pyramides}{\MPAssemblagePyramides{\useKV[Assemblage]{Cotes}}}%
+    {PavePyramide}{\MPAssemblagePavePyramide}%
+    {PyramidePave}{\MPAssemblagePavePyramide}%
+    {PavePyramides}{\MPAssemblagePavePyramides}%
+    {PyramidesPave}{\MPAssemblagePavePyramides}%
+    {PrismePyramide}{\MPAssemblagePrismePyramide{\useKV[Assemblage]{Cotes}}}%
+    {PyramidePrisme}{\MPAssemblagePrismePyramide{\useKV[Assemblage]{Cotes}}}%
+    {CylindreCone}{\MPAssemblageCylindreCone}%
+    {ConeCylindre}{\MPAssemblageCylindreCone}%
+    {CylindreCones}{\MPAssemblageCylindreCones}%
+    {ConesCylindre}{\MPAssemblageCylindreCones}%
+    {CylindreConeBoule}{\MPAssemblageCylindreConeBoule}%
+    {CylindreBouleCone}{\MPAssemblageCylindreConeBoule}%
+    {ConeCylindreBoule}{\MPAssemblageCylindreConeBoule}%
+    {ConeBouleCylindre}{\MPAssemblageCylindreConeBoule}%
+    {BouleCylindreCone}{\MPAssemblageCylindreConeBoule}%
+    {BouleConeCylindre}{\MPAssemblageCylindreConeBoule}%
+    {CylindreBoule}{\MPAssemblageCylindreBoule}%
+    {BouleCylindre}{\MPAssemblageCylindreBoule}%
+    {CylindreBoules}{\MPAssemblageCylindreBoules}%
+    {BoulesCylindre}{\MPAssemblageCylindreBoules}%
+    {ConeBoule}{\MPAssemblageConeBoule}%
+    {BouleCone}{\MPAssemblageConeBoule}%
+  }%
+}%
+
+\NewDocumentCommand\MPAssemblagePyramides{m}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      input PfCSolid;
+
+      Initialisation(1500,\useKV[Assemblage]{Phi},\useKV[Assemblage]{Theta},\useKV[Assemblage]{Distance});
+      angx:=\useKV[Assemblage]{Anglex};
+      angz:=\useKV[Assemblage]{Anglez};
+
+      HautA=\useKV[Assemblage]{HauteurPyramideA};
+      HautB=\useKV[Assemblage]{HauteurPyramideB};
+
+      boolean Trace;
+      Trace=\useKV[Assemblage]{Trace};
+      
+      color Sommet[];
+      
+      NbS:=#1+2;
+      angbase=360/#1;
+      
+      for k=0 upto #1-1:
+      Sommet[k]:=(cosd(k*angbase),sind(k*angbase),0);
+      endfor;
+      Sommet[NbS-1]:=(0,0,HautA);
+      Sommet[NbS]:=(0,0,-HautB);
+      for k=0 upto NbS:
+      Sommet[k]:=Image(Sommet[k]);
+      endfor;
+      %% Faces
+      NF:=2*#1;
+      for k=1 upto #1:
+      Fc[k*100]:=3;Fc[k*100+1]:=(k+1) mod #1;Fc[k*100+3]:=k mod #1;Fc[k*100+2]:=NbS-1;
+      endfor;
+      for k=#1+1 upto 2*#1:
+      Fc[k*100]:=3;Fc[k*100+1]:=k mod #1;Fc[k*100+3]:=(k+1) mod #1;Fc[k*100+2]:=NbS;
+      endfor;
+      %
+      DessineObjet;
+      %
+      if Trace:
+      \useKV[Assemblage]{Traces};
+      fi;
+    \end{mplibcode}
+  \fi
+}%
+
+\NewDocumentCommand\MPAssemblagePavePyramide{}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      input PfCSolid;
+
+      Initialisation(1500,\useKV[Assemblage]{Phi},\useKV[Assemblage]{Theta},\useKV[Assemblage]{Distance});
+      angx:=\useKV[Assemblage]{Anglex};
+      angz:=\useKV[Assemblage]{Anglez};
+
+      Larg=\useKV[Assemblage]{Hauteur};
+      Long=\useKV[Assemblage]{Largeur};
+      Prof=\useKV[Assemblage]{Profondeur};
+      HautA=\useKV[Assemblage]{HauteurPyramideA};
+      
+      boolean Trace;
+      Trace=\useKV[Assemblage]{Trace};
+      
+      color Sommet[];
+      NbS:=9;
+
+      Sommet1:=(Long,0,0);
+      Sommet2:=(Long,Prof,0);
+      Sommet3:=(0,Prof,0);
+      Sommet4:=(0,0,0);
+      Sommet5:=(0,0,Larg);
+      Sommet6:=(Long,0,Larg);
+      Sommet7:=(Long,Prof,Larg);
+      Sommet8:=(0,Prof,Larg);
+      Sommet9:=(Sommet5+Sommet6+Sommet7+Sommet8)/4+(0,0,HautA);
+      for k=1 upto 9:
+      Sommet[k]:=Image(Sommet[k]);
+      endfor;
+      %% Faces
+      NF:=9;
+      Fc[100]:=4;Fc[101]:=1;Fc[102]:=4;Fc[103]:=3;Fc[104]:=2;
+      Fc[200]:=4;Fc[201]:=4;Fc[202]:=5;Fc[203]:=8;Fc[204]:=3;
+      Fc[300]:=4;Fc[301]:=1;Fc[302]:=6;Fc[303]:=5;Fc[304]:=4;
+      Fc[400]:=4;Fc[401]:=2;Fc[402]:=3;Fc[403]:=8;Fc[404]:=7;
+      Fc[500]:=4;Fc[501]:=1;Fc[502]:=2;Fc[503]:=7;Fc[504]:=6;
+      Fc[600]:=3;Fc[601]:=8;Fc[602]:=5;Fc[603]:=9;
+      Fc[700]:=3;Fc[701]:=5;Fc[702]:=6;Fc[703]:=9;
+      Fc[800]:=3;Fc[801]:=6;Fc[802]:=7;Fc[803]:=9;
+      Fc[900]:=3;Fc[901]:=7;Fc[902]:=8;Fc[903]:=9;
+      %
+      DessineObjet;
+      %
+      %
+      if Trace:
+      \useKV[Assemblage]{Traces};
+      fi;
+    \end{mplibcode}
+  \fi
+}%
+
+\NewDocumentCommand\MPAssemblagePavePyramides{}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      input PfCSolid;
+
+      Initialisation(1500,\useKV[Assemblage]{Phi},\useKV[Assemblage]{Theta},\useKV[Assemblage]{Distance});
+      angx:=\useKV[Assemblage]{Anglex};
+      angz:=\useKV[Assemblage]{Anglez};
+
+      Larg=\useKV[Assemblage]{Hauteur};
+      Long=\useKV[Assemblage]{Largeur};
+      Prof=\useKV[Assemblage]{Profondeur};
+      HautA=\useKV[Assemblage]{HauteurPyramideA};
+      HautB=\useKV[Assemblage]{HauteurPyramideB};
+      
+      boolean Trace;
+      Trace=\useKV[Assemblage]{Trace};
+      
+      color Sommet[];
+      NbS:=10;
+      
+      Sommet1:=(Long,0,0);
+      Sommet2:=(Long,Prof,0);
+      Sommet3:=(0,Prof,0);
+      Sommet4:=(0,0,0);
+      Sommet5:=(0,0,Larg);
+      Sommet6:=(Long,0,Larg);
+      Sommet7:=(Long,Prof,Larg);
+      Sommet8:=(0,Prof,Larg);
+      Sommet9:=(Sommet5+Sommet6+Sommet7+Sommet8)/4+(0,0,HautA);
+      Sommet10:=(Sommet1+Sommet2+Sommet3+Sommet4)/4+(0,0,-HautB);
+      for k=1 upto 10:
+      Sommet[k]:=Image(Sommet[k]);
+      endfor;
+      %% Faces
+      NF:=12;
+      Fc[100]:=4;Fc[101]:=4;Fc[102]:=5;Fc[103]:=8;Fc[104]:=3;
+      Fc[200]:=4;Fc[201]:=1;Fc[202]:=6;Fc[203]:=5;Fc[204]:=4;
+      Fc[300]:=4;Fc[301]:=2;Fc[302]:=3;Fc[303]:=8;Fc[304]:=7;
+      Fc[400]:=4;Fc[401]:=1;Fc[402]:=2;Fc[403]:=7;Fc[404]:=6;
+      %
+      Fc[500]:=3;Fc[501]:=8;Fc[502]:=5;Fc[503]:=9;
+      Fc[600]:=3;Fc[601]:=5;Fc[602]:=6;Fc[603]:=9;
+      Fc[700]:=3;Fc[701]:=6;Fc[702]:=7;Fc[703]:=9;
+      Fc[800]:=3;Fc[801]:=7;Fc[802]:=8;Fc[803]:=9;
+      %
+      Fc[900]:=3;Fc[901]:=4;Fc[902]:=3;Fc[903]:=10;
+      Fc[1000]:=3;Fc[1001]:=1;Fc[1002]:=4;Fc[1003]:=10;
+      Fc[1100]:=3;Fc[1101]:=2;Fc[1102]:=1;Fc[1103]:=10;
+      Fc[1200]:=3;Fc[1201]:=3;Fc[1202]:=2;Fc[1203]:=10;
+      %
+      DessineObjet;
+      %
+      if Trace:
+      \useKV[Assemblage]{Traces};
+      fi;
+    \end{mplibcode}
+  \fi
+}%
+
+\NewDocumentCommand\MPAssemblagePrismePyramide{m}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      input PfCSolid;
+
+      Initialisation(1500,\useKV[Assemblage]{Phi},\useKV[Assemblage]{Theta},\useKV[Assemblage]{Distance});
+      angx:=\useKV[Assemblage]{Anglex};
+      angz:=\useKV[Assemblage]{Anglez};
+
+      HautP=\useKV[Assemblage]{HauteurPrisme};
+      HautA=\useKV[Assemblage]{HauteurPyramideA};
+      
+      boolean Trace;
+      Trace=\useKV[Assemblage]{Trace};
+      
+      color Sommet[];
+      
+      NbS:=2*#1+1;
+      angbase=360/#1;
+      
+      for k=0 upto #1-1:
+      Sommet[k]:=(cosd(k*angbase),sind(k*angbase),0);
+      endfor;
+
+      for k=#1 upto 2*#1-1:
+      Sommet[k]:=Sommet[k-#1]+(0,0,-HautP);
+      endfor;
+      Sommet[NbS-1]:=(0,0,HautA);
+      for k=0 upto NbS-1:
+      Sommet[k]:=Image(Sommet[k]);
+      endfor;
+      %% Faces
+      NF:=2*#1+1;
+      %latérale pyramide
+      for k=1 upto #1:
+      Fc[k*100]:=3;Fc[k*100+1]:=k mod #1;Fc[k*100+2]:=(k+1) mod #1;Fc[k*100+3]:=NbS-1;
+      endfor;
+      % face latérales prisme
+      for k=1 upto #1:
+      rang:=k+#1;
+      Fc[rang*100]:=4;Fc[rang*100+1]:=(k mod #1)+#1;Fc[rang*100+2]:=((k+1) mod #1)+#1;Fc[rang*100+3]:=(k+1) mod #1;Fc[rang*100+4]:=(k) mod #1;
+      endfor;
+      %face base du prisme
+      Fc[(2*#1+1)*100]:=#1;
+      for k=1 upto #1:
+      Fc[(2*#1+1)*100+k]:=((#1-k) mod #1)+#1;
+      endfor;
+      %
+      DessineObjet;
+      % 
+      if Trace:
+      \useKV[Assemblage]{Traces};
+      fi;
+    \end{mplibcode}
+  \fi
+}%
+
+\NewDocumentCommand\MPAssemblageCylindreCone{}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      input PfCSolid;
+
+      Initialisation(1500,\useKV[Assemblage]{Phi},\useKV[Assemblage]{Theta},\useKV[Assemblage]{Distance});
+
+      angx:=\useKV[Assemblage]{Anglex};
+      angz:=\useKV[Assemblage]{Anglez};
+
+      Rayon=\useKV[Assemblage]{RayonCylindre};
+      HautC=\useKV[Assemblage]{HauteurCylindre};
+      HautCo=\useKV[Assemblage]{HauteurConeA};
+      
+      boolean Trace;
+      Trace=\useKV[Assemblage]{Trace};
+      
+      nb:=36;
+      subh:=1;
+      incolor:=white;
+      outcolor:=0.8white;
+      Ferme1:=true;
+      Objetcylindre1("r="&"Rayon","h="&"HautC");
+      TR:=(0,-HautC*sind(angx),HautC*cosd(angx));
+      nb:=72;
+      Objetcone2("r="&"Rayon","h="&"HautCo");
+      AffichageObjetCylindre1;
+      AffichageObjetCone2;
+      if Trace:
+      \useKV[Assemblage]{Traces};
+      fi;
+    \end{mplibcode}
+  \fi
+}%
+
+\NewDocumentCommand\MPAssemblageCylindreCones{}{%
+  % à faire
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      input PfCSolid;
+
+      Initialisation(1500,\useKV[Assemblage]{Phi},\useKV[Assemblage]{Theta},\useKV[Assemblage]{Distance});
+
+      angx:=\useKV[Assemblage]{Anglex};
+      angz:=\useKV[Assemblage]{Anglez};
+
+      Rayon=\useKV[Assemblage]{RayonCylindre};
+      HautC=\useKV[Assemblage]{HauteurCylindre};
+      HautCo=\useKV[Assemblage]{HauteurConeA};
+      HautCob=\useKV[Assemblage]{HauteurConeB};
+
+      boolean Trace;
+      Trace=\useKV[Assemblage]{Trace};
+      
+      nb:=36;
+      subh:=1;
+      incolor:=white;
+      outcolor:=0.8white;
+      Ferme1:=true;
+      Objetcylindre1("r="&"Rayon","h="&"HautC");
+      nb:=72;
+      TR:=(0,-HautC*sind(angx),HautC*cosd(angx));
+      Objetcone2("r="&"Rayon","h="&"HautCo");
+      TR:=(0,0,0);
+      angx:=180+angx;
+      Objetcone3("r="&"Rayon","h="&"HautCob");
+      angx:=0;
+      AffichageObjetCylindreSansBase1;
+      AffichageObjetCone2;
+      AffichageObjetCone3;
+      if Trace:
+      \useKV[Assemblage]{Traces};
+      fi;
+    \end{mplibcode}
+  \fi
+}%
+
+\NewDocumentCommand\MPAssemblageCylindreConeBoule{}{%
+  % à faire
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      input PfCSolid;
+
+      Initialisation(1500,\useKV[Assemblage]{Phi},\useKV[Assemblage]{Theta},\useKV[Assemblage]{Distance});
+
+      angx:=\useKV[Assemblage]{Anglex};
+      angz:=\useKV[Assemblage]{Anglez};
+
+      Rayon=\useKV[Assemblage]{RayonCylindre};
+      HautC=\useKV[Assemblage]{HauteurCylindre};
+      HautCo=\useKV[Assemblage]{HauteurConeA};
+
+      boolean Trace;
+      Trace=\useKV[Assemblage]{Trace};
+      
+      nb:=36;%36
+      subh:=1;%
+      incolor:=white;
+      outcolor:=0.8white;
+      Ferme1:=true;
+      Objetcylindre1("r="&"Rayon","h="&"HautC");
+      TR:=(0,-HautC*sind(angx),HautC*cosd(angx));
+      Objetcone2("r="&"Rayon","h="&"HautCo");
+      TR:=(0,0,0);
+      nb:=12;
+      subh:=72;
+      angx:=180+angx;
+      Objetcalotte3("R="&"Rayon","phib="&"-pi/36","phih="&"pi/2");
+      angx:=0;
+      AffichageObjetCylindreSansBase1;
+      AffichageObjetCone2;
+      AffichageObjetCalotte3;
+      %
+      if Trace:
+      \useKV[Assemblage]{Traces};
+      fi;
+    \end{mplibcode}
+  \fi
+}%
+
+\NewDocumentCommand\MPAssemblageCylindreBoule{}{%
+  % à faire
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      input PfCSolid;
+
+      Initialisation(1500,\useKV[Assemblage]{Phi},\useKV[Assemblage]{Theta},\useKV[Assemblage]{Distance});
+
+      angx:=\useKV[Assemblage]{Anglex};
+      angz:=\useKV[Assemblage]{Anglez};
+
+      Rayon=\useKV[Assemblage]{RayonCylindre};
+      HautC=\useKV[Assemblage]{HauteurCylindre};
+
+      boolean Trace;
+      Trace=\useKV[Assemblage]{Trace};
+      
+      nb:=36;%36
+      subh:=1;%
+      incolor:=white;
+      outcolor:=0.8white;
+      Ferme1:=true;
+      Objetcylindre1("r="&"Rayon","h="&"HautC");
+      TR:=(0,-HautC*sind(angx),HautC*cosd(angx));
+      nb:=12;
+      subh:=72;%
+      Objetcalotte2("R="&"Rayon","phib="&"-pi/36","phih="&"pi/2");
+      TR:=(0,0,0);
+      AffichageObjetCylindreSansBase1;
+      AffichageObjetCalotte2;
+      % 
+      if Trace:
+      \useKV[Assemblage]{Traces};
+      fi;
+    \end{mplibcode}
+  \fi
+}%
+
+\NewDocumentCommand\MPAssemblageCylindreBoules{}{%
+  % à faire
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      input PfCSolid;
+
+      Initialisation(1500,\useKV[Assemblage]{Phi},\useKV[Assemblage]{Theta},\useKV[Assemblage]{Distance});
+      
+      angx:=\useKV[Assemblage]{Anglex};
+      angz:=\useKV[Assemblage]{Anglez};
+      
+      Rayon=\useKV[Assemblage]{RayonCylindre};
+      HautC=\useKV[Assemblage]{HauteurCylindre};
+      
+      boolean Trace;
+      Trace=\useKV[Assemblage]{Trace};
+      
+      nb:=36;
+      subh:=1;
+      incolor:=white;
+      outcolor:=0.8white;
+      Ferme1:=true;
+      Objetcylindre1("r="&"Rayon","h="&"HautC");
+      TR:=(0,-HautC*sind(angx),HautC*cosd(angx));
+      nb:=12;
+      subh:=72;%
+      Objetcalotte2("R="&"Rayon","phib="&"0","phih="&"pi/2");
+      TR:=(0,0,0);
+      angx:=180+angx;
+      TR:=(0,0,0);
+      Objetcalotte3("R="&"Rayon","phib="&"0","phih="&"pi/2");
+      TR:=(0,0,0);
+      AffichageObjetCylindreSansBase1;
+      AffichageObjetCalotte2;
+      AffichageObjetCalotte3;
+      % 
+      if Trace:
+      \useKV[Assemblage]{Traces};
+      fi;
+    \end{mplibcode}
+  \fi
+}%
+
+\NewDocumentCommand\MPAssemblageConeBoule{}{%
+  % à faire
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      input PfCSolid;
+
+      Initialisation(1500,\useKV[Assemblage]{Phi},\useKV[Assemblage]{Theta},\useKV[Assemblage]{Distance});
+      
+      angx:=\useKV[Assemblage]{Anglex};
+      angz:=\useKV[Assemblage]{Anglez};
+      
+      Rayon=\useKV[Assemblage]{RayonCone};
+      HautCa=\useKV[Assemblage]{HauteurConeA};
+      
+      boolean Trace;
+      Trace=\useKV[Assemblage]{Trace};
+      
+      nb:=72;%36
+      subh:=1;%
+      incolor:=white;
+      outcolor:=0.8white;
+      Ferme1:=true;
+      Objetcone1("r="&"Rayon","h="&"HautCa");
+      angx:=180+angx;
+      nb:=12;
+      subh:=72;%
+      Objetcalotte2("R="&"Rayon","phib="&"-pi/144","phih="&"pi/2");
+      TR:=(0,0,0);
+      AffichageObjetConeAvecBase1;
+      AffichageObjetCalotte2;%Cone3;
+      % 
+      if Trace:
+      \useKV[Assemblage]{Traces};
+      fi;
+    \end{mplibcode}
+  \fi
+}%

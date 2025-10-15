@@ -1,0 +1,698 @@
+% \iffalse meta-comment
+%
+% File: ltx-talk-overlay.dtx Copyright (C) 2024,2025 Joseph Wright
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+% This file is part of the "ltx-talk bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% The released version of this bundle is available from CTAN.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/josephwright/ltx-talk
+%
+% for those people who are interested.
+%
+% -----------------------------------------------------------------------
+%
+%<*driver>
+\documentclass{l3doc}
+% Additional commands needed in this source
+\NewDocumentCommand\email{m}{\href{mailto:#1}{\nolinkurl{#1}}}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% ^^A As we are dealing with a class, this has to be done manually
+% \def\filedate{2025-10-10}
+% \def\fileversion{v0.2.3}
+%
+% \title{^^A
+%   \pkg{ltx-talk-overlay} -- Overlays^^A
+%   \thanks{This file describes \fileversion,
+%     last revised \filedate.}^^A
+% }
+%
+% \author{^^A
+%  Joseph Wright^^A
+%  \thanks{^^A
+%    E-mail: \email{joseph@texdev.net}^^A
+%   }^^A
+% }
+%
+% \date{Released \filedate}
+%
+% \maketitle
+%
+% \begin{documentation}
+%
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{ltx-talk-overlay} implementation}
+%
+% Start the \pkg{DocStrip} guards.
+%    \begin{macrocode}
+%<*class>
+%    \end{macrocode}
+%
+% Identify the internal prefix.
+%    \begin{macrocode}
+%<@@=talk>
+%    \end{macrocode}
+%
+% \subsection{Utilities}
+%
+% \begin{macro}[TF]{\@@_if_overlay:n, \@@_if_overlay:V}
+% \begin{macro}{\@@_overlay_arg:n}
+%    \begin{macrocode}
+\prg_new_protected_conditional:Npnn \@@_if_overlay:n #1 { T , F , TF }
+  {
+    \@@_decode_parse:n {#1}
+    \bool_if:NTF \l_@@_decode_overlays_bool
+      \prg_return_true:
+      \prg_return_false:
+  }
+\prg_generate_conditional_variant:Nnn \@@_if_overlay:n { V } { T , F , TF }
+%    \end{macrocode}
+%   A macro processor variant of the check that always results in an |N|-type
+%   bool.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_overlay_arg:n #1
+  {
+    \@@_if_overlay:nTF {#1}
+      { \cs_set:Npn \ProcessedArgument { \c_true_bool } }
+      { \cs_set:Npn \ProcessedArgument { \c_false_bool } }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \subsection{Action commands and environments}
+%
+% Commands that can be used as actions all have a common form (with one
+% exception). The common internal structure is used to enable them to be used
+% as actions by looking for the name \cs[no-index]{@@_action_\meta{name}:N}.
+% This is set up such that the inactive versions insert a whatsit equal to that
+% which would be present if they were active: that's needed for spacing.
+%
+% \begin{macro}{\@@_action_:N}
+%   The fallback action. At present, we need to create a whatsit here to avoid
+%   spacing issues. (In Lua\TeX{}, if we can move to attributes, this can be
+%   removed.)
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_action_:N #1 { \opacity_select:n { 1 } }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_action_alert:N}
+%   At present a color selection.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_action_alert:N #1
+  {
+    \bool_if:NTF #1
+      { \color_select:n { alert } }
+      { \color_select:n { . } }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}
+%   {
+%     \@@_action_invisible:N,
+%     \@@_action_visible:N
+%   }
+%   Simply hide unconditionally.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_action_invisible:N #1
+  {
+    \bool_if:NTF #1
+      { \opacity_select:n { 0 } }
+      { \opacity_select:n { 1 } }
+  }
+\cs_new_protected:Npn \@@_action_visible:N #1
+  {
+    \bool_if:NTF #1
+      { \opacity_select:n { 1 } }
+      { \opacity_select:n { 0 } }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_action_only_begin:N, \@@_action_only_end:N}
+%   Here, we simply throw away the content we do not want: this is done by
+%   typesetting in a disposable box.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_action_only:N #1
+  {
+    \bool_if:NF #1
+      { \vbox_set:Nw \l_@@_tmp_box }
+  }
+\cs_new_protected:Npn \@@_action_only_end:N #1
+  {
+    \bool_if:NF #1
+      { \vbox_set_end: }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{variable}{\l_@@_uncover_hidden_fp}
+%   Currently just an on-off, but that will change.
+%    \begin{macrocode}
+\NewTemplateType { hidden } { 0 }
+\DeclareTemplateInterface { hidden } { talk } { 0 }
+  { opacity : real = 0 }
+\DeclareTemplateCode { hidden } { talk } { 0 }
+  { opacity = \l_@@_uncover_hidden_fp }
+  { \opacity_select:n { \l_@@_uncover_hidden_fp } }
+\DeclareInstance { hidden } { std } { talk } { }
+%    \end{macrocode}
+% \end{variable}
+% \begin{macro}{\@@_action_uncover:N}
+%   Use the template
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_action_uncover:N #1
+  {
+    \bool_if:NTF #1
+      { \opacity_select:n { 1 } }
+      { \UseInstance { hidden } { std } }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\only, \invisible, \uncover}
+%   Commands and environments where the payload applies when the material is
+%   not active on the slide.
+%    \begin{macrocode}
+\clist_map_inline:nn { only , invisible , uncover }
+  {
+    \ExpandArgs { cne } \NewDocumentCommand {#1}
+      { > { \@@_overlay_arg:n } D <> { all } +m }
+      {
+        \group_begin:
+          \exp_not:c { @@_action_ #1 :N } ##1
+          ##2
+          \cs_if_exist:cT { @@_action_ #1 _end:N }
+            { \exp_not:c { @@_action_ #1 _end:N } ##1 }
+        \group_end:
+      }
+%    \end{macrocode}
+% \end{macro}
+% \begin{environment}{onlyenv, invisibleenv, uncoverenv}
+%    \begin{macrocode}
+    \ExpandArgs { nnee } \NewDocumentEnvironment { #1 env }
+      { > { \@@_overlay_arg:n } D <> { all } }
+      { \exp_not:c { @@_action_ #1 :N } ##1 }
+      {
+        \cs_if_exist:cT { @@_action_ #1 _end:N }
+          { \exp_not:c { @@_action_ #1 _end:N } ##1 }
+      }
+  }
+%    \end{macrocode}
+% \end{environment}
+% \begin{macro}{\alert, \visible}
+%   And those where the action applies when we are on the slide.
+%    \begin{macrocode}
+\clist_map_inline:nn { alert , visible }
+  {
+    \ExpandArgs { cne } \NewDocumentCommand {#1}
+      { > { \@@_overlay_arg:n } D <> { all } +m }
+      {
+        \group_begin:
+          \exp_not:c { @@_action_ #1 :N } ##1
+            ##2
+         \group_end:
+      }
+%    \end{macrocode}
+% \end{macro}
+% \begin{environment}{alertenv, visibleenv}
+%    \begin{macrocode}
+    \ExpandArgs { nnee } \NewDocumentEnvironment { #1 env }
+      { > { \@@_overlay_arg:n } D <> { all } }
+      { \exp_not:c { @@_action_ #1 :N } ##1 }
+      { }
+  }
+%    \end{macrocode}
+% \end{environment}
+% \begin{macro}{\only}
+%   This code needs to be done manually as for the command version the content
+%   must be entirely discarded. That can't work for the environment version,
+%   which has to deal with for example single items in a list (and so cannot
+%   be collected up verbatim and must use a box).
+%    \begin{macrocode}
+\RenewDocumentCommand \only { D <> { all } +m }
+  {
+    \@@_if_overlay:nT {#1}
+      {#2}
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{variable}
+%   {
+%     \l_@@_saved_overlays_bool ,
+%     \l_@@_saved_action_str    ,
+%     \l_@@_saved_actions_bool
+%   }
+%    \begin{macrocode}
+\bool_new:N \l_@@_saved_overlays_bool
+\str_new:N \l_@@_saved_action_str
+\bool_new:N \l_@@_saved_actions_bool
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}{\action}
+% \begin{environment}{actionenv}
+% \begin{macro}{\@@_action_begin:n}
+% \begin{macro}{\@@_action_end:}
+%   As we need data on not just overlays but also actions at the end of the
+%   environment, this has to be done manually. To allow working with
+%   environments but also items, the code needs to save data for the end
+%   function. The group is needed for cases where we are not in a \LaTeX{}
+%   environment group.
+%    \begin{macrocode}
+\NewDocumentCommand \action { D <> { all } +m }
+  {
+    \group_begin:
+      \@@_action_begin:n {#1}
+      #2
+      \@@_action_end:
+    \group_end:
+  }
+\NewDocumentEnvironment { actionenv } { D <> { all } }
+  { \@@_action_begin:n {#1} }
+  { \@@_action_end: }
+\cs_new_protected:Npn \@@_action_begin:n #1
+  {
+    \group_begin:
+      \@@_decode_parse:n {#1}
+      \bool_set_eq:NN \l_@@_saved_overlays_bool
+        \l_@@_decode_overlays_bool
+      \str_set_eq:NN \l_@@_saved_action_str
+        \l_@@_decode_action_str
+      \bool_set_eq:NN \l_@@_saved_actions_bool
+        \l_@@_decode_actions_bool
+      \bool_if:NTF \l_@@_decode_overlays_bool
+        {
+          \use:c { @@_action_ \l_@@_decode_action_str :N }
+            \l_@@_decode_actions_bool
+        }
+        { \UseInstance { hidden } { std } }
+  }
+\cs_new_protected:Npn \@@_action_end:
+  {
+      \bool_if:NT \l_@@_saved_overlays_bool
+        {
+          \cs_if_exist_use:cF
+            { @@_action_ \l_@@_saved_action_str _end:N }
+            { \use_none:n }
+              \l_@@_saved_actions_bool
+        }
+    \group_end:
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{environment}
+% \end{macro}
+%
+% \subsection{Non-action commands and environments}
+%
+% This section contains commands and environments that do \emph{not}
+% need to be made available as actions.
+%
+% \begin{macro}{\alt}
+%   Simple wrappers around the internal switch.
+%    \begin{macrocode}
+\NewDocumentCommand \alt { D <> { all } +m +m }
+  {
+    \@@_if_overlay:nTF {#1}
+      {#2}
+      {#3}
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\onslide}
+% \begin{macro}{\@@_onslide:n}
+% \begin{macro}{\@@_onslide_reset:}
+%   Simply make transparent: we will likely need to save the original
+%   opacity level. To allow us to apply independent of group level, a little
+%   work is needed.
+%    \begin{macrocode}
+\NewDocumentCommand \onslide { D <> { all } }
+  { \@@_onslide:n {#1} }
+\cs_new_protected:Npn \@@_onslide:n #1
+  {
+    \tl_use:N \g_@@_onslide_tl
+    \@@_if_overlay:nTF {#1}
+      { \@@_onslide_reset: }
+      {
+        \opacity_select:n { 0 }
+        \tl_gset:Nn \g_@@_onslide_escape_tl
+          {
+            \opacity_select:n { 0 }
+            \group_insert_after:N \g_@@_onslide_escape_tl
+          }
+        \group_insert_after:N \g_@@_onslide_escape_tl
+        \tl_gset:Nn \g_@@_onslide_tl
+          {
+            \tl_gclear:N \g_@@_onslide_tl
+            \tl_gclear:N \g_@@_onslide_escape_tl
+            \@@_onslide_reset:
+          }
+      }
+  }
+\cs_new_protected:Npn \@@_onslide_reset: { \opacity_select:n { 1 } }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \begin{variable}{\g_@@_onslide_tl, \g_@@_onslide_escape_tl}
+%    \begin{macrocode}
+\tl_new:N \g_@@_onslide_tl
+\tl_new:N \g_@@_onslide_escape_tl
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}{\temporal}
+%   A tricky one: to separate the not-on-current-slide cases, the flag to
+%   continue is used.
+%    \begin{macrocode}
+\NewDocumentCommand \temporal { D <> { all } +m +m +m }
+  {
+    \@@_if_overlay:nTF {#1}
+      {#3}
+      {
+        \bool_if:NTF \g_@@_slide_continue_bool
+          {#4}
+          {#2}
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\pause}
+%   A thin wrapper.
+%    \begin{macrocode}
+\NewDocumentCommand \pause { o }
+  {
+    \IfNoValueTF {#1}
+      { \int_gincr:N \g_@@_pauses_int }
+      { \int_gset:Nn \g_@@_pauses_int {#1} }
+    \exp_args:Ne \@@_onslide:n { \int_eval:n { \g_@@_pauses_int + 1 } - }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Fixed-size areas}
+%
+% \begin{macro}{\@@_overprint_begin:n}
+%   A common auxiliary for overprinting, which starts off much the same for
+%   both \env{overlayarea} and \env{overprint}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_overprint_begin:n #1
+  {
+    \par
+    \vbox_set_to_wd:Nnw \l_@@_tmp_box {#1}
+      \raggedright
+      \ignorespaces
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{environment}{overlayarea}
+%   An initial approach: quite similar to a column.
+%    \begin{macrocode}
+\NewDocumentEnvironment { overlayarea } { m m }
+  { \@@_overprint_begin:n {#1} }
+  {
+    \vbox_set_end:
+    \vbox_to_ht:nn {#2}
+      {
+        \box_use_drop:N \l_@@_tmp_box
+        \vfil
+      }
+    \par
+  }
+%    \end{macrocode}
+% \end{environment}
+%
+% \begin{variable}{\l_@@_overprint_int}
+%   Track the overprints on a slide: as the slide forms a group, we do not need
+%   to worry about resetting.
+%    \begin{macrocode}
+\int_new:N \l_@@_overprint_int
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}[EXP]{\@@_frame_overprint:}
+%   To refer to the current overprint environment within the document:
+%   needed in the \texttt{.aux} so avoids using non-letters.
+%    \begin{macrocode}
+\cs_new:Npn \@@_frame_overprint:
+  {
+    \int_to_Roman:n \g_@@_frame_int
+    \int_to_roman:n \l_@@_overprint_int
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{environment}{overprint}
+% \begin{macro}{\@@_overprint_save_ht:}
+% \begin{macro}{\@@_overprint_check_ht:n}
+%   For overprinting, in contrast to \cls{beamer} we use a two-pass approach
+%   to save the size at the end of the run: this means you can use \cs{only}
+%   for example in overprinting.
+%    \begin{macrocode}
+\NewDocumentEnvironment { overprint } { O { \textwidth } }
+  { \@@_overprint_begin:n {#1} }
+  {
+    \vbox_set_end:
+    \int_incr:N \l_@@_overprint_int
+    \@@_overprint_save_ht:
+    \cs_if_exist:cTF 
+      { overprint@ \@@_frame_overprint: }
+      {
+        \dim_compare:vNnTF
+          { overprint@ \@@_frame_overprint: }
+            > { \box_ht:N \l_@@_tmp_box }
+          {
+            \vbox_to_ht:vn
+              { overprint@ \@@_frame_overprint: }
+              {
+                \box_use_drop:N \l_@@_tmp_box
+                \vfil
+              }
+          }
+          { \box_use_drop:N \l_@@_tmp_box }
+      }
+      { \box_use_drop:N \l_@@_tmp_box }
+    \par
+  }
+%    \end{macrocode}
+%   As there is no clear end-point for overprinting, we need to be careful to
+%   keep the current width separate from the saved one. The rest is then about
+%   saving to the \texttt{.aux} file and helping out the user. 
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_overprint_save_ht:
+  {
+    \tl_if_exist:cF { g_@@_overprint_ \@@_frame_overprint: _tl }
+      {
+        \tl_new:c { g_@@_overprint_ \@@_frame_overprint: _tl }
+        \tl_gset:cn { g_@@_overprint_ \@@_frame_overprint: _tl }
+          { 0pt }
+      }
+    \tl_gset:ce { g_@@_overprint_ \@@_frame_overprint: _tl }
+      {
+        \dim_max:vn { g_@@_overprint_ \@@_frame_overprint: _tl }
+          { \box_ht:N \l_@@_tmp_box }
+      }
+    \legacy_if:nT { @filesw }
+      {
+        \iow_now:Ne \@auxout
+          {
+            \gdef \exp_not:c { overprint@ \@@_frame_overprint: }
+              {
+                \exp_not:v { g_@@_overprint_ \@@_frame_overprint: _tl }
+              }
+          }
+      }
+    \hook_gput_code:nne { enddocument / afterlastpage } { talk }
+       { \@@_overprint_check_ht:n { \@@_frame_overprint: } }
+  }
+\cs_new_protected:Npn \@@_overprint_check_ht:n #1
+  {
+    \bool_lazy_and:nnF
+      { \exp_not:N \cs_if_exist_p:c { overprint@ #1 } }
+      {
+        \dim_compare_p:vNv { overprint@ #1 } = { g_@@_overprint_ #1 _tl }
+      }
+      {
+        \msg_warning:nn { talk } { overprint-ht }
+        \cs_gset_protected:Npn \@@_overprint_check_ht:n ##1 { }
+      }
+  }
+\msg_new:nnn { talk } { overprint-ht }
+  {
+    Overprint~area~height~has~changed:\\
+    rerun~LaTeX.
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{environment}
+%
+% \subsection{Adding overlays to existing commands}
+%
+% \begin{macro}
+%  {
+%    \textbf ,
+%    \textit ,
+%    \textmd ,
+%    \textnormal ,
+%    \textrm ,
+%    \textsc ,
+%    \textsf ,
+%    \textsl ,
+%    \texttt ,
+%    \textup ,
+%    \emph
+%  }
+% \begin{macro}
+%  {
+%    \stdtextbf ,
+%    \stdtextit ,
+%    \stdtextmd ,
+%    \stdtextnormal ,
+%    \stdtextrm ,
+%    \stdtextsc ,
+%    \stdtextsf ,
+%    \stdtextsl ,
+%    \stdtexttt ,
+%    \stdtextup ,
+%    \stdemph
+%  }
+
+% \begin{macro}{\@@_textcmd_eqiv:n}
+%   Make the standard text commands overlay-aware. To keep the spacing
+%   unchanged when the command is not active, we use the same approach as
+%   the kernel does for inserting the right grouping.
+%    \begin{macrocode}
+\tl_map_inline:nn
+  {
+    \textbf
+    \textit
+    \textmd
+    \textnormal
+    \textrm
+    \textsc
+    \textsf
+    \textsl
+    \texttt
+    \textup
+    \emph
+  }
+  {
+    \ExpandArgs { c } \NewCommandCopy { std \cs_to_str:N #1 } #1
+    \ExpandArgs { Nne } \RenewDocumentCommand #1
+      { D <> { all } +m }
+      {
+        \exp_not:N \@@_if_overlay:nTF {##1}
+          { \exp_not:c { std \cs_to_str:N #1 } }
+          { \exp_not:N \@@_textcmd_eqiv:n }
+            {##2}
+      }
+  }
+\cs_new_protected:Npn \@@_textcmd_eqiv:n #1
+  {
+    \mode_if_math:TF
+      { { \mbox {#1} } }
+      {
+        \mode_leave_vertical:
+        {#1}
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\includegraphics}
+% \begin{macro}{\stdincludegraphics}
+%   Just wrap up the args and forward if appropriate. The star is |#1| here as
+%   that matches the documented behavior of starred commands generally.
+%    \begin{macrocode}
+\RequirePackage { graphicx }
+\NewCommandCopy \stdincludegraphics \includegraphics
+\RenewDocumentCommand \includegraphics { s D <> { all } o o m }
+  {
+    \@@_if_overlay:nT {#2}
+      {
+        \use:e
+          {
+            \exp_not:N \stdincludegraphics
+              \IfBooleanT #1 { * }
+              \IfNoValueF {#3} { [ \exp_not:n { {#3} } ] }
+              \IfNoValueF {#4} { [ \exp_not:n { {#4} } ] }
+          }
+            {#5}
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\label}
+% \begin{macro}{\@@_label:n}
+%   Here, we can't wrap the existing command up as we need the space hack, so
+%   it has to be declared from scratch. There is also a non-standard overlay
+%   default. At present, no special tricks as seen in \pkg{beamer}.   
+%    \begin{macrocode}
+\RenewDocumentCommand \label { D <> { 1 } m }
+  {
+    \@bsphack
+    \@@_if_overlay:nT {#1}
+      { \@@_label:n {#2} }
+    \@esphack
+  }
+\cs_new_protected:Npn \@@_label:n #1
+  {
+    \begingroup
+      \UseHookWithArguments { label } { 1 } {#1}
+      \protected@write \@auxout { }
+        {
+          \string \newlabel {#1}
+            { 
+              { \@currentlabel }
+              { \thepage }
+              { \@currentlabelname }
+              { \@currentHref }
+              { \@kernel@reserved@label@data }
+            }
+        }
+    \endgroup
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</class>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \PrintIndex

@@ -1,0 +1,1075 @@
+%%%
+% Solide et sections
+%%%
+\def\filedateSolides{2025/05/27}%
+\def\fileversionSolides{0.1b}%
+\message{-- \filedateSolides\space v\fileversionSolides}%
+%
+\setKVdefault[ClesSolides]{Nom=cube,Aretes,Sommets,Pointilles,Largeur=1.5,Hauteur=1,Profondeur=0.75,ListeSommets={A,B,C,D,E,F,G,H},Rho=1500,Phi=30,Theta=20,Distance=50,Code=false,Couleur=white,Anglex=0,Arete=1,RayonCone=1,HauteurCone=2,HauteurPrisme=2,SommetsPrisme=6,HauteurPyramide=2,RayonPyramide=1,SommetsPyramide=5,Reguliere=false,DecalageSommet={(0,0,0)},RayonCylindre=1,HauteurCylindre=2,RayonSphere=1,AutoLabel=true,Sections=false,CoefSection=0.3,Axes=false,PointsSection={M,N,O,P},RemplisSection=false,ObjetSection={0.5,E,H,0.25,F,G,G,B},Traces={},Section={},CouleurSection={}}%
+\defKV[ClesSolides]{
+  Traces=\ifempty{#1}{}{\setKV[ClesSolides]{Code}},%
+  Section=\ifempty{#1}{}{\setKV[ClesSolides]{Sections}},%
+  CouleurSection=\ifempty{#1}{}{\setKV[ClesSolides]{RemplisSection}}%
+}%
+
+\newcommand\MPSolidePrisme[4]{%
+  \ifluatex
+    \mplibnumbersystem{double}
+    \mplibforcehmode
+    \begin{mplibcode}
+    input PfCSolid;
+    
+    boolean Pointilles,TraceArete,NommeSommets,Code,AutoLabel,Sections,RemplisSection;
+    AutoLabel:=\useKV[ClesSolides]{AutoLabel};
+    Pointilles=\useKV[ClesSolides]{Pointilles};
+    TraceArete=\useKV[ClesSolides]{Aretes};
+    NommeSommets=\useKV[ClesSolides]{Sommets};
+    Code=\useKV[ClesSolides]{Code};
+    Sections:=\useKV[ClesSolides]{Sections};
+    RemplisSection=\useKV[ClesSolides]{RemplisSection};
+    if RemplisSection:color CouleurSection;CouleurSection=\useKV[ClesSolides]{CouleurSection};fi;
+
+    color PfCOutColor;
+    PfCOutColor=Cornsilk;%\useKV[ClesSolides]{Couleur};
+    
+    string Section;
+    if Sections:Section=\useKV[ClesSolides]{Section};fi;
+    
+    %Initialisation
+    PfCRho=\useKV[ClesSolides]{Rho};
+    PfCPhi=\useKV[ClesSolides]{Phi};
+    PfCTheta=\useKV[ClesSolides]{Theta};
+    PfCDistance=\useKV[ClesSolides]{Distance};
+    anglerotationx=\useKV[ClesSolides]{Anglex};
+    hauteurprisme=\useKV[ClesSolides]{HauteurPrisme};
+    nombresommets=\useKV[ClesSolides]{SommetsPrisme};
+    Initialisation(PfCRho,PfCPhi,PfCTheta,PfCDistance);
+    typetrace:="3D";
+    typerepre:="persp";
+    eclairage:=false;
+    incolor:=white;
+    outcolor:=white;
+    if Pointilles=false:
+    pointilles:="non";
+    fi;
+
+    Ferme1:=true;
+    
+    color A,B,C,D,E,F,G,H;
+    color Sommet[];
+
+    NbS:=nombresommets;
+
+    color TS[];
+    
+    ecartangle=360/(NbS/2);
+    for k=1 upto (NbS/2):
+    repereangle:=(k-2)*ecartangle+(ecartangle*0.25+uniformdeviate(floor(ecartangle/2)));
+    TS[k]:=(cosd(repereangle),-sind(repereangle),0);
+    endfor;
+    TS[NbS/2+1]:=TS[1];
+
+    for k=1 upto (NbS/2):
+    TS[NbS/2+1+k]:=TS[k]+(0,0,hauteurprisme);
+    endfor;
+    TS[NbS+2]:=TS[NbS/2+2];
+
+    angx:=anglerotationx;
+    for k=1 upto (NbS+2):
+    TS[k]:=RotXYZ(TS[k]);
+    endfor;
+    angx:=0;
+    
+    ObjetNew1(%
+    TS1, for k=2 upto (NbS+1):TS[k], endfor TS[NbS+2]
+    )(%
+    NbS/2, for p_=1 upto NbS/2:p_, endfor
+    NbS/2, for p_=NbS/2+1 downto NbS+2:p_, endfor
+    for p=1 upto NbS/2:
+    4,p,p+1,NbS/2+1+p+1,NbS/2+1+p,%
+    endfor
+    );
+    %AffichageObjet1;
+
+    NF:=(NbS/2+2);
+    Fc[100*(NbS/2+1)]:=NbS/2;
+    for k=1 upto NbS/2:
+    Fc[100*(NbS/2+1)+k]:=k;
+    endfor;
+    Fc[100*(NbS/2+2)]:=NbS/2;
+    for k=1 upto NbS/2:
+    Fc[100*(NbS/2+2)+k]:=NbS+2-k;
+    endfor;
+    for l=1 upto NbS/2:
+    Fc[l*100]:=4;
+    %for k=1 upto 4:
+    Fc[l*100+1]:=l;Fc[l*100+4]:=l+1;Fc[l*100+3]:=NbS/2+1+l+1;Fc[l*100+2]:=NbS/2+1+l;
+    %Fc[101]:=1;Fc[102]:=2;Fc[103]:=6;Fc[104]:=5;
+    %endfor;
+    endfor;
+    DefinirSommets(#1);
+    DessineObjet;
+%    picture Depart;
+%    Depart=currentpicture;
+%    currentpicture:=nullpicture;
+%    for k=1 upto 8:
+%    dotlabel.top(decimal(k),Projette(TS[k]));
+%    endfor;
+    u:=1cm;
+    if Code:
+    \useKV[ClesSolides]{Traces};
+    fi;
+  \end{mplibcode}
+  \mplibnumbersystem{scaled}
+  \fi
+}
+
+\NewDocumentCommand\MPSolideCylindre{mmm}{%
+  \ifluatex
+    \mplibnumbersystem{double}
+    \mplibforcehmode
+    \begin{mplibcode}
+    input PfCSolid;
+    
+    boolean NommeSommets,Code,Sections,Axes,RemplisSection;
+    NommeSommets=\useKV[ClesSolides]{Sommets};
+    Code=\useKV[ClesSolides]{Code};
+    Sections:=\useKV[ClesSolides]{Sections};
+    Axes:=\useKV[ClesSolides]{Axes};
+    RemplisSection=\useKV[ClesSolides]{RemplisSection};
+    if RemplisSection:color CouleurSection;CouleurSection=\useKV[ClesSolides]{CouleurSection};fi;
+    %Initialisation
+    PfCRho=\useKV[ClesSolides]{Rho};
+    PfCPhi=\useKV[ClesSolides]{Phi};
+    PfCTheta=\useKV[ClesSolides]{Theta};
+    PfCDistance=\useKV[ClesSolides]{Distance};
+    CoefSection=\useKV[ClesSolides]{CoefSection};
+    anglerotationx=\useKV[ClesSolides]{Anglex};
+    rayoncylindre=\useKV[ClesSolides]{RayonCylindre};
+    hauteurcylindre=\useKV[ClesSolides]{HauteurCylindre};
+
+    string Section;
+    if Sections:Section=\useKV[ClesSolides]{Section};fi;
+        
+    color PfCOutColor;
+    PfCOutColor=\useKV[ClesSolides]{Couleur};
+    
+    vardef BaseCylindre(text t)=
+    save Cer;
+    picture Cer;
+    save n;
+    n:=0;
+    for p_=t:
+    if color p_:
+    n:=n+1;
+    _T[n]:=p_;
+    fi;
+    endfor;
+    pascercle:=5;
+    color ptcer[];
+    for k=0 step pascercle until (360+pascercle) :
+    ptcer[k div pascercle]-_T[1]=Distance(_T[1],_T[2])*((_T[4]-_T[3])*cosd(k)/Distance(_T[3],_T[4])+(_T[5]-_T[3])*sind(k)/Distance(_T[3],_T[5]));
+    endfor;
+    %
+    color ddcer,cccer;
+    nbpointilles:=0;
+    nbtraces:=0;
+    path PathSection[];
+    nbpathsection:=0;
+    Cer=image(%
+    for k=0 step pascercle until 360:
+    ddcer:=Oeil-ptcer[k div pascercle];
+    cccer:=-Normal(ptcer[k div pascercle],ptcer[(k+pascercle) div pascercle],ptcer[k div pascercle]+Sommet1-Sommet2);
+    if (ProduitScalaire(ddcer,cccer)>=0):
+    nbtraces:=nbtraces+1;
+    if (nbtraces=1) and (nbpointilles>0):
+    draw chemin(ptcer[k div pascercle],ptcer[k div pascercle]+Sommet1-Sommet2);
+    fi;
+    nbpathsection:=nbpathsection+1;
+    PathSection[nbpathsection]=chemin(ptcer[k div pascercle],ptcer[(k+pascercle) div pascercle]);
+    draw chemin(ptcer[k div pascercle],ptcer[(k+pascercle) div pascercle]);
+    draw chemin(ptcer[k div pascercle]+Sommet1-Sommet2,ptcer[(k+pascercle) div pascercle]+Sommet1-Sommet2);
+    else:
+    nbpointilles:=nbpointilles+1;
+    nbtraces:=0;
+    if (nbpointilles=1):
+    draw chemin(ptcer[k div pascercle],ptcer[k div pascercle]+Sommet1-Sommet2);
+    fi;
+    if k mod (2*pascercle)=0:
+    nbpathsection:=nbpathsection+1;
+    PathSection[nbpathsection]=chemin(ptcer[k div pascercle],ptcer[(k+pascercle) div pascercle]);
+    draw chemin(ptcer[k div pascercle],ptcer[(k+pascercle) div pascercle]);
+    draw chemin(ptcer[k div pascercle]+Sommet1-Sommet2,ptcer[(k+pascercle) div pascercle]+Sommet1-Sommet2);
+    fi;
+    fi;
+    endfor;
+    );
+    Cer
+    enddef;
+
+    Figure(-10u,-10u,10u,10u);
+    Initialisation(PfCRho,PfCPhi,PfCTheta,PfCDistance);
+%    Initialisation(1500,30,20,50);
+    typetrace:="3D";
+    typerepre:="persp";
+    eclairage:=false;
+    nb:=36;%36
+    subh:=1;%
+    incolor:=white;
+    outcolor:=PfCOutColor;
+    Ferme1:=true;
+    angx:=anglerotationx;
+    Objetcylindre1("r=rayoncylindre","h=hauteurcylindre");
+    eclairage:=false;
+%    traits:=false;
+%    AffichageObjet1;
+
+    color O,S,A,M,B,C,D,Sommet[];
+    Sommet2=(0,0,0);
+    Sommet1-Sommet2=(0,0,hauteurcylindre);
+    Sommet3-Sommet2=rayoncylindre*(cosd(0),-sind(0),0);
+    Sommet4-Sommet2=rayoncylindre*(cosd(90),-sind(90),0);
+    color MSection[];
+    MSection[1]-Sommet2=rayoncylindre*(CoefSection,sin(arccos(CoefSection)),0);
+    MSection[7]-Sommet2=rayoncylindre*(CoefSection+0.01,sin(arccos(CoefSection+0.01)),0);
+    MSection[2]-Sommet2=rayoncylindre*(CoefSection,-sin(arccos(CoefSection)),0);
+    MSection[3]-MSection[2]=Sommet1-Sommet2;
+    MSection[4]-MSection[1]=Sommet1-Sommet2;
+    MSection[5]-Sommet2=CoefSection[Sommet1,Sommet2];
+    MSection[6]-MSection[5]=MSection[2]-MSection[1];
+    Sommet1:=RotXYZ(Sommet1);
+    Sommet2:=RotXYZ(Sommet2);
+    Sommet3:=RotXYZ(Sommet3);
+    Sommet4:=RotXYZ(Sommet4);
+    MSection[1]:=RotXYZ(MSection[1]);
+    MSection[2]:=RotXYZ(MSection[2]);
+    MSection[3]:=RotXYZ(MSection[3]);
+    MSection[4]:=RotXYZ(MSection[4]);
+    MSection[5]:=RotXYZ(MSection[5]);
+    MSection[6]:=RotXYZ(MSection[6]);
+    MSection[7]:=RotXYZ(MSection[7]);
+
+    trace BaseCylindre(Sommet2,Sommet3,Sommet2,Sommet3,Sommet4);
+    currentpicture:=nullpicture;
+    
+    if Sections:
+    if Section="parallele":
+    if RemplisSection:
+    fill polygone(MSection[1],MSection[2],MSection[3],MSection[4]) withcolor CouleurSection;
+    fi;
+    color dcer,ccer;
+    invnormale:=if CoefSection<=0:-1 else:1 fi;
+    %1er côté et 3eme côté : face "basse" et face "haute"
+    dcer:=Oeil-Sommet3;
+    ccer:=-Normal(Sommet3,MSection1,MSection2);
+    draw chemin(MSection1,MSection2) if (ProduitScalaire(dcer,ccer)<0):dashed evenly fi;
+    draw chemin(MSection3,MSection4) if (ProduitScalaire(dcer,ccer)>0):dashed evenly fi;
+    % 2eme côté et 4eme coté
+    dcer:=Oeil-MSection7;
+    ccer:=-Normal(MSection7,MSection4,MSection1);
+    draw chemin(MSection4,MSection1) if (ProduitScalaire(dcer,ccer)<0):dashed evenly fi;
+    draw chemin(MSection2,MSection3) if (ProduitScalaire(dcer,ccer)>0):dashed evenly fi;
+    else:
+    if RemplisSection:
+    fill (PathSection[1] for p_=2 upto nbpathsection:--PathSection[p_] endfor--cycle) shifted(Projette(CoefSection[Sommet1,Sommet2]-Sommet2)) withcolor CouleurSection;
+    fi;
+    for p_=1 upto nbpathsection:
+    draw (PathSection[p_] shifted(Projette(CoefSection[Sommet1,Sommet2]-Sommet2)));
+    endfor;
+    fi;
+    fi;
+    
+    trace BaseCylindre(Sommet2,Sommet3,Sommet2,Sommet3,Sommet4);
+
+    color dcer,ccer;
+    dcer:=Oeil-Sommet2;
+    ccer:=Normal(Sommet2,Sommet3,Sommet4);
+    if (ProduitScalaire(dcer,ccer)>=0):
+    draw Cercles(Sommet2,Sommet3,Sommet2,Sommet3,Sommet4);
+    fi;
+    dcer:=Oeil-Sommet1;
+    ccer:=Normal(Sommet1,Sommet4+Sommet1-Sommet2,Sommet3+Sommet1-Sommet2);
+    if (ProduitScalaire(dcer,ccer)>=0):
+    draw Cercles(Sommet1,Sommet3+Sommet1-Sommet2,Sommet1,Sommet3+Sommet1-Sommet2,Sommet4+Sommet1-Sommet2);
+    fi;
+
+    vardef EcrireSommets(text t)=
+    nb:=0;
+    for p_=t:
+    nb:=nb+1;
+    if bluepart(Sommet1)>bluepart(Sommet2):
+    if nb=1:
+    label.ulft(TEX(p_),Projette(Sommet1));%p_
+    elseif nb=2:
+    dotlabel.rt(TEX(p_),Projette(Sommet2));%p_
+    fi;
+    else:
+    if nb=1:
+    label.bot(TEX(p_),Projette(Sommet1));
+    elseif nb=2:
+    dotlabel.ulft(TEX(p_),Projette(Sommet2));
+    fi;
+    fi;
+    endfor;
+    enddef;
+
+    DefinirSommets(#1);
+    DefinirSommetsSection(#3);
+    
+    if Axes:
+    draw segment(1.5[Sommet1,Sommet2],1.5[Sommet2,Sommet1]) dashed dashpattern(on6 off3 on3 off 3);
+    remplis (fullcircle scaled 1mm) shifted(Projette(Sommet1));
+    remplis (fullcircle scaled 1mm) shifted(Projette(Sommet2));
+    fi;
+    
+    if Code:
+    \useKV[ClesSolides]{Traces};
+    fi;
+    
+  \end{mplibcode}
+  \mplibnumbersystem{scaled}%
+  \fi%
+}%
+
+\newcommand\MPSolidePyramide[4]{%
+  \ifluatex
+    \mplibnumbersystem{double}
+    \mplibforcehmode
+    \begin{mplibcode}
+
+    input PfCSolid;
+    
+    boolean Pointilles,TraceArete,NommeSommets,Code,Reguliere,AutoLabel,Sections,RemplisSection;
+    Sections:=\useKV[ClesSolides]{Sections};
+    RemplisSection=\useKV[ClesSolides]{RemplisSection};
+    if RemplisSection:color CouleurSection;CouleurSection=\useKV[ClesSolides]{CouleurSection};fi;
+    AutoLabel:=\useKV[ClesSolides]{AutoLabel};
+    Pointilles=\useKV[ClesSolides]{Pointilles};
+    TraceArete=\useKV[ClesSolides]{Aretes};
+    NommeSommets=\useKV[ClesSolides]{Sommets};
+    Code=\useKV[ClesSolides]{Code};
+    Reguliere:=\useKV[ClesSolides]{Reguliere};
+    % Initialisation
+    PfCRho=\useKV[ClesSolides]{Rho};
+    PfCPhi=\useKV[ClesSolides]{Phi};
+    PfCTheta=\useKV[ClesSolides]{Theta};
+    PfCDistance=\useKV[ClesSolides]{Distance};
+    CoefSection=\useKV[ClesSolides]{CoefSection};
+    anglerotationx=\useKV[ClesSolides]{Anglex};
+    hauteurpyramide=\useKV[ClesSolides]{HauteurPyramide};
+    rayonpyramide=\useKV[ClesSolides]{RayonPyramide};
+    nombresommets=\useKV[ClesSolides]{SommetsPyramide};
+    color PfCOutColor,DecalageSommet;
+    PfCOutColor=\useKV[ClesSolides]{Couleur};
+    DecalageSommet=#3;%if Reguliere:(0,0,0) else: #3 fi;
+    
+    Figure(-10u,-10u,10u,10u);
+    Initialisation(PfCRho,PfCPhi,PfCTheta,PfCDistance);
+    typetrace:="3D";
+    typerepre:="persp";
+    if Pointilles=false:
+    pointilles:="non";
+    fi;
+
+    Ferme1:=true;
+
+    color O,A[],S;
+    O=(0,0,0);
+    S-O=(0,0,hauteurpyramide)+DecalageSommet;
+
+    NbS:=nombresommets;
+    Sommet1:=S;
+    ecartangle=360/(NbS-1);
+    for k=2 upto NbS:
+    if Reguliere:
+    repereangle:=(k-2)*ecartangle;
+    else:
+    repereangle:=(k-2)*ecartangle+(ecartangle*0.25+uniformdeviate(floor(ecartangle/2)));
+    fi;
+    Sommet[k]:=rayonpyramide*(cosd(repereangle),-sind(repereangle),0);
+    endfor;
+    Sommet[NbS+1]:=Sommet[2];
+
+    color TS[];
+    for k=1 upto (NbS+1):
+    TS[k]=Sommet[k];
+    endfor;
+    color PiedHauteur;
+    PiedHauteur=ProjectionsurPlan(Sommet1,Sommet2,Sommet3,Sommet4);
+    eclairage:=false;
+    traits:=false;
+    outcolor:=PfCOutColor;
+    angx:=anglerotationx;
+    for k=1 upto (NbS+1):
+    TS[k]:=RotXYZ(TS[k]);
+    endfor;
+    angx:=0;
+
+    color MSection[];
+    for p_=2 upto NbS:
+    MSection[p_-1]=CoefSection[Sommet[1],Sommet[p_]];
+    endfor;
+
+    DefinirSommetsSection(#4);
+    
+    vardef SectionPyramide(expr fracsection)=
+    save Section;
+    picture Section;
+    Section=image(%
+    if RemplisSection:
+    remplis polygone(fracsection[Sommet1,Sommet2],for p_=3 upto NbS-1:fracsection[Sommet1,Sommet[p_]],endfor fracsection[Sommet1,Sommet[NbS]]) withcolor CouleurSection;
+    fi;
+    color dcer,ccer;
+    for p_=2 upto NbS:
+    dcer:=Oeil-Sommet[p_];
+    ccer:=-Normal(Sommet1,Sommet[p_],Sommet[p_+1]);
+    if (ProduitScalaire(dcer,ccer)>=0):
+    draw chemin(fracsection[Sommet1,Sommet[p_]],fracsection[Sommet1,Sommet[p_+1]]);
+    else:
+    draw chemin(fracsection[Sommet1,Sommet[p_]],fracsection[Sommet1,Sommet[p_+1]]) dashed evenly;
+    fi;
+    endfor;
+    );
+    Section
+    enddef;
+    
+    ObjetNew1(%
+    TS1, for k=2 upto NbS:TS[k], endfor TS[NbS+1]
+    )(%
+    NbS-1, for p_=2 upto NbS:p_, endfor 
+    for p=2 upto NbS:
+    3,1,p+1,p,%
+    endfor);
+    AffichageObjet1;
+
+    Sommet[NbS+1]:=Sommet[2];
+
+    if Sections:
+    draw SectionPyramide(CoefSection);
+    fi;
+    
+    NF:=NbS;%nombresommets;
+    % Fc[100] est la base
+    Fc[100]:=NbS-1;
+    for k=2 upto NbS:
+    Fc[100+k-1]:=k;
+    endfor;
+    for k=2 upto NF:
+    Fc[k*100]:=3;
+    Fc[k*100+1]:=1;
+    Fc[k*100+2]:=k+1;
+    Fc[k*100+3]:=k;
+    endfor;
+    DessineObjet;
+
+    vardef EcrireSommets(text t)=
+    if AutoLabel:
+    nb:=0;
+    for p_=t:
+    nb:=nb+1;
+    if nb<NbS+1:
+    if nb>1:
+    label(TEX(""&p_&""),1.1[Projette(Sommet1),Projette(Sommet[nb])]);
+    else:
+    label(TEX(p_),1.1[Projette(Sommet[2]),Projette(Sommet[1])]);
+    fi;
+    fi;
+    endfor;
+    fi;
+    enddef;
+     
+    DefinirSommets(#1);
+
+    if TraceArete=false:
+    currentpicture:=nullpicture;    
+    fi;
+    if NommeSommets:
+    EcrireSommets(#2);
+    fi;
+    u:=0.25u;
+    marque_p:="croix";
+    nbcroix=0;
+    for p_=#1:
+    nbcroix:=nbcroix+1;
+    if nbcroix<NbS+1:
+    pointe(p_);
+    fi;
+    endfor;
+    u:=1cm;
+    if Code:
+    \useKV[ClesSolides]{Traces};
+    fi;
+  \end{mplibcode}
+  \mplibnumbersystem{scaled}
+  \fi
+}
+
+\newcommand\MPSolideCone[3]{%
+  \ifluatex
+    \mplibnumbersystem{double}
+    \mplibforcehmode
+    \begin{mplibcode}
+    boolean NommeSommets,Code,Sections,Axes,RemplisSection;
+    NommeSommets=\useKV[ClesSolides]{Sommets};
+    Code=\useKV[ClesSolides]{Code};
+    Axes:=\useKV[ClesSolides]{Axes};
+    Sections=\useKV[ClesSolides]{Sections};
+    RemplisSection=\useKV[ClesSolides]{RemplisSection};
+    if RemplisSection:color CouleurSection;CouleurSection=\useKV[ClesSolides]{CouleurSection};fi;
+    %Initialisation
+    PfCRho=\useKV[ClesSolides]{Rho};
+    PfCPhi=\useKV[ClesSolides]{Phi};
+    PfCTheta=\useKV[ClesSolides]{Theta};
+    PfCDistance=\useKV[ClesSolides]{Distance};
+    CoefSection=\useKV[ClesSolides]{CoefSection};
+    anglerotationx=\useKV[ClesSolides]{Anglex};
+    rayoncone=\useKV[ClesSolides]{RayonCone};
+    hauteurcone=\useKV[ClesSolides]{HauteurCone};
+    
+    color PfCOutColor;
+    PfCOutColor=\useKV[ClesSolides]{Couleur};
+    input PfCSolid;
+    
+    vardef BaseCone(text t)=
+    save Cer;
+    picture Cer;
+    save n;
+    n:=0;
+    for p_=t:
+    if color p_:
+    n:=n+1;
+    _T[n]:=p_;
+    fi;
+    endfor;
+    pascercle:=5;
+    color ptcer[];
+    for k=0 step pascercle until (360+pascercle) :
+    ptcer[k div pascercle]-_T[1]=Distance(_T[1],_T[2])*((_T[4]-_T[3])*cosd(k)/Distance(_T[3],_T[4])+(_T[5]-_T[3])*sind(k)/Distance(_T[3],_T[5]));
+    endfor;
+    %
+    color ddcer,cccer;
+    nbpointilles:=0;
+    nbtraces:=0;
+    Cer=image(%
+    for k=0 step pascercle until 360:
+    ddcer:=Oeil-ptcer[k div pascercle];
+    cccer:=-Normal(Sommet1,ptcer[k div pascercle],ptcer[(k+pascercle) div pascercle]);
+    if (ProduitScalaire(ddcer,cccer)>=0):
+    nbtraces:=nbtraces+1;
+    if (nbtraces=1) and (nbpointilles>0):
+    draw chemin(ptcer[k div pascercle],Sommet1);
+    fi;
+    draw chemin(ptcer[k div pascercle],ptcer[(k+pascercle) div pascercle]);
+    else:
+    nbpointilles:=nbpointilles+1;
+    nbtraces:=0;
+    if (nbpointilles=1):
+    draw chemin(ptcer[k div pascercle],Sommet1);
+    fi;
+    if k mod (2*pascercle)=0:
+    draw chemin(ptcer[k div pascercle],ptcer[(k+pascercle) div pascercle]);
+    fi;
+    fi;
+    endfor;
+    );
+    Cer
+    enddef;
+
+    Figure(-10u,-10u,10u,10u);
+    Initialisation(PfCRho,PfCPhi,PfCTheta,PfCDistance);
+    typetrace:="3D";
+    typerepre:="persp";
+    eclairage:=false;
+    nb:=36;%36
+    subh:=1;%
+    incolor:=white;
+    outcolor:=PfCOutColor;
+    Ferme1:=true;
+    angx:=anglerotationx;
+    Objetcone1("r=rayoncone","h=hauteurcone");
+    traits:=false;
+    AffichageObjet1;
+
+    color Sommet[];%O,S,A,M,B,C,D,
+    Sommet2=(0,0,0);
+    Sommet1-Sommet2=(0,0,hauteurcone);
+    Sommet3-Sommet2=rayoncone*(cosd(0),-sind(0),0);
+    Sommet4-Sommet2=rayoncone*(cosd(90),-sind(90),0);
+    Sommet1:=RotXYZ(Sommet1);
+    Sommet3:=RotXYZ(Sommet3);
+    Sommet4:=RotXYZ(Sommet4);
+
+    color MSection[];
+    MSection[1]=CoefSection[Sommet1,Sommet2];
+
+    DefinirSommetsSection(#3);
+    
+    if Sections:
+    if RemplisSection:
+    remplis Cercles(CoefSection[Sommet1,Sommet2],CoefSection[Sommet1,Sommet3],CoefSection[Sommet1,Sommet2],CoefSection[Sommet1,Sommet3],CoefSection[Sommet1,Sommet4]) withcolor CouleurSection;
+    fi;
+    trace BaseCone(CoefSection[Sommet1,Sommet2],CoefSection[Sommet1,Sommet3],CoefSection[Sommet1,Sommet2],CoefSection[Sommet1,Sommet3],CoefSection[Sommet1,Sommet4]);
+    fi;
+
+    trace BaseCone(Sommet2,Sommet3,Sommet2,Sommet3,Sommet4);
+    color dcer,ccer;
+    dcer:=Oeil-Sommet2;
+    ccer:=Normal(Sommet2,Sommet3,Sommet4);
+    if (ProduitScalaire(dcer,ccer)>=0):
+    draw Cercles(Sommet2,Sommet3,Sommet2,Sommet3,Sommet4);
+    fi;
+
+    vardef EcrireSommets(text t)=
+    nb:=0;
+    for p_=t:
+    nb:=nb+1;
+    if bluepart(Sommet1)>bluepart(Sommet2):
+    if nb=1:
+    label.ulft(TEX(p_),Projette(Sommet1));
+    elseif nb=2:
+    dotlabel.rt(TEX(p_),Projette(Sommet2));
+    fi;
+    else:
+    if nb=1:
+    label.bot(TEX(p_),Projette(Sommet1));
+    elseif nb=2:
+    dotlabel.ulft(TEX(p_),Projette(Sommet2));
+    fi;
+    fi;
+    endfor;
+    enddef;
+
+    DefinirSommets(#1);
+
+    if Axes:
+    draw segment(1.5[Sommet1,Sommet2],1.5[Sommet2,Sommet1]) dashed dashpattern(on6 off3 on3 off 3);
+    remplis (fullcircle scaled 1mm) shifted(Projette(Sommet1));
+    remplis (fullcircle scaled 1mm) shifted(Projette(Sommet2));
+    fi;
+
+    if Code:
+    \useKV[ClesSolides]{Traces};
+    fi;
+
+  \end{mplibcode}
+  \mplibnumbersystem{scaled}
+  \fi
+}
+
+\newcommand\MPSolidePave[5]{%
+  \ifluatex
+    \mplibnumbersystem{double}
+    \mplibforcehmode
+    \begin{mplibcode}
+    input PfCSolid;
+    
+    boolean Pointilles,TraceArete,NommeSommets,Code,AutoLabel,Sections,RemplisSection;
+    AutoLabel:=\useKV[ClesSolides]{AutoLabel};
+    Pointilles=\useKV[ClesSolides]{Pointilles};
+    TraceArete=\useKV[ClesSolides]{Aretes};
+    NommeSommets=\useKV[ClesSolides]{Sommets};
+    Code=\useKV[ClesSolides]{Code};
+    Sections:=\useKV[ClesSolides]{Sections};
+    RemplisSection=\useKV[ClesSolides]{RemplisSection};
+    if RemplisSection:color CouleurSection;CouleurSection=\useKV[ClesSolides]{CouleurSection};fi;
+
+    string Section;
+    if Sections:Section=\useKV[ClesSolides]{Section};fi;
+    
+    %Initialisation
+    PfCRho=\useKV[ClesSolides]{Rho};
+    PfCPhi=\useKV[ClesSolides]{Phi};
+    PfCTheta=\useKV[ClesSolides]{Theta};
+    PfCDistance=\useKV[ClesSolides]{Distance};
+    
+    Figure(-10u,-10u,10u,10u);
+    Initialisation(PfCRho,PfCPhi,PfCTheta,PfCDistance);
+    typetrace:="3D";
+    typerepre:="persp";
+    if Pointilles=false:
+    pointilles:="non";
+    fi;
+    color A,B,C,D,E,F,G,H;
+    color Sommet[];
+    trace Pave(A,B,C,D,E,F,G,H)(#3);
+    picture Depart;
+    Depart=currentpicture;
+    currentpicture:=nullpicture;
+    Sommet1=A;
+    Sommet2=B;
+    Sommet3=C;
+    Sommet4=D;
+    Sommet5=E;
+    Sommet6=F;
+    Sommet7=G;
+    Sommet8=H;
+
+    DefinirSommets(#1);
+    
+    color MSection[];
+    numeric RetiensSection[];
+    numretienssection:=0;
+    color RetiensDefSection[];
+    numretiensdefsection:=0;
+    if Sections:
+    if Section="arete":
+    for p_=#5:
+    if numeric p_:
+    numretienssection:=numretienssection+1;
+    RetiensSection[numretienssection]=p_;
+    elseif color p_:
+    numretiensdefsection:=numretiensdefsection+1;
+    RetiensDefSection[numretiensdefsection]=p_;
+    fi;    
+    endfor;
+    % On dessine la section
+    MSection[1]=(RetiensSection[1])[RetiensDefSection[1],RetiensDefSection[2]];
+    MSection[2]=(RetiensSection[2])[RetiensDefSection[3],RetiensDefSection[4]];
+    MSection[3]-MSection[2]=RetiensDefSection[6]-RetiensDefSection[5];
+    MSection[4]-MSection[1]=RetiensDefSection[6]-RetiensDefSection[5];
+    if RemplisSection:
+    fill polygone(MSection1,MSection2,MSection3,MSection4) withcolor CouleurSection;
+    fi;
+%    DotLabel.top(TEX("M1"),MSection[1]);
+%    DotLabel.top(TEX("M2"),MSection[2]);
+%    DotLabel.top(TEX("M3"),MSection[3]);
+%    DotLabel.top(TEX("M4"),MSection[4]);
+%    if RemplisSection:
+%    fill polygone(MSection1,MSection2,MSection3,MSection4) withcolor CouleurSection;
+%    fi;
+%    trace polygone(MSection1,MSection2,MSection3,MSection4);
+    color dcer,ccer;
+    % 1er cote -> ok
+    %DotLabel("",RetiensDefSection[4]);
+    dcer:=Oeil-RetiensDefSection[4];
+    ccer:=Normal(RetiensDefSection[4],RetiensDefSection[2],RetiensDefSection[1]);
+    draw chemin(MSection1,MSection2) if (ProduitScalaire(dcer,ccer)<0):dashed evenly fi;
+    % 2eme cote
+    dcer:=Oeil-RetiensDefSection[4];
+    ccer:=Normal(RetiensDefSection[4],RetiensDefSection[3],RetiensDefSection[4]+RetiensDefSection[6]-RetiensDefSection[5]);
+    draw chemin(MSection2,MSection3) if (ProduitScalaire(dcer,ccer)<0):dashed evenly fi;
+    % 3eme cote
+    dcer:=Oeil-RetiensDefSection[4];
+    ccer:=Normal(RetiensDefSection[4],RetiensDefSection[2],RetiensDefSection[1]);
+    draw chemin(MSection3,MSection4) if (ProduitScalaire(dcer,ccer)>=0):dashed evenly fi;
+    % 4eme cote
+    dcer:=Oeil-RetiensDefSection[4];
+    ccer:=Normal(RetiensDefSection[4],RetiensDefSection[3],RetiensDefSection[4]+RetiensDefSection[6]-RetiensDefSection[5]);
+    draw chemin(MSection4,MSection1) if (ProduitScalaire(dcer,ccer)>=0):dashed evenly fi;
+    else:
+    %face 
+    for p_=#5:
+    if numeric p_:
+    numretienssection:=numretienssection+1;
+    RetiensSection[numretienssection]=p_;
+    elseif color p_:
+    numretiensdefsection:=numretiensdefsection+1;
+    RetiensDefSection[numretiensdefsection]=p_;
+    fi;    
+    endfor;
+    % On dessine la section
+    MSection[1]=(RetiensSection[1])[RetiensDefSection[1],RetiensDefSection[2]];
+    MSection[2]-MSection[1]=RetiensDefSection[4]-RetiensDefSection[3];
+    MSection[3]-MSection[2]=RetiensDefSection[5]-RetiensDefSection[4];
+    MSection[4]-MSection[1]=MSection[3]-MSection[2];
+%    DotLabel.top(TEX("M1"),MSection[1]);
+%    DotLabel.top(TEX("M2"),MSection[2]);
+%    DotLabel.top(TEX("M3"),MSection[3]);
+%    DotLabel.top(TEX("M4"),MSection[4]);
+    if RemplisSection:
+    fill polygone(MSection1,MSection2,MSection3,MSection4) withcolor CouleurSection;
+    fi;
+    color dcer,ccer;
+    % 1er cote -> ok
+    dcer:=Oeil-RetiensDefSection[4];
+    ccer:=Normal(RetiensDefSection[4],RetiensDefSection[2],RetiensDefSection[1]);
+    draw chemin(MSection1,MSection2) if (ProduitScalaire(dcer,ccer)<0):dashed evenly fi;
+    % 2eme cote
+    dcer:=Oeil-RetiensDefSection[4];
+    ccer:=Normal(RetiensDefSection[5],RetiensDefSection[4],RetiensDefSection[5]+RetiensDefSection[1]-RetiensDefSection[2]);
+    draw chemin(MSection2,MSection3) if (ProduitScalaire(dcer,ccer)<0):dashed evenly fi;
+    % 3eme cote
+    dcer:=Oeil-RetiensDefSection[4];
+    ccer:=Normal(RetiensDefSection[4],RetiensDefSection[2],RetiensDefSection[1]);
+    draw chemin(MSection3,MSection4) if (ProduitScalaire(dcer,ccer)>=0):dashed evenly fi;
+    % 4eme cote
+    dcer:=Oeil-RetiensDefSection[4];
+    ccer:=Normal(RetiensDefSection[5],RetiensDefSection[4],RetiensDefSection[5]+RetiensDefSection[1]-RetiensDefSection[2]);
+    draw chemin(MSection4,MSection1) if (ProduitScalaire(dcer,ccer)>=0):dashed evenly fi;
+    fi;
+    %On trace la section considérée
+    %trace polygone(MSection1,MSection2,MSection3,MSection4);
+    fi;
+
+    % trace Pave(A,B,C,D,E,F,G,H)(#3);
+    trace Depart;
+    
+    DefinirSommetsSection(#4);
+    
+    if TraceArete=false:
+    currentpicture:=nullpicture;    
+    fi;
+    if NommeSommets:
+    EcrireSommetsPave(#2);
+    fi;
+    u:=0.25u;
+    marque_p:="croix";
+    nbcroix=0;
+    for p_=#1:
+    nbcroix:=nbcroix+1;
+    if nbcroix=4:
+    if Pointilles:
+    pointe(p_);
+    fi;
+    else:
+    pointe(p_);
+    fi;
+    endfor;
+    u:=1cm;
+    if Code:
+    \useKV[ClesSolides]{Traces};
+    fi;
+  \end{mplibcode}
+  \mplibnumbersystem{scaled}
+  \fi
+}
+
+\newcommand\MPSolideSphere[3]{%
+  \ifluatex
+    \mplibnumbersystem{double}
+  \mplibforcehmode
+  \begin{mplibcode}
+    boolean NommeSommets,Code,Sections,Axes,RemplisSection;
+    NommeSommets=\useKV[ClesSolides]{Sommets};
+    Code=\useKV[ClesSolides]{Code};
+    Axes:=\useKV[ClesSolides]{Axes};
+    Sections=\useKV[ClesSolides]{Sections};
+    RemplisSection=\useKV[ClesSolides]{RemplisSection};
+    if RemplisSection:color CouleurSection;CouleurSection=\useKV[ClesSolides]{CouleurSection};fi;
+    %Initialisation
+    PfCRho=\useKV[ClesSolides]{Rho};
+    PfCPhi=0;%\useKV[ClesSolides]{Phi};
+    PfCTheta=10;%\useKV[ClesSolides]{Theta};
+    PfCDistance=\useKV[ClesSolides]{Distance};
+    CoefSection=\useKV[ClesSolides]{CoefSection};
+    anglerotationx=\useKV[ClesSolides]{Anglex};
+    rayonsphere=\useKV[ClesSolides]{RayonSphere};
+    
+    color PfCOutColor;
+    PfCOutColor=\useKV[ClesSolides]{Couleur};
+    input PfCSolid;
+    
+    vardef BaseSphere=
+    save Cer;
+    picture Cer;
+    color PtInter.iso,PtInter[];
+    vardef Famille(expr u,v)=(R*(cos(u)*cos(v),cos(u)*sin(v),sin(u))) enddef;
+    subh:=72;
+    Cer=image(%
+    if Sections:
+    if RemplisSection:fill (Cercles(Image((0,0,0)),Image((0,1,0)),Image((0,0,0)),Image((0,1,0)),Image((-1,0,0))) scaled (sqrt(1-(abs(CoefSection+0.02))**2))) shifted(Projette(MSection1-Sommet1)) withcolor CouleurSection; fi;
+    fi;
+    %Equateur
+    umin:=0; umax:=pi/nb; upas:=pi/nb;
+    vmin:=0; vpas:=2*pi/subh; vmax:=2*pi;
+    for l=0 upto subh-1:
+    PtInter[1]:=Image(Famille(umin+(0+1)*upas,vmin+l*vpas));
+    PtInter[2]:=Image(Famille(umin+0*upas,vmin+l*vpas));
+    PtInter[3]:=Image(Famille(umin+0*upas,vmin+(l+1)*vpas));
+    PtInter[4]:=Image(Famille(umin+(0+1)*upas,vmin+(l+1)*vpas));
+    PtInter.iso:=(PtInter[1]+PtInter[2]+PtInter[3]+PtInter[4])/4;
+    if ProduitScalaire(Oeil-PtInter.iso,Normal(PtInter.iso,PtInter[4],PtInter[1]))>=0:
+    if Sections:
+    draw (segment(PtInter[3],PtInter[2]) scaled (sqrt(1-(abs(CoefSection+0.02))**2))) shifted(Projette(MSection1-Sommet1));
+    fi;
+    draw segment(PtInter[3],PtInter[2]);
+    else:
+    if l mod 2=0:
+    if Sections:
+    draw (segment(PtInter[3],PtInter[2]) scaled (sqrt(1-(abs(CoefSection+0.02))**2))) shifted(Projette(MSection1-Sommet1));
+    fi;
+    draw segment(PtInter[3],PtInter[2]);
+    fi;
+    fi;
+    endfor;
+    
+    % "Exterieur"
+    nb:=72;
+    subh:=18;
+    umin:=-pi; umax:=pi; upas:=2*pi/nb;
+    vpas:=2*pi/subh; vmin:=pi/2; vmax:=2*pi;
+    for k=0 upto nb-1:
+    PtInter[1]:=Image(Famille(umin+(k+1)*upas,vmin+0*vpas));
+    PtInter[2]:=Image(Famille(umin+k*upas,vmin+0*vpas));
+    PtInter[3]:=Image(Famille(umin+k*upas,vmin+(0+1)*vpas));
+    PtInter[4]:=Image(Famille(umin+(k+1)*upas,vmin+(0+1)*vpas));
+    PtInter.iso:=(PtInter[1]+PtInter[2]+PtInter[3]+PtInter[4])/4;
+    draw segment(PtInter[2],PtInter[1]);
+    endfor;
+    );
+    Cer
+    enddef;
+
+    Figure(-10u,-10u,10u,10u);
+    Initialisation(PfCRho,PfCPhi,PfCTheta,PfCDistance);
+    typetrace:="3D";
+    typerepre:="persp";
+    eclairage:=false;
+    nb:=24;%36
+    subh:=36;%
+    incolor:=blue;
+    outcolor:=white;%PfCOutColor;
+    Ferme1:=true;
+    angx:=anglerotationx;
+    Objetsphere1("R=rayonsphere");
+    % traits:=false;
+    % AffichageObjet1;
+    color Sommet[],SommetN,SommetS,SommetB;
+    Sommet1=(0,0,0);
+    Sommet2=(0,rayonsphere,0);
+    Sommet3=(-rayonsphere,0,0);
+    Sommet4=(0,0,rayonsphere);
+    SommetN=Sommet4;
+    SommetS=(0,0,-rayonsphere);
+    SommetB=(rayonsphere,0,0);
+    Sommet2:=RotXYZ(Sommet2);
+    Sommet3:=RotXYZ(Sommet3);
+    Sommet4:=RotXYZ(Sommet4);
+    SommetN:=RotXYZ(SommetN);
+    SommetS:=RotXYZ(SommetS);
+    SommetB:=RotXYZ(SommetB);
+    color MSection[];
+    MSection[1]=CoefSection[Sommet1,SommetN];
+    MSection[2]=Image((0,sqrt(1-CoefSection**2),CoefSection));    
+
+    trace BaseSphere;
+
+    DefinirSommets(#1);
+    DefinirSommetsSection(#3);
+
+    if Axes:
+    draw segment(1.25[SommetN,SommetS],1.25[SommetS,SommetN]) dashed dashpattern(on6 off3 on3 off3);
+    remplis (fullcircle scaled 1mm) shifted(Projette(SommetN));
+    remplis (fullcircle scaled 1mm) shifted(Projette(SommetS));
+    fi;
+
+    if Code:
+    \useKV[ClesSolides]{Traces};
+    fi;
+
+  \end{mplibcode}
+  \mplibnumbersystem{scaled}
+  \fi
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand\MPSolideDemiSphere[3]{%
+  \ifluatex
+    \mplibnumbersystem{double}
+  \mplibforcehmode
+  \begin{mplibcode}
+    boolean NommeSommets,Code,Sections,Axes,RemplisSection;
+    NommeSommets=\useKV[ClesSolides]{Sommets};
+    Code=\useKV[ClesSolides]{Code};
+    Axes:=\useKV[ClesSolides]{Axes};
+    %Initialisation
+    PfCRho=\useKV[ClesSolides]{Rho};
+    PfCPhi=0;%\useKV[ClesSolides]{Phi};
+    PfCTheta=10;%\useKV[ClesSolides]{Theta};
+    PfCDistance=\useKV[ClesSolides]{Distance};
+    anglerotationx=\useKV[ClesSolides]{Anglex};
+    rayonsphere=\useKV[ClesSolides]{RayonSphere};
+    
+    color PfCOutColor;
+    PfCOutColor=\useKV[ClesSolides]{Couleur};
+    input PfCSolid;
+
+    Figure(-10u,-10u,10u,10u);
+    Initialisation(PfCRho,PfCPhi,PfCTheta,PfCDistance);
+    typetrace:="3D";
+    typerepre:="persp";
+    eclairage:=false;
+    nb:=24;%36
+    subh:=36;%
+    incolor:=white;
+    outcolor:=white;%PfCOutColor;
+    % Ferme1:=false;
+    creux:=true;
+    angx:=anglerotationx;
+    Objetdemispherebasse1("R=rayonsphere");
+    % traits:=false;
+    AffichageObjet1;
+    color Sommet[],SommetN,SommetS,SommetB;
+    Sommet1=(0,0,0);
+    Sommet2=(0,rayonsphere,0);
+    Sommet3=(-rayonsphere,0,0);
+    Sommet4=(0,0,rayonsphere);
+    SommetN=Sommet4;
+    SommetS=(0,0,-rayonsphere);
+    SommetB=(rayonsphere,0,0);
+    Sommet2:=RotXYZ(Sommet2);
+    Sommet3:=RotXYZ(Sommet3);
+    Sommet4:=RotXYZ(Sommet4);
+    SommetN:=RotXYZ(SommetN);
+    SommetS:=RotXYZ(SommetS);
+    SommetB:=RotXYZ(SommetB);
+
+    fill Cercles((0,0,0),(0,1,0),(0,0,0),(0,1,0),(-1,0,0)) withcolor white;
+    trace Cercles((0,0,0),(0,1,0),(0,0,0),(0,1,0),(-1,0,0));
+
+    DefinirSommets(#1);
+
+    if Code:
+    \useKV[ClesSolides]{Traces};
+    fi;
+
+  \end{mplibcode}
+  \mplibnumbersystem{scaled}
+  \fi
+}
+%%%
+
+
+\def\UpdatetoksSolide#1\nil{\addtotok\toksolidelistesommets{"#1",}}
+\newtoks\toksolidelistesommets%
+\newtoks\toksolidelistepointssections%
+
+\NewDocumentCommand\Solide{o}{%
+  \useKVdefault[ClesSolides]%
+  \setKV[ClesSolides]{#1}%
+  \setsepchar{,}\ignoreemptyitems%
+  \xdef\foo{\useKV[ClesSolides]{ListeSommets}}%
+  \readlist*\ListeNomSommet{\foo}%\showitems\ListeNomSommet
+  \reademptyitems%
+  \toksolidelistesommets{}
+  \foreachitem\compteur\in\ListeNomSommet{\expandafter\UpdatetoksSolide\compteur\nil}%\the\toksolidelistesommets%
+  \IfStrEqCase{\useKV[ClesSolides]{Nom}}{%
+    {cube}{%
+      \MPSolidePave{\useKV[ClesSolides]{ListeSommets}}{\the\toksolidelistesommets}{\useKV[ClesSolides]{Arete},\useKV[ClesSolides]{Arete},\useKV[ClesSolides]{Arete}}{\useKV[ClesSolides]{PointsSection}}{\useKV[ClesSolides]{ObjetSection}}%
+    }%
+    {pave}{%
+      \MPSolidePave{\useKV[ClesSolides]{ListeSommets}}{\the\toksolidelistesommets}{\useKV[ClesSolides]{Profondeur},\useKV[ClesSolides]{Largeur},\useKV[ClesSolides]{Hauteur}}{\useKV[ClesSolides]{PointsSection}}{\useKV[ClesSolides]{ObjetSection}}%
+    }%
+    {cone}{%
+      \MPSolideCone{\useKV[ClesSolides]{ListeSommets}}{\the\toksolidelistesommets}{\useKV[ClesSolides]{PointsSection}}%
+    }%
+    {prisme}{%
+      \MPSolidePrisme{\useKV[ClesSolides]{ListeSommets}}{\the\toksolidelistesommets}{}{\useKV[ClesSolides]{PointsSection}}%
+    }%
+    {pyramide}{%
+      \MPSolidePyramide{\useKV[ClesSolides]{ListeSommets}}{\the\toksolidelistesommets}{\useKV[ClesSolides]{DecalageSommet}}{\useKV[ClesSolides]{PointsSection}}%
+    }%
+    {cylindre}{%
+      \MPSolideCylindre{\useKV[ClesSolides]{ListeSommets}}{\the\toksolidelistesommets}{\useKV[ClesSolides]{PointsSection}}%
+    }%
+    {sphere}{%
+      \MPSolideSphere{\useKV[ClesSolides]{ListeSommets}}{\the\toksolidelistesommets}{\useKV[ClesSolides]{PointsSection}}%
+    }%
+    {demisphere}{%
+      \MPSolideDemiSphere{\useKV[ClesSolides]{ListeSommets}}{\the\toksolidelistesommets}{\useKV[ClesSolides]{PointsSection}}%
+    }%
+    {boule}{%
+      \MPSolideSphere{\useKV[ClesSolides]{ListeSommets}}{\the\toksolidelistesommets}{\useKV[ClesSolides]{PointsSection}}%
+    }%
+  }%
+}%

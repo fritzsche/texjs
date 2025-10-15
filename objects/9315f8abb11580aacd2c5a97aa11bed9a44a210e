@@ -1,0 +1,116 @@
+%%%
+% OpCroisees
+%%%
+\def\filedateOpCroisees{2025/05/27}%
+\def\fileversionOpCroisees{0.1a}%
+\message{-- \filedateOpCroisees\space v\fileversionOpCroisees}%
+%
+\newcounter{PfCOCHor}%
+\newcounter{PfCOCVer}%
+\setcounter{PfCOCHor}{0}%
+\setcounter{PfCOCVer}{0}%
+\newlength\PfCOpCroisees%
+\setKVdefault[OpCroisees]{Solution=false,Largeur=20pt,Graines=false,ValeurMin=2,ValeurMax=9,Consignes=false,Modeles=false,CouleurSolution={},Graine={},Modele={}}%,Persos=false,
+\defKV[OpCroisees]{%
+  CouleurSolution=\ifempty{#1}{}{\setKV[OpCroisees]{Solution}\colorlet{PfCOCCoulSol}{#1}},%
+  Graine=\ifempty{#1}{}{\setKV[OpCroisees]{Graines}\PfCGraineAlea{#1}},%
+  Modele=\ifempty{#1}{}{\setKV[OpCroisees]{Modeles}}%
+}%
+%
+\NewDocumentCommand\OpCroisees{om}{%
+  \useKVdefault[OpCroisees]%
+  \setKV[OpCroisees]{#1}%
+  \ifx#2\bla\bla%
+    \setKV[OpCroisees]{Consignes}%
+    % On a un seul motif où il faut 12 nombres et 15 opérations
+    \PfCChoixAleaMultiMixRep{12}{\useKV[OpCroisees]{ValeurMin}}{\useKV[OpCroisees]{ValeurMax}}{0}{\PfCListeOCNombresAv}%
+    \PfCChoixAleaMulti{15}{1}{3}{\PfCListeOCTypeOperationsAv}%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeOCNombre{\PfCListeOCNombresAv}%
+    \readlist*\ListeOCTypeOperations{\PfCListeOCTypeOperationsAv}%
+    \readlist*\ListeOperationsAv{+,-,*}%
+    \xdef\PfCFooOp{}%
+    \foreachitem\compteur\in\ListeOCTypeOperations{%
+      \itemtomacro\ListeOCTypeOperations[\compteurcnt]\Titi%
+      \xdef\PfCFooOp{\PfCFooOp,\ListeOperationsAv[\Titi]}%
+    }%
+    \readlist*\ListeOperations{\PfCFooOp}%
+    \reademptyitems
+    \ifboolKV[OpCroisees]{Modeles}{\xdef\TypeModele{\useKV[OpCroisees]{Modele}}}{\ChoixAlea{1}{2}{\TypeModele}}%
+    \ifnum\fpeval{\TypeModele}=1\relax%
+      \setsepchar[*]{§*,}\ignoreemptyitems%
+      \readlist\ListeOCPerso{\ListeOCNombre[1],\ListeOperations[1],\ListeOCNombre[2],!,\ListeOCNombre[3],\ListeOperations[2],\ListeOCNombre[4]§%
+        \ListeOperations[3],!,\ListeOperations[4],!,\ListeOperations[5],!,\ListeOperations[6]§%
+        \ListeOCNombre[5],\ListeOperations[7],\ListeOCNombre[6],\ListeOperations[8],\ListeOCNombre[7],\ListeOperations[9],\ListeOCNombre[8]§%
+        \ListeOperations[10],!,\ListeOperations[11],!,\ListeOperations[12],!,\ListeOperations[13]§%
+        \ListeOCNombre[9],\ListeOperations[14],\ListeOCNombre[10],\ListeOperations[15],\ListeOCNombre[11],!,\ListeOCNombre[12]%
+      }%
+      \reademptyitems%
+      \setsepchar{,}\ignoreemptyitems%
+      \readlist\PfCOpListeHor{\fpeval{\ListeOCNombre[1]\ListeOperations[1]\ListeOCNombre[2]},\fpeval{\ListeOCNombre[3]\ListeOperations[2]\ListeOCNombre[4]},\fpeval{\ListeOCNombre[5]\ListeOperations[7]\ListeOCNombre[6]\ListeOperations[8]\ListeOCNombre[7]\ListeOperations[9]\ListeOCNombre[8]},\fpeval{\ListeOCNombre[9]\ListeOperations[14]\ListeOCNombre[10]\ListeOperations[15]\ListeOCNombre[11]}}%
+      \readlist\PfCOpListeVer{\fpeval{\ListeOCNombre[1]\ListeOperations[3]\ListeOCNombre[5]\ListeOperations[10]\ListeOCNombre[9]},\fpeval{\ListeOCNombre[2]\ListeOperations[4]\ListeOCNombre[6]\ListeOperations[11]\ListeOCNombre[10]},\fpeval{\ListeOCNombre[3]\ListeOperations[5]\ListeOCNombre[7]\ListeOperations[12]\ListeOCNombre[11]},\fpeval{\ListeOCNombre[4]\ListeOperations[6]\ListeOCNombre[8]\ListeOperations[13]\ListeOCNombre[12]}}%
+      \reademptyitems%
+  \else%
+    \setsepchar[*]{§*,}\ignoreemptyitems%
+      \readlist\ListeOCPerso{\ListeOCNombre[1],\ListeOperations[1],\ListeOCNombre[2],!,\ListeOCNombre[3],\ListeOperations[2],\ListeOCNombre[4]§%
+        \ListeOperations[3],!,\ListeOperations[4],!,\ListeOperations[5],!,\ListeOperations[6]§%
+        \ListeOCNombre[5],\ListeOperations[7],\ListeOCNombre[6],\ListeOperations[8],\ListeOCNombre[7],\ListeOperations[9],\ListeOCNombre[8]§%
+        \ListeOperations[10],!,\ListeOperations[11],!,\ListeOperations[12],!,\ListeOperations[13]§%
+        \ListeOCNombre[9],\ListeOperations[14],\ListeOCNombre[10],!,\ListeOCNombre[11],\ListeOperations[15],\ListeOCNombre[12]%
+      }%
+      \reademptyitems%
+      \setsepchar{,}\ignoreemptyitems%
+      \readlist\PfCOpListeHor{\fpeval{\ListeOCNombre[1]\ListeOperations[1]\ListeOCNombre[2]},\fpeval{\ListeOCNombre[3]\ListeOperations[2]\ListeOCNombre[4]},\fpeval{\ListeOCNombre[5]\ListeOperations[7]\ListeOCNombre[6]\ListeOperations[8]\ListeOCNombre[7]\ListeOperations[9]\ListeOCNombre[8]},\fpeval{\ListeOCNombre[9]\ListeOperations[14]\ListeOCNombre[10]},\fpeval{\ListeOCNombre[11]\ListeOperations[15]\ListeOCNombre[12]}}%
+      \readlist\PfCOpListeVer{\fpeval{\ListeOCNombre[1]\ListeOperations[3]\ListeOCNombre[5]\ListeOperations[10]\ListeOCNombre[9]},\fpeval{\ListeOCNombre[2]\ListeOperations[4]\ListeOCNombre[6]\ListeOperations[11]\ListeOCNombre[10]},\fpeval{\ListeOCNombre[3]\ListeOperations[5]\ListeOCNombre[7]\ListeOperations[12]\ListeOCNombre[11]},\fpeval{\ListeOCNombre[4]\ListeOperations[6]\ListeOCNombre[8]\ListeOperations[13]\ListeOCNombre[12]}}%
+      \reademptyitems
+    \fi%
+  \else%
+    \setsepchar[*]{§*,}\ignoreemptyitems\readlist\ListeOCPerso{#2}\reademptyitems%
+  \fi%
+  \setlength{\PfCOpCroisees}{\useKV[OpCroisees]{Largeur}+\tabcolsep}%
+  \def\PfCOCTaille{\listlen\ListeOCPerso[1]}%
+  \def\PfCOCHauteur{\ListeOCPersolen}%
+  \setcounter{PfCOCHor}{0}%
+  \setcounter{PfCOCVer}{0}%
+  %
+  \begin{center}
+      \begin{NiceTabular}{c*{\PfCOCTaille}{m{\useKV[OpCroisees]{Largeur}}}}%[color-inside]%
+    \Block{}{\rule{0pt}{\PfCOpCroisees}}\xintFor* ##1 in {\xintSeq{1}{\PfCOCTaille}}\do{%
+      &\Block{}{\modulo{##1}{2}\ifnum\remainder=1\relax\stepcounter{PfCOCHor}\Roman{PfCOCHor}\fi}%
+    }\\
+    \hhline{~*{\PfCOCTaille}{-}}%
+    \xintFor* ##1 in{\xintSeq{1}{\PfCOCHauteur}}\do{%
+      \rule{0pt}{\PfCOpCroisees}\Block[m]{1-1}{\modulo{##1}{2}\ifnum\remainder=1\relax\stepcounter{PfCOCVer}\Alph{PfCOCVer}\fi}%
+      \xintFor* ##2 in{\xintSeq{1}{\PfCOCTaille}}\do{%
+        &\Block[draw,m]{1-1}{\itemtomacro\ListeOCPerso[##1,##2]\Titi\IfDecimal{\Titi}{\num{\Titi}}{\IfStrEqCase{\Titi}{%
+            {!}{\cellcolor{black}}%
+            {+}{\ifboolKV[OpCroisees]{Solution}{$\mathcolor{PfCOCCoulSol}{+}$}{}}%
+            {-}{\ifboolKV[OpCroisees]{Solution}{$\mathcolor{PfCOCCoulSol}{\_}$}{}}%
+            {:}{\ifboolKV[OpCroisees]{Solution}{$\mathcolor{PfCOCCoulSol}{\div}$}{}}%
+            {*}{\ifboolKV[OpCroisees]{Solution}{$\mathcolor{PfCOCCoulSol}{\times}$}{}}%
+            }%
+          }%
+        }%
+      }%
+      % 
+      \\%
+      \hhline{~*{\PfCOCTaille}{-}}%
+    }%
+  \end{NiceTabular}%
+  \end{center}
+  \ifboolKV[OpCroisees]{Solution}{}{\ifboolKV[OpCroisees]{Consignes}{%
+        Compléter la grille ci-dessus à l'aide des opérations $+$, $-$ et $\times$ afin de retrouver les résultats suivants :
+        \ifnum\fpeval{\TypeModele}=1\relax  
+      \begin{align*}
+        A_1&:\num{\PfCOpListeHor[1]}&A_2&:\num{\PfCOpListeHor[2]}&B&:\num{\PfCOpListeHor[3]}&C&:\num{\PfCOpListeHor[4]}\\
+        I&:\num{\PfCOpListeVer[1]}&II&:\num{\PfCOpListeVer[2]}&III&:\num{\PfCOpListeVer[3]}&IV&:\num{\PfCOpListeVer[4]}
+      \end{align*}
+    \else
+\begin{align*}
+        A_1&:\num{\PfCOpListeHor[1]}&A_2&:\num{\PfCOpListeHor[2]}&B&:\num{\PfCOpListeHor[3]}&C_1&:\num{\PfCOpListeHor[4]}&C_2&:\num{\PfCOpListeHor[5]}\\
+        I&:\num{\PfCOpListeVer[1]}&II&:\num{\PfCOpListeVer[2]}&III&:\num{\PfCOpListeVer[3]}&IV&:\num{\PfCOpListeVer[4]}
+      \end{align*}
+      \fi%
+    }{}%
+  }%
+}%

@@ -1,0 +1,165 @@
+%%%
+% Fraction d'aire d'un carré
+%%%
+\def\filedateFractionCarre{2025/05/27}%
+\def\fileversionFractionCarre{0.1a}%
+\message{-- \filedateFractionCarre\space v\fileversionFractionCarre}%
+%
+\setKVdefault[JeuAireCarre]{Couleur=LightSteelBlue,CouleurFond=Cornsilk,Perso=false,Graines=false,Parts=3,Longueur=4,NbPoints=2,Angle=0,Graine={},ListeParts={}}%
+\defKV[JeuAireCarre]{%
+  Graine=\ifempty{#1}{}{\setKV[JeuAireCarre]{Graines}\PfCGraineAlea{#1}},%
+  ListeParts=\ifempty{#1}{}{\setKV[JeuAireCarre]{Perso}\xdef\PfCFooJeuAireCarre{#1}}%
+}%
+%
+\NewDocumentCommand\FractionAireCarre{o}{%
+  \useKVdefault[JeuAireCarre]%
+  \setKV[JeuAireCarre]{#1}%
+  \ifboolKV[JeuAireCarre]{Perso}{%
+      \BuildJeuAireCarre{\PfCFooJeuAireCarre}%
+    }{%
+    \BuildJeuAireCarre{}%
+  }%
+}%
+
+\def\BuildJeuAireCarreCode{%
+  vardef ChoixParmiEntier(expr nentier,nbretiens)=
+  numeric ListeInitiale[],ListeFinale[];
+  for l=1 upto nentier:
+  ListeInitiale[l]=l;
+  ListeIntermed[l]=l;
+  endfor;
+  maxx=nentier;
+  for l=1 upto nbretiens:
+  intermed:=ceiling(uniformdeviate(maxx));
+  ListeFinale[l]=ListeInitiale[intermed];
+  f:=0;
+  for g=1 upto nentier:
+  if g<>intermed:
+  f:=f+1;
+  ListeIntermed[f]:=ListeInitiale[g];
+  fi;
+  endfor;
+  maxx:=nentier-l;
+  for h=1 upto maxx:
+  ListeInitiale[h]:=ListeIntermed[h];
+  endfor;
+  endfor;
+  enddef;
+  % On crée un Quick Sort
+  def QS(expr ndeb,nfin)=
+  begingroup
+  save v,m,x;
+  if ndeb<nfin:
+  v:=ListeFinale[cpt[ndeb]];
+  m:=ndeb;
+  for i=(ndeb+1) upto nfin:
+  if ListeFinale[cpt[i]]<v:
+  m:=m+1;
+  x:=cpt[m];cpt[m]:=cpt[i];cpt[i]:=x;
+  fi
+  endfor;
+  x:=cpt[m];cpt[m]:=cpt[ndeb];cpt[ndeb]:=x;
+  QS(ndeb,m-1);
+  QS(m+1,nfin);
+  fi
+  endgroup
+  enddef;
+  % 
+  vardef PartsPerso(text t)=
+  nbptsperso:=0;
+  for p_=t:
+  nbptsperso:=nbptsperso+1;
+  Base[nbptsperso]=point(length CarreSupport*p_/(4*Parts)) of CarreSupport;
+  endfor;
+  NbPoints:=nbptsperso;
+  enddef;
+  % 
+  Cote=\useKV[JeuAireCarre]{Longueur};
+  Parts=\useKV[JeuAireCarre]{Parts};
+  NbPoints=\useKV[JeuAireCarre]{NbPoints};
+  Angle=\useKV[JeuAireCarre]{Angle};
+  color Couleur,CouleurFond;
+  CouleurFond=\useKV[JeuAireCarre]{CouleurFond};
+  Couleur=\useKV[JeuAireCarre]{Couleur};
+  boolean Perso;
+  Perso=\useKV[JeuAireCarre]{Perso};
+  pair A[],M[],Base[];
+  A1=(0,0);
+  A2=pointarc(cercles(A1,Cote*cm),45);
+  A3=rotation(A1,A2,-90);
+  A4-A3=A1-A2;
+  path CarreSupport;
+  CarreSupport=polygone(A1,A2,A3,A4);
+  Base0=A[1];
+  for k=0 upto (4*Parts):
+  M[k]=point(length CarreSupport*k/(4*Parts)) of CarreSupport;
+  endfor;
+}
+%
+\NewDocumentCommand\BuildJeuAireCarre{m}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      \BuildJeuAireCarreCode
+      if Perso=false:
+      if NbPoints>2:
+      ChoixParmiEntier(4*Parts-1,NbPoints);
+      else:
+      ChoixParmiEntier(3*Parts-1,NbPoints);
+      fi;
+      for k=1 upto NbPoints:
+      cpt[k]=k;
+      endfor;
+      QS(1,NbPoints);
+      for k=1 upto NbPoints:
+      place:=ListeFinale[cpt[k]];
+      Base[k]=M[place];
+      endfor;
+      else:
+      PartsPerso(#1);
+      fi;
+      fill CarreSupport withcolor CouleurFond;
+      fill Base0 for k=1 upto NbPoints:--Base[k] endfor --cycle withcolor Couleur;
+      trace Base0 for k=1 upto NbPoints:--Base[k] endfor --cycle;
+      trace CarreSupport;
+      for k=0 upto (4*Parts):
+      draw cercles(M[k],0.5mm);
+      endfor;
+      picture Retiens;
+      Retiens=currentpicture;
+      currentpicture:=nullpicture;
+      trace rotation(Retiens,iso(A1,A3),Angle);
+    \end{mplibcode}
+  \else
+    \begin{mpost}[mpsettings={\BuildJeuAireCarreCode}]
+            if Perso=false:
+      if NbPoints>2:
+      ChoixParmiEntier(4*Parts-1,NbPoints);
+      else:
+      ChoixParmiEntier(3*Parts-1,NbPoints);
+      fi;
+      for k=1 upto NbPoints:
+      cpt[k]=k;
+      endfor;
+      QS(1,NbPoints);
+      for k=1 upto NbPoints:
+      place:=ListeFinale[cpt[k]];
+      Base[k]=M[place];
+      endfor;
+      else:
+      PartsPerso(#1);
+      fi;
+      fill CarreSupport withcolor CouleurFond;
+      fill Base0 for k=1 upto NbPoints:--Base[k] endfor --cycle withcolor Couleur;
+      trace Base0 for k=1 upto NbPoints:--Base[k] endfor --cycle;
+      trace CarreSupport;
+      for k=0 upto (4*Parts):
+      draw cercles(M[k],0.5mm);
+      endfor;
+      picture Retiens;
+      Retiens=currentpicture;
+      currentpicture:=nullpicture;
+      trace rotation(Retiens,iso(A1,A3),Angle);
+    \end{mpost}
+  \fi
+}%

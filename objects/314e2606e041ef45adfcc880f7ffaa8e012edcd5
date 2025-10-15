@@ -1,0 +1,66 @@
+%%%
+% Barres de niveaux
+%%%
+\def\filedateBarreNiveaux{2024/08/04}%
+\def\fileversionBarreNiveaux{0.1}%
+\message{-- \filedateBarreNiveaux\space v\fileversionBarreNiveaux}%
+%
+\setKVdefault[ClesBarre]{Niveau=false,LimiteI=25,LimiteF=50,LimiteS=75,TexteOrigine=0,TexteReference=100,CouleurGraduation=white,CouleurFond=gray!50,CouleurBarre=black,Graduation=false,Nom=D\'efaut,Pas=10,CouleurI=red,CouleurF=orange,CouleurS=yellow,CouleurM=green}
+
+\newlength{\barrewidth}
+
+\newcommand\Jauge[2][]{%
+  \setlength{\barrewidth}{\linewidth-2\fboxsep}%
+  \useKVdefault[ClesBarre]%
+  \setKV[ClesBarre]{#1}%
+  \xdef\NomComp{\useKV[ClesBarre]{Nom}}%
+  \def\TexteOrigine{\useKV[ClesBarre]{TexteOrigine}}%
+  \def\TexteReference{\useKV[ClesBarre]{TexteReference}}%
+  \xdef\CouleurFond{\useKV[ClesBarre]{CouleurFond}}%
+  \xdef\CouleurGrad{\useKV[ClesBarre]{CouleurGraduation}}%
+  \xdef\CouleurBarre{\useKV[ClesBarre]{CouleurBarre}}%
+  \xdef\CouleurI{\useKV[ClesBarre]{CouleurI}}%
+  \xdef\CouleurF{\useKV[ClesBarre]{CouleurF}}%
+  \xdef\CouleurS{\useKV[ClesBarre]{CouleurS}}%
+  \xdef\CouleurM{\useKV[ClesBarre]{CouleurM}}%
+  \ifboolKV[ClesBarre]{Niveau}{%
+    \begin{tikzpicture}[rounded corners=2pt,very thin]
+      \fill [gray!50] (0,0) rectangle (\barrewidth, 0.15);
+      \xintifboolexpr{#2<\useKV[ClesBarre]{LimiteI}}{%
+        \fill [\CouleurI] (0,0) rectangle (#2/100*\barrewidth, 0.15);
+      }{\xintifboolexpr{#2<\useKV[ClesBarre]{LimiteF}}{%
+          \fill [\CouleurF] (0,0) rectangle (#2/100*\barrewidth, 0.15);
+        }{\xintifboolexpr{#2<\useKV[ClesBarre]{LimiteS}}{%
+            \fill [\CouleurS] (0,0) rectangle (#2/100*\barrewidth, 0.15);
+          }{\fill [\CouleurM] (0,0) rectangle (#2/100*\barrewidth, 0.15);}
+        }%
+      }%
+      \node[anchor=south west] at (0,0.5em) {\NomComp};%
+      \node[anchor=north] at (0,-0.25em) {\TexteOrigine};
+      \node[anchor=north] at (\barrewidth,-0.25em) {\TexteReference};
+      \ifboolKV[ClesBarre]{Graduation}{%
+        \foreach \s in {1,...,\fpeval{\useKV[ClesBarre]{Pas}-1}}%
+        {
+          \draw[\CouleurGrad] (\s/\useKV[ClesBarre]{Pas}*\barrewidth,0)--(\s/\useKV[ClesBarre]{Pas}*\barrewidth,0.15);
+        }
+      }{}
+      \foreach \s in {\useKV[ClesBarre]{LimiteI},\useKV[ClesBarre]{LimiteF},\useKV[ClesBarre]{LimiteS}}%
+      {
+        \draw[black] (\s/100*\barrewidth,-0.1)--(\s/100*\barrewidth,0.2);%
+      }
+    \end{tikzpicture}%
+  }{%
+    \begin{tikzpicture}[rounded corners=2pt,very thin]
+      \fill [\CouleurFond] (0,0) rectangle (\barrewidth, 0.15);%
+      \fill [\CouleurBarre] (0,0) rectangle (#2/100*\barrewidth, 0.15);%
+      \node[anchor=south west] at (0,0.5em) {\NomComp};%
+      \node[anchor=north] at (0,-0.25em) {\useKV[ClesBarre]{TexteOrigine}};%
+      \node[anchor=north] at (\barrewidth,-0.25em) {\useKV[ClesBarre]{TexteReference}};%
+      \ifboolKV[ClesBarre]{Graduation}{%
+      \foreach \s in {1,...,\fpeval{\useKV[ClesBarre]{Pas}-1}}%
+      {%
+        \draw[\CouleurGrad] (\s/\useKV[ClesBarre]{Pas}*\barrewidth,0)--(\s/\useKV[ClesBarre]{Pas}*\barrewidth,0.15);
+      }}{}%
+    \end{tikzpicture}%
+  }%
+}%

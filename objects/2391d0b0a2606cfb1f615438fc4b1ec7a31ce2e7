@@ -1,0 +1,150 @@
+%%%
+% Application : pourcentage
+%%%
+\def\filedatePourcentage{2025/08/08}%
+\def\fileversionPourcentage{0.1b}%
+\message{-- \filedatePourcentage\space v\fileversionPourcentage}%
+%
+\setKVdefault[ClesPourcentage]{Appliquer,Calculer=false,Augmenter=false,Reduire=false,Fractionnaire=false,Decimal,Formule=false,GrandeurA=Grandeur A,GrandeurB=Total,Largeur=1cm,MotReduction=diminution,AideTableau=false,ColorFill=white,CouleurTab=gray!15,Unite={},EchellePourcent=false,Vide=false,CouleurEchelle=LightSteelBlue,ACompleter=false}
+%
+\NewDocumentCommand\Pourcentage{omm}{%
+  \useKVdefault[ClesPourcentage]%
+  \setKV[ClesPourcentage]{#1}%
+  \ifboolKV[ClesPourcentage]{EchellePourcent}{%
+    \PfMBuildEchellePourcentage[#1]{#2}{#3}%
+  }{%
+  \ifboolKV[ClesPourcentage]{Reduire}{%
+    \ifboolKV[ClesPourcentage]{Formule}{%
+        R\'eduire une quantit\'e de \num{#2}~\%, cela revient \`a multiplier cette quantit\'e par $1-\dfrac{\num{#2}}{100}$. Par cons\'equent, si on r\'eduit \num{#3}\ifemptyKV[ClesPourcentage]{Unite}{}{~\useKV[ClesPourcentage]{Unite}} de \num{#2}~\%, cela donne :
+        \[\num{#3}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}\times\left(1-\frac{\num{#2}}{100}\right)=\num{#3}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}\times(1-\num{\fpeval{#2/100}})=\num{#3}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}\times\num{\fpeval{(1-#2/100)}}=\num{\fpeval{#3*(1-#2/100)}}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}.\]
+      }{%
+        Calculons ce que repr\'esente la \useKV[ClesPourcentage]{MotReduction} de \num{#2}~\%.
+        \ifboolKV[ClesPourcentage]{AideTableau}{%
+          \xdef\NomA{\useKV[ClesPourcentage]{GrandeurA}}%
+          \xdef\NomB{\useKV[ClesPourcentage]{GrandeurB}}%
+          \xdef\NomCouleurTab{\useKV[ClesPourcentage]{CouleurTab}}%
+          \xdef\NomLargeurTab{\useKV[ClesPourcentage]{Largeur}}%
+          \begin{center}
+            \Propor[Math,GrandeurA=\NomA,GrandeurB=\NomB,CouleurTab=\NomCouleurTab,Largeur=\NomLargeurTab]{/\num{#3},\num{#2}/100}
+          \end{center}
+          \FlecheCoefInv{\tiny$\times\num{\fpeval{#2/100}}$}%
+          On obtient une \useKV[ClesPourcentage]{MotReduction} de $\num{\fpeval{#2/100}}\times\num{#3}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}=\num{\fpeval{#3*#2/100}}$\ifemptyKV[ClesPourcentage]{Unite}{}{~\useKV[ClesPourcentage]{Unite}}. Donc un total de $\num{#3}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}-\num{\fpeval{#3*#2/100}}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}=\num{\fpeval{#3*(1-#2/100)}}$\ifemptyKV[ClesPourcentage]{Unite}{}{~\useKV[ClesPourcentage]{Unite}}.%
+        }{Pour calculer \num{#2}~\% de \num{#3}\ifemptyKV[ClesPourcentage]{Unite}{}{~\useKV[ClesPourcentage]{Unite}}, on effectue le calcul :
+        \[\ifboolKV[ClesPourcentage]{Fractionnaire}{\frac{\num{#2}}{100}}{\num{\fpeval{#2/100}}}\times\num{#3}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}=\ifboolKV[ClesPourcentage]{Fractionnaire}{\frac{\num{\fpeval{#2*#3}}}{100}}{\num{\fpeval{#2*#3/100}}}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}\ifboolKV[ClesPourcentage]{Fractionnaire}{=\num{\fpeval{#2*#3/100}}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}}{}.\]%
+       On obtient une \useKV[ClesPourcentage]{MotReduction} de $\num{\fpeval{#3*#2/100}}$\ifemptyKV[ClesPourcentage]{Unite}{}{~\useKV[ClesPourcentage]{Unite}}.\\Donc un total de $\num{#3}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}-\num{\fpeval{#3*#2/100}}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}=\num{\fpeval{#3*(1-#2/100)}}$\ifemptyKV[ClesPourcentage]{Unite}{}{~\useKV[ClesPourcentage]{Unite}}.}%
+      }%
+  }{%
+    \ifboolKV[ClesPourcentage]{Augmenter}{%
+      \ifboolKV[ClesPourcentage]{Formule}{%
+        Augmenter de \num{#2}~\% une quantit\'e, cela revient \`a multiplier cette quantit\'e par $1+\dfrac{\num{#2}}{100}$. Par cons\'equent, si on augmente \num{#3}\ifemptyKV[ClesPourcentage]{Unite}{}{~\useKV[ClesPourcentage]{Unite}} de \num{#2}~\%, cela donne :
+        \[\num{#3}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}\times\left(1+\frac{\num{#2}}{100}\right)=\num{#3}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}\times(1+\num{\fpeval{#2/100}})=\num{#3}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}\times\num{\fpeval{(1+#2/100)}}=\num{\fpeval{#3*(1+#2/100)}}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}.\]
+      }{%
+        Calculons ce que repr\'esente l'augmentation de \num{#2}~\%. %
+        \ifboolKV[ClesPourcentage]{AideTableau}{%
+          \xdef\NomA{\useKV[ClesPourcentage]{GrandeurA}}%
+          \xdef\NomB{\useKV[ClesPourcentage]{GrandeurB}}%
+          \xdef\NomCouleurTab{\useKV[ClesPourcentage]{CouleurTab}}%
+          \xdef\NomLargeurTab{\useKV[ClesPourcentage]{Largeur}}%
+          \begin{center}%
+            \Propor[Math,GrandeurA=\NomA,GrandeurB=\NomB,CouleurTab=\NomCouleurTab,Largeur=\NomLargeurTab]{/\num{#3},\num{#2}/100}%
+          \end{center}%
+          \FlecheCoefInv{\tiny$\times\num{\fpeval{#2/100}}$}%
+          On obtient une augmentation de $\num{\fpeval{#2/100}}\times\num{#3}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}=\num{\fpeval{#3*#2/100}}$\ifemptyKV[ClesPourcentage]{Unite}{}{~\useKV[ClesPourcentage]{Unite}}.\\Donc un total de $\num{#3}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}+\num{\fpeval{#3*#2/100}}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}=\num{\fpeval{#3*(1+#2/100)}}$\ifemptyKV[ClesPourcentage]{Unite}{}{~\useKV[ClesPourcentage]{Unite}}.%
+        }{Pour calculer \num{#2}~\% de \num{#3}\ifemptyKV[ClesPourcentage]{Unite}{}{~\useKV[ClesPourcentage]{Unite}}, on effectue le calcul :
+          \[\ifboolKV[ClesPourcentage]{Fractionnaire}{\frac{\num{#2}}{100}}{\num{\fpeval{#2/100}}}\times\num{#3}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}=\ifboolKV[ClesPourcentage]{Fractionnaire}{\frac{\num{\fpeval{#2*#3}}}{100}}{\num{\fpeval{#2*#3/100}}}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}\ifboolKV[ClesPourcentage]{Fractionnaire}{=\num{\fpeval{#2*#3/100}}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}}{}.\]%
+          On obtient une augmentation de $\num{\fpeval{#3*#2/100}}$\ifemptyKV[ClesPourcentage]{Unite}{}{~\useKV[ClesPourcentage]{Unite}}.\\Donc un total de $\num{#3}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}+\num{\fpeval{#3*#2/100}}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}=\num{\fpeval{#3*(1+#2/100)}}$\ifemptyKV[ClesPourcentage]{Unite}{}{~\useKV[ClesPourcentage]{Unite}}.}%
+      }%
+    }{%
+      \ifboolKV[ClesPourcentage]{Calculer}{%
+        \xdef\NomA{\useKV[ClesPourcentage]{GrandeurA}}%
+        \xdef\NomB{\useKV[ClesPourcentage]{GrandeurB}}%
+        \xdef\NomCouleurTab{\useKV[ClesPourcentage]{CouleurTab}}%
+        \xdef\NomLargeurTab{\useKV[ClesPourcentage]{Largeur}}%
+        \Propor[Math,GrandeurA=\NomA,GrandeurB=\NomB,CouleurTab=\NomCouleurTab,Largeur=\NomLargeurTab]{\num{#2}/\num{#3},/100}%
+        \xdef\colorfill{\useKV[ClesPourcentage]{ColorFill}}%
+        \FlechesPB{2}{1}{\scriptsize$\times\num{\fpeval{#3/100}}$}%
+        \FlechesPH{1}{2}{\scriptsize$\div\num{\fpeval{#3/100}}$}%
+        \xdef\ResultatPourcentage{\fpeval{#2*100/#3}}%
+      }{%
+        Pour calculer \num{#2}~\% de \num{#3}\ifemptyKV[ClesPourcentage]{Unite}{}{~\useKV[ClesPourcentage]{Unite}}, on effectue le calcul :%
+        \[\ifboolKV[ClesPourcentage]{Fractionnaire}{\frac{\num{#2}}{100}}{\num{\fpeval{#2/100}}}\times\num{#3}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}=\ifboolKV[ClesPourcentage]{Fractionnaire}{\frac{\num{\fpeval{#2*#3}}}{100}}{\num{\fpeval{#2*#3/100}}}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}\ifboolKV[ClesPourcentage]{Fractionnaire}{=\num{\fpeval{#2*#3/100}}\ifemptyKV[ClesPourcentage]{Unite}{}{~\text{\useKV[ClesPourcentage]{Unite}}}}{}.\]%
+      }%
+    }%
+  }%
+}%
+}%
+
+\NewDocumentCommand\PfMBuildEchellePourcentage{omm}{%
+  \setKV[ClesPourcentage]{#1}%
+  \modulo{#2}{10}
+  \ifnum\remainder=0\relax%
+    \PfMBuildEchellePourcentageMP{10}{#2}{#3}%
+  \else%
+    \modulo{#2}{5}
+    \ifnum\remainder=0\relax%
+      \PfMBuildEchellePourcentageMP{5}{#2}{#3}%
+    \else%
+      Le pourcentage choisi n'est pas adapté à une échelle de pourcentage.%
+    \fi%
+  \fi%
+}%
+
+\NewDocumentCommand\PfMBuildEchellePourcentageMP{mmm}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{Geometrie}[Cadre="aucun"]
+      boolean Vide,ACompleter;
+      Vide=\useKV[ClesPourcentage]{Vide};
+      ACompleter=\useKV[ClesPourcentage]{ACompleter};
+      color CoulFond;
+      CoulFond=\useKV[ClesPourcentage]{CouleurEchelle};
+      %
+      pair A[],B[],M[],N[],O[],P[];
+      A1=u*(0,1.5);
+      A2-A1=u*(7,0);
+      A3-A2=u*(0,1);
+      A4-A3=A1-A2;
+      B1=u*(0,0);
+      B2-B1=u*(7,0);
+      B3-B2=u*(0,1);
+      B4-B3=B1-B2;
+      base=100/#1;
+      for k=0 upto base:
+        M[k]=(k/base)[A1,A2];
+        N[k]=(k/base)[A4,A3];
+        O[k]=(k/base)[B1,B2];
+        P[k]=(k/base)[B4,B3];
+      endfor;
+      if Vide=false:
+        fill polygone(M0,M[#2/#1],N[#2/#1],N0) withcolor CoulFond;
+        fill polygone(O0,O[#2/#1],P[#2/#1],P0) withcolor CoulFond;
+      fi;
+      if ACompleter=false:
+        for k=1 step (10/#1) until base-1:
+          label.top(TEX("\rule[-1pt]{0pt}{0pt}\scriptsize\num{\fpeval{"&decimal(k)&"*#1*#3/100}}\ifempty{Unite}{}{~\useKV[ClesPourcentage]{Unite}}"),P[k]);
+        endfor;
+      fi;
+      k:=0;  
+      label.top(TEX("\footnotesize\num{\fpeval{"&decimal(k)&"*#1*#3/100}}\ifempty{Unite}{}{~\useKV[ClesPourcentage]{Unite}}"),P[k]);
+      k:=base;
+      label.top(TEX("\footnotesize\num{\fpeval{"&decimal(k)&"*#1*#3/100}}\ifempty{Unite}{}{~\useKV[ClesPourcentage]{Unite}}"),P[k]);  
+      for k=1 step (10/#1) until base-1:
+        label.top(TEX("\scriptsize\SI{"&decimal(k*#1)&"}{\percent}"),N[k]);
+      endfor;
+      label.top(TEX("\footnotesize\SI{"&decimal(0)&"}{\percent}"),N[0]);
+      label.top(TEX("\footnotesize\SI{"&decimal(100)&"}{\percent}"),N[base]);
+      for k=0 upto base:
+        trace M[k]--N[k];
+        trace O[k]--P[k];
+      endfor;
+      drawoptions(withpen pencircle scaled 1.02);  
+      for k=0 step (10/#1) until base:
+        trace M[k]--N[k];
+        trace O[k]--P[k];
+      endfor;
+      trace polygone(A1,A2,A3,A4);
+      trace polygone(B1,B2,B3,B4);  
+      drawoptions();
+    \end{Geometrie}%
+  \fi%
+}%

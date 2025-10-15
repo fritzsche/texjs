@@ -1,0 +1,471 @@
+%%%
+% Diff\'erentes représentations graphiques
+%%%
+\def\filedateRepGraph{2025/05/27}%
+\def\fileversionRepGraph{0.1a}%
+\message{-- \filedateRepGraph\space v\fileversionRepGraph}%
+%
+\setKVdefault[TraceG]{Millimetre=false,Grille=false,Graduations=false,PasGradX=1,PasGradY=1,PasGrilleX=1,PasGrilleY=1,Xmin=-5.5,Xmax=5.5,Xstep=1,Ymin=-5.5,Ymax=5.5,Ystep=1,Bornea=-5.5,Borneb=5.5,LabelX={},LabelY={},LegendeX=false,LegendeY=false,LabelC=0.5,NomCourbe={},Origine={(5.5,5.5)},Fonction=false,Points=false,Invisible=false,CouleurPoint=red,CouleurTrace=black,Epaisseur=1,Relie=false,RelieSegment=false,Marque=dot,Code=false,Vide=false,NbPointsCourbe=100,Tiret=false,StyleTrace=0,Date=false,DonneesSup=false,Traces={},LabelX={},LabelY={}}%
+\defKV[TraceG]{
+  Traces=\ifempty{#1}{}{\setKV[TraceG]{Code}},%
+  LabelX=\ifempty{#1}{}{\setKV[TraceG]{LegendeX}},%
+  LabelY=\ifempty{#1}{}{\setKV[TraceG]{LegendeY}}%
+}%
+
+\newcommand\TraceGraphique[2][]{%
+  \useKVdefault[TraceG]%
+  \setKV[TraceG]{#1}%
+  \ifboolKV[TraceG]{Fonction}{%
+    \MPTraceFonction[#1]{#2}%
+  }{%
+    \setKV[TraceG]{Xmin=0,Ymin=0}%
+    \setKV[TraceG]{#1}%
+    \readlist*\ListePointsPlaces{#2}%
+    \newtoks\toklistepoint%
+    \foreachitem\compteur\in\ListePointsPlaces{\expandafter\Updatetoks\compteur\nil}%
+    \MPPlacePoint[#1]{\the\toklistepoint}%
+  }%
+}%
+
+\newcommand\MPPlacePoint[2][]{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    xmin=\useKV[TraceG]{Xmin};
+    xmax=\useKV[TraceG]{Xmax};
+    ymin=\useKV[TraceG]{Ymin};
+    ymax=\useKV[TraceG]{Ymax};
+    pasx=\useKV[TraceG]{Xstep};
+    pasy=\useKV[TraceG]{Ystep};
+    x.u=1cm/\useKV[TraceG]{Xstep};
+    y.u=1cm/\useKV[TraceG]{Ystep};
+    grillex=\useKV[TraceG]{PasGrilleX};
+    grilley=\useKV[TraceG]{PasGrilleY};
+    pasgradx=\useKV[TraceG]{PasGradX};
+    pasgrady=\useKV[TraceG]{PasGradY};
+    pos=\useKV[TraceG]{LabelC};
+
+    marque_p:=str \useKV[TraceG]{Marque};
+    m_c:=m_c*2;
+    
+    color colorpoint,colortrace;
+    colorpoint=\useKV[TraceG]{CouleurPoint};
+    colortrace=\useKV[TraceG]{CouleurTrace};
+    boolean Grille,Graduations,LegendeX,LegendeY;
+    Grille=\useKV[TraceG]{Grille};
+    Graduations=\useKV[TraceG]{Graduations};
+    LegendeX:=\useKV[TraceG]{LegendeX};
+    LegendeY:=\useKV[TraceG]{LegendeY};
+    
+    boolean Date,DonneesSup,Relie,RelieSegment,Invisible;
+    Date=\useKV[TraceG]{Date};
+    DonneesSup=\useKV[TraceG]{DonneesSup};
+    Relie=\useKV[TraceG]{Relie};
+    RelieSegment=\useKV[TraceG]{RelieSegment};
+    Invisible=\useKV[TraceG]{Invisible};
+    
+    pair Origine;
+    Origine=(0,0);
+    
+    if Grille:
+    drawoptions(withcolor 0.75white);
+    for k=0 step grillex until (xmax-xmin):
+    trace (k*x.u,ypart(Origine))--(x.u*k,y.u*(ymax-ymin));
+    endfor;
+    for k=0 step grilley until (ymax-ymin):
+    trace (xpart(Origine),k*y.u)--(x.u*(xmax-xmin),y.u*k);
+    endfor;
+    drawoptions();
+    fi;
+    
+    if Graduations:
+    for k=0 step pasgradx until (xmax-xmin):
+    trace ((0,-0.5mm)--(0,0.5mm)) shifted ((k*x.u,0) shifted Origine) withpen pencircle scaled1.25;
+    if Date:
+    label.bot(TEX(decimal(xmin+k)),(k*x.u,0) shifted Origine);
+    else:
+    label.bot(TEX("\num{"&decimal(xmin+k)&"}"),(k*x.u,0) shifted Origine);
+    fi;
+    endfor;
+    label.ulft(TEX("\num{"&decimal(ymin)&"}"),(0,0) shifted Origine);
+    for k=pasgrady step pasgrady until (ymax-ymin):
+    trace ((-0.5mm,0)--(0.5mm,0)) shifted ((0,k*y.u) shifted Origine) withpen pencircle scaled1.25;
+    label.lft(TEX("\num{"&decimal(ymin+k)&"}"),(0,k*y.u) shifted Origine);
+    endfor;
+    fi;
+    drawoptions(withpen pencircle scaled1.5);
+    drawarrow Origine--(xpart(Origine),y.u*(ymax-ymin));
+    drawarrow Origine--((xmax-xmin)*x.u,ypart(Origine));
+    drawoptions();
+
+    % On relie éventuellement les points
+    if Relie:
+    pair N[];
+    nbpoint=0;
+    for p_=#2:
+    nbpoint:=nbpoint+1;
+    N[nbpoint]=(x.u*(xpart(p_)-xmin),y.u*(ypart(p_)-ymin));
+    endfor;
+    draw N[1] for k=2 upto nbpoint:
+    ..N[k]
+    endfor withcolor colortrace;
+    fi;
+    if RelieSegment:
+    pair N[];
+    nbpoint=0;
+    for p_=#2:
+    nbpoint:=nbpoint+1;
+    N[nbpoint]=(x.u*(xpart(p_)-xmin),y.u*(ypart(p_)-ymin));
+    endfor;
+    draw N[1] for k=2 upto nbpoint:
+    --N[k]
+    endfor withcolor colortrace;
+    fi;
+    
+    % On place les points
+    if Invisible=false:
+    drawoptions(withcolor colorpoint);
+    for p_=#2:
+    if marque_p="dot":
+    dotlabel("",(x.u*(xpart(p_)-xmin),y.u*(ypart(p_)-ymin)));
+    elseif marque_p="croix":
+    pointe((x.u*(xpart(p_)-xmin),y.u*(ypart(p_)-ymin)));
+    elseif marque_p="carre":
+    fill (unitsquare scaled 1mm) shifted((x.u*(xpart(p_)-xmin),y.u*(ypart(p_)-ymin))-(center unitsquare scaled 1mm));
+    fi;
+    if DonneesSup:
+    labeloffset:=labeloffset*2;
+    drawoptions(withcolor black);
+    label.top(TEX("\num{"&decimal(ypart(p_))&"}"),(x.u*(xpart(p_)-xmin),y.u*(ypart(p_)-ymin)));
+    drawoptions(withcolor colorpoint);
+    labeloffset:=labeloffset/2;
+    fi;
+    endfor;
+    drawoptions();
+    fi;
+    % on labelise les axes
+    if LegendeX:
+    label.urt(btex \useKV[TraceG]{LabelX} etex,(x.u*(xmax-xmin),ypart(Origine)));
+    fi;
+    if LegendeY:
+    label.urt(btex \useKV[TraceG]{LabelY} etex,(xpart(Origine),y.u*(ymax-ymin)));
+    fi;
+  \end{mplibcode}
+  \else%
+  \mpxcommands{%
+    \usepackage{ProfCollege}
+    \setKV[TraceG]{#1}
+  }%
+  \begin{mpost}[mpsettings={xmin=\useKV[TraceG]{Xmin};xmax=\useKV[TraceG]{Xmax};ymin=\useKV[TraceG]{Ymin};ymax=\useKV[TraceG]{Ymax};pasx=\useKV[TraceG]{Xstep};pasy=\useKV[TraceG]{Ystep};xu=1cm/\useKV[TraceG]{Xstep};yu=1cm/\useKV[TraceG]{Ystep};grillex=\useKV[TraceG]{PasGrilleX};grilley=\useKV[TraceG]{PasGrilleY};pos=\useKV[TraceG]{LabelC};color colorpoint,colortrace;colorpoint=\useKV[TraceG]{CouleurPoint};colortrace=\useKV[TraceG]{CouleurTrace};boolean Grille;Grille=\useKV[TraceG]{Grille};boolean Graduations;Graduations=\useKV[TraceG]{Graduations};boolean Relie;Relie=\useKV[TraceG]{Relie};boolean RelieSegment;RelieSegment=\useKV[TraceG]{RelieSegment};boolean Invisible;Invisible=\useKV[TraceG]{Invisible};}]    
+    pair Origine;
+    Origine=(0,0);
+    
+    if Grille:
+    drawoptions(withcolor 0.75white);
+    for k=0 step grillex until (xmax-xmin):
+    trace (k*xu,ypart(Origine))--(xu*k,yu*(ymax-ymin));
+    endfor;
+    for k=0 step grilley until (ymax-ymin):
+    trace (xpart(Origine),k*yu)--(xu*(xmax-xmin),yu*k);
+    endfor;
+    drawoptions();
+    fi;
+    
+    if Graduations:
+    for k=0 step grillex until (xmax-xmin):
+    trace ((0,-0.5mm)--(0,0.5mm)) shifted ((k*xu,0) shifted Origine) withpen pencircle scaled1.25;
+    label.bot(LATEX("\num{"&decimal(xmin+k)&"}"),(k*xu,0) shifted Origine);
+    endfor;
+    label.ulft(LATEX("\num{"&decimal(ymin)&"}"),(0,0) shifted Origine);
+    for k=grilley step grilley until (ymax-ymin):
+    trace ((-0.5mm,0)--(0.5mm,0)) shifted ((0,k*yu) shifted Origine) withpen pencircle scaled1.25;
+    label.lft(LATEX("\num{"&decimal(ymin+k)&"}"),(0,k*yu) shifted Origine);
+    endfor;
+    fi;
+    drawoptions(withpen pencircle scaled1.5);
+    drawarrow Origine--(xpart(Origine),yu*(ymax-ymin));
+    drawarrow Origine--((xmax-xmin)*xu,ypart(Origine));
+    drawoptions();
+
+    % On relie éventuellement les points
+    if Relie:
+    pair N[];
+    nbpoint=0;
+    for p_=#2:
+    nbpoint:=nbpoint+1;
+    N[nbpoint]=(xu*(xpart(p_)-xmin),yu*(ypart(p_)-ymin));
+    endfor;
+    draw N[1] for k=2 upto nbpoint:
+    ..N[k]
+    endfor withcolor colortrace;
+    fi;
+    if RelieSegment:
+    pair N[];
+    nbpoint=0;
+    for p_=#2:
+    nbpoint:=nbpoint+1;
+    N[nbpoint]=(xu*(xpart(p_)-xmin),yu*(ypart(p_)-ymin));
+    endfor;
+    draw N[1] for k=2 upto nbpoint:
+    --N[k]
+    endfor withcolor colortrace;
+    fi;
+    
+    % On place les points
+    if Invisible=false:
+    drawoptions(withcolor colorpoint);
+    for p_=#2:
+    dotlabel("",(xu*(xpart(p_)-xmin),yu*(ypart(p_)-ymin)));
+    endfor;
+    drawoptions();
+    fi;
+    %on labelise les axes
+    label.urt(btex \unexpanded{\useKV[TraceG]{LabelX}} etex,(xu*(xmax-xmin),ypart(Origine)));
+    label.urt(btex \unexpanded{\useKV[TraceG]{LabelY}} etex,(xpart(Origine),yu*(ymax-ymin)));
+  \end{mpost}
+  \fi%
+}%
+
+\newcommand\MPTraceFonction[2][]{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    borneinf=\useKV[TraceG]{Bornea};
+    bornesup=\useKV[TraceG]{Borneb};
+    nbpointsCourbe:=\useKV[TraceG]{NbPointsCourbe};
+    xmin=\useKV[TraceG]{Xmin};
+    xmax=\useKV[TraceG]{Xmax};
+    ymin=\useKV[TraceG]{Ymin};
+    ymax=\useKV[TraceG]{Ymax};
+    pasx=\useKV[TraceG]{Xstep};
+    pasy=\useKV[TraceG]{Ystep};
+    x.u=1cm/\useKV[TraceG]{Xstep};
+    y.u=1cm/\useKV[TraceG]{Ystep};
+    grillex=\useKV[TraceG]{PasGrilleX};
+    grilley=\useKV[TraceG]{PasGrilleY};
+    gradx=\useKV[TraceG]{PasGradX};
+    grady=\useKV[TraceG]{PasGradY};
+    pos=\useKV[TraceG]{LabelC};
+    Epaisseur:=\useKV[TraceG]{Epaisseur};
+    
+    color colortrace;
+    colortrace=\useKV[TraceG]{CouleurTrace};
+    
+    pair Origine;
+    Origine=(xmin,ymin)+\useKV[TraceG]{Origine};
+
+    boolean Grille,Vide,Graduations,LegendeX,LegendeY;
+    Grille=\useKV[TraceG]{Grille};
+    Vide=\useKV[TraceG]{Vide};
+    Graduations=\useKV[TraceG]{Graduations};
+    LegendeX:=\useKV[TraceG]{LegendeX};
+    LegendeY:=\useKV[TraceG]{LegendeY};
+    vardef sin(expr t) = sind(c*t) enddef;
+
+    vardef cos(expr t) = cosd(c*t) enddef;
+    
+    vardef tan(expr t) = sin(t)/cos(t) enddef;
+    
+    vardef exp(expr t) = e**t enddef;
+    
+    vardef ch(expr x)=(exp(x)+exp(-x))/2 enddef;
+    
+    vardef sh(expr x)=(exp(x)-exp(-x))/2 enddef;
+    
+    vardef ln(expr t) = mlog(t)/256 enddef;
+    
+    vardef arcsin(expr x)=%Définition mathématique en radian
+    pi*angle((sqrt(1-x**2),x))/180
+    enddef;
+    
+    vardef arccos(expr x)=%Définition mathématique en radian
+    pi*angle((x,sqrt(1-x**2)))/180
+    enddef;
+
+    def enplace=
+    xscaled x.u yscaled y.u shifted (Origine*cm)
+    enddef;
+
+    vardef placepoint(expr q,r)=
+    (q,r) enplace
+    enddef;
+    
+    path Cb[];
+    
+    vardef courbe[](expr a,b,nb)(text texte)=
+    path Courbe;
+    for i:=0 upto nb :
+    x@[i]:=(a+i*(b-a)/nb);
+    x:=x@[i];
+    y@[i]:=texte;
+    endfor ;
+    Cb@:=(x@.0*x.u,y@.0*y.u)
+    for i:=1 upto nb :
+    ..(x@[i]*x.u,y@[i]*y.u)
+    endfor;
+    Cb@:=Cb@ shifted (Origine*cm);
+    Courbe=Cb@;
+    Courbe
+    enddef;
+
+    if Grille:
+    drawoptions(withcolor 0.75white);
+    for k=xpart(Origine) step grillex until xmax:
+    trace u*(k,ymin)--u*(k,ymax);
+    endfor;
+    for k=xpart(Origine) step -grillex until xmin:
+    trace u*(k,ymin)--u*(k,ymax);
+    endfor;
+    for k=ypart(Origine) step grilley until ymax:
+    trace u*(xmin,k)--u*(xmax,k);
+    endfor;
+    for k=ypart(Origine) step -grilley until ymin:
+    trace u*(xmin,k)--u*(xmax,k);
+    endfor;
+    drawoptions();
+    fi;
+    if Graduations:
+    for k=gradx step gradx until bornesup:%xmax*gradx/grillex:
+    dotlabel.bot(TEX("\num{"&decimal(k)&"}"),(k*x.u+xpart(Origine*cm),ypart(Origine*cm)));
+    endfor;
+    for k=-gradx step -gradx until borneinf:%xmin*gradx/grillex:
+    dotlabel.bot(TEX("\num{"&decimal(k)&"}"),(k*x.u+xpart(Origine*cm),ypart(Origine*cm)));
+    endfor;
+    for k=grady step grady until ymax*grady/grilley:
+    dotlabel.lft(TEX("\num{"&decimal(k)&"}"),(xpart(Origine*cm),k*y.u+ypart(Origine*cm)));
+    endfor;
+    for k=-grady step -grady until ymin*grady/grilley:
+    dotlabel.lft(TEX("\num{"&decimal(k)&"}"),(xpart(Origine*cm),k*y.u+ypart(Origine*cm)));
+    endfor;
+    fi;
+
+    drawoptions(withpen pencircle scaled(1));
+    drawarrow (u*(0,ymin)--u*(0,ymax)) shifted (u*(xpart(Origine),0));
+    drawarrow (u*(xmin,0)--u*(xmax,0)) shifted (u*(0,ypart(Origine)));
+    label.llft(btex 0 etex,u*Origine);
+    drawoptions();
+    if Vide:
+    clip currentpicture to polygone(u*(xmin,ymin),u*(xmax,ymin),u*(xmax,ymax),u*(xmin,ymax));
+    else:
+    draw courbe1(borneinf,bornesup,nbpointsCourbe)(#2) withpen (pencircle scaled Epaisseur) withcolor colortrace;
+    % labelisation
+    numeric t;
+    t=pos*length Cb1;
+    pair PT,Tangente;
+    PT:=point (pos*length Cb1) of Cb1;
+    Tangente:=unitvector(direction t of Cb1);
+    label(TEX("\useKV[TraceG]{NomCourbe}") rotated angle(Tangente),PT+2mm*(Tangente rotated 90));
+    % fin labelisation
+    if \useKV[TraceG]{Code}:
+    \useKV[TraceG]{Traces}
+    fi;
+    clip currentpicture to polygone(u*(xmin,ymin),u*(xmax,ymin),u*(xmax,ymax),u*(xmin,ymax));
+    if LegendeX:
+    label.rt(btex \useKV[TraceG]{LabelX} etex,u*(xmax,ypart(Origine)));
+    fi;
+    if LegendeY:
+    label.top(btex \useKV[TraceG]{LabelY} etex,u*(xpart(Origine),ymax));
+    fi;
+    fi;
+  \end{mplibcode}
+  \else%
+  \mpxcommands{%
+    \usepackage{ProfCollege}
+    \setKV[TraceG]{#1}
+  }%
+  \begin{mpost}[mpsettings={borneinf=\useKV[TraceG]{Bornea};bornesup=\useKV[TraceG]{Borneb};nbpointsCourbe:=\useKV[TraceG]{NbPointsCourbe};xmin=\useKV[TraceG]{Xmin};xmax=\useKV[TraceG]{Xmax};ymin=\useKV[TraceG]{Ymin};ymax=\useKV[TraceG]{Ymax};pasx=\useKV[TraceG]{Xstep};pasy=\useKV[TraceG]{Ystep};xu=1cm/\useKV[TraceG]{Xstep};yu=1cm/\useKV[TraceG]{Ystep};grillex=\useKV[TraceG]{PasGrilleX};grilley=\useKV[TraceG]{PasGrilleY};pos=\useKV[TraceG]{LabelC};Epaisseur=\useKV[TraceG]{Epaisseur}; color colortrace;colortrace=\useKV[TraceG]{CouleurTrace};boolean Grille,Vide;Grille=\useKV[TraceG]{Grille};Vide=\useKV[TraceG]{Vide};boolean Graduations;Graduations=\useKV[TraceG]{Graduations};
+    pair Origine;
+    Origine=(xmin,ymin)+\useKV[TraceG]{Origine};}]
+
+    vardef sin(expr t) = sind(c*t) enddef;
+
+    vardef cos(expr t) = cosd(c*t) enddef;
+    
+    vardef tan(expr t) = sin(t)/cos(t) enddef;
+   
+    vardef exp(expr t) = e**t enddef;
+   
+    vardef ch(expr x)=(exp(x)+exp(-x))/2 enddef;
+    
+    vardef sh(expr x)=(exp(x)-exp(-x))/2 enddef;
+    
+    vardef ln(expr t) = mlog(t)/256 enddef;
+    
+    vardef arcsin(expr x)=%Définition mathématique en radian
+    pi*angle((sqrt(1-x**2),x))/180
+    enddef;
+    
+    vardef arccos(expr x)=%Définition mathématique en radian
+    pi*angle((x,sqrt(1-x**2)))/180
+    enddef;
+    
+    path Cb[];
+    
+    vardef courbe[](expr a,b,nb)(text texte)=
+    path Courbe;
+    for i:=0 upto nb :
+    x@[i]:=(a+i*(b-a)/nb);
+    x:=x@[i];
+    y@[i]:=texte;
+    endfor ;
+    Cb@:=(x@.0*xu,y@.0*yu)
+    for i:=1 upto nb :
+    ..(x@[i]*xu,y@[i]*yu)
+    endfor;
+    Cb@:=Cb@ shifted (Origine*cm);
+    Courbe=Cb@;
+    Courbe
+    enddef;
+
+    if Grille:
+    drawoptions(withcolor 0.75white);
+    for k=xpart(Origine) step grillex until xmax:
+    trace u*(k,ymin)--u*(k,ymax);
+    endfor;
+    for k=xpart(Origine) step -grillex until xmin:
+    trace u*(k,ymin)--u*(k,ymax);
+    endfor;
+    for k=ypart(Origine) step grilley until ymax:
+    trace u*(xmin,k)--u*(xmax,k);
+    endfor;
+    for k=ypart(Origine) step -grilley until ymin:
+    trace u*(xmin,k)--u*(xmax,k);
+    endfor;
+    drawoptions();
+    fi;
+    if Graduations:
+    for k=1 upto xmax/grillex:
+    dotlabel.bot(LATEX("\num{"&decimal(k)&"}"),(k*xu+xpart(Origine*cm),ypart(Origine*cm)));
+    endfor;
+    for k=-1 downto xmin/grillex:
+    dotlabel.bot(LATEX("\num{"&decimal(k)&"}"),(k*xu+xpart(Origine*cm),ypart(Origine*cm)));
+    endfor;
+    for k=1 upto ymax/grilley:
+    dotlabel.lft(LATEX("\num{"&decimal(k)&"}"),(xpart(Origine*cm),k*yu+ypart(Origine*cm)));
+    endfor;
+    for k=-1 downto ymin/grilley:
+    dotlabel.lft(LATEX("\num{"&decimal(k)&"}"),(xpart(Origine*cm),k*yu+ypart(Origine*cm)));
+    endfor;
+    fi;
+    drawoptions(withpen pencircle scaled1.5);
+    drawarrow (u*(0,ymin)--u*(0,ymax)) shifted (u*(xpart(Origine),0));
+    drawarrow (u*(xmin,0)--u*(xmax,0)) shifted (u*(0,ypart(Origine)));
+    drawoptions();
+    if Vide:
+    else:
+    draw courbe1(borneinf,bornesup,nbpointsCourbe)(#2) withpen (pencircle scaled Epaisseur) withcolor colortrace;
+%    % labelisation
+    numeric t;
+    t=pos*length Cb1;
+    pair PT,Tangente;
+    PT:=point (pos*length Cb1) of Cb1;
+    Tangente:=unitvector(direction t of Cb1);
+    label(btex \noexpand\useKV[TraceG]{NomCourbe} etex rotated angle(Tangente),PT+2mm*(Tangente rotated 90));
+%    % fin labelisation
+    clip currentpicture to polygone(u*(xmin,ymin),u*(xmax,ymin),u*(xmax,ymax),u*(xmin,ymax));
+    label.rt(btex \useKV[TraceG]{LabelX} etex,u*(xmax,ypart(Origine)));
+    label.top(btex \useKV[TraceG]{LabelY} etex,u*(xpart(Origine),ymax));
+    fi;
+  \end{mpost}
+  \fi%
+}%

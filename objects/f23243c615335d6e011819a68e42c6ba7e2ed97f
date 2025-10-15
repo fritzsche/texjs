@@ -1,0 +1,564 @@
+% \iffalse
+% File: numberpt.dtx
+%
+% Copyright (C) 2019 Miguel V. S. Frasson (mvsfrasson@gmail.com)
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3c
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2008/05/04 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+%
+% The Current Maintainer of this work is the author.
+%
+% This work consists of the files numberpt.dtx and numberpt.ins
+% and the derived file numberpt.sty.
+% 
+%<*driver>
+\documentclass{ltxdoc}
+\usepackage{doc}
+\usepackage[T1]{fontenc}
+\usepackage{amstext,makeidx,multicol}
+\usepackage{numberpt}
+\begin{document}
+  \DocInput{numberpt.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% \StopEventually
+%
+% \changes{1.0}{2019/07/13}{initial version}
+%
+% \MakeShortVerb+ 
+%
+% \title{\textsf{numberpt}: counters spelled out in Portuguese}
+% \author{Miguel Vin\'\i cius Santini Frasson}
+% \date{2019--07--13 version 1.0}
+%
+% \maketitle
+%
+% \tableofcontents
+%
+% \section{Introduction}
+%
+% The package \textsf{numberpt} provides a counter style like
+% +\arabic+, +\alph+ etc., but that spells numbers in Portuguese, like
+% ``um'' (one in Portuguese), ``dois'' (two), ``tr\^es'' (three),
+% \ldots, up to ``novecentos e noventa e nove mil novecentos e noventa
+% e nove'' (999{,}999).  There are counter commands to output the text
+% in ``lowercase'', ``First word capitalized'', ``All Words
+% Capitalized'' ou in ``UPPERCASE''.
+%
+% \section{User commands}
+%
+% \newcommand{\countername}{\texttt{\textit{counter}}}
+%
+% \DescribeMacro{\numberpt}
+% \DescribeMacro{\Numberpt}
+% \DescribeMacro{\NumberPt}
+% \DescribeMacro{\NUMBERPT}
+%    Macros to output counters in Portuguese  in ``lowercase'',
+%    ``Capitalized'' or in ``UPPERCASE''---:\\
+%    +  \numberpt{+\countername+}+ (ex: vinte e tr\^es),\\
+%    +  \Numberpt{+\countername+}+ (ex: Vinte e tr\^es),\\
+%    +  \NumberPt{+\countername+}+ (ex: Vinte E Tr\^es),\\
+%    +  \NUMBERPT{+\countername+}+ (ex: VINTE E TR\^ES).
+%
+%    Example:
+%
+%\begin{verbatim}
+%\renewcommand{\thechapter}{\Numberpt{chapter}}
+%\end{verbatim}
+% will produce chapter headers like:
+%
+% \centerline{Cap\'itulo Um}
+% \centerline{Cap\'itulo Dois}
+%
+% By default, command +\NumberPt+ for all capitalized numbers output
+% connectors ``e'' in uppercase. For example, if +page+ counter is 23,
+% then +\NumberPt{page}+ $\to$ Vinte E Tr\^es.  To change this behavior
+% (connector ``e'' in lowercase), use starred versions +\NumberPt*+.
+%
+% \section{Package options}
+%
+% \DescribeMacro{catorze}
+% \DescribeMacro{quatorze}
+% For 14, both forms ``catorze'' e ``quatorze'' are correct.  Use
+% package option +catorze+ (default) or +quatorze+ to select which
+% form is used.
+%
+% \DescribeMacro{dezesseis}
+% \DescribeMacro{dezasseis}
+% In Brazil, the forms for 16, 17 and 19 are ``dezesseis'',
+% ``dezessete'' and ``de\-ze\-no\-ve''.  In Portugal, the forms are
+% ``dezasseis'', ``dezassete'' and ``dezanove''. To select Brazilian
+% Portuguese forms (default), use option +dezesseis+; for European
+% Portuguese form, use +dezasseis+.
+%
+% \section{Code}
+%
+% \subsection{Package identification}
+%
+%    \begin{macrocode}
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{numberpt}[2019/07/12 v1.0 Counters as numbers in Portuguese]
+%    \end{macrocode}
+%
+% We use \LaTeX3 in this package.
+%
+%    \begin{macrocode}
+\RequirePackage{expl3,xparse}
+\ExplSyntaxOn
+%    \end{macrocode}
+%
+% \subsection{Package options}
+% Package options declarations +catorze+ or +quatorze+, and
+% +dezasseis+ or +dezesseis+.  Creating undocumented ``user commands''
+% +\NumberPTcatorze+, +\NumberPTquatorze+, +\NumberPTdezasseis+ and
+% +\NumberPTdezasseis+ that set switches.
+%
+%    \begin{macrocode}
+\bool_new:N \NumberPT_catorze
+\bool_new:N \NumberPT_dezesseis
+\newcommand{\NumberPTcatorze}{\bool_set_true:N  \NumberPT_catorze}
+\newcommand{\NumberPTquatorze}{\bool_set_false:N  \NumberPT_catorze}
+\DeclareOption{ catorze  }{ \NumberPTcatorze }
+\DeclareOption{ quatorze }{ \NumberPTquatorze }
+\ExecuteOptions{ catorze }
+\newcommand{\NumberPTdezesseis}{\bool_set_true:N  \NumberPT_dezesseis}
+\newcommand{\NumberPTdezasseis}{\bool_set_false:N  \NumberPT_dezesseis}
+\DeclareOption{ dezasseis  }{ \NumberPTdezasseis}
+\DeclareOption{ dezesseis  }{ \NumberPTdezesseis}
+\ExecuteOptions{ dezesseis }
+\ProcessOptions
+%    \end{macrocode}
+%
+% \subsection{Case handling}
+% Command +\NumberPT_case:nn+ and switches govern capitalization.
+%
+%    \begin{macrocode}
+\bool_new:N \NumberPT_capital
+\bool_new:N \NumberPT_capitalfirst
+\bool_new:N \NumberPT_capitale
+\bool_new:N \NumberPT_uppercase
+\cs_new:Nn \NumberPT_case:nn {
+  \bool_if:NTF \NumberPT_capital {
+    \uppercase { #1 }
+  } {
+    #1
+  }
+  \bool_if:NTF \NumberPT_uppercase {
+    \uppercase { #2 }
+  } {
+    #2 }
+  \bool_if:NT \NumberPT_capitalfirst {
+    \bool_set_false:N \NumberPT_capital
+  }
+}
+%    \end{macrocode}
+%
+% \subsection{Output for numbers with 1, 2 or 3 digits}
+% +\NumberPT_u:n{+$U$+}+ takes digit $U$ and outputs ``zero'', ``um'',
+% ``dois'', \dots, ``nove''.
+%
+%    \begin{macrocode}
+\cs_new:Nn \NumberPT_u:n {
+  \if_case:w #1
+    \NumberPT_case:nn {z}{ero}\or:
+    \NumberPT_case:nn {u}{m}\or:
+    \NumberPT_case:nn {d}{ois}\or:
+    \NumberPT_case:nn {t}{r\^es}\or:
+    \NumberPT_case:nn {q}{uatro}\or:
+    \NumberPT_case:nn {c}{inco}\or:
+    \NumberPT_case:nn {s}{eis}\or:
+    \NumberPT_case:nn {s}{ete}\or:
+    \NumberPT_case:nn {o}{ito}\or:
+    \NumberPT_case:nn {n}{ove}%
+  \fi:}
+%    \end{macrocode}
+%
+% Command +\NumberPT_e_u:n{+$U$+}+ outputs `` e um'' etc, if $U>0$,
+% otherwise outputs nothing.
+%
+%    \begin{macrocode}
+\cs_new:Nn \NumberPT_e_u:n {
+  \int_compare:nNnT #1 > 0 {
+    \space \bool_if:nTF \NumberPT_capitale {E}{e} \space \NumberPT_u:n #1
+  }
+}
+%    \end{macrocode}
+%
+% Commands +\NumberPT_du:nn{+$D$+}{+$U$+}+ and
+% +\NumberPT_e_du:nn{+$D$+}{+$U$+}+ are similar, with 2 digits.
+% Numbers from 0 to 19 are all special cases.
+%
+%    \begin{macrocode}
+\cs_new:Nn \NumberPT_du:nn {
+  \if_case:w #1 % #1=0
+    \NumberPT_u:n #2
+  \or: % #1=1
+    \if_case:w #2
+      \NumberPT_case:nn {d}{ez}\or:
+      \NumberPT_case:nn {o}{nze}\or:
+      \NumberPT_case:nn {d}{oze}\or:
+      \NumberPT_case:nn {t}{reze}\or:
+      \bool_if:NTF \NumberPT_catorze {
+        \NumberPT_case:nn {c}{atorze}
+      } {
+        \NumberPT_case:nn {q}{uatorze}
+      }\or:
+      \NumberPT_case:nn {q}{uinze}\or:
+      \bool_if:NTF \NumberPT_dezesseis {
+        \NumberPT_case:nn {d}{ezesseis}
+      } {
+        \NumberPT_case:nn {d}{ezasseis}
+      }\or:
+      \bool_if:NTF \NumberPT_dezesseis {
+        \NumberPT_case:nn {d}{ezessete}
+      } {
+        \NumberPT_case:nn {d}{ezassete}
+      }\or:
+      \NumberPT_case:nn {d}{ezoito}\or:
+      \bool_if:NTF \NumberPT_dezesseis {
+        \NumberPT_case:nn {d}{ezenove}
+      } {
+        \NumberPT_case:nn {d}{ezanove}
+      }\or:
+    \fi:
+  \or: % #1>1
+    \NumberPT_case:nn {v}{inte} \NumberPT_e_u:n #2
+  \or:
+    \NumberPT_case:nn {t}{rinta} \NumberPT_e_u:n #2
+  \or:
+    \NumberPT_case:nn {q}{uarenta} \NumberPT_e_u:n #2
+  \or:
+    \NumberPT_case:nn {c}{inquenta} \NumberPT_e_u:n #2
+  \or:
+    \NumberPT_case:nn {s}{essenta} \NumberPT_e_u:n #2
+  \or:
+    \NumberPT_case:nn {s}{etenta} \NumberPT_e_u:n #2
+  \or:
+    \NumberPT_case:nn {o}{itenta} \NumberPT_e_u:n #2
+  \or:
+    \NumberPT_case:nn {n}{oventa} \NumberPT_e_u:n #2
+  \fi:
+}
+
+\cs_new:Nn \NumberPT_e_du:nn {
+  \int_compare:nNnT { #1 + #2 } > 0 {
+    \space \bool_if:nTF \NumberPT_capitale {E}{e} \space \NumberPT_du:nn #1 #2
+  }
+}
+%    \end{macrocode}
+%
+% +\NumberPT_cdu:nnn{+$C$+}{+$D$+}{+$U$+}+ takes digits $C$, $D$ and $U$
+% and outputs correspondent number.
+%
+%    \begin{macrocode}
+\cs_new:Nn \NumberPT_cdu:nnn {%
+  \if_case:w #1 % #1=0
+    \NumberPT_du:nn #2 #3
+  \or: % #1=1
+    \int_compare:nNnTF { #2 + #3 } = 0  % "cem" if 00 or "cento e " + finish
+      { \NumberPT_case:nn {c}{em} }
+      { \NumberPT_case:nn {c}{ento} \NumberPT_e_du:nn #2 #3 }
+  \or: % #1>1
+    \NumberPT_case:nn {d}{uzentos}  \NumberPT_e_du:nn #2 #3
+  \or:
+    \NumberPT_case:nn {t}{rezentos} \NumberPT_e_du:nn #2 #3
+  \or:
+    \NumberPT_case:nn {q}{uatrocentos} \NumberPT_e_du:nn #2 #3
+  \or:
+    \NumberPT_case:nn {q}{uinhentos} \NumberPT_e_du:nn #2 #3
+  \or:
+    \NumberPT_case:nn {s}{eiscentos} \NumberPT_e_du:nn #2 #3
+  \or:
+    \NumberPT_case:nn {s}{etecentos} \NumberPT_e_du:nn #2 #3
+  \or:
+    \NumberPT_case:nn {o}{itocentos} \NumberPT_e_du:nn #2 #3
+  \or:
+    \NumberPT_case:nn {n}{ovecentos} \NumberPT_e_du:nn #2 #3
+  \fi:
+}
+%    \end{macrocode}
+%
+% \subsection{Output for numbers with 4, 5 or 6 digits}
+%
+% \DeleteShortVerb+
+% If a number $abcdef$ has between 4 and 6 digits, the rule for
+% spelling this number is\footnote{See
+% \texttt{www.languagesandnumbers.com/como-contar-em-portugues-brasil/pt/por-bra/}}:
+% \begin{itemize}
+% \item spell the 3-digits number $abc$ (unless $abc=001$) + ``mil''
+% \item stop if $def=000$, otherwise:
+% \item add the connector ``e'' for numbers
+%   \begin{itemize}
+%   \item finishing in 00, \emph{i.e.}, $e+f=0$
+%   \item without digit for hundreds , \emph{i.e.}, $d=0$
+%   \end{itemize}%
+% \item spell the 3-digits number $def$
+% \end{itemize}
+%
+%    \begin{macrocode}
+\cs_new:Nn \NumberPT_e_cdu:nnn {
+  \int_compare:nNnF {#1 + #2 + #3} = 0 {
+    \space
+    \bool_if:nT { \int_compare_p:nNn #1 = 0 || \int_compare_p:nNn {#2 + #3} = 0 }
+    {
+      \bool_if:nTF \NumberPT_capitale {E}{e}
+      \space
+    }
+    \NumberPT_cdu:nnn #1 #2 #3
+  }
+}
+%    \end{macrocode}
+%
+% Output for numbers with up to 6 digits.
+%
+%    \begin{macrocode}
+\cs_new:Nn \NumberPT_abcdef:nnnnnn {
+  \int_compare:nNnTF {#1 + #2 + #3} = 0 %abc=000
+  {
+    \NumberPT_cdu:nnn #4 #5 #6
+  }
+  % else
+  {
+    % avoid "um mil", using just "mil"
+    \int_compare:nNnF {100 * #1 + 10 * #2 + #3} = 1 {
+      \NumberPT_cdu:nnn #1 #2 #3
+      \space
+    }
+    \NumberPT_case:nn {m}{il}
+    \NumberPT_e_cdu:nnn #4 #5 #6
+  }
+}
+\cs_generate_variant:Nn \NumberPT_abcdef:nnnnnn {xxxxxx}
+%    \end{macrocode}
+%
+% \subsection{Conversion from counter to digits}
+%
+% \MakeShortVerb+
+% Now, conversion from counter to digits.  digits will be stored in
+% macros +\NumberPT_digit_u+, +\NumberPT_digit_d+, +\NumberPT_digit_c+.
+% Decomposition is done with mod.
+%
+%    \begin{macrocode}
+\int_new:N \NumberPT_digit_u
+\int_new:N \NumberPT_digit_d
+\int_new:N \NumberPT_digit_c
+\int_new:N \NumberPT_digit_um
+\int_new:N \NumberPT_digit_dm
+\int_new:N \NumberPT_digit_cm
+
+\cs_new:Nn \NumberPT_decompose:n {
+  \int_set:Nn \l_tmpa_int { #1 }
+  \int_set:Nn \NumberPT_digit_u { \int_mod:nn { \l_tmpa_int } { 10 } }
+  \int_set:Nn \l_tmpa_int { ( \l_tmpa_int - \NumberPT_digit_u ) / 10 }
+  \int_set:Nn \NumberPT_digit_d { \int_mod:nn { \l_tmpa_int } { 10 } }
+  \int_set:Nn \l_tmpa_int { ( \l_tmpa_int - \NumberPT_digit_d ) / 10 }
+  \int_set:Nn \NumberPT_digit_c { \int_mod:nn { \l_tmpa_int } { 10 } }
+  \int_set:Nn \l_tmpa_int { ( \l_tmpa_int - \NumberPT_digit_c ) / 10 }
+  \int_set:Nn \NumberPT_digit_um { \int_mod:nn { \l_tmpa_int } { 10 } }
+  \int_set:Nn \l_tmpa_int { ( \l_tmpa_int - \NumberPT_digit_um ) / 10 }
+  \int_set:Nn \NumberPT_digit_dm { \int_mod:nn { \l_tmpa_int } { 10 } }
+  \int_set:Nn \l_tmpa_int { ( \l_tmpa_int - \NumberPT_digit_dm ) / 10 }
+  \int_set:Nn \NumberPT_digit_cm { \int_mod:nn { \l_tmpa_int } { 10 } }
+}
+%    \end{macrocode}
+%
+% Now, command that prints counter: +\NumberPT_print_counter:n+.
+% Declaring error message in case counter is out of range from 0 to 999.
+% Even in case of this error, falls back to arabic number.
+%
+%    \begin{macrocode}
+\msg_new:nnn
+{ numberpt } { counter-out-of-range } {Counter~`#1'~out~of~range~0~...~999999}
+
+\cs_new:Nn \NumberPT_print_counter:n {
+  \int_set:Nn \l_tmpa_int { \value{#1} }
+  \bool_if:nTF {
+    \int_compare_p:n { \l_tmpa_int >= 0 } &&
+    \int_compare_p:n { \l_tmpa_int < 1000000 }
+  }
+  {
+    \NumberPT_decompose:n { \l_tmpa_int }
+    \NumberPT_abcdef:xxxxxx
+    { \int_use:N \NumberPT_digit_cm }
+    { \int_use:N \NumberPT_digit_dm }
+    { \int_use:N \NumberPT_digit_um }
+    { \int_use:N \NumberPT_digit_c  }
+    { \int_use:N \NumberPT_digit_d  }
+    { \int_use:N \NumberPT_digit_u  }
+  }
+  {
+    \msg_error:nnn { numberpt } { counter-out-of-range } {#1}
+    \arabic{#1}
+  }
+}
+%    \end{macrocode}
+%
+% \subsection{User macros}
+% Finally, user macros.  Each macro sets switches for capitalization
+% and calls +\NumberPT_print_counter:n+.
+%    \begin{macrocode}
+\NewDocumentCommand{\numberpt}{m}{
+  \bool_set_false:N \NumberPT_capital
+  \bool_set_false:N \NumberPT_capitale
+  \bool_set_false:N \NumberPT_uppercase
+  \NumberPT_print_counter:n { #1 }
+}
+
+\NewDocumentCommand{\NumberPt}{s m}{
+  \bool_set_true:N \NumberPT_capital
+  \bool_set:Nn \NumberPT_capitale {! #1}
+  \bool_set_false:N \NumberPT_capitalfirst
+  \bool_set_false:N \NumberPT_uppercase
+  \NumberPT_print_counter:n { #2 }
+}
+
+\NewDocumentCommand{\Numberpt}{m}{
+  \bool_set_true:N \NumberPT_capital
+  \bool_set_false:N \NumberPT_capitale
+  \bool_set_true:N \NumberPT_capitalfirst
+  \bool_set_false:N \NumberPT_uppercase
+  \NumberPT_print_counter:n { #1 }
+}
+
+\NewDocumentCommand{\NUMBERPT}{m}{
+  \bool_set_true:N \NumberPT_capital
+  \bool_set_true:N \NumberPT_capitale
+  \bool_set_true:N \NumberPT_uppercase
+  \NumberPT_print_counter:n { #1 }
+}
+%    \end{macrocode}
+%
+% End of code.
+%    \begin{macrocode}
+\ExplSyntaxOff
+\endinput
+%    \end{macrocode}
+%
+% \section{Tests}
+%
+% Here we create a counter and spell the numbers for some selected values.
+%
+% \newcounter{test}
+% \newcommand{\test}[1]{\par\setcounter{test}{#1}#1: \numberpt{test}}
+% \newcommand{\Test}[1]{\par\setcounter{test}{#1}#1: \Numberpt{test}}
+% \newcommand{\TesT}[1]{\par\setcounter{test}{#1}#1: \NumberPt{test}}
+% \newcommand{\TesTs}[1]{\par\setcounter{test}{#1}#1: \NumberPt*{test}}
+% \newcommand{\TEST}[1]{\par\setcounter{test}{#1}#1: \NUMBERPT{test}} 
+%
+% \subsection{Tests with \texttt{\protect\string\numberpt}}
+%
+% \begin{multicols}{3}
+% \test{1}
+% \test{2}
+% \test{3}
+% \test{4}
+% \test{5}
+% \test{6}
+% \test{7}
+% \test{8}
+% \test{9}
+% \test{10}
+% \test{11}
+% \test{12}
+% \test{13}
+% \test{14}
+% \test{15}
+% \test{16}
+% \test{17}
+% \test{18}
+% \test{19}
+% \test{20}
+% \test{21}
+% \test{22}
+% \test{30}
+% \test{31}
+% \test{40}
+% \test{41}
+% \test{50}
+% \test{51}
+% \test{60}
+% \test{61}
+% \test{70}
+% \test{71}
+% \test{80}
+% \test{81}
+% \test{90}
+% \test{91}
+% \test{100}
+% \test{101}
+% \end{multicols}
+% \subsection{Tests with \texttt{\protect\string\Numberpt}}
+% \begin{multicols}{2}
+% \Test{199}
+% \Test{200}
+% \Test{201}
+% \Test{300}
+% \Test{301}
+% \Test{400}
+% \Test{401}
+% \Test{500}
+% \Test{501}
+% \end{multicols}
+% \subsection{Tests with \texttt{\protect\string\NumberPt}}
+% \begin{multicols}{2}
+% \TesT{600}
+% \TesT{601}
+% \TesT{700}
+% \TesT{701}
+% \end{multicols}
+% \subsection{Tests with \texttt{\protect\string\NumberPt*}}
+% \begin{multicols}{2}
+% \TesTs{800}
+% \TesTs{801}
+% \TesTs{900}
+% \TesTs{999}
+% \end{multicols}
+% \subsection{Tests with \texttt{\protect\string\NUMBERPT}}
+% \begin{multicols}{1}
+% \end{multicols}
+% \TEST{1000}
+% \TEST{1001}
+% \TEST{1099}
+% \TEST{1100}
+% \TEST{1101}
+% \TEST{2000}
+% \TEST{2001}
+% \TEST{2099}
+% \TEST{2100}
+% \TEST{2101}
+% \TEST{2200}
+% \TEST{2201}
+% \TEST{2299}
+% \TEST{2300}
+%
+% \subsection{Tests with 14, 16, 17, 19}
+%
+% \begin{quote}
+%   
+% \end{quote}
+% \NumberPTcatorze
+% \test{14} (must be ``catorze'')\medskip
+% \NumberPTquatorze
+% \test{14} (must be ``quatorze'')\bigskip
+%
+% \NumberPTdezasseis
+% \test{16} (must be ``dezasseis'')
+% \test{17} (must be ``dezassete'')
+% \test{19} (must be ``dezanove'')\medskip
+% \NumberPTdezesseis
+% \test{16} (must be ``dezesseis'')
+% \test{17} (must be ``dezessete'')
+% \test{19} (must be ``dezenove'')
+% \end{document}
+

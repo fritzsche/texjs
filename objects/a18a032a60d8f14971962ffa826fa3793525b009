@@ -1,0 +1,327 @@
+% \iffalse 
+%<*internal>
+\iffalse
+%</internal>
+%<*readme>
+___________________
+The complexpolylongdiv package
+v0.2
+
+This package provides a simple interface for typesetting
+(complex) polynomial long division.
+
+If you want to report any bugs or typos and corrections in the
+documentation, or ask for any new features, or suggest any
+improvements, or ask any questions about the package, then
+please use the issue tracker:
+
+  <https://github.com/xepersian/complexpolylongdiv/issues>
+  
+In doing so, please always explain your issue well enough, 
+and always include a minimal working example showing the 
+issue.
+
+You may also have conversations, ask questions and post answers
+without opening issues using the Discussions space:
+
+  <https://github.com/xepersian/complexpolylongdiv/discussions>
+  
+The announcements for the new releases of the package will
+also appear in the Discussions space under the Announcements
+category.
+  
+Current version release date: 2024/12/30
+
+___________________________________________
+Vafa Khalighi
+  
+Copyright (c) Vafa Khalighi 2024--2025
+
+It may be distributed and/or modified under the LaTeX Project Public License,
+version 1.3c or higher (your choice). The latest version of
+this license is at: http://www.latex-project.org/lppl.txt
+
+This work is “author-maintained” (as per LPPL maintenance status) 
+by Vafa Khalighi.
+%</readme>
+%<*internal>
+\fi
+\begingroup
+%</internal>
+%<*batchfile>
+\input docstrip.tex
+\keepsilent
+\preamble
+
+  __________________________________________________
+  Vafa Khalighi
+  
+  Copyright (c) 2024--2025  Vafa Khalighi
+  
+  It may be distributed and/or modified under the LaTeX Project Public License,
+  version 1.3c or higher (your choice). The latest version of
+  this license is at: http://www.latex-project.org/lppl.txt
+
+  This work is “author-maintained” (as per LPPL maintenance status) 
+  by Vafa Khalighi.
+
+
+\endpreamble
+\askforoverwritefalse
+\generate{\file{complexpolylongdiv.sty}{\from{\jobname.dtx}{table,complexpolylongdiv.sty}}}
+%</batchfile>
+%<batchfile>\endbatchfile
+%<*internal>
+\generate{\file{\jobname.ins}{\from{\jobname.dtx}{batchfile}}}
+\nopreamble\nopostamble
+\generate{\file{README.txt}{\from{\jobname.dtx}{readme}}}
+\generate{\file{complexpolylongdiv-example.tex}{\from{\jobname.dtx}{complexpolylongdiv-example.tex}}}
+\endgroup
+\immediate\write18{mv README.txt README}
+\immediate\write18{makeindex -s gind.ist -o \jobname.ind  \jobname.idx}
+\immediate\write18{makeindex -s gglo.ist -o \jobname.gls  \jobname.glo}
+%</internal>
+%
+%<*driver>
+\documentclass{ltxdoc}
+\usepackage{complexpolylongdiv}
+\usepackage{bidicode}
+\usepackage{microtype}
+\definecolor{niceblue}{rgb}{0.2,0.4,0.8}
+\usepackage[numbered]{hypdoc}
+\hypersetup{%
+  pdfauthor={Vafa Khalighi},%
+  linkcolor=niceblue,%
+  urlcolor=niceblue,%
+  citecolor=niceblue%
+}
+\pdfstringdefDisableCommands{%
+\renewcommand\Lcs[1]{\textbackslash#1}
+}
+\EnableCrossrefs
+\CodelineIndex
+%\RecordChanges
+\begin{document}
+  \DocInput{\jobname.dtx}
+  \PrintIndex
+%  \PrintChanges
+\end{document}
+%</driver>
+%
+%
+% \fi
+%
+% \GetFileInfo{\jobname.dtx}
+% \title{The \textsf{complexpolylongdiv} Package}
+% \author{Vafa Khalighi}
+%\maketitle
+%
+%\begingroup
+%\parindent 0pt
+%\vskip 0pt plus 3fill
+%{\color{red!85!black}\fbox{\begin{minipage}{\dimexpr\textwidth-2\fboxsep-2\fboxrule}
+%If you want to report any bugs or typos and corrections in the documentation,
+%or ask for any new features, or suggest any improvements, or ask any questions about the package, then please use the issue tracker:
+%
+%\medskip
+%  \centerline{\url{https://github.com/xepersian/complexpolylongdiv/issues}}
+%
+%\medskip
+%In doing so, please always explain your issue well enough, and always include
+%a minimal working example showing the issue. 
+%
+%\bigskip
+%You may also have conversations, ask questions and post answers
+%without opening issues using the Discussions space:
+%
+%\medskip
+%  \centerline{\url{https://github.com/xepersian/complexpolylongdiv/discussions}}
+%
+%\medskip
+%The announcements for the new releases of the package will
+%also appear in the Discussions space under the Announcements
+%category.
+%\end{minipage}
+%}}
+%
+%\vskip 0pt plus 3fill
+%
+%Copyright (c) 2024--2025 Vafa Khalighi
+%
+%\medskip
+%Permission is granted to distribute and/or modify \emph{both the documentation and the code} under the conditions of the \LaTeX{} Project Public License, either version 1.3c of this license or (at your option) any later version.
+%\endgroup
+%
+%\clearpage
+% \tableofcontents
+% \section{Introduction}
+%To the best of my knowledge, there is no {\TeX} package for 
+%typesetting (complex) polynomial long division. The 
+%\textsf{complexpolylongdiv} package provides a simple interface
+%for typesetting (complex) polynomial long division.
+%
+%The package does not provide automatic (complex) polynomial long
+%division at present and the long division should be done by hand. 
+%However, if there is enough interest in the package, I will add this
+%feature in the next version.
+%
+%\section{Using the package}
+%\subsection{Loading The Package}
+%You can load the package in the ordinary way:
+%\begin{BDef}
+%\Lcs{usepackage}\Largb{complexpolylongdiv}
+%\end{BDef}
+%\subsection{The user interface}
+%The package provides the environment \texttt{complexpolylongdiv}
+%and the control sequence \Lcs{complexpolyquotient} for 
+%typesetting (complex) polynomial long division.
+%\subsubsection{The \texttt{complexpolylongdiv} environment}
+%\begin{BDef}
+%\LBEG{complexpolylongdiv}\OptArg{pos}\quad\Larga{content}\quad\LEND{complexpolylongdiv}
+%\end{BDef}
+%
+%The \OptArg{pos} is optional and determines the vertical alignment of
+%the (complex) polynomial long division. If \texttt{pos} is \texttt{t}, then 
+%the \Larga{content} is placed vertically at the top and if \texttt{pos} is \texttt{b}, then 
+%the \Larga{content} is placed vertically at the bottom; otherwise, 
+%the \Larga{content} is placed vertically at the center (the default 
+%when the optional \OptArg{pos} is omitted).
+%
+%\subsubsection{The control sequence \Lcs{complexpolyquotient}}
+%\begin{BDef}
+%\Lcs{complexpolyquotient}\Largb{\Larga{quotient}}
+%\end{BDef}
+%
+%The control sequence \Lcs{complexpolyquotient} typesets \Larga{quotient}.
+%
+%\subsection{An Example}
+%\begin{lstlisting}[gobble=1]
+%\documentclass{article}
+%\usepackage{complexpolylongdiv}
+%\begin{document}
+%\begin{equation}
+%\begin{complexpolylongdiv}
+%&x+1-2i \\
+%x-1&\complexpolyquotient{x^2-2ix+6}\\
+%-&\underline{x^2-x}\\
+%  -&(1-2i)x+6\\
+%  -&\underline{(1-2i)x-(1-2i)}\\
+%  &7-2i
+%\end{complexpolylongdiv}
+%\end{equation}
+%\end{document}
+%\end{lstlisting}
+%
+%\begin{equation}
+%\begin{complexpolylongdiv}
+%&x+1-2i \\
+%x-1&\complexpolyquotient{x^2-2ix+6}\\
+%-&\underline{x^2-x}\\
+%  -&(1-2i)x+6\\
+%  -&\underline{(1-2i)x-(1-2i)}\\
+%  &7-2i\\
+%\end{complexpolylongdiv}
+%\end{equation}
+%
+% \StopEventually{}
+% \section{Implementation}
+%\iffalse
+%<*table>
+%\fi
+%% \CheckSum{52}
+%% \CharacterTable
+%%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%%   Digits        \0\1\2\3\4\5\6\7\8\9
+%%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%%   Dollar        \$     Percent       \%     Ampersand     \&
+%%   Acute accent  \'     Left paren    \(     Right paren   \)
+%%   Asterisk      \*     Plus          \+     Comma         \,
+%%   Minus         \-     Point         \.     Solidus       \/
+%%   Colon         \:     Semicolon     \;     Less than     \<
+%%   Equals        \=     Greater than  \>     Question mark \?
+%%   Commercial at \@     Left bracket  \[     Backslash     \\
+%%   Right bracket \]     Circumflex    \^     Underscore    \_
+%%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%%   Right brace   \}     Tilde         \~}
+%%
+% \iffalse
+%</table>
+%<*complexpolylongdiv.sty>
+%\fi
+%
+%
+%
+%    \begin{macrocode}
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{complexpolylongdiv}[2024/12/30 v0.2 Typesetting (complex) polynomial long division]
+\newenvironment{complexpolylongdiv}[1][c]{%
+  \let\\\@arraycr
+  \if #1t
+    \vtop 
+  \else 
+    \if#1b
+      \vbox 
+    \else 
+      \vcenter 
+    \fi
+  \fi
+  \bgroup
+    \normalbaselines
+    \offinterlineskip
+    \setbox\strutbox\hbox{%
+      \vrule height 2.1ex depth .5ex width0ex}%
+      \tabskip=0pt
+      \halign\bgroup
+        \hfil$##$&$\,\hphantom{\big)}\mkern2mu ##$\hfil\strut\cr
+}{%
+      \crcr
+    \egroup
+  \egroup
+}
+\newcommand*{\complexpolyquotient}[1]{%
+  \omit$\,
+  \overline{%
+    \vphantom{\big)}%
+    \hbox{%
+      \smash{%
+        \raise3.5\fontdimen8\textfont3\hbox{$\big)$}%
+      }%
+    }%
+    \mkern2mu #1
+  }$%
+}
+%    \end{macrocode}
+% \iffalse
+%</complexpolylongdiv.sty>
+%\fi
+%
+% \Finale
+%
+%
+%\iffalse
+%<*complexpolylongdiv-example.tex>
+\documentclass{article}
+\usepackage{complexpolylongdiv}
+\begin{document}
+\begin{equation}
+\begin{complexpolylongdiv}
+&x+1-2i \\
+x-1&\complexpolyquotient{x^2-2ix+6}\\
+-&\underline{x^2-x}\\
+  -&(1-2i)x+6\\
+  -&\underline{(1-2i)x-(1-2i)}\\
+  &7-2i
+\end{complexpolylongdiv}
+\end{equation}
+\end{document}
+%</complexpolylongdiv-example.tex>
+%\fi
+%
+% \typeout{*************************************************************}
+% \typeout{*}
+% \typeout{* To finish the installation you have to move the file}
+% \typeout{* `complexpolylongdiv.sty' into a directory searched by TeX.}
+% \typeout{*************************************************************}
+%
+\endinput

@@ -1,0 +1,330 @@
+% \iffalse meta-comment
+%
+% File: ltx-talk-frame-structure.dtx Copyright (C) 2025 Joseph Wright
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+% This file is part of the "ltx-talk bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% The released version of this bundle is available from CTAN.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/josephwright/ltx-talk
+%
+% for those people who are interested.
+%
+% -----------------------------------------------------------------------
+%
+%<*driver>
+\documentclass{l3doc}
+% Additional commands needed in this source
+\NewDocumentCommand\email{m}{\href{mailto:#1}{\nolinkurl{#1}}}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% ^^A As we are dealing with a class, this has to be done manually
+% \def\filedate{2025-10-10}
+% \def\fileversion{v0.2.3}
+%
+% \title{^^A
+%   \pkg{ltx-talk-frame} -- The structure of frames^^A
+%   \thanks{This file describes \fileversion,
+%     last revised \filedate.}^^A
+% }
+%
+% \author{^^A
+%  Joseph Wright^^A
+%  \thanks{^^A
+%    E-mail: \email{joseph@texdev.net}^^A
+%   }^^A
+% }
+%
+% \date{Released \filedate}
+%
+% \maketitle
+%
+% \begin{documentation}
+%
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{ltx-talk-frame-structure} implementation}
+%
+% Start the \pkg{DocStrip} guards.
+%    \begin{macrocode}
+%<*class>
+%    \end{macrocode}
+%
+% Identify the internal prefix.
+%    \begin{macrocode}
+%<@@=talk>
+%    \end{macrocode}
+%
+%  \subsection{Columns}
+%
+%    \begin{macrocode}
+\keys_define:nn { talk }
+  { columns .inherit:n = talk / column }
+%    \end{macrocode}
+%
+% \begin{variable}{\l_@@_columns_wd_tl}
+%   We store the requested width for columns in a \texttt{tl} as this means
+%   that the key value will make sense even if it depends on the current
+%   \cs{textwidth}.
+%    \begin{macrocode}
+\keys_define:nn { talk / columns }
+  { width .tl_set:N = \l_@@_columns_wd_tl }
+\keys_set:nn { talk / columns }
+  { width = \textwidth }
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{environment}{columns}
+%   Columns are block-like environments so we start and end with a \cs{par} to
+%   ensure correct tagging.
+%    \begin{macrocode}
+\NewDocumentEnvironment { columns } { D <> { all } O { } }
+  {
+    \@@_action_begin:n {#1}
+    \par
+    \keys_set:nn { talk / columns } {#2}
+    \hbox_set_to_wd:Nnw \l_@@_tmp_box { \l_@@_columns_wd_tl }
+      \dim_set:Nn \textwidth { \l_@@_columns_wd_tl }
+      \dim_set_eq:NN \columnwidth \textwidth
+      \hfil
+      \ignorespaces
+  }
+  {
+      \unskip
+      \hfil
+    \hbox_set_end:
+    \box_use_drop:N \l_@@_tmp_box
+    \par
+    \@@_action_end:
+  }
+%    \end{macrocode}
+% \end{environment}
+%
+% \begin{variable}{\l_@@_column_alignment_tl}
+%    \begin{macrocode}
+\keys_define:nn { talk / column }
+  {
+    b .meta:n =
+      { vertical-alignment = bottom } ,
+    b .value_forbidden:n = true ,
+    c .meta:n =
+      { vertical-alignment = center } ,
+    c .value_forbidden:n = true ,
+    t .meta:n =
+      { vertical-alignment = top } ,
+    t .value_forbidden:n = true ,
+    vertical-alignment .choices:nn =
+      { bottom , center , top }
+      {
+        \tl_set_eq:NN \l_@@_column_alignment_tl
+          \l_keys_value_tl
+      }
+  }
+\keys_set:nn { talk / column }
+  {
+    vertical-alignment = center
+  }
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}
+%   {
+%     \@@_column_align_bottom:n  ,
+%     \@@_column_align_center:n  ,
+%     \@@_column_align_top:n
+%   }
+%   Based on ideas in the highly experimental \pkg{xbox}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_column_align_bottom:n #1
+  { \vbox:n {#1} }
+\cs_new_protected:Npn \@@_column_align_center:n #1
+  {
+    \vbox:n
+      {
+        \hbox:n
+          {
+            \box_move_down:nn
+              {
+                  0.5 \box_ht:N \l_@@_tmp_box
+                - \tex_fontdimen:D 22 ~ \tex_textfont:D 2 ~
+              }
+              { \vbox:n {#1} }
+          }
+      }
+  }
+\cs_new_protected:Npn \@@_column_align_top:n #1
+  { \vbox_top:n {#1} }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{environment}{column}
+%   A cut-down version of a minipage: we want to be clear on the semantic
+%   meaning. the action is applied inside the box after starting horizontal
+%   mode to avoid spacing issues when switching whatsits in and out.
+%    \begin{macrocode}
+\NewDocumentEnvironment { column } { D <> { all } O { } m }
+  {
+    \par
+    \keys_set:nn { talk / column } {#2}
+    \vbox_set_to_wd:Nnw \l_@@_tmp_box {#3}
+      \dim_set:Nn \textwidth {#3}
+      \dim_set_eq:NN \columnwidth \textwidth
+      \@parboxrestore
+      \leavevmode
+      \raggedright
+      \@@_action_begin:n {#1}
+      \ignorespaces
+  }
+%    \end{macrocode}
+%   The \cs{@ignore} here means that any spaces after |\end{column}| are
+%   suppressed by a \tn{ignorespaces} inserted by the kernel.
+%    \begin{macrocode}
+  {
+      \@@_action_end:
+    \vbox_set_end:
+    \use:c { @@_column_align_ \l_@@_column_alignment_tl :n }
+      { \vbox_unpack_drop:N \l_@@_tmp_box }
+    \hfil
+    \par
+    \@ignoretrue
+  }
+%    \end{macrocode}
+% \end{environment}
+%
+% \subsection{Floats}
+% 
+% Well really \enquote{not floats at all} but the idea is clear.
+%
+% \begin{variable}{\l_@@_float_alignment_tl}
+%   We only worry about horizontal alignment here.
+%    \begin{macrocode}
+\tl_new:N  \l_@@_float_alignment_tl 
+%    \end{macrocode}
+% \end{variable}
+%
+%   A bit similar to the current approach to lists: we need a template at
+%   the start but a common function at the end. The |float-placement| key is
+%   at present just there to allow mopping up of any argument that is given
+%   by accident, hence maps to a temporary variable.
+%    \begin{macrocode}
+\NewTemplateType { floatenv } { 2 }
+\DeclareTemplateInterface { floatenv } { talk } { 2 }
+  {
+    float-placement : tokenlist ,
+    horizontal-alignment : choice { left , center ,  right } = left
+  }
+\DeclareTemplateCode { floatenv } { talk } { 2 }
+  {
+    float-placement = \l_@@_tmp_tl ,
+    horizontal-alignment =
+      {
+        left = \tl_set:Nn \l_@@_float_alignment_tl { flushleft } ,
+        center = \tl_set:Nn \l_@@_float_alignment_tl { center } ,
+        right = \tl_set:Nn \l_@@_float_alignment_tl { flushright }
+      }
+  }
+  {
+    \SetTemplateKeys { floatenv } { talk } {#1}
+    \begin { minipage } { \columnwidth }
+      \begin { \l_@@_float_alignment_tl }
+        \cs_set_nopar:Npn \@captype {#2}
+  }
+\DeclareInstance { floatenv } { std } { talk } { horizontal-alignment = left }
+%    \end{macrocode}
+% \begin{macro}{\endfloatenv}
+%   And the common end function.
+%    \begin{macrocode}
+\cs_new_protected:Npn \endfloatenv
+  {
+      \end { \l_@@_float_alignment_tl }
+    \end { minipage }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{environment}{figure, table}
+%  Unlike \cls{beamer}, we allow for overlays for the environments as a whole.
+%    \begin{macrocode}
+\clist_map_inline:nn { figure , table }
+  {
+    \NewDocumentEnvironment {#1} { D <> { all } = { float-placement } O { } }
+      {
+        \@@_action_begin:n {##1}
+        \UseInstance { floatenv } { std } {##2} {#1}
+      }
+      {
+        \endfloatenv
+        \@@_action_end:
+      }
+%    \end{macrocode}
+% \end{environment}
+% \begin{variable}{\c@figure, \thefigure, \c@table, \thetable}
+% \begin{variable}{\figurename, \tableename}
+% \begin{variable}{\fnum@figure, \fnum@table}
+%   The standard variables needed to make captions work (nothing for list
+%   of floats, as at present those are not offered).
+%    \begin{macrocode}
+    \newcounter {#1}
+    \tl_new:c { #1 name }
+    \tl_set:ce { #1 name } { \text_titlecase_first:n {#1} }
+    \tl_new:c { fnum@ #1 }
+    \tl_set:ce { fnum@ #1 }
+      { \exp_not:c { #1 name } \exp_not:N \nobreakspace \exp_not:c { the #1 } }
+  }
+%    \end{macrocode}
+% \end{variable}
+% \end{variable}
+% \end{variable}
+%
+% The spacing values needed for the standard function.
+%    \begin{macrocode}
+\newlength \abovecaptionskip
+\newlength \belowcaptionskip
+\setlength \abovecaptionskip { 7pt }
+\setlength \belowcaptionskip { 7pt }
+%    \end{macrocode}
+%
+% \begin{macro}{\@caption}
+%   This is a copy of the kernel version of the function, but with writing to
+%   the list of whatever file removed. It is very likely this needs to be
+%   reworked as a template, but that will likely come from the kernel.
+%    \begin{macrocode}
+\cs_set_protected:Npn \@caption #1 [ #2 ] #3
+  {
+    \par
+    \begingroup
+      \@parboxrestore 
+      \if@minipage \@setminipage \fi
+      \normalsize
+      \@makecaption { \csname fnum@ #1 \endcsname } { \ignorespaces #3 }
+      \par 
+    \endgroup
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</class>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \PrintIndex

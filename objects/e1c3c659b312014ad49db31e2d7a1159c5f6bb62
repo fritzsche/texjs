@@ -1,0 +1,148 @@
+%%%
+% Codage RLE
+%%%
+\def\filedateRLE{2024/08/04}%
+\def\fileversionRLE{0.1}%
+\message{-- \filedateRLE\space v\fileversionRLE}%
+%
+\setKVdefault[RLE]{Largeur=10pt,Taille=5,Unite=1cm,Solution=false,Enonce=true}
+
+\newtoks\toklisterle
+\def\UpdatetoksRLE#1\nil{\addtotok\toklisterle{#1,}}%
+
+%\newlength\PfCRLEHeight%
+\NewDocumentCommand\CodageRLE{o m}{%
+  \useKVdefault[RLE]%
+  \setKV[RLE]{#1}%
+  %\setlength{\PfCRLEHeight}{\useKV[RLE]{Largeur}}%
+  \setsepchar{,}%
+  \readlist*\PfCListeRLE{#2}%
+  \toklisterle{}%
+  \foreachitem\compteur\in\PfCListeRLE{\expandafter\UpdatetoksRLE\compteur\nil}%
+  \BuildRLE{\the\toklisterle}%
+}
+
+\def\BuildRLECode{%
+  Taille:=\useKV[RLE]{Taille};
+  u:=\useKV[RLE]{Unite};
+  boolean Solution,Enonce;
+  Solution:=\useKV[RLE]{Solution};
+  Enonce:=\useKV[RLE]{Enonce};
+  %  
+  color RLEFill;
+  RLEFill=white;
+  %
+  numeric nbretenir[][];
+  %
+  vardef NombreLigne(text t)=
+  retiens:=0;
+  nblignes:=0;
+  for p_=t:
+  retiens:=retiens+p_;
+  if retiens=Taille:
+  nblignes:=nblignes+1;
+  retiens:=0;
+  fi;
+  endfor;
+  enddef;
+  %
+  path Square;
+  Square=unitsquare scaled u;
+  %
+  vardef RLE(text t)=
+  nbcoups:=0;
+  nbcases:=0;
+  nbcaseslignes:=0;
+  cptretiensnb:=0;
+  cptretiensnblignes:=1;
+  for p_=t:
+  if p_=0:
+  cptretiensnb:=cptretiensnb+1;
+  nbretenir[cptretiensnblignes][cptretiensnb]=p_;
+  RLEFill:=black;
+  else:
+  nbcoups:=nbcoups+1;
+  for l=0 upto p_-1:
+  if Solution: fill ((Square scaled 0.95) shifted(u*((nbcases mod Taille)+l,-(nbcases div Taille))+u*(0.025,0.025))) withcolor RLEFill; fi;
+  trace (Square shifted(u*((nbcases mod Taille)+l,-(nbcases div Taille))));
+  endfor;
+  nbcaseslignes:=nbcaseslignes+p_;
+  nbcases:=nbcases+p_;
+  if (nbcaseslignes mod Taille)=0:
+  RLEFill:=white;
+  cptretiensnb:=cptretiensnb+1;
+  nbretenir[cptretiensnblignes][cptretiensnb]=p_;
+  cptretiensnblignes:=cptretiensnblignes+1;
+  cptretiensnb:=0;
+  else:
+  if RLEFill=white: RLEFill:=black else: RLEFill:=white fi;
+  cptretiensnb:=cptretiensnb+1;
+  nbretenir[cptretiensnblignes][cptretiensnb]=p_;
+  fi;
+  fi;
+  endfor;
+  enddef;
+  % 
+  string Sequence[];
+  % 
+  boolean STOP;
+  STOP:=false;
+  %
+  vardef Affichage=
+  for k=1 upto nblignes:
+  Sequence[k]=decimal(nbretenir[k][1]);
+  n:=1;
+  forever:
+  n:=n+1;
+  if unknown nbretenir[k][n]:
+  STOP:=true;
+  else:
+  Sequence[k]:=Sequence[k]&","&decimal(nbretenir[k][n]);
+  fi;
+  exitif STOP;
+  endfor;
+  label.rt(TEX(Sequence[k]),u*(Taille+1,-k+1+0.5));
+  STOP:=false;
+  endfor;
+  enddef;
+  %
+  vardef AffichagePDF=
+  for k=1 upto nblignes:
+  Sequence[k]=decimal(nbretenir[k][1]);
+  n:=1;
+  forever:
+  n:=n+1;
+  if unknown nbretenir[k][n]:
+  STOP:=true;
+  else:
+  Sequence[k]:=Sequence[k]&","&decimal(nbretenir[k][n]);
+  fi;
+  exitif STOP;
+  endfor;
+  label.rt(LATEX(Sequence[k]),u*(Taille+1,-k+1+0.5));
+  STOP:=false;
+  endfor;
+  enddef;
+}
+
+\NewDocumentCommand\BuildRLE{m}{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    \BuildRLECode    
+    NombreLigne(#1);
+    RLE(#1);
+    if Enonce:
+    Affichage;
+    fi;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={\BuildRLECode}]
+    NombreLigne(#1);
+    RLE(#1);
+    if Enonce:
+    AffichagePDF;
+    fi;    
+  \end{mpost}
+  \fi
+}

@@ -1,0 +1,418 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2019-2023 by Jan Hajer
+% -----------------------------------
+%
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3c
+% of this license or (at your option) any later version.
+% The latest version of this license is in:
+%
+% http://www.latex-project.org/lppl.txt
+%
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+% \fi
+%
+% \iffalse
+%
+%<package>\NeedsTeXFormat{LaTeX2e}[2005/12/01]
+%<package>\ProvidesPackage{hep-reference}[2025/09/01 v1.4 Convenience macros for references]
+%<documentation>\ProvidesFile{hep-reference-documentation.tex}[2025/09/01 v1.4 HEP-reference documentation]
+%
+%<*documentation>
+\documentclass{ltxdoc}
+
+\renewcommand*\theCodelineNo{\rmfamily\tstyle\footnotesize\arabic{CodelineNo}}
+\AtBeginEnvironment{macrocode}{\renewcommand*{\ttdefault}{clmt}}
+\renewcommand*{\MacroFont}{\codestyle}
+\AtBeginDocument{\DeleteShortVerb{\|}}
+\AtBeginDocument{\MakeShortVerb{\"}}
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+
+\usepackage{hologo}
+
+\usepackage[parskip,oldstyle,font=10pt]{hep-paper}
+\bibliography{bibliography}
+\shortacronym{PDF}{portable document format}
+%</documentation>
+
+%<*driver>
+\expandafter\newif\csname ifshort\endcsname
+\shortfalse
+\begin{document}
+\DocInput{hep-reference-implementation.dtx}
+\end{document}
+%</driver>
+%
+% \fi
+%
+% \CheckSum{181}
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+% \changes{v1.0}{2011/08/01}{Initial version of the style file.}
+% \changes{v1.1}{2022/11/01}{Bug fixes.}
+% \changes{v1.2}{2023/07/01}{Bug fixes.}
+% \changes{v1.3}{2024/11/01}{Bug fixes.}
+% \changes{v1.4}{2025/09/01}{Bug fixes.}
+%
+% \ifshort
+%<*documentation>
+% \fi
+%
+\GetFileInfo{hep-reference.sty}
+
+\title{The \software{hep-reference} package\thanks{This document corresponds to \software{hep-reference}~\fileversion.}}
+\subtitle{Adjustments of standard references, footnote, and citations}
+\author{Jan Hajer \email{jan.hajer@tecnico.ulisboa.pt}}
+\date{\filedate}
+
+% \ifshort
+\begin{document}
+% \fi
+
+\newgeometry{vscale=.8, vmarginratio=3:4, includeheadfoot, left=11em, marginparwidth=4.6cm, marginparsep=3mm, right=7em}
+
+\maketitle
+
+\begin{abstract}
+The \software{hep-reference} package applies some light convenience modifications to the reference, citation and footnote macros after loading standard classes improving on the default \hologo{LaTeX} behaviour.
+\end{abstract}
+
+\section{Introduction}
+
+The \software{hyperref} package is loaded and the links are hidden.
+
+\DescribeMacro{\cref}
+References are extended with the \software{cleveref} package \cite{cleveref}, which allows to \eg just type "\cref"\marg{key}  in order to write \enquote{figure 1}.
+Furthermore, the \software{cleveref} package allows to reference multiple objects within one "\cref"\marg{key1,key2}.
+
+\DescribeMacro{\cite}
+Citations are adjusted to not start on a new line in order to avoid the repeated use of "~\cite"\marg{key}.
+
+\DescribeMacro{\ref}
+\DescribeMacro{\eqref}
+\DescribeMacro{\subref}
+References are also adjusted to not start on a new line.
+
+\DescribeMacro{\footnote}
+Footnotes are adjusted to swallow white space before the footnote mark and at the beginning of the footnote text.
+Additionally the reference back to the text where they are called from.
+
+% \ifshort
+\printbibliography
+
+\end{document}
+%
+%</documentation>
+% \fi
+%
+% \StopEventually{
+% \printbibliography
+% \PrintChanges
+% }
+%
+% \appendix
+%
+%<*package>
+%
+% \section{Implementation}
+%
+% Load the \software{hyperref} package \cite{hyperref} enable Unicode encoding and hide links.
+%    \begin{macrocode}
+\RequirePackage{hyperref}
+\hypersetup{
+  pdfencoding=auto, psdextra,
+  linktoc=all, hidelinks, breaklinks=true,
+  pdfcreator={}, pdfproducer={}
+}
+\AtBeginDocument{\@ifpackageloaded{doc}{\hypersetup{hidelinks}}{}}
+%    \end{macrocode}
+%
+% Ensure that unnecessary information is suppressed.
+%    \begin{macrocode}
+\pdfstringdefDisableCommands{\def\varepsilon{\textepsilon}}
+\pdfstringdefDisableCommands{\def\to{\textrightarrow}}
+\AtBeginDocument{
+  \pdfstringdefDisableCommands{\let\ensuremath\@gobble}
+  \pdfstringdefDisableCommands{\let\mathsurround\@gobble}
+  \pdfstringdefDisableCommands{\let\unskip\@gobble}
+  \pdfstringdefDisableCommands{\let\thanks\@gobble}
+  \pdfstringdefDisableCommands{\let\footnote\@gobble}
+  \pdfstringdefDisableCommands{\let\\\@gobble}
+}
+%    \end{macrocode}
+%
+% Set the \PDF meta data according to the paper information
+%
+%    \begin{macrocode}
+\AtBeginDocument{
+  \@ifundefined{@title}{}{
+    \@ifundefined{hep@sub@title}{
+      \hypersetup{pdftitle={\@title}}
+    }{
+      \hypersetup{pdftitle={\@title: \hep@sub@title}}
+    }
+  }
+%   \hypersetup{pdfauthor={\@author}}
+  \@ifundefined{hep@key@words}{}{%
+    \hypersetup{pdfkeywords={\hep@key@words}}%
+  }
+}
+%    \end{macrocode}
+
+% \subsection{Footnotes}
+%
+% Place a hyperlink from the footnote back to its referencing label using the \software{footnotebackref} package \cite{footnotebackref}.
+%    \begin{macrocode}
+\def\BackrefFootnoteTag{}
+\RequirePackage{footnotebackref}
+%    \end{macrocode}
+%
+% \begin{macro}{\footnote}
+% Ensure that no spaces appear before the footmark or at the beginning of the footnote.
+%    \begin{macrocode}
+\let\@foot@note\footnote
+\renewcommand*{\footnote}[1]{\unskip\@foot@note{\ignorespaces#1}}
+%    \end{macrocode}
+% \end{macro}
+
+% \subsection{References}
+%
+% \begin{macro}{\ref}
+% Adjust "\ref"\marg{key} in order to prevent preceding line breaks.
+%    \begin{macrocode}
+\AtBeginDocument{
+  \let\hep@ref\ref
+  \renewcommand*\ref{\no@break@before\hep@ref}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\eqref}
+% Adjust "\eqref"\marg{key} from the \software{amsmath} package in order to prevent preceding line breaks.
+%    \begin{macrocode}
+\AtBeginDocument{\@ifpackageloaded{amsmath}{%
+  \renewcommand*\eqref{\no@break@before\labelcref}%
+}{}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\usecommand}
+% Define the "\usecommand" macro providing an anonymous function.
+%    \begin{macrocode}
+\providecommand*\hep@use@command{}
+\newcommand*\usecommand[2][1]{%
+  \renewcommand*\hep@use@command[#1]{#2}\hep@use@command%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\textlabel}
+% Define the "\textlabel" macro allowing to link to a piece of text using the \software{etoolbox} pcakage \cite{etoolbox}.
+%    \begin{macrocode}
+\RequirePackage{etoolbox}
+\NewDocumentCommand\textlabel{O{}mO{}m}{%
+  \protected@write\@auxout{}{%
+    \string\newlabel{#2}{%
+      {\hspace{-4pt}\protecting{#1{#4}}}{\thepage}{#4}{#2}{}%
+    }%
+  }%
+  \hypertarget{#2}{}%
+  {#3{#4}}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\cref}
+% Improve reference using the \software{cleveref} package \cite{cleveref}.
+%    \begin{macrocode}
+\PassOptionsToPackage{noabbrev, nameinlink}{cleveref}
+\RequirePackage{cleveref}
+\newcommand*{\creflastconjunction}{, and\nobreakspace}
+\crefname{enumi}{point}{points}
+\crefname{inlinelisti}{point}{points}
+%    \end{macrocode}
+% \end{macro}
+%
+%\begin{macro}{\no@break@before}
+% Define a macro able to prevent line breaks.
+%    \begin{macrocode}
+\newcommand*\no@break@before{%
+  \relax\ifvmode\else%
+    \ifhmode%
+      \ifdim\lastskip > 0pt%
+        \relax\unskip\nobreakspace%
+      \fi%
+    \fi%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\subref}
+% Adjust "\subref"\marg{key} from the \software{subcaption} package in order to prevent preceding line breaks.
+%    \begin{macrocode}
+\AtBeginDocument{\@ifpackageloaded{subcaption}{%
+  \let\hep@subref\subref
+  \renewcommand*\subref{\no@break@before\hep@subref}
+  \renewcommand*\subcaption@ref[2]{\begingroup%
+    \caption@setoptions{sub}%
+    \subcaption@reffmt\p@subref{\hep@ref#1{sub@#2}}%
+  \endgroup}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\subcref}
+% Provide the "\subcref" macro.
+%    \begin{macrocode}
+  \newcommand*{\subcref}[1]{\cref{sub@#1}}
+}{}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\eqcrefname}
+% Define the "\eqcrefname" macro for named equation types.
+%    \begin{macrocode}
+\NewDocumentCommand{\eqcrefname}{mmo}{
+  \crefname{#1}{#2}{\IfValueTF{#3}{#3}{#2s}}
+  \creflabelformat{#1}{(##2##1##3)}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\labelcrefrange}
+% Define the missing "\labelcrefrange"\marg{key1}\marg{key2} macro.
+%    \begin{macrocode}
+\DeclareRobustCommand{\labelcrefrange}[2]{%
+  \@crefrangenostar{labelcref}{#1}{#2}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% Adjust the title page
+%    \begin{macrocode}
+\AtBeginDocument{\@ifpackageloaded{hep-title}{%
+  \labelcrefmultiformat{affiliation}{#2#1#3}{%
+    \textsuperscript,#2#1#3}{\textsuperscript,#2#1#3%
+  }{%
+    \textsuperscript,#2#1#3%
+  }
+  \labelcrefrangeformat{affiliation}{#3#1#4\textsuperscript{--}#5#2#6}
+}{}}
+%    \end{macrocode}
+
+% \subsection{Citations}
+%
+% \begin{macro}{\cite}
+% Adjust "\cite"\marg{key} in order to prevent preceding line breaks.
+%    \begin{macrocode}
+\let\hep@cite\cite
+\renewcommand*\cite{\no@break@before\hep@cite}
+%    \end{macrocode}
+% \end{macro}
+%
+%</package>
+%
+% \section{Tests}
+%
+%<*test>
+%
+%    \begin{macrocode}
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{hep-reference}
+\usepackage{parskip}
+\providecommand*{\cref}{section \ref}
+
+\begin{document}
+
+\section{Section} \label{sec:Section}
+
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
+Etiam lobortis section \ref{sec:Section}
+
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
+Etiam lobortis \cref{sec:Section}
+
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
+Etiam loborti equation \eqref{eq:Equation}
+
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
+Etiam loborti reference \cite{cite}
+
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
+\footnote{
+ Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
+}
+
+\begin{equation} \label{eq:Equation}
+E=mc^2
+\end{equation}
+
+
+\begin{thebibliography}{1}
+\bibitem{cite} reference
+\end{thebibliography}
+
+\end{document}
+%    \end{macrocode}
+%
+%</test>
+%
+% \section{Readme}
+%
+%<*readme>
+%
+%    \begin{macrocode}
+# The `hep-reference` package
+
+A `LaTeX` package for publications in High Energy Physics.
+
+## Introduction
+
+The `hep-reference` package applies some light convenience modifications
+to the reference, citation and footnote macros after loading standard
+classes improving on the default LaTeX behaviour.
+
+## Author
+
+Jan Hajer
+
+## License
+
+This file may be distributed and/or modified under the conditions of the
+`LaTeX` Project Public License, either version 1.3c of this license or
+(at your option) any later version. The latest version of this license is
+in `http://www.latex-project.org/lppl.txt` and version 1.3c or later is
+part of all distributions of LaTeX version 2005/12/01 or later.
+%    \end{macrocode}
+%
+%</readme>
+%
+% \Finale
+
+\endinput
+
+% \PrintIndex
+% makeindex -s gglo.ist -o hep-reference-implementation.gls hep-reference-implementation.glo
+% makeindex -s gglo.ist -o hep-reference-implementation.ind hep-reference-implementation.idx

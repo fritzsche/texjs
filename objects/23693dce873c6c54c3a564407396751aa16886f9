@@ -1,0 +1,1368 @@
+%% This is part of the OpTeX project, see http://petr.olsak.net/optex
+
+\_codedecl \_undefined {OpTeX tricks ready to autoload <2025-03-03>} % chunks loaded on demand
+
+% Selected OpTeX tricks are here, they are auto-loaded if the macro is used first
+% namespace: optextrick
+
+\_trick 0057 \begfile \createfile ;
+%%%%%%%%%%%%
+
+\newwrite\.outfile
+\:\def\begfile #1 {\_immediate\_openout\.outfile={#1}%
+   \_begingroup \_setverb \_endlinechar=`\^^J \.begfileA^^J%
+}
+\_ea\_def\_ea\.begfileA\_ea#\_ea1\_ea^^J\_csstring\\endfile#2^^J{\_endgroup
+   \_ifx^#1^\_else \_immediate\_write\.outfile{\_ignoreit #1}\_fi
+   \_immediate\_closeout\.outfile
+}
+\:\_let\createfile=\begfile
+
+\_trick 0054 \beglua \begLUA \logginglua ;
+%%%%%%%%%%%%
+
+\_newtoks\.luamacros
+\.luamacros={\_let\\=\_nbb \_edef\%{\_csstring\%}\_edef\#{\csstring\#}\_let\n=\_relax}
+\:\_def\beglua{\.savelineno\_bgroup \_setverb \_endlinechar=`\^^J \.begluaA}
+\_ea\_def\_ea\.begluaA\_ea#\_ea1\_csstring\\endlua^^J{\_egroup\.debuglua{#1}\_directlua{#1}}
+\:\_def\begLUA{\.savelineno\_bgroup \_setverb \_endlinechar=`\^^J \_catcode`\\=0 \.begLUAA}
+\_def\.begLUAA#1\endLUA^^J{\_the\.luamacros\.debuglua{#1}\_directlua{#1}\_egroup}
+\_def\.savelineno{\_edef\.tmp{\_the\_numexpr\_inputlineno+1}}
+\_let\.debuglua=\_ignoreit
+\_def\.printloglua#1{\_wlog{lua code processed (l.\.tmp):^^J#1-------------}}
+\:\_def\logginglua{\_let\.debuglua=\.printloglua}
+
+\_trick 0055 \sethours \setminutes \setseconds \setweekday ;
+%%%%%%%%%%%%
+
+\_newcount\.hours \_newcount\.minutes \_newcount\.seconds \_newcount\.weekday
+
+\:\_def\setminutes{%
+   \.minutes=\_directlua{tex.sprint(\_the\_time\_pcent 60)}\_relax
+   \.hours=\_directlua{tex.sprint(math.floor(\_the\_time/60))}\_relax
+}
+\:\_let\sethours=\setminutes
+\:\_def\setseconds{\_ea\.setsecondsA\_pdffeedback creationdate\_relax}
+\_def\.setsecondsA#1#2#3#4#5#6#7#8#9{\.setsecondsB}
+\_def\.setsecondsB#1#2#3#4#5#6#7#8\_relax{\.seconds=#6#7\_relax}
+\:\_def\setweekday{\.weekday=\_directlua{% Zeller's algorithm:
+      local m, y, K, J
+      m = \_the\_month \_ifnum\_month<3 +12 \_fi
+      y = \_the\_year  \_ifnum\_month<3 -1 \_fi
+      K = y \_pcent 100
+      J = math.floor(y/100)
+      tex.sprint((\_the\_day + math.floor((13*(m+1))/5) + K +
+         math.floor(K/4) + math.floor(J/4) - 2*J + 6)\_pcent 7)
+   }\_relax
+}
+\:\_def\Othe#1{\_ifnum#1<10 0\_fi\_the#1}
+
+\_nspublic \hours \minutes \seconds \weekday ;
+
+\_trick 0132 \thedimen ;
+%%%%%%%%%%%%
+
+\_sdef {_thedimen:pt}{1}
+\_sdef {_thedimen:cm}{28.4527559}
+\_sdef {_thedimen:mm}{2.84527559}
+\_sdef {_thedimen:in}{72.27}
+\_sdef {_thedimen:sp}{(1/65536)}
+\_sdef {_thedimen:pc}{12}
+\_sdef {_thedimen:bp}{1.00375}
+\_sdef {_thedimen:dd}{1.070008643}
+\_sdef {_thedimen:cc}{12.8401037}
+\_sdef {_thedimen:em}{(\number\fontdimen6\font/65536)}
+\_sdef {_thedimen:ex}{(\number\fontdimen5\font/65536)}
+
+\_def\thedimen #1#2#3{\_nnum{\_expr[5]{%
+   \_number\_dimexpr#1\_relax / 65536 / \_trycs{_thedimen:#2#3}{5000000000}}}#2#3}
+
+
+\_trick 0063 \showpglists ;
+%%%%%%%%%%%%
+
+\_def\.addshowpglists{\_directlua{
+   local nodetree = require("nodetree")
+   callback.add_to_callback("pre_shipout_filter", function(head)
+         nodetree.print(head)
+         return head
+      end, "showpglists") }}
+\_gdef\.removeshowpglists{\_directlua{
+   callback.remove_from_callback("pre_shipout_filter", "showpglists") }}
+
+\_def\showpglists #1 {\_addto\.showpgs{#1,}}
+\_def\.showpgs{,}
+
+\_addto\_begoutput{%
+   \_ea\_isinlist\_ea\.showpgs\_ea{\_ea,\_the\_pageno,}\_iftrue
+      \.addshowpglists
+      \_addto\_endoutput{\.removeshowpglists}%
+   \_fi
+}
+
+\_trick 0133 \shownodes ;
+%%%%%%%%%%%%
+
+\_def\shownodes#1{%
+   \_ifcat\_noexpand#1\_relax \_def\.tmp{#1}\_tmpnum=#1\_ea\.shownodesA
+   \_else \_def\.tmp{}\_afterfi{\_afterassignment\.shownodesA \_tmpnum=#1}\_fi
+}
+\_def\.shownodesA{%
+   \_wterm{==== Box \_the\_tmpnum\_space (\_ea\_string\.tmp):}%
+   \_directlua{
+   local nodetree = require("nodetree")
+   nodetree.print(tex.box[\_the\_tmpnum])
+}}
+
+\_trick 0143 \mathinexpr ;
+%%%%%%%%%%%%
+
+\_def\mathinexpr{\_directlua{\_foreach{abs}{acos}{asin}{atan}{ceil}{cos}{deg}{exp}%
+      {floor}{fmod}{huge}{log}{max}{maxinteger}{min}{mininteger}{modf}%
+      {pi}{rad}{random}{randomseed}{sin}{sqrt}{tan}{tointeger}{type}{ult}%
+      \_do{##1=math.##1 }}%
+}
+
+\_trick 0134 \rebox \leftfill \rightfill \lrfill ;
+%%%%%%%%%%%%
+
+\:\_def\rebox{\_directlua{
+   local nod = tex.box[token.scan_int()]      % read head node of the given box
+   if not(nod==nil) and nod.id==1 then        % given box must be \vbox
+       for n in node.traverse(nod.head) do
+           if n.id==0 then                    % i.e. hlist (\hbox)
+               local nn = node.hpack (n.head) % calculate its natural width
+               n.width = nn.width             % save natural width
+               nn.head = nil  node.free (nn)  % remove created box node
+           end
+       end
+       local nn = node.vpack (nod.head)       % calculate main vlist (\vbox) width
+       nod.width = nn.width                   % save this width to nod.width
+       nn.head = nil  node.free (nn)          % remove created box node
+       for n in node.traverse(nod.head) do
+           if n.id==0 then
+               local nn = node.hpack (n.head, nod.width, "exactly") % \hbox to nod.width
+               n.width = nn.width             % save changed hlist (\hbox) parameters
+               n.glue_order = nn.glue_order n.glue_set = nn.glue_set n.glue_sign = nn.glue_sign
+               nn.head = nil  node.free (nn)  % remove created box node
+           end
+       end
+   end
+}}
+\:\_def\leftfill {\_leftskip=0pt plus1fill \_parindent=0pt }
+\:\_def\rightfill{\_rightskip=0pt plus1fill \_parindent=0pt }
+\:\_def\lrfill{\_leftskip=0pt plus1fill \_rightskip=\_leftskip \_parindent=0pt }
+
+
+\_trick 0101 \runsystem ;
+%%%%%%%%%%%%
+
+\_newcount\.exitstatus
+\_def\runsystem#1{\.exitstatus=\_directlua{
+   texio.write_nl("")
+   local status = os.execute("\_luaescapestring{#1}")
+   texio.write("log", "\_nbb runsystem{\_luaescapestring{#1}} status: " .. (status or -1) .. "\_string\n")
+   tex.print(status or -1)
+} }
+
+\_nspublic \exitstatus ;
+
+\_trick 0105 \directoutput ;
+%%%%%%%%%%%%
+
+\_newbox\.outbox
+\_def\directoutput{\_begingroup \_afterassignment\.directoutputA \_setbox\.outbox=}
+\_def\.directoutputA{\_aftergroup \.directoutputB}
+\_def\.directoutputB{\_preshipout\.outbox\_box\.outbox
+   \_pdfpageheight=\_dimexpr\_ht\.outbox+\_dp\.outbox+2\_vvkern \_relax
+   \_pdfpagewidth=\_dimexpr\_wd\.outbox+2\_hhkern\_relax
+   \_hoffset=\_hhkern \_voffset=\_vvkern
+   \_shipout\_box\.outbox
+   \_incr\_pageno
+   \_endgroup
+}
+
+\_trick 0135 \directchar ;
+%%%%%%%%%%%%
+
+\_protected\_def\directchar{\_ifmmode \_ea\_Uchar\_else \_quitvmode \_ea\.directcharA\_fi}
+\_def\.directcharA{\_directlua{
+   local n = node.new(29, 256)
+   n.font = font.current()
+   n.char = token.scan_int()
+   node.write(n)
+}}
+
+\_trick 0137 \replmacro ;
+%%%%%%%%%%%%
+
+\_def\replmacro #1{\_ea\.replmacroA\_ea#1\_meaning#1\_relax}
+\_def\.replmacroA #1#2:#3->#4\_relax#5#6#7#8{%
+   {\_let\\=\_nbb \_edef\"{\_string\"}%
+    \_xargs\.replmacroB \{\}\$\&\#\^\~;\_ea
+   }\_ea\.replmacroC\_ea#1\_directlua{
+      local prefixes="\_luaescapestring{#2}"
+      local params="\_luaescapestring{#3}"
+      local body="\_luaescapestring{#4}"
+      prefixes = string.gsub(prefixes,"macro","")
+      \_ifx;#5;\_else prefixes = string.gsub(prefixes,#5)\_fi
+      \_ifx;#6;\_else params   = string.gsub(params,#6)\_fi
+      \_ifx;#7;\_else body     = string.gsub(body,#7)\_fi
+      \_ifx;#8;\_else body     = string.gsub(body,#8)\_fi
+      tex.sprint("{"..prefixes.."}{"..params.."}{"..body.."}")
+   }%
+}
+\_def\.replmacroB #1{\_edef#1{\_csstring#1}}
+\_def\.replmacroC #1#2#3#4{\_useit#2\_def#1#3{#4}}
+
+
+\_trick 0136 \xreplstring ;
+%%%%%%%%%%%%
+
+\_directlua{%
+local scan_toks = token.scan_toks
+local put_next = token.put_next
+local create = token.create
+local lbrace = create(string.byte('{'))
+local rbrace = create(string.byte('}'))
+define_lua_command('xreplstring', function()
+    local macro_name = create(token.scan_csname())
+    put_next(create'_expandafter',
+    lbrace,macro_name,rbrace)
+    local macro_body = scan_toks(false,false)
+    local nested = token.scan_keyword('nested')
+    local find = scan_toks(false,false)
+    local replace = scan_toks(false,false)
+    local find_length = \_csstring\#find
+    local replace_length = \_csstring\#replace
+    local range = \_csstring\#macro_body - find_length + 1
+    local i = 1
+    local nested_level = 0
+    while i <= range do
+        if not nested then
+            if macro_body[i].tok == lbrace.tok then
+               nested_level = nested_level + 1
+            elseif macro_body[i].tok == rbrace.tok then
+               nested_level = nested_level - 1
+            end
+        end
+        if nested_level > 0 then i = i+1 else
+            for j = 0, find_length - 1 do
+                if not nested then
+                    if macro_body[i + j].tok == lbrace.tok then
+                        nested_level = nested_level + 1
+                        i = i+j+1
+                      break
+                    end
+                end
+                if (macro_body[i + j].tok \_csstring\~= find[j+1].tok) then
+                    i = i+1
+                  break
+                else
+                    if j == find_length - 1 then
+                        for t = 0, find_length - 1 do
+                            table.remove(macro_body,i)
+                        end
+                        for t = 0, replace_length - 1 do
+                            table.insert(macro_body,i+t,replace[t+1])
+                        end
+                            range = \_csstring\#macro_body - find_length + 1
+                            i = i+replace_length
+                      break
+                    end
+                end
+            end
+        end
+    end
+    put_next(rbrace)
+    put_next(macro_body)
+    put_next(create'_def',macro_name,lbrace)
+    if macro_name.protected then
+        put_next(create'_protected')
+    end
+end,'global') % we want to keep the meanig after group
+}
+
+\_trick 0136 \ereplstring ;
+
+\_def\ereplstring#1#2#3{\_immediateassigned{\_def\.repl{#1}\_replstring\.repl{#2}{#3}}\.repl}
+
+\_trick 0078 0145 0146 \algol \algolkw \algolcap \makeLOA \algolnum \setaca ;
+%%%%%%%%%%%%%%%%%%%%%%
+
+\_newtoks \_hisyntaxalg
+\_hisyntaxalg = {
+   \_hicolor K \_bf  % Keywords
+   \_replfromto {//}{^^J}{\algolcomment{#1}^^J}
+   \_replthis{++}{{++}}\_replthis{--}{{--}}
+   \_replfromto {$}{$}{${#1}$}
+   \_foreach {Require:}{Ensure:}{Input:}{Output:}{Launch:}
+      {while}{do}{if}{then}{else}{end}{function}{return}{print}
+      {for}{all}{range}{continue}{repeat}{until}{loop}
+      {not}{and}{or}{xor}{true}{false}
+      \_do {\_replthis{\n#1\n}{\z K{#1}}}
+}
+\_def\.algolmath#1${\_catcodetable\_optexcatcodes \_scantextokens{#1}$}
+\_def\.addcoloneq{\_ifx\coloneq\_undefined \_else
+   \_mathcode`:="8000 \_adef:{\_isnextchar={\coloneq\_ignoreit}{\_Umathchar 6 1 `: }}\_fi
+}
+\:\_def\algol{\_catcode`$=3 %
+   \_everymath={\.algolmath}%
+   \_def\_ttfont{\_rm}%
+   \_def\var##1{\_mathbox{\_it\_def\.tmp{##1}\_replstring\.tmp{_}{\.lowline}\.tmp}}
+   \_def\.lowline{\_vrule height.4pt width4pt depth0pt\_relax}%
+   \.addcoloneq
+   \_catcode`\!=13
+   \_bgroup \_lccode`\~=`\! \_lowercase{\_egroup \_protected\_def~##1~}{\algolem{##1}}%
+   \_hisyntax{ALG}%
+}
+\:\_def\algolkw#1{\_toksapp\_hisyntaxalg{\_replthis{\n#1\n}{\z K{#1}}}}
+\_ifx\algolcomment\_undefined \_protected\_def\algolcomment#1{/\_kern-.2em/{\_it #1}} \_fi
+\_ifx\algolem\_undefined      \_def\algolem#1{\_ifx^#1^!\_else{\_bf #1}\_fi}\_fi
+
+\_newcount\.anum
+\_def \.theanum  {\_othe\_chapnum.\_othe\_secnum.\_the\.anum}
+\_addto\_seccx {\.anum=0 }
+
+\_sdef{_mt:algol:en}{Algorithm} \_sdef{_mt:algol:cs}{Algoritmus}
+
+\:\_def\algolcap{\_isnextchar [{\.capaA}{\.capaA[]}}
+\_def\.capaA [#1]#2\_relax{\_label[#1]%
+   \_incr\.anum
+   \_def\.algoltitle{\_indent\_wlabel{\.theanum}{\_bf\_mtext{algol} \.theanum}%
+                     \_enspace\_rm\_strut\_ignorespaces #2}%
+   \_ewref\.Xalg{{}{\.theanum}{\_nospaceafter\_empty#2}}%
+   \_setbox0=\_vbox\_bgroup \_advance\_hsize by-2\_hhkern \_advance\_hsize by-.8pt
+       \_begingroup \_aftergroup\.createalgol
+}
+\_def\.createalgol{\_egroup % \box0 is completed
+   \_frame{\_vbox{\_medskip\_hbox{\.algoltitle}\_medskip\_hrule\_medskip\_box0\_medskip}}%
+   \_endgroup % of \begtt
+}
+\:\_def\makeLOA{%
+   \_ifx\.alglist\_undefined \_opwarning{no data for LOA, try to run TeX again}\_openref
+   \_else \.alglist\_fi
+}
+\_def\.alline #1#2#3#4#5{\_line{\_hskip2em\_llap{\_bf#2\_enspace}#3 \_tocdotfill\ \_ilink[pg:#4]{#5}}}
+
+\:\_def\algolnum{\_ttline=0
+   \_def\_printverbline ##1{\_putttpenalty
+       \_indent
+       \.testindent ##1.\_iftrue \_printverblinenum \_else \_decr\_ttline \_fi
+       \_kern\_ttshift ##1\_par}%
+   \_def\_printverblinenum{\_llap{\_sevenrm \_the\_ttline\_kern.1em}}%
+}
+\_def\.testindent#1#2\_iftrue {\_ea\_ifx#1\_dsp}
+
+\_newcount\.algollistnum
+\:\_def\setaca {\_aheadto\algol{\.algolsetcomments}}
+\_def\.algolsetcomments{\_incr\.algollistnum
+   \_tmpnum=0 \_tmpdim=-\_maxdimen
+   \_loop \_incr\_tmpnum
+      \_ifcsname _pos:\.alcomlabel \_endcsname
+         \_ifdim\_tmpdim<\_posx[\.alcomlabel] \_tmpdim=\_posx[\.alcomlabel] \_fi \_repeat
+   \_tmpnum=0
+   \_let\aca=\.algolcommentsalignment
+}
+\_def\.alcomlabel{comment:\_the\.algollistnum/\_the\_tmpnum}
+\_protected\_def \.algolcommentsalignment {\_incr\_tmpnum \_setpos[\.alcomlabel]%
+   \_ifdim\_tmpdim=-\_maxdimen \_else
+       \_ifdim\_posx[\.alcomlabel]=0pt \_else \_kern\_dimexpr\_tmpdim-\_posx[\.alcomlabel]\_relax
+   \_fi\_fi
+}
+\_globaldefs=0 % \refdecl needs to be processed when \localdefs=0
+\_refdecl{%
+   \_def\.alglist{}^^J
+   \_def\.Xalg#1#2#3{\_addto\.alglist{\.alline{#1}{#2}{#3}}%
+                     \_ea\_addto\_ea\.alglist\_ea{\_currpage}}^^J
+}
+
+\_trick 0079 \ttlineref \lref ;
+%%%%%%%%%%%%
+
+\:\_def\ttlineref#1{\_protected\_adef#1[##1]{\_label[ttline:##1]\_wlabel{\_the\_ttline}}}
+\:\_def\lref[#1]{\_ref[ttline:#1]}
+
+\_trick 0011 \scaleto \scaletof ;
+%%%%%%%%%%%%
+
+\:\_def\scaleto#1#{\_def\.tmp{#1}\.scaletoA}
+\_def\.scaletoA#1{\_setbox0=\_hbox{{#1}}%
+   \_edef\.tmp{\_expr{\_bp{\.tmp}/\_bp{\_wd0}}}%
+   \_transformbox{\_pdfscale{\.tmp}{\.tmp}}{#1}}
+
+\:\_def\scaletof#1#{\_def\.tmp{#1}\.scaletofA}
+\_def\.scaletofA#1{\_setbox0=\_hbox{{#1}}%
+   \_edef\.tmpa{\_expr{\_bp{\.tmp}/\_bp{\_wd0}}}%
+   \.scaletoA{\_setfontsize{mag\.tmpa}\_currvar#1}}
+
+\_trick 0141 \clipbox ;
+%%%%%%%%%%%%
+
+\_def\.scanthreedimens{%
+   \_directlua{tex.print(string.format('{\_pcent d}{\_pcent d}{\_pcent d}',
+               token.scan_dimen(),token.scan_dimen(),token.scan_dimen()))}%
+}
+
+\_def\clipbox{\_ea\_ea\_ea\.clipboxA\.scanthreedimens}
+\_def\.clipboxA#1#2#3#4#{\.clipboxB{#1}{#2}{#3}{#4}}
+\_def\.clipboxB#1#2#3#4#5{% #1,#2,#3: width, height, depth, #4 shift, #5 contents.
+   \_hbox to #1sp{%
+      \_pdfliteral{q 0 \_bp{-#3sp} \_bp{#1sp} \_bp{#2sp+#3sp} re W n}%
+      \_puttext #4{#5}%
+      \_pdfliteral{Q}%
+      \_vrule height#2sp depth#3sp width0pt \_hss
+   }%
+}
+
+\_trick 0053 \ignoreinspic ;
+%%%%%%%%%%%%
+
+\_def\.trydef #1{\_ifx#1\_undefined \_afterfi{\_def#1}\_else \_afterfi{\_def\.tmp}\_fi}
+\.trydef\nopicw{5cm}
+\.trydef\nopicratio{1.7}
+
+\_let\.inspicBori=\_inspicB
+\_def\.inspicBnew#1{%
+   \_isfile{\_the\_picdir#1}\_iftrue
+      \_edef\.filename{\_the\_picdir#1}%
+      \_setbox0=\_hbox\_bgroup\.inspicBori{#1}% \egroup is in \inspicBori
+   \_else
+      \_edef\.filename{NONE: \_the\_picdir#1}%
+      \_ifdim\_picheight=0pt \_picheight=\_expr{1/\nopicratio}\_picwidth \_fi
+      \_ifdim\_picwidth=0pt \_picwidth=\nopicratio\_picheight \_fi
+      \_ifdim\_picwidth=0pt \_picwidth=\nopicw\_relax \_picheight=\_expr{1/\nopicratio}\_picwidth \_fi
+      \_setbox0=\_hbox to\_picwidth{\_vbox to\_picheight{}\_hss}%
+   \_fi
+   {\LightGrey \_vrule height\_ht0 width\_wd0\Black\_raise1ex\_llap{\.filename\ }}\_egroup
+}
+\_def\ignoreinspic{\_let\_inspicB=\.inspicBnew}
+
+\_trick 0040 \tdnum ;
+%%%%%%%%%%%%
+
+\_def\tdnum #1 {\_isinlist{#1}{.}\_iftrue \_ea\.tdnumG \_else \_ea\.tdnumH \_fi #1\_end}
+\_def\.tdnumG #1.#2\_end {\.tdnumH#1\_end \.decdot \.tdnumB #2\_empty\_empty\_empty}
+\_def\.tdnumH#1\_end{\.tdnumA #1\_empty\_empty\_empty #1\_empty}
+\_def\.tdnumA #1#2#3{\_xcasesof
+   {\_ifx #1\_empty} {\.tdnumB}
+   {\_ifx #2\_empty} {\.tdnumB{}}
+   {\_ifx #3\_empty} {\_ea\.tdnumB\_ignoreit}
+   \_finc          {\.tdnumA}
+}
+\_def\.tdnumB #1#2#3#4{#1#2#3\_ifx#4\_empty\_else \.numsep \_ea\.tdnumB\_ea#4\_fi}
+\_def\.numsep{\,}
+\_def\.decdot{.}
+
+\_trick 0047 \style m \keepstyle ;
+%%%%%%%%%%%%
+
+\_def\.iprefix#1{}
+\_addto\_setlistskip{\_ifnum\_ilevel>1 \_edef\.iprefix{\.iprefix.\_the\_itemnum}\_fi}
+\_sdef{_item:m}{\.iprefix.\_the\_itemnum. }
+\_def\keepstyle{\_defaultitem=\_printitem}
+
+\_trick 0048 \easylist ;
+%%%%%%%%%%%%
+
+\_def\easylist{\_adef*{\.countlist}\_def\enditems{\_fornum 1..\_ilevel\_do{\_enditems}}}
+\_def\.aast{\.countlist}
+\_def\.countlist{\_tmpnum=1 \.countlistA}
+\_def\.countlistA{\_futurelet\.next\.countlistB}
+\_def\.countlistB{\_ifx\.next\.aast \_ea\.countlistC\_else \_ea\.countlistD \_fi}
+\_def\.countlistC#1{\_incr\_tmpnum \.countlistA}
+\_def\.countlistD{%
+   \_ifnum\_tmpnum>\_ilevel \_fornum \_ilevel..\_tmpnum-1 \_do{\_begitems\easylist}\_else
+   \_ifnum\_tmpnum<\_ilevel \_fornum \_tmpnum..\_ilevel-1 \_do{\_enditems}\_fi\_fi
+   \_startitem}
+
+\_trick 0092 \fcread ;
+%%%%%%%%%%%%
+
+\_newtoks\.fcithook
+\_def\.fcitlist{}
+
+\_def\.xbibadd#1{%
+   \_unless \_ifcsname fcit:\_entrykey\_endcsname
+      \_sxdef{fcit:\_entrykey}{}\_xdef\.fcitlist{\.fcitlist\fcititem[\_entrykey]}\_fi
+   \_global \_ea\_addto\_csname fcit:\_entrykey\_ea\_endcsname\_ea{\_expanded{#1}}%
+}
+\_def\.ubibfield{\_unexpanded\_ea{\_bibfield}}
+\_def\.remdotspace #1. \_end #2\_relax #3{%
+   \_ifx ^#2^\_else \_ea \_gdef \_csname fcit:#3\_endcsname{#1}\_fi}
+\_def\.remdotxspace #1.\ \_end #2\_relax #3{%
+   \_ifx ^#2^\_else \_ea \_gdef \_csname fcit:#3\_endcsname{#1}\_fi}
+
+\.fcithook{
+  \_def\_dofullfield#1#2{\_def\_dofield##1{#1}\.xbibadd{\_ea\_dofield\_ea{\.ubibfield}}}
+  \_def\_dofemptyfield#1#2{\_def\_dofield##1{#2}\.xbibadd{\_ea\_dofield\_ea{\.ubibfield}}}
+  \_def\_bprintaB #1*#2*#3\_fin{%
+     \_ifx\_bibfield\.readauthor \_def\_bibfield{}\.readauthor \_fi
+     \_ifx\_bibfield\.readeditor \_def\_bibfield{}\.readeditor \_fi
+     \.xbibadd{\_if^#3^#1\_else\_ea\_bprintaC\_ea{\.ubibfield}{#1}{#2}\_fi}}
+  \_def\_authorini#1\_endcsname{\_edef\_bibfield{\.ubibfield\_authorname}}
+  \_def\_editorini#1\_endcsname{\_edef\_bibfield{\.ubibfield\_editorname}}
+  \_def\_addauthlist{}
+  \_def\_bprintv [#1]#2#3{#3}
+  \_def\_Inclause{\.xbibadd{In:~}}
+  \_def\_dobibmark{}
+  \_let\_url=\_relax  \_let\_ulink=\_relax \_def\_preurl{}
+  \_def\_citelist{\_citeI[*]}
+  \_let\fcititem=\_relax
+}
+\_def\.readauthor{\_loopauthors {author}}
+\_def\.readeditor{\_loopauthors {editor}}
+
+\_def\fcread (#1) #2 {{%
+   \_setbox0=\_vbox{\_bibtexhook=\.fcithook
+      \_bibpart{fullcites}\_nocite[*]\_usebib/c (#1) #2 }
+   \_def\fcititem[##1]{%
+   \_ea\_ea\_ea \.remdotspace  \_csname fcit:##1\_endcsname \_end . \_end \_relax {##1}%
+   \_ea\_ea\_ea \.remdotxspace \_csname fcit:##1\_endcsname \_end .\ \_end \_relax {##1}%
+   }\.fcitlist % removing last .\space or .space from each bib-record
+}}
+\:\_def\fullcite[#1]{\_trycs{fcit:#1}{??\_opwarning{\_string\fullcite[#1] unknown label}}}
+
+\_trick 0071 \shadedframe ;
+%%%%%%%%%%%%
+
+\_def\.shadedframedefaults {% defaults:
+   frame-color=\Grey,       % color of frame rules
+   text-color=\Black,       % color of text inside the frame
+   shadow-color=\LightGrey, % color of shadow
+   bg-color=\Yellow,        % background color inside the frame
+   rule-width=1pt,          % width of rules used in the frame
+   v-margins=4pt,           % vertical space between text and frame
+   h-margins=4pt,           % horizontal space between text and frame
+   shade-width=4pt,         % the width of the shadow
+   text-width=4cm,          % width of the text inside the frame
+}
+\_optdef\shadedframe [] #1{\_bgroup
+      \_readkv\.shadedframedefaults \_readkv{\_the\_opt}%
+      \_vvkern=\_kv{v-margins}\_hhkern=\_kv{h-margins}%
+      \_rulewidth=\_kv{rule-width}\_hsize=\_kv{text-width}\relax
+      \_kv{frame-color}%
+      \_setbox0=\_hbox{\_frame{\_vbox{\_kv{text-color}\_noindent\_ignorespaces#1}}}%
+      \_edef\.htzo{\_the\_ht0}\_edef\.wdzo{\_the\_wd0}%
+      \_kv{shadow-color}%
+      \_hbox{\_vbox{\_hbox{\_rlap{\_kv{bg-color}\_vrule height\_ht0 width\_wd0 depth\_dp0}\_box0}%
+                  \_nointerlineskip \_moveright\_kv{shade-width}
+                     \_hbox{\_vrule height\_kv{shade-width}width\.wdzo}\_kern-\_kv{shade-width}}%
+            \_kern-\_kv{shade-width}\_vrule height\.htzo width\kv{shade-width}}%
+   \_egroup
+}
+
+\_trick 0073 \roundframe ;
+%%%%%%%%%%%%
+
+\_def \.roundframedefaults {% default parameters:
+   round-corner=3mm,        % diameter of corners
+   title-bgcolor=\Blue,     % background color of the title area
+   title-color=\White,      % color of title text
+   title-font=\_bf,         % font of title text
+   title-above=2pt,         % space above the first line of title
+   title-below=1pt,         % space below the last line of title
+   midrule-color=\Yellow,   % color of the rule between title and text area
+   midrule-width=2pt,       % thickness of the rule between title and text area
+   text-bgcolor=\LightGrey, % background color of the text area
+   text-color=\Black,       % color of normal text
+   text-font=\_rm,          % font of normal text
+   text-width=6cm,          % text paragraph width; frame width = text width + margins
+   text-margins=3mm,        % left and right margins
+   text-above=3pt,          % space above the first line of text
+   text-below=1pt,          % space below the last line of text
+   shadow-width=2pt,        % shadow thickness (if 0pt then no shadow printed)
+}
+\_optdef \roundframe [] #1#2{\_bgroup
+   \_kvdict{_optextrick:roundframe}% dictionary of used key-value parameters
+   \_readkv\.roundframedefaults \_readkv{\_the\_opt}%
+   \_roundness=\_kv{round-corner}\_relax
+   \_hsize=\_kv{text-width}\_relax
+   \_leftskip=\_kv{text-margins}\_relax \_rightskip=\_leftskip
+   \_setbox0=\_vbox{%
+      \.bgbox{\_kv{title-bgcolor}}{\_kern\_kv{title-above}%
+         \_noindent\_strut\_kv{title-color}\_kv{title-font}#1\.parstrut\_kern\_kv{title-below}}
+      \_kv{midrule-color}\_hrule height\_kv{midrule-width}%
+      \.bgbox{\_kv{text-bgcolor}}{\_kern\_kv{text-above}%
+         \_noindent\_strut\_kv{text-color}\_kv{text-font}#2\.parstrut\_kern\_kv{text-below}}}
+   \_setbox1=\_vbox to\_dimexpr\_ht0-2\_roundness{}\_wd1=\_dimexpr\_wd0-2\_roundness\_relax
+   \_hbox{\_unless\_ifdim\_kv{shadow-width}=0pt \.roundframeshadow \_fi
+      \_clipinoval .5\_wd0 .5\_ht0 \_wd0 \_ht0 {\_box0}}%
+   \_egroup
+}
+\_def\.bgbox#1#2{\_setbox0=\_vbox{#2}\_hbox{\_rlap{#1\_vrule height\_ht0 depth\_dp0 width\_wd0}\_box0}}
+\_def\.parstrut{\_par\_kern-\_prevdepth\_kern\_dp\_strutbox}
+\_def\.roundframeshadow{\_raise\_roundness\_rlap{\_edef\_shadowb{\_bp{\_kv{shadow-width}}}%
+   \_inoval[\_fcolor=\Grey \_roundness=\_kv{round-corner} \_shadow=Y \_lwidth=0pt]{\_box1}}}
+\_edef\.tmp{\_the\_kvdict}
+{\_kvdict{_optextrick:roundframe} \_ea\_foreach\.roundframedefaults \_do #1#2=#3,{\_global\_kvx{#1#2}{}}
+ \_global\_nokvx{\_opwarning{\_string\roundframe: Unknown option "#1"}}}
+\_kvdict=\_ea{\.tmp} % restoring \_kvdict, because \globaldefs=1
+
+\_trick 0103 \cancel ;
+%%%%%%%%%%%%
+
+\_def\cancel#1#{\_isempty{#1}\_iftrue \_afterfi{\cancel/}
+   \_else
+      \_lowercase{\_casesof #1}
+        /  {\_let\.cancline=\.drawFslash}
+        \\ {\_let\.cancline=\.drawBslash}
+        x  {\_def\.cancline{\.drawBslash\.drawFslash}}
+        -  {\_let\.cancline=\.drawHline}
+        \_finc {}%
+      \_ea\.cancelA
+   \_fi
+}
+\_def\.cancelA{\_ifmmode \_ea\.cancelM \_else \_ea\.cancelT \_fi}
+\_def\.cancelT#1{\_setbox0=\_hbox{#1}\.cancelF} % text mode
+\_def\.cancelM#1{\_mathstyles{\_setbox0=\_hbox{$\_currstyle#1$}\_cancelF}} % math mode
+\_def\.cancelF{\_edef\.tmp{\.cancline}\_quitvmode\_box0 \_pdfliteral{q \_useit{\cancelparams} \.tmp S Q}}
+\_def\.drawFslash{\_bp{-\_wd0} \_bp{-\_dp0} m 0 \_bp{\_ht0} l } % forward slash
+\_def\.drawBslash{\_bp{-\_wd0} \_bp{\_ht0} m 0 \_bp{-\_dp0} l } % backward slash
+\_def\.drawHline {\_bp{-\_wd0} \_bp{.5ex} m 0 \_bp{.5ex} l }    % horizontal line
+\_ifx\cancelparams\_undefined \_def\cancelparams{1 0 0 RG 1 J .6 w}\_fi % color RG linetype J linewidth w
+
+\_trick 0070 \keystroke ;
+%%%%%%%%%%%%
+
+\_ifx\keysize\_undefined \_newdimen\keysize \keysize=1.3em \_fi
+\_ifx\keystrokefont\_undefined \_def\keystrokefont{\_setfontsize{mag.77}\_cs{sans}\_rm} \_fi
+
+\_newbox\.keylbox  \_newbox\.keymbox  \_newbox\.keyrbox
+\_edef\.picheight{\_the\_picheight}
+\_setbox\.keylbox=\_hbox{\_picheight=\keysize \_inspic{keystroke_left.pdf}}
+\_setbox\.keymbox=\_hbox{\_picheight=\keysize \_inspic{keystroke_middle.pdf}}
+\_setbox\.keyrbox=\_hbox{\_picheight=\keysize \_inspic{keystroke_right.pdf}}
+\_picheight=\.picheight
+
+\_def\keystroke#1{\_setbox0=\_hbox{\keystrokefont#1}%
+   \_leavevmode \_lower.2\keysize \_hbox{\_copy\.keylbox
+      \_tmpdim=\_wd\.keymbox
+      \_ifdim\_wd0>\_tmpdim \_tmpdim=\_wd0 \_fi
+      \_ifdim\_tmpdim>\_wd\.keymbox
+         \_pdfsave \_pdfscale{\_expr{\_bp{\_tmpdim}/\_bp{\_wd\.keymbox}}}{1}%
+            \_rlap{\_copy\.keymbox}\_pdfrestore
+      \_else \_rlap{\_copy\.keymbox}\_fi
+      \_raise.33\keysize \_hbox to\_tmpdim{\_hss\_box0\_hss}\_copy\.keyrbox}%
+}
+
+\_trick 0004 \colortab ;
+%%%%%%%%%%%%
+
+\_def\.tabdC{\_futurelet\.next\.setcellcolor##\_fin\_hfil\_hfil}
+\_def\.tabdL{\_futurelet\.next\.setcellcolor##\_fin\_relax\_hfil}
+\_def\.tabdR{\_futurelet\.next\.setcellcolor##\_fin\_hfil\_relax}
+\_def\.tabdP#1{\_futurelet\.next\.setcellcolor##\_fin\_vtop
+    {\_hsize=#1\_relax \_baselineskip=\_normalbaselineskip
+     \_lineskiplimit=0pt \_noindent\.tmp\_unsskip\_lower\_dp\_tstrutbox\_hbox{}}}
+\_def\colortab{\_tablinespace=0pt \_let\_paramtabdeclarep=\.tabdP
+   \_let\_tabdeclarec=\.tabdC \_let\_tabdeclarel=\.tabdL \_let\_tabdeclarer=\.tabdR}
+\_def\.setcellcolor{%
+   \_ifx\.next\_setcolor \_ea\.setcellcolorC\_else \_ea\.setcellcolorD\_fi}
+\_def\.setcellcolorC\_setcolor#1#2#3#4\_fin#5#6{%
+   \_ifx#5\_vtop \_def\.tmp{#4}%
+      \_setbox0=\_hbox{\_the\_tabiteml\_vtop{\_localcolor#6}\_the\_tabitemr}%
+      \_the\_tabstrut {\_localcolor\_setcolor{#1}{#2}{#3}\_vrule width\_wd0}\_kern-\_wd0 \_box0
+   \_else
+      \_setbox0=\_hbox{\_the\_tabiteml\_localcolor#4\_unsskip\_the\_tabitemr}%
+      {\_localcolor\_setcolor{#1}{#2}{#3}%
+       \_the\_tabstrut\_leaders\_vrule\_hskip\_wd0 \_ifx#5\_hfil plus1fil\_fi}\_kern-\_wd0 \_box0
+      \_ifx#6\_hfil
+      {\_kern-.3bp \_localcolor\_setcolor{#1}{#2}{#3}\_leaders\_vrule\_hskip.3bp plus1fil}\_fi
+   \_fi
+}
+\_def\.setcellcolorD{\_ifx\cellcolor\undefined \_let\.next=\.setcellcolorN
+   \_else \_def\.next{\_ea\_ea\_ea\.setcellcolorC\cellcolor}%
+   \_fi \.next
+}
+\_def\.setcellcolorN#1\_fin#2#3{#2\_the\_tabiteml{\_localcolor#1\_unskip}\_the\_tabitemr#3}
+
+\:\_def\multispanc#1#2#3{\_multispan{#1}%
+   \_ea\_ea\_ea\.cellcolexp#2#3\_fin\_hfil\_hfil\_ignorespaces}
+\_def\.cellcolexp{\_futurelet\.next\.setcellcolor}
+
+\_trick 0005 \crx ;
+%%%%%%%%%%%%
+
+\_newcount\.tabline  \.tabline=1
+\_def\crx {\_crcr \_ifodd\.tabline \.colortabline \_else\_noalign{\_hrule height0pt}\_fi \_incr\.tabline}
+\_def\.colortabline{\_noalign{\_localcolor\LightGrey
+   \_hrule height\_ht\_strutbox depth\_dimexpr\_dp\_strutbox +2\_tablinespace\_relax
+   \_kern-\_dimexpr\_ht\_strutbox+\_dp\_strutbox +2\_tablinespace}}
+
+\_trick 0007 \crtop \crbot \crmid ;
+%%%%%%%%%%%%
+
+\:\_def\crtop{\_crcr \_noalign{\_hrule height.6pt \_kern2.5pt}}
+\:\_def\crbot{\_crcr \_noalign{\_kern2.5pt\_hrule height.6pt}}
+\:\_def\crmid{\_crcr \_noalign{\_kern1pt\_hrule height.4pt\_kern1pt}}
+
+\_trick 0016 \longtable ;
+%%%%%%%%%%%%
+
+\_def\longtable#1#2{\_goodbreak \_bgroup \_tablinespace=0pt \_let\_zerotabrule=\_empty
+   \_setbox0=\_table{#1}{\.strutT\_relax #2}
+   \_setbox1=\_vbox{\_unvbox0 \_setbox2=\_vbox{}\.revertbox}
+   \_setbox2=\_vbox{\_unvbox2 \_global\_setbox4=\_lastbox\_unskip \_global\_setbox5=\_lastbox\_unskip}
+   \.whatfree4 \_advance\_tmpdim by-.8pt \_ifdim\_tmpdim<\_baselineskip \_vfil\_break \_fi
+   \_offinterlineskip \.crule\.center4\.crule\.center5 \.printboxes
+   \.center5\.crule \_egroup \_goodbreak
+}
+\_def\.whatfree#1{\_tmpdim=\_vsize \_advance\_tmpdim by-\_pagetotal
+   \_advance\_tmpdim by-\_prevdepth \_advance\_tmpdim by-.4pt
+   \_advance\_tmpdim by-\_ht#1 \_advance\_tmpdim by-\_dp#1 \_advance\_tmpdim by-\_ht5 }
+\_def\.revertbox {\_setbox0=\_lastbox\_unskip
+   \_ifvoid0 \_else \_global\_setbox2=\_vbox{\_unvbox2\_box0} \_ea\.revertbox\_fi}
+\_def\.printboxes{\_setbox2=\_vbox{\_unvbox2 \_global\_setbox0=\_lastbox\_unskip}
+   \_ifvoid0 \_else \.whatfree0
+      \_ifdim\_tmpdim<0pt \.center5\.crule\_vfil\_break \.crule\.center4\.crule\.center5 \_fi
+      \.center0 \_nobreak \.printboxes \_fi}
+\_def\.crule{\_centerline{\_hbox to\_wd4{\_hrulefill}}\_nobreak}
+\_def\.center#1{\_centerline{\_copy#1}\_nobreak}
+
+\_def\.strutT {\_vrule height1.8em depth.8em width0pt} % strut for the title
+
+\_trick 0032 \vcent \vbot ;
+%%%%%%%%%%%%
+
+\:\_def\vbot {\_let\_tableparbox=\_vbox}
+\:\_def\vcent {\_toksapp\_tabiteml{$}\_tokspre\_tabitemr{$}\_let\_tableparbox=\_vcenter}
+
+\_trick 0046 \tnote ;
+%%%%%%%%%%%%
+
+\_newcount\.tnotenum
+\_def\.tnotelist{}
+\_def\.tnoteformat{$\Red^{\_rm\_athe\.tnotenum}$}
+\_def\tnote#1{\_incr\.tnotenum \.tnoteformat\_global\_addto\.tnotelist{{#1}}}
+\:\_def\tnoteprint{\_par\_noindent \.tnotenum=0
+   \_ea\_foreach\.tnotelist \_do{\_advance\.tnotenum by1 \.tnoteformat##1 }\_par
+   \_global\.tnotenum=0 \_gdef\.tnotelist{}%
+}
+
+\_trick 0050 \tabnodes \tablebefore ;
+%%%%%%%%%%%%
+
+\_newcount\.tndnum \_newcount\.trownum
+\:\_def\tablebefore{\_incr\.tndnum \_ifvmode \_null \_fi
+   \_setpos[t\_the\.tndnum:ori:b]\_ea\.tbpxpy\_ea{\_the\.tndnum}{b}\_decr\.tndnum \_nobreak
+}
+\:\_def\tableafter {\_setpos[t\_the\.tndnum:ori:e]\_ea\.tbpxpy\_ea{\_the\.tndnum}{e}}
+\_def\.tbpxpy#1#2{%
+   \_def\.tbpx[##1##2]{\_expr{\_bp{\_posx[t#1:##1\_the\_numexpr##2]}-\_bp{\_posx[t#1:ori:#2]}}}%
+   \_def\.tbpy[##1##2]{\_expr{\_bp{\_posy[t#1:##1\_the\_numexpr##2]}-\_bp{\_posy[t#1:ori:#2]}}}%
+}
+\_def\.putnodeh#1{\_immediateassigned{\_let\_tabstrutA=\_relax\_tabiteml{}\_tabitemr{}}\_relax
+   \_setpos[t\_the\.tndnum:l#1]\_hskip0pt plus1fill\_relax \_setpos[t\_the\.tndnum:r#1]}
+\_def\.putnodelr{\_fornum 1..\_colnum-1\_do{\.putnodeh{##1}&}\.putnodeh{\_the\_colnum}%
+   \_gdef\.putnode{\_noalign{\.putnodebt}}\_cr}
+\_def\.putnodebt{\.nup{-\_tablinespace}{\.putnodeb\_incr\.trownum \.putnodet}%
+   \.settskip \_gdef\.corrposb{\_noalign{\_advance\.trownum by-1 \.putnodeb}}}%
+\:\_def\tabnodes{\_incr\.tndnum \.trownum=0 \_let\.putnode=\.putnodelr \_everycr={\.putnode}%
+   \_foreach \crl\_crl \crll\_crll \crli\_crli \crlli\_crlli \_do ##1##2{%
+      \_def##1{\_crcr\.corrposb##2\.corrpost
+              \_noalign{\.initskip \_glet\.testskip=\_ignoresecond \_glet\.corrposb=\_empty}}}%
+   \_def\crlp##1{\_crcr\.corrposb\_crlp{##1}\.corrpost}%
+   \_addto\_tskipA {\_noalign{\_decr\.trownum \_glet\.corrposb=\_empty
+      \.testskip{\.putnodet}{\.nup\_tablinespace\.putnodet}}}%
+   \_def\.initskip{\_gdef\.settskip{\_gdef\.settskip{\_glet\.testskip=\_usesecond}}}\.initskip
+   \_def\.nup##1##2{\_kern##1 ##2\_kern-##1 }%
+   \_def\.putnodet{\_setpos[t\_the\.tndnum:t\_the\.trownum]}%
+   \_def\.putnodeb{\_setpos[t\_the\.tndnum:b\_the\.trownum]}%
+   \_def\.corrpost{\_noalign{\.putnodet}}%
+}
+\:\_def\itl[#1,#2]{\.tbpx[l#2] \.tbpy[t#1]}
+\:\_def\icl[#1,#2]{\.tbpx[l#2] \_expr{(\.tbpy[t#1]+(\.tbpy[b#1]))/2}}
+\:\_def\ibl[#1,#2]{\.tbpx[l#2] \.tbpy[b#1]}
+\:\_def\itc[#1,#2]{\_expr{(\.tbpx[l#2]+(\.tbpx[r#2]))/2} \.tbpy[t#1]}
+\:\_def\icc[#1,#2]{\_expr{(\.tbpx[l#2]+(\.tbpx[r#2]))/2} \_expr{(\.tbpy[t#1]+(\.tbpy[b#1]))/2}}
+\:\_def\ibc[#1,#2]{\_expr{(\.tbpx[l#2]+(\.tbpx[r#2]))/2} \.tbpy[b#1]}
+\:\_def\itr[#1,#2]{\_expr{\.tbpx[r#2]} \_expr{\.tbpy[t#1]}}
+\:\_def\icr[#1,#2]{\.tbpx[r#2] \_expr{(\.tbpy[t#1]+(\.tbpy[b#1]))/2}}
+\:\_def\ibr[#1,#2]{\.tbpx[r#2] \.tbpy[b#1]}
+\:\_def\iwd[#1,#2]{\_expr{\.tbpx[r#2]-(\.tbpx[l#2])}}
+\:\_def\iht[#1,#2]{\_expr{\.tbpy[t#1]-(\.tbpy[b#1])}}
+
+\:\_def\ishift #1[#2]{\_ea\.ishiftA#1[#2] }  %  \ishift\icc[2,3][1pt,2.5pt]
+\_def\.ishiftA #1 #2 #3#4,#5]{\_expr{#1+(\_bp{#4})} \_expr{#2+(\_bp{#5})}}
+\:\_def\tabpos#1#2{#1\_ifx\ishift#2\_ea\.tabposA \_else \_ea\.tabposB \_fi #2}
+\_def\.tabposA #1#2[#3]#4#5]{\_ea\.tabposC\_expanded{#1#2[#3][#5] }}
+\_def\.tabposB #1[#2,#3]{\_ea\.tabposC#1[#2,#3] }
+\_def\.tabposC #1 #2 {#1bp #2bp}
+
+
+\_trick 0147 0148 0149 0151 0152 \csvread \csvdecl \dbcreate ;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\_newcount\.dbcol \_newcount\.dbrow
+\:\_def\csvread#1#{\_ifcsname dbmaxrow#1\_endcsname
+   \_opwarning{\_noexpand\csvread ignored: database "#1" created already}%
+   \_ea \_ignoreit
+   \_else \_afterfi{\_par \_bgroup \_def\.dbn{#1}\.dbrow=0 \.csvreadA}\_fi}
+\_def\.csvreadA#1{\_everypar={\.readline}\_cs{csvreadsetup}\_catcode`\ =10 \_input{#1}%
+   \_decr\.dbrow \_sxdef{dbmaxrow\.dbn}{\_the\.dbrow}
+   \_decr\.dbcol \_sxdef{dbmaxcol\.dbn}{\_the\.dbcol}\_egroup}
+\:\_def\csvdecl #1#2#3{%
+   \_eoldef\.readline##1{\_setbox0=\_lastbox \_par \.dbcol=0
+      \_ifnum\.dbrow=0 \_afterfi{\.readitem\.csvsethead}\_else \_afterfi{\.readitem\.csvsetdata}\_fi ##1#3\_fin
+      \_incr\.dbrow}
+   \_def\.readitem##1##2{\_incr\.dbcol
+      \_ifx##2\_fin \_else \_afterfi{\_ifx ##2#1\_afterfi{\.readitemA##1}\_else \_afterfi{\.readitemB##1##2}\_fi}\_fi}
+   \_def\.readitemA ##1##2#2#3{##1{##2}\.readitem##1}
+   \_def\.readitemB ##1##2#3{##1{##2}\.readitem##1}
+} \csvdecl "", % " " , are default data separators
+\_def\.csvsethead#1{\_sxdef{dbcol:\.dbn(#1)}{\_the\.dbcol}\_sxdef{dbhead:\.dbn(\_the\.dbcol)}{#1}}
+\_def\.csvsetdata#1{\_global\_sdef{dbitem:\.dbn(\_the\.dbrow,\_the\.dbcol)}{#1}}
+\:\_def\dbitem#1(#2,#3#4){\.dbset{#1}%
+   \_ifcsname dbitem:#1(#2,#3#4)\_endcsname \_unexpanded\_ea\_ea\_ea{\_lastnamedcs}\_else \dbunknown\_fi}
+\_def\.dbset#1{\_immediateassignment\_edef\.dbname{#1}}
+\:\_def\colname#1){\_ifcsname dbcol:\.dbname(#1)\_endcsname \_lastnamedcs \_else 0\_fi)}
+\:\_def\dbhead#1(#2){\_ifcsname dbhead:#1(#2)\_endcsname \_lastnamedcs \_else \dbunknown \_fi}
+\:\_def\dbunknown{??}
+\_let\.dbitem=\dbitem \_let\.colname=\colname
+
+\:\_def\dbhash #1(#2){%
+   \.onlyifdb #1(#2)\dbhash {%
+      \_fornum 1..\cs{dbmaxrow#1}\_do
+         {\_edef\.tmp{\.dbitem#1(##1,#2)}\.sxadef{dbrow:#1(#2)\_detokenize\_ea{\.tmp}}{##1,}}%
+}}
+\_def\.sxadef#1#2{\_ifcsname#1\_endcsname \_sxdef{#1}{\_cs{#1}#2}\_else\_sxdef{#1}{#2}\_fi}
+\_def\.onlyifdb #1(#2)#3#4{\.dbset{#1}%
+   \_ifcsname dbhead:#1(#2)\_endcsname #4\_else
+   \_ifcsname dbmaxrow#1\_endcsname \_opwarning{\_string#3 ignored: undeclared column \.missingcol(#2) in "#1"}%
+   \_else \_opwarning{\_string#3 ignored: database "#1" isn't created}%
+   \_fi\_fi
+}
+\:\_def\dbwhere #1(#2)#3{\.dbset{#1}%
+   \_ifcsname dbrow:#1(#2)\_detokenize{#3}\_endcsname \_ea\_ea\_ea\.firstfromlist\_lastnamedcs;\_else 0\_fi}
+\_def\.missingcol (#1#2){(\_ifx#1\colname \_noexpand#1#2\_else #1#2\_fi)}
+\_def\.firstfromlist #1,#2;{#1}
+
+\:\_def\dbloop #1(#2)#3{\.onlyifdb #1(1)\dbloop {%
+   \_immediateassigned{\_def\.settinglist{}\.dbsetting #2,\_fin=\_fin,}%
+   \_ifcsname dblist:#1\_endcsname
+      \_afterfi{\_ea\_foreachx\_csname dblist:#1\_endcsname \_do ##1,}%
+   \_else \_afterfi{\_fornum 1..\cs{dbmaxrow#1}\_do}\_fi
+      {\_immediateassigned{\.dbrow=##1 \.settinglist}#3}%
+}}
+\_def\.dbsetting #1#2=#3,{\_ifx#3\_fin \_else \_addto\.settinglist{\.dbdef#1{#3}}\_ea\.dbsetting\_fi}
+\_def\.dbdef#1#2{\_edef#1{\.dbitem\.dbname(\_the\.dbrow,\.colname#2)}}
+\:\_def\dbsort #1(#2){\.onlyifdb #1(#2)\dbsort {% basename column exists:
+   \_def\.dblist{}%
+   \_ifcsname db:sortlist\_endcsname \_afterfi {\_ea\_foreachx \_lastnamedcs \_do ##1,}%
+   \_else \_afterfi{\_fornum 1..\cs{dbmaxrow#1}\_do}\_fi {%
+      \_edef\.tmp{\.dbitem #1(##1,#2)}\_edef\.tmp{\_ea\dbsortfmt\_ea{\.tmp}{##1}}%
+      \_ea\_addto \_ea\.dblist \_csname +\.tmp\_endcsname
+      \_sdef{+\.tmp}{##1,}}%
+   \_ifx\.dblist \_empty \_else \_dosorting\.dblist \_fi
+   \_sxdef{dblist:#1}{\.dblist}\_global\_slet{db:sortlist}{_undefined}%
+}}
+\_ifx\dbsortfmt\_undefined \_def\dbsortfmt#1#2{\_detokenize{#1}|\.fmtnum#2;} \_fi
+\:\_def\fmtnum #1;{\_ea\_ignoreit\_the\_numexpr#1+100000\_relax}
+\_let\.fmtnum=\fmtnum
+
+\:\def\dbcreate #1({\_ifcsname dbmaxrow#1\_endcsname
+   \_opwarning{\_noexpand\dbcreate ignored: database "#1" created already}%
+   \_ea \.dbignore \_else \_afterfi {\_bgroup \_edef\.dbname{#1}\.dbcreateA \_empty}\_fi}
+\_def\.dbignore #1){}
+\_def\.dbcreateA #1){\.dbcol=0
+   \_ea \_foreach #1\_do{\_incr\.dbcol
+      \_sxdef{dbcol:\.dbname(##1)}{\_the\.dbcol}\_sxdef{dbhead:\.dbname(\_the\.dbcol)}{##1}}%
+   \_sxdef{dbmaxrow\.dbname}{0}\_sxdef{dbmaxcol\.dbname}{\_the\.dbcol}%
+   \_ifnum\.dbcol=0 \_sxdef{dbhead:\.dbname(1)}{\dbunknown}\fi
+   \_egroup
+}
+\:\_def\dbinsert #1({\.dbinsertA #1(\_empty}
+\_def\.dbinsertA #1(#2){\.onlyifdb #1(1)\dbinsert {%
+   \.dbrow=\_cs{dbmaxrow#1} \_incr\.dbrow \.dbcol=0 \_tmpnum=\cs{dbmaxcol#1}
+   \_ea \_foreach #2\_do
+      {\_incr\.dbcol \_ifnum\.dbcol>\_tmpnum\_else \_sxdef{dbitem:#1(\_the\.dbrow,\_the\.dbcol)}{##1}\_fi}%
+   \_ifnum\.dbcol>\_tmpnum
+      \_opwarning{\_string\dbinsert: data row larger than max column (\_the\.tmpnum) in "#1"}\_fi
+   \_sxdef{dbmaxrow#1}{\_the\.dbrow}%
+}}
+\:\_def\dbitemset #1(#2,#3#4)#5{\.onlyifdb #1(#3)\dbitemset {\_sxdef{dbitem:#1(#2,#3#4)}{#5}}}
+\:\_def\dbheadset #1(#2)#3{\.onlyifdb #1(1)\dbheadset{\.dbcol=\_ea\.getrownum \_expanded{#2)}\_relax
+   \_ifnum\.dbcol=0 \_opwarning{\_noexpand\dbheadset ignored: bad column \.missingcol(#2)}%
+   \_else \_sxdef{dbcol:#1(#3)}{\_the\.dbcol}\_sxdef{dbhead:#1(\_the\.dbcol)}{#3}\_fi
+}}
+\_def\.getrownum #1){#1}
+
+\:\_def\dbshow #1(#2){\.onlyifdb #1(1)\dbshow {\_immediateassignment\.dbcol=\_cs{dbmaxcol#1}
+   \_fornum 1..\.dbcol \_do {\.dbps{dbhead:#1(##1)}{#2}{##1}}\dbrowchar \dbheadchar
+   \_fornum 1..\_cs{dbmaxrow#1} \_do {\_fornum 1..\.dbcol \_do {%
+      \.dbps{dbitem:#1(##1,####1)}{#2}{####1}%
+   }\dbrowchar}
+}}
+\_def\.dbps #1#2#3{\_if\_relax\_detokenize{#2}\_relax {\.utrycs{#1}{\dbunknown}}\_else \.dbpsA {#1}#2{#3}\fi}
+\_def\.dbpsA #1#2#3#4#5{#2\.utrycs{#1}{\dbunknown}#3\_ifnum #5<\.dbcol #4\_fi} % cs, open, close, between, colnum
+\:\_def\dbrowchar{^^J}  \:\_def\dbheadchar{}
+\:\_def\dbshowrow #1(#2)(#3){\.onlyifdb #1(1)\dbshowrow {\_immediateassignment\.dbcol=\cs{dbmaxcol#1}
+   \_fornum 1..\.dbcol \_do {\.dbps{dbitem:#1(#2,##1)}{#3}{##1}}%
+}}
+\_def\.utrycs#1#2{\_ifcsname#1\_endcsname \_unexpanded\_ea\_ea\_ea{\_lastnamedcs}\_else #2\_fi}
+\:\_def\dbshowhead #1(#2){\.onlyifdb #1(1)\dbshowhead {\_immediateassignment\.dbcol=\_cs{dbmaxcol#1}
+   \_fornum 1..\.dbcol \_do {\.dbps{dbhead:#1(##1)}{#2}{##1}}%
+}}
+\:\_def\dbwrite #1(#2)#3{\.onlyifdb #1(1)\dbwrite {%
+   \_immediate\_openout\.dbout={#3}%
+   \_immediate\_write\.dbout{\dbBOM\.dbshow #1(#2)}%
+   \_immediate\_closeout\.dbout
+}}
+\_newwrite\.dbout
+\_let\.dbshow=\dbshow
+\_ifx\dbBOM\_undefined \_def\dbBOM{^^^^^^1100ef^^^^^^1100bb^^^^^^1100bf} \_fi
+
+
+\_trick 0153 0154 0165 \inode \enode \execedges \showtree \jsonread \jsoncnv \treedata \tracingtreedata \treenodes ;
+%%%%%%%%%%%%%%%%%%%%%%
+
+\:\_def\inode [#1]#2{\_immediateassignment\_opt={#1}\startinode#2\stopinode}
+\:\_def\enode [#1]{\_immediateassignment\_opt={#1}\execenode}
+\:\_def\execedges#1#2{\_foreachx#1\_do##1[##2]##3{##1[##2]{##3}#2}}
+
+\_ifx \startinode\_undefined \_def\startinode{} \_fi
+\_ifx \stopinode \_undefined \_def\stopinode{}  \_fi
+\_ifx \execenode \_undefined \_def\execenode#1{(#1)} \_fi
+
+\_newcount\.treelevel
+\_let\.ima=\_immediateassignment
+\_def\.spaces{\_fornum 1..\.treelevel \_do{\_space\_space\_space}}
+\_def\.nline{\_ifnum\.treelevel>0 \_pcent^^J\.spaces\_fi}
+\_def\.showdefs{%
+   \_def\startinode{\.nline \_string\inode[\_the\_opt] \.ima\_incr\.treelevel\_csstring\{}%
+   \_def\stopinode{\_csstring\}\.ima\_decr\.treelevel}%
+   \_def\execenode##1{\.nline \_string\enode[\_the\_opt] \_unexpanded{{##1}}}%
+}
+\:\_def\showtree#1{\_immediateassigned{\.treelevel=0
+   \_let\.startinodeB=\startinode \_let\.stopinodeB=\stopinode \_let\.execenodeB=\execenode \.showdefs}%
+   #1\_immediateassigned{%
+   \_let\startinode=\.startinodeB \_let\stopinode=\.stopinodeB \_let\execenode=\.execenodeB}%
+}
+
+\_def\.isnschar#1#2#3{\_immediateassignment\_def\_isnextcharA{\_isnextcharB{#1}{#2}{#3}}%
+   \_nospacefuturelet\_next\_isnextcharA} % behaves like \isnextchar but skip spaces
+\:\_let\nonstring=\_useit % the presence of it in the value of \enode means that the value isn't string
+
+\_def\.arrayread#1[#2]#3,{\_noexpand\inode \.eid {\.aread#2,\_fin}\.isnschar\_fin{\_ignoreit}{#1}}
+\_def\.aread{\.isnschar\_bgroup{\.objread\.aread}
+     {\_isnextchar[{\.arrayread\.aread}{\_isnextchar"{\.readstr\.aread}{\.readnostr\.aread}}}}
+\_def\.objread#1#2#3,{\_noexpand\inode \.eid {\.oread#2,\_fin}\.isnschar\_fin{\_ignoreit}{#1}}
+\_def\.oread #1"#2"#3:{\_immediateassignment\_def\.idj{#2}%
+   \.isnschar\_bgroup{\.objread\.oread}
+      {\_isnextchar[{\.arrayread\.oread}{\_isnextchar"{\.readstr\.oread}{\.readnostr\.oread}}}}
+\_def\.readstr#1"#2"#3,{\_noexpand\enode\.eid{\_unexpanded{#2}}\.isnschar\_fin{\_ignoreit}{#1}}
+\_def\.readnostr#1#2,{\_noexpand\enode\.eid{\_noexpand\nonstring{\.nospaces#2 }}\.isnschar\_fin{\_ignoreit}{#1}}
+\_def\.nospaces#1 {#1\_nospaceafter\_empty}
+\_def\.eid{\_ifx\.idj\_undefined[]\_else [\.idj]\_immediateassignment\_let\.idj=\_undefined\_fi}
+
+\:\_optdef\jsonread[JSON]#1#2{{\_suppressoutererror=1 \_edef\.idj{\_the\_opt}%
+   \_xdef#1{\_ea\.jsoncnv\_input{#2},\_fin}}}
+\:\def\jsoncnv{\.isnschar\_bgroup{\_ea\_useit\.objread\_empty}{\_ea\_useit\.arrayread\_empty}}
+\_let\.jsoncnv=\jsoncnv
+
+\:\_optdef\treedata[]#1{%
+   \_bgroup
+      \_if\_relax\_the\_opt\_relax \_def\.csprefix{\_ignoreit}\_else \_edef\.tmp{\_the\_opt}\_fi
+      \_def\startinode{\_bgroup \.addprefix}%
+      \_def\stopinode{\_egroup}%
+      \_def\execenode##1{{\.addprefix \.savetreedata{##1}}}%
+      #1%
+   \_egroup
+}
+\_def\.addprefix{%
+   \_ifx\.csprefix\_undefined \_edef\.csprefix{\.tmp}\_else
+   \_if\_relax\_the\_opt\_relax \_else\_edef\.csprefix{\.csprefix/\_the\_opt}\_fi\_fi
+   \_ea\_isinlist\_expanded{{,\reptreenames,,}{,\_the\_opt,}}\_iftrue
+      \_ifcsname \.csprefix[]\_endcsname
+         \_sxdef{\.csprefix[]}{\_the\_numexpr\_lastnamedcs+1\_relax}%
+      \_else \_sxdef{\.csprefix[]}{1}\_fi
+      \_edef\.csprefix{\.csprefix[\_lastnamedcs]}%
+   \_fi}
+\_ifx \reptreenames\_undefined \def\reptreenames{} \_fi % default
+\_def\.savetreedata{\_global\_sdef\.csprefix}  % default: no messages on terminal
+\:\_def\tracingtreedata{\_def\.savetreedata##1{%
+   \_wterm{\_string\treedata: \_ifcsname\.csprefix\_endcsname !redef. \_else \_space\_fi
+          \_noexpand\sdef{\.csprefix}{\_unexpanded{##1}}}%
+   \_global\_sdef\.csprefix{##1}%
+}}
+
+\:\_def\treenodes[#1]#2{\_bgroup
+   \_def\.tname{#1(\_the\_tmpnum)}\_tmpnum=0 \_def\.parent{\_relax}%
+   \_def\startinode{\_incr\_tmpnum \.addparent
+      \_bgroup \_protected\_sxdef\.tname{[\_the\_opt]}\_edef\.parent{\_cs\.tname}}%
+   \_def\stopinode{\_egroup}%
+   \_def\execenode##1{\_incr\_tmpnum\.addparent \_protected\_sxdef\.tname{[\_the\_opt]{\_unexpanded{##1}}}}%
+   #2\_egroup \_sxdef{#1()}{\_the\_tmpnum}%
+}
+\_def\.addparent{\_sxdef{^\.tname}{\.parent}%
+   \_ea\_ifx\.parent\_relax\_else \_protected\_ea\_xdef\.parent{\_ea\_ea\_ea\_empty\.parent\_cs\.tname}\_fi}
+
+\:\_def\showtreenodes#1{\.ima\.treelevel=0 \_ea\.showthisnode\_csname#1\_endcsname}
+\_def\.showthisnode#1{\.nline \_string#1 \_ifx#1\_relax -> ?? \_else \_ea\.shownodedata#1;\_fi}
+\_def\.shownodedata [#1]{-> [#1]\_isnextchar\_bgroup{\.showenode}{\.showinodes}}
+\_def\.showenode#1#2{{\_unexpanded{#1}}}
+\_def\.showinodes#1;{#1\.ima\_incr\.treelevel\.showinode#1;}
+\_def\.showinode#1{\_ifx#1;\.ima\_decr\.treelevel \_else\.showthisnode#1\_ea\.showinode\_fi}
+
+\:\_def\treefromnodes#1{\_ea\.putthisnode\_csname#1\_endcsname}
+\_def\.putthisnode#1{\_ifx#1\_relax \_else \_ea\.putnodedata#1;\_fi}
+\_def\.putnodedata[#1]{\_isnextchar\_bgroup
+   {\_noexpand\enode[#1]\.showenode}{\_noexpand\inode[#1]{\_iffalse}\_fi\.putinode}}
+\_def\.putinode#1{\_ifx#1;\_iffalse{\_fi}\_else \.putthisnode#1\_ea\.putinode\_fi}
+
+\:\_def\nodedef#1{\_ea\.nodedefA\_csname#1\_endcsname}
+\_def\.nodedefA#1#2{\_bgroup \_def\id{}\_def\nodes{}\_def\data{}%
+   \_ifx#1\_relax \_else \_ea\.nodedefB#1;\_fi
+   \_def\n##1{\_cs{##1}\.ima\_sxdef{^##1}{#1}}\_def\u##1{{\_unexpanded{##1}}}%
+   \_protected\_xdef#1{#2}\_egroup
+}
+\_def\.nodedefB[#1]{\_def\id{#1}\_isnextchar\_bgroup{\.defdata}{\.defnodes}}
+\_def\.defdata#1#2{\_def\data{#1}}\_def\.defnodes#1;{\_def\nodes{#1}}
+
+\:\_def\nodedel#1{\_ea\.nodedelA\_csname#1\_ea\_ea\_ea\_endcsname\_csname^#1\_endcsname}
+\_def\.nodedelA#1#2{\_ifx#2\_relax\_else{\_def#1{}\_xdef#2{\_ea\_empty#2}}\_fi}
+
+
+\_trick 0031 \framedblocks ;
+%%%%%%%%%%%%
+
+\_newcount\.blocklevel  % nesting level of blocks
+\_def\begblock{\_par\_bgroup
+   \_advance\.blocklevel by1 \_advance\_leftskip by\_iindent \_rightskip=\_leftskip
+   \_medskip
+   \_openref\_pdfsavepos \_ea\_wref\_ea\.Xblock\_ea{\_ea{\_the\.blocklevel}B{\_the\_pdflastypos}}
+   \_nobreak \_medskip
+}
+\_def\endblock{\_par\_nobreak\_medskip
+   \_pdfsavepos \_ea\_wref\_ea\.Xblock\_ea{\_ea{\_the\.blocklevel}E{\_the\_pdflastypos}}
+   \_medskip \_egroup
+}
+\_newdimen\.frtop \_newdimen\.frbottom % positions of top and bottom text on the pages
+\_pgbackground={%
+   \_slet{_optextrick_tmp}{frm:\_the\_gpageno}
+   \_ifx\.tmp\_undefined \_def\.tmp{}\_fi
+   \.frtop=\_dimexpr \_pdfpageheight-\_voffset+\_smallskipamount\_relax
+   \.frbottom=\_dimexpr\_pdfpageheight-\_voffset-\_vsize-\_medskipamount\_relax
+   \_ifx\.frnext y \_edef\.tmp{B{\_number\.frtop}\.tmp}\_global\_let\.frnext n\_fi
+   \_ea\.printframes \.tmp B{0}E{\_number\.frbottom}
+   \_ifx\frameslist\_empty \_else
+   \_pdfliteral{q 1 0 0 1 0 \_bp{-\_pdfpageheight} cm \frameslist Q}\_fi
+}
+\_def\.printframes B#1#2E#3{\_ifnum#1=0 \_else
+   \printframe {\_hoffset}{#3sp}{\_xhsize}{\_ifnum#1=-1 \_number\.frtop\_else#1\_fi sp-#3sp}
+   \_ifx^#2^\_else \_global\_let\.frnext=y \_let\.printframes=\_relax \_fi
+   \_ea\.printframes\_fi
+}
+\:\_def\frameslist{}
+\_ifx\printframe\_undefined
+\_def\printframe #1#2#3#4{\_edef\frameslist{\frameslist
+    .8 g \_bp{#1} \_bp{#2} \_bp{#3} \_bp{#4} re f }%
+}
+\_fi
+\_def\framedblocks{} % for autoloading only, it redefines standard \begblock, \endblock
+\_globaldefs=0 % \refdecl needs to be processed when \localdefs=0
+\_refdecl{%
+   \_def\.Xblock#1#2#3{\_ifnum#1=1 \_edef\.tmp{frm:\_ea\_ignoresecond\_currpage}^^J
+      \_unless\_ifcsname \.tmp \_endcsname \_sxdef{\.tmp}{}\_fi^^J
+      \_sxdef{\.tmp}{\_cs{\.tmp}#2{#3}}\_fi}
+}
+
+\_trick 0086 \twoblocks ;
+%%%%%%%%%%%%
+
+\_newdimen\.pageblank
+\_newdimen\.columnsht
+
+\_def\.setcolumn{\_advance\_hsize by-\_colsep \_hsize=.5\_hsize \_penalty0 }
+\_def\twoblocks{\_par
+   \_begingroup \_hbadness=5000 \_splittopskip=1em plus1fil \_brokenpenalty=0
+   \_setbox0=\_vbox\_bgroup \.setcolumn
+      \_aftergroup\.twoblocksA
+      \_let\.next=%
+}
+\_def\.twoblocksA{%
+   \_setbox1=\_vbox\_bgroup \.setcolumn
+      \_aftergroup\.twoblocksB
+      \_let\.next=%
+}
+\_def\.twoblocksB{\_setbox2=\_vsplit0 to0pt \_setbox2=\_vsplit1 to0pt \.twoblocksC}
+\_def\.twoblocksC{%
+   \_penalty0 \_vskip\_parskip
+   \_ifdim\_pagegoal=\_maxdimen \.pageblank=\_vsize \_else \.pageblank=\_pagegoal \_fi
+   \_advance\.pageblank by-\_pagetotal
+   \_ifdim\.pageblank<24pt \_vfil\_break \.pageblank=\_vsize \_fi
+   \_ifdim\_ht0>\_ht1 \.columnsht=\_ht0 \_dimen0=\_dp0 \_else \.columnsht=\_ht1 \_dimen0=\_dp1 \_fi
+   \_ifdim\.columnsht>\.pageblank
+      \_setbox2=\_vsplit0 to\.pageblank \_setbox3=\_vsplit1 to\.pageblank
+      \_line{\.xvtop2\_hss\.xvtop3}
+      \_kern-\_baselineskip \_nobreak\_vfil\_break
+      \_ea\.twoblocksC
+   \_else
+      \_line{\.xvtop0\_hss\.xvtop1}
+      \_prevdepth=\_dimen0
+      \_endgroup
+   \_fi
+}
+\_def\.xvtop#1{\_vtop{\_null\_kern-\_splittopskip\_unvbox#1}}
+
+\_trick 0069 \pstart ;
+%%%%%%%%%%%%
+
+\_newcount\.firstlinenum
+\_newcount\.gprevgraf
+
+\_def\pstart{\_par \_setbox0=\_vbox\_bgroup
+   \_def\_par{\_endgraf\_advance\.gprevgraf by\_prevgraf \_prevgraf=0 }}
+\:\_def\pend{\_par \_global\_tmpnum=\.gprevgraf \_egroup
+   \_ifnum\.firstlinenum=0 \.firstlinenum=1 \_fi
+   \_advance\_tmpnum by\.firstlinenum
+   \.firstlinenum=\_tmpnum \_advance\_tmpnum by-1
+   \_setbox0=\_vbox{\_unvbox0
+      \_setbox2=\_hbox{}
+      \_loop
+         \_unskip\_unskip\_unpenalty \_setbox1=\_lastbox
+         \_ifvoid1 \_else
+            \_global\_setbox2=\_hbox{\_llap{\.pendprintnum}\_box1\_penalty0\_unhbox2}
+            \_advance\_tmpnum by-1
+            \_repeat
+   }\_noindent\_unhbox2 \_par
+}
+\_def\.pendprintnum{\_setfontsize{mag.6}\_rm\_the\_tmpnum\_kern.8em}
+
+\_trick 0021 \settabs ;
+%%%%%%%%%%%%
+
+\:\_def\tabs #1\cr{\_setbox0=\_hbox\_bgroup \.tabA #1&\cr&}
+\_def\.tabA #1&{\_ifx\cr#1\_egroup\_box0 \_else
+   \_egroup
+      \_tmpdim=\_maxdimen \_ea\.tabB \.tabsdata {}\_relax
+      \_ifdim \_tmpdim=\_maxdimen \_tmpdim=0pt
+      \_else \_advance\_tmpdim by-\_wd0 \_fi
+   \_setbox0=\_hbox\_bgroup \_unhbox0 \_kern\_tmpdim \_ignorespaces#1\_unskip\_kern1sp
+   \_ea\.tabA \_fi
+}
+\_def\.tabB #1{\_ifx^#1^\_else \_unless\_ifdim \_wd0>#1 \_tmpdim=#1 \.tabC \_fi \_ea\.tabB \_fi}
+\_def\.tabC #1\_relax {\_fi\_fi}
+
+\_def\settabs #1{\_def\.tabsdata{}\_ifx\tabs#1\_ea\.settabstext \_else\_ea\.settabscols \_fi #1}
+\_def\.settabscols #1\columns{\_tmpdim=\_hsize \_divide\_tmpdim by#1\_relax
+   \_fornum 0..#1 \_do {\_edef\.tabsdata{\.tabsdata{\_the\_dimexpr##1\_tmpdim\_relax}}}}
+
+\_def\.settabstext #1#2\cr{\_setbox0=\_hbox\_bgroup \.settabA #2&\cr&}
+\_def\.settabA #1&{\_ifx\cr#1\_egroup \_edef\.tabsdata{\.tabsdata{\_the\_wd0}}\_else
+    #1\_egroup \_edef\.tabsdata{\.tabsdata{\_the\_wd0}}%
+    \_setbox0=\_hbox\_bgroup \_unhbox0
+    \_ea\.settabA \_fi
+}
+\_def\.tabsdata{}  % default: no tabulators set
+
+\_trick 0035 \import ;
+%%%%%%%%%%%%
+
+\_def\import#1#2{\_def\.tmp{\_gtoksapp\_picdir{#1/}\input{#2}}%
+   \_ea\.tmp\_ea\_global\_ea\_picdir\_ea{\_the\_picdir}}
+\_def\input#1{\_input{\_the\_picdir#1}}
+
+\_trick 0051 \incrpp ;
+%%%%%%%%%%%%
+
+\_openref
+\:\_def\thepp#1{\_trycs{pp:\_csstring#1}{?\_the#1}}
+\:\_def\thepplast#1#2{\_trycs{lastpp:\_csstring#1:#2}{?\_the#1}}
+\:\_def\truepage{?\_the\_pageno}
+\_def\incrpp#1{\_incr#1%
+   \_isdefined{_pgref:pp:\_csstring#1:\_the#1}\_iftrue
+      \_edef\.tmp{\_cs{_pgref:pp:\_csstring#1:\_the#1}}%
+      \_ea\_ifx\_csname currpp:\_csstring#1\_endcsname\.tmp
+         \_sxdef{pp:\_csstring#1}{\_the\_numexpr\_cs{pp:\_csstring#1}+1\_relax}%
+      \_else \_sxdef{pp:\_csstring#1}{\_trycs{resetpp:\csstring#1}{1}}%
+         \_sxdef{currpp:\csstring#1}{\.tmp}\_fi
+      \_xdef\truepage{\_ea\_ea\_ea\_usesecond \_csname currpp:\_csstring#1\_endcsname}%
+      \_sxdef{lastpp:\_csstring#1:\truepage}{\_cs{pp:\_csstring#1}}%
+   \_else \_incr\_unresolvedrefs \_openref \_fi
+   \_ewref \_Xlabel {{pp:\csstring#1:\the#1}{}}%
+}
+
+\_trick 0115 \ispageodd ;
+%%%%%%%%%%%%
+
+\_def\ispageodd#1{%
+   \_incr\_mnotenum
+   \_ifcsname _mn:\_the\_mnotenum \_endcsname
+       \_expanded{\_let \_noexpand\.pgtype =\_cs{_mn:\_the\_mnotenum}}\_else
+       \_let\.pgtype=\_right \_opwarning{pageside is unknown, TeX me again}\_openref
+   \_fi
+   \_wref\_Xmnote{}%
+   #1\_else \_ea\_unless\_fi \_ifx\.pgtype\_right
+}
+
+\_trick 0033 \iniseccc \seccc ;
+%%%%%%%%%%%%
+
+\_newcount \_secccnum
+\_def \_thesecccnum {\_othe\_chapnum.\_the\_secnum.\_the\_seccnum.\_the\_secccnum}
+
+\_optdef\_seccc[]{\_trylabel \_scantoeol\_inseccc}
+
+\_def\_inseccc #1{\_par \_sectionlevel=4
+   \_def \_savedtitle {#1}% saved to .ref file
+   \_ifnonum \_else {\_globaldefs=1 \_incr\_secccnum \_secccx}\_fi
+   \_edef \_therefnum {\_ifnonum \_space \_else \_thesecccnum \_fi}%
+   \_printseccc{\_scantextokens{#1}}%
+   \_resetnonumnotoc
+}
+\:\public \seccc ;
+
+\_def \_seccx {\_secccx \_secccnum=0 }
+\_def \_secccx {}
+
+\_def\_printseccc#1{\_par
+   \_abovetitle{\_penalty-100}{\_medskip}
+   {\_bf \_noindent \_raggedright \_printrefnum[@\_quad]#1\_nbpar}%
+   \_nobreak \_belowtitle{\_smallskip}%
+   \_firstnoindent
+}
+
+\:\_def\iniseccc{} % use it for autoloading the OpTeX trick code before \maketoc
+\_sdef{_tocl:4}#1#2#3{\_advance\_leftskip by2\_iindent \_cs{_tocl:2}{#1}{#2}{#3}}
+
+\_trick 0066 \makeLOF \makeLOT \captionT \captionF ;
+%%%%%%%%%%%%
+
+\:\_def\captionT [#1]#2{\_caption/t[#1]\_ewref\.Xtab{{#1}{\_thetnum}{#2}}\_ignorespaces}
+\:\_def\captionF [#1]#2{\_caption/f[#1]\_ewref\.Xfig{{#1}{\_thefnum}{#2}}\_ignorespaces}
+
+\_def\.lline#1#2#3#4#5{\_line{\_hskip2em\_llap{\_bf#2\_enspace}#3 \_tocdotfill\ \_ilink[pg:#4]{#5}}}
+
+\_def\.makell#1#2{\_par
+   \_ifx#1\_undefined \_opwarning{no data for #2, try to run TeX again}\_openref
+   \_else #1\_fi
+}
+\:\_def\makeLOF{\.makell\.loflist{LOF}}
+\:\_def\makeLOT{\.makell\.lotlist{LOT}}
+
+\_globaldefs=0 % \refdecl needs to be processed when \localdefs=0
+\_refdecl{%
+\_def\.lotlist{} \_def\.loflist{}^^J
+\_def\.Xtab#1#2#3{\_addto\.lotlist{\.lline{#1}{#2}{#3}}\_ea\_addto\_ea\.lotlist\_ea{\_currpage}}^^J
+\_def\.Xfig#1#2#3{\_addto\.loflist{\.lline{#1}{#2}{#3}}\_ea\_addto\_ea\.loflist\_ea{\_currpage}}
+}
+
+\_trick 0121 \correctvsize ;
+%%%%%%%%%%%%
+
+\_def\correctvsize{%
+   \_vsize=\_dimexpr
+      \_expr[0]{\_bp{\_vsize-\_topskip}//\_bp{\_baselineskip}}\_baselineskip
+      +\_topskip \_relax
+}
+
+\_trick 0129 \pgforeground ;
+%%%%%%%%%%%%
+
+\:\_newtoks \pgforeground
+
+\_addto\_makefootline{
+   \_istoksempty\pgforeground \_iffalse
+      \_vskip-\_prevdepth
+      \_vskip-\_vsize
+      \_vskip-\_voffset
+      \_istoksempty\_footline \_iffalse \_vskip-\_footlinedist \_fi
+      \_nointerlineskip
+      \_moveleft\_hoffset \_vbox{\_the\pgforeground}
+   \_fi
+}
+
+\_trick 0144 \xparshape ;
+%%%%%%%%%%%%
+
+\_newcount\.xprevgraf
+\_def\xparshape{%
+   \.xprevgraf=0
+   \_def\_par{{\_prevgraf=\.xprevgraf\_endgraf}\.xprevgraf=\_prevgraf}%
+   \_parshape}
+\:\_def\endxparshape{\_par \_let\_par=\_endgraf}
+
+
+\_trick 0130 \onlyifnew ;
+%%%%%%%%%%%%
+
+\_def \onlyifnew#1#2{\_begingroup
+   \_edef\.tmpA{\_csstring #2}%
+   \_edef\.tmpB{\_string #2}%
+   \_ea\_ifcsname\.tmpA\_endcsname
+   \_ifx\.tmpA\.tmpB% #2 has no backslash
+   \_def\.onlyifnewA{#1{_optextrick_onlyifnewB}}\_else
+   \_def\.onlyifnewA{#1\_optextrick_onlyifnewB}\_fi
+   \_else
+   \_ifx\.tmpA\.tmpB
+   \_def\.onlyifnewA{#1{#2}}\_else
+   \_def\.onlyifnewA{#1#2}\_fi
+   \_fi\_ea\_endgroup\.onlyifnewA}
+
+\_trick 0142 \ismatch \isinmacro ;
+%%%%%%%%%%%%
+
+\_def\.ismatch#1#2{\_ea\.ismatchA\_directlua{
+   tex.sprint("{")
+   tex.sprint(-2,"\_luaescapestring{\_unexpanded{#1}}")
+   tex.sprint("}{")
+   tex.sprint(-2,"\_luaescapestring{\_unexpanded{#2}}")
+   tex.sprint{"}"}
+}}
+\_def\.ismatchA#1#2{\_immediateassignment
+   \_def\.ismatchB##1#2##2\_relax{\_ifx^##2^\_ea\_unless\_fi}%
+   \.ismatchB #1\_sep\_sep#2\_relax
+}
+\:\_def\isinmacro#1{%
+   \_isinlist{\_meaning#1}{->}\_iffalse \_ea\_ignoresecond \_else \_ea\_usesecond \_fi
+   {\_ignoresecond\_unless}{\_ea\.isinmacroA\_meaning#1\_relax}%
+}
+\_def\.isinmacroA #1->#2\_relax{\.ismatch{#2}}
+
+\_nspublic \ismatch ;
+
+%%%%%%%%%%%%
+\_trick end ;
+
+\_endcode
+
+2025-03-03 \getnodes introduced, tree structure re-implemented
+2025-02-27 \treedata, \tracingtreedata introduced
+2024-12-13 \algol: \algolem, \aca introduced
+2024-12-09 \exectree: bug in default macros fixed
+2024-11-26 \exectree, \jsonread etc. implemented
+2024-11-23 \dbcreate etc. implemented
+2024-11-22 \dbloop etc. implemented
+2024-11-21 \: introduced for warning if a macro is re-defined
+2024-11-21 \csvread added
+2024-11-05 \algolnum added
+2024-11-04 \algolcap, \makeLOA added
+2024-10-31 \xparshape added
+2024-10-27 \mathinexpr added
+2024-10-22 \ismatch, \isinmacro added
+2024-09-10 \clipbox added
+2024-05-07 \replmacro added
+2024-05-02 \xreplstring added
+2024-04-15 \directchar added
+2024-03-21 \rebox added
+2024-03-19 \shownodes added
+2024-03-09 \thedimen added
+2024-02-13 \onlyifnew added
+2024-02-12 \pgforeground added
+2023-11-15 \correctvsize added
+2023-11-09 \makeLOF, \makeLOT added
+2023-11-08 \ispageodd, \seccc added
+2023-11-07 \settabs \import \incrpp added
+2023-11-05 \twoblocks, \pstart added
+2023-11-03 \framedblocks added
+2023-11-01 \longtable, \vcent, \vbot, \tnote, \tabnodes added
+2023-10-31 \ignoreinspic, \keystroke, \colortab, \crx, \crtop, \crbot, \crmid added
+2023-10-23 \shadedframe, \roundframe  added
+2023-10-21 \fcread, \fullcite added
+2023-10-20 \style m, \keepstyle, \easylist, \ttlineref added
+2023-10-19 \directoutput, \scaleto added
+2023-10-18 \algol, \cancel added
+2023-10-18 \createfile added
+2023-10-17 released

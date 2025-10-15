@@ -1,0 +1,280 @@
+%%%
+% Midpoint
+%%%
+\def\filedateMidpoint{2025/06/04}%
+\def\fileversionMidpoint{0.1b}%
+\message{-- \filedateMidpoint\space v\fileversionMidpoint}%
+%
+\setKVdefault[MidPoint]{Solution=false,Hard=false,Graine={}}%
+
+\NewDocumentCommand\MidPoint{o}{%
+  \useKVdefault[MidPoint]%
+  \setKV[MidPoint]{#1}%
+  \PfMBuildMidPoint%
+}%
+
+\NewDocumentCommand\PfMBuildMidPoint{}{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    numeric Longueur,Largeur;
+    Longueur=8;
+    Largeur=4;
+    boolean Horizontal,Vertical,RetiensSens;
+    Horizontal=false;
+    Vertical=false;
+    
+    boolean Solution,Hard;
+    Solution:=\useKV[MidPoint]{Solution};
+    Hard:=\useKV[MidPoint]{Hard};
+
+    \ifemptyKV[MidPoint]{Graine}{}{randomseed:=\useKV[MidPoint]{Graine};}
+    
+    u:=8mm;
+  
+    pair A[][];%centre des carrés.
+
+    vardef CherchePoint(expr basek,basel)=
+      % Si le déplacement précédent est horizontal, il faut passer en vertical
+      % Si le déplacement précédent est vertical, il faut passer en horizontal
+      p:=p+1;
+      if basel=ColonneArrivee:
+        RP[p]:=Arrivee;
+      else:
+        if Vertical:
+        % deplacement horizontal
+	  ecart:=ColonneArrivee-basel;
+          if ecart=1:
+	    Basel:=ColonneArrivee;
+            RP[p]:=A[basek][ColonneArrivee];
+          else:
+	    Basel:=ceiling(basel+uniformdeviate(ecart));
+            RP[p]:=A[basek][Basel];
+          fi;
+          Basek:=basek;
+          Horizontal:=true;
+          Vertical:=false;
+        else:
+	% on vérifie qu'on peut se déplacer dans les deux sens.
+        % on choisit vertical positif ou vertical négatif
+	  if basek=1:
+	    choix:=0.75;
+          elseif basek=Largeur:
+	    choix:=0.25;
+          else:
+	    choix:=uniformdeviate(1);
+          fi;
+          if choix<0.5:
+	    ecart:=basek-1;
+            if ecart=1:
+	      Basek:=1;
+              RP[p]:=A[1][basel];
+            else:
+	      Basek:=ceiling(uniformdeviate(ecart));
+              RP[p]:=A[Basek][basel];
+            fi;
+            Basel:=basel;
+          else:
+	    ecart:=Largeur-basek;
+            if ecart=1:
+	      Basek:=Largeur;
+              RP[p]:=A[Largeur][basel];
+            else:
+	      Basek:=basek+ceiling(uniformdeviate(ecart));
+              RP[p]:=A[Basek][basel];
+            fi;
+            Basel:=basel;
+          fi;
+          Horizontal:=false;
+          Vertical:=true;
+        fi;
+      fi;
+    enddef;
+
+    vardef MidPoint(expr Aa,Bb)=
+      save $;
+      picture $;
+      $=image(
+        if Solution:
+          trace Aa--Bb withpen pencircle scaled 1.5;
+        fi;
+        if Hard:
+          NbMid:=NbMid+1;
+          if NbMid mod 2=0:
+            remplis cercles(1/2[Aa,Bb],1mm);
+          fi;
+        else:
+          remplis cercles(1/2[Aa,Bb],1mm);
+        fi;
+      );
+      $
+    enddef;
+  
+    % tracé de la grille
+    for k=1 upto 2*Largeur:
+      for l=-3 upto Largeur+Longueur-4:
+        trace (unitsquare scaled u) shifted (u*(l,-k)-center (unitsquare scaled u)) withcolor 0.5*white;
+      endfor;
+    endfor;
+  
+    for k=1 upto Largeur:
+      for l=1 upto Longueur:
+        A[k][l]=u*(l,-k);
+      endfor;
+    endfor;
+  
+    % On choisit le premier déplacement
+    choix:=uniformdeviate(1);
+    if choix<0.5:
+      Horizontal:=true;
+    else:
+      Vertical:=true;
+    fi;
+  
+    p:=0;
+    NbMid=ceiling(uniformdeviate(2));%Pour le niveau Hard
+
+    % 1er rectangle
+    LigneDepart:=2;%2;
+    ColonneDepart:=1;
+    LigneArrivee:=4;%4;
+    ColonneArrivee:=8;
+    pair Depart,Arrivee;
+    Depart=A[LigneDepart][ColonneDepart];
+    Arrivee=A[LigneArrivee][ColonneArrivee];
+    
+    pair RP[];%RetiensPoints
+    RP[0]=Depart;
+  
+    Basek:=LigneDepart;
+    Basel:=ColonneDepart;
+    forever:
+      CherchePoint(Basek,Basel);
+      exitif RP[p]=Arrivee;
+    endfor;
+
+    if ypart(RP[p])=ypart(RP[p-1]):
+      RetiensSens:=true;
+    else:
+      RetiensSens:=false;
+      p:=p-1;
+    fi;
+
+    % 2eme rectangle
+    for k=1 upto Largeur:
+      for l=1 upto Longueur:
+        A[k][l]:=u*(Longueur+l,-k);
+      endfor;
+    endfor;
+
+    LigneDepart:=4;
+    ColonneDepart:=1;
+    LigneArrivee:=2;
+    ColonneArrivee:=8;
+    Depart:=A[LigneDepart][ColonneDepart];
+    Arrivee:=A[LigneArrivee][ColonneArrivee];
+    
+    Basek:=LigneDepart;
+    Basel:=ColonneDepart;
+    Retiens:=p;
+    RP[p+1]:=Depart;
+    
+    forever:
+      CherchePoint(Basek,Basel);
+      exitif RP[p]=Arrivee;
+    endfor;
+
+    if ypart(RP[p])=ypart(RP[p-1]):
+      RetiensSens:=true;
+      p:=p-1;
+    else:
+      RetiensSens:=false;
+    fi;
+
+    for h=(Retiens+1) upto p:
+      RP[h]:=symetrie(RP[h],u*(Longueur+0.5,-Largeur-0.5));
+    endfor;
+    % 3eme Rectangle
+    for k=1 upto Largeur:
+      for l=1 upto Longueur:
+        A[k][l]:=u*(2*Longueur+l,-k);
+      endfor;
+    endfor;
+
+    LigneDepart:=4;
+    ColonneDepart:=2;
+    LigneArrivee:=1;
+    ColonneArrivee:=4;
+    Depart:=A[LigneDepart][ColonneDepart];
+    Arrivee:=A[LigneArrivee][ColonneArrivee];
+    
+    Basek:=LigneDepart;
+    Basel:=ColonneDepart;
+    Retiens:=p;
+    RP[p+1]:=Depart;
+    forever:
+      CherchePoint(Basek,Basel);
+      exitif RP[p]=Arrivee;
+    endfor;
+
+    if ypart(RP[p])=ypart(RP[p-1]):
+      RetiensSens:=true;
+      p:=p-1;
+    else:
+      RetiensSens:=false;
+    fi;
+  
+    for h=(Retiens+1) upto p:
+      RP[h]:=rotation(RP[h],u*(2*Longueur+0.5,-Largeur-0.5),90) shifted(u*(-2*Longueur,-Largeur));
+    endfor;
+    % 4eme rectangle. On termine la boucle ?
+    for k=1 upto Largeur:
+      for l=1 upto Longueur:
+        A[k][l]:=u*(3*Longueur+l,-k);
+      endfor;
+    endfor;
+
+    LigneDepart:=4;
+    ColonneDepart:=1;
+    LigneArrivee:=2;
+    ColonneArrivee:=4;
+    Depart:=A[LigneDepart][ColonneDepart];
+    Arrivee:=A[LigneArrivee][ColonneArrivee];
+    
+    Basek:=LigneDepart;
+    Basel:=ColonneDepart;
+    Retiens:=p;
+    RP[p+1]:=Depart;
+    forever:
+      CherchePoint(Basek,Basel);
+      exitif RP[p]=Arrivee;
+    endfor;
+
+    if ypart(RP[p])=ypart(RP[p-1]):
+      p:=p-1;
+    fi;
+
+    if ypart(RP[0])=ypart(RP[1]):
+      RetiensSens:=true;
+    else:
+      RetiensSens:=false;
+    fi;
+
+    for h=(Retiens+1) upto p:
+      RP[h]:=RP[h] shifted(u*(-3.5*Longueur,0));
+    endfor;
+
+    if RetiensSens:
+      RP[p+1]:=RP[1];
+      go:=1;
+    else:
+      RP[p+1]:=RP[0];
+      go:=0;
+    fi;
+
+    for h=go upto p:
+      draw MidPoint(RP[h],RP[h+1]);
+    endfor;
+  \end{mplibcode}%
+\fi%
+}%

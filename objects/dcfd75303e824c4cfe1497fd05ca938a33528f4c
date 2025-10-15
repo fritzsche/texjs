@@ -1,0 +1,139 @@
+%%%
+% Visualisation Multiplication Décimaux
+%%%
+\def\filedateVisuMulDeci{2024/08/04}%
+\def\fileversionVisuMulDeci{0.1}%
+\message{-- \filedateVisuMulDeci\space v\fileversionVisuMulDeci}%
+%
+\setKVdefault[VisMulDec]{Couleur=Orange,CouleurUnite=DarkGreen,Dixiemes=false,Unite=2}%
+
+\newtoks\toksvismuldec%
+\def\UpdatetoksVisMulDec#1\nil{\addtotok\toksvismuldec{"#1",#1,}}%
+
+\NewDocumentCommand\VisualisationMulDecimaux{om}{%
+  \useKVdefault[VisMulDec]%
+  \setKV[VisMulDec]{#1}%
+  \setsepchar{x}\ignoreemptyitems%
+  \readlist*\PfCVisMulDec{#2}%
+  \toksvismuldec{}%
+  \foreachitem\compteur\in\PfCVisMulDec{\expandafter\UpdatetoksVisMulDec\compteur\nil}%
+  \BuildVisMulDec{\the\toksvismuldec}%
+  \reademptyitems%
+}%
+
+\NewDocumentCommand\BuildVisMulDec{m}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      string Nombres[];
+      numeric Decimaux[];
+      color Coul[];
+      boolean Dixiemes;
+      
+      Unite=\useKV[VisMulDec]{Unite}*cm;
+      Coul1=\useKV[VisMulDec]{Couleur};
+      Coul2=\useKV[VisMulDec]{CouleurUnite};
+      Coul3=0.7[Coul2,white];
+
+      Dixiemes=\useKV[VisMulDec]{Dixiemes};
+      
+      vardef RecupererDonnees(text t)=
+      nbs:=0;
+      nbd:=0;
+      for p_=t:
+      if string p_:
+      nbs:=nbs+1;
+      Nombres[nbs]=p_;
+      else:
+      nbd:=nbd+1;
+      Decimaux[nbd]=p_;
+      fi;
+      endfor;
+      enddef;
+
+      RecupererDonnees(#1);
+      
+      pair A,B,C,D;
+      A=(0,0);
+      B-A=Unite*(Decimaux[1],0);
+      D-A=Unite*(0,Decimaux[2]);
+      C-D=B-A;
+      fill polygone(A,Unite*(1,0),Unite*(1,1),Unite*(0,1)) withcolor Coul3;
+      drawoptions(withcolor Coul1);
+      pasx=0.1;
+      pasy=0.1;
+      if (Dixiemes and ((Decimaux[1]*10) mod 10=0)):
+      pasy:=1;
+      fi;
+      if (Dixiemes and ((Decimaux[2]*10) mod 10=0)):
+      pasx:=1;
+      fi;
+      for k=0 step pasx until Decimaux[1]:
+      trace (A--(Unite*(0,Decimaux[2]))) shifted(k*Unite*(1,0));
+      endfor;
+      for k=0 step pasy until Decimaux[2]:
+      trace (A--(Unite*(Decimaux[1],0))) shifted(k*Unite*(0,1));
+      endfor;
+      drawoptions(withpen pencircle scaled 1.2 withcolor Coul2);
+      for k=0 upto Decimaux[1]:
+      trace (A--(Unite*(0,Decimaux[2]))) shifted(k*Unite*(1,0));
+      endfor;
+      for k=0 upto Decimaux[2]:
+      trace (A--(Unite*(Decimaux[1],0))) shifted(k*Unite*(0,1));
+      endfor;
+      drawoptions();
+      trace cotation(A,B,-5mm,-3mm,TEX("\num{"&Nombres[1]&"}"));
+      trace cotation(A,D,5mm,5mm,TEX("\num{"&Nombres[2]&"}") rotated -90);
+    \end{mplibcode}
+  \else
+    \begin{mpost}[mpsettings={string Nombres[];numeric Decimaux[];color Coul[];boolean Dixiemes;Unite=\useKV[VisMulDec]{Unite}*cm;Coul1=\useKV[VisMulDec]{Couleur};Coul2=\useKV[VisMulDec]{CouleurUnite};Coul3=0.7[Coul2,white];Dixiemes=\useKV[VisMulDec]{Dixiemes};}]
+      vardef RecupererDonnees(text t)=
+      nbs:=0;
+      nbd:=0;
+      for p_=t:
+      if string p_:
+      nbs:=nbs+1;
+      Nombres[nbs]=p_;
+      else:
+      nbd:=nbd+1;
+      Decimaux[nbd]=p_;
+      fi;
+      endfor;
+      enddef;
+
+      RecupererDonnees(#1);
+      
+      pair A,B,C,D;
+      A=(0,0);
+      B-A=Unite*(Decimaux[1],0);
+      D-A=Unite*(0,Decimaux[2]);
+      C-D=B-A;
+      fill polygone(A,Unite*(1,0),Unite*(1,1),Unite*(0,1)) withcolor Coul3;
+      drawoptions(withcolor Coul1);
+      pasx=0.1;
+      pasy=0.1;
+      if (Dixiemes and ((Decimaux[1]*10) mod 10=0)):
+      pasy:=1;
+      fi;
+      if (Dixiemes and ((Decimaux[2]*10) mod 10=0)):
+      pasx:=1;
+      fi;
+      for k=0 step pasx until Decimaux[1]:
+      trace (A--(Unite*(0,Decimaux[2]))) shifted(k*Unite*(1,0));
+      endfor;
+      for k=0 step pasy until Decimaux[2]:
+      trace (A--(Unite*(Decimaux[1],0))) shifted(k*Unite*(0,1));
+      endfor;
+      drawoptions(withpen pencircle scaled 1.2 withcolor Coul2);
+      for k=0 upto Decimaux[1]:
+      trace (A--(Unite*(0,Decimaux[2]))) shifted(k*Unite*(1,0));
+      endfor;
+      for k=0 upto Decimaux[2]:
+      trace (A--(Unite*(Decimaux[1],0))) shifted(k*Unite*(0,1));
+      endfor;
+      drawoptions();
+      trace cotation(A,B,-5mm,-3mm,LATEX("\num{"&Nombres[1]&"}"));
+      trace cotation(A,D,5mm,5mm,LATEX("\num{"&Nombres[2]&"}") rotated -90);
+    \end{mpost}
+  \fi
+}%

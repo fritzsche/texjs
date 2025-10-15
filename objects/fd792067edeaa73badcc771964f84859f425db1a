@@ -1,0 +1,159 @@
+%%%
+% Pièces de puzzle pour multiplication
+%%%
+\def\filedateMulPiecesPuzzle{2024/08/04}%
+\def\fileversionMulPiecesPuzzle{0.1}%
+\message{-- \filedateMulPiecesPuzzle\space v\fileversionMulPiecesPuzzle}%
+%
+%https://mirror.gutenberg-asso.fr/tex.loria.fr/prod-graph/metafun.pdf
+\newtoks\toklistepuzzlea%
+
+\def\UpdatetoksPuzzleA#1\nil{\addtotok\toklistepuzzlea{"#1",}}%
+
+\setKVdefault[ClesPuzzleMul]{Solution=false,Unite=1cm,Couleur=LightSteelBlue,Cube=false}
+
+\NewDocumentCommand\PuzzleMul{om}{%
+  \useKVdefault[ClesPuzzleMul]%
+  \setKV[ClesPuzzleMul]{#1}%
+  \setsepchar{,}%
+  \readlist*\PfCListePuzzle{#2}%
+  \StrLen{\PfCListePuzzle[1]}[\TaillePuzzle]%
+  \xdef\HauteurPuzzle{\PfCListePuzzlelen}%
+  \toklistepuzzlea{}%
+  \foreachitem\compteur\in\PfCListePuzzle{\expandafter\UpdatetoksPuzzleA\compteur\nil}%
+  \ifboolKV[ClesPuzzleMul]{Cube}{%
+    \BuildPuzzleEspace{\the\toklistepuzzlea}%
+  }{%
+    \BuildPuzzle{\the\toklistepuzzlea}%
+  }%
+}%
+
+\def\BuildPuzzleCode{%
+  def PreDrawPuzzle ( expr ww, hh, uu ) =
+  %randomseed := random_seed;
+  def rand (expr x) =
+    (((x)+(uniformdeviate 10))/100)
+  enddef;
+  w := ww;
+  h := hh;
+  un := uu/100;
+  boolean swapone; swapone := false;
+  boolean swaptwo; swaptwo := false;
+  path p[], pw[], ph[];
+  def buildpath (expr len, num) =
+    for j=1 upto num:
+      clearxy;
+      swaptwo := not swaptwo;
+      if odd num:
+	swapone := not swaptwo;
+      else:
+	swapone := swaptwo;
+      fi;
+      for i=0 upto len+1:
+	x[i]c = ((i*100)*un);
+	y[i]c = ((j*100)*un);
+	x[i]m = (x[i]c+50*un);
+	if swapone:
+	  y[i]m = (y[i]c-25*un)
+	else:
+	  y[i]m = (y[i]c+25*un)
+	fi;
+	x[i]l = (rand(85)[x[i]c,x[i]m]);
+	x[i]r = (rand(15)[x[i]m,x[i+1]c]);
+	y[i]l = y[i]r=y[i]c;
+	x[i]ll = (rand(75)[x[i]c,x[i]m]);
+	x[i]rr = (rand(25)[x[i]m,x[i+1]c]);
+	y[i]ll = y[i]rr=.50[y[i]c,y[i]m];
+      endfor;
+      p[j] :=
+	for i=0 upto len:
+	z[i]c..z[i]l..z[i]ll..z[i]m..z[i]rr..z[i]r..
+      endfor
+      z[len+1]c ;
+    endfor;
+  enddef;
+  pw[1] := (100*un,100*un)--(100*un,(h+1)*100*un);
+  pw[w+1] := ((w+1)*100*un,100*un)--((w+1)*100*un,(h+1)*100*un);
+  ph[1] := (100*un,100*un)--((w+1)*100*un,100*un);
+  ph[h+1] := (100*un,(h+1)*100*un)--((w+1)*100*un,(h+1)*100*un);
+  buildpath (w+1,h);
+  for k=2 upto h:
+    ph[k] := p[k] cutbefore pw[1];
+    ph[k] := ph[k] cutafter pw[w+1];
+  endfor;
+  buildpath (h+1,w);
+  for k=2 upto w:
+    pw[k] := p[w-k+2] rotated 90 shifted ((w+2)*100*un,0);
+    pw[k] := pw[k] cutbefore ph[1];
+    pw[k] := pw[k] cutafter ph[h+1];
+  endfor;
+  path phw[][];
+  for kh=1 upto h:
+    for kw=1 upto w:
+      phw[kh][kw] := buildcycle (ph[kh], pw[kw], ph[kh+1], pw[kw+1]);
+    endfor;
+  endfor;
+enddef;
+def DrawWholePuzzle =
+  for k=1 upto h+1:
+    draw ph[k] withpen pencircle scaled (2.5*un) shifted (-100*un,-100*un);
+  endfor;
+  for k=1 upto w+1:
+    draw pw[k] withpen pencircle scaled (2.5*un) shifted (-100*un,-100*un);
+  endfor;
+enddef;
+def DrawPuzzlePiece (expr ww, hh) =
+draw phw[ww][hh] withpen pencircle scaled (2.5*un) shifted (-100*un,-100*un);
+enddef;
+def DrawPuzzleBorder =
+draw (pw[1]--ph[1]--pw[w+1]--ph[h+1]--cycle)
+withpen pencircle scaled (2.5*un) shifted (-100*un,-100*un);
+enddef;
+%
+vardef AffichagePiece(text t)=
+ligne:=Hauteur+1;
+for p_=t:
+ligne:=ligne-1;
+colonne:=0;
+for k=1 upto Taille:
+colonne:=colonne+1;
+if substring(k-1,k) of p_="X":
+DrawPuzzlePiece(ligne,colonne);
+else:
+if Solution:
+path titi;
+titi=phw[ligne][colonne];
+fill (titi shifted (-100*un,-100*un)) withcolor CoulSolution;
+draw titi withpen pencircle scaled (2.5*un) shifted (-100*un,-100*un);
+fi;
+fi;
+endfor;
+endfor;
+enddef;
+}%
+
+\NewDocumentCommand\BuildPuzzle{m}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      \BuildPuzzleCode
+      Taille:=\TaillePuzzle;
+      Hauteur:=\HauteurPuzzle;
+      Unite:=\useKV[ClesPuzzleMul]{Unite};
+      boolean Solution;
+      Solution=\useKV[ClesPuzzleMul]{Solution};
+      color CoulSolution;
+      CoulSolution=\useKV[ClesPuzzleMul]{Couleur};
+      
+      PreDrawPuzzle(Taille, Hauteur, Unite);
+      
+      AffichagePiece(#1);
+    \end{mplibcode}
+  \else%
+    \begin{mpost}[mpsettings={\BuildPuzzleCode;Taille:=\TaillePuzzle;Hauteur:=\HauteurPuzzle;Unite:=\useKV[ClesPuzzleMul]{Unite};boolean Solution;Solution=\useKV[ClesPuzzleMul]{Solution};color CoulSolution;CoulSolution=\useKV[ClesPuzzleMul]{Couleur};}]
+      PreDrawPuzzle(Taille, Hauteur, Unite);
+      
+      AffichagePiece(#1);
+    \end{mpost}
+  \fi%
+}%

@@ -1,0 +1,203 @@
+%%%
+% Rangement des nombres
+%%%
+\def\filedateRgtNb{2024/08/04}%
+\def\fileversionRgtNb{0.1}%
+\message{-- \filedateRgtNb\space v\fileversionRgtNb}%
+%
+\setKVdefault[ClesRgt]{Croissant,Decroissant=false,Strict,Fraction=false,Details=false,Seul=false}%
+
+\dtlexpandnewvalue%
+\DTLgnewdb{mtnumedb}%
+\DTLgnewdb{mtRGTdb}% Pb de doublon avec mtdb de Mediane
+
+%\begin{document}
+
+\NewDocumentCommand\RangementListe{m}{%
+  \readlist*\ListeRgt{#1}%
+  \xdef\Foo{\ListeRgt[1]}%
+  \xintFor* ##1 in{\xintSeq{2}{\ListeRgtlen}}\do{%
+    \xdef\Foo{\Foo,\ListeRgt[##1]}%
+  }%
+  \xdef\Fooa{\Foo}%
+  \xdef\PfCRetiensRangement{}%
+  \xintFor* ##1 in{\xintSeq{1}{\fpeval{\ListeRgtlen-1}}}\do{%
+    \xdef\Element{\fpeval{min(\Fooa)}}%
+    \xintifboolexpr{##1>1}{%
+      \xdef\PfCRetiensRangement{\PfCRetiensRangement,\Element}%
+    }{%
+      \xdef\PfCRetiensRangement{\Element}%
+    }%
+    \readlist*\RetiensListe{\Fooa}%
+    %La liste des rangements vaut \RetiensRangement.\par
+    %La retiensliste vaut \showitems\RetiensListe[]\par
+    \xdef\Fooi{}%
+    \xdef\PfCNombreFoisElementMini{0}%
+    \foreachitem\rgt\in\RetiensListe{%
+      % \rgtcnt~\RetiensListe[\rgtcnt] et \Element%
+      %POur gére les cas où le minimum apparaît plusieurs fois
+      \xintifboolexpr{\RetiensListe[\rgtcnt]==\Element}{%
+        \xdef\PfCNombreFoisElementMini{\fpeval{\PfCNombreFoisElementMini+1}}%
+        %Element mini =\Element -- \PfCNombreFoisElementMini\\
+        \xintifboolexpr{\PfCNombreFoisElementMini>1}{\xdef\Fooi{\Fooi,\RetiensListe[\rgtcnt]}}{}%
+      }{%
+        \xdef\Fooi{\Fooi,\RetiensListe[\rgtcnt]}%
+      }%
+     %  La liste Fooi est \Fooi\par
+    }%
+    \readlist*\ListeTempo{\Fooi}%
+    \xintifboolexpr{\ListeTempolen>1}{%
+      \xdef\Fooa{\ListeTempo[1]}%
+      \xintFor* ##2 in{\xintSeq{2}{\ListeTempolen}}\do{%
+        \xdef\Fooa{\Fooa,\ListeTempo[##2]}%
+      }%
+    }{%
+      % \xdef\Fooa{\ListeTempo[1]}%
+      \xdef\PfCRetiensRangement{\PfCRetiensRangement,\ListeTempo[1]}%
+    }%
+    % La liste Fooa vaut \Fooa\par
+  }%
+}%
+
+\NewDocumentCommand\Rangement{om}{%
+  \useKVdefault[ClesRgt]%
+  \setKV[ClesRgt]{#1}%
+  \ignoreemptyitems%
+  \readlist*\ListeRgt{#2}%
+  % \showitems\ListeRgt[]\par%
+  \ifboolKV[ClesRgt]{Fraction}{%
+    \setsepchar[*]{,*/}\ignoreemptyitems%
+    \readlist*\ListeRgt{#2}%
+    % on cherche le d\'enominateur commun
+    \ppcm=1\relax%
+    \foreachitem\x\in\ListeRgt{%
+      \PPCM{\fpeval{\ListeRgt[\xcnt,2]}}{\fpeval{\the\ppcm}}%
+    }%
+    % 
+    \xdef\FooFraction{\fpeval{\ListeRgt[1,1]*\the\ppcm/\ListeRgt[1,2]}}%
+    \xintFor* ##1 in{\xintSeq{2}{\ListeRgtlen}}\do{%
+      \xdef\FooFraction{\FooFraction,\fpeval{\ListeRgt[##1,1]*\the\ppcm/\ListeRgt[##1,2]}}%
+    }%
+    \RangementListe{\FooFraction}%
+    \readlist*\PfCListeFinaleRgt{\PfCRetiensRangement}%
+    %%%%%%%%% 
+    \ifboolKV[ClesRgt]{Decroissant}{%
+      \ifboolKV[ClesRgt]{Details}{%
+        \ensuremath{%
+          \xintFor* ##1 in{\xintSeq{0}{\fpeval{\PfCListeFinaleRgtlen-1}}}\do{%
+            \xintifForFirst{}{\ifboolKV[ClesRgt]{Strict}{>}{\geqslant}}\frac{\num{\PfCListeFinaleRgt[\fpeval{\PfCListeFinaleRgtlen-##1}]}}{\num{\the\ppcm}}
+          }%
+        }%
+      }{%
+        \ensuremath{%
+          \xintFor* ##1 in{\xintSeq{0}{\fpeval{\PfCListeFinaleRgtlen-1}}}\do{%
+            \xintifForFirst{}{\ifboolKV[ClesRgt]{Strict}{>}{\qeqslant}}\Simplification{\PfCListeFinaleRgt[\fpeval{\PfCListeFinaleRgtlen-##1}]}{\the\ppcm}}%
+        }%
+      }%
+    }{%
+      \ifboolKV[ClesRgt]{Details}{%
+        \ensuremath{%
+           \xintFor* ##1 in{\xintSeq{1}{\PfCListeFinaleRgtlen}}\do{%
+             \xintifForFirst{}{\ifboolKV[ClesRgt]{Strict}{<}{\leqslant}}\frac{\num{\PfCListeFinaleRgt[##1]}}{\num{\the\ppcm}}%
+           }%
+        }%
+      }{%
+        \ensuremath{%
+          \xintFor* ##1 in{\xintSeq{1}{\PfCListeFinaleRgtlen}}\do{%
+            \xintifForFirst{}{\ifboolKV[ClesRgt]{Strict}{<}{\leqslant}}\Simplification{\PfCListeFinaleRgt[##1]}{\the\ppcm}%
+          }%
+        }%
+      }%
+    }%
+  }{%
+    \RangementListe{#2}%
+    % 
+    % \PfCRetiensRangement%
+    \ifboolKV[ClesRgt]{Seul}{}{%
+       \readlist*\PfCListeFinaleRgt{\PfCRetiensRangement}%
+       % \par \showitems\PfCListeFinaleRgt[] -- La longueur de la liste est \PfCListeFinaleRgtlen
+       \ifboolKV[ClesRgt]{Decroissant}{%
+         \ensuremath{%
+            \xintFor* ##1 in{\xintSeq{0}{\fpeval{\PfCListeFinaleRgtlen-1}}}\do{%
+              \xintifForFirst{}{\ifboolKV[ClesRgt]{Strict}{>}{\geqslant}}\num{\PfCListeFinaleRgt[\fpeval{\PfCListeFinaleRgtlen-##1}]}%
+            }%
+          }%
+        }{%
+          \ensuremath{%
+            \xintFor* ##1 in{\xintSeq{1}{\fpeval{\PfCListeFinaleRgtlen}}}\do{%
+              \xintifForFirst{}{\ifboolKV[ClesRgt]{Strict}{<}{\leqslant}}\num{\PfCListeFinaleRgt[##1]}%
+            }%
+          }%
+        }%
+      }%
+    }%
+    \reademptyitems
+%
+}%
+
+\NewDocumentCommand\Rangementold{om}{%
+  \useKVdefault[ClesRgt]%
+  \setKV[ClesRgt]{#1}%
+  \ifboolKV[ClesRgt]{Fraction}{%
+    \setsepchar[*]{,*/}\ignoreemptyitems%
+    \readlist*\ListeRgt{#2}%
+    % on cherche le d\'enominateur commun
+    \ppcm=1\relax
+    \foreachitem\x\in\ListeRgt{%
+      \PPCM{\fpeval{\ListeRgt[\xcnt,2]}}{\fpeval{\the\ppcm}}%
+    }%
+    % On cr\'ee la liste des rangements.
+    \DTLcleardb{mtnumedb}%
+    %    % on les trie pour les ranger par ordre croissant
+    \foreachitem\x\in\ListeRgt{%
+      \DTLnewrow{mtnumedb}%
+      \xdef\toto{\fpeval{\ListeRgt[\xcnt,1]*\the\ppcm/\ListeRgt[\xcnt,2]}}%
+      \DTLnewdbentry{mtnumedb}{numeric}{\toto}%
+    }%
+    %    % On trie
+    \ifboolKV[ClesRgt]{Decroissant}{%
+      %      % On trie la liste
+      \dtlsort{numeric=descending}{mtnumedb}{\dtlicompare}%
+      \ifboolKV[ClesRgt]{Details}{\ensuremath{\DTLforeach{mtnumedb}{\numeroDonnee=numeric}{\frac{\num{\numeroDonnee}}{\num{\the\ppcm}}\DTLiflastrow{}{\ifboolKV[ClesRgt]{Strict}{>}{\geqslant}}}}}{%
+        \ensuremath{\DTLforeach{mtnumedb}{\numeroDonnee=numeric}{\Simplification{\numeroDonnee}{\ppcm}\DTLiflastrow{}{\ifboolKV[ClesRgt]{Strict}{>}{\geqslant}}}}%
+      }%
+    }{%
+      %      % On trie la liste
+      \dtlsort{numeric}{mtnumedb}{\dtlicompare}%
+      \ifboolKV[ClesRgt]{Details}{%
+        \ensuremath{\DTLforeach{mtnumedb}{\numeroDonnee=numeric}{\frac{\num{\numeroDonnee}}{\num{\the\ppcm}}\DTLiflastrow{}{\ifboolKV[ClesRgt]{Strict}{<}{\leqslant}}}}%
+      }{%
+        \ensuremath{\DTLforeach{mtnumedb}{\numeroDonnee=numeric}{\Simplification{\numeroDonnee}{\ppcm}\DTLiflastrow{}{\ifboolKV[ClesRgt]{Strict}{<}{\leqslant}}}}%
+      }%
+    }%
+  }{%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeRgt{#2}%
+    % on cr\'ee la base de donn\'ees des valeurs
+    \DTLcleardb{mtRGTdb}%
+    %    % on les trie pour les ranger par ordre croissant
+    \foreachitem\xcompteur\in\ListeRgt{%
+      % Les nombres sont \showitems\ListeRgt[]
+      \DTLnewrow{mtRGTdb}%
+      \itemtomacro\ListeRgt[\xcompteurcnt]\ycompteur%
+      \DTLnewdbentry{mtRGTdb}{numeric}{\ycompteur}%
+    }%
+    \DTLdisplaydb[]{mtRGTdb}%
+    %    % 
+    \ifboolKV[ClesRgt]{Seul}{%
+      \xdef\PfCListeRgtRecup{}%
+      \dtlsort{numeric}{mtRGTdb}{\dtlicompare}%
+      \DTLforeach{mtRGTdb}{\numeroDonnee=numeric}{\xdef\PfCListeRgtRecup{\PfCListeRgtRecup \numeroDonnee\DTLiflastrow{}{,}}}%
+    }{%
+      \ifboolKV[ClesRgt]{Decroissant}{%
+        % On trie la liste
+        \dtlsort{numeric=descending}{mtRGTdb}{\dtlicompare}%
+        \ensuremath{\DTLforeach{mtRGTdb}{\numeroDonnee=numeric}{\num{\numeroDonnee}\DTLiflastrow{}{\ifboolKV[ClesRgt]{Strict}{>}{\geqslant}}}}%
+      }{%
+        %      % On trie la liste
+        \dtlsort{numeric}{mtRGTdb}{\dtlicompare}%
+        \ensuremath{\DTLforeach{mtRGTdb}{\numeroDonnee=numeric}{\num{\numeroDonnee}\DTLiflastrow{}{\ifboolKV[ClesRgt]{Strict}{<}{\leqslant}}}}%
+      }%
+    }%
+  }%
+}%

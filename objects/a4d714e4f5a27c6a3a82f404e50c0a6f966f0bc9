@@ -1,0 +1,682 @@
+%%%
+% Vue Cubes
+%%%
+\def\filedateVueCubes{2025/05/27}%
+\def\fileversionVueCubes{0.1c}%
+\message{-- \filedateVueCubes\space v\fileversionVueCubes}%
+%
+\setKVdefault[VueCubes]{Solution=false,Hauteur=5,Profondeur=4,Largeur=3,Angle=60,Nom=Ex1,Trou=false,Echelle=0.25,CouleurCube=LightSteelBlue,CouleurFleche=LightGray,Face=false,Creation=false,Grilles=false,Seul=false,Perso=false,EclateX=0,EclateZ=0,EclateY=0,TroisCouleur=false,TroisCouleurs={},Colores=false,ListeCouleurs={},Theta=20,Codes=false,Traces={},Visualisation=false,Ecart=\qquad}
+\defKV[VueCubes]{%
+  TroisCouleurs=\ifempty{#1}{}{\setKV[VueCubes]{TroisCouleur}\setsepchar{,}\ignoreemptyitems\readlist*\ListeCouleursVueCubes{#1}},%
+  ListeCouleurs=\ifempty{#1}{}{\setKV[VueCubes]{Colores}\setsepchar{,}\ignoreemptyitems\readlist*\ListeCouleursVueCubes{#1}},%
+  Traces=\ifempty{#1}{}{\setKV[VueCubes]{Codes}}%    
+}%
+%
+\newtoks\toklisteVueCube%
+\def\UpdatetoksVueCube#1\nil{\addtotok\toklisteVueCube{#1,}}%
+\def\UpdatetoksEmpilementPerso#1\nil{\addtotok\toklisteVueCube{"#1",}}%
+
+\NewDocumentCommand\VueCubes{o m}{%
+  \newtoks\toklistecouleur\toklistecouleur{}%
+  \useKVdefault[VueCubes]%
+  \setKV[VueCubes]{#1}%
+  \toklisteVueCube{}%
+  \ifboolKV[VueCubes]{TroisCouleur}{%
+    \foreachitem\couleur\in\ListeCouleursVueCubes{\expandafter\UpdateCoul\couleur\nil}%
+  }{}%
+  \ifboolKV[VueCubes]{Colores}{%
+    \foreachitem\couleur\in\ListeCouleursVueCubes{\expandafter\UpdateCoul\couleur\nil}%
+  }{}%
+  \ifboolKV[VueCubes]{Perso}{%
+    \setsepchar[*]{,*/}\ignoreemptyitems%
+    \readlist*\ListeCouches{#2}%
+    \reademptyitems%
+    \foreachitem\compteur\in\ListeCouches{%
+      \foreachitem\compteurdeux\in\ListeCouches[\compteurcnt]{%
+        \expandafter\UpdatetoksEmpilementPerso\compteurdeux\nil%
+      }%
+    }%
+    \ifboolKV[VueCubes]{Colores}{%
+      \BuildMPEmpilementPersoColore{\the\toklisteVueCube}{\ListeCoucheslen}{\listlen\ListeCouches[1]}{\the\toklistecouleur}%
+    }{%
+      \BuildMPEmpilementPerso{\the\toklisteVueCube}{\ListeCoucheslen}{\listlen\ListeCouches[1]}{\the\toklistecouleur}%
+    }%
+  }{%
+    \ifboolKV[VueCubes]{Solution}{%
+      \BuildVueCubesSolution%
+    }{%
+      \ifboolKV[VueCubes]{Creation}{%Le nombre de données doit être compatible avec le "volume du pavé droit"
+        \ignoreemptyitems%
+        \readlist*\PfCListeHauteursCubes{#2}%
+        \reademptyitems%
+        \foreachitem\compteur\in\PfCListeHauteursCubes{\expandafter\UpdatetoksVueCube\compteur\nil}%
+        \BuildVueCubes{\useKV[VueCubes]{Angle}}{\the\toklisteVueCube}{\useKV[VueCubes]{Nom}}{\the\toklistecouleur}%%
+      }{%
+        \BuildVueCubes{\useKV[VueCubes]{Angle}}{}{\useKV[VueCubes]{Nom}}{\the\toklistecouleur}%%
+      }%
+    }%
+  }%
+}%
+
+\NewDocumentCommand\BuildMPEmpilementPerso{mmmm}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      nbcouches=#2;
+      nblignes:=#3;
+      %
+      input PfCSolid;
+      %
+      boolean TroisCouleur;
+      TroisCouleur=\useKV[VueCubes]{TroisCouleur};
+      %
+      intensite:=1.5;
+      %
+      Ferme[0]:=false;
+      outcolor:=\useKV[VueCubes]{CouleurCube};%
+      incolor:=white;
+      nb:=1;subh:=1;
+      creux:=true;
+      %
+      Phi := \useKV[VueCubes]{Angle};
+      Theta := \useKV[VueCubes]{Theta};
+      Echelle:=\useKV[VueCubes]{Echelle};
+      EclateX:=\useKV[VueCubes]{EclateX};
+      EclateY:=\useKV[VueCubes]{EclateY};
+      EclateZ:=\useKV[VueCubes]{EclateZ};
+      %
+      string LesSymboles[];
+      string LesLignes[][];
+      %
+      TotalObj:=0;
+      %
+      vardef CreationSolide(text t)=
+        n:=0;
+        for pk=t:
+          n:=n+1;
+          LesSymboles[n]=pk;
+        endfor;
+        for l=nbcouches downto 1:
+          for k=nblignes downto 1:
+            LesLignes[l][k]=LesSymboles[(nbcouches-l)*nblignes+(nblignes-k+1)];
+          endfor;
+        endfor;
+        for l=nbcouches downto 1:
+          for k=nblignes downto 1:
+            for m=0 upto (length(LesLignes[l][k])-1):
+              if (substring((m,m+1)) of LesLignes[l][k])="x":
+                TotalObj:=incr TotalObj;
+                TR:=(Echelle*(nblignes-k)+Echelle*(nblignes-k)*EclateX,Echelle*(m+m*EclateY),Echelle*l-Echelle*(nbcouches-l)*EclateZ);
+                ObjetDeplacement[TotalObj](0);
+              fi;
+            endfor;
+          endfor;
+        endfor;
+      enddef;
+      %
+      Initialisation(2500,Phi,Theta,50);
+      Objetcube0("a=Echelle");%&decimal(Echelle));
+      %
+      CreationSolide(#1);
+      nbobj:=TotalObj;
+      if TroisCouleur:
+        color retienscoul[];
+        n:=0;
+        for pk=#4:
+          n:=n+1;
+          retienscoul[n]=pk;
+        endfor;
+        coulfaceX:=retienscoul[1];
+        coulfaceY:=retienscoul[2];
+        coulfaceZ:=retienscoul[3];
+        DessineFusionTroisCouleurs;
+      else:
+        DessineFusion;
+      fi;
+    \end{mplibcode}%
+  \fi%
+}%
+
+\NewDocumentCommand\BuildVueCubes{m m m m}{%
+  \ifluatex%
+  \mplibforcehmode%
+  \xdef\PfCVueCubeNom{\useKV[VueCubes]{Nom}}%
+  \begin{mplibcode}[\PfCVueCubeNom]
+    string NomRetenu;
+    NomRetenu=str #3;
+
+    input PfCSolid;
+
+    boolean TroisCouleur;
+    TroisCouleur=\useKV[VueCubes]{TroisCouleur};
+    
+    intensite:=1.5;
+
+    Ferme[0]:=false;
+    outcolor:=\useKV[VueCubes]{CouleurCube};
+    incolor:=white;
+    nb:=1;subh:=1;
+    creux:=true;
+
+    Profondeur:=\useKV[VueCubes]{Profondeur};
+    Largeur:=\useKV[VueCubes]{Largeur};
+    Hauteur:=\useKV[VueCubes]{Hauteur};
+    Phi:=#1;
+    Theta:=\useKV[VueCubes]{Theta};
+    Echelle:=\useKV[VueCubes]{Echelle};
+    EclateX:=\useKV[VueCubes]{EclateX};
+    EclateY:=\useKV[VueCubes]{EclateY};
+    EclateZ:=\useKV[VueCubes]{EclateZ};
+    
+    color CouleurFleche;
+    CouleurFleche:=\useKV[VueCubes]{CouleurFleche};
+    
+    boolean Trou,FaceVue,Creation,Grille;
+    Trou:=\useKV[VueCubes]{Trou};
+    FaceVue:=\useKV[VueCubes]{Face};
+    Creation:=\useKV[VueCubes]{Creation};
+    Grille:=\useKV[VueCubes]{Grilles};
+    
+    TotalObj:=0;
+
+    vardef CreationSolide(text t)=
+    PfCnbcubes:=0;
+    for p_=t:
+    m:=(PfCnbcubes div Profondeur);
+    k:=(PfCnbcubes mod Profondeur);
+    hauteurtour[m+1][k+1]:=p_;
+    for l=1 upto hauteurtour[m+1][k+1]:
+    TotalObj:=incr TotalObj;
+    % TR:=(-Echelle*k,(m+1)*Echelle,Echelle*l-Echelle/2);
+    TR:=(Echelle*(Largeur-k)+Echelle*(Largeur-k)*EclateX,Echelle*(m+m*EclateY),Echelle*l-Echelle*(Hauteur-l)*EclateZ);
+    ObjetDeplacement[TotalObj](0);
+    endfor;
+    PfCnbcubes:=incr PfCnbcubes;
+    endfor;
+    enddef;
+
+    Initialisation(2500,Phi,Theta,50);
+    Objetcube0("a="&decimal(Echelle));
+    
+    if Creation:
+    CreationSolide(#2);
+    else:
+    for k=1 upto Profondeur:%4 profondeur
+    hauteurtour[0][k]:=Hauteur;%5 hauteur totale
+    endfor;
+    for m=1 upto Largeur:%3 largeur
+    for k=1 upto Profondeur:%4 profondeur
+    if Trou:
+    if m>1:
+    hauteurtour[m][k]:=floor(uniformdeviate(hauteurtour[m-1][k]+1));%5 hauteur totale
+    else:
+    hauteurtour[m][k]:=1+floor(uniformdeviate(hauteurtour[m-1][k]));%5 hauteur totale
+    fi;
+    else:
+    hauteurtour[m][k]:=1+floor(uniformdeviate(hauteurtour[m-1][k]));%5 hauteur totale
+    fi;
+    for l=1 upto hauteurtour[m][k]:
+    TotalObj:=incr TotalObj;
+    TR:=(-Echelle*(k-1),m*Echelle,Echelle*l-Echelle/2);
+    ObjetDeplacement[TotalObj](0);
+    endfor;
+    endfor;
+    endfor;
+    fi;
+
+    write  decimal(TotalObj) to "PfCNombreCubes"&NomRetenu&".tex";%
+    write EOF to "PfCNombreCubes"&NomRetenu&".tex";%
+    
+    % Pour la fleche
+    path Fleche;
+    color A[];
+    if FaceVue:
+    A0=Echelle*(1,Largeur/2,0);
+    A1-A0=0.25*(2,2,0);
+    A2-A1=0.25*(0,-1,0);
+    A3-A2=0.25*(2,0,0);
+    A4-A3=0.25*(0,-2,0);
+    A5-A4=A2-A3;
+    A6-A5=A2-A1;
+    Fleche=Projette(A0)--Projette(A1)--Projette(A2)--Projette(A3)--Projette(A4)--Projette(A5)--Projette(A6)--cycle;
+    fill Fleche withcolor CouleurFleche;
+    draw Fleche;
+    fi;    
+    
+    nbobj:=TotalObj;
+    % DessineFusion;
+          if TroisCouleur:
+      color retienscoul[];
+      n:=0;
+      for p_=#4:
+      n:=n+1;
+      retienscoul[n]=p_;
+      endfor;
+      coulfaceX:=retienscoul[1];
+      coulfaceY:=retienscoul[2];
+      coulfaceZ:=retienscoul[3];
+      DessineFusionTroisCouleurs;
+      else:
+      DessineFusion;
+      fi;      
+
+    if Grille:
+    % dessus
+    color Ad[];
+    Ad0=(0.5Echelle,0.5*Echelle,-0.5);
+    Ad1-Ad0=(0,Largeur*Echelle,0);
+    Ad2-Ad1=(-Profondeur*Echelle,0,0);
+    Ad3-Ad2=Ad0-Ad1;
+    draw Projette(Ad0) for k=1 upto 3: --Projette(Ad[k]) endfor --cycle;
+    for k=1 upto Largeur-1:
+    draw Projette((k/Largeur)[Ad0,Ad1])--Projette((k/Largeur)[Ad3,Ad2]);
+    endfor;
+    for k=1 upto Profondeur-1:
+    draw Projette((k/Profondeur)[Ad0,Ad3])--Projette((k/Profondeur)[Ad1,Ad2]);
+    endfor;
+    % face
+    color Af[];
+    Af0=(-1-Profondeur*Echelle,0.5*Echelle,0);
+    Af1-Af0=(0,Largeur*Echelle,0);
+    Af2-Af1=(0,0,Hauteur*Echelle);
+    Af3-Af2=Af0-Af1;
+    draw Projette(Af0) for k=1 upto 3: --Projette(Af[k]) endfor --cycle;
+    for k=1 upto Largeur-1:
+    draw Projette((k/Largeur)[Af0,Af1])--Projette((k/Largeur)[Af3,Af2]);
+    endfor;
+    for k=1 upto Hauteur-1:
+    draw Projette((k/Hauteur)[Af0,Af3])--Projette((k/Hauteur)[Af1,Af2]);
+    endfor;
+    % droite
+    color Adg[];
+    Adg0=(0.5Echelle,-Largeur*Echelle-1,0);
+    Adg1-Adg0=(-Profondeur*Echelle,0,0);
+    Adg2-Adg1=(0,0,Hauteur*Echelle);
+    Adg3-Adg2=Adg0-Adg1;
+    draw Projette(Adg0) for k=1 upto 3: --Projette(Adg[k]) endfor --cycle;
+    for k=1 upto Profondeur-1:
+    draw Projette((k/Profondeur)[Adg0,Adg1])--Projette((k/Profondeur)[Adg3,Adg2]);
+    endfor;
+    for k=1 upto Hauteur-1:
+    draw Projette((k/Hauteur)[Adg0,Adg3])--Projette((k/Hauteur)[Adg1,Adg2]);
+    endfor;
+    fi;
+  \end{mplibcode}%
+  \ifboolKV[VueCubes]{Seul}{}{%
+  \ifboolKV[VueCubes]{Grilles}{}{%
+    \useKV[VueCubes]{Ecart}%
+    \begin{mplibcode}[\PfCVueCubeNom]
+      input PfCSolid;
+
+      boolean TroisCouleur;
+      TroisCouleur=\useKV[VueCubes]{TroisCouleur};
+      
+      intensite:=1.5;
+
+      Ferme[0]:=false;
+      outcolor:=\useKV[VueCubes]{CouleurCube};
+      incolor:=white;
+      nb:=1;subh:=1;
+      creux:=true;
+      
+      Profondeur:=\useKV[VueCubes]{Profondeur};
+      Largeur:=\useKV[VueCubes]{Largeur};
+      Hauteur:=\useKV[VueCubes]{Hauteur};
+      Phi:=#1;
+      Echelle:=\useKV[VueCubes]{Echelle};
+      
+      color CouleurFleche;
+      CouleurFleche:=\useKV[VueCubes]{CouleurFleche};
+      
+      TotalObj:=0;
+      
+      Initialisation(2500,Phi+90,30,50);
+      Objetcube0("a="&decimal(Echelle));
+      
+      for m=1 upto Largeur:%3 largeur
+      for k=1 upto Profondeur:%4 profondeur
+      for l=1 upto hauteurtour[m][k]:
+      TotalObj:=incr TotalObj;
+      TR:=(-Echelle*(k-1),m*Echelle,Echelle*l-Echelle/2);%TR:=(-0.5*(k-1),m*0.5,l/2-0.25);
+      ObjetDeplacement[TotalObj](0);
+      endfor;
+      endfor;
+      endfor;
+      
+      if Grille:
+      undraw Projette(Ad0) for k=1 upto 3: --Projette(Ad[k]) endfor --cycle;
+      undraw Projette(Af0) for k=1 upto 3: --Projette(Af[k]) endfor --cycle;
+      undraw Projette(Adg0) for k=1 upto 3: --Projette(Adg[k]) endfor --cycle;
+      fi;
+      
+      path Fleche;
+      if FaceVue:
+      Fleche=Projette(A0)--Projette(A1)--Projette(A2)--Projette(A3)--Projette(A4)--Projette(A5)--Projette(A6)--cycle;
+      fill Fleche withcolor CouleurFleche;
+      draw Fleche;
+      fi;
+      
+      nbobj:=TotalObj;
+      % DessineFusion;
+            if TroisCouleur:
+      color retienscoul[];
+      n:=0;
+      for p_=#4:
+      n:=n+1;
+      retienscoul[n]=p_;
+      endfor;
+      coulfaceX:=retienscoul[1];
+      coulfaceY:=retienscoul[2];
+      coulfaceZ:=retienscoul[3];
+      DessineFusionTroisCouleurs;
+      else:
+      DessineFusion;
+      fi;      
+    \end{mplibcode}%
+  }%
+  }%
+  \fi%
+}%
+
+\NewDocumentCommand\BuildVueCubesSolution{}{%
+  \ifluatex%
+  \xdef\PfCVueCubeNom{\useKV[VueCubes]{Nom}}%
+  \begin{NiceTabular}{ccc}%
+    Vue de face&Vue de dessus&Vue de gauche\\
+    {\begin{mplibcode}[\PfCVueCubeNom]
+        input PfCSolid;
+        
+        intensite:=1.5;
+        
+        Ferme[0]:=false;
+        outcolor:=\useKV[VueCubes]{CouleurCube};
+        incolor:=white;
+        nb:=1;subh:=1;
+        creux:=true;
+        
+        Profondeur:=\useKV[VueCubes]{Profondeur};
+        Largeur:=\useKV[VueCubes]{Largeur};
+        Hauteur:=\useKV[VueCubes]{Hauteur};
+        Phi:=0;
+        Echelle:=\useKV[VueCubes]{Echelle};
+
+        color CouleurFleche;
+        CouleurFleche:=\useKV[VueCubes]{CouleurFleche};
+        
+        TotalObj:=0;
+        
+        Initialisation(2500,Phi,0,50);
+        Objetcube0("a="&decimal(Echelle));
+        
+        for m=1 upto Largeur:%3 largeur
+        for k=1 upto Profondeur:%4 profondeur
+        for l=1 upto hauteurtour[m][k]:
+        TotalObj:=incr TotalObj;
+        TR:=(-Echelle*(k-1),m*Echelle,Echelle*l-Echelle/2);%TR:=(-0.5*(k-1),m*0.5,l/2-0.25);
+        ObjetDeplacement[TotalObj](0);
+        endfor;
+        endfor;
+        endfor;
+        
+        nbobj:=TotalObj;
+        DessineFusion;
+      \end{mplibcode}}&
+    {\begin{mplibcode}[\PfCVueCubeNom]
+    input PfCSolid;
+    
+    intensite:=1.5;
+    
+    Ferme[0]:=false;
+    outcolor:=\useKV[VueCubes]{CouleurCube};
+    incolor:=white;
+    nb:=1;subh:=1;
+    creux:=true;
+    
+    Profondeur:=\useKV[VueCubes]{Profondeur};
+    Largeur:=\useKV[VueCubes]{Largeur};
+    Hauteur:=\useKV[VueCubes]{Hauteur};
+    Phi:=0;
+    Echelle:=\useKV[VueCubes]{Echelle};
+
+    color CouleurFleche;
+    CouleurFleche:=\useKV[VueCubes]{CouleurFleche};
+    
+    TotalObj:=0;
+    
+    Initialisation(2500,Phi,90,50);
+    Objetcube0("a="&decimal(Echelle));
+    
+    for m=1 upto Largeur:%3 largeur
+    for k=1 upto Profondeur:%4 profondeur
+    for l=1 upto hauteurtour[m][k]:
+    TotalObj:=incr TotalObj;
+    TR:=(-Echelle*(k-1),m*Echelle,Echelle*l-Echelle/2);%TR:=(-0.5*(k-1),m*0.5,l/2-0.25);
+    ObjetDeplacement[TotalObj](0);
+    endfor;
+    endfor;
+    endfor;
+
+    nbobj:=TotalObj;
+    DessineFusion;
+  \end{mplibcode}}&{\begin{mplibcode}[\PfCVueCubeNom]
+    input PfCSolid;
+    
+    intensite:=1.5;
+    
+    Ferme[0]:=false;
+    outcolor:=\useKV[VueCubes]{CouleurCube};
+    incolor:=white;
+    nb:=1;subh:=1;
+    creux:=true;
+    
+    Profondeur:=\useKV[VueCubes]{Profondeur};
+    Largeur:=\useKV[VueCubes]{Largeur};
+    Hauteur:=\useKV[VueCubes]{Hauteur};
+    Phi:=-90;
+    Echelle:=\useKV[VueCubes]{Echelle};
+
+    color CouleurFleche;
+    CouleurFleche:=\useKV[VueCubes]{CouleurFleche};
+    
+    TotalObj:=0;
+    
+    Initialisation(2500,Phi,0,50);
+    Objetcube0("a="&decimal(Echelle));
+    
+    for m=1 upto Largeur:%3 largeur
+    for k=1 upto Profondeur:%4 profondeur
+    for l=1 upto hauteurtour[m][k]:
+    TotalObj:=incr TotalObj;
+    TR:=(-Echelle*(k-1),m*Echelle,Echelle*l-Echelle/2);%TR:=(-0.5*(k-1),m*0.5,l/2-0.25);
+    ObjetDeplacement[TotalObj](0);
+    endfor;
+    endfor;
+    endfor;
+
+    nbobj:=TotalObj;
+    DessineFusion;
+  \end{mplibcode}}\\
+  \end{NiceTabular}%
+  \fi%
+}%
+
+\NewDocumentCommand\BuildMPEmpilementPersoColore{mmmm}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      nbcouches=#2;
+      nblignes:=#3;
+      %
+      hauteur:=\useKV[VueCubes]{Hauteur};
+      profondeur:=\useKV[VueCubes]{Profondeur};
+      largeur:=\useKV[VueCubes]{Largeur};
+      %
+      boolean Codes,Visualisation;
+      Codes=\useKV[VueCubes]{Codes};
+      Visualisation=\useKV[VueCubes]{Visualisation};
+      input PfCSolid;
+      
+      % intensite:=1.5;
+      
+      nb:=1;subh:=1;
+      creux:=true;
+      eclairage:=false;
+      
+      vardef RecupCouleurs(text t)=
+        color Coul[];
+        nbcoul=0;
+        for p_=t:
+          nbcoul:=nbcoul+1;
+          Coul[nbcoul]=p_;
+        endfor;
+      enddef;
+      
+      Phi := \useKV[VueCubes]{Angle};
+      Theta := \useKV[VueCubes]{Theta};
+      Echelle:=\useKV[VueCubes]{Echelle};
+      EclateX:=\useKV[VueCubes]{EclateX};
+      EclateY:=\useKV[VueCubes]{EclateY};
+      EclateZ:=\useKV[VueCubes]{EclateZ};
+
+      Initialisation(2500,Phi,Theta,50);
+      
+      string LesSymboles[];
+      string LesLignes[][];
+
+      TotalObj:=0;
+
+      vardef CreationSolide(text t)=
+        n:=0;
+        for p_=t:
+          n:=n+1;
+          LesSymboles[n]=p_;
+        endfor;
+        for l=nbcouches downto 1:
+          for k=nblignes downto 1:
+            LesLignes[l][k]=LesSymboles[(nbcouches-l)*nblignes+(nblignes-k+1)];
+          endfor;
+        endfor;
+        nbcubes=length LesLignes[nbcouches][nblignes];  
+        for l=nbcouches downto 1:
+          for k=nblignes downto 1:
+            for m=0 upto (length(LesLignes[l][k])-1):
+              if (substring((m,m+1)) of LesLignes[l][k])<>"o":
+                TotalObj:=incr TotalObj;
+                TR:=(Echelle*(nblignes-k)+Echelle*(nblignes-k)*EclateX,Echelle*(m+m*EclateY),Echelle*l-Echelle*(nbcouches-l)*EclateZ);
+                outcolor:=Coul[scantokens(substring((m,m+1)) of LesLignes[l][k])];
+                Objetcube[TotalObj]("a="&decimal(Echelle));
+              fi;
+            endfor;
+          endfor;
+        endfor;
+      enddef;
+
+      RecupCouleurs(#4);
+      CreationSolide(#1);
+      nbobj:=TotalObj;
+      DessineFusion;
+
+      if Visualisation:
+        %Vue de dessus
+        drawarrow chemin(Echelle*(((nblignes-1)/2),((nbcubes-1)/2),nbcouches+2.5),Echelle*(((nblignes-1)/2),((nbcubes-1)/2),nbcouches+1.5));
+        label.top(TEX("A"),Projette(Echelle*(((nblignes-1)/2),((nbcubes-1)/2),nbcouches+2.5)));
+        %Vue de derriere
+        drawarrow chemin(Echelle*(-2.5,((nbcubes-1)/2),((nbcouches+1)/2)),Echelle*(-1.5,((nbcubes-1)/2),((nbcouches+1)/2)));
+        label.rt(TEX("B"),Projette(Echelle*(-2.5,((nbcubes-1)/2),((nbcouches+1)/2))));
+        %Vue de face
+        drawarrow chemin(Echelle*(nblignes+1.5,((nbcubes-1)/2),((nbcouches+1)/2)),Echelle*(nblignes+0.5,((nbcubes-1)/2),((nbcouches+1)/2)));
+        label.lft(TEX("D"),Projette(Echelle*(nblignes+1.5,((nbcubes-1)/2),((nbcouches+1)/2))));
+        %Vue de droite
+        drawarrow chemin(Echelle*((nblignes-1)/2,nbcubes+2.5,((nbcouches+1)/2)),Echelle*((nblignes-1)/2,nbcubes+1.5,((nbcouches+1)/2)));
+        label.rt(TEX("C"),Projette(Echelle*((nblignes-1)/2,nbcubes+2.5,((nbcouches+1)/2))));
+        %Vue de gauche
+        drawarrow chemin(Echelle*((nblignes-1)/2,-3.5,((nbcouches+1)/2)),Echelle*((nblignes-1)/2,-2.5,((nbcouches+1)/2)));
+        label.lft(TEX("E"),Projette(Echelle*((nblignes-1)/2,-3.5,((nbcouches+1)/2))));     
+      fi;
+      
+      \ifemptyKV[VueCubes]{Traces}{}{\useKV[VueCubes]{Traces}};
+%      if Codes:
+%        \useKV[VueCubes]{Traces};
+%      fi;
+    \end{mplibcode}%
+  \fi%
+}%
+
+\NewDocumentCommand\VueCubesSimple{mmmm}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}%
+      nbcouches=#2;
+      nblignes:=#3;
+      %
+      input PfCSolid;
+      %
+      boolean TroisCouleur;
+      TroisCouleur=\useKV[VueCubes]{TroisCouleur};
+      %
+      intensite:=1.5;
+      %
+      Ferme[0]:=false;
+      outcolor:=\useKV[VueCubes]{CouleurCube};%
+      incolor:=white;
+      nb:=1;subh:=1;
+      creux:=true;
+      %
+      Phi := \useKV[VueCubes]{Angle};
+      Theta := \useKV[VueCubes]{Theta};
+      Echelle:=\useKV[VueCubes]{Echelle};
+      EclateX:=\useKV[VueCubes]{EclateX};
+      EclateY:=\useKV[VueCubes]{EclateY};
+      EclateZ:=\useKV[VueCubes]{EclateZ};
+      %
+      string LesSymboles[];
+      string LesLignes[][];
+      %
+      TotalObj:=0;
+      %
+      vardef CreationSolide(text t)=
+        n:=0;
+        for pk=t:
+          n:=n+1;
+          LesSymboles[n]=pk;
+        endfor;
+        for l=nbcouches downto 1:
+          for k=nblignes downto 1:
+            LesLignes[l][k]=LesSymboles[(nbcouches-l)*nblignes+(nblignes-k+1)];
+          endfor;
+        endfor;
+        for l=nbcouches downto 1:
+          for k=nblignes downto 1:
+            for m=0 upto (length(LesLignes[l][k])-1):
+              if (substring((m,m+1)) of LesLignes[l][k])="x":
+                TotalObj:=incr TotalObj;
+                TR:=(Echelle*(nblignes-k)+Echelle*(nblignes-k)*EclateX,Echelle*(m+m*EclateY),Echelle*l-Echelle*(nbcouches-l)*EclateZ);
+                ObjetDeplacement[TotalObj](0);
+              fi;
+            endfor;
+          endfor;
+        endfor;
+      enddef;
+      %
+      Initialisation(2500,Phi,Theta,50);
+      Objetcube0("a=Echelle");%&decimal(Echelle));
+      %
+      CreationSolide(#1);
+      nbobj:=TotalObj;
+      if TroisCouleur:
+        color retienscoul[];
+        n:=0;
+        for pk=#4:
+          n:=n+1;
+          retienscoul[n]=pk;
+        endfor;
+        coulfaceX:=retienscoul[1];
+        coulfaceY:=retienscoul[2];
+        coulfaceZ:=retienscoul[3];
+        DessineFusionTroisCouleurs;
+      else:
+        DessineFusion;
+      fi;
+    \end{mplibcode}%
+  \fi%
+}%

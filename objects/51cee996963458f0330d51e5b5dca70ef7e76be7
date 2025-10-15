@@ -1,0 +1,285 @@
+%%%
+% Factorisation
+%%%
+\def\filedateFactorisation{2025/05/27}%
+\def\fileversionFactorisation{0.1a}%
+\message{-- \filedateFactorisation\space v\fileversionFactorisation}%
+%
+\setKVdefault[Facto]{Aide=false,AideMul=false,Couleur=Crimson,NomExpression=A,Lettre=x,Details,Formel=false,VariableSup=false,ParenthesesFin=false,Finale=false,Type=0,Litteral={},AutreVariable={},Resultat={}}%
+\defKV[Facto]{%
+  Litteral=\ifempty{#1}{}{\setKV[Facto]{Details=false}},%
+  AutreVariable=\ifempty{#1}{}{\setKV[Facto]{VariableSup}},%
+  Resultat=\ifempty{#1}{}{\setKV[Facto]{Finale}}%
+}%
+
+\NewDocumentCommand\PfCEcrireFacteur{mm}{%
+  \StrCount{#1}{+}[\PfCCountArgTroisPlus]%
+  \StrCount{#1}{-}[\PfCCountArgTroisMoins]%
+  \xdef\PfCCountArgTrois{\fpeval{\PfCCountArgTroisPlus+\PfCCountArgTroisMoins}}%
+  \ensuremath{%
+    \IfDecimal{#1}{%
+      \ifboolKV[Facto]{Aide}{%
+        \phantom{(}\print{#2}\phantom{)}%
+      }{%
+        \print{#2}%
+      }%
+    }{%
+      \xintifboolexpr{\PfCCountArgTrois==0}{%
+        \ifboolKV[Facto]{Aide}{%
+          \phantom{(}\print{#2}\phantom{)}%
+        }{%
+          \print{#2}%
+        }%
+      }{%
+        (\print{#2})%
+      }%
+    }%
+  }%
+}%
+ 
+\NewDocumentCommand\Factorisation{sommm}{%
+%  \directlua{dofile('poly_render_fix.lua')}
+  \useKVdefault[Facto]%
+  \setKV[Facto]{#2}%
+  \colorlet{Csymbole}{\useKV[Facto]{Couleur}}%
+  \IfBooleanTF{#1}{%
+    \xdef\PfCFactoSymbole{-}%
+  }{%
+    \xdef\PfCFactoSymbole{+}%
+  }%
+  \xdef\PfCFactoNE{\useKV[Facto]{NomExpression}}%
+  \ifx\bla#5\bla%
+  % Cas a^2-b^2
+  \begin{CAS}
+    % La variable
+    vars('\useKV[Facto]{Lettre}')
+    % Les facteurs
+    Ka=#3
+    Kb=#4
+    Kc=(#3)^2
+    Kd=(#4)^2
+    Ke=(#3)-(#4)
+    Kf=(#3)+(#4)
+    % Les dérivées pour savoir si ce sont des facteurs littéraux ou pas.
+    PfCDDn=DD(Ka,\useKV[Facto]{Lettre}):autosimplify()
+    PfCDDm=DD(Kb,\useKV[Facto]{Lettre}):autosimplify()
+    PfCDDo=DD(Ke,\useKV[Facto]{Lettre}):autosimplify()
+    PfCDDp=DD(Kf,\useKV[Facto]{Lettre}):autosimplify()
+    % opposé
+    Ko=topoly(-Kb)
+    % 
+  \end{CAS}
+  \setsepchar{,}\ignoreemptyitems
+  \readlist\ListeElementDeriveeA{\fetch{PfCDDn}}
+  \readlist\ListeElementDeriveeB{\fetch{PfCDDm}}
+  \readlist\ListeElementDeriveeE{\fetch{PfCDDo}}
+  \readlist\ListeElementDeriveeF{\fetch{PfCDDp}}
+  \reademptyitems
+  \xdef\TestCASA{\ListeElementDeriveeA[1]}
+  \xdef\TestCASB{\ListeElementDeriveeB[1]}
+  \ifboolKV[Facto]{Details}{%Version monome mais pas deux nombres
+    \begin{align*}
+      \PfCFactoNE&=\print{Kc:expand()}-\print{Kd:expand()}\\
+      \PfCFactoNE&=\ifboolKV[Facto]{Aide}{\xintifboolexpr{\TestCASA>1}{(\,}{}{\underbrace{\Fdash{$\print{Ka}$}}_{A}}\xintifboolexpr{\TestCASA>1}{\,)}{}^{\,2}-\xintifboolexpr{\TestCASB>1}{(\,}{}{\underbrace{\Fdash{$\print{Kb}$}}_{B}}\xintifboolexpr{\TestCASB>1}{\,)}{}^{\,2}}{\IfDecimal{#3}{\print{Ka}^2}{\print{Kc}}-\IfDecimal{#4}{\print{Kb}^2}{\print{Kd}}}\\
+      \PfCFactoNE&=(\print{Ke})\times(\print{Kf})%
+                   \ifboolKV[Facto]{Formel}{\\\PfCFactoNE&=(\print{Ke})(\print{Kf})}{}%
+    \end{align*}
+  }{%Avec au moins un des facteurs polynomes
+    \begin{align*}
+      \ifboolKV[Facto]{Aide}{\IfDecimal{#3}{\PfCFactoNE&=\print{Kc}-\print{Kd}}{\IfDecimal{#4}{\PfCFactoNE&=\print{Kc}-\print{Kd}}{\PfCFactoNE&={\underbrace{\Fdash{$(\print{Ka})$}}_{A}}^{\,2}-{\underbrace{\Fdash{$(\print{Kb})$}}_{B}}^{\,2}}}}{\PfCFactoNE&=\print{Kc}-\print{Kd}}\\
+      \IfDecimal{#3}{\PfCFactoNE\uppercase{&}=\ifboolKV[Facto]{Aide}{{\underbrace{\Fdash{$\phantom{(}\print{Ka}\phantom{)}$}}_{A}}^{\,2}}{\print{Ka}^2}-\ifboolKV[Facto]{Aide}{{\underbrace{\Fdash{$(\print{Kb})$}}_{B}}^{\,2}}{\print{Kd}}\\}{\IfDecimal{#4}{\PfCFactoNE\uppercase{&}=\ifboolKV[Facto]{Aide}{{\underbrace{\Fdash{$(\print{Ka})$}}_{A}}^{\,2}}{\print{Kc}}-\ifboolKV[Facto]{Aide}{{\underbrace{\Fdash{$\phantom{(}\print{Kb}\phantom{)}$}}_{B}}^{\,2}}{\print{Kb}^2}\\}{}}
+      \PfCFactoNE&=\left[\IfDecimal{#3}{\print{Ka}}{(\print{Ka})}-\IfDecimal{#4}{\print{Kb}}{(\print{Kb})}\right]\times\left[\IfDecimal{#3}{\print{Ka}}{(\print{Ka})}+\IfDecimal{#4}{\print{Kb}}{(\print{Kb})}\right]\\
+      \PfCFactoNE&=\left[\print{Ka}\xintifboolexpr{\TestCASB<0}{+}{}\print{Ko}\right]\times\left[\print{Ka}\StrChar{#4}{1}[\PfCTestCaracUn]\StrCompare{\PfCTestCaracUn}{-}[\PfCTestCaracRetour]\xintifboolexpr{\PfCTestCaracRetour==0}{}{+}\print{Kb}\right]\\
+      \PfCFactoNE&=\ifboolKV[Facto]{ParenthesesFin}{\left(}{\left[}\print{Ke:expand():topolynomial()}\ifboolKV[Facto]{ParenthesesFin}{\right)}{\right]}\times\ifboolKV[Facto]{ParenthesesFin}{\left(}{\left[}\print{Kf:expand():topolynomial()}\ifboolKV[Facto]{ParenthesesFin}{\right)}{\right]}%
+                   \ifboolKV[Facto]{Finale}{\\\PfCFactoNE&=\useKV[Facto]{Resultat}}{\ifboolKV[Facto]{Formel}{\\\PfCFactoNE&=\ifboolKV[Facto]{ParenthesesFin}{\left(}{\left[}\print{Ke:expand():topolynomial()}\ifboolKV[Facto]{ParenthesesFin}{\right)}{\right]}\ifboolKV[Facto]{ParenthesesFin}{\left(}{\left[}\print{Kf:expand():topolynomial()}\ifboolKV[Facto]{ParenthesesFin}{\right)}{\right]}}{}}%
+    \end{align*}
+  }
+\else%k*a+-k*b=k(a+-b)
+%  \#3 #3 -- \#4 #4 -- \#5 #5
+  \begin{CAS}
+    % La variable
+    vars('\useKV[Facto]{Lettre}'\ifboolKV[Facto]{VariableSup}{%
+      ,'\useKV[Facto]{AutreVariable}'
+    }{})
+    % Les facteurs
+    Kk=#3
+    Ka=#4
+    Kb=#5
+    Kka=Kk*Ka
+    Kkb=Kk*Kb
+    % Les dérivées pour savoir si ce sont des facteurs littéraux ou pas.
+    PfCDDn=DD(Ka,\useKV[Facto]{Lettre}):autosimplify()
+    PfCDDm=DD(Kb,\useKV[Facto]{Lettre}):autosimplify()
+    % opposé
+    Ko=topoly(-Kb)
+    Ke=(#4)\PfCFactoSymbole(#5)
+  \end{CAS}
+  \setsepchar{,}\ignoreemptyitems
+  \readlist\ListeElementDeriveeA{\fetch{PfCDDn}}
+  \readlist\ListeElementDeriveeB{\fetch{PfCDDm}}
+  \reademptyitems
+  \xdef\TestCAS{\ListeElementDeriveeA[1]}
+  \xdef\TestCASB{\ListeElementDeriveeB[1]}
+  \ifboolKV[Facto]{Details}{%Version monome mais pas des nombres
+    \begin{align*}
+      \PfCFactoNE&=\print{Kka:expand()}\PfCFactoSymbole\print{Kkb:expand()}\\
+      \PfCFactoNE&=\ifboolKV[Facto]{Aide}{\underbrace{\Fdash{$\phantom{(}\print{Kk}\phantom{)}$}}_{k}}{\print{Kk}}\times\xintifboolexpr{\TestCAS<0}{\ifboolKV[Facto]{Aide}{\underbrace{\Fdash{$(\print{Ka}$}}_{a}}{(\print{Ka})}}{\ifboolKV[Facto]{Aide}{\underbrace{\Fdash{$\phantom{(}\print{Ka}\phantom{)}$}}_{a}}{\print{Ka}}}\PfCFactoSymbole\ifboolKV[Facto]{Aide}{\underbrace{\Fdash{$\phantom{(}\print{Kk}\phantom{)}$}}_{k}}{\print{Kk}}\times\xintifboolexpr{\TestCASB<0}{\ifboolKV[Facto]{Aide}{\underbrace{\Fdash{$(\print{Kb}$}}_{b}}{(\print{Kb})}}{\ifboolKV[Facto]{Aide}{\underbrace{\Fdash{$\phantom{(}\print{Kb}\phantom{)}$}}_{b}}{\print{Kb}}}\\
+      \PfCFactoNE&=\print{Kk}\times(\print{Ka\PfCFactoSymbole Kb})%
+                   \ifboolKV[Facto]{Formel}{\\\PfCFactoNE&=\print{Kk}(\print{Ka\PfCFactoSymbole Kb})}{}%
+    \end{align*}
+  }{%Avec au moins un des facteurs polynomes
+    \StrCompare{\PfCFactoSymbole}{-}[\PfCRetiensSigneFacteurDeux]%
+    \StrChar{#5}{1}[\RetiensPremierCaractere]%en cas de deuxième terme écrit b-ax
+    \ifnum\fpeval{\useKV[Facto]{Type}}=1\relax
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+      \begin{align*}
+        \ifboolKV[Facto]{Aide}{\PfCFactoNE&=\setKV[Facto]{Aide=false}\PfCEcrireFacteur{#4}{Ka}\ifboolKV[Facto]{AideMul}{\times}{}\PfCEcrireFacteur{#3}{Kk}\PfCFactoSymbole\PfCEcrireFacteur{#3}{Kk}\ifboolKV[Facto]{AideMul}{\times}{}\PfCEcrireFacteur{#5}{Kb}\\\setKV[Facto]{Aide}}{}%
+        \PfCFactoNE&=\ifboolKV[Facto]{Aide}{\underbrace{\Fdash{\PfCEcrireFacteur{#4}{Ka}}}_{a}\times\underbrace{\Fdash{\PfCEcrireFacteur{#3}{Kk}}}_{k}\PfCFactoSymbole\underbrace{\Fdash{\PfCEcrireFacteur{#3}{Kk}}}_{k}\times\underbrace{\Fdash{\PfCEcrireFacteur{#5}{Kb}}}_{b}}{\PfCEcrireFacteur{#4}{Ka}\ifboolKV[Facto]{AideMul}{\times}{}\PfCEcrireFacteur{#3}{Kk}\PfCFactoSymbole\PfCEcrireFacteur{#3}{Kk}\ifboolKV[Facto]{AideMul}{\times}{}\PfCEcrireFacteur{#5}{Kb}}\setKV[Facto]{Aide=false}\\
+        \PfCFactoNE&=\setKV[Facto]{Aide=false}\PfCEcrireFacteur{#3}{Kk}\times\left[\PfCEcrireFacteur{#4}{Ka}\PfCFactoSymbole\PfCEcrireFacteur{#5}{Kb}\right]\\
+        \PfCFactoNE&=\setKV[Facto]{Aide=false}\PfCEcrireFacteur{#3}{Kk}\times\ifboolKV[Facto]{ParenthesesFin}{\left(}{\left[}\print{Ka}\xintifboolexpr{\PfCRetiensSigneFacteurDeux==1}{\xintifboolexpr{\TestCASB<0}{\IfDecimal{\RetiensPremierCaractere}{+}{}}{+}\print{Kb}}{\xintifboolexpr{\TestCASB<0}{+}{}\print{Ko}}\ifboolKV[Facto]{ParenthesesFin}{\right)}{\right]}\\
+        \PfCFactoNE&=\setKV[Facto]{Aide=false}\PfCEcrireFacteur{#3}{Kk}\times\ifboolKV[Facto]{ParenthesesFin}{\left(}{\left[}\print{Ke:expand():topolynomial()}\ifboolKV[Facto]{ParenthesesFin}{\right)}{\right]}%
+                     \ifboolKV[Facto]{Finale}{\\\PfCFactoNE&=\useKV[Facto]{Resultat}}{\ifboolKV[Facto]{Formel}{\\\PfCFactoNE&=\setKV[Facto]{Aide=false}\PfCEcrireFacteur{#3}{Kk}\ifboolKV[Facto]{ParenthesesFin}{\left(}{\left[}\print{Ke:expand():topolynomial()}\ifboolKV[Facto]{ParenthesesFin}{\right)}{\right]}}{}}%
+      \end{align*}
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+    \else
+      \ifnum\fpeval{\useKV[Facto]{Type}}=3\relax
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+        \begin{align*}
+          \ifboolKV[Facto]{Aide}{\PfCFactoNE&=\setKV[Facto]{Aide=false}\PfCEcrireFacteur{#4}{Ka}\ifboolKV[Facto]{AideMul}{\times}{}\PfCEcrireFacteur{#3}{Kk}\PfCFactoSymbole\PfCEcrireFacteur{#5}{Kb}\ifboolKV[Facto]{AideMul}{\times}{}\PfCEcrireFacteur{#3}{Kk}\\\setKV[Facto]{Aide}}{}%
+          \PfCFactoNE&=\ifboolKV[Facto]{Aide}{\underbrace{\Fdash{\PfCEcrireFacteur{#4}{Ka}}}_{a}\times\underbrace{\Fdash{\PfCEcrireFacteur{#3}{Kk}}}_{k}\PfCFactoSymbole\underbrace{\Fdash{\PfCEcrireFacteur{#5}{Kb}}}_{b}\times\underbrace{\Fdash{\PfCEcrireFacteur{#3}{Kk}}}_{k}}{\PfCEcrireFacteur{#4}{Ka}\ifboolKV[Facto]{AideMul}{\times}{}\PfCEcrireFacteur{#3}{Kk}\PfCFactoSymbole\PfCEcrireFacteur{#5}{Kb}\ifboolKV[Facto]{AideMul}{\times}{}\PfCEcrireFacteur{#3}{Kk}}\setKV[Facto]{Aide=false}\\
+          \PfCFactoNE&=\setKV[Facto]{Aide=false}\PfCEcrireFacteur{#3}{Kk}\times\left[\PfCEcrireFacteur{#4}{Ka}\PfCFactoSymbole\PfCEcrireFacteur{#5}{Kb}\right]\\
+          \PfCFactoNE&=\setKV[Facto]{Aide=false}\PfCEcrireFacteur{#3}{Kk}\times\ifboolKV[Facto]{ParenthesesFin}{\left(}{\left[}\print{Ka}\xintifboolexpr{\PfCRetiensSigneFacteurDeux==1}{\xintifboolexpr{\TestCASB<0}{\IfDecimal{\RetiensPremierCaractere}{+}{}}{+}\print{Kb}}{\xintifboolexpr{\TestCASB<0}{+}{}\print{Ko}}\ifboolKV[Facto]{ParenthesesFin}{\right)}{\right]}\\
+          \PfCFactoNE&=\setKV[Facto]{Aide=false}\PfCEcrireFacteur{#3}{Kk}\times\ifboolKV[Facto]{ParenthesesFin}{\left(}{\left[}\print{Ke:expand():topolynomial()}\ifboolKV[Facto]{ParenthesesFin}{\right)}{\right]}%
+                       \ifboolKV[Facto]{Finale}{\\\PfCFactoNE&=\useKV[Facto]{Resultat}}{\ifboolKV[Facto]{Formel}{\\\PfCFactoNE&=\setKV[Facto]{Aide=false}\PfCEcrireFacteur{#3}{Kk}\ifboolKV[Facto]{ParenthesesFin}{\left(}{\left[}\print{Ke:expand():topolynomial()}\ifboolKV[Facto]{ParenthesesFin}{\right)}{\right]}}{}}%
+        \end{align*}
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+      \else
+        \ifnum\fpeval{\useKV[Facto]{Type}}=2\relax
+          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+          \begin{align*}
+            \ifboolKV[Facto]{Aide}{\PfCFactoNE&=\setKV[Facto]{Aide=false}\PfCEcrireFacteur{#3}{Kk}\ifboolKV[Facto]{AideMul}{\times}{}\PfCEcrireFacteur{#4}{Ka}\PfCFactoSymbole\PfCEcrireFacteur{#5}{Kb}\ifboolKV[Facto]{AideMul}{\times}{}\PfCEcrireFacteur{#3}{Kk}\\\setKV[Facto]{Aide}}{}%
+            \PfCFactoNE&=\ifboolKV[Facto]{Aide}{\underbrace{\Fdash{\PfCEcrireFacteur{#3}{Kk}}}_{k}\times\underbrace{\Fdash{\PfCEcrireFacteur{#4}{Ka}}}_{a}\PfCFactoSymbole\underbrace{\Fdash{\PfCEcrireFacteur{#5}{Kb}}}_{b}\times\underbrace{\Fdash{\PfCEcrireFacteur{#3}{Kk}}}_{k}}{\PfCEcrireFacteur{#3}{Kk}\ifboolKV[Facto]{AideMul}{\times}{}\PfCEcrireFacteur{#4}{Ka}\PfCFactoSymbole\PfCEcrireFacteur{#5}{Kb}\ifboolKV[Facto]{AideMul}{\times}{}\PfCEcrireFacteur{#3}{Kk}}\setKV[Facto]{Aide=false}\\
+            \PfCFactoNE&=\setKV[Facto]{Aide=false}\PfCEcrireFacteur{#3}{Kk}\times\left[\PfCEcrireFacteur{#4}{Ka}\PfCFactoSymbole\PfCEcrireFacteur{#5}{Kb}\right]\\
+            \PfCFactoNE&=\setKV[Facto]{Aide=false}\PfCEcrireFacteur{#3}{Kk}\times\ifboolKV[Facto]{ParenthesesFin}{\left(}{\left[}\print{Ka}\xintifboolexpr{\PfCRetiensSigneFacteurDeux==1}{\xintifboolexpr{\TestCASB<0}{\IfDecimal{\RetiensPremierCaractere}{+}{}}{+}\print{Kb}}{\xintifboolexpr{\TestCASB<0}{+}{}\print{Ko}}\ifboolKV[Facto]{ParenthesesFin}{\right)}{\right]}\\
+            \PfCFactoNE&=\setKV[Facto]{Aide=false}\PfCEcrireFacteur{#3}{Kk}\times\ifboolKV[Facto]{ParenthesesFin}{\left(}{\left[}\print{Ke:expand():topolynomial()}\ifboolKV[Facto]{ParenthesesFin}{\right)}{\right]}%
+                         \ifboolKV[Facto]{Finale}{\\\PfCFactoNE&=\useKV[Facto]{Resultat}}{\ifboolKV[Facto]{Formel}{\\\PfCFactoNE&=\setKV[Facto]{Aide=false}\PfCEcrireFacteur{#3}{Kk}\ifboolKV[Facto]{ParenthesesFin}{\left(}{\left[}\print{Ke:expand():topolynomial()}\ifboolKV[Facto]{ParenthesesFin}{\right)}{\right]}}{}}%
+          \end{align*}
+          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+        \else
+          \begin{align*}
+            \ifboolKV[Facto]{Aide}{\PfCFactoNE&=\setKV[Facto]{Aide=false}\PfCEcrireFacteur{#3}{Kk}\ifboolKV[Facto]{AideMul}{\times}{}\PfCEcrireFacteur{#4}{Ka}\PfCFactoSymbole\PfCEcrireFacteur{#3}{Kk}\ifboolKV[Facto]{AideMul}{\times}{}\PfCEcrireFacteur{#5}{Kb}\\\setKV[Facto]{Aide}}{}%
+            \PfCFactoNE&=\ifboolKV[Facto]{Aide}{\underbrace{\Fdash{\PfCEcrireFacteur{#3}{Kk}}}_{k}\times\underbrace{\Fdash{\PfCEcrireFacteur{#4}{Ka}}}_{a}\PfCFactoSymbole\underbrace{\Fdash{\PfCEcrireFacteur{#3}{Kk}}}_{k}\times\underbrace{\Fdash{\PfCEcrireFacteur{#5}{Kb}}}_{b}}{\PfCEcrireFacteur{#3}{Kk}\ifboolKV[Facto]{AideMul}{\times}{}\PfCEcrireFacteur{#4}{Ka}\PfCFactoSymbole\PfCEcrireFacteur{#3}{Kk}\ifboolKV[Facto]{AideMul}{\times}{}\PfCEcrireFacteur{#5}{Kb}}\setKV[Facto]{Aide=false}\\
+            \PfCFactoNE&=\setKV[Facto]{Aide=false}\PfCEcrireFacteur{#3}{Kk}\times\left[\PfCEcrireFacteur{#4}{Ka}\PfCFactoSymbole\PfCEcrireFacteur{#5}{Kb}\right]\\
+            \PfCFactoNE&=\setKV[Facto]{Aide=false}\PfCEcrireFacteur{#3}{Kk}\times\ifboolKV[Facto]{ParenthesesFin}{\left(}{\left[}\print{Ka}\xintifboolexpr{\PfCRetiensSigneFacteurDeux==1}{\xintifboolexpr{\TestCASB<0}{\IfDecimal{\RetiensPremierCaractere}{+}{}}{+}\print{Kb}}{\xintifboolexpr{\TestCASB<0}{+}{}\print{Ko}}\ifboolKV[Facto]{ParenthesesFin}{\right)}{\right]}\\
+            \PfCFactoNE&=\setKV[Facto]{Aide=false}\PfCEcrireFacteur{#3}{Kk}\times\ifboolKV[Facto]{ParenthesesFin}{\left(}{\left[}\print{Ke:expand():topolynomial()}\ifboolKV[Facto]{ParenthesesFin}{\right)}{\right]}%
+                         \ifboolKV[Facto]{Finale}{\\\PfCFactoNE&=\useKV[Facto]{Resultat}}{\ifboolKV[Facto]{Formel}{\\\PfCFactoNE&=\setKV[Facto]{Aide=false}\PfCEcrireFacteur{#3}{Kk}\ifboolKV[Facto]{ParenthesesFin}{\left(}{\left[}\print{Ke:expand():topolynomial()}\ifboolKV[Facto]{ParenthesesFin}{\right)}{\right]}}{}}%
+          \end{align*}
+        \fi%
+      \fi%
+    \fi%
+  }%
+  \fi%
+}%
+
+\NewDocumentCommand\Factorisationold{sommm}{%
+  \directlua{dofile('poly_render_fix.lua')}
+  \useKVdefault[Facto]%
+  \setKV[Facto]{#2}%
+  \colorlet{Csymbole}{\useKV[Facto]{Couleur}}%
+  \IfBooleanTF{#1}{%
+    \xdef\PfCFactoSymbole{-}%
+  }{%
+    \xdef\PfCFactoSymbole{+}%
+  }%
+  \xdef\PfCFactoNE{\useKV[Facto]{NomExpression}}%
+  \ifx\bla#5\bla%
+  % Cas a^2-b^2
+  \begin{CAS}
+    % La variable
+    vars('\useKV[Facto]{Lettre}')
+    % Les facteurs
+    a=#3
+    b=#4
+    % Les dérivées pour savoir si ce sont des facteurs littéraux ou pas.
+    PfCDDn=DD(a,\useKV[Facto]{Lettre}):autosimplify()
+    PfCDDm=DD(b,\useKV[Facto]{Lettre}):autosimplify()
+    % opposé
+    o=topoly(-b)
+    % 
+    c=(#3)^2
+    d=(#4)^2
+    e=(#3)-(#4)
+    f=(#3)+(#4)
+  \end{CAS}
+  \setsepchar{,}\ignoreemptyitems
+  \readlist\ListeElementDeriveeA{\fetch{PfCDDn}}
+  \readlist\ListeElementDeriveeB{\fetch{PfCDDm}}
+  \reademptyitems
+  \xdef\TestCASA{\ListeElementDeriveeA[1]}
+  \xdef\TestCASB{\ListeElementDeriveeB[1]}
+  \ifboolKV[Facto]{Details}{%Version monome mais pas deux nombres
+    \begin{align*}
+      \PfCFactoNE&=\print{c:expand()}-\print{d:expand()}\\
+      \PfCFactoNE&=\ifboolKV[Facto]{Aide}{\xintifboolexpr{\TestCASA>1}{(\,}{}{\underbrace{\Fdash{$\print{a}$}}_{A}}\xintifboolexpr{\TestCASA>1}{\,)}{}^{\,2}-\xintifboolexpr{\TestCASB>1}{(\,}{}{\underbrace{\Fdash{$\print{b}$}}_{B}}\xintifboolexpr{\TestCASB>1}{\,)}{}^{\,2}}{\print{c}-\print{d}}\\
+      \PfCFactoNE&=(\print{e})\times(\print{f})%
+                   \ifboolKV[Facto]{Formel}{\\\PfCFactoNE&=(\print{e})(\print{f})}{}%
+    \end{align*}
+  }{%Avec au moins un des facteurs polynomes
+    \begin{align*}
+      \ifboolKV[Facto]{Aide}{\IfDecimal{#3}{\PfCFactoNE&=\print{c}-\print{d}}{\IfDecimal{#4}{\PfCFactoNE&=\print{c}-\print{d}}{\PfCFactoNE&={\underbrace{\Fdash{$(\print{a})$}}_{A}}^{\,2}-{\underbrace{\Fdash{$(\print{b})$}}_{B}}^{\,2}}}}{\PfCFactoNE&=\print{c}-\print{d}}\\
+      \IfDecimal{#3}{\PfCFactoNE\uppercase{&}=\ifboolKV[Facto]{Aide}{{\underbrace{\Fdash{$\phantom{(}\print{a}\phantom{)}$}}_{A}}^{\,2}}{\print{a}^2}-\ifboolKV[Facto]{Aide}{{\underbrace{\Fdash{$(\print{b})$}}_{B}}^{\,2}}{\print{d}}\\}{\IfDecimal{#4}{\PfCFactoNE\uppercase{&}=\ifboolKV[Facto]{Aide}{{\underbrace{\Fdash{$(\print{a})$}}_{A}}^{\,2}}{\print{c}}-\ifboolKV[Facto]{Aide}{{\underbrace{\Fdash{$\phantom{(}\print{b}\phantom{)}$}}_{B}}^{\,2}}{\print{b}^2}\\}{}}
+      \PfCFactoNE&=\left[\IfDecimal{#3}{\print{a}}{(\print{a})}-\IfDecimal{#4}{\print{b}}{(\print{b})}\right]\times\left[\IfDecimal{#3}{\print{a}}{(\print{a})}+\IfDecimal{#4}{\print{b}}{(\print{b})}\right]\\
+      \PfCFactoNE&=\left[\print{a}\xintifboolexpr{\TestCASB<0}{+}{}\print{o}\right]\times\left[\print{a}%
+                   \xintifboolexpr{\TestCASB<0}{\StrChar{\print{b}}{1}[\PfCTestCaracUn]\StrCompare*{\PfCTestCaracUn}{-}[\PfCTestCaracRetour]\xintifboolexpr{\PfCTestCaracRetour==0}{}{+}}{+}\print{b}\right]\\
+      \PfCFactoNE&=\left[\print{e:expand():topolynomial()}\right]\times\left[\print{f:expand():topolynomial()}\right]%
+                   \ifboolKV[Facto]{Formel}{\\\PfCFactoNE&=\left[\print{e:expand():topolynomial()}\right]\left[\print{f:expand():topolynomial()}\right]}{}%
+    \end{align*}
+  }
+  \else%k*a+-k*b=k(a+-b)
+  \begin{CAS}
+    % La variable
+    vars('\useKV[Facto]{Lettre}'\ifboolKV[Facto]{VariableSup}{%
+      ,'\useKV[Facto]{AutreVariable}'
+    }{})
+    % Les facteurs
+    k=#3
+    a=#4
+    b=#5
+    ka=k*a
+    kb=k*b
+    % Les dérivées pour savoir si ce sont des facteurs littéraux ou pas.
+    PfCDDn=DD(a,\useKV[Facto]{Lettre}):autosimplify()
+    PfCDDm=DD(b,\useKV[Facto]{Lettre}):autosimplify()
+    % opposé
+    o=topoly(-b)
+    e=(#4)\PfCFactoSymbole(#5)
+  \end{CAS}
+  \setsepchar{,}\ignoreemptyitems
+  \readlist\ListeElementDeriveeA{\fetch{PfCDDn}}
+  \readlist\ListeElementDeriveeB{\fetch{PfCDDm}}
+  \reademptyitems
+  \xdef\TestCAS{\ListeElementDeriveeA[1]}
+  \xdef\TestCASB{\ListeElementDeriveeB[1]}
+  \ifboolKV[Facto]{Details}{%Version monome mais pas des nombres
+    \begin{align*}
+      \PfCFactoNE&=\print{ka:expand()}\PfCFactoSymbole\print{kb:expand()}\\
+      \PfCFactoNE&=\ifboolKV[Facto]{Aide}{\underbrace{\Fdash{$\phantom{(}\print{k}\phantom{)}$}}_{k}}{\print{k}}\times\xintifboolexpr{\TestCAS<0}{\ifboolKV[Facto]{Aide}{\underbrace{\Fdash{$(\print{a}$}}_{a}}{(\print{a})}}{\ifboolKV[Facto]{Aide}{\underbrace{\Fdash{$\phantom{(}\print{a}\phantom{)}$}}_{a}}{\print{a}}}\PfCFactoSymbole\ifboolKV[Facto]{Aide}{\underbrace{\Fdash{$\phantom{(}\print{k}\phantom{)}$}}_{k}}{\print{k}}\times\xintifboolexpr{\TestCASB<0}{\ifboolKV[Facto]{Aide}{\underbrace{\Fdash{$(\print{b}$}}_{b}}{(\print{b})}}{\ifboolKV[Facto]{Aide}{\underbrace{\Fdash{$\phantom{(}\print{b}\phantom{)}$}}_{b}}{\print{b}}}\\
+      \PfCFactoNE&=\print{k}\times(\print{a\PfCFactoSymbole b})%
+                   \ifboolKV[Facto]{Formel}{\\\PfCFactoNE&=\print{k}(\print{a\PfCFactoSymbole b})}{}%
+    \end{align*}
+  }{%Avec au moins un des facteurs polynomes
+    \StrCompare{\PfCFactoSymbole}{-}[\PfCRetiensSigneFacteurDeux]
+    \begin{align*}
+      \ifboolKV[Facto]{Aide}{\PfCFactoNE&=\setKV[Facto]{Aide=false}\PfCEcrireFacteur{#3}{k}\ifboolKV[Facto]{AideMul}{\times}{}\PfCEcrireFacteur{#4}{a}\PfCFactoSymbole\PfCEcrireFacteur{#3}{k}\ifboolKV[Facto]{AideMul}{\times}{}\PfCEcrireFacteur{#5}{b}\\\setKV[Facto]{Aide}}{}%
+      \PfCFactoNE&=\ifboolKV[Facto]{Aide}{\underbrace{\Fdash{\PfCEcrireFacteur{#3}{k}}}_{k}\times\underbrace{\Fdash{\PfCEcrireFacteur{#4}{a}}}_{a}\PfCFactoSymbole\underbrace{\Fdash{\PfCEcrireFacteur{#3}{k}}}_{k}\times\underbrace{\Fdash{\PfCEcrireFacteur{#5}{b}}}_{b}}{\PfCEcrireFacteur{#3}{k}\ifboolKV[Facto]{AideMul}{\times}{}\PfCEcrireFacteur{#4}{a}\PfCFactoSymbole\PfCEcrireFacteur{#3}{k}\ifboolKV[Facto]{AideMul}{\times}{}\PfCEcrireFacteur{#5}{b}}\\
+      \PfCFactoNE&=\PfCEcrireFacteur{#3}{k}\times\left[\PfCEcrireFacteur{#4}{a}\PfCFactoSymbole\PfCEcrireFacteur{#5}{b}\right]\\
+      \PfCFactoNE&=\PfCEcrireFacteur{#3}{k}\times\ifboolKV[Facto]{ParenthesesFin}{\left(}{\left[}\print{a}\xintifboolexpr{\PfCRetiensSigneFacteurDeux==1}{\xintifboolexpr{\TestCASB<0}{}{+}\print{b}}{\xintifboolexpr{\TestCASB<0}{+}{}\print{o}}\ifboolKV[Facto]{ParenthesesFin}{\right)}{\right]}\\
+      \PfCFactoNE&=\PfCEcrireFacteur{#3}{k}\times\ifboolKV[Facto]{ParenthesesFin}{\left(}{\left[}\print{e:expand():topolynomial()}\ifboolKV[Facto]{ParenthesesFin}{\right)}{\right]}%
+                   \ifboolKV[Facto]{Formel}{\\\PfCFactoNE&=\PfCEcrireFacteur{#3}{k}\ifboolKV[Facto]{ParenthesesFin}{\left(}{\left[}\print{e:expand():topolynomial()}\ifboolKV[Facto]{ParenthesesFin}{\right)}{\right]}}{}%
+    \end{align*}
+  }
+  \fi
+}%
+
+
+

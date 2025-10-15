@@ -1,0 +1,203 @@
+%%%
+% ArbreChiffre
+%%%
+% https://tex.stackexchange.com/questions/112975/how-to-print-the-permutation-of-s-u-v-a-t-with-latex
+\def\filedateArbreCh{2025/05/27}%
+\def\fileversionArbreCh{0.1a}%
+\message{-- \filedateArbreCh\space v\fileversionArbreCh}%
+
+\def\recurse#1#2#3#4\endmarker{%
+  \dopermute{#1#3}#2#4\endmarker
+  \ifx\relax#4\relax\else % add a \par before \else if there are more than 8 items
+    \recurse{#1}{#2#3}#4\endmarker
+  \fi}
+\def\dopermute#1#2#3\endmarker{%
+  \ifx\relax#3\relax
+    #1#2,%
+  \else
+    \dopermute{#1#2}#3\endmarker
+    \recurse{#1}{#2}#3\endmarker
+  \fi}
+
+\newcommand*\permute[1]{\dopermute{}#1\endmarker}
+
+\newtoks\toklistepermute%
+
+\def\UpdatetoksArbre#1\nil{\addtotok\toklistepermute{"#1",}}%
+
+\setKVdefault[ArbreChiffre]{Fixe=false,EcartV=0.5,Chiffre={}}%
+\defKV[ArbreChiffre]{Chiffre=\ifempty{#1}{}{\setKV[ArbreChiffre]{Fixe}}}%
+
+\NewDocumentCommand\ArbreChiffre{om}{%
+  \useKVdefault[ArbreChiffre]%
+  \setKV[ArbreChiffre]{#1}%
+  \toklistepermute{}%
+  \xdef\Foo{\permute{#2}}%
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist\ListePermutations{\Foo}%
+  \reademptyitems%
+  %
+  \foreachitem\compteur\in\ListePermutations{\expandafter\UpdatetoksArbre\compteur\nil}%
+  \BuildArbreChiffre{\the\toklistepermute}%
+}%
+
+\NewDocumentCommand\BuildArbreChiffre{m}{%
+  \ifluatex
+    \mplibforcehmode
+    \mplibnumbersystem{double}
+    \begin{mplibcode}
+      boolean Fixe;
+      Fixe=\useKV[ArbreChiffre]{Fixe};
+      string NombreFixe;
+      if Fixe:
+      NombreFixe=\useKV[ArbreChiffre]{Chiffre};
+      else:
+      NombreFixe="-1";
+      fi;
+
+      string LesPermu[];
+      
+      vardef LongueurArbre(text t)=
+      ec:=0;
+      for p_=t:
+      LesPermu[ec]=p_;
+      longA:=length p_;
+      ec:=ec+1;
+      endfor;
+      enddef;
+
+      LongueurArbre(#1);
+      
+      ecartV=\useKV[ArbreChiffre]{EcartV}*1cm;
+      ecartH=1cm;
+      
+      k:=longA;
+
+      vardef Factorielle(expr nb)=
+      save Fact;
+      numeric Fact;
+      if nb<2:
+      Fact=1;
+      else:
+      Fact=nb;
+      for m=nb-1 downto 2:
+      Fact:=Fact*m;
+      endfor;
+      fi;
+      Fact
+      enddef;
+
+      pair A[][];%1 colonne 2 ligne
+      
+      vardef Lecture(text t)=
+      for p_=t:
+      n:=n+1;
+      if Fixe:
+      if k>2:
+      if (n mod Factorielle(k-1))=1:
+      A[k][decalv]=pointdepart+(0,ecartV*decalv*Factorielle(k-1));
+      if NombreFixe=substring(0,1) of p_:
+      label(TEX(substring(longA-k,longA-k+1) of p_),A[k][decalv]);
+      fi;
+      decalv:=decalv-1;
+      fi;
+      else:
+      A[k][decalv]=pointdepart+(0,ecartV*decalv);
+      if NombreFixe=substring(0,1) of p_:
+      label(TEX(substring(longA-k,longA-k+1) of p_),A[k][decalv]);
+      fi;
+      decalv:=decalv-1;
+      fi;      
+      else:%Pas Fixe
+      if k>2:
+      if (n mod Factorielle(k-1))=1:
+      A[k][decalv]=pointdepart+(0,ecartV*decalv*Factorielle(k-1));
+      label(TEX(substring(longA-k,longA-k+1) of p_),A[k][decalv]);
+      decalv:=decalv-1;
+      fi;
+      else:
+      A[k][decalv]=pointdepart+(0,ecartV*decalv);
+      label(TEX(substring(longA-k,longA-k+1) of p_),A[k][decalv]);
+      decalv:=decalv-1;
+      fi;
+      fi;
+      endfor;
+      enddef;
+
+      pair pointdepart;
+      pointdepart=(0,0);
+      
+      forever:
+      n:=0;
+      decalv:=0;
+      Lecture(#1);
+      k:=k-1;
+      if k>1:
+      if k>2:
+      pointdepart:=if k mod 2=0:pointdepart+(ecartH,1.5*Factorielle(k-1)*ecartV); else:pointdepart+(ecartH,Factorielle(k-1)*ecartV); fi;
+      else:
+      pointdepart:=if k mod 2=0:pointdepart+(ecartH,Factorielle(k-1)*ecartV-0.5*ecartV); else:pointdepart+(ecartH,Factorielle(k-1)*ecartV+0.5*ecartV); fi;
+      fi;
+      else:
+      pointdepart:=pointdepart+(ecartH,0);
+      fi;
+      exitif k=0;
+      endfor;
+
+%      drawoptions(withcolor red);
+      if Fixe:
+      for k=longA downto 3:
+      for l=0 downto (-Factorielle(longA)/Factorielle(k-1))+1:
+      if (substring(0,1) of LesPermu[abs(l)*Factorielle(k-1)+1])=NombreFixe:
+      for p=0 upto k-2:
+      drawarrow (A[k][l]--A[k-1][(k-1)*l-p]) cutbefore cercles(A[k][l],2mm) cutafter cercles(A[k-1][(k-1)*l-p],2mm);
+      endfor;
+      fi;
+      endfor;
+      endfor;
+      else:
+      for k=longA downto 3:
+      for l=0 downto (-Factorielle(longA)/Factorielle(k-1))+1:
+      for p=0 upto k-2:
+      drawarrow (A[k][l]--A[k-1][(k-1)*l-p]) cutbefore cercles(A[k][l],2mm) cutafter cercles(A[k-1][(k-1)*l-p],2mm);
+      endfor;
+      endfor;
+      endfor;
+      fi;
+%      drawoptions();
+
+      % affichage du dernier cran.
+      for k=2 downto 2:
+      l:=1;
+      for p_=#1:
+      l:=l-1;
+      if Fixe:
+      if substring(0,1) of p_=NombreFixe:
+drawarrow (A[k][l]--A[k-1][l]) cutbefore cercles(A[k][l],2mm) cutafter cercles(A[k-1][l],2mm);
+      fi;
+      else:
+      drawarrow (A[k][l]--A[k-1][l]) cutbefore cercles(A[k][l],2mm) cutafter cercles(A[k-1][l],2mm);
+      fi;
+      endfor;
+      endfor;
+
+      %Affichage final du nombre
+      l:=1;
+      for p_=#1:
+      l:=l-1;
+      A[0][l]-A[1][l]=(ecartH,0);
+      if Fixe:
+      if substring(0,1) of p_=NombreFixe:
+      label.rt(TEX("\num{"&p_&"}"),A[0][l]);
+      drawarrow (A[1][l]--A[0][l]) cutbefore cercles(A[1][l],2mm) dashed evenly;
+      fi;
+      else:
+      label.rt(TEX("\num{"&p_&"}"),A[0][l]);
+      drawarrow (A[1][l]--A[0][l]) cutbefore cercles(A[1][l],2mm) dashed evenly;
+      fi;
+      endfor;
+      
+    \end{mplibcode}
+    \mplibnumbersystem{scaled}
+  \fi
+}%

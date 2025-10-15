@@ -1,0 +1,533 @@
+%%%
+% Ronde infernale
+%%%
+\def\filedateRondeI{2025/05/26}%
+\def\fileversionRondeI{0.1a}%
+\message{-- \filedateRondeI\space v\fileversionRondeI}%
+%
+\newcommand\TestNombrePremier[1]{%
+  % #1 le nombre \`a tester
+  \newcount\anp\newcount\bnp\newcount\cnp%
+  \anp=#1\relax
+  \bnp=2\relax
+  \premier=-1\relax
+  \whiledo{\anp > 1}{%
+    \modulo{\the\anp}{\the\bnp}
+    \ifnum\remainder=0\relax%
+      \global\premier=\numexpr\premier+1\relax%
+      \cnp=\numexpr\anp/\bnp\relax%
+      \anp=\cnp\relax%
+    \else%
+      \bnp=\numexpr\bnp+1\relax%
+    \fi%
+  }%
+}%
+
+\newcommand\PfCRIListeDiviseur[1]{%#1 : nombre entier
+  \newcount\anp\newcount\bnp%
+  \anp=\fpeval{abs(#1)}%
+  \bnp=2\relax%
+  \xdef\PfCRIRetiensListeDiviseurs{}%
+  \ifnum#1=0%
+  \xdef\PfCRIRetiensListeDiviseurs{\fpeval{randint(2,5)},\fpeval{randint(6,9)}}%
+  \else
+  \whiledo{\bnp<\anp}{%
+    \modulo{\the\anp}{\the\bnp}{}%
+    \ifnum\remainder=0%
+    \ifnum#1>0
+    \xdef\PfCRIRetiensListeDiviseurs{\PfCRIRetiensListeDiviseurs \the\bnp,}%
+    \else
+    \xdef\PfCRIRetiensListeDiviseurs{\PfCRIRetiensListeDiviseurs \the\bnp,-\the\bnp,}%
+    \fi
+    \fi%
+    \bnp=\numexpr\bnp+1%
+  }%
+  \ifnum#1>0
+  \xdef\PfCRIRetiensListeDiviseurs{\PfCRIRetiensListeDiviseurs \the\anp,1}
+  \else
+  \xdef\PfCRIRetiensListeDiviseurs{\PfCRIRetiensListeDiviseurs \the\anp,-\the\anp}
+  \fi
+  \fi
+}%
+
+\newcommand\ChercheLesDiviseurs[1]{%
+  \PfCRIListeDiviseur{#1}%
+}%
+
+\setKVdefault[RondeInfernale]{Solution=false,Relatifs=false,Etapes=4,Perso=false,Cles=false,Vide,Rayon=2.5cm,Rectangle=false,Div=false,CDot=false,Graine={},Cle={},ListeOperations={},ListeNombres={}}%
+\defKV[RondeInfernale]{%
+  Graine=\ifempty{#1}{}{\PfCGraineAlea{#1}},%
+  Cle=\ifempty{#1}{}{\setKV[RondeInfernale]{Cles}\setKV[RondeInfernale]{Vide=false}},%
+  ListeOperations=\ifempty{#1}{}{\setKV[RondeInfernale]{Perso}},%
+  ListeNombres=\ifempty{#1}{}{\setKV[RondeInfernale]{Perso}}
+}% 
+
+\NewDocumentCommand\RondeInfernale{ }{%Mise en place pour les germanistes : le " est actif :(
+  \begingroup
+  \catcode`\"12
+  \RondeInfernaleaux
+}%
+
+\NewDocumentCommand\RondeInfernaleaux{o}{%
+  \endgroup
+  \useKVdefault[RondeInfernale]%
+  \setKV[RondeInfernale]{#1}%
+  % Graine
+%  \ifboolKV[RondeInfernale]{Graines}{\PfCGraineAlea{\useKV[RondeInfernale]{Graine}}}{}%
+  % Nombre clé
+  \ifboolKV[RondeInfernale]{Cles}{%
+    \xdef\PfCRINombreCle{\useKV[RondeInfernale]{Cle}}%
+  }{%
+    \ifboolKV[RondeInfernale]{Relatifs}{%
+      \xdef\PfCRIListeNegatifs{-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,8,9,10}
+      \MelangeListe{\PfCRIListeNegatifs}{1}
+      \readlist*\PfCRIListeCle{\faa}
+      \xdef\PfCRINombreCle{\PfCRIListeCle[1]}%
+    }{%
+      \xdef\PfCRINombreCle{\fpeval{randint(2,9)}}%
+    }%
+  }%
+  \ifboolKV[RondeInfernale]{Perso}{%
+    \xdef\PfCRIRecupOperations{\useKV[RondeInfernale]{ListeOperations}}%
+    \xdef\PfCRIRecupNombres{\useKV[RondeInfernale]{ListeNombres}}%
+  }{%
+    % On définit les éléments nécessaires
+    \xdef\PfCRIListeToutesOperations{+,-,*,/}%
+    \xdef\PfCRIListeOperationsSansDiv{+,-,*}%
+    \xdef\PfCRIListeOperationsSansMul{+,-,/}%
+    \xdef\PfCRIListeOperationsSimple{+,-}%
+    \xdef\PfCRIRecupOperations{}%
+    \xdef\PfCRIRecupNombres{}%
+    \xdef\PfCRIRecupResultats{}%
+    \xdef\PfCRINombreATester{\PfCRINombreCle}%
+    \xdef\PfCRIRetiensNbEtapes{\useKV[RondeInfernale]{Etapes}}%
+    \setsepchar{,}\ignoreemptyitems%
+    % Liste des opérations jusqu'à l'étape n-1
+    \xintFor* ##1 in{\xintSeq{1}{\fpeval{\useKV[RondeInfernale]{Etapes}-1}}}\do{%
+      \TestNombrePremier{\PfCRINombreATester}\relax%
+      \xintifboolexpr{\premier==0}{%
+        % Définition des opérations
+        \MelangeListe{\PfCRIListeOperationsSansDiv}{1}%
+        \readlist*\PfCRIRetiensLoperation{\faa}%
+        \xdef\PfCRIRecupOperations{\PfCRIRecupOperations \faa}%
+        \xdef\PfCRIOperateur{\fpeval{randint(2,9)}}%
+        \xdef\PfCRIRecupNombres{\PfCRIRecupNombres \PfCRIOperateur,}%
+        \xdef\PfCRIResultat{\fpeval{\PfCRINombreATester\PfCRIRetiensLoperation[1]\PfCRIOperateur}}%
+        \xdef\PfCRIRecupResultats{\PfCRIRecupResultats \PfCRIResultat,}%
+        \xdef\PfCRINombreATester{\PfCRIResultat}%
+      }{%
+        \MelangeListe{\PfCRIListeToutesOperations}{1}%
+        \readlist*\PfCRIRetiensLoperation{\faa}%
+        \xdef\PfCRIRecupOperations{\PfCRIRecupOperations \faa}%
+        \IfStrEq{\PfCRIRetiensLoperation[1]}{/}{%
+          \PfCRIListeDiviseur{\PfCRINombreATester}%
+          \MelangeListe{\PfCRIRetiensListeDiviseurs}{1}%
+          \readlist*\PfCRIRetiensLeDiviseur{\faa}%
+          \xdef\PfCRIOperateur{\PfCRIRetiensLeDiviseur[1]}%
+        }{%
+          \xdef\PfCRIOperateur{\fpeval{randint(2,9)}}%
+        }%
+        \xdef\PfCRIRecupNombres{\PfCRIRecupNombres \PfCRIOperateur,}%
+        \xdef\PfCRIResultat{\fpeval{\PfCRINombreATester\PfCRIRetiensLoperation[1]\PfCRIOperateur}}%
+        \xdef\PfCRIRecupResultats{\PfCRIRecupResultats \PfCRIResultat,}%
+        \xdef\PfCRINombreATester{\PfCRIResultat}%
+      }%
+    }%
+    % Dernière opération
+    \xintifboolexpr{\fpeval{abs(\PfCRINombreATester)-abs(\PfCRINombreCle)}>0}{%
+      \modulo{\PfCRINombreATester}{\PfCRINombreCle}{}%
+      \xintifboolexpr{\remainder==0}{%
+        \MelangeListe{\PfCRIListeOperationsSansMul}{1}%
+        \xdef\PfCRIRecupOperations{\PfCRIRecupOperations \faa}%
+        \ignoreemptyitems%
+        \readlist*\PfCRIRetiensLoperation{\faa}%
+        \IfStrEq{\PfCRIRetiensLoperation[1]}{/}{%
+          \xdef\PfCRINombreATester{\fpeval{\PfCRINombreATester/\PfCRINombreCle}}%
+        }{%
+          \IfStrEq{\PfCRIRetiensLoperation[1]}{-}{%
+            \xdef\PfCRINombreATester{\fpeval{\PfCRINombreATester-\PfCRINombreCle}}%
+          }{%
+            \xdef\PfCRINombreATester{\fpeval{\PfCRINombreCle-\PfCRINombreATester}}%
+          }%
+        }%
+        \xdef\PfCRIRecupNombres{\PfCRIRecupNombres \PfCRINombreATester}%
+      }{%
+        \MelangeListe{\PfCRIListeOperationsSimple}{1}%
+        \xdef\PfCRIRecupOperations{\PfCRIRecupOperations \faa}%
+        \ignoreemptyitems%
+        \readlist*\PfCRIRetiensLoperation{\faa}%
+        \IfStrEq{\PfCRIRetiensLoperation[1]}{-}{%
+          \xdef\PfCRINombreATester{\fpeval{\PfCRINombreATester-\PfCRINombreCle}}%
+        }{%
+          \xdef\PfCRINombreATester{\fpeval{\PfCRINombreCle-\PfCRINombreATester}}%
+        }%
+        \xdef\PfCRIRecupNombres{\PfCRIRecupNombres \PfCRINombreATester}%
+      }%
+    }{%
+      \xintifboolexpr{\fpeval{abs(\PfCRINombreATester)-abs(\PfCRINombreCle)}==0}{%
+        \xdef\PfCRIRecupOperations{\PfCRIRecupOperations *}%
+        \ignoreemptyitems%
+        \readlist*\PfCRIRIListeOperations{\PfCRIRecupOperations}%
+        \xdef\PfCRIRecupNombres{\PfCRIRecupNombres 1}%
+      }{%
+        \xintifboolexpr{\PfCRINombreATester==0}{%
+          \MelangeListe{\PfCRIListeOperationsSimple}{1}%
+          \xdef\PfCRIRecupOperations{\PfCRIRecupOperations \faa}%
+          \ignoreemptyitems%
+          \readlist*\PfCRIRetiensLoperation{\faa}%
+          \IfStrEq{\PfCRIRetiensLoperation[1]}{-}{%
+            \xdef\PfCRINombreATester{\fpeval{\PfCRINombreATester-\PfCRINombreCle}}%
+          }{%
+            \xdef\PfCRINombreATester{\fpeval{\PfCRINombreCle-\PfCRINombreATester}}%
+          }%
+          \xdef\PfCRIRecupNombres{\PfCRIRecupNombres \PfCRINombreATester}%
+        }{%
+          \modulo{\PfCRINombreCle}{\PfCRINombreATester}{}%
+          \xintifboolexpr{\remainder==0}{%-1
+            \MelangeListe{\PfCRIListeToutesOperations}{1}%
+            \xdef\PfCRIRecupOperations{\PfCRIRecupOperations \faa}%
+            \readlist*\PfCRIRetiensLoperation{\faa}%
+            \ignoreemptyitems%
+            \readlist*\PfCRIRIListeOperations{\PfCRIRecupOperations}%
+            \IfStrEq{\PfCRIRetiensLoperation[1]}{*}{%
+              \xdef\PfCRINombreATester{\fpeval{\PfCRINombreCle/\PfCRINombreATester}}%
+              \xdef\PfCRIRecupNombres{\PfCRIRecupNombres \PfCRINombreATester}%
+            }{
+              \IfStrEq{\PfCRIRetiensLoperation[1]}{-}{%
+                \xdef\PfCRINombreATester{\fpeval{\PfCRINombreATester-\PfCRINombreCle}}%
+              }{%
+                \xdef\PfCRINombreATester{\fpeval{\PfCRINombreCle-\PfCRINombreATester}}%
+              }%
+              \xdef\PfCRIRecupNombres{\PfCRIRecupNombres \PfCRINombreATester}%
+            }%
+          }{%
+            \MelangeListe{\PfCRIListeOperationsSimple}{1}%
+            \xdef\PfCRIRecupOperations{\PfCRIRecupOperations \faa}%
+            \ignoreemptyitems%
+            \readlist*\PfCRIRIListeOperations{\PfCRIRecupOperations}%
+            \IfStrEq{\PfCRIRIListeOperations[\PfCRIRetiensNbEtapes]}{-}{%
+              \xdef\PfCRINombreATester{\fpeval{\PfCRINombreATester-\PfCRINombreCle}}%
+            }{%
+              \xdef\PfCRINombreATester{\fpeval{\PfCRINombreCle-\PfCRINombreATester}}%
+            }%
+            \xdef\PfCRIRecupNombres{\PfCRIRecupNombres \PfCRINombreATester}%
+          }%
+        }%
+      }%
+    }%
+  }%
+  \ignoreemptyitems%
+  \readlist*\PfCRIRIOperations{\PfCRIRecupOperations}%
+  \readlist*\PfCRIRINombres{\PfCRIRecupNombres}%
+  \reademptyitems%
+  % On prépare le dessin
+  \xdef\PfCRINombresDessin{}%
+  \xdef\PfCRIOperationsDessin{}%
+  \foreachitem\compteur\in\PfCRIRINombres{%
+    \xintifboolexpr{\PfCRIRINombres[\compteurcnt]<0}{%
+      \xdef\PfCRINombresDessin{\PfCRINombresDessin "(\num{\PfCRIRINombres[\compteurcnt]})",}%
+    }{%
+      \xdef\PfCRINombresDessin{\PfCRINombresDessin "\num{\PfCRIRINombres[\compteurcnt]}",}%
+    }%
+  }%
+  \foreachitem\compteur\in\PfCRIRIOperations{%
+    \xdef\PfCRIOperationsDessin{\PfCRIOperationsDessin "\PfCRIRIOperations[\compteurcnt]",}%
+  }%
+  % On dessine
+  \BuildRondeInfernale{\PfCRINombresDessin}{\PfCRIOperationsDessin}%
+}%
+
+\NewDocumentCommand\BuildRondeInfernale{m m}{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    boolean Vide,Rectangle,Perso,Div,CDot;
+    Vide=\useKV[RondeInfernale]{Vide};
+    Div=\useKV[RondeInfernale]{Div};
+    CDot=\useKV[RondeInfernale]{CDot};
+    Rectangle=\useKV[RondeInfernale]{Rectangle};
+    Perso=\useKV[RondeInfernale]{Perso};
+    if Perso:
+    string Depart;
+    Depart=\useKV[RondeInfernale]{Cle};
+    else:
+    numeric Depart;
+    Depart=\PfCRINombreCle;
+    fi;
+
+    numeric Rayon;
+    Rayon=\useKV[RondeInfernale]{Rayon};
+
+    string Nombre[];
+    
+    vardef Compte(text t)=%On compte le nb d'étapes et on retient les nombres
+    nbcase:=0;
+    for p_=t:
+    nbcase:=nbcase+1;
+    Nombre[nbcase]=p_;
+    endfor;
+    enddef;
+
+    vardef AfficheRonde(text t)=%On fait l'affichage des opérations
+    n:=0;
+    for k=1 upto nbcase:
+    fill cercles(rotation(A[k],O,0.5*(360/nbcase)),5mm) withcolor white;
+    endfor;
+    for p_=t:
+    n:=n+1;
+    if p_="*":
+    if CDot:
+    label(TEX("$\cdot"&Nombre[n]&"$"),rotation(A[nbcase-n],O,0.5*(360/nbcase)));
+    else:
+    label(TEX("$\times"&Nombre[n]&"$"),rotation(A[nbcase-n],O,0.5*(360/nbcase)));
+    fi;
+    elseif p_="/":
+    if Div:
+    label(TEX("$:"&Nombre[n]&"$"),rotation(A[nbcase-n],O,0.5*(360/nbcase)));
+    else:
+    label(TEX("$\div"&Nombre[n]&"$"),rotation(A[nbcase-n],O,0.5*(360/nbcase)));
+    fi;
+    else:
+    label(TEX("$"&p_&Nombre[n]&"$"),rotation(A[nbcase-n],O,0.5*(360/nbcase)));
+        fi;
+    endfor;
+    enddef;
+
+    vardef AfficheRectangle(text t)=%On fait l'affichage des opérations
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    if n=nbcase:
+    if p_="*":
+    if CDot:
+    label.bot(TEX("$\cdot"&Nombre[n]&"$"),1/2[A[n-1],A[0]]+u*(0,-1));
+    else:
+    label.bot(TEX("$\times"&Nombre[n]&"$"),1/2[A[n-1],A[0]]+u*(0,-1));
+    fi;
+    elseif p_="/":
+    if Div:
+    label.bot(TEX("$:"&Nombre[n]&"$"),1/2[A[n-1],A[0]]+u*(0,-1));
+    else:
+    label.bot(TEX("$\div"&Nombre[n]&"$"),1/2[A[n-1],A[0]]+u*(0,-1));
+    fi;
+    else:
+    label.bot(TEX("$"&p_&Nombre[n]&"$"),1/2[A[n-1],A[0]]+u*(0,-1));
+    fi;
+    else:
+    if p_="*":
+    if CDot:
+    label.top(TEX("$\cdot"&Nombre[n]&"$"),1/2[A[n-1],A[n]]);
+    else:
+    label.top(TEX("$\times"&Nombre[n]&"$"),1/2[A[n-1],A[n]]);
+    fi;
+    elseif p_="/":
+    if Div:
+    label.top(TEX("$:"&Nombre[n]&"$"),1/2[A[n-1],A[n]]);
+    else:
+    label.top(TEX("$\div"&Nombre[n]&"$"),1/2[A[n-1],A[n]]);
+    fi;
+    else:
+    label.top(TEX("$"&p_&Nombre[n]&"$"),1/2[A[n-1],A[n]]);
+    fi;
+    fi;
+    endfor;
+    enddef;
+
+    vardef BaseRonde=
+    pair O,A[];
+    O=(0,0);
+    path cc;
+    cc=cercles(O,Rayon);
+    A[0]=pointarc(cc,0);
+    A[nbcase+1]=A[0];
+    for k=1 upto nbcase:
+    A[k]=rotation(A[0],O,k*(360/nbcase));
+    endfor;
+    for k=0 upto nbcase:
+    drawarrow reverse(arccercle(A[k],A[k+1],O) cutbefore cercles(A[k],5mm) cutafter cercles(A[k+1],5mm)) withpen pencircle scaled 1.5;
+    endfor;
+    for k=0 upto nbcase:
+    fill cercles(A[k],5mm) withcolor white;
+    trace cercles(A[k],5mm) withpen pencircle scaled 1.5;
+    endfor;
+    enddef;
+
+    vardef BoiteRectangle=
+    save $;
+    path $;
+    $=u*(0.9,-0.5){dir 0}..{dir 90}(u*(1,-0.4))--(u*(1,0.4)){dir 90}..{dir180}(u*(0.9,0.5))--u*(-0.9,0.5){dir 180}..{dir-90}(u*(-1,0.4))--(u*(-1,-0.4)){dir-90}..{dir0}(u*(-0.9,-0.5))--cycle;
+    $
+    enddef;
+    
+    vardef BaseRectangle=
+    pair O,A[];
+    O=(0,0);
+    A[0]=O;
+    for k=1 upto nbcase:
+    A[k]-A[k-1]=(Rayon+2cm,0);
+    endfor;
+    for k=0 upto nbcase-2:
+    drawarrow (A[k]--A[k+1]) cutbefore (BoiteRectangle shifted A[k]) cutafter (BoiteRectangle shifted A[k+1]) withpen pencircle scaled 1.5;
+    endfor;
+    drawarrow (A[nbcase-1]--(A[nbcase-1]+u*(0,-1))--(A[0]+u*(0,-1))--A[0]) cutbefore (BoiteRectangle shifted A[nbcase-1]) cutafter (BoiteRectangle shifted A[0]) withpen pencircle scaled 1.5;
+    for k=0 upto nbcase-1:
+    trace (BoiteRectangle shifted A[k]) withpen pencircle scaled 1.5;
+    endfor;
+    enddef;
+    
+    Compte(#1);
+    
+    if Rectangle:
+    BaseRectangle;
+    AfficheRectangle(#2);
+    else:
+    BaseRonde;
+    AfficheRonde(#2);
+    fi;
+    if Vide=false:
+    if Perso:
+    label(TEX("$"&Depart&"$"),A[0]);
+    else:
+    label(TEX("$"&decimal(Depart)&"$"),A[0]);
+    fi;
+    fi;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={%
+      boolean Vide,Rectangle,Perso;Vide=\useKV[RondeInfernale]{Vide};Rectangle=\useKV[RondeInfernale]{Rectangle};Perso=\useKV[RondeInfernale]{Perso};if Perso:string Depart;Depart=\useKV[RondeInfernale]{Cle};else:numeric Depart;Depart=\PfCRINombreCle;fi;numeric Rayon;Rayon=\useKV[RondeInfernale]{Rayon};}]
+    string Nombre[];
+    
+    vardef Compte(text t)=%On compte le nb d'étapes et on retient les nombres
+    nbcase:=0;
+    for p_=t:
+    nbcase:=nbcase+1;
+    Nombre[nbcase]=p_;
+    endfor;
+    enddef;
+
+    vardef AfficheRonde(text t)=%On fait l'affichage des opérations
+    n:=0;
+    for k=1 upto nbcase:
+    fill cercles(rotation(A[k],O,0.5*(360/nbcase)),5mm) withcolor white;
+    endfor;
+    for p_=t:
+    n:=n+1;
+    if p_="*":
+    if CDot:
+    label(LATEX("$\cdot"&Nombre[n]&"$"),rotation(A[nbcase-n],O,0.5*(360/nbcase)));
+    else:
+    label(LATEX("$\times"&Nombre[n]&"$"),rotation(A[nbcase-n],O,0.5*(360/nbcase)));
+    fi;
+    elseif p_="/":
+    if Div:
+    label(LATEX("$:"&Nombre[n]&"$"),rotation(A[nbcase-n],O,0.5*(360/nbcase)));
+    else:
+    label(LATEX("$\div"&Nombre[n]&"$"),rotation(A[nbcase-n],O,0.5*(360/nbcase)));
+    fi;
+    else:
+    label(LATEX("$"&p_&Nombre[n]&"$"),rotation(A[nbcase-n],O,0.5*(360/nbcase)));
+    fi;
+    endfor;
+    enddef;
+
+    vardef AfficheRectangle(text t)=%On fait l'affichage des opérations
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    if n=nbcase:
+    if p_="*":
+    if CDot:
+    label.bot(LATEX("$\cdot"&Nombre[n]&"$"),1/2[A[n-1],A[0]]+u*(0,-1));
+    else:
+    label.bot(LATEX("$\times"&Nombre[n]&"$"),1/2[A[n-1],A[0]]+u*(0,-1));
+    fi;
+    elseif p_="/":
+    if Div:
+    label.bot(LATEX("$:"&Nombre[n]&"$"),1/2[A[n-1],A[0]]+u*(0,-1));
+    else:
+    label.bot(LATEX("$\div"&Nombre[n]&"$"),1/2[A[n-1],A[0]]+u*(0,-1));
+    fi;
+    else:
+    label.bot(LATEX("$"&p_&Nombre[n]&"$"),1/2[A[n-1],A[0]]+u*(0,-1));
+    fi;
+    else:
+    if p_="*":
+    if CDot:
+    label.top(LATEX("$\cdot"&Nombre[n]&"$"),1/2[A[n-1],A[n]]);
+    else:
+    label.top(LATEX("$\times"&Nombre[n]&"$"),1/2[A[n-1],A[n]]);
+    fi;
+    elseif p_="/":
+    if Div:
+    label.top(LATEX("$:"&Nombre[n]&"$"),1/2[A[n-1],A[n]]);
+    else:
+    label.top(LATEX("$\div"&Nombre[n]&"$"),1/2[A[n-1],A[n]]);
+    fi;
+    else:
+    label.top(LATEX("$"&p_&Nombre[n]&"$"),1/2[A[n-1],A[n]]);
+    fi;
+    fi;
+    endfor;
+    enddef;
+
+    vardef BaseRonde=
+    pair O,A[];
+    O=(0,0);
+    path cc;
+    cc=cercles(O,Rayon);
+    A[0]=pointarc(cc,0);
+    A[nbcase+1]=A[0];
+    for k=1 upto nbcase:
+    A[k]=rotation(A[0],O,k*(360/nbcase));
+    endfor;
+    for k=0 upto nbcase:
+    drawarrow reverse(arccercle(A[k],A[k+1],O) cutbefore cercles(A[k],5mm) cutafter cercles(A[k+1],5mm)) withpen pencircle scaled 1.5;
+    endfor;
+    for k=0 upto nbcase:
+    fill cercles(A[k],5mm) withcolor white;
+    trace cercles(A[k],5mm) withpen pencircle scaled 1.5;
+    endfor;
+    enddef;
+
+    vardef BoiteRectangle=
+    save $;
+    path $;
+    $=u*(0.9,-0.5){dir 0}..{dir 90}(u*(1,-0.4))--(u*(1,0.4)){dir 90}..{dir180}(u*(0.9,0.5))--u*(-0.9,0.5){dir 180}..{dir-90}(u*(-1,0.4))--(u*(-1,-0.4)){dir-90}..{dir0}(u*(-0.9,-0.5))--cycle;
+    $
+    enddef;
+    
+    vardef BaseRectangle=
+    pair O,A[];
+    O=(0,0);
+    A[0]=O;
+    for k=1 upto nbcase:
+    A[k]-A[k-1]=(Rayon+2cm,0);
+    endfor;
+    for k=0 upto nbcase-2:
+    drawarrow (A[k]--A[k+1]) cutbefore (BoiteRectangle shifted A[k]) cutafter (BoiteRectangle shifted A[k+1]) withpen pencircle scaled 1.5;
+    endfor;
+    drawarrow (A[nbcase-1]--(A[nbcase-1]+u*(0,-1))--(A[0]+u*(0,-1))--A[0]) cutbefore (BoiteRectangle shifted A[nbcase-1]) cutafter (BoiteRectangle shifted A[0]) withpen pencircle scaled 1.5;
+    for k=0 upto nbcase-1:
+    trace (BoiteRectangle shifted A[k]) withpen pencircle scaled 1.5;
+    endfor;
+    enddef;
+    
+    Compte(#1);
+    
+    if Rectangle:
+    BaseRectangle;
+    AfficheRectangle(#2);
+    else:
+    BaseRonde;
+    AfficheRonde(#2);
+    fi;
+    if Vide=false:
+    if Perso:
+    label(LATEX("$"&Depart&"$"),A[0]);
+    else:
+    label(LATEX("$"&decimal(Depart)&"$"),A[0]);
+    fi;
+    fi;
+  \end{mpost}
+  \fi
+}%

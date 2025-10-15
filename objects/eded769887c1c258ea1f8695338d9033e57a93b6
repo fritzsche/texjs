@@ -1,0 +1,399 @@
+%%%
+% QCM
+%%%
+\def\filedateQCM{2025/05/27}%
+\def\fileversionQCM{0.1c}%
+\message{-- \filedateQCM\space v\fileversionQCM}%
+%
+\setKVdefault[ClesQCM]{Reponses=3,Solution=false,Stretch=1,Largeur=60pt,Couleur=gray!15,Titre=false,Nom=R\'eponse,NomV=Vrai,NomF=Faux,Alph=false,AlphT=false,VF=false,Depart=1,Alterne=false,Noms={A/B/C},Multiple=false,Parties={Yeux,Nez,Bouche},CouleurAlt=gray!15,Seul=false,ACompleter=false,AllSeul=false}%
+\newlength{\LargeurQCM}%
+\newlength{\PfCLargeurQCM}%
+\newcounter{QuestionQCM}%
+\newcounter{TitreQCM}%
+%
+\newcounter{TotalQCMSeul}%
+\newcounter{TotalQCMSeulSol}%
+\setcounter{TotalQCMSeul}{0}%
+\setcounter{TotalQCMSeulSol}{0}%
+%
+\def\PfCTexteReponseEleve{Ma réponse}%
+%
+\setKVdefault[QCMSeul]{Melange=false,Solution=false,EnColonne=false,LabelLettre=false,Colonnes={}}%
+\defKV[QCMSeul]{Colonnes=\ifempty{#1}{}{\setKV[QCMSeul]{EnColonne}}}%
+%
+\NewDocumentCommand\PfCQCMSChoixLabelSol{m}{%
+  \xdef\PfCFooChoixLabel{\ListeQCM[\ListeQCMlen]}%
+  \setsepchar{-}%
+  \readlist*\PfCSolListeReponses{\PfCFooChoixLabel}%
+  \xdef\RetiensSiSol{0}%
+  \xintFor* ##3 in{\xintSeq{1}{\PfCSolListeReponseslen}}\do{%
+    \ifnum#1=\PfCSolListeReponses[##3]\relax%
+      \xdef\RetiensSiSol{\fpeval{\RetiensSiSol+1}}%
+    \fi%
+  }%
+  \ifnum\RetiensSiSol>0\relax%
+    $\blacksquare$%
+  \else%
+    $\square$%
+  \fi%
+}%
+
+\NewDocumentCommand\PfCQCMSMultiChoixLabelSol{mm}{%
+  \xdef\PfCFooChoixLabel{\ListeQCM[#1,\fpeval{\NumeroReponse}]}%
+  \setsepchar{-}%
+  \readlist*\PfCSolListeReponses{\PfCFooChoixLabel}%
+  \xdef\RetiensSiSol{0}%
+  \xintFor* ##3 in{\xintSeq{1}{\PfCSolListeReponseslen}}\do{%
+    \ifnum#2=\PfCSolListeReponses[##3]\relax%
+      \xdef\RetiensSiSol{\fpeval{\RetiensSiSol+1}}%
+    \fi%
+  }%
+  \ifnum\RetiensSiSol>0\relax%
+    $\blacksquare$%
+  \else%
+    $\square$%
+  \fi%
+}%
+
+\NewDocumentCommand\QCMSeul{oO{&}m}{%
+  \useKVdefault[QCMSeul]%
+  \setKV[QCMSeul]{#1}%
+  \setsepchar{#2}\ignoreemptyitems%
+  \readlist*\ListeQCM{#3}%
+  % on définit une liste ordonnées des numéros d'items. Elle est utilisée par défaut.
+  \xdef\PfCFooListePermute{1}%
+  \xintFor* ##1 in{\xintSeq{2}{\fpeval{\ListeQCMlen-2}}}\do{%
+    \xdef\PfCFooListePermute{\PfCFooListePermute,##1}%
+  }%
+  %
+  \ifboolKV[QCMSeul]{Melange}{%
+    \ifboolKV[QCMSeul]{Solution}{%
+      \stepcounter{TotalQCMSeulSol}%
+      \expandafter\xdef\csname PfCQCMSListeAv\endcsname{\csname PfCQCMSListe\Roman{TotalQCMSeulSol}\endcsname}%
+      % La liste restaurée est \PfCQCMSListeAv
+    }{%
+      \stepcounter{TotalQCMSeul}%
+      \MelangeListe{\PfCFooListePermute}{\fpeval{\ListeQCMlen-2}}%
+      \expandafter\xdef\csname PfCQCMSListe\Roman{TotalQCMSeul}\endcsname{\faa}%
+      % La liste exportée est \faa
+      \expandafter\xdef\csname PfCQCMSListe\endcsname{\faa}%
+    }%
+  }{%
+    \ifboolKV[QCMSeul]{Solution}{%
+      \expandafter\xdef\csname PfCQCMSListeAv\endcsname{\csname PfCFooListePermute\endcsname}%
+    }{%
+      \expandafter\xdef\csname PfCQCMSListe\endcsname{\PfCFooListePermute}%
+    }%
+  }%
+  \setsepchar{,}\ignoreemptyitems%
+  \ifboolKV[QCMSeul]{Solution}{%
+    \readlist*\ListeEnumerate{\PfCQCMSListeAv}%
+  }{%
+    \readlist*\ListeEnumerate{\PfCQCMSListe}%
+  }%
+  %  On écrit
+  \ListeQCM[1]%
+  \ifboolKV[QCMSeul]{EnColonne}{\begin{multicols}{\useKV[QCMSeul]{Colonnes}}}{}%
+    \IfClassLoadedTF{beamer}{%
+      \ifboolKV[QCMSeul]{LabelLettre}{%
+        \setbeamertemplate{enumerate item}{\color{black}\bfseries\Alph{enumi}/}%
+        \begin{enumerate}
+      }{%
+        \setbeamertemplate{enumerate item}{$\square$}%  
+        \begin{enumerate}
+      }%
+    }{%
+      \ifboolKV[QCMSeul]{LabelLettre}{%
+        \begin{enumerate}[label=\Alph{*}/]
+      }{%
+        \begin{enumerate}[label=$\square$]
+      }%
+    }%
+    \xintFor* ##1 in{\xintSeq{2}{\fpeval{\ListeQCMlen-1}}}\do{%
+      \xdef\Titi{\ListeEnumerate[\fpeval{##1-1}]}
+      \ifboolKV[QCMSeul]{Solution}{%
+        \item[\PfCQCMSChoixLabelSol{\Titi}] \ListeQCM[\fpeval{\Titi+1}]
+      }{%
+      \item \ListeQCM[\fpeval{\Titi+1}]
+      }%
+    }%
+  \end{enumerate}
+  \ifboolKV[QCMSeul]{EnColonne}{\end{multicols}}{}%
+}%
+
+\NewDocumentCommand\QCMSeulold{om}{%
+  \useKVdefault[QCMSeul]%
+  \setKV[QCMSeul]{#1}%
+  \setsepchar{&}\ignoreemptyitems%
+  \readlist*\ListeQCM{#2}%
+  % on définit une liste ordonnées des numéros d'items. Elle est utilisée par défaut.
+  \xdef\PfCFooListePermute{1}%
+  \xintFor* ##1 in{\xintSeq{2}{\fpeval{\ListeQCMlen-2}}}\do{%
+    \xdef\PfCFooListePermute{\PfCFooListePermute,##1}%
+  }%
+  %
+  \ifboolKV[QCMSeul]{Melange}{%
+    \ifboolKV[QCMSeul]{Solution}{%
+      \stepcounter{TotalQCMSeulSol}%
+      \expandafter\xdef\csname PfCQCMSListeAv\endcsname{\csname PfCQCMSListe\Roman{TotalQCMSeulSol}\endcsname}%
+      % La liste restaurée est \PfCQCMSListeAv
+    }{%
+      \stepcounter{TotalQCMSeul}%
+      \MelangeListe{\PfCFooListePermute}{\fpeval{\ListeQCMlen-2}}%
+      \expandafter\xdef\csname PfCQCMSListe\Roman{TotalQCMSeul}\endcsname{\faa}%
+      % La liste exportée est \faa
+      \expandafter\xdef\csname PfCQCMSListe\endcsname{\faa}%
+    }%
+  }{%
+    \ifboolKV[QCMSeul]{Solution}{%
+      \expandafter\xdef\csname PfCQCMSListeAv\endcsname{\csname PfCFooListePermute\endcsname}%
+    }{%
+      \expandafter\xdef\csname PfCQCMSListe\endcsname{\PfCFooListePermute}%
+    }%
+  }%
+  \setsepchar{,}\ignoreemptyitems%
+  \ifboolKV[QCMSeul]{Solution}{%
+    \readlist*\ListeEnumerate{\PfCQCMSListeAv}%
+  }{%
+    \readlist*\ListeEnumerate{\PfCQCMSListe}%
+  }%
+  %  On écrit
+  \ListeQCM[1]%
+  \ifboolKV[QCMSeul]{EnColonne}{\begin{multicols}{\useKV[QCMSeul]{Colonnes}}}{}%
+    \IfClassLoadedTF{beamer}{%
+      \ifboolKV[QCMSeul]{LabelLettre}{%
+        \setbeamertemplate{enumerate item}{\color{black}\bfseries\Alph{enumi}/}%
+        \begin{enumerate}
+      }{%
+        \setbeamertemplate{enumerate item}{$\square$}%  
+        \begin{enumerate}
+      }%
+    }{%
+      \ifboolKV[QCMSeul]{LabelLettre}{%
+        \begin{enumerate}[label=\Alph{*}/]
+      }{%
+        \begin{enumerate}[label=$\square$]
+      }%
+    }%
+    \xintFor* ##1 in{\xintSeq{2}{\fpeval{\ListeQCMlen-1}}}\do{%
+      \xdef\Titi{\ListeEnumerate[\fpeval{##1-1}]}
+      \ifboolKV[QCMSeul]{Solution}{%
+        \item[\PfCQCMSChoixLabelSol{\Titi}] \ListeQCM[\fpeval{\Titi+1}]
+      }{%
+      \item \ListeQCM[\fpeval{\Titi+1}]
+      }%
+    }%
+  \end{enumerate}
+  \ifboolKV[QCMSeul]{EnColonne}{\end{multicols}}{}%
+}%
+%
+\ifdef{\QCM}{%
+  \PackageWarning{ProfCollege}{La commande \noexpand\QCM étant définie par la classe du document, ProfCollege modifie sa commande \noexpand\QCM en \noexpand\QCMPfC.}%
+  \NewDocumentCommand\QCMPfC{so+m}{%
+    \useKVdefault[ClesQCM]%
+    \setKV[ClesQCM]{#2}%
+    \ifboolKV[ClesQCM]{Seul}{%
+      \QCMSeul[#2][&]{#3}%
+    }{%
+      \colorlet{PfCCouleurAlterneQCM}{\useKV[ClesQCM]{CouleurAlt}}%
+      \setcounter{QuestionQCM}{\fpeval{\useKV[ClesQCM]{Depart}-1}}%
+      \setcounter{TitreQCM}{0}%
+      \setsepchar[*]{,*&}\ignoreemptyitems%
+      \readlist*\ListeQCM{#3}%
+      \renewcommand{\arraystretch}{\useKV[ClesQCM]{Stretch}}%
+      \xdef\NBcases{\fpeval{\useKV[ClesQCM]{Reponses}+1}}%
+      \ifboolKV[ClesQCM]{Multiple}{%
+        \setlength{\LargeurQCM}{\fpeval{(\linewidth-\useKV[ClesQCM]{Reponses}*(3*\tabcolsep+\useKV[ClesQCM]{Largeur}))}pt}%
+        \xdef\ListeNom{\useKV[ClesQCM]{Noms}}%
+        \setsepchar[*]{/}%
+        \readlist*\ListeNomsMul{\ListeNom}%
+        \begin{longtable}{|p{\LargeurQCM}|*{\useKV[ClesQCM]{Reponses}}{>{\centering\arraybackslash}p{\useKV[ClesQCM]{Largeur}}|}}%
+          \cline{2-\NBcases}%
+          \multicolumn{1}{c|}{}%
+          \xintFor* ##2 in {\xintSeq {1}{\useKV[ClesQCM]{Reponses}}}\do{%
+            &\ListeNomsMul[##2]%
+          }%
+          \\
+          \hline%
+          \xintFor* ##1 in {\xintSeq {1}{\ListeQCMlen}}\do{%
+            \stepcounter{QuestionQCM}\ifboolKV[ClesQCM]{Alterne}{\modulo{\theQuestionQCM}{2}\ifnum\remainder=0\cellcolor{PfCCouleurAlterneQCM}\fi}{}\ifboolKV[ClesQCM]{Alph}{\textbf{\Alph{QuestionQCM}}/}{\textbf{\theQuestionQCM/}}~\ListeQCM[##1,1]%
+            \xintFor* ##2 in {\xintSeq {1}{\useKV[ClesQCM]{Reponses}}}\do{%
+              &\ifboolKV[ClesQCM]{Alterne}{\modulo{\theQuestionQCM}{2}\ifnum\remainder=0\cellcolor{PfCCouleurAlterneQCM}\fi}{}\ifboolKV[ClesQCM]{Solution}{\xintifboolexpr{\ListeQCM[##1,\fpeval{##2+1}]==1}{$\boxtimes$}{$\square$}}{$\square$}%
+            }\\
+          }%
+          \hline%
+        \end{longtable}%
+        \renewcommand{\arraystretch}{1}%
+      }{%
+        \ifboolKV[ClesQCM]{VF}{%
+          \setKV[ClesQCM]{Reponses=2}%
+          \setlength{\PfCLargeurQCM}{\useKV[ClesQCM]{Largeur}}%
+          \setlength{\LargeurQCM}{\linewidth-6\tabcolsep-2\PfCLargeurQCM-4\arrayrulewidth}%
+          \xdef\NBcases{\fpeval{\useKV[ClesQCM]{Reponses}+1}}%
+          \begin{longtable}{|p{\LargeurQCM}|*{\useKV[ClesQCM]{Reponses}}{>{\centering\arraybackslash}p{\useKV[ClesQCM]{Largeur}}|}}%
+            \cline{2-\NBcases}%
+            \multicolumn{1}{c|}{}&\useKV[ClesQCM]{NomV}&\useKV[ClesQCM]{NomF}\\
+            \hline%
+            \xintFor* ##1 in {\xintSeq {1}{\ListeQCMlen}}\do{%
+              \stepcounter{QuestionQCM}\ifboolKV[ClesQCM]{Alterne}{\modulo{\theQuestionQCM}{2}\ifnum\remainder=0\cellcolor{PfCCouleurAlterneQCM}\fi}{}\IfBooleanTF{#1}{}{\ifboolKV[ClesQCM]{Alph}{\textbf{\Alph{QuestionQCM}}/}{\textbf{\theQuestionQCM/}}~}\ListeQCM[##1,1]%
+              \xintFor* ##2 in {\xintSeq {1}{\useKV[ClesQCM]{Reponses}}}\do{%
+                 &\ifboolKV[ClesQCM]{Alterne}{\modulo{\theQuestionQCM}{2}\ifnum\remainder=0\cellcolor{PfCCouleurAlterneQCM}\fi}{}\ifboolKV[ClesQCM]{Solution}{\xintifboolexpr{##2==\ListeQCM[##1,2]}{$\boxtimes$}{$\square$}}{$\square$}%
+              }\\
+            }%
+            \hline%
+          \end{longtable}
+        }{%
+          \ifboolKV[ClesQCM]{ACompleter}{%
+            \xdef\PfCTotalCases{\fpeval{\useKV[ClesQCM]{Reponses}+1}}%
+          }{%
+            \xdef\PfCTotalCases{\useKV[ClesQCM]{Reponses}}%
+          }%
+          \setlength{\LargeurQCM}{\fpeval{(\linewidth-2*\tabcolsep-\PfCTotalCases*(2*\tabcolsep+\useKV[ClesQCM]{Largeur}))}pt}%
+          \xdef\NumeroReponse{\fpeval{\useKV[ClesQCM]{Reponses}+2}}%
+          \begin{longtable}{|p{\LargeurQCM}|*{\PfCTotalCases}{>{\centering\arraybackslash}p{\useKV[ClesQCM]{Largeur}}|}}%
+            \ifboolKV[ClesQCM]{Titre}{%
+              \cline{2-\fpeval{\PfCTotalCases+1}}%
+              \multicolumn{1}{c|}{}\xintFor* ##2 in {\xintSeq {1}{\useKV[ClesQCM]{Reponses}}}\do{%
+              &\stepcounter{TitreQCM}\useKV[ClesQCM]{Nom} \ifboolKV[ClesQCM]{AlphT}{\Alph{TitreQCM}}{##2}}\ifnum\fpeval{\PfCTotalCases-\useKV[ClesQCM]{Reponses}}>0\relax\uppercase{&}\PfCTexteReponseEleve\fi%
+            \\
+            }{}%
+            \hline%
+            \xintFor* ##1 in {\xintSeq {1}{\ListeQCMlen}}\do{%
+              \stepcounter{QuestionQCM}\ifboolKV[ClesQCM]{Alterne}{\modulo{\theQuestionQCM}{2}\ifnum\remainder=0\cellcolor{PfCCouleurAlterneQCM}\fi}{}\ifboolKV[ClesQCM]{Alph}{\textbf{\Alph{QuestionQCM}}/}{\textbf{\theQuestionQCM/}}~\ListeQCM[##1,1]%
+              \xintFor* ##2 in {\xintSeq {1}{\useKV[ClesQCM]{Reponses}}}\do{%
+                &\ifboolKV[ClesQCM]{Alterne}{\modulo{\theQuestionQCM}{2}\ifnum\remainder=0\cellcolor{PfCCouleurAlterneQCM}\fi}{}\ifboolKV[ClesQCM]{Solution}{\PfCSolCellColor{##1}{##2}}{}\ListeQCM[##1,\fpeval{##2+1}]%
+               }\ifnum\fpeval{\PfCTotalCases-\useKV[ClesQCM]{Reponses}}>0\relax\uppercase{&}\ifboolKV[ClesQCM]{Alterne}{\modulo{\theQuestionQCM}{2}\ifnum\remainder=0\cellcolor{PfCCouleurAlterneQCM}\fi}{}\fi\\
+            }%
+            \hline%
+          \end{longtable}%
+        }%
+      }%
+      \renewcommand{\arraystretch}{1}%
+    }%
+  }%
+}{%
+  \NewDocumentCommand\QCM{so+m}{%
+    \useKVdefault[ClesQCM]%
+    \setKV[ClesQCM]{#2}%
+    \ifboolKV[ClesQCM]{AllSeul}{%
+      \setKV[QCMSeul]{#2}%
+      \setsepchar[*]{,*&}\ignoreemptyitems%
+      \readlist*\ListeQCM{#3}%
+      \reademptyitems%
+      \setcounter{QuestionQCM}{\fpeval{\useKV[ClesQCM]{Depart}-1}}%
+      \xdef\NumeroReponse{\fpeval{\useKV[ClesQCM]{Reponses}+2}}%
+      \begin{enumerate}
+        \xintFor* ##1 in {\xintSeq {1}{\ListeQCMlen}}\do{%
+        \item\ListeQCM[##1,1]%
+        \ifboolKV[QCMSeul]{EnColonne}{\begin{multicols}{\useKV[QCMSeul]{Colonnes}}}{}%
+        \ifboolKV[QCMSeul]{LabelLettre}{
+          \begin{enumerate}[label=\Alph{*}/]%
+        }{%
+          \begin{enumerate}[label=$\square$]%
+        }%
+        \xintFor* ##2 in{\xintSeq{1}{\fpeval{\NumeroReponse-2}}}\do{%
+          \xdef\Titi{##2}%
+          \ifboolKV[QCMSeul]{Solution}{%
+            \item[\PfCQCMSMultiChoixLabelSol{##1}{##2}]%
+          }{%
+            \item% 
+          }%
+          \ListeQCM[##1,\fpeval{##2+1}]%
+        }%
+        \end{enumerate}
+        \ifboolKV[QCMSeul]{EnColonne}{\end{multicols}}{}%
+        }%
+      \end{enumerate}
+    }{%
+      \ifboolKV[ClesQCM]{Seul}{%
+        \QCMSeul[#2][&]{#3}%
+      }{%
+        \colorlet{PfCCouleurAlterneQCM}{\useKV[ClesQCM]{CouleurAlt}}%
+        \setcounter{QuestionQCM}{\fpeval{\useKV[ClesQCM]{Depart}-1}}%
+        \setcounter{TitreQCM}{0}%
+        \setsepchar[*]{,*&}\ignoreemptyitems%
+        \readlist*\ListeQCM{#3}%
+        \reademptyitems%
+        \renewcommand{\arraystretch}{\useKV[ClesQCM]{Stretch}}%
+        \xdef\NBcases{\fpeval{\useKV[ClesQCM]{Reponses}+1}}%
+        \ifboolKV[ClesQCM]{Multiple}{%
+          \setlength{\LargeurQCM}{\fpeval{(\linewidth-\useKV[ClesQCM]{Reponses}*(3*\tabcolsep+\useKV[ClesQCM]{Largeur}))}pt}%
+          \xdef\ListeNom{\useKV[ClesQCM]{Noms}}%
+          \setsepchar[*]{/}%
+          \readlist*\ListeNomsMul{\ListeNom}%
+          \begin{longtable}{|p{\LargeurQCM}|*{\useKV[ClesQCM]{Reponses}}{>{\centering\arraybackslash}p{\useKV[ClesQCM]{Largeur}}|}}%
+            \cline{2-\NBcases}%
+            \multicolumn{1}{c|}{}%
+            \xintFor* ##2 in {\xintSeq {1}{\useKV[ClesQCM]{Reponses}}}\do{%
+              &\ListeNomsMul[##2]
+            }%
+            \\
+            \hline%
+            \xintFor* ##1 in {\xintSeq {1}{\ListeQCMlen}}\do{%
+              \stepcounter{QuestionQCM}\ifboolKV[ClesQCM]{Alterne}{\modulo{\theQuestionQCM}{2}\ifnum\remainder=0\cellcolor{PfCCouleurAlterneQCM}\fi}{}\ifboolKV[ClesQCM]{Alph}{\textbf{\Alph{QuestionQCM}}/}{\textbf{\theQuestionQCM/}}~\ListeQCM[##1,1]%
+              \xintFor* ##2 in {\xintSeq {1}{\useKV[ClesQCM]{Reponses}}}\do{%
+                &\ifboolKV[ClesQCM]{Alterne}{\modulo{\theQuestionQCM}{2}\ifnum\remainder=0\cellcolor{PfCCouleurAlterneQCM}\fi}{}\ifboolKV[ClesQCM]{Solution}{\xintifboolexpr{\ListeQCM[##1,\fpeval{##2+1}]==1}{$\boxtimes$}{$\square$}}{$\square$}%
+              }\\
+            }%
+            \hline%
+          \end{longtable}%
+          \renewcommand{\arraystretch}{1}%
+        }{%
+          \ifboolKV[ClesQCM]{VF}{%
+            \setKV[ClesQCM]{Reponses=2}%
+            \setlength{\PfCLargeurQCM}{\useKV[ClesQCM]{Largeur}}%
+            \setlength{\LargeurQCM}{\linewidth-6\tabcolsep-2\PfCLargeurQCM-4\arrayrulewidth}%
+            \xdef\NBcases{\fpeval{\useKV[ClesQCM]{Reponses}+1}}%
+            \begin{longtable}{|p{\LargeurQCM}|*{\useKV[ClesQCM]{Reponses}}{>{\centering\arraybackslash}p{\useKV[ClesQCM]{Largeur}}|}}%
+              \cline{2-\NBcases}%
+              \multicolumn{1}{c|}{}&\useKV[ClesQCM]{NomV}&\useKV[ClesQCM]{NomF}\\
+              \hline%
+              \xintFor* ##1 in {\xintSeq {1}{\ListeQCMlen}}\do{%
+               \stepcounter{QuestionQCM}\ifboolKV[ClesQCM]{Alterne}{\modulo{\theQuestionQCM}{2}\ifnum\remainder=0\cellcolor{PfCCouleurAlterneQCM}\fi}{}\IfBooleanTF{#1}{}{\ifboolKV[ClesQCM]{Alph}{\textbf{\Alph{QuestionQCM}}/}{\textbf{\theQuestionQCM/}}~}\ListeQCM[##1,1]%
+                \xintFor* ##2 in {\xintSeq {1}{\useKV[ClesQCM]{Reponses}}}\do{%
+                   &\ifboolKV[ClesQCM]{Alterne}{\modulo{\theQuestionQCM}{2}\ifnum\remainder=0\cellcolor{PfCCouleurAlterneQCM}\fi}{}\ifboolKV[ClesQCM]{Solution}{\xintifboolexpr{##2==\ListeQCM[##1,2]}{$\boxtimes$}{$\square$}}{$\square$}%
+                }\\
+              }%
+              \hline%
+            \end{longtable}
+          }{%
+            \ifboolKV[ClesQCM]{ACompleter}{%
+              \xdef\PfCTotalCases{\fpeval{\useKV[ClesQCM]{Reponses}+1}}%
+            }{%
+              \xdef\PfCTotalCases{\useKV[ClesQCM]{Reponses}}%
+            }%
+            \setlength{\LargeurQCM}{\fpeval{(\linewidth-2*\tabcolsep-\PfCTotalCases*(2*\tabcolsep+\useKV[ClesQCM]{Largeur}))}pt}%
+            \xdef\NumeroReponse{\fpeval{\useKV[ClesQCM]{Reponses}+2}}%
+            \begin{longtable}{|p{\LargeurQCM}|*{\PfCTotalCases}{>{\centering\arraybackslash}p{\useKV[ClesQCM]{Largeur}}|}}%
+              \ifboolKV[ClesQCM]{Titre}{%
+                \cline{2-\fpeval{\PfCTotalCases+1}}%
+                \multicolumn{1}{c|}{}\xintFor* ##2 in {\xintSeq {1}{\useKV[ClesQCM]{Reponses}}}\do{%
+                &\stepcounter{TitreQCM}\useKV[ClesQCM]{Nom} \ifboolKV[ClesQCM]{AlphT}{\Alph{TitreQCM}}{##2}}\ifnum\fpeval{\PfCTotalCases-\useKV[ClesQCM]{Reponses}}>0\relax\uppercase{&}\PfCTexteReponseEleve\fi%
+              \\
+              }{}%
+              \hline%
+              \xintFor* ##1 in {\xintSeq {1}{\ListeQCMlen}}\do{%
+                \stepcounter{QuestionQCM}\ifboolKV[ClesQCM]{Alterne}{\modulo{\theQuestionQCM}{2}\ifnum\remainder=0\cellcolor{PfCCouleurAlterneQCM}\fi}{}\ifboolKV[ClesQCM]{Alph}{\textbf{\Alph{QuestionQCM}}/}{\textbf{\theQuestionQCM/}}~\ListeQCM[##1,1]%
+                \xintFor* ##2 in {\xintSeq {1}{\useKV[ClesQCM]{Reponses}}}\do{%
+                  &\ifboolKV[ClesQCM]{Alterne}{\modulo{\theQuestionQCM}{2}\ifnum\remainder=0\cellcolor{PfCCouleurAlterneQCM}\fi}{}\ifboolKV[ClesQCM]{Solution}{\PfCSolCellColor{##1}{##2}}{}\ListeQCM[##1,\fpeval{##2+1}]
+                }\ifnum\fpeval{\PfCTotalCases-\useKV[ClesQCM]{Reponses}}>0\relax\uppercase{&}\ifboolKV[ClesQCM]{Alterne}{\modulo{\theQuestionQCM}{2}\ifnum\remainder=0\cellcolor{PfCCouleurAlterneQCM}\fi}{}\fi\\
+              }%
+              \hline%
+            \end{longtable}%
+          }%
+        }%
+        \renewcommand{\arraystretch}{1}%
+      }%
+    }%
+  }%
+}%
+
+\NewDocumentCommand\PfCSolCellColor{mm}{%
+  \xdef\PfCFooSolColor{\ListeQCM[#1,\NumeroReponse]}%
+  \setsepchar{-}%
+  \readlist*\PfCSolListeReponses{\PfCFooSolColor}%
+  \xintFor* ##3 in{\xintSeq{1}{\PfCSolListeReponseslen}}\do{%
+    \xintifboolexpr{#2==\PfCSolListeReponses[##3]}{\cellcolor{\useKV[ClesQCM]{Couleur}}}{}%
+  }%
+}%
+  

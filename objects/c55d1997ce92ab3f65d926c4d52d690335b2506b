@@ -1,0 +1,136 @@
+%%%
+% Squaro
+%%%
+\def\filedateSquarO{2025/06/12}%
+\def\fileversionSquarO{0.1b}%
+\message{-- \filedateSquarO\space v\fileversionSquarO}%
+%
+\newtoks\tokPfCSquaro%
+\def\UpdatetoksSquaro#1\nil{\addtotok\tokPfCSquaro{#1,}}%
+
+\setKVdefault[Squaro]{Solution=false,Longueur=8,Largeur=8,Echelle=8mm,Nom=Jeu1,Graines=false,Persos=false,Graine={},Perso={}}
+\defKV[Squaro]{%
+  Graine=\ifempty{#1}{}{\setKV[Squaro]{Graines}},%
+  Perso=\ifempty{#1}{}{\setKV[Squaro]{Persos}\setsepchar{,}\ignoreemptyitems\readlist*\ListeSquaroPerso{#1}\reademptyitems%
+      \foreachitem\compteur\in\ListeSquaroPerso{\expandafter\UpdatetoksSquaro\compteur\nil}%
+  }%
+}%
+
+\NewDocumentCommand\SquarO{o}{%
+  \tokPfCSquaro{}%
+  \useKVdefault[Squaro]%
+  \setKV[Squaro]{#1}%
+  \BuildSquaro%
+}%
+
+\def\BuildSquarobase{%
+  numeric Longueur,Largeur;
+  Longueur=\useKV[Squaro]{Longueur};
+  Largeur=\useKV[Squaro]{Largeur};
+  boolean Solution,Graines,Persos;
+  Solution=\useKV[Squaro]{Solution};
+  Graines=\useKV[Squaro]{Graines};
+  Persos=\useKV[Squaro]{Persos};
+  if Graines:
+    randomseed:=\useKV[Squaro]{Graine};
+  fi;
+  %
+  u:=\useKV[Squaro]{Echelle};
+  %
+  p:=0;
+  pair A[];%centre des carrés.
+  boolean Allume[][];
+  %
+  if Persos:
+    n:=0;
+    for p_=\the\tokPfCSquaro:
+    n:=n+1;
+    ligne:=(n-1) div (Longueur+1);
+    colonne:=(n-1) mod (Longueur+1);
+    Allume[ligne][colonne]=if p_=1:true else:false fi;
+    %label.top(decimal(ligne)&"--"&decimal(colonne),u*(0,-0.5*n));%colonne,-ligne));
+    endfor;
+  else:
+    for k=0 upto Largeur:
+    for l=0 upto Longueur:
+    m:=uniformdeviate(1);
+    if m<0.5:
+    Allume[k][l]=true;
+    else:
+    Allume[k][l]=false;
+    fi;
+    endfor;
+    endfor;
+  fi;
+}%
+
+\NewDocumentCommand\BuildSquaro{}{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \BuildSquarobase
+    % 
+    for k=0 upto Longueur-1:
+      for l=0 upto Largeur-1:
+        p:=p+1;
+        A[p]=u*(k,-l);
+        trace (unitsquare scaled u) shifted A[p];
+      endfor;
+    endfor;
+    % 
+    for k=0 upto Largeur:
+      for l=0 upto Longueur:
+        if Allume[k][l]:
+          fill cercles(u*(l,-k+1),1mm) if Solution=false:withcolor white fi;
+        else:
+          fill cercles(u*(l,-k+1),1mm) withcolor white;
+        fi;
+        trace cercles(u*(l,-k+1),1mm);
+      endfor;
+    endfor;
+%    % 
+    for k=0 upto Largeur-1:
+      for l=0 upto Longueur-1:
+        Retiens:=0;
+        if Allume[k][l]:Retiens:=Retiens+1 fi;
+        if Allume[k][l+1]:Retiens:=Retiens+1 fi;
+        if Allume[k+1][l]:Retiens:=Retiens+1 fi;
+        if Allume[k+1][l+1]:Retiens:=Retiens+1 fi;
+        label(TEX(decimal(Retiens)),u*(l+0.5,-k+0.5));
+      endfor;
+    endfor;
+  \end{mplibcode}%
+\else%
+  \begin{mpost}[mpsettings={\BuildSquarobase}]
+    for k=0 upto Longueur-1:
+      for l=0 upto Largeur-1:
+        p:=p+1;
+        A[p]=u*(k,-l);
+        trace (unitsquare scaled u) shifted A[p];
+      endfor;
+    endfor;
+    %
+    for k=0 upto Largeur:
+      for l=0 upto Longueur:
+        if Allume[k][l]:
+          fill cercles(u*(l,-k+1),1mm) if Solution=false:withcolor white fi;
+        else:
+          fill cercles(u*(l,-k+1),1mm) withcolor white;
+        fi;
+        trace cercles(u*(l,-k+1),1mm);
+      endfor;
+    endfor;
+    %
+    for k=0 upto Largeur-1:
+      for l=0 upto Longueur-1:
+        Retiens:=0;
+        if Allume[k][l]:Retiens:=Retiens+1 fi;
+        if Allume[k][l+1]:Retiens:=Retiens+1 fi;
+        if Allume[k+1][l]:Retiens:=Retiens+1 fi;
+        if Allume[k+1][l+1]:Retiens:=Retiens+1 fi;
+        label(LATEX(decimal(Retiens)),u*(l+0.5,-k+0.5));
+      endfor;
+    endfor;
+  \end{mpost}%
+ \fi%
+}%

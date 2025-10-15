@@ -1,0 +1,183 @@
+%%%
+% Tableur
+%%%
+\def\filedateRepTab{2025/05/26}%
+\def\fileversionRepTab{0.1b}%
+\message{-- \filedateRepTab\space v\fileversionRepTab}%
+%
+\setKVdefault[Tableur]{Colonnes=4,Largeur=30pt,LargeurUn=30pt,Bandeau=true,Formule={},Cellule=A1,Ligne=0,Colonne=0,PasL=1,PasC=1,Selection=false,DebutColonnes=0,DebutLignes=0,LargeurNombre=10pt,Apres=false,ApresBandeau=false,Couleur={},CodeAfter={},CodeAfterBandeau={}}%
+%Idee de P. Nuns
+\defKV[Tableur]{%
+  Couleur=\ifempty{#1}{}{\setKV[Tableur]{Selection}},%
+  CodeAfter=\ifempty{#1}{}{\setKV[Tableur]{Apres}},%
+  CodeAfterBandeau=\ifempty{#1}{}{\setKV[Tableur]{ApresBandeau}}%
+}%
+%
+
+%Bas\'e sur un code de Christian T\'ell\'ech\'ea.
+\newcount\cntlin%
+\newcount\cntcol%
+\newcount\Affichecntcol%
+\newcount\Affichecntlin%
+\makeatletter%
+% Pour la version nicematrix
+\newtoks\t@b%
+\long\def\ifremain@lines#1\\#2\@nil{%
+  \csname @\ifx\@empty#2\@empty second\else first\fi oftwo\endcsname}%
+\long\def\subst@eol#1\\#2\@nil{\addtot@b{#1\\}%
+  \ifremain@lines#2\\\@nil{\addtot@b&\subst@eol#2\@nil}{\addtot@b{#2\CodeAfter\xintifboolexpr{\useKV[Tableur]{Ligne}==0 || \useKV[Tableur]{Colonne}==0}{}{%
+        \tikz\node at (row-\fpeval{\useKV[Tableur]{Ligne}+1+\useKV[Tableur]{PasL}}-|col-\fpeval{\useKV[Tableur]{Colonne}+1+\useKV[Tableur]{PasC}}) {\tiny$\blacksquare$};%
+      }%
+      \ifboolKV[Tableur]{Apres}{%
+        \useKV[Tableur]{CodeAfter}%
+      }{}%
+    \end{NiceTabular}}}}%
+\long\def\collectcp@body#1\end{\subst@eol#1\@nil\end}%
+
+\newcommand\addtot@b[1]{\t@b\expandafter{\the\t@b#1}}%
+\newcommand\edftot@b[1]{\edef\temp@{#1}\expandafter\addtot@b\expandafter{\temp@}}%
+%%%%%%%%%%
+% Pour la version tabular
+\newtoks\t@bs%
+\long\def\ifremain@liness#1\\#2\@nil{%
+  \csname @\ifx\@empty#2\@empty second\else first\fi oftwo\endcsname}%
+\long\def\subst@eols#1\\#2\@nil{\addtot@bs{#1\\\hline}%
+  \ifremain@lines#2\\\@nil{\addtot@bs&\subst@eols#2\@nil}{\addtot@bs{#2\end{tabular}}}}%
+\long\def\collectcp@bodys#1\end{\subst@eols#1\@nil\end}%
+
+\newcommand\addtot@bs[1]{\t@bs\expandafter{\the\t@bs#1}}%
+\newcommand\edftot@bs[1]{\edef\temp@{#1}\expandafter\addtot@bs\expandafter{\temp@}}%
+%%%%%%%%%%%%%%%
+
+\newlength\PfCLongInter%
+\newlength\PfCTableurLargeurUn%
+\newlength\PfCTableurLargeur%
+\newlength\PfCTableurLargeurZero%
+
+\NewDocumentEnvironment{Tableur}{so}{%
+  \useKVdefault[Tableur]%
+  \setKV[Tableur]{#2}%
+  \setlength{\PfCTableurLargeurUn}{\fpeval{\useKV[Tableur]{LargeurUn}}pt}%
+  \setlength{\PfCTableurLargeur}{\fpeval{\useKV[Tableur]{Largeur}}pt}%
+  \setlength{\PfCTableurLargeurZero}{\fpeval{\useKV[Tableur]{LargeurNombre}}pt}%
+  \ifnum\useKV[Tableur]{DebutColonnes}=0\relax
+    \Affichecntcol\z@%
+  \else
+    \Affichecntcol=\number\numexpr\useKV[Tableur]{DebutColonnes}-1%
+  \fi
+  \ifnum\useKV[Tableur]{DebutLignes}=0\relax
+    \Affichecntlin\z@%
+  \else
+    \Affichecntlin=\number\numexpr\useKV[Tableur]{DebutLignes}-1%
+  \fi
+  \ttfamily%
+  \newcolumntype{A}{>{\centering\arraybackslash}m{\PfCTableurLargeurUn}}%
+  \newcolumntype{B}{>{\centering\arraybackslash}m{\PfCTableurLargeur}}%
+  \IfBooleanTF{#1}{%
+    %%Bandeau avec 20pt :( en largeurZero
+    \setlength{\PfCLongInter}{-60pt+\fpeval{\useKV[Tableur]{LargeurNombre}}pt+\fpeval{\useKV[Tableur]{LargeurUn}}pt+\fpeval{(\useKV[Tableur]{Colonnes}-2)*\useKV[Tableur]{Largeur}}pt+\fpeval{2*\useKV[Tableur]{Colonnes}-6}\tabcolsep+\fpeval{\useKV[Tableur]{Colonnes}-3}\arrayrulewidth}%
+  \ifboolKV[Tableur]{Bandeau}{%
+    \begin{tabular}{|p{\PfCTableurLargeur}|p{10pt}|p{50pt}|p{\PfCLongInter}|}%
+      \hhline{--~-}%
+      \useKV[Tableur]{Cellule}&\scriptsize$\blacktriangledown$&$f_x$\hfill$\sum$~\scriptsize$\blacktriangledown$\hfill$=$&\useKV[Tableur]{Formule}\hfill\scriptsize$\blacktriangledown$\\%
+      \hhline{--~-}%
+    \end{tabular}%
+    \nopagebreak%
+    \\%
+  }{}%
+  \cntlin\z@%
+  \t@bs{%
+    \begin{tabular}{%
+      |>{%
+      \cellcolor{gray!15}%
+          \global\cntcol\z@
+          \global\advance\cntlin\@ne%
+          \centering\arraybackslash%
+          \ifnum\cntlin>\@ne%
+          \fpeval{\cntlin+\Affichecntlin-1}\fi}%
+      wc{\PfCTableurLargeurZero}|A|*{\fpeval{\useKV[Tableur]{Colonnes}-1}}{B|}}%
+      \hline%
+      \rowcolor{gray!15}%
+      }%
+  \loop%
+  \ifnum\cntcol<\useKV[Tableur]{Colonnes}%
+    \advance\cntcol\@ne%
+    \advance\Affichecntcol\@ne%
+    \addtot@bs{&}%
+    % \edftot@bs{\@Alph{\the\cntcol}}%
+    \edftot@bs{\@Alph{\the\Affichecntcol}}%
+  \repeat%
+  \addtot@bs{\\\hline&}%
+  \collectcp@bodys
+  }{%
+                       \setlength{\PfCLongInter}{\fpeval{-60+\useKV[Tableur]{LargeurNombre}+\useKV[Tableur]{LargeurUn}+(\useKV[Tableur]{Colonnes}-2)*\useKV[Tableur]{Largeur}}pt+\fpeval{2*\useKV[Tableur]{Colonnes}-6}\tabcolsep+\fpeval{\useKV[Tableur]{Colonnes}+2}\arrayrulewidth}%
+  \ifboolKV[Tableur]{Bandeau}{%
+    \begin{NiceTabular}{p{\PfCTableurLargeur}p{10pt}p{50pt}p{\PfCLongInter}}%
+      \Block[l,hvlines]{}{\useKV[Tableur]{Cellule}}&\Block[draw]{}{\scriptsize$\blacktriangledown$}&\Block{}{$f_x$\hfill$\sum$~\scriptsize$\blacktriangledown$\hfill$=$}&\Block[draw]{}{\useKV[Tableur]{Formule}\hfill\scriptsize$\blacktriangledown$}\\
+      \CodeAfter
+      \ifboolKV[Tableur]{ApresBandeau}{%
+        \useKV[Tableur]{CodeAfterBandeau}%
+      }{}%
+    \end{NiceTabular}%
+    \nopagebreak%
+    \\%
+  }{}%
+  \cntlin\z@%
+  \t@b{%
+    \begin{NiceTabular}{%
+        >{%
+          \global\cntcol\z@
+          \global\advance\cntlin\@ne%
+          \centering\arraybackslash%
+          \ifnum\cntlin>\@ne%
+          \ifboolKV[Tableur]{Selection}{%
+            \xintifboolexpr{\cntlin>\fpeval{\useKV[Tableur]{Ligne}} 'and' \cntlin<\fpeval{\useKV[Tableur]{Ligne}+\useKV[Tableur]{PasL}+1}}{\textcolor{white}{\fpeval{\cntlin+\Affichecntlin-1}}}{\fpeval{\cntlin+\Affichecntlin-1}}%
+            }{\fpeval{\cntlin+\Affichecntlin-1}}%
+        \fi}%
+        wc{\PfCTableurLargeurZero}A*{\fpeval{\useKV[Tableur]{Colonnes}-1}}{B}}[hvlines]%,color-inside
+      \CodeBefore
+      % on colorie en gris toute la première ligne
+      \tikz\fill[gray!15](row-1-|col-1) rectangle (row-2-|last);%
+      % on colorie en gris toute la première colonne
+      \tikz\fill[gray!15](row-1-|col-1) rectangle (last-|col-2);%
+      %
+      \xintifboolexpr{\useKV[Tableur]{Ligne}==0 || \useKV[Tableur]{Colonne}==0}{}{%
+        \ifboolKV[Tableur]{Selection}{%
+          \xdef\PfCTabCouleur{\useKV[Tableur]{Couleur}}%
+          % on colorie les cellules sans les tracer
+          \tikz\fill[\PfCTabCouleur!50](row-\fpeval{\useKV[Tableur]{Ligne}+1}-|col-\fpeval{\useKV[Tableur]{Colonne}+1}) rectangle (row-\fpeval{\useKV[Tableur]{Ligne}+1+\useKV[Tableur]{PasL}}-|col-\fpeval{\useKV[Tableur]{Colonne}+1+\useKV[Tableur]{PasC}});%
+%          % on trace la première cellule qui a servi à sélectionner
+          \tikz\draw[line width=1.25pt,fill=\PfCTabCouleur!50](row-\fpeval{\useKV[Tableur]{Ligne}+1}-|col-\fpeval{\useKV[Tableur]{Colonne}+1}) rectangle (row-\fpeval{\useKV[Tableur]{Ligne}+1+1}-|col-\fpeval{\useKV[Tableur]{Colonne}+1+1});%
+%          % on colorie la zone nécessaire sur la première ligne
+          \tikz\fill[\PfCTabCouleur](row-1-|col-\fpeval{\useKV[Tableur]{Colonne}+1}) rectangle (row-2-|col-\fpeval{\useKV[Tableur]{Colonne}+1+\useKV[Tableur]{PasC}});%
+%          % on colorie la zone nécessaire sur la première colonne
+          \tikz\fill[\PfCTabCouleur](row-\fpeval{\useKV[Tableur]{Ligne}+1}-|col-1) rectangle (row-\fpeval{\useKV[Tableur]{Ligne}+1+\useKV[Tableur]{PasL}}-|col-2);%
+        }{%
+          \tikz\draw[line width=1.25pt](row-\fpeval{\useKV[Tableur]{Ligne}+1}-|col-\fpeval{\useKV[Tableur]{Colonne}+1}) rectangle (row-\fpeval{\useKV[Tableur]{Ligne}+1+\useKV[Tableur]{PasL}}-|col-\fpeval{\useKV[Tableur]{Colonne}+1+\useKV[Tableur]{PasC}});%
+        }%
+      }%
+      \Body
+    %
+    }%
+  \loop%
+  \ifnum\cntcol<\useKV[Tableur]{Colonnes}%
+    \advance\cntcol\@ne%
+    \advance\Affichecntcol\@ne%
+  \addtot@b{&}%
+  % modif by Pascal Nuns
+  \ifboolKV[Tableur]{Selection}{%
+    \ifnum\cntcol>\fpeval{\useKV[Tableur]{Colonne}-1}%
+    \ifnum\cntcol<\fpeval{\useKV[Tableur]{Colonne}+\useKV[Tableur]{PasC}}%
+    \edftot@b{{\noexpand\textcolor{white}{\noexpand\bfseries\@Alph{\the\Affichecntcol}}}}%
+    \else%
+    \edftot@b{\@Alph{\the\Affichecntcol}}%
+    \fi%
+    \else%
+    \edftot@b{\@Alph{\the\Affichecntcol}}%
+    \fi%
+  }{\edftot@b{\@Alph{\the\Affichecntcol}}}%
+  % fin de modif
+  \repeat%
+  \addtot@b{\\&}%
+  \collectcp@body}}{\IfBooleanTF{#1}{\the\t@bs}{\the\t@b}}%
+\makeatother

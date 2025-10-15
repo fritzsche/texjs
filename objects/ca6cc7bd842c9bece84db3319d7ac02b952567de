@@ -1,0 +1,191 @@
+%%%
+% Probabilité et fréquence
+%%%
+\def\filedateProbaFrequence{2025/05/28}%
+\def\fileversionProbaFrequence{0.1a}%
+\message{-- \filedateProbaFrequence\space v\fileversionProbaFrequence}%
+%
+\setKVdefault[PfCFrequence]{Couleur=false,Lancers=1,Legende=false,ListeCouleurs={},Legendes={}}%
+\defKV[PfCFrequence]{%
+  ListeCouleurs=\ifempty{#1}{}{\setKV[PfCFrequence]{Couleur}},%
+  Legendes=\ifempty{#1}{}{\setKV[PfCFrequence]{Legende}\setsepchar{,}\reademptyitems\readlist*\PfMListeLegendes{#1}\reademptyitems}%
+}%
+
+\newtoks\tokPfMListeObjets%
+\newtoks\tokPfMListeLegendes%
+\def\UpdatetoksObj#1\nil{\addtotok\tokPfMListeObjets{#1,}}%
+\def\UpdatetoksLegendes#1\nil{\addtotok\tokPfMListeLegendes{"#1",}}%
+
+\NewDocumentCommand\ProbaFrequence{om}{%
+  % #1 options
+  % #2 répartition
+  \tokPfMListeObjets{}%
+  \tokPfMListeLegendes{}%
+  \useKVdefault[PfCFrequence]%
+  \setKV[PfCFrequence]{#1}%
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\PfMListeObjets{#2}%
+  \reademptyitems%
+  \foreachitem\compteur\in\PfMListeObjets{\expandafter\UpdatetoksObj\compteur\nil}%
+  \ifboolKV[PfCFrequence]{Legende}{%
+    \foreachitem\compteur\in\PfMListeLegendes{\expandafter\UpdatetoksLegendes\compteur\nil}%
+  }{}%
+  \BuildFrequence{\the\tokPfMListeObjets}{\the\tokPfMListeLegendes}%
+}%
+
+\NewDocumentCommand\BuildFrequence{mm}{%
+  \ifluatex
+  \mplibnumbersystem{decimal}%
+  \begin{Geometrie}[CoinBG={u*(-5,0)},CoinHD={u*(7.5,7.5)}]%6 en ordonnee
+    Lancers = \useKV[PfCFrequence]{Lancers};
+    LegendeVide=0;
+    %
+    color Col[];
+    if \useKV[PfCFrequence]{Couleur}:
+      n:=0;
+      for p_=\useKV[PfCFrequence]{ListeCouleurs}:
+        n:=n+1;
+        if color p_:
+          Col[n]=p_;
+        else:
+          LegendeVide:=n;
+        fi;
+      endfor;
+    fi;
+    %
+    string Legende[];
+    vardef EcrireLegendes(text t)=
+    n:=0;
+      for p_=t:
+        n:=n+1;
+        if p_="":
+          LegendeVide:=n;
+        else:
+          Legende[n]=p_;
+        fi;
+      endfor;
+      n:=0;  
+    enddef;
+    %    
+    vardef LectureDonnees(text t)=
+    numeric A[];
+    numeric SommeTotale;
+    SommeTotale=0;
+      n:=0;
+      for p_=t:
+        n:=incr(n);
+        A[n]=p_;
+        SommeTotale:=SommeTotale+p_;
+      endfor;
+      total:=n;  
+    enddef;
+    %
+    LectureDonnees(#1);
+    if \useKV[PfCFrequence]{Legende}:
+    EcrireLegendes(#2);
+    fi;
+    %
+    numeric borne[];
+    borne0=0;
+    for k=1 upto total:
+      borne[k]=borne[k-1]+A[k];
+    endfor;
+    %
+    x.u:=5mm;
+    y.u:=5mm;
+    quad.u:=5mm;
+    unites(1/(170*Lancers),5);
+    origine((1,4));
+    % grille
+    for k=1 upto 11:
+    draw (pp(0,0)--pp(0,1.1)) shifted(pp(k*Lancers*100,0)-pp(0,0)) withcolor gris;
+    draw (pp(0,0)--pp(Lancers*(1000+100),0)) shifted(pp(0,k/10)-pp(0,0)) withcolor gris;
+    endfor;
+    % axe
+    drawarrow pp(0,0)--pp(0,1.1);
+    drawarrow pp(0,0)--pp(Lancers*(1000+100),0);
+    % tiret
+    for k=1 upto 10:
+    draw (pp(k*Lancers*100,0)+u*(0,-0.05))--(pp(k*Lancers*100,0)+u*(0,0.05));
+    endfor;
+    numeric nb[],freq[];
+    pair Freq[][];
+    for k=1 upto total:
+      nb[k]:=0;
+      freq[k]=0;
+    endfor;
+    %
+    for k=1 upto (Lancers*1000):
+      nn:=floor(uniformdeviate(SommeTotale))+1;
+      if nn=0:
+        message("il est nul...");
+      fi;
+      for l=1 upto total:
+        if (nn>borne[l-1]) and (nn<borne[l]+1):
+          nb[l]:=nb[l]+1;
+        fi;
+        freq[l]:=nb[l]/k;
+        Freq[l][k]=pp(k,freq[l]);
+      endfor;
+    endfor;
+    %
+    def Style=enddef;
+    def Stylea=dashed evenly enddef;
+    def Styleb=dashed withdots scaled 1/2 enddef;
+    def Stylec=dashed dashpattern(on 1 off 1) enddef;
+    def Styled=dashed withdots scaled 1/4 enddef;
+    def Stylee=dashed dashpattern(on 6 off2) enddef;
+    parc:=0;
+    for l=1 upto total:
+    if \useKV[PfCFrequence]{Couleur}=false:
+    if (l mod 6)=1:
+    elseif (l mod 6)=2:
+    drawoptions(Stylea);
+    elseif (l mod 6)=3:
+    drawoptions(Styleb);
+    elseif (l mod 6)=4:
+    drawoptions(Stylec);
+    elseif (l mod 6)=5:
+    drawoptions(Styled);
+    else:
+    drawoptions(Stylee);
+    fi;
+    if \useKV[PfCFrequence]{Legende}:
+    parc:=incr(parc);
+    if l<>LegendeVide:
+    draw pp(Lancers*400*((parc-1) mod 3),-0.25-0.1*((parc-1) div 3))--pp(Lancers*400*((parc-1) mod 3)+125,-0.25-0.1*((parc-1) div 3));
+    label.rt(TEX(Legende[l]),pp(Lancers*400*((parc-1) mod 3)+125,-0.25-0.1*((parc-1) div 3)));
+    else:
+    parc:=parc-1;
+    fi;
+    fi;
+    fi;
+    %
+    if l<>LegendeVide:
+      if Lancers<1:
+        trace Freq[l][1]
+        for k=2 upto (1000*Lancers):
+          --Freq[l][k]
+        endfor withcolor if unknown Col[l]:black else:Col[l] fi;
+      else:
+        trace Freq[l][1]
+        for k=5 step 4 until (1000*Lancers):
+          --Freq[l][k]
+        endfor withcolor if unknown Col[l]:black else:Col[l] fi;
+      fi;
+    fi;
+    endfor;
+   drawoptions();
+    for k=1 upto 10 :
+    label.bot(TEX("\scriptsize\num{"&decimal((100*k)*Lancers)&"}"),pp(Lancers*100k,0));
+    endfor;
+    for k=2 step 2 until 10:
+    label.lft(TEX("\scriptsize\num{"&decimal(k/10)&"}"),pp(0,k/10));
+    endfor;
+    label.llft(TEX("\scriptsize 0"),pp(0,0));
+    label.urt(TEX("Fréquence"),pp(0,1));
+    label.bot(TEX("Nombre de lancers"),pp(0.5*Lancers*(1000+200),-0.075));
+  \end{Geometrie}%
+  \mplibnumbersystem{scaled}%
+  \fi%
+}%

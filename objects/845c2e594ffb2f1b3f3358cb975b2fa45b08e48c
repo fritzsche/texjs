@@ -1,0 +1,494 @@
+% \iffalse meta-comment
+% Copyright (C) 2021 by Martin Vassor
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either
+% version 1.3 of this license or (at your option) any later
+% version. The latest version of this license is in:
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of
+% LaTeX version 2005/12/01 or later.
+% 
+% \fi
+
+
+
+% \iffalse
+%<package>\NeedsTeXFormat{LaTeX2e}
+%<package>\ProvidesPackage{formal-grammar}[2022/02/09 v1.2 A package to typeset formal grammars]
+%<package>\RequirePackage{xparse}
+%<package>\RequirePackage{newfloat}
+%<package>\RequirePackage{xcolor}
+%<package>\RequirePackage{colortbl}
+%<package>\RequirePackage{array}
+%<package>\definecolor{LightCyan}{rgb}{0.8,1,1}
+%<*driver>
+\documentclass{ltxdoc}
+\usepackage{formal-grammar}
+\usepackage[hidelinks]{hyperref}
+\usepackage{amsfonts}
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+\begin{document}
+  \DocInput{formal-grammar.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \CheckSum{112}
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+%
+% \changes{v1.2}{2022/02/09}{Add the `center` option}
+% \changes{v1.1}{2021/11/15}{Use Coloneqq if defined, internal changes, typos}
+% \changes{v1.0}{2021/11/10}{Initial version for publication}
+%
+% \GetFileInfo{formal-grammar.sty}
+%
+% \title{The \textsf{formal-grammar} package\thanks{This document
+%   corresponds to \textsf{formal-grammar}~\fileversion,
+%   dated \filedate.}}
+% \author{Martin Vassor\\ \texttt{bromind+ctan@gresille.org}}
+%
+% \maketitle
+%
+%\iffalse
+%% \begin{abstract}
+%%   The \textsf{formal-grammar} package provides commands to typeset formal grammars.
+%% \end{abstract}
+%\fi
+% \tableofcontents
+%
+% \section{Introduction}
+%
+% The notion of formal language is one of the most important in theoretical
+% computer science. Intuitively, it is defined as follow: we are given a set
+% \(\Sigma\) of \emph{letters} or \emph{symbols} (the \emph{alphabet}). For instance, we can consider
+% \(\Sigma = \{a, b, \dots, z\}\): our symbols is the set of lowercase
+% characters. A \emph{word} is a tuple of letters. For instance, \(\langle a, b,
+% c\rangle\) is a word of three letters over \(\Sigma\). Therefore, \(\Sigma^k\)
+% is the set of words of \(k\) letters over \(\Sigma\). Notice in particular
+% that \(\Sigma^0\) is the set \(\{\langle\rangle\}\).  \(\langle\rangle\) is
+% the unique word that contains \(0\) letters. It is often noted
+% \(\varepsilon\).
+%
+% The set of all words over \(\Sigma\) (independently of their length) is
+% defined as \(\Sigma^\star = \bigcup_{i\in\mathbb{N}} \Sigma^i\).
+%
+% An important operation is the \emph{concatenation}, noted \(\cdot\), which
+% consists in sticking two words together. For instance \(\langle a,
+% b\rangle\cdot\langle c\rangle = \langle a, b, c\rangle\). For the sake of this
+% quick introduction, we do not specify further this operation.
+%
+% A (formal) language over \(\Sigma\) is a subset of \(\Sigma^\star\):
+% \(\mathbb{L}\subseteq\Sigma^\star\). That is, it consists in picking some of
+% the words of \(\Sigma^\star\). For instance we can define the language
+% \(\mathbb{L}_{a}\) which contains all words that begin with an \(a\):
+% \(\mathbb{L}_a = \{\langle a \rangle \cdot w, w\in \Sigma^\star\}\).
+%
+% We can see that describing languages by the mean of equations is quite
+% tedious. Therefore, we most often use \emph{grammars}, which are a set of
+% rules that characterise a language. In particular, one of the standard way to
+% define a grammar is what we call the \textsc{bnf}, for \emph{Backus-Naur form}
+% (or \emph{Backus normal form}). Such grammars are defined from two sets of
+% elements: \emph{terminal} and \emph{non-terminal} (by convention, in this
+% document, non-terminal are in calligraphic font, except when explicitely
+% stated otherwise). Basically, \emph{terminal}
+% correspond to the alphabet, and \emph{non-terminal} are names of rules. 
+%
+%A rule
+% has the form \begin{grammar}\firstcase{R}{a}{}\end{grammar}, where
+% \(\nonterm{R}\) is the name of the rule, and \(a\) is the production. The name
+% of the rule is a non-terminal, and the production is a sequence of terminals
+% and non-terminal. If a rule has multiple possible productions, we separate
+% them as follow: \begin{grammar}\firstcase{S}{a\gralt
+% a\nonterm{S}}{}\end{grammar}. 
+%
+% Finally, a grammar is a set of rules.
+%
+% A production defines a set of words. Without
+% going into formalities, a production produces
+% the words described by the terminal, and where non-terminal are replaced by
+% productions of the corresponding rule. For instance, the rule \(\nonterm{S}\)
+% above produces \(\{a, aa, aaa, \dots\}\). Notice that rules can be mutually
+% recursive.
+%
+% This package provides a new environment (|grammar|) and associated commands to
+% typeset \textsc{bnf} grammars. It allows to easily write formal grammars. For instance,
+% the syntax of the \(\lambda\)-calculus is given in Grammar~\ref{gr:lambda}.
+%
+%\begin{grammar}[\(\lambda\)-calculus syntax][][gr:lambda]
+%	\firstcase{T}{\nonterm{V}}{Variable}
+%	\highlight
+%	\otherform{(\nonterm{T}\ \nonterm{T})}{Application}
+%	\highlight
+%	\otherform{\lambda \nonterm{V}\cdot\nonterm{T}}{Abstraction}
+%	\downplay
+%	\firstcase{V}{x, y, \dots}{Variables}
+%\end{grammar}
+%
+% \section{Usage}
+% \subsection{Loading the package (and loading options)}
+%
+% This package accepts a single option when loading: \verb+center+. If the
+% option is set, the initial \(\gralt\) of non-initial lines of multi-line rules is
+% centered with respect to the \(::=\) of the initial line. If
+% unset, the \(\gralt\) is aligned to the right.
+%
+% \subsection{Basic usage}
+%
+% \paragraph{Creating a grammar.}
+% We first start creating a grammar using the |grammar| environment.
+%
+% \DescribeEnv{grammar}
+% This is the main environment to write your grammar. |grammar| accepts 3
+% optional arguments: the first one is a possible caption; the second is a
+% positionning option; and the third is a label.
+%
+% If none of the optional arguments are provided, the grammar is inlined (i.e.
+% not in a float environment. If the first argument is set (the optional
+% caption), the grammar is typeset in a float, captionned with the provided
+% caption.
+% The second optional argument is a positionning option (one of \texttt{t},
+% \texttt{b}, \texttt{p}, \texttt{h}, etc.). The default is \texttt{p}.
+% The last argument is a label, used to reference the grammar elsewhere in the
+% document.
+%
+% The grammar can then be populated using two basic constructs: |firstcase| and
+% |otherform|.
+%
+% \DescribeMacro{\firstcase}
+% The |firstcase| command creates a new non-terminal of the grammar. It takes 3 mandatory
+% arguments: the letter(s) of the non-terminal, the definition, and an
+% explanation. 
+% \DescribeMacro{\otherform}
+% On the other hand, |otherform| create an alternative for the preceding
+% non-terminal, on a new line. It takes two arguments: the definition of the
+% alternative, and an explanation. For instance, the following grammar typesets
+% as the grammar in Grammar~\ref{gr:simple_grammar}.
+% \begin{verbatim}
+% \begin{grammar}[A simple grammar][t][gr:simple_grammar]
+% \firstcase{A}{()}{Parenthesis}
+% \otherform{\{\}}{Curly brackets}
+% \end{grammar}
+% \end{verbatim}
+% \begin{grammar}[A simple grammar][t][gr:simple_grammar]
+% \firstcase{A}{()}{Parenthesis}
+% \otherform{\{\}}{Curly brackets}
+% \end{grammar}
+%
+% \paragraph{Referencing non-terminals.}
+%
+% \DescribeMacro{\nonterm}
+% This allows you to typeset a symbol as a non-terminal. In the current version,
+% the default typesetting is to wrap in a \verb+\mathcal+ command. This allow
+% to reference those non-terminals, both in grammar rules and elsewhere in the
+% document. Notice that, since the typesetting is just a wrapper over
+% \verb+\mathcal+, it should be used in a math environment. For instance, the
+% only non-terminal of Grammar~\ref{gr:simple_grammar} is \(\nonterm{A}\)
+% (\verb+\(\nonterm{A}\)+).
+% 
+% 
+% \subsection{Advanced capabilities}
+% In this subsection, we will explain the more advanced capabilities of the
+% package. These would allow to typeset more complex grammars such as the one
+% displayed in Grammar~\ref{gr:advanced_grammar}.
+%
+% \begin{grammar}[A more advanced grammar][t][gr:advanced_grammar]
+% \firstcase{B}{(\nonterm{B})\gralt \{\nonterm{B}\}}{Nested parenthesis or brackets}
+% \firstcasesubtil{\(\nonterm{C}_1\)}{\nonterm{B}}{Example of subtil non-terminal}
+% \highlight
+% \firstcase{D}{\nonterm{B}}{An interesting line}
+% \downplay
+% \otherform{\nonterm{D}}{An uninteresting line}
+% \otherform{\lochighlight{\nonterm{D} + \nonterm{D}} 
+%	\gralt \nonterm{A}}{Important item}
+% \end{grammar}
+%
+% \paragraph{Variants on the same line.}
+% \DescribeMacro{\gralt}
+% When variants are short and simple, it is possible to display multiple of them
+% on the same line using |\gralt|. For instance, the first line of
+% Grammar~\ref{gr:advanced_grammar} is typeset with the following command:
+% \begin{verbatim}
+% \firstcase{B}{(\nonterm{B})\gralt \{\nonterm{B}\}}{Nested parenthesis or brackets}
+% \end{verbatim}
+% \paragraph{Subtle typesetting of non-terminals.}
+% Since nonterminals are, by default, typeset using \verb+\mathcal+, it can lead
+% to the usual issues of \verb+\mathcal+ (typically, for lowercases). Therefore, we provide \emph{subtle}
+% variants of |\firstcase| and |\nonterm|, in which the non-terminal symbol is
+% not typeset (i.e. as the user, you have to typeset it manually).
+%
+% \DescribeMacro{\nontermsubtil}
+% This is equivalent to |\nonterm|, but where typesetting is left to the user.
+% In the current implementation does nothing. However users are encouraged to
+% use it for future modifications of the package. For instance, it is possible
+% to typeset a non-terminal with a number index as follow
+% \(\nontermsubtil{\nonterm{C}_1}\) with the following command:
+% \verb+\(\nontermsubtil{\nonterm{C}_1}\)+
+%
+% \DescribeMacro{\firstcasesubtil}
+% The subtle variant of |\firstcase|. It works similarly, except that the
+% non-terminal (i.e. the first argument) is not embedded in a \verb+\mathcal+
+% macro. For instance, the \(\nontermsubtil{\nonterm{C}_1}\) in
+% Grammar~\ref{gr:advanced_grammar} is typeset with the following command:
+% \begin{verbatim}
+% \firstcasesubtil{\(\nonterm{C}_1\)}{\nonterm{B}}{Example of subtil non-terminal}
+% \end{verbatim}
+%
+% \paragraph{Highlighting and downplaying variants.}
+% Three commands are provided to highlight or downplay some parts of a grammar.
+% |\highlight| highlights a whole line, |\loghighlight| highlights a part of a
+% line, while |\downplay| downplays a line.
+%
+% \DescribeMacro{\downplay}
+% \DescribeMacro{\highlight} 
+% The two commands |\highlight| and |\downplay| work similarly: when used before
+% a |\firstcase|, |\firstcasesubtil|, or |\otherform|, the next line is
+% highlighted in blue, or printed in light grey. For instance, in
+% Grammar~\ref{gr:advanced_grammar}, the rule for non-terminal \(\nonterm{D}\)
+% is typeset with:
+% \begin{verbatim}
+% \highlight
+% \firstcase{D}{\nonterm{B}}{An interesting line}
+% \downplay
+% \otherform{\nonterm{D}}{An uninteresting line}
+% \end{verbatim}
+%
+% \DescribeMacro{\lochighlight}
+% For more local highlighting, it is possible to use |\lochighlight|, which
+% prints some part of a rule in red. The last line of
+% Grammar~\ref{gr:advanced_grammar}, which contains such local highlight, is
+% typeset with the following command:
+% \begin{verbatim}
+% \otherform{\lochighlight{\nonterm{D} + \nonterm{D}} 
+% 	\gralt \nonterm{A}}{Important item}
+% \end{verbatim}
+%
+% \paragraph{Customizing the \(::=\) symbol.}
+% At the end of the preamble (i.e. before the \verb+\begin{document}+), the
+% package checks if a command \verb+\Coloneqq+ is defined. If that is the case,
+% it is used instead of \(::=\). Typically, packages
+% \href{https://www.ctan.org/pkg/mathtools}{mathtools},
+% \href{https://www.ctan.org/pkg/txfonts}{txfonts} and
+% \href{https://www.ctan.org/pkg/pxfonts}{pxfonts} define this command, but you
+% can also define it manually if you use the symbol elsewhere in the document.
+%
+% \StopEventually{\PrintIndex}
+%
+% \section{Implementation}
+% We declare an option \verb+center+ for aligning definition symbol (\(::=\))
+% and separator symbol (\(\gralt\)) in center.
+% This is done by create a new conditional, and assign corresponding values
+% depending on the option.
+%    \begin{macrocode}
+    \newif\if@formalalignsymbol\@formalalignsymbolfalse
+    \DeclareOption{center}{
+      \@formalalignsymboltrue
+    }
+%    \end{macrocode}
+%
+% Now we process options.
+%    \begin{macrocode}
+    \ProcessOptions\relax
+%    \end{macrocode}
+%
+%
+% \begin{environment}{floatgrammar}
+% This is a new float that contains floating grammars. This is needed so that
+% they are labeled with 'Grammar'.
+%    \begin{macrocode}
+	\DeclareFloatingEnvironment[
+		name=Grammar,
+		listname={List of Grammars},
+		placement=tbhp,
+	]{floatgrammar}
+%    \end{macrocode}
+% \end{environment}
+%
+%\iffalse
+%% Taken from https://tex.stackexchange.com/a/26364/107341
+%\fi
+%
+% \begin{macro}{\formal@rowstyle}
+% The default \verb+rowstyle+ is empty.
+%    \begin{macrocode}
+\newcommand*{\formal@rowstyle}{}
+%    \end{macrocode}
+% \end{macro}
+%
+
+% \begin{macro}{\rowstyle}
+% An command used to set the style of a row. In addition, we add column
+% types to reset the style (\verb:=:) and to keep the style from one column to
+% the other (\verb:+:).
+% As of today, it is not advised for the user to use \verb+\rowstyle+ to define
+% their own style (i.e.\ I have not tested it), although I hope it will someday
+% be possible.
+%    \begin{macrocode}
+\newcommand*{\rowstyle}[1]{% sets the style of the next row
+  \gdef\formal@rowstyle{#1}%
+  \formal@rowstyle\ignorespaces%
+}
+%    \end{macrocode}
+%    \begin{macrocode}
+\newcolumntype{\formal@reset}{% resets the row style
+  >{\gdef\formal@rowstyle{}}%
+}
+
+\newcolumntype{\formal@add}{% adds the current row style to the next column
+  >{\formal@rowstyle}%
+}
+%    \end{macrocode}
+% \end{macro}
+%\iffalse
+%% End of stackexchange
+%\fi
+%
+% \begin{environment}{grammar}
+% This is the implementation of the |grammar| environment. The main difficulty
+% is to check whether optional arguments are provided. If the first is provided,
+% we embed the grammar into a \verb+floatgrammar+; then if the second argument
+% is provided, we use it as the position, (otherwise, we use \verb+p+). Finally,
+% if the third argument is provided, we use it as a label.
+% Notice that, if the grammar is not a float (is inline), we do \emph{not}
+% break line before and after the grammar.
+%
+% Depending on whether the option \verb+center+ is set, we align the symbols
+% accordingly. This is done via an auxiliary column type.
+%    \begin{macrocode}
+    \if@formalalignsymbol
+      \newcolumntype{\formal@symbol}{c}
+    \else
+      \newcolumntype{\formal@symbol}{r}
+    \fi
+%    \end{macrocode}
+%    \begin{macrocode}
+\ExplSyntaxOn
+%% 1st argument: caption (makes it float)
+%% 2nd argument: positionning option (`p` by default)
+%% 3rd argument: label
+	\NewDocumentEnvironment{grammar} {o O{p} o}
+	{
+		\IfNoValueF{#1}{
+			\begin{floatgrammar}[#2]
+			\centering
+		}
+
+		\begin{tabular}{\formal@reset l \formal@add \formal@symbol \formal@add l \formal@add l}
+	}{
+		\end{tabular}
+
+		\IfNoValueF{#1}{
+			\caption{#1}
+			\IfNoValueF{#3}{
+				\label{#3}
+			}
+			\end{floatgrammar}
+		}
+	}
+\ExplSyntaxOff
+%    \end{macrocode}
+% \end{environment}
+
+% \begin{macro}{\firstcase}
+% The |\firstcase| is typeset as a new line in the array, which first cell is
+% the symbol of the non-terminal, the second cell is just \(::=\), the third
+% cell is the rule (it is directly printed, without any modification), and the
+% last cell is the description of the rule, in greyish color.
+%    \begin{macrocode}
+\newcommand{\firstcase}[3]{\(\mathcal{#1}\) & \(\formal@Coloneqq\) & \(#2\) & {\itshape \color{gray!90!black} #3}\\}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\firstcasesubtil}
+% The |\firstcasesubtil| is implemented similarly to |\firstcase|, except that
+% the first argument is not surrounded by \verb+\mathcal+.
+%    \begin{macrocode}
+\newcommand{\firstcasesubtil}[3]{#1 & \(\formal@Coloneqq\) & \(#2\) & {\itshape \color{gray!90!black} #3}\\}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\otherform}
+% Adds a line with an empty first cell, and which second cell is just a pipe.
+% The third and fourth cells are similar to |\firstcase|.
+%    \begin{macrocode}
+\newcommand{\otherform}[2]{& \(|\) & \(#1\) & {\itshape \color{gray!90!black} #2}\\}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\nonterm}
+% Typesets in \verb+\mathcal+.
+%    \begin{macrocode}
+\newcommand{\nonterm}[1]{\mathcal{#1}}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\nontermsubtil}
+% Does nothing right now.
+%    \begin{macrocode}
+\newcommand{\nontermsubtil}[1]{#1}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\gralt}
+% |\gralt| is simply a pipe surrounded by large spaces.
+%    \begin{macrocode}
+\newcommand{\gralt}[0]{\quad |\quad }
+%    \end{macrocode}
+% \end{macro}
+
+
+% \begin{macro}{\highlight}
+% We simply set the row color to LightCyan.
+%    \begin{macrocode}
+\newcommand{\highlight}[0]{\rowcolor{LightCyan}}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\lochighlight}
+% We simply surround the argument with red.
+%    \begin{macrocode}
+\newcommand{\lochighlight}[1]{{\color{red} #1}}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\downplay}
+% We simply apply a style that write in light grey for the row.
+%    \begin{macrocode}
+\newcommand{\downplay}[0]{\rowstyle{\color{white!80!black}}}
+%    \end{macrocode}
+% \end{macro}
+%
+% Finally, we check, at the end of the preamble, if there already exist a
+% \verb+::=+ symbol. We search for a command called \verb+Coloneqq+, e.g.
+% defined in the \href{https://www.ctan.org/pkg/mathtools}{mathtools}.
+%    \begin{macrocode}
+\AtBeginDocument{%
+	\ifdefined\Coloneqq
+		\let\formal@Coloneqq\Coloneqq
+	\else
+		\newcommand{\formal@Coloneqq}{::=}
+	\fi
+}
+%    \end{macrocode}
+%
+% \Finale
+\endinput

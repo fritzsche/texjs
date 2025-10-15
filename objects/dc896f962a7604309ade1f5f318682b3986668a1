@@ -1,0 +1,106 @@
+% \iffalse meta-comment
+%
+% File: ltx-talk-mode.dtx Copyright (C) 2025 Joseph Wright
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+% This file is part of the "ltx-talk bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% The released version of this bundle is available from CTAN.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/josephwright/ltx-talk
+%
+% for those people who are interested.
+%
+% -----------------------------------------------------------------------
+%
+%<*driver>
+\documentclass{l3doc}
+% Additional commands needed in this source
+\NewDocumentCommand\email{m}{\href{mailto:#1}{\nolinkurl{#1}}}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% ^^A As we are dealing with a class, this has to be done manually
+% \def\filedate{2025-10-10}
+% \def\fileversion{v0.2.3}
+%
+% \title{^^A
+%   \pkg{ltx-talk-mode} -- Modes^^A
+%   \thanks{This file describes \fileversion,
+%     last revised \filedate.}^^A
+% }
+%
+% \author{^^A
+%  Joseph Wright^^A
+%  \thanks{^^A
+%    E-mail: \email{joseph@texdev.net}^^A
+%   }^^A
+% }
+%
+% \date{Released \filedate}
+%
+% \maketitle
+%
+% \begin{documentation}
+%
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{ltx-talk-mode} implementation}
+%
+% Start the \pkg{DocStrip} guards.
+%    \begin{macrocode}
+%<*class>
+%    \end{macrocode}
+%
+% Identify the internal prefix.
+%    \begin{macrocode}
+%<@@=talk>
+%    \end{macrocode}
+%
+% \begin{macro}{\@@_mode:nT}
+%   A simplified version of \cs{mode}: only deal with the argument form,
+%   only check the entire overlay spec as a string.
+%    \begin{macrocode}
+\prg_new_protected_conditional:Npnn \@@_mode:n #1 { T }
+  {
+    \bool_lazy_or:nnTF
+      { \str_if_eq_p:nn {#1} { all } }
+      { \str_if_eq_p:Vn \l_@@_mode_str {#1} }
+      \prg_return_true:
+      \prg_return_false:
+  }
+%    \end{macrocode}
+% \end{macro}
+
+%
+% \begin{macro}{\mode}
+
+%    \begin{macrocode}
+\NewDocumentCommand \mode { D <> { all } +m }
+  { \@@_mode:nT {#1} {#2} }
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</class>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \PrintIndex

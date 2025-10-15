@@ -1,0 +1,199 @@
+%%%
+% Radar
+%%%
+\def\filedateRadar{2024/02/02}%
+\def\fileversionRadar{0.1a}%
+\message{-- \filedateRadar\space v\fileversionRadar}%
+%
+\setKVdefault[ClesRadar]{Rayon=3cm,Reference=20,MoyenneClasse=false,Disciplines=false,Pas=5}
+
+\newtoks\toklisteradarb%pour la discipline
+
+\def\UpdateRadarb#1/#2/#3\nil{\addtotok\toklisteradarb{"#2",}}%
+
+\def\PfCRadarMotifA{Dispensé(e)}%
+\def\PfCRadarMotifB{Absent(e)}%
+\def\PfCRadarMotifC{Non évalué(e)}%
+
+\NewDocumentCommand\MPRadar{mmmmmm}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      pair O;
+      O=(0,0);
+      path cc;
+      cc=cercles(O,#1);
+      % Retenir les valeurs:
+      numeric Val[],ValMoy[];
+      n:=0;
+      for p_=#5:
+      n:=n+1;
+      Val[n]=p_;
+      endfor;
+      n:=0;
+      for p_=#6:
+      n:=n+1;
+      ValMoy[n]=p_;
+      endfor;
+      TotalVal:=n;
+      % On affiche les cas particuliers en premier
+      pair El[],Cl[];
+      for k=1 upto TotalVal:
+        N[k]=k*(360/TotalVal);
+        trace segment(O,pointarc(cc,N[k]));
+        if Val[k]<0:
+          El[k]=O;
+          picture MotifZero;
+          MotifZero=image(
+          if Val[k]=-1:
+            label(TEX("\footnotesize \PfCRadarMotifA"),O);
+          elseif Val[k]=-2:
+            label(TEX("\footnotesize \PfCRadarMotifB"),O);
+          elseif Val[k]=-3:
+            label(TEX("\footnotesize \PfCRadarMotifC"),O);
+          fi;
+          );
+          MotifZero:=rotation(MotifZero,O,angle(pointarc(cc,N[k])-O)) shifted 1/2[O,pointarc(cc,N[k])];
+          fill bbox MotifZero withcolor white;
+          trace MotifZero;
+        else:
+          El[k]=(Val[k]/#4)[O,pointarc(cc,N[k])];
+        fi;
+        Cl[k]=(ValMoy[k]/#4)[O,pointarc(cc,N[k])];
+      endfor;
+      %% etiquettage des disciplines
+%      for k=1 upto TotalVal:%
+%
+%      endfor;
+      p:=0;
+      for p_=#2:
+        p:=p+1;
+        if (N[p]<90):
+          label.urt(TEX(p_),1.025[O,pointarc(cc,N[p])]);
+        fi;
+        if N[p]=90:
+          label.top(TEX(p_),1.025[O,pointarc(cc,N[p])]);
+        fi;
+        if ((N[p]>90) and (N[p]<180)):
+          label.ulft(TEX(p_),1.025[O,pointarc(cc,N[p])]);
+        fi;
+        if N[p]=180:
+        label.lft(TEX(p_),1.025[O,pointarc(cc,N[p])]);
+        fi;
+        if (N[p]>180) and (N[p]<270):
+          label.llft(TEX(p_),1.025[O,pointarc(cc,N[p])]);
+        fi;
+        if N[p]=270:
+          label.bot(TEX(p_),1.025[O,pointarc(cc,N[p])]);
+        fi;
+        if (N[p]>270):
+          label.lrt(TEX(p_),1.025[O,pointarc(cc,N[p])]);
+        fi;
+      endfor;
+      % trac\'e des pas:
+      pas=#4/#3;
+      for k=1 upto pas-1:
+        trace (k/pas)[O,pointarc(cc,N[1])] for l=2 upto TotalVal: --(k/pas)[O,pointarc(cc,N[l])] endfor --cycle dashed evenly withcolor 0.5white;
+      endfor;
+      trace pointarc(cc,N[1]) for l=2 upto TotalVal: --pointarc(cc,N[l]) endfor --cycle;
+      % etiquettage des pas
+      dotlabel.urt(TEX("\tiny"&decimal(#4)),pointarc(cc,0));
+      dotlabel.urt(TEX("\tiny"&decimal(#3)),(1/pas)[O,pointarc(cc,0)]);
+      % trac\'e des r\'esultats \'el\`eves et de la moyenne
+      draw El[1] for p=2 upto TotalVal:--El[p] endfor --cycle withpen pencircle scaled 1.5 withcolor blue;
+      trace Cl[1] for p=2 upto TotalVal:--Cl[p] endfor --cycle withcolor rouge;
+  \end{mplibcode}
+  \else
+  \begin{mpost}
+    pair O;
+    O=(0,0);
+    path cc;
+    cc=cercles(O,#1);
+    %%etiquettage des disciplines
+    n:=0;%compter le nombre de disciplines
+    for p_=#2:
+    n:=n+1;
+    endfor;
+    for k=1 upto n:
+    N[k]=k*(360/n);
+    trace segment(O,pointarc(cc,N[k]));% dashed evenly;
+    endfor;
+    p:=0;
+    for p_=#2:
+    p:=p+1;
+    if (N[p]<90) or (N[p]=90):
+    label.urt(TEX(p_),1.025[O,pointarc(cc,N[p])]);
+    fi;
+    if ((N[p]>90) and (N[p]<180)) or (N[p]=180):
+    label.ulft(TEX(p_),1.025[O,pointarc(cc,N[p])]);
+    fi;
+    if (N[p]>180) and (N[p]<270):
+    label.llft(TEX(p_),1.025[O,pointarc(cc,N[p])]);
+    fi;
+    if (N[p]>270) or (N[p]=270):
+    label.lrt(TEX(p_),1.025[O,pointarc(cc,N[p])]);
+    fi;
+    endfor;
+    % trac\'e des pas:
+    pas=#4/#3;
+    for k=1 upto pas-1:
+    trace (k/pas)[O,pointarc(cc,N[1])] for l=2 upto n: --(k/pas)[O,pointarc(cc,N[l])] endfor
+    --cycle dashed evenly withcolor 0.5white;
+    endfor;
+    trace pointarc(cc,N[1]) for l=2 upto n: --pointarc(cc,N[l]) endfor
+    --cycle;
+    % etiquettage des pas
+    dotlabel.top(LATEX("\noexpand\tiny"&decimal(#4)&"") rotated -90,pointarc(cc,0));
+    dotlabel.urt(LATEX("\noexpand\tiny"&decimal(#3)&""),(1/pas)[O,pointarc(cc,0)]);
+    % trac\'e des r\'esultats \'el\`eves
+    pair El[];
+    el=0;
+    for p_=#5:
+    el:=el+1;
+    El[el]=(p_/#4)[O,pointarc(cc,N[el])];
+    endfor;
+    trace El[1] for p=2 upto n:--El[p] endfor --cycle withpen
+    pencircle scaled 1.5 withcolor blue;
+    % trac\'e des r\'esultats classe
+    pair Cl[];
+    cl=0;
+    for p_=#6:
+    cl:=cl+1;
+    Cl[cl]=(p_/#4)[O,pointarc(cc,N[cl])];
+    endfor;
+    trace Cl[1] for p=2 upto n:--Cl[p] endfor --cycle withcolor rouge;
+  \end{mpost}
+  \fi
+}
+
+\NewDocumentCommand\Radar{om}{%
+  % 1 les param\`etres
+  % 2 la r\'epartition des notes
+  \useKVdefault[ClesRadar]%
+  \setKV[ClesRadar]{#1}%
+  \ignoreemptyitems%
+  \setsepchar[*]{,*/}%
+  \readlist*\ListeRadar{#2}%
+  \reademptyitems%
+  \foreachitem\compteur\in\ListeRadar{%
+    \ifnum\compteurcnt=1\relax%
+      \xdef\PfCListeRadarA{\ListeRadar[\compteurcnt,1]}%
+    \else%
+      \xdef\PfCListeRadarA{\PfCListeRadarA,\ListeRadar[\compteurcnt,1]}%
+    \fi%
+  }%
+  \ifboolKV[ClesRadar]{Disciplines}{}{%
+    \toklisteradarb{}%
+    \foreachitem\compteur\in\ListeRadar{\expandafter\UpdateRadarb\compteur\nil}%
+  }%
+  \ifboolKV[ClesRadar]{MoyenneClasse}{}{%
+    \foreachitem\compteur\in\ListeRadar{%
+      \ifnum\compteurcnt=1\relax%
+        \xdef\PfCListeRadarC{\ListeRadar[\compteurcnt,3]}%
+      \else%
+        \xdef\PfCListeRadarC{\PfCListeRadarC,\ListeRadar[\compteurcnt,3]}%
+      \fi%
+    }%
+  }%
+  \MPRadar{\useKV[ClesRadar]{Rayon}}{\the\toklisteradarb}{\useKV[ClesRadar]{Pas}}{\useKV[ClesRadar]{Reference}}{\PfCListeRadarA}{\PfCListeRadarC}%
+}%

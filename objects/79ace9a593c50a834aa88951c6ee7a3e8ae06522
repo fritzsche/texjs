@@ -1,0 +1,512 @@
+%%
+%% This is file `mismath.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% mismath.dtx  (with options: `package')
+%% 
+%% This is a generated file.
+%% 
+%% Copyright (C) 2019-2025 by Antoine Missier <antoine.missier@ac-toulouse.fr>
+%% 
+%% This file may be distributed and/or modified under the conditions of
+%% the LaTeX Project Public License, either version 1.3 of this license
+%% or (at your option) any later version. The latest version of this
+%% license is in:
+%% 
+%%    http://www.latex-project.org/lppl.txt
+%% 
+%% and version 1.3 or later is part of all distributions of LaTeX version
+%% 2005/12/01 or later.
+%% 
+\NeedsTeXFormat{LaTeX2e}[2005/12/01]
+\ProvidesPackage{mismath}
+    [2025/10/08 v3.2 .dtx Miscellaneous mathematical macros]
+
+\newif\ifmm@ibrackets % initialized to false
+\DeclareOption{ibrackets}{\mm@ibracketstrue}
+\newif\ifmm@decimalcomma
+\DeclareOption{decimalcomma}{\mm@decimalcommatrue}
+\newif\ifmm@nofunction
+\DeclareOption{nofunction}{\mm@nofunctiontrue}
+\newif\ifmm@otherReIm
+\DeclareOption{otherReIm}{\mm@otherReImtrue}
+\newif\ifmm@classicReIm
+\DeclareOption{classicReIm}{\mm@classicReImtrue}
+\DeclareOption*{\PassOptionsToPackage{\CurrentOption}{mathtools}}
+\ProcessOptions \relax
+
+\@ifpackageloaded{mathtools}{}{\RequirePackage{mathtools}}
+\@ifpackageloaded{esvect}{}{\RequirePackage[b]{esvect}}
+\RequirePackage{mleftright}
+\RequirePackage{ifthen}
+\providecommand\IfFormatAtLeastTF{\@ifl@t@r\fmtversion}
+\IfFormatAtLeastTF{2020-10-01}{}{\RequirePackage{xparse}}
+\RequirePackage{xspace} % for \iif command
+\RequirePackage{iftex}
+\RequirePackage{etoolbox} % provides \AtEndPreamble
+\RequirePackage{xkeyval} % for \pinumber options
+
+\@ifpackageloaded{unicode-math}{
+    \PackageWarningNoLine{mismath}{The package unicode-math\MessageBreak
+        should be loaded after mismath}
+}{}
+\newif\ifmm@unicodemath
+\newif\ifmm@multicol
+\AtEndPreamble{% necessary to work with unicode-math
+    \ifmm@decimalcomma\RequirePackage{decimalcomma}\fi
+    \ifmm@ibrackets\RequirePackage{ibrackets}\fi
+    \@ifpackageloaded{multicol}{\mm@multicoltrue}{}
+    \@ifpackageloaded{unicode-math}{\mm@unicodemathtrue}{
+        \DeclareMathAlphabet{\mathbfsfit}{\encodingdefault}%
+            {\sfdefault}{bx}{it}}
+}
+
+{\catcode`\|=\z@ \catcode`\\=12 |gdef|bslash{\}} % \bslash command
+
+\newcommand\mm@warning[1]{
+    \PackageWarningNoLine{mismath}{Command \bslash #1 already exist
+        \MessageBreak and will not be redefined}
+}
+\newcommand\mm@macro[2]{
+    \@ifundefined{#1}{
+        \expandafter\def\csname #1\endcsname{#2}
+    }{\mm@warning{#1}}
+}
+\NewDocumentCommand\mm@operator{O{#3}mm}{%
+    \@ifundefined{#1}{
+        \DeclareMathOperator{#2}{#3}
+    }{\mm@warning{#1}}
+}
+
+\@ifundefined{mathup}{
+    \providecommand*{\mathup}[1]{{\operatorfont #1}}
+    }{\mm@warning{mathup} } % also in kpfonts and unicode-math
+\mm@macro{e}{\mathup{e}}
+\AtBeginDocument{\let\oldi\i \let\oldj\j
+    \renewcommand{\i}{\TextOrMath{\oldi}{\mathup{i}}}
+    \renewcommand{\j}{\TextOrMath{\oldj}{\mathup{j}}} }
+
+\newcount\mm@charcode
+\newcount\mm@charclass
+\newcount\mm@charfam
+\newcount\mm@charslot
+
+\newcommand*\MathFamily[2]{%
+    \mm@charfam=#2
+    \ifluatex
+        \mm@charclass=\Umathcharclass`#1
+        %\mm@charfam=\Umathcharfam`#1
+        \mm@charslot=\Umathcharslot`#1
+        \Umathcode`#1= \mm@charclass \mm@charfam \mm@charslot
+    \else
+        \mm@charcode=\mathcode`#1
+        % extract charclass
+        \@tempcnta=\mm@charcode
+        \divide\@tempcnta by "1000
+        \multiply\@tempcnta by "1000 % charclass
+        \mm@charclass=\@tempcnta
+        % extract charslot
+        \@tempcnta=\mm@charcode
+        \@tempcntb=\mm@charcode
+        \divide\@tempcnta by "100
+        \multiply\@tempcnta by "100 % charclass + charfam
+        \advance\@tempcntb by -\@tempcnta % charslot
+        \mm@charslot=\@tempcntb
+        % construct charcode
+        \mm@charcode=\mm@charclass
+        \multiply\mm@charfam by "100
+        \advance\mm@charcode by \mm@charfam
+        \advance\mm@charcode by \mm@charslot
+        \mathcode`#1=\mm@charcode
+    \fi
+}
+
+\newcommand*\MathUp[1]{%
+    \ifx\@onlypreamble\@notprerr % not in preamble
+        \ifmm@unicodemath
+            \DeclareMathSymbol{#1}{\mathalpha}{operators}{`#1}
+        \else
+            \MathFamily{#1}{0}
+        \fi
+    \else % in preamble
+      \AtBeginDocument{
+        \ifmm@unicodemath
+            \DeclareMathSymbol{#1}{\mathalpha}{operators}{`#1}
+        \else
+            \MathFamily{#1}{0}
+        \fi
+      }
+    \fi
+}
+
+\newcommand*\MathIt[1]{%
+    \ifx\@onlypreamble\@notprerr % not in preamble
+        \ifmm@unicodemath
+            \DeclareMathSymbol{#1}{\mathalpha}{letters}{`#1}
+        \else
+            \MathFamily{#1}{1}
+        \fi
+    \else % in preamble
+      \AtBeginDocument{
+        \ifmm@unicodemath
+            \DeclareMathSymbol{#1}{\mathalpha}{letters}{`#1}
+        \else
+            \MathFamily{#1}{1}
+        \fi
+      }
+    \fi
+}
+
+\newcommand*\MathNumbers[1]{%
+    \in@{e}{#1} \ifin@ \MathUp{e} \fi
+    \in@{i}{#1} \ifin@ \MathUp{i} \fi
+    \in@{j}{#1} \ifin@ \MathUp{j} \fi
+}
+
+\def\apply#1#2{\apply@#1#2,\apply@,}
+\def\apply@#1#2,{\ifx\apply@#2\empty
+    \else #1{#2}\afterfi@{\apply@#1}\fi}
+\def\afterfi@#1#2\fi{\fi#1}
+
+\newcommand*\MathNormal[1]{% list argument
+    \apply\MathIt{#1}
+}
+
+\newcommand{\enumber}{\MathUp{e}}
+\newcommand{\inumber}{\MathUp{i}}
+\newcommand{\jnumber}{\MathUp{j}}
+
+\newif\ifmm@lgr
+\define@cmdkey{pifonts}[mm@]{lgrmath}[lmr]{\mm@lgrtrue}
+\newif\ifmm@upgreek
+\define@choicekey{pifonts}{upgreek}[\mm@upgreek@option]%
+    {Euler,Symbol,Symbolsmallscale}[Symbol]{\mm@upgreektrue}
+\newif\ifmm@mathdesign
+\define@choicekey{pifonts}{mathdesign}[\mm@mathdesign@option]%
+    {Utopia,Garamond,Charter}[Charter]{\mm@mathdesigntrue}
+\newif\ifmm@kpfonts
+\define@choicekey{pifonts}{kpfonts}[\mm@kp@option]%
+    {normal,light}[normal]{\mm@kpfontstrue}
+\define@boolkeys{pifonts}[mm@]{fourier,pxfonts,txfonts}[true]
+\newif\ifmm@fontspec
+\define@cmdkey{pifonts}[mm@]{fontspec}[GFS Didot]{\mm@fontspectrue}
+
+\newcommand*\pifonts[1]{%
+    \setkeys{pifonts}{#1}
+    \let\pi\relax
+
+    \ifmm@lgr
+        \DeclareFontEncoding{LGR}{}{}
+        \DeclareSymbolFont{mmupgr}{LGR}{\mm@lgrmath}{m}{n}
+        % may work with bold (b) instead of m
+        \DeclareMathSymbol{\pi}{\mathord}{mmupgr}{112}
+
+    \else\ifmm@fontspec
+        \@ifpackageloaded{fontspec}{}{
+            \PackageError{mismath}{\string\pinumber\space with
+                the `fontspec' option\MessageBreak
+                needs the fontspec package,\MessageBreak
+                which must be run with LuaLaTeX or XeLaTeX}{}
+        }
+        \newfontfamily\mismathgreekfont{\mm@fontspec}[NFSSFamily=mgr]
+        \DeclareSymbolFont{mmupgr}{TU}{mgr}{m}{n}
+        \Umathchardef\pi="7 \symmmupgr "03C0
+
+    \else\ifmm@upgreek
+        \ifdefstring{\mm@upgreek@option}{Euler}{
+            \DeclareFontFamily{U}{eur}{\skewchar\font'177}
+            \DeclareFontShape{U}{eur}{m}{n}{%
+              <-6> eurm5 <6-8> eurm7 <8-> eurm10}{}
+            \DeclareSymbolFont{mmupgr}{U}{eur}{m}{n}
+            \DeclareMathSymbol{\pi}{\mathord}{mmupgr}{"19}
+        }{
+        \ifdefstring{\mm@upgreek@option}{Symbol}{
+            \DeclareSymbolFont{mmupgr}{U}{psy}{m}{n}
+            \DeclareMathSymbol{\pi}{\mathord}{mmupgr}{`p}
+        }{
+        \ifdefstring{\mm@upgreek@option}{Symbolsmallscale}{
+            \DeclareFontFamily{U}{fsy}{}
+            \DeclareFontShape{U}{fsy}{m}{n}{<->s*[.9]psyr}{}
+            \DeclareSymbolFont{mmupgr}{U}{fsy}{m}{n}
+            \DeclareMathSymbol{\pi}{\mathord}{mmupgr}{`p}
+        }{}}}
+
+    \else\ifmm@mathdesign
+        \ifdefstring{\mm@mathdesign@option}{Utopia}{
+            \DeclareSymbolFont{mmupgr}{OML}{mdput}{m}{n}
+        }{
+        \ifdefstring{\mm@mathdesign@option}{Garamond}{
+            \DeclareSymbolFont{mmupgr}{OML}{mdugm}{m}{n}
+        }{
+        \ifdefstring{\mm@mathdesign@option}{Charter}{
+            \DeclareSymbolFont{mmupgr}{OML}{mdbch}{m}{n}
+        }{}}}
+
+    \else\ifmm@fourier
+        \DeclareFontEncoding{FML}{}{}
+        \DeclareSymbolFont{mmupgr}{FML}{futm}{m}{it}
+
+    \else\ifmm@kpfonts
+        \ifdefstring{\mm@kp@option}{normal}{
+            \DeclareSymbolFont{mmupgr}{U}{jkpmia}{m}{it}
+        }{
+        \ifdefstring{\mm@kp@option}{light}{
+            \DeclareSymbolFont{mmupgr}{U}{jkplmia}{m}{it}
+        }{}}
+
+    \else\ifmm@pxfonts
+        \DeclareSymbolFont{mmupgr}{U}{pxmia}{m}{it}
+
+    \else\ifmm@txfonts
+        \DeclareSymbolFont{mmupgr}{U}{txmia}{m}{it}
+
+    \fi\fi\fi\fi\fi
+        \DeclareMathSymbol{\pi}{\mathord}{mmupgr}{"19}
+    \fi\fi\fi
+}
+
+\newcommand*\pinumber[1][]{%
+    \ifthenelse{\equal{#1}{}}{% no argument given
+        \ifx\@onlypreamble\@notprerr % not in preamble
+            \@ifundefined{savedpi}{
+                \PackageWarning{mismath}{%
+                    \string\pinumber\space
+                    must be used in the preamble first}
+            }{\let\pi\savedpi}
+        \else % in the preamble
+            \AtEndPreamble{\AtBeginDocument{
+                \let\itpi\pi
+                \pifonts{lgrmath}
+                \let\savedpi\pi
+            }}
+        \fi
+    }{% command name or keyval options, necessarily in the preamble
+        \AtEndPreamble{\AtBeginDocument{% must be here with unicode-math
+            \let\itpi\pi
+            \@ifundefined{#1}{%
+                \pifonts{#1}
+            }{
+                \ifmm@unicodemath
+                    \ifthenelse{\equal{#1}{uppi}}{% or "1D70B
+                        \renewcommand\pi{\symup{\symbol{"03C0}}}
+                        \renewcommand\itpi{\symit{\symbol{"03C0}}}
+                    }{\renewcommand{\pi}{\csname #1\endcsname}}
+                \else
+                    \renewcommand{\pi}{\csname #1\endcsname}
+                \fi
+            }
+            \let\savedpi\pi
+        }}
+      }
+}
+
+\newcommand{\pinormal}{%
+  \@ifundefined{itpi}{
+    \PackageWarning{mismath}{Command \string\itpi\space undefined,
+    \MessageBreak
+    use \string\pinumber\space in the preamble first}
+  }{
+    \ifmm@unicodemath
+      \@ifundefined{savedpi}{
+        \PackageError{mismath}{Before using \string \pinormal,
+        \MessageBreak
+        you must call \string\pinumber\space in the preamble}{}}
+    \fi
+    \let\pi\itpi
+  }
+}
+
+\newboolean{arrowvect}
+\setboolean{arrowvect}{true}
+\newcommand{\arrowvect}{\setboolean{arrowvect}{true}}
+\newcommand{\boldvect}{\setboolean{arrowvect}{false}}
+\newcommand{\boldvectcommand}{\boldsymbol} % from amsbsy package
+\mm@macro{vect}{\ifthenelse{\boolean{arrowvect}}{
+    \vv}{\boldvectcommand}} % doesn't work well with \if... \fi
+\newcommand*{\hvect}[1]{\vect{\vphantom{A}#1}}
+\newcommand*{\hvec}[1]{\vec{\vphantom{A}#1}}
+
+\newcommand*{\@norm}[1]{
+    \mbox{\raisebox{1.75pt}{\small$\bigl\Vert$}} #1
+    \mbox{\raisebox{1.75pt}{\small$\bigr\Vert$}} }
+\newcommand*{\@@norm}[1]{
+    \mbox{\footnotesize\raisebox{1pt}{$\Vert$}} #1
+    \mbox{\footnotesize\raisebox{1pt}{$\Vert$}} }
+\newcommand*{\@@@norm}[1]{
+    \mbox{\tiny\raisebox{1pt}{$\Vert$}} #1
+    \mbox{\tiny\raisebox{1pt}{$\Vert$}} }
+\@ifundefined{norm}{\providecommand*{\norm}[1]{
+    \mathchoice{\@norm{#1}}{\@norm{#1}}{\@@norm{#1}}{\@@@norm{#1}}
+    }
+}{\mm@warning{norm}} % bad result with libertinust1math
+
+\newcommand{\tensor}{\mathbfsfit} % isomath uses \mathsfbfit
+
+\mm@macro{di}{\operatorname{d}\mathopen{}}
+\mm@macro{upDelta}{\Delta}
+\mm@macro{opDelta}{\operatorname{\upDelta}\mathopen{}}
+\mm@macro{opdelta}{\operatorname{\updelta}\mathopen{}}
+
+\newcommand\probastyle{}
+\let\Par\P % end of paragraph symbol
+\renewcommand{\P}{\operatorname{\probastyle{P}}}
+\mm@macro{E}{\operatorname{\probastyle{E}}}
+\mm@macro{V}{\operatorname{\probastyle{V}}}
+
+\newcommand*\MathProba[1]{%
+    \in@{P}{#1} \ifin@ \MathUp{P} \fi
+    \in@{E}{#1} \ifin@ \MathUp{E} \fi
+    \in@{V}{#1} \ifin@ \MathUp{V} \fi
+}
+
+\ifmm@nofunction\else
+    \mm@operator{\adj}{adj}
+    \mm@operator{\Aut}{Aut}
+    \mm@operator{\codim}{codim}
+    \mm@operator{\coker}{coker}
+    \mm@operator{\Conv}{Conv}
+    \mm@operator{\cov}{cov}
+    \mm@operator{\Cov}{Cov}
+    \mm@macro{curl}{\operatorname{\vect{\mathup{curl}}}}
+    \mm@operator[divg]{\divg}{div}
+
+    \mm@operator{\End}{End}
+    \mm@operator{\erf}{erf}
+    \mm@macro{grad}{\operatorname{\vect{\mathup{grad}}}}
+    \mm@operator{\id}{id} % mathop or mathord?
+    \mm@operator{\Id}{Id}
+    \mm@operator{\im}{im}
+    \mm@operator{\lb}{lb}
+    \mm@operator{\lcm}{lcm}
+    \mm@operator{\rank}{rank}
+
+    \mm@operator{\Res}{Res}
+    \mm@macro{rot}{\operatorname{\vect{\mathup{rot}}}}
+    \mm@operator{\sgn}{sgn}
+    \mm@operator{\sinc}{sinc}
+    \mm@operator[spa]{\spa}{span}
+    \mm@operator{\tr}{tr}
+    \mm@operator{\var}{var}
+    \mm@operator{\Var}{Var}
+    \mm@operator[Zu]{\Zu}{Z}
+
+    \mm@operator{\arccot}{arccot}
+    \mm@operator{\sech}{sech}
+    \mm@operator{\csch}{csch}
+    \mm@operator{\arsinh}{arsinh}
+    \mm@operator{\arcosh}{arcosh}
+    \mm@operator{\artanh}{artanh}
+    \mm@operator{\arcoth}{arcoth}
+    \mm@operator{\arsech}{arsech}
+    \mm@operator{\arcsch}{arcsch}
+\fi
+
+\DeclareFontFamily{U}{cmsy}{\skewchar\font48 }
+\DeclareFontShape{U}{cmsy}{m}{n}{% from mathalpha
+    <-5.5> cmsy5%
+    <5.5-6.5> cmsy6%
+    <6.5-7.5> cmsy7%
+    <7.5-8.5> cmsy8%
+    <8.5-9.5> cmsy9%
+    <9.5-> cmsy10}{}
+\DeclareMathAlphabet{\cmmathcal}{U}{cmsy}{m}{n}
+
+\AtEndPreamble{\AtBeginDocument{
+    \ifmm@classicReIm\else
+        \let\oldRe\Re
+        \let\oldIm\Im
+    \ifmm@otherReIm
+        \renewcommand{\Re}{\cmmathcal{R}\mathit{e}}
+        \renewcommand{\Im}{\cmmathcal{I}\mathit{m}}
+    \else
+        \renewcommand{\Re}{\operatorname{Re}}
+        \renewcommand{\Im}{\operatorname{Im}}
+    \fi\fi
+}}
+
+\mm@operator[bigO]{\bigO}{\cmmathcal{O}}
+\mm@operator[bigo]{\bigo}{O}
+\mm@operator[lito]{\lito}{o}
+
+\mm@macro{mathset}{\mathbf}
+\mm@macro{R}{\mathset{R}}
+\mm@macro{C}{\mathset{C}}
+\AtBeginDocument{% \iftutex = LuaTex or XeTeX engines
+    \@ifpackageloaded{hyperref}{\iftutex\onlymathC\fi}{} }
+\providecommand\onlymathC{\let\oldC\C
+    \renewcommand{\C}{\TextOrMath{\oldC}{\mathset{C}}} }
+\mm@macro{N}{\mathset{N}}
+\mm@macro{Z}{\mathset{Z}}
+\mm@macro{Q}{\mathset{Q}}
+\mm@macro{F}{\mathset{F}}
+\mm@macro{K}{\mathset{K}}
+
+\mm@macro{ds}{\displaystyle}
+\mm@macro{dlim}{\lim\limits}
+\mm@macro{dsum}{\sum\limits}
+\mm@macro{dprod}{\prod\limits}
+\mm@macro{dcup}{\bigcup\limits}
+\mm@macro{dcap}{\bigcap\limits}
+
+\mm@macro{lbar}{\overline}
+\@ifundefined{hlbar}{
+    \providecommand*{\hlbar}[1]{\overline{\vphantom{A}#1}}}{
+    \mm@warning{hlbar} }
+\newcommand\@eqdef{\stackrel{\mathup{def}}{=}}
+\newcommand\@@eqdef{\stackrel{\upDelta}{=}}
+\mm@macro{eqdef}{\@ifstar{\@@eqdef}{\@eqdef}}
+\mm@macro{unbr}{\underbrace}
+\mm@macro{iif}{if and only if\xspace}
+\mm@macro{then}{\implies}
+
+\@ifundefined{txt}{
+    \providecommand*{\txt}[1]{\quad\text{#1}\quad} }{
+    \mm@warning{txt} }
+\mm@macro{mul}{\mathclose{}\mathord{\times}\mathopen{}}
+\@ifundefined{pow}{
+    \providecommand*{\pow}[2]{\left( #1 \right)^{\!#2}} }{
+    \mm@warning{pow} }
+\@ifundefined{abs}{
+    \providecommand*{\abs}[1]{{\left\vert#1\right\vert}} }{
+    \mm@warning{abs} }
+\@ifundefined{lfrac}{
+    \providecommand*{\lfrac}[3][7mu]{%
+        \frac{\mkern#1#2\mkern#1}{\mkern#1#3\mkern#1}} }{
+    \mm@warning{lfrac} }
+
+\newcommand{\systemstretch}{1.2}
+\newcommand{\systemsep}{\medspace}
+\newenvironment{system}[1][l]{
+    \renewcommand{\arraystretch}{\systemstretch}
+    \setlength{\arraycolsep}{0.15em}
+    \left\{\begin{array}{@{\systemsep}#1@{}} %
+}{\end{array}\right.}
+
+\newenvironment{spmatrix}{
+    \left(\begin{smallmatrix}
+}{\end{smallmatrix}\right)}
+
+\newenvironment{mathcols}{% needs multicol package
+  \ifmm@multicol
+    \renewcommand{\columnseprule}{0.1pt}
+    \begin{multicols}{2}
+        \par\noindent\hfill
+        \begin{math}\begin{aligned}\displaystyle
+  \else
+    \PackageError{mismath}{The mathcols environment
+        needs the multicol package}{Call the package multicol
+        in your preamble.}
+  \fi
+}{       \end{aligned}\end{math} \hfill\mbox{}
+    \end{multicols}
+}
+\newcommand{\changecol}{%
+    \end{aligned}\end{math} \hfill\mbox{}
+    \par\noindent\hfill
+    \begin{math}\begin{aligned}\displaystyle}
+
+\endinput
+%%
+%% End of file `mismath.sty'.

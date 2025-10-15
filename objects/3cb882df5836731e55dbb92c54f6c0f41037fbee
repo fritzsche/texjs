@@ -1,0 +1,432 @@
+%%%
+% Lien : ratio
+%%%
+\def\filedateDessinRatio{2025/05/26}%
+\def\fileversionDessinRatio{0.1b}%
+\message{-- \filedateDessinRatio\space v\fileversionDessinRatio}%
+%
+\setKVdefault[ClesRatio]{FigureCours=false,Figure=false,Longueur=5cm,TexteTotal=quantit\'e,TextePart=part,Tableau=false,GrandeurA=Grandeur A,GrandeurB=Part(s),Largeur=1cm,Stretch=1,Nom=false,CouleurUn=gris,CouleurDeux=0.5gris+0.5blanc,CouleurTrois=white,CouleurTab=gray!15,ModeleCouleur=5,Legende=false,Legendes={},AideLecture,Couleurs={gris,0.5gris+0.5blanc,white}}
+\defKV[ClesRatio]{Legendes=\ifempty{#1}{}{\setKV[ClesRatio]{Legende}}}%
+
+\newcommand\MPTest[9][]{%
+  % #2 : Longueur de la barre unit\'e
+  % #3 : premier nombre
+  % #4 : deuxi\`eme nombre
+  % #5 : troisi\`eme nombre
+  % #6 : ne sert à rien. Laissé en attente.
+  % #7 \`a #9: Couleurs de remplissage
+  \ifluatex
+   \mplibforcehmode
+   \begin{mplibcode}
+     defaultcolormodel := \useKV[ClesRatio]{ModeleCouleur};
+     boolean Legende,AideLecture;
+     Legende=\useKV[ClesRatio]{Legende};
+     AideLecture=\useKV[ClesRatio]{AideLecture};
+     %
+    vardef RatioTrois(expr long)(text t)=%longueur de la barre / quantit\'e \`a partager / textepart :) / t le ratio
+    pair A,B,C,D;
+    A=u*(1,1);
+    B-A=(long,0);
+    C-B=u*(0,0.5);
+    D-C=A-B;
+    n:=0;%n pour savoir si le ratio est a:b ou a:b:c
+    numeric N[];%Pour sauvegarder les \'el\'ements du ratio
+    for p_=t:
+    n:=n+1;
+    N[n]=p_;
+    endfor;
+    % on fait la somme totale "du ratio"
+    somme=0;
+    somme:=somme for k=1 upto n:+N[k] endfor;
+    %Figure(0,0,long+2u,3u);
+    remplis polygone(A,(N[1]/somme)[A,B],(N[1]/somme)[D,C],D)
+    withcolor #7;
+    remplis polygone(B,(N[1]/somme)[A,B],(N[1]/somme)[D,C],C)
+    withcolor #8;
+    if n>2:
+    remplis
+    polygone((N[1]/somme)[A,B],((N[1]+N[2])/somme)[A,B],((N[1]+N[2])/somme)[D,C],(N[1]/somme)[D,C])
+    withcolor #8;
+    remplis
+    polygone(B,((N[1]+N[2])/somme)[A,B],((N[1]+N[2])/somme)[D,C],C)
+    withcolor #9;
+    fi;
+    drawoptions(withpen pencircle scaled1.5bp);
+    draw polygone(A,B,C,D);
+    for k=1 upto somme-1:
+    draw segment((k/somme)[A,B],(k/somme)[D,C]);
+    endfor;
+    drawoptions();
+    % accolades
+    ecartvert=0;
+    if Legende:
+    ecartvert:=1;
+    label.bot(TEX("\footnotesize$\underbrace{\hbox
+      to"&decimal(abs((N[1]/somme)[A,B]-A))&"pt{}}$"),iso(A,(N[1]/somme)[A,B]));
+    label.bot(TEX("\footnotesize$\underbrace{\hbox
+      to"&decimal(abs((N[1]/somme)[A,B]-((N[1]+N[2])/somme)[A,B]))&"pt{}}$"),iso(((N[1]+N[2])/somme)[A,B],(N[1]/somme)[A,B]));
+    if n>2:
+    label.bot(TEX("\footnotesize$\underbrace{\hbox
+      to"&decimal(abs(((N[1]+N[2])/somme)[A,B]-B))&"pt{}}$"),iso(B,((N[1]+N[2])/somme)[A,B]));
+    fi;
+    fi;
+    labeloffset:=labeloffset/2;
+    label.top(TEX("\footnotesize$\overbrace{\hbox
+      to"&decimal(abs(A-B))&"pt{}}$"),iso(D,C));
+    labeloffset:=labeloffset*2;
+    if AideLecture:
+    label.bot(TEX("\footnotesize$\underbrace{\hbox
+      to"&decimal(abs((N[1]/somme)[A,B]-A))&"pt{}}$"),iso(A,(N[1]/somme)[A,B])+u*(0,-ecartvert));
+    label.bot(TEX("\footnotesize$\underbrace{\hbox
+      to"&decimal(abs((N[1]/somme)[A,B]-((N[1]+N[2])/somme)[A,B]))&"pt{}}$"),iso(((N[1]+N[2])/somme)[A,B],(N[1]/somme)[A,B])+u*(0,-ecartvert));
+    if n>2:
+    label.bot(TEX("\footnotesize$\underbrace{\hbox
+      to"&decimal(abs(((N[1]+N[2])/somme)[A,B]-B))&"pt{}}$"),iso(B,((N[1]+N[2])/somme)[A,B])+u*(0,-ecartvert));
+    fi;
+    fi;
+    enddef;
+    RatioTrois(#2)(#3,#4,#5);
+    % etiquettage
+    if Legende:
+    nbleg:=0;
+    string Leg[];
+    for p_=\useKV[ClesRatio]{Legendes}:
+    nbleg:=nbleg+1;
+    Leg[nbleg]=p_;
+    endfor;
+    labeloffset:=labeloffset*3;
+    label.bot(TEX(Leg[1]),iso(A,(N[1]/somme)[A,B]));
+    label.bot(TEX(Leg[2]),iso(((N[1]+N[2])/somme)[A,B],(N[1]/somme)[A,B]));
+    if n>2:
+    label.bot(TEX(Leg[3]),iso(B,((N[1]+N[2])/somme)[A,B]));
+    fi;
+    labeloffset:=labeloffset/3;
+    if AideLecture:
+    draw (A+u*0.75(0,-ecartvert))--(A+u*(0,-ecartvert)+(0,-1.5*labeloffset)) dashed evenly;
+    draw (B+u*0.75(0,-ecartvert))--(B+u*(0,-ecartvert)+(0,-1.5*labeloffset)) dashed evenly;
+    draw ((N[1]/somme)[A,B]+u*0.75(0,-ecartvert))--((N[1]/somme)[A,B]+u*(0,-ecartvert)+(0,-1.5*labeloffset)) dashed evenly;
+    fi;
+    fi;
+    %
+    labeloffset:=labeloffset*3;
+    label.top(btex \useKV[ClesRatio]{TexteTotal} etex,iso(D,C));
+    if AideLecture:
+    if #3>1:
+    label.bot(btex #3~\useKV[ClesRatio]{TextePart}s
+    etex,iso(A,(N[1]/somme)[A,B])+u*(0,-ecartvert));
+    else:
+    label.bot(btex #3~\useKV[ClesRatio]{TextePart} etex,iso(A,(N[1]/somme)[A,B])+u*(0,-ecartvert));
+    fi;
+    if #4>1:
+    label.bot(btex #4~\useKV[ClesRatio]{TextePart}s etex,iso(((N[1]+N[2])/somme)[A,B],(N[1]/somme)[A,B])+u*(0,-ecartvert));
+    else:
+    label.bot(btex #4~\useKV[ClesRatio]{TextePart}
+    etex,iso(((N[1]+N[2])/somme)[A,B],(N[1]/somme)[A,B])+u*(0,-ecartvert));
+    fi;
+    if n>2:
+    if #5>1:
+    label.bot(btex #5~\useKV[ClesRatio]{TextePart}s etex,iso(B,((N[1]+N[2])/somme)[A,B])+u*(0,-ecartvert));
+    else:
+    label.bot(btex #5~\useKV[ClesRatio]{TextePart} etex,iso(B,((N[1]+N[2])/somme)[A,B])+u*(0,-ecartvert));
+    fi;
+    fi;
+    fi;
+  \end{mplibcode}
+  \else
+  \mpxcommands{%
+    \usepackage{ProfCollege}
+    \setKVdefault[ClesRatio]{TexteTotal=quantit\'e,TextePart=part}
+    \setKV[ClesRatio]{#1}
+  }
+  \begin{mpost}
+    vardef RatioTrois(expr long)(text t)=%longueur de la barre / quantit\'e \`a partager / textepart :) / t le ratio
+    pair A,B,C,D;
+    A=u*(1,1);
+    B-A=(long,0);
+    C-B=u*(0,0.5);
+    D-C=A-B;
+    n:=0;%n pour savoir si le ratio est a:b ou a:b:c
+    numeric N[];%Pour sauvegarder les \'el\'ements du ratio
+    for p_=t:
+    n:=n+1;
+    N[n]=p_;
+    endfor;
+    % on fait la somme totale "du ratio"
+    somme=0;
+    somme:=somme for k=1 upto n:+N[k] endfor;
+    Figure(0,0,long+2u,3u);
+    remplis polygone(A,(N[1]/somme)[A,B],(N[1]/somme)[D,C],D)
+    withcolor #7;
+    remplis polygone(B,(N[1]/somme)[A,B],(N[1]/somme)[D,C],C)
+    withcolor #8;
+    if n>2:
+    remplis
+    polygone((N[1]/somme)[A,B],((N[1]+N[2])/somme)[A,B],((N[1]+N[2])/somme)[D,C],(N[1]/somme)[D,C])
+    withcolor #8;
+    remplis
+    polygone(B,((N[1]+N[2])/somme)[A,B],((N[1]+N[2])/somme)[D,C],C)
+    withcolor #9;
+    fi;
+    drawoptions(withpen pencircle scaled1.5bp);
+    draw polygone(A,B,C,D);
+    for k=1 upto somme-1:
+    draw segment((k/somme)[A,B],(k/somme)[D,C]);
+    endfor;
+    drawoptions();
+    %accolades
+    label.top(LATEX("\noexpand\footnotesize$\noexpand\overbrace{\noexpand\hbox
+      to"&decimal(abs(A-B))&"pt{}}$"),iso(D,C));
+    label.bot(LATEX("\noexpand\footnotesize$\noexpand\underbrace{\noexpand\hbox
+      to"&decimal(abs((N[1]/somme)[A,B]-A))&"pt{}}$"),iso(A,(N[1]/somme)[A,B]));
+    label.bot(LATEX("\noexpand\footnotesize$\noexpand\underbrace{\noexpand\hbox
+      to"&decimal(abs((N[1]/somme)[A,B]-((N[1]+N[2])/somme)[A,B]))&"pt{}}$"),iso(((N[1]+N[2])/somme)[A,B],(N[1]/somme)[A,B]));
+    if n>2:
+    label.bot(LATEX("\noexpand\footnotesize$\noexpand\underbrace{\noexpand\hbox
+      to"&decimal(abs(((N[1]+N[2])/somme)[A,B]-B))&"pt{}}$"),iso(B,((N[1]+N[2])/somme)[A,B]));
+    fi;
+    enddef;
+    RatioTrois(#2)(#3,#4,#5);
+    %etiquettage
+    labeloffset:=labeloffset*3;
+    label.top(\btex \useKV[ClesRatio]{TexteTotal} etex,iso(D,C));
+    if #3>1:
+    label.bot(btex #3\unexpanded{~\useKV[ClesRatio]{TextePart}}s etex,iso(A,(N[1]/somme)[A,B]));
+    else:
+    label.bot(btex #3\unexpanded{~\useKV[ClesRatio]{TextePart}} etex,iso(A,(N[1]/somme)[A,B]));
+    fi;
+    if #4>1:
+    label.bot(btex #4\unexpanded{~\useKV[ClesRatio]{TextePart}}s etex,iso(((N[1]+N[2])/somme)[A,B],(N[1]/somme)[A,B]));
+    else:
+    label.bot(btex #4\unexpanded{~\useKV[ClesRatio]{TextePart}} etex,iso(((N[1]+N[2])/somme)[A,B],(N[1]/somme)[A,B]));
+    fi;
+    if n>2:
+    if #5>1:
+    label.bot(btex #5\unexpanded{~\useKV[ClesRatio]{TextePart}}s etex,iso(B,((N[1]+N[2])/somme)[A,B]));
+    else:
+    label.bot(btex #5\unexpanded{~\useKV[ClesRatio]{TextePart}} etex,iso(B,((N[1]+N[2])/somme)[A,B]));
+    fi;
+    fi;
+  \end{mpost}
+  \fi
+}%
+
+\newcommand\MPTestCours[9][]{%
+  % #2 : Longueur de la barre unit\'e
+  % #3 : premier nombre
+  % #4 : deuxi\`eme nombre
+  % #5 : troisi\`eme nombre
+  % #6 : Valeurs du ratio
+  % #7 \`a #9: Couleurs de remplissage
+  \ifluatex
+   \mplibforcehmode
+   \begin{mplibcode}
+     defaultcolormodel := \useKV[ClesRatio]{ModeleCouleur};
+    vardef RatioTrois(expr long)(text t)=%longueur de la barre / quantit\'e \`a partager / textepart :) / t le ratio
+    pair A,B,C,D;
+    A=u*(1,1);
+    B-A=(long,0);
+    C-B=u*(0,0.5);
+    D-C=A-B;
+    n:=0;%n pour savoir si le ratio est a:b ou a:b:c
+    numeric N[];%Pour sauvegarder les \'el\'ements du ratio
+    for p_=t:
+    n:=n+1;
+    N[n]=p_;
+    endfor;
+    % on fait la somme totale "du ratio"
+    somme=0;
+    somme:=somme for k=1 upto n:+N[k] endfor;
+    %%Figure(0,0,long+2u,3u);
+    remplis polygone(A,(N[1]/somme)[A,B],(N[1]/somme)[D,C],D)
+    withcolor #7;
+    remplis polygone(B,(N[1]/somme)[A,B],(N[1]/somme)[D,C],C)
+    withcolor #8;
+    if n>2:
+    remplis
+    polygone((N[1]/somme)[A,B],((N[1]+N[2])/somme)[A,B],((N[1]+N[2])/somme)[D,C],(N[1]/somme)[D,C])
+    withcolor #8;
+    remplis
+    polygone(B,((N[1]+N[2])/somme)[A,B],((N[1]+N[2])/somme)[D,C],C)
+    withcolor #9;
+    fi;
+    drawoptions(withpen pencircle scaled1.5bp);
+    draw polygone(A,B,C,D);
+    for k=1 upto somme-1:
+    draw segment((k/somme)[A,B],(k/somme)[D,C]);
+    endfor;
+    drawoptions();
+    % accolades
+    label.bot(TEX("\footnotesize$\underbrace{\hbox
+      to"&decimal(abs((N[1]/somme)[A,B]-A))&"pt{}}$"),iso(A,(N[1]/somme)[A,B]));
+    label.bot(TEX("\footnotesize$\underbrace{\hbox
+      to"&decimal(abs((N[1]/somme)[A,B]-((N[1]+N[2])/somme)[A,B]))&"pt{}}$"),iso(((N[1]+N[2])/somme)[A,B],(N[1]/somme)[A,B]));
+    if n>2:
+    label.bot(TEX("\footnotesize$\underbrace{\hbox
+      to"&decimal(abs(((N[1]+N[2])/somme)[A,B]-B))&"pt{}}$"),iso(B,((N[1]+N[2])/somme)[A,B]));
+    fi;
+    enddef;
+    RatioTrois(#2)(#3,#4,#5);
+    %etiquettage
+    labeloffset:=labeloffset*3;
+    label.bot(btex $a$ etex,iso(A,(N[1]/somme)[A,B]));
+    label.bot(btex $b$ etex,iso(((N[1]+N[2])/somme)[A,B],(N[1]/somme)[A,B]));
+    if n>2:
+    label.bot(btex $c$ etex,iso(B,((N[1]+N[2])/somme)[A,B]));
+    fi;
+  \end{mplibcode}
+  \else
+  \begin{mpost}
+    vardef RatioTrois(expr long)(text t)=%longueur de la barre / quantit\'e \`a partager / textepart :) / t le ratio
+    pair A,B,C,D;
+    A=u*(1,1);
+    B-A=(long,0);
+    C-B=u*(0,0.5);
+    D-C=A-B;
+    n:=0;%n pour savoir si le ratio est a:b ou a:b:c
+    numeric N[];%Pour sauvegarder les \'el\'ements du ratio
+    for p_=t:
+    n:=n+1;
+    N[n]=p_;
+    endfor;
+    % on fait la somme totale "du ratio"
+    somme=0;
+    somme:=somme for k=1 upto n:+N[k] endfor;
+    %Figure(0,0,long+2u,3u);
+    remplis polygone(A,(N[1]/somme)[A,B],(N[1]/somme)[D,C],D)
+    withcolor #7;
+    remplis polygone(B,(N[1]/somme)[A,B],(N[1]/somme)[D,C],C)
+    withcolor #8;
+    if n>2:
+    remplis
+    polygone((N[1]/somme)[A,B],((N[1]+N[2])/somme)[A,B],((N[1]+N[2])/somme)[D,C],(N[1]/somme)[D,C])
+    withcolor #8;
+    remplis
+    polygone(B,((N[1]+N[2])/somme)[A,B],((N[1]+N[2])/somme)[D,C],C)
+    withcolor #9;
+    fi;
+    drawoptions(withpen pencircle scaled1.5bp);
+    draw polygone(A,B,C,D);
+    for k=1 upto somme-1:
+    draw segment((k/somme)[A,B],(k/somme)[D,C]);
+    endfor;
+    drawoptions();
+    % accolades
+    label.bot(LATEX("\noexpand\footnotesize$\noexpand\underbrace{\noexpand\hbox
+      to"&decimal(abs((N[1]/somme)[A,B]-A))&"pt{}}$"),iso(A,(N[1]/somme)[A,B]));
+    label.bot(LATEX("\noexpand\footnotesize$\noexpand\underbrace{\noexpand\hbox
+      to"&decimal(abs((N[1]/somme)[A,B]-((N[1]+N[2])/somme)[A,B]))&"pt{}}$"),iso(((N[1]+N[2])/somme)[A,B],(N[1]/somme)[A,B]));
+    if n>2:
+    label.bot(LATEX("\noexpand\footnotesize$\noexpand\underbrace{\noexpand\hbox
+      to"&decimal(abs(((N[1]+N[2])/somme)[A,B]-B))&"pt{}}$"),iso(B,((N[1]+N[2])/somme)[A,B]));
+    fi;
+    enddef;
+    RatioTrois(#2)(#3,#4,#5);
+    %etiquettage
+    labeloffset:=labeloffset*3;
+    label.bot(btex $a$ etex,iso(A,(N[1]/somme)[A,B]));
+    label.bot(btex $b$ etex,iso(((N[1]+N[2])/somme)[A,B],(N[1]/somme)[A,B]));
+    if n>2:
+    label.bot(btex $c$ etex,iso(B,((N[1]+N[2])/somme)[A,B]));
+    fi;
+  \end{mpost}
+  \fi
+}
+
+\newtoks\toklisteratio
+\def\UpdateRatio#1\nil{\addtotok\toklisteratio{#1,}}
+
+\def\updateratiotoks#1/#2/#3\nil{\addtotok\tabtoksa{&\ifx\bla#2\bla\else\num{#2}\fi}\addtotok\tabtoksb{&\ifx\bla#3\bla\else\num{#3}\fi}\addtotok\tabtoksc{&#1}}
+
+\def\buildtabratio{%
+  \tabtoksa{}\tabtoksb{}\tabtoksc{}%
+  \tabtoksa{\useKV[ClesRatio]{GrandeurA}}\tabtoksb{\useKV[ClesRatio]{GrandeurB}}
+  \foreachitem\compteur\in\ListeRatio{\expandafter\updateratiotoks\compteur\nil}%
+  \xdef\LongListe{\ListeRatiolen}%
+  \renewcommand{\arraystretch}{\useKV[ClesRatio]{Stretch}}%
+  \begin{tabular}{|>{\columncolor{\useKV[ClesRatio]{CouleurTab}}}c|*{\number\numexpr\ListeRatiolen}{>{\centering\arraybackslash}p{\useKV[ClesRatio]{Largeur}}|}l}
+    \ifboolKV[ClesRatio]{Nom}{%
+    \hhline{~*{\number\numexpr\ListeRatiolen}{-}}
+    \multicolumn{1}{c|}{}\the\tabtoksc\\
+    }{}
+    \hhline{*{\number\numexpr\ListeRatiolen+1}{-}}%
+    \the\tabtoksa&\setcounter{NbPropor}{1}\TikzRH\\%
+    \hhline{*{\number\numexpr\ListeRatiolen+1}{-}}%
+    \the\tabtoksb&\setcounter{NbPropor}{1}\TikzRB\\%
+    \hhline{*{\number\numexpr\ListeRatiolen+1}{-}}%
+  \end{tabular}%
+}%
+
+\newcommand\TikzRH{%
+   \tikz[remember picture,overlay]{%
+   \coordinate[name=ProporH-\theNbPropor,yshift=\getstrut\ht*\arraystretch];}%
+   \stepcounter{NbPropor}%
+ }%
+
+ \newcommand\TikzRB{%
+   \tikz[remember picture, overlay]{%
+     \coordinate[name=ProporB-\theNbPropor,yshift=-\getstrut\dp*\arraystretch];}%
+   \stepcounter{NbPropor}%
+ }%
+ 
+\newcommand\FlecheRatio[2][\EcartLargeur]{%
+  \begin{tikzpicture}[remember picture, overlay]%
+    \node[] (Point1) at ($(ProporH-1)!0.1!(ProporB-1)$) {};%
+    \node[] (Point2) at ($(ProporH-1)!0.9!(ProporB-1)$) {};%
+    \coordinate[right of=Point1,node distance=0*#1-\tabcolsep] (point1);%
+    \coordinate[right of=Point2,node distance=0*#1-\tabcolsep] (point2);%
+    \draw[-stealth,out=-20,in=20] (point1) to node[midway,right,inner sep=1pt]{#2}(point2);%
+\end{tikzpicture}%
+}%
+
+\newcommand\FlecheInvRatio[2][\EcartLargeur]{%
+  \begin{tikzpicture}[remember picture, overlay]%
+    \node[] (Point1) at ($(ProporH-1)!0.1!(ProporB-1)$) {};%
+    \node[] (Point2) at ($(ProporH-1)!0.9!(ProporB-1)$) {};%
+    \coordinate[right of=Point1,node distance=0*#1-\tabcolsep] (point1);%
+    \coordinate[right of=Point2,node distance=0*#1-\tabcolsep] (point2);%
+    \draw[-stealth,out=20,in=-20] (point2) to node[midway,right,inner sep=1pt]{#2}(point1);%
+\end{tikzpicture}%
+}%
+
+\newcommand\Ratio[2][]{%
+  \useKVdefault[ClesRatio]%
+  \setKV[ClesRatio]{#1}%
+  \xdef\EcartLargeur{\useKV[ClesRatio]{Largeur}}%
+  \ifboolKV[ClesRatio]{FigureCours}{%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeRatio{#2}%
+    \toklisteratio{}%
+    \foreachitem\compteur\in\ListeRatio{\expandafter\UpdateRatio\compteur\nil}%
+    \itemtomacro\ListeRatio[1]\NbUn%
+    \itemtomacro\ListeRatio[2]\NbDeux%
+    \xintifboolexpr{\ListeRatiolen>2}{\itemtomacro\ListeRatio[3]\NbTrois}{\xdef\NbTrois{}}%
+    \xintifboolexpr{\ListeRatiolen>2}{\xdef\PfCFooRatioCoul{\useKV[ClesRatio]{Couleurs}}}{\xdef\PfCFooRatioCoul{\useKV[ClesRatio]{Couleurs},white}}%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeCouleurs{\PfCFooRatioCoul}%
+    \reademptyitems%
+    % \MPTestCours[#1]{\useKV[ClesRatio]{Longueur}}{\NbUn}{\NbDeux}{\NbTrois}{\the\toklisteratio}{\useKV[ClesRatio]{CouleurUn}}{\useKV[ClesRatio]{CouleurDeux}}{\useKV[ClesRatio]{CouleurTrois}}%
+    \MPTestCours[#1]{\useKV[ClesRatio]{Longueur}}{\NbUn}{\NbDeux}{\NbTrois}{\the\toklisteratio}{\ListeCouleurs[1]}{\ListeCouleurs[2]}{\ListeCouleurs[3]}%
+  }{%
+    \ifboolKV[ClesRatio]{Figure}{%
+      \setsepchar{,}\ignoreemptyitems%
+      \readlist*\ListeRatio{#2}%
+      \toklisteratio{}%
+      \foreachitem\compteur\in\ListeRatio{\expandafter\UpdateRatio\compteur\nil}%
+      \itemtomacro\ListeRatio[1]\NbUn%
+      \itemtomacro\ListeRatio[2]\NbDeux%
+      \xintifboolexpr{\ListeRatiolen>2}{\itemtomacro\ListeRatio[3]\NbTrois}{\xdef\NbTrois{}}%
+      \xintifboolexpr{\ListeRatiolen>2}{\xdef\PfCFooRatioCoul{\useKV[ClesRatio]{Couleurs}}}{\xdef\PfCFooRatioCoul{\useKV[ClesRatio]{Couleurs},white}}%
+      \setsepchar{,}\ignoreemptyitems%
+      \readlist*\ListeCouleurs{\PfCFooRatioCoul}%
+      \reademptyitems%
+%      \MPTest[#1]{\useKV[ClesRatio]{Longueur}}{\NbUn}{\NbDeux}{\NbTrois}{\the\toklisteratio}{\useKV[ClesRatio]{CouleurUn}}{\useKV[ClesRatio]{CouleurDeux}}{\useKV[ClesRatio]{CouleurTrois}}%
+      \MPTest[#1]{\useKV[ClesRatio]{Longueur}}{\NbUn}{\NbDeux}{\NbTrois}{\the\toklisteratio}{\ListeCouleurs[1]}{\ListeCouleurs[2]}{\ListeCouleurs[3]}%
+    }{%
+      \ifboolKV[ClesRatio]{Tableau}{%
+        \setsepchar[*]{,*/}\ignoreemptyitems%
+        \readlist*\ListeRatio{#2}%
+        \buildtabratio%
+      }{}%
+    }%
+  }%
+}%

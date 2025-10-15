@@ -1,0 +1,56 @@
+%%%
+% Message caché
+%%%
+\def\filedateHidden{2025/05/26}%
+\def\fileversionHidden{0.1a}%
+\message{-- \filedateHidden\space v\fileversionHidden}%
+%
+\setKVdefault[Hidden]{TLargeur=5,THauteur=3,Solution=false,Hauteur=70pt,Largeur=120pt,Jeu=false,Solution,Plateau={}}
+\defKV[Hidden]{Plateau=\ifempty{#1}{}{\setKV[Hidden]{Jeu}\setKV[Hidden]{Solution=false}}}%
+
+\newlength\PfCHiddenHeight%
+\newlength\PfCHiddenWidth%
+
+\NewDocumentCommand\MessageCache{o m m}{%1 options 2 questions/réponses 3 message
+  % on récupère les options
+  \useKVdefault[Hidden]%
+  \setKV[Hidden]{#1}%
+  % on définit les dimensions des cases
+  \setlength{\PfCHiddenHeight}{\useKV[Hidden]{Hauteur}+\tabcolsep}%
+  \setlength{\PfCHiddenWidth}{\useKV[Hidden]{Largeur}}%
+  % On récupère les questions
+  \setsepchar[*]{§*/}%
+  \readlist*\PfCHiddenQuestions{#2}%
+  \setsepchar{,}
+  \ifboolKV[Hidden]{Solution}{%
+    % On donne les questions et la phrase
+    \begin{center}
+      \begin{NiceTabular}{*{\useKV[Hidden]{TLargeur}}{m{\PfCHiddenWidth}}}%[hvlines]
+        \xintFor* ##1 in{\xintSeq{1}{\useKV[Hidden]{THauteur}}}\do{%
+          \rule{0pt}{\PfCHiddenHeight}\xintFor* ##2 in {\xintSeq{1}{\useKV[Hidden]{TLargeur}}}\do{%
+            \Block[draw]{1-1}{\PfCHiddenQuestions[\fpeval{\useKV[Hidden]{THauteur}*(##1-1)+##2},1]}\xintifForLast{}{&}
+          }\\
+        }%
+        \CodeAfter%
+        \StrGobbleLeft{#3}{0}[\PhraseCorrection]%
+        \xintFor* ##1 in{\xintSeq{1}{\useKV[Hidden]{THauteur}}}\do{%
+          \xintFor* ##2 in{\xintSeq{1}{\fpeval{\useKV[Hidden]{TLargeur}-1}}}\do{%
+            \StrLeft{\PhraseCorrection}{1}[\LettreAAfficher]\StrGobbleLeft{\PhraseCorrection}{1}[\PhraseCorrection]%
+            \tikz{\node[anchor=south] at (\fpeval{##1+1}-|\fpeval{##2+1}) {\huge\bfseries\LettreAAfficher};}%
+          }%
+        }%
+      \end{NiceTabular}
+    \end{center}
+  }{%
+    % On donne le plateau des solutions
+    \begin{center}
+      \begin{NiceTabular}{*{\useKV[Hidden]{TLargeur}}{m{\PfCHiddenWidth}}}%[hvlines]
+        \xintFor* ##1 in{\xintSeq{1}{\useKV[Hidden]{THauteur}}}\do{%
+          \rule{0pt}{\PfCHiddenHeight}\xintFor* ##2 in {\xintSeq{1}{\useKV[Hidden]{TLargeur}}}\do{%
+            \Block[draw]{1-1}{\PfCHiddenQuestions[\fpeval{\useKV[Hidden]{THauteur}*(##1-1)+##2},2]}\xintifForLast{}{&}
+          }\\
+        }%
+      \end{NiceTabular}
+    \end{center}
+  }%
+}%

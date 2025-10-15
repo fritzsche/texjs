@@ -1,0 +1,364 @@
+%%%
+% Logos Recyclage
+%%%
+\def\filedateRecyclage{2025/05/27}%
+\def\fileversionRecyclage{0.1a}%
+\message{-- \filedateRecyclage\space v\fileversionRecyclage}%
+%
+\setKVdefault[Recyclage]{Ticket,Papier=false,Verre=false,Bouteille=false,Carton=false,Couleurs,Couleur={}}%
+\defKV[Recyclage]{Couleur=\ifempty{#1}{}{\setKV[Recyclage]{Couleurs=false}}}%
+
+\NewDocumentCommand\LogoRecyclage{o}{%
+  \useKVdefault[Recyclage]%
+  \setKV[Recyclage]{#1}%
+  \ifboolKV[Recyclage]{Papier}{%
+    \PfCLogoTriPapier%
+  }{%
+    \ifboolKV[Recyclage]{Carton}{%
+      \PfCLogoTriCarton%
+    }{%
+      \ifboolKV[Recyclage]{Verre}{%
+        \PfCLogoTriVerre%
+      }{%
+        \ifboolKV[Recyclage]{Bouteille}{%
+          \PfCLogoTriBouteille%
+        }{%
+          \PfCLogoTriTicket%
+        }%
+      }%
+    }%
+  }%
+}%
+
+\def\PfCLogoTriCodeBase{%
+  largeur=3;
+  rayon=0.5;
+  pair A,B,C,D,Mab,Mbc,Mcd,Mda,O,N[],T[];
+  A=(0,0);
+  B-A=u*(largeur,0);
+  C-B=u*(0,0.5*largeur);
+  D-C=A-B;
+  O=iso(A,B,C,D)+u*(rayon/2,0);
+  Mab-A=u*(rayon,0);
+  Mbc-C=u*(0,-rayon);
+  Mcd-C=u*(-rayon,0);
+  Mda-A=u*(0,rayon);
+  N1=2/5[D,C]+u*(rayon/2,-0.1);
+  N2-D=u*(0.1,-0.1);
+  N3-Mda=u*(0.1,0);
+  N4-Mab=u*(0,0.1);
+  N5=2/5[A,B]+u*(rayon/2,0.1);
+  path contourtri;
+  contourtri=D--Mda{dir-90}..{dir0}Mab--B--Mbc{dir90}..{dir180}Mcd--cycle;
+  path partieg;
+  partieg=O--N1--N2--N3{dir-90}..{dir0}N4--N5--cycle;
+  fill contourtri withcolor CouleurFond;
+  fill partieg withcolor white;
+  picture poubelle;
+  poubelle=image(
+  pair Q[],R[];
+  Q1=C+u*(-0.75rayon,-.75rayon);
+  Q2-Q1=u*(-0.25rayon,-1.75rayon);
+  Q3-Q2=u*(-0.85rayon,0);
+  Q4-Q3=u*(-0.25rayon,1.75rayon);
+  R1-Q1=u*(0.125rayon,0.1rayon);
+  R2-R1=u*(0.05rayon,0.2rayon);
+  R3-R2=u*(-0.15rayon,0);
+  R4-R3=u*(-0.15rayon,0.15rayon);
+  R8-Q4=u*(-0.125rayon,0.1rayon);
+  R7-R8=u*(-0.05rayon,0.2rayon);
+  R6-R7=u*(0.15rayon,0);
+  R5-R6=u*(0.15rayon,0.15rayon);
+  drawoptions(withpen pencircle scaled 1.25 withcolor black);
+  trace Q1--Q2--Q3--Q4;
+  trace R1--R2--R3--R4--R5--R6--R7--R8--cycle;
+  trace 1/5[R3,R6]--4/5[R3,R6];
+  drawoptions(withpen pencircle scaled 2.5 withcolor black);
+  trace (Q2+u*(0.1rayon,-0.1rayon))--(Q2+u*(0.1rayon,0.1rayon));
+  trace (Q3+u*(-0.1rayon,-0.1rayon))--(Q3+u*(-0.1rayon,0.1rayon));
+  drawoptions();
+  );
+  picture bacverre;
+  bacverre=image(%
+  pair S[];
+  S1=C+u*(-0.5rayon,-.35rayon);
+  S2-S1=u*(0,-0.45rayon);
+  S3-S2=u*(0,-1.25rayon);
+  S4-S3=u*(-0.45rayon,-0.45rayon);
+  S5-S4=u*(-0.875rayon,0);
+  S6-S5=u*(-0.45rayon,0.45rayon);
+  S7-S6=u*(0,1.25rayon);
+  S8-S7=u*(0.45rayon,0.45rayon);
+  S9-S8=u*(0.875rayon,0);
+  trace S2--S3{dir-90}..{dir180}S4--S5{dir180}..{dir90}S6--S7{dir90}..{dir0}S8--S9{dir0}..cycle;
+  trace (S4+u*(0.15rayon,-0.05rayon))--(S5+u*(-0.15rayon,-0.05rayon));
+  trace fullcircle scaled 1mm shifted (iso(S2,S7));
+  );
+}%
+
+\NewDocumentCommand\PfCLogoTriTicket{}{%
+  \ifluatex
+    \begin{Geometrie}[Cadre="aucun"]
+      boolean Colore;
+      color CouleurFond;
+      Colore=\useKV[Recyclage]{Couleurs};
+      if Colore:
+      CouleurFond=(253/256,197/256,47/256);
+      else:
+      CouleurFond=\useKV[Recyclage]{Couleur};
+      fi;
+      \PfCLogoTriCodeBase;
+      picture journal;
+      journal=image(%
+%      typetrace:="mainlevee";
+      label.top(TEX("\ttfamily\footnotesize TICKET"),iso(A,iso(A,B)+u*(rayon/2,0))+u*(0,rayon/4));
+      T1=A+u*(rayon,1.5rayon);
+      T2-T1=u*(rayon,-rayon/4);
+      T3-T2=u*(0.5rayon,1rayon);
+      T4-T3=T1-T2;
+      path ticket,lignesprix[];
+      ticket=T1--T2{dir60}..{dir90}T3--T4{dir-90}..{dir-150}T1--cycle;
+      draw ticket;
+      for k=2 upto 7:
+      lignesprix[k]=(point(3+k/10) of ticket)--((point(3+k/10) of ticket)+T2-T1);
+      if k<7:
+      draw subpath(0.1,0.5) of lignesprix[k];
+      fi;
+      draw subpath(0.6,0.8) of lignesprix[k];
+      endfor;
+      );
+      trace journal;
+      if Colore:
+      drawoptions(withcolor black);
+      else:
+      drawoptions(withcolor white);
+      fi;
+      trace poubelle;
+      label(TEX("\bfseries\scriptsize\begin{tabular}{c}BAC\\DE\\TRI\end{tabular}"),iso(Q1,Q2,Q3,Q4));
+      drawoptions();
+    \end{Geometrie}
+  \fi
+}%
+
+\NewDocumentCommand\PfCLogoTriBouteille{}{%
+  \ifluatex
+    \begin{Geometrie}[Cadre="aucun"]
+      boolean Colore;
+      color CouleurFond;
+      Colore=\useKV[Recyclage]{Couleurs};
+      if Colore:
+      CouleurFond=(253/256,197/256,47/256);
+      else:
+      CouleurFond=\useKV[Recyclage]{Couleur};
+      fi;
+      \PfCLogoTriCodeBase;
+      picture bouteille;
+      bouteille=image(%
+      %typetrace:="mainlevee";
+      label.top(TEX("\ttfamily\footnotesize PLASTIQUE"),iso(A,iso(A,B)+u*(rayon/2,0))+u*(0,rayon/4));
+      T1=A+u*(1.25rayon,1.125rayon);
+      T2-T1=u*(0.75rayon,0);
+      T3-T2=u*(0,0.5rayon);
+      T4-T3=u*(0,0.5rayon);
+      T5-T4=u*(0,0.125rayon);
+      T6-T5=u*(-0.25rayon,0.25rayon);
+      T7-T6=u*(-0.125rayon,0);
+      T8-T7=u*(-0.25rayon,-0.25rayon);
+      T9-T8=u*(0,-0.125rayon);
+      T10-T9=u*(0,-0.5rayon);
+      T11-T10=u*(0,-0.5rayon);
+      path corps,bouchon,corpsg,lignesgrad[];
+      corps=T3{dir100}..{dir70}T4--T5{dir95}..{dir90}T6--T7{dir-90}..{dir-95}T8--T9{dir-70}..{dir-100}T10..{dir-50}T11{dir-10}..{dir10}T2{dir50}..cycle;
+      corpsg=T8--T9{dir-70}..{dir-100}T10..{dir-50}T11{dir-10};
+      bouchon=T6--(T6+u*(0.05rayon,0))--(T6+u*(0.05rayon,0.05rayon))--(T7+u*(-0.05rayon,0.05rayon))--(T7+u*(-0.05rayon,0))--cycle;
+      draw corps;
+      draw bouchon;
+      for k=1 upto 7:
+      lignesgrad[k]=(point(k*length corpsg/8) of corpsg){dir-10}..((point(k*length corpsg/8) of corpsg)+u*(0.125rayon,0));
+      if k<>6:
+      draw lignesgrad[k];
+      fi;
+      endfor;
+      );
+      trace bouteille;
+      if Colore:
+      drawoptions(withcolor black);
+      else:
+      drawoptions(withcolor white);
+      fi;
+      trace poubelle;
+      label(TEX("\bfseries\scriptsize\begin{tabular}{c}BAC\\DE\\TRI\end{tabular}"),iso(Q1,Q2,Q3,Q4));
+      drawoptions();
+    \end{Geometrie}
+  \fi
+}%
+
+\NewDocumentCommand\PfCLogoTriVerre{}{%
+  \ifluatex
+    \begin{Geometrie}[Cadre="aucun"]
+      boolean Colore;
+      color CouleurFond;
+      Colore=\useKV[Recyclage]{Couleurs};
+      if Colore:
+      CouleurFond=(0,139/256,50/256);
+      else:
+      CouleurFond=\useKV[Recyclage]{Couleur};
+      fi;
+      \PfCLogoTriCodeBase;
+      picture bouteille;
+      bouteille=image(%
+      %typetrace:="mainlevee";
+      label.top(TEX("\ttfamily\footnotesize VERRE"),iso(A,iso(A,B)+u*(rayon/2,0))+u*(0,rayon/4));
+      T1=A+u*(1.25rayon,1.125rayon);
+      T2-T1=u*(0.75rayon,0);
+      T3-T2=u*(0,0.5rayon);
+      T4-T3=u*(0,0.5rayon);
+      T5-T4=u*(0,0.125rayon);
+      T6-T5=u*(-0.25rayon,0.25rayon);
+      T7-T6=u*(-0.125rayon,0);
+      T8-T7=u*(-0.25rayon,-0.25rayon);
+      T9-T8=u*(0,-0.125rayon);
+      T10-T9=u*(0,-0.5rayon);
+      T11-T10=u*(0,-0.5rayon);
+      path corps,bouchon,corpsg,lignesgrad[];
+      corps=T3{dir100}..{dir70}T4--T5{dir95}..{dir90}T6--T7{dir-90}..{dir-95}T8--T9{dir-70}..{dir-100}T10..{dir-50}T11{dir-10}..{dir10}T2{dir50}..cycle;
+      corpsg=T8--T9{dir-70}..{dir-100}T10..{dir-50}T11{dir-10};
+      bouchon=T6--(T6+u*(0.05rayon,0))--(T6+u*(0.05rayon,0.05rayon))--(T7+u*(-0.05rayon,0.05rayon))--(T7+u*(-0.05rayon,0))--cycle;
+      draw corps;
+      draw bouchon;
+      for k=1 upto 7:
+      lignesgrad[k]=(point(k*length corpsg/8) of corpsg){dir-10}..((point(k*length corpsg/8) of corpsg)+u*(0.125rayon,0));
+      if k<>6:
+      draw lignesgrad[k];
+      fi;
+      endfor;
+      );
+      trace bouteille;
+%      if Colore:
+%      drawoptions(withcolor black);
+%      else:
+      drawoptions(withpen pencircle scaled 1.25 withcolor white);
+%      fi;
+      trace bacverre;
+      label(TEX("\bfseries\scriptsize\begin{tabular}{c}TRI\\VERRE\end{tabular}"),iso(S3,S6)+u*(0,0.245rayon));
+      drawoptions();
+    \end{Geometrie}
+  \fi
+}%
+
+\NewDocumentCommand\PfCLogoTriCarton{}{%
+  \ifluatex
+    \begin{Geometrie}[Cadre="aucun"]
+      boolean Colore;
+      color CouleurFond;
+      Colore=\useKV[Recyclage]{Couleurs};
+      if Colore:
+      CouleurFond=(253/256,197/256,47/256);
+      else:
+      CouleurFond=\useKV[Recyclage]{Couleur};
+      fi;
+      \PfCLogoTriCodeBase;
+      picture etui;
+      etui=image(%
+      %typetrace:="mainlevee";
+      label.top(TEX("\ttfamily\footnotesize CARTON"),iso(A,iso(A,B)+u*(rayon/2,0))+u*(0,rayon/4));
+      pair Tcarton[];
+      Tcarton1=A+u*(0.75rayon,1.75rayon);
+      Tcarton2-Tcarton1=u*(0,0.5rayon);
+      Tcarton3-Tcarton2=u*(0.5rayon,0.25rayon);
+      Tcarton4-Tcarton3=u*(1.25rayon,-0.5rayon);
+      Tcarton5-Tcarton4=Tcarton1-Tcarton2;
+      Tcarton6-Tcarton5=Tcarton2-Tcarton3;
+      Tcarton7-Tcarton6=Tcarton4-Tcarton5;
+      Tcarton8-Tcarton3=Tcarton5-Tcarton4;
+      path cotehaut,cotegauche,cotedroit,cotebas;
+      cotehaut=polygone(Tcarton4,Tcarton7,Tcarton7+u*(0.05rayon,0.35rayon),Tcarton4+u*(0.05rayon,0.35rayon));
+      cotebas=polygone(Tcarton5,Tcarton6,Tcarton6+u*(0.15rayon,-0.35rayon),Tcarton5+u*(0.15rayon,-0.35rayon));
+      cotegauche=polygone(Tcarton6,Tcarton7,Tcarton7+u*(-0.15rayon,-0.35rayon),Tcarton6+u*(-0.15rayon,-0.35rayon));
+      cotedroit=polygone(Tcarton4,Tcarton5,Tcarton5+u*(0.35rayon,-0.15rayon),Tcarton4+u*(0.35rayon,-0.15rayon));
+      trace polygone(Tcarton4,Tcarton5,Tcarton6,Tcarton7);
+      trace chemin(Tcarton7,Tcarton2,Tcarton3);
+      trace segment(Tcarton2,Tcarton1);
+      trace cotehaut; trace cotebas; trace cotegauche; trace cotedroit;
+      trace segment(Tcarton3,Tcarton4) cutafter segment(Tcarton7+u*(0.05rayon,0.35rayon),Tcarton4+u*(0.05rayon,0.35rayon));
+      trace segment(Tcarton1,Tcarton6) cutafter segment(Tcarton7+u*(-0.15rayon,-0.35rayon),Tcarton6+u*(-0.15rayon,-0.35rayon));
+      trace segment(Tcarton5,Tcarton8) cutafter segment(Tcarton7,Tcarton6);
+      );
+      trace etui;
+      if Colore:
+      drawoptions(withcolor black);
+      else:
+      drawoptions(withcolor white);
+      fi;
+      trace poubelle;
+      label(TEX("\bfseries\scriptsize\begin{tabular}{c}BAC\\DE\\TRI\end{tabular}"),iso(Q1,Q2,Q3,Q4));
+      drawoptions();
+    \end{Geometrie}
+  \fi
+}%
+
+\NewDocumentCommand\PfCLogoTriPapier{}{%
+  \ifluatex
+    \begin{Geometrie}[Cadre="aucun"]
+      boolean Colore;
+      color CouleurFond;
+      Colore=\useKV[Recyclage]{Couleurs};
+      if Colore:
+      CouleurFond=(253/256,197/256,47/256);
+      else:
+      CouleurFond=\useKV[Recyclage]{Couleur};
+      fi;
+      \PfCLogoTriCodeBase;
+      picture journal;
+      journal=image(%
+%      typetrace:="mainlevee";
+      label.top(TEX("\ttfamily\footnotesize PAPIER"),iso(A,iso(A,B)+u*(rayon/2,0))+u*(0,rayon/4));
+      T1=A+u*(1.25rayon,rayon);
+      T2-T1=u*(0.5rayon,0.125rayon);
+      T3-T2=u*(0.5rayon,0);
+      T4-T3=u*(-0.125rayon,1.5rayon);
+      T5-T2=0.85*(T4-T3);
+      T6-T1=0.95*(T4-T3);
+      path ticket,lignesprix[];
+      ticket=T1--T2--T3--T4--T5--T6--cycle;
+      draw ticket;
+      trace T2--T5;
+      % lignes côté gauche
+      for k=1 upto 3:
+      lignesprix[k]=(point(5+k/12) of ticket)--((point(5+k/12) of ticket)+T5-T6);
+      draw subpath(0.1,0.5) of lignesprix[k];
+      endfor;
+      for k=5 upto 6:
+      lignesprix[k]=(point(5+k/12) of ticket)--((point(5.065+k/12) of ticket)+T2-T1);
+      draw subpath(0.1,0.9) of lignesprix[k];
+      endfor;
+      for k=9 upto 11:
+      lignesprix[k]=(point(5+k/12) of ticket)--((point(5+k/12) of ticket)+T2-T1);
+      draw subpath(0.5,0.9) of lignesprix[k];
+      endfor;
+      % lignes côté droit
+      for k=1 upto 3:
+      lignesprix[k]:=(point(2+k/12) of ticket)--((point(2+k/12) of ticket)+T2-T3);
+      draw subpath(0.1,0.5) of lignesprix[k];
+      endfor;
+      for k=5 upto 7:
+      lignesprix[k]:=(point(2+k/12) of ticket)--((point(1.935+k/12) of ticket)+T2-T3);
+      draw subpath(0.1,0.4) of lignesprix[k];
+      endfor;
+      for k=9 upto 11:
+      lignesprix[k]:=(point(2+k/12) of ticket)--((point(2+k/12) of ticket)+T5-T4);
+      draw subpath(0.2,0.8) of lignesprix[k];
+      endfor;
+      );
+      trace journal;
+      if Colore:
+      drawoptions(withcolor black);
+      else:
+      drawoptions(withcolor white);
+      fi;
+      trace poubelle;
+      label(TEX("\bfseries\scriptsize\begin{tabular}{c}BAC\\DE\\TRI\end{tabular}"),iso(Q1,Q2,Q3,Q4));
+      drawoptions();
+    \end{Geometrie}
+  \fi
+}%

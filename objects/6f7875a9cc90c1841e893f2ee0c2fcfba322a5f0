@@ -1,0 +1,2191 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2019-2024 by Antoine Missier <antoine.missier@ac-toulouse.fr>
+%
+% This file may be distributed and/or modified under the conditions of
+% the LaTeX Project Public License, either version 1.3 of this license
+% or (at your option) any later version.  The latest version of this
+% license is in:
+%
+%   http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of LaTeX version
+% 2005/12/01 or later.
+% \fi
+%
+% \iffalse
+%<*driver>
+\ProvidesFile{mismath.dtx}
+%</driver>
+%<*package> 
+\NeedsTeXFormat{LaTeX2e}[2005/12/01]
+\ProvidesPackage{mismath}   
+    [2025/10/08 v3.2 .dtx Miscellaneous mathematical macros]
+%</package>
+%<*driver>
+\documentclass{ltxdoc}
+\usepackage[utf8]{inputenc} % run through XeLaTeX
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+%\usepackage{fontspec}
+\usepackage{fourier} % in case of font change, modify 2.1 (3rd §)
+\usepackage[ibrackets,decimalcomma,otherReIm]{mismath}
+%\usepackage{amssymb} % unnecessary with fourier
+\usepackage{multicol}
+\usepackage{sectsty}
+\usepackage{xcolor}
+\usepackage[pifont]{spacingtricks}
+\usepackage{array}
+\usepackage{metalogo} % for logos of XeLaTeX et LuaLaTeX
+
+\definecolor{darkbrown}{rgb}{0.5,0.1,0.1}
+\allsectionsfont{\color{darkbrown}}
+
+% Next command is used for showing original Latin Modern \i and \j in text mode:
+%\DeclareTextFontCommand{\extrafont}{\fontfamily{lmr}\selectfont} % useless with fourier
+
+% The following commands provide several shapes for pi
+\DeclareFontEncoding{LGR}{}{}
+\def\pilmr{\text{\usefont{LGR}{lmr}{m}{n}\symbol{112}}}
+\def\piAlegreya{\text{\usefont{LGR}{Alegreya-LF}{m}{n}\symbol{112}}}
+\def\piCochineal{\text{\usefont{LGR}{Cochineal-LF}{m}{n}\symbol{112}}}
+\def\piLibSerif{\text{\usefont{LGR}{LibertinusSerif-LF}{m}{n}\symbol{112}}}
+\def\piLibSans{\text{\usefont{LGR}{LibertinusSans-LF}{m}{n}\symbol{112}}}
+\def\pilmss{\text{\usefont{LGR}{lmss}{m}{n}\symbol{112}}}
+\def\pigentium{\text{\usefont{LGR}{gentium}{m}{n}\symbol{112}}}
+\def\pilato{\text{\usefont{LGR}{lato-LF}{m}{n}\symbol{112}}}
+\DeclareFontFamily{U}{eur}{\skewchar\font'177}
+\DeclareFontShape{U}{eur}{m}{n}{%
+    <-6> eurm5 <6-8> eurm7 <8-> eurm10}{}
+\def\piEuler{\text{\usefont{U}{eur}{m}{n}\symbol{"19}}}
+\def\piSymbol{\text{\usefont{U}{psy}{m}{n}\symbol{`p}}}
+\def\piCharter{\text{\usefont{OML}{mdbch}{m}{n}\symbol{"19}}}
+\def\pikp{\text{\usefont{U}{jkpmia}{m}{it}\symbol{"19}}}
+\pinumber[otherpi] % fourier
+\def\pipx{\text{\usefont{U}{pxmia}{m}{it}\symbol{"19}}}
+\def\pitx{\text{\usefont{U}{txmia}{m}{it}\symbol{"19}}}
+
+\let\updelta\otherdelta
+
+\DisableCrossrefs         
+%\CodelineIndex
+%\RecordChanges
+
+\usepackage{hyperref}
+\hypersetup{%
+    colorlinks, 
+    linkcolor=blue,
+    citecolor=red,   
+    pdftitle={mismath}, 
+    pdfsubject={LaTeX package}, 
+    pdfauthor={Antoine Missier}
+}
+\begin{document}
+  \DocInput{mismath.dtx}
+  %\PrintChanges
+  %\PrintIndex
+\end{document}
+%</driver>
+% \fi
+%
+% \GetFileInfo{mismath.sty}
+%
+% \title{Miscellaneous mathematical macros \\The \textsf{mismath} package\thanks{This document
+% corresponds to \textsf{mismath}~\fileversion, dated \filedate. 
+% Thanks to François Bastouil for initial help in English translation.}}
+% \author{Antoine Missier \\ \texttt{antoine.missier@ac-toulouse.fr}}
+% \date{October 8, 2025}
+%
+% \maketitle
+% \tableofcontents
+%
+% \section{Introduction}
+%
+% According to the International Standards ISO~31-0:1992 to ISO~31-13:1992
+% (superseded by ISO~80000-2:2009), mathematical \emph{constants} $\e$, $\i$, $\pi$ 
+% should be typeset in roman (upright shape) and not in italic like
+% variables (see~\cite{TYPMA}~\cite{NIST}~\cite{SI}~\cite{ICTNS}).
+% This package provides some tools to achieve this automatically.
+%
+% \medskip
+% Even though it is recommended to typeset vectors names 
+% in bold italic style~\cite{NIST}~\cite{ICTNS}, 
+% they are often represented with arrows,
+% especially in school documents or in physics. 
+% To draw nice arrows above vectors, we use the \textsf{esvect} package 
+% by Eddie Saudrais~\cite{VECT}.
+% Additionally we provide a few more macros related to vectors with arrows, 
+% particularly to improve the typesetting of the norm: $\norm{\vect{AB}}$ 
+% instead of the \LaTeX\ version $\lVert\vect{AB}\rVert$, which is not vertically adjusted,
+% or worse $\left\Vert \vect{AB} \right\Vert$ (when using |\left|\ldots |\right|).
+% 
+% \smallskip
+% The package also offers other macros to typeset:
+% \begin{itemize}
+% \item tensors in sans serif bold italic shape 
+% (ISO recommendation~\cite{TYPMA}~\cite{NIST}~\cite{SI}),
+% \item some standard operator names,
+% \item several commands with useful aliases,
+% \item improved spacings in mathematical formulas,
+% \item systems of equations and small matrices,
+% \item displaymath in double columns for lengthy calculations with short expressions.
+% \end{itemize}
+%
+% To avoid compatibility issues, most of our macros will only be defined 
+% if there isn't already a command with the same name in the packages loaded 
+% before \textsf{mismath}. If a macro is already defined,
+% a warning message will be displayed and the \textsf{mismath} definition 
+% will be ignored. If you wish to keep the \textsf{mismath} or the existing command,
+% you can use |\let\|\meta{command}|\relax|, before loading \textsf{mismath}, or after.
+%
+% \medskip
+% \DescribeEnv{\oarg{options}}
+% The \textsf{mismath} package loads the \textsf{mleftright}
+% \footnote{The \textsf{mleftright} package defines variants \texttt{\string \mleft} 
+% and \texttt{\string \mright} of \texttt{\string \left} and \texttt{\string \right}.} 
+% package by Heiko Oberdiek~\cite{MLR} and also \textsf{mathtools}  
+% \footnote{The \textsf{mathtools} package offers numerous helpful macros and improvements 
+% of the \textsf{amsmath} package.}
+% by Morten Høgholm and Lars Madsen~\cite{TOOL} which in turn loads
+% the \mbox{\textsf{amsmath}} package~\cite{AMS}.
+% If you want to use \mbox{\textsf{amsmath}} or \textsf{mathtools} with specific options,
+% you can include these options as options of \mbox{\textsf{mismath}}, or 
+% you can load \textsf{amsmath} or \textsf{mathtools}
+% with the desired options before loading \mbox{\textsf{mismath}}.
+% When using the package \mbox{\textsf{unicode-math}}~\cite{UNIC}, \textsf{mismath} 
+% should be loaded before \textsf{unicode-math}, just like \textsf{amsmath}.
+%
+% \medskip
+% An ISO recommendation, although rarely followed, is to typeset uppercase 
+% Greek letters in italic shape,
+% as for other variables~\cite{ICTNS}. This is automatically achieved,
+% for some particular fonts, with packages 
+% such as \textsf{fixmath} by Walter Schmidt~\cite{FIXM},
+% \mbox{\textsf{isomath}} by Günter Milde~\cite{ISOM} 
+% or \textsf{pm-isomath} by Claudio Beccari~\cite{PMISO} and optionally with many others
+% (such as \textsf{mathpazo} or \textsf{mathptmx} with the option \texttt{slantedGreek}).
+% When running through \LuaLaTeX\ or \XeLaTeX\ you can also get this result 
+% with the option \mbox{\texttt{math-style=ISO}} provided 
+% by the \textsf{unicode-math} package.
+% We also have the new \mbox{\textsf{mathgreeks}} package~\cite{MGREEK} which offers 
+% a wide range of fonts and different settings with Greek letters.
+% However this feature is not implemented here due to a conflicting rule in France,
+% where all capital letters in mathematics
+% are required to be typeset in upright shape
+% \footnote{The \textsf{frenchmath} package~\cite{FR}
+% ensures to follow the recommended French rules.}.
+% The user is free to choose loading one of these packages or not.
+% 
+%
+% \section{Usage}
+%
+% \subsection{Mathematical constants} 
+%
+% \DescribeMacro{\mathup} 
+% As for classic functions identifiers, \emph{predefined} mathematical constants
+% should be typeset in upright shape (typically in roman family), 
+% but this practice is not sufficiently respected, probably because it's a bit tedious. 
+% A first solution is to use the |\mathup| macro, 
+% which is preferable to |\mathrm|
+% \footnote{The \texttt{\string \mathup} macro is based on \texttt{\string \operatorfont}, 
+% which comes from the
+% \textsf{amsopn} package, automatically loaded by \textsf{amsmath}. 
+% In \textsf{beamer}, the default math font is sans serif, 
+% but \texttt{\string \mathrm} produces a font with serifs, which might not match the 
+% overall style of the presentation. Hence, using \texttt{\string \mathup} is indeed 
+% a better choice in \textsf{beamer} presentations to ensure that mathematical 
+% constants are typeset in upright shape and consistent 
+% with the default sans serif math font.},
+% for setting any group of letters in roman. For example you can use
+% |\mathup{e}| to get the Euler's number.
+%
+% \pagebreak
+% \DescribeMacro{\e} \DescribeMacro{\i}  \DescribeMacro{\j} 
+% To avoid cluttering a document that contains many occurrences of Euler's number $\e$,
+% or imaginary number $\i$, with |\mathup{e}| or |\mathup{i}|, 
+% the package provides the |\e| command for Euler's number 
+% and |\i| or |\j| for imaginary numbers.
+% Let us notice that |\i| and |\j| already exist in \LaTeX. In LR (left-to-right) mode, 
+% they produce \mbox{`\i,\ \j'} without the dot,  
+% allowing you to place accents on them. 
+% However, in mathematical mode, they produce the warning 
+% ``\texttt{LaTeX Warning: Command \string \i\space invalid in math mode on input line}
+% \meta{line}''. 
+% With the new definition provided by the package, |\i| and |\j| will be redefined 
+% specifically for mathematical mode.
+%
+% \medskip
+% \DescribeMacro{\MathUp} 
+% Indeed, typing a lot of backslashes for constants like $\e$, $\i$, or $\j$
+% in a document with numerous formulas using them can become tiresome. 
+% To alleviate this, the package proposes another solution 
+% with the macro |\MathUp|\marg{char}.
+% For example, when |\MathUp{e}| is called, any subsequent occurrence of $\e$
+% will automatically be set in roman (upright shape), 
+% without the need to type |\e| explicitly. The effect of this macro 
+% can be either global or local, depending on whether it is used outside or inside an
+% environment or braces.
+% Furthermore, you can also call this macro in the preamble, then the change will apply
+% from the beginning of the document. This powerful command allows you 
+% to bring a document up to the standards effortlessly and without changing anything
+% in your mathematical formulas. 
+% In fact, |\MathUp| can be applied to any valid single character, 
+% offering flexibility for various use cases
+% \footnote{Another use of it with probability 
+% will be presented in section \ref{operators}.}.
+%
+% \medskip
+% \DescribeMacro{\MathIt}
+% When there are other occurrences of $e$, $i$ or $j$ as variables, 
+% you can still obtain italicized $e$, $i$ or $j$ using \LaTeX\
+% commands |\mathit| or |\mathnormal|, which are useful for a single use. 
+% However, you also have the option to use the inverse switch |\MathIt|\marg{char},
+% which has a global effect when used outside environments or braces, 
+% or a local effect when used inside them. 
+% Similar to |\MathUp|, |\MathIt| can be applied to any single character.
+%
+% \medskip
+% \DescribeMacro{\MathNumbers} \DescribeMacro{\MathNormal}
+% These macros enable you to set upright or normal (italic) typesetting 
+% for multiple letters in a single command. 
+% For instance, |\MathNumbers{e,i}| is equivalent to |\MathUp{e}\MathUp{i}|.
+% In |\MathNumbers|, the comma separator between letters can be modified 
+% or removed as needed. In fact, this macro only affects the letters e, i, or j; 
+% it has no effect on other characters.
+% On the other hand, |\MathNormal| accepts any comma-separated list of arguments.
+% This means you can apply the normal italic math mode typesetting to various letters 
+% at once using |\MathNormal|.
+%
+% \medskip
+% \DescribeMacro{\enumber}\DescribeMacro{\inumber}\DescribeMacro{\jnumber}
+% These three commands, used until version 2.2 but only functioning within the preamble, 
+% serve now as aliases for the commands |\MathUp{e}|, |\MathUp{i}| or |\MathUp{j}|, 
+% so they can be used anywhere 
+% in the document or preamble and has an inverse switch with |\MathIt|. 
+% 
+% \medskip
+% \DescribeMacro{\pinumber[\meta{option}]}
+% The constant $\pi$  should also be typeset in upright shape 
+% (see~\cite{TYPMA}, \cite{NIST}, \cite{ICTNS}), which is different from italicized $\itpi$. 
+% However, this recommendation is even less commonly followed compared to the one 
+% concerning  $\e$ and $\i$~\cite{TYPMA}.
+% Thanks to the |\pinumber| command, the italic $\itpi$ will be replaced 
+% with an upright $\pi$
+% each time |\pi| is called. Thus |\pinumber| makes your document compliant with standards 
+% without changing the source code of your mathematical formulas. 
+% It functions in two different ways.
+%
+% \begin{enumerate}
+% \item You can load a Greek letters package that provides the glyphs in upright shape. 
+% There are many available.
+% Notably, let us mention \textsf{upgreek}~\cite{GREEK}, 
+% \mbox{\textsf{mathdesign}}~\cite{DESIGN},
+% \mbox{\textsf{kpfonts}}~\cite{KPF}, 
+% \mbox{\textsf{fourier}}~\cite{FOUR} (used in the present document), but also
+% \mbox{\textsf{pxgreeks}} (using \textsf{pxfonts}~\cite{PX}), \mbox{\textsf{txgreeks}}
+% (using \textsf{txfonts}~\cite{TX})
+% \footnote{When using \textsf{pxgreeks} or \textsf{txgreeks},
+% they should be loaded \emph{after} \textsf{mismath} to avoid an error
+% due to conflict with the existing macros \texttt{\string\iint}, \texttt{\string\iiint},
+% \texttt{\string\iiiint}, \texttt{\string\idotsint} in \textsf{amsmath}.}, 
+% \mbox{\textsf{libertinust1math}}~\cite{LIB}, \textsf{libgreek}, etc.
+% A special mention goes to \textsf{lgrmath} of Jean-François Burnol~\cite{LGR}
+% which allows the use of any Greek LGR-encoded font in math mode,
+% an idea taken up in \textsf{mathgreeks}~\cite{MGREEK}.
+% Also note \textsf{newtxmath}~\cite{NTX} which has several font options.
+% These packages provide commands like |\uppi| (\textsf{upgreek}, \textsf{mathgreeks}), 
+% |\piup| (\textsf{mathdesign}, \textsf{kpfonts}, \textsf{lgrmath}), 
+% |\otherpi| (\textsf{fourier}), etc.
+% \footnote{They have also options to typeset all the Greek lowercase 
+% letters in upright shape by default, but this in not our goal here.}
+%
+% In this case, |\pinumber| must be called in the preamble 
+% with an optional argument being the name of the command, \emph{without the backslash},
+% giving access to the upright pi:
+% \texttt{piup}, \texttt{uppi}, \texttt{otherpi}\ldots
+% However, installing such a Greek letters package will modify 
+% all the other Greek letter glyphs.
+% ^^A even if, except for pi, they will be in italics. 
+%
+% By calling in the preamble |\MathNumbers{ei}\pinumber[otherpi]| 
+% (assuming the \textsf{fourier} package is loaded),
+% you can achieve the following result:
+% \begin{center}
+% |$e^{i\pi} = -1$| \quad yields \quad   $\e^{\i\pi}=-1$.
+% \end{center}
+%
+% \item Without installing a package, it is possible to change only the glyph of pi 
+% without altering the other Greek letters, 
+% which are typically in italics.
+%
+% In this case, |\pinumber| must be called in the preamble with an optional argument 
+% of the \texttt{key=value} type. The key name corresponds to a package
+% providing the same glyph.
+% The following table summarizes the available options.
+% When a key is given without a value, |\pinumber| will choose a default value
+% specified in the text list following the table.
+%
+% \begin{center}
+% \setlength{\extrarowheight}{1pt}
+% \begin{tabular}{>{\ttfamily}l>{$}c<{$}}
+% \hline
+% {\normalfont Option} lgrmath=... & \mbox{Result} \\
+% \hline
+% Alegreya-LF & \piAlegreya \\
+% Cochineal-LF & \piCochineal \\
+% LibertinusSerif-LF & \piLibSerif \\
+% LibertinusSans-LF & \piLibSans \\
+% lmr & \pilmr \\
+% lmss & \pilmss \\
+% gentium & \pigentium\\
+% lato-LF & \pilato \\
+% \hline
+% \end{tabular}
+% \qquad
+% \begin{tabular}{>{\ttfamily}l>{$}c<{$}}
+% \hline
+% \normalfont Other options & \mbox{Result} \\
+% \hline
+% fontspec=\ldots & \ldots \\
+% upgreek=Euler & \piEuler \\
+% upgreek=Symbol & \piSymbol \\
+% mathdesign & \piCharter \\
+% kpfonts & \pikp \\
+% fourier & \pi\\
+% pxfonts & \pipx \\
+% txfonts & \pitx \\
+% \hline
+% \end{tabular}
+% \end{center}
+%
+% \medskip
+% \begin{itemize}
+%
+% \item With the \texttt{lgrmath} key, we actually have numerous possibilities 
+% for values (any Greek letters math font in LGR encoding). 
+% The documentation of the \textsf{lgrmath}
+% package explains how to check an visualize all available fonts on your distribution.
+% We have only presented eight of them. The default value is \texttt{lmr}.
+% Other interesting values are \texttt{NotoSerif-LF}, \texttt{Clara-TLF},
+% \texttt{droidserif}, \texttt{fct}, \texttt{llcmss}.
+%
+% \item When |\pinumber| is called without an argument in the preamble, 
+% it corresponds to the option \texttt{lgrmath=lmr}.
+% This $\pilmr$ character is well-suited
+% for use with the Latin Modern font family
+% \footnote{It will look the same as the one provided by \texttt{lgrmath=cmr} or by
+% Günter Milde's \textsf{textalpha} package~\cite{ALPHA}.}.
+%
+% \item With the \texttt{fontspec} key, there are also many possible values,
+% corresponding to the TrueType or OpenType fonts installed on your system
+% (works with \LuaLaTeX\ or \XeLaTeX).
+% See the \textsf{mathgreeks} documentation for examples.
+
+% \item With the \texttt{upgreek} key, the default value is \texttt{Symbol}. 
+% There is a third possible value, \texttt{Symbolsmallscale}, 
+% which provides the same character as \texttt{Symbol} but reduced in size by 10\,\%.
+%
+% \item With the \texttt{mathdesign} key, there are actually 3 possible values: 
+% \texttt{Utopia}, \texttt{Garamond} or \texttt{Charter} (the default value), 
+% but the glyphs obtained for pi look quite similar.
+%
+% \item With the \texttt{kpfonts} key, we have two possible values: 
+% \texttt{normal} (default) and \texttt{light}. The option \texttt{kpfonts=light}
+% provides a slightly less bold character.
+%
+% \item The last keys, \texttt{fourier} (based on Utopia), \texttt{pxfonts} 
+% (based on Palatino),
+% \texttt{txfonts} (based on Times)
+% are booleans whose default value is \texttt{true} (when called).
+% The \texttt{txfonts} key yields the same glyph than \texttt{lgrmath=txr}.
+%
+% \end{itemize}
+% \end{enumerate}
+% 
+% The \textsf{unicode-math} package~\cite{UNIC} provides |\uppi|, so you can use
+% |\pinumber[uppi]| to produce automatic upright pi in the selected math font,
+% but a math font must have been explicitly chosen with |\setmathfont|.
+% You can also use the \texttt{fontspec} key option,
+% \eg |\pinumber[fontspec=STIX Two Math]|,
+% to obtain pi in any font 
+% that is supported by \textsf{unicode-math}.
+%
+% For other fonts, it can be quite complicated to make Greek letters packages 
+% work with \textsf{unicode-math}. In any case, such a package must be loaded 
+% after \textsf{unicode-math} and in |\AtBeginDocument|. 
+% However, |\pinumber| supports \textsf{unicode-math} very well with any previous
+% \texttt{key=value} option, by calling |\pinumber|\oarg{option} 
+% after \textsf{unicode-math}.
+%
+% \medskip
+% \DescribeMacro{\itpi}
+% When you activate |\pinumber|, the original italic $\itpi$ 
+% is still accessible using |\itpi|.
+%
+% \medskip
+% \DescribeMacro{\pinormal}
+% In fact, |\pinumber| is a toggle, with its inverse toggle being |\pinormal|. 
+% The latter restores the |\pi| command to its default behavior. 
+% Thus, |\pinumber| can be used anywhere in the document (like |\pinormal|), 
+% but then without arguments and provided it has been initially called in the preamble,
+% according to the procedures outlined above.
+%
+% \subsection{Vectors (and tensors)}
+%
+% \DescribeMacro{\vect}
+% By default, the |\vect| command
+% \footnote{The definition of most macros in this package, 
+% will only take effect if the macro has not been previously
+% defined by another package. This ensures compatibility and avoids conflicts 
+% when using the \textsf{mismath} package with other \LaTeX\ packages.},
+% produces vectors with arrows
+% (thanks to the \textsf{esvect} package by Eddie Saudrais
+% \footnote{\textsf{esvect} provides the \texttt{\string \vv} macro 
+% used by \texttt{\string \vect}.})
+% which are more elegant than those produced by \LaTeX's |\overrightarrow| command.
+% The \textsf{esvect} package has an optional argument 
+% (a single letter between \texttt{a} and \texttt{h}) to define 
+% the desired type of arrow (see~\cite{VECT}).
+% In \textsf{mismath}, \textsf{esvect} is loaded with the option \texttt{b}:
+% |\vect{AB}| gives $\vect{AB}$.
+% If you wish to use a different type of arrow, you must call \textsf{esvect}
+% with the appropriate option \emph{before} loading \textsf{mismath}.  
+% For example, using |\usepackage[d]{esvect}|
+% will provide the same arrows that are used by default in~\cite{VECT}.
+%
+% \medskip 
+% \DescribeMacro{\boldvect}
+% The |\vect| macro allows vector names to be typeset using bold italic font,
+% as recommended by ISO~\cite{NIST}~\cite{SI}, instead of using arrows. 
+% To achieve this, call the |\boldvect| command, it will modify the behavior of |\vect|
+% locally or globally, depending on its placement in the document (inside or outside
+% a group or an environment):\\[2ex]
+% \begin{minipage}{8cm}
+% \begin{verbatim} 
+%\[ \boldvect \vect{v}
+%   =\lambda\vect{e}_x+\mu\vect{e}_y \]
+% \end{verbatim}
+% \end{minipage} 
+% \begin{minipage}{4cm}\vspace{-2ex}
+% $\boldvect \vect{v}=\lambda\vect{e}_x +\mu\vect{e}_y$
+% \end{minipage}
+%
+% \DescribeMacro{\boldvectcommand}
+% By default |\boldvect| uses the |\boldsymbol| command
+% \footnote{\texttt{\string \mathbf} produces upright bold font, 
+% even when used in combination with \texttt{\string \mathit}.}
+% from the \textsf{amsbsy} package, which is automatically loaded by \textsf{amsmath}.
+% However, you may prefer other packages that produce bold italic fonts, 
+% such as \textsf{fixmath} with the |\mathbold| command,
+% \textsf{isomath} with |\mathbfit| 
+% or \textsf{bm} with the |\bm| command;
+% \textsf{unicode-math} provides the |\symbfit| command.
+% To use an alternative command instead of |\boldsymbol| in \mbox{\textsf{mismath}}, 
+% redefine |\boldvectcommand|, 
+% for instance if \textsf{fixmath} is loaded:
+%
+% \medskip
+% \centeredline{|\renewcommand\boldvectcommand{\mathbold}|}
+%
+% \medskip
+% According to ISO rules, symbols for matrices are also in bold italic.
+% Therefore you can also use |\vect| with |\boldvect| for matrices, or create another alias.
+%
+% \medskip
+% \DescribeMacro{\arrowvect}
+% At any moment, you can revert to the default behavior using the inverse switch
+% |\arrowvect|. 
+% These switches can be placed anywhere, whether
+% inside mathematical mode or within an environment (with a local effect) or outside 
+% (with a global effect).
+%
+% \medskip
+% \DescribeMacro{\hvect}
+% When vectors with arrows are typeset side by side,
+% the arrows can be set up slightly higher using |\hvect|
+% (which places a vertical phantom box containing `$A$') 
+% to prevent inelegant effects. For example, writing
+% \begin{itemize}
+% \item $\vect{AB}=\hvect{u} + \vect{AC}$, obtained with |\hvect{u}|,
+% looks better than $\vect{AB}=\vect{u}+ \vect{AC}$;
+% \item $\hvect{a} \cdot \vect{b}=0$, obtained with |\hvect{a}|,
+% looks better than $\vect{a} \cdot \vect{b}=0$.
+% \end{itemize}
+% This adjustment ensures a nicer appearance when vectors 
+% with arrows are combined in an equation
+% \footnote{For a fine tuning you can also use the \texttt{\string\vstrut} or
+% \texttt{\string\cstrut} macros from the \textsf{spacingtricks} package~\cite{SPA}.}.
+% The |\boldvect| and |\arrowvect| switches have the same effect on |\hvect| 
+% as they do on |\vect|.
+%
+% \DescribeMacro{\hvec}
+% In a similar way, |\hvec| raises the little arrow produced by
+% the \LaTeX\ command |\vec|, to the height of the letter `$A$'
+% (but |\boldvect| have no effect on |\vec| nor |\hvec|):
+% \begin{itemize}
+% \item $\mathcal{P}=\vec{f}\cdot\hvec{v}$, obtained with |\hvec{v}|,
+% seems better than $\mathcal{P}=\vec{f}\cdot\vec{v}$;
+% ^^A (the result of |\vec| with \textsf{fourier} may be bad with high letters, \eg $\vec{h}$)
+% \item $\vec{f} =m \hvec{a}$, obtained with |\hvec{a}|,
+% seems better than $\vec{f} =m \vec{a}$.
+% \end{itemize}
+%
+% \DescribeMacro{\norm}
+% The norm of a vector is conventionally represented using the delimiters |\lVert| and |\rVert|
+% (or |\|$\mid$ unless a plus (+) or minus (-) sign follows the opening delimiter)
+% or |\left\Vert| and |\right\Vert| 
+% for adaptive delimiters. Unfortunately, these delimiters 
+% are always vertically centered, relatively to the mathematical center line, 
+% whereas vectors with arrows are asymmetric objects.
+% The code |$\norm{\vec{h}}$| raises the double bar to produce $\norm{\vec{h}}$
+% instead of $\Vert\vec{h}\Vert$ or $\left\Vert \vec{h} \right\Vert$.
+% Let's notice that the height of the bars don't adjust to content, 
+% but however to context: main text, subscripts or exponents, 
+% \eg $X^{\norm{\vec{h}}}$. 
+% This macro is useful only for arguments of special height, such as $\vec{h}$ or $\vect{AB}$
+% and may give bad results in other situations.
+%
+% \medskip
+% \DescribeMacro{\mathbfsfit}\DescribeMacro{\tensor}
+% For tensors symbols, ISO rules recommend using
+% sans serif bold italic, but there
+% is no such math alphabet in the default \LaTeX\  mathematical style.
+% However, the \mbox{\textsf{mismath}} package defines this alphabet 
+% (assuming the font encoding and package you use permits it) 
+% and provides the macro |\mathbfsfit| or its alias |\tensor|.
+% By writing |\tensor{S}\otimes\tensor{T}|, you get $\tensor{S}\otimes\tensor{T}$.
+%
+% \subsection{Standard operator names}\label{operators}
+%
+% \DescribeMacro{\di}
+% The \emph{differential} operator should be typeset in upright shape, not in
+% italics, to distinguish it from variables 
+% (as mentioned in \cite{TYPMA}~\cite{NIST}~\cite{ICTNS}~\cite{LSHORT}).
+% To achieve this, we provide the |\di| command.
+% Take a look at the following examples (notice the thin spaces before the d, 
+% just like with classic function's names): \\[2ex]
+% \begin{minipage}{7cm}
+% \begin{verbatim} 
+%\[ \iint xy\di x\di y \]
+% \end{verbatim}
+% \end{minipage}
+% \begin{minipage}{5cm}
+% \[ \iint xy\di x\di y \]
+% \end{minipage}
+% \\[0.5ex]
+% \begin{minipage}{7cm}
+% \begin{verbatim} 
+%\[ m\frac{\di^2x}{\di t^2}
+%   + h\frac{\di x}{\di t} + kx = 0 \]
+% \end{verbatim}
+% \end{minipage}
+% \begin{minipage}{5cm}
+% \[m\frac{\di^2x}{\di t^2}+h\frac{\di x}{\di t}+kx=0\]
+% \end{minipage}
+%
+% The command |\di| can also represent the \emph{distance}, hence its name:
+% \[\di(u, \cmmathcal{H}) = \frac{\abs{\langle u,v\rangle}}{\lVert v \rVert}.\]
+%
+% \DescribeMacro{\opDelta} \DescribeMacro{\opdelta}
+% Two other `difference' operators allow for expressing variations ($\opDelta$)
+% or small variations ($\opdelta$). 
+% They are obtained using the |\opDelta| and |\opdelta| commands.
+% \begin{align*}
+% \opDelta f \approx \opDelta h = f'(x_0) \opDelta x &&
+% \frac{\opdelta T}{T}=\frac{1}{2}\frac{\opdelta l}{l} &&
+% h= \opdelta x\opdelta y
+% \end{align*}
+%
+% Like |\di|, these operators use specific spacing and are typeset using 
+% the upright Greek letters given by |\updelta| and |\upDelta|.
+% By default |\upDelta| is an alias for |\Delta| (which is supposed to be in upright shape);
+% |\updelta| is not provided by \textsf{mismath} but can be obtained with 
+% other packages such as \textsf{mathgreeks}~\cite{MGREEK}, 
+% \mbox{\textsf{unicode-math}}~\cite{UNIC}, 
+% or as an alias for the upright delta provided by other fonts
+% \footnote{With \textsf{fourier} (without the \texttt{upright} option) we have used 
+% \texttt{\string\let\string\updelta\string\otherdelta}.}.
+%
+% \DescribeMacro{\P} \DescribeMacro{\E}
+% To refer to probability
+% \footnote{\LaTeX\ provides also \texttt{\string \Pr} which gives $\Pr$.}
+% and expectation the proper use is to typeset the capital letters $\P$, $\E$ 
+% in roman just like any standard function identifier.
+% This can be achieved with |\P| and |\E| commands.
+%
+% \medskip
+% \DescribeMacro{\Par}
+% The |\P| command already existed to refer to the `end of paragraph' symbol (\Par)
+% and has been redefined, but this symbol can still be obtained with |\Par|.
+%
+% \medskip
+% \DescribeMacro{\V}
+% Variance is generally denoted by $\var$ or $\Var$ (see the following table),
+% but some authors prefer to use $\V$, which can be produced using |\V|.
+%
+% \DescribeMacro{\MathProba}\DescribeMacro{\MathNormal}
+% As for $\e$, $\i$ or $\j$, you can use |\MathUp{P}|, |\MathUp{E}| 
+% or |\MathUp{V}| to avoid typing many |\P|, |\E| or |\V|. 
+% However you can also achieve this in a single command with |\MathProba|, 
+% for example |\MathProba{PE}|. We get the inverse toggle with
+% |\MathIt| for any individual letter or |\MathNormal| for a comma-separated list.
+%
+% \medskip
+% \DescribeMacro{\probastyle}
+% Some authors use double-struck font shape to represent probability, expectation 
+% and variance: $\mathbb{P}, \mathbb{E}, \mathbb{V}$.
+% The |\probastyle| macro sets the appearance of |\P|, |\E| and |\V|.
+% For instance |\renewcommand\probastyle{\mathbb}|
+% \footnote{The effect of this redefinition is global or local to the container environment 
+% in which it is used.}
+% brings the double-struck letters.
+% The |\mathbb| command is provided by \textsf{amsfonts} package
+% (which needs to be loaded in the preamble), but also by other complete math font
+% packages such as \mbox{\textsf{mathdesign}}, \textsf{kpfonts}, \textsf{fourier}, 
+% \textsf{unicode-math}\ldots
+% \hypertarget{nofunction}{}
+%
+% \pagebreak
+% The following standard operator names are defined in \textsf{mismath}:
+% \begin{center}
+% \begin{tabular}{rlrlrl}
+% |\adj| & $\adj$ \qquad\mbox{} & |\End| & $\End$ \qquad\mbox{} & |\Res| & $\Res$ \\
+% |\Aut| & $\Aut$ & |\erf| & $\erf$ & |\rot| & $\rot$ \\
+% |\codim| & $\codim$ & |\grad| & $\grad$ & |\sgn| & $\sgn$ \\
+% |\coker| & $\coker$ & |\id| & $\id$ & |\sinc| & $\sinc$ \\
+% |\Conv| & $\Conv$ & |\Id| & $\Id$ & |\spa| & $\spa$ \\
+% |\Cov| & $\Cov$ & |\im| & $\im$ & |\tr| & $\tr$ \\
+% |\cov| & $\cov$ & |\lb| & $\lb$ & |\var| & $\var$ \\
+% |\curl| & $\curl$ & |\lcm| & $ \lcm$ & |\Var| & $\Var$  \\
+% |\divg| & $\divg$ & |\rank| & $\rank$ & |\Zu| & $\Zu$
+% \end{tabular}
+% \end{center}
+%
+% By default, operators returning vectors,  |\grad| and |\curl| (or its synonym |\rot|
+% rather used in Europe), are written with an arrow on the top.
+% When |\boldvect| is activated, they are typeset in bold style:
+% $\boldvect \grad, \curl, \rot$.
+% For the variance, the covariance and the identity function, 
+% two notations are proposed, with or without a first capital letter, 
+% because both are very common.
+% Please note that |\div| already exists ($\div$) and |\span| is a \TeX\ primitive;
+% they haven't been redefined. Therefore the provided macros are called |\divg| (divergence) 
+% and |\spa| (span of a set of vectors).
+% Furthermore |\Z| is used to denote the set of integers (see \ref{aliases}), 
+% which is why we propose |\Zu|,
+% to designate the center of a group: $\Zu(G)$ (from German Zentrum).
+%
+% \medskip
+% The \textsf{mismath} package also provides some (inverse) circular or hyperbolic functions, 
+% that are missing in \LaTeX:
+% \begin{center}
+% \begin{tabular}{rlrlrl}
+% |\arccot| & $\arccot$\qquad\mbox{} & |\arsinh| & $\arsinh$\qquad\mbox{} 
+%    & |\arcoth| & $\arcoth$ \\
+% |\sech| & $\sech$ & |\arcosh| & $\arcosh$ & |\arsech| & $\arsech$ \\
+% |\csch| & $\csch$ & |\artanh| & $\artanh$ & |\arcsch| & $\arcsch$
+% \end{tabular}
+% \end{center}
+%
+% \DescribeMacro{[nofunction]}
+% Some may find that the definition of all these operators and functions is not useful 
+% for their needs. So, the definitions of standard operators and functions in both
+% previous tables can be disabled with the \texttt{nofunction} option.
+% \hypertarget{classicReIm}{}
+%
+% \medskip
+% \DescribeMacro{\Re} \DescribeMacro{\Im}
+% The |\Re| and |\Im| macros refer to real and imaginary part 
+% of a complex number. They have been redefined to produce $\mathup{Re}$ and $\mathup{Im}$, 
+% in place of outdated symbols $\oldRe$ and $\oldIm$.
+% Nevertheless, it is still possible to obtain the old symbols 
+% with |\oldRe| and |\oldIm|.
+%
+% \DescribeMacro{[otherReIm]}
+% An alternative notation $\Re$, $\Im$ is provided by invoking the \texttt{otherReIm}
+% package option,
+% \DescribeMacro{[classicReIm]}
+% whereas the \texttt{classicReIm} option deactivates these redefinitions.
+%
+% \DescribeMacro{\bigO} \DescribeMacro{\bigo} \DescribeMacro{\lito}
+% Asymptotic comparison operators (in Bachmann-Landau notation) are obtained with
+% |\bigO| or |\bigo| and |\lito| commands. The first one uses
+% the |\cmmathcal| alphabet and the last two compose the letters `O' and `o' in 
+% roman, as for any operator: 
+% \[ n^2+\bigO(n\log n) \txt{or} n^2+\bigo(n\log n)\txt{and} 
+% \e^x=1+x+\frac{x^2}{2}+\lito\bigl(x^2\bigr).\]
+%
+% \subsection{A few useful aliases} \label{aliases}
+% 
+% In the tradition of Bourbaki and D.~Knuth, proper use requires 
+% that classic sets of numbers are typeset in bold roman:
+% $\R, \C, \Z, \N, \Q$, 
+% whereas double-struck letters 
+% ($\mathbb{R}, \mathbb{C}, \mathbb{Z}, \mathbb{N}, \mathbb{Q}$) 
+% are reserved for writing at the blackboard~\cite{LSHORT}.
+% Similarly, to designate a field we use $\F$ or $\K$ (Körper in German).
+% We obtain these symbols with the following macros:
+% \begin{center}
+% |\R|, |\C|, |\Z|, |\N|, |\Q|, |\F|, |\K|.
+% \end{center}
+%
+% \smallskip
+% \DescribeMacro{\mathset}
+% The |\mathset| command enables you to change the behavior 
+% of all these macros in a global way. 
+% By default, |\mathset| is an alias for |\mathbf|, but if you prefer double-struck letters, 
+% you can simply use |\renewcommand\mathset{\mathbb}| (with local effect within
+% an environment or a pair of curly braces).
+%
+% \smallskip
+% \DescribeMacro{\onlymathC}
+% The macro |\onlymathC| is designed for cases when |\C| is already defined,
+% but only in text mode (usually with the Russian language). Then you get the message:
+% ``\texttt{Command \string\C\space invalid in math mode}''.
+% This macro preserves the original definition for text mode
+% and allows you to use |\C| for the complex number set in math mode.
+% Simply call |\onlymathC| once in the preamble or anywhere in the document.
+%
+% \medskip
+% \DescribeMacro{\ds}
+% The |\displaystyle| command is very common, so the |\ds| alias is provided.
+% Not only it eases typing but also it makes source code more readable.
+%
+% \medskip
+% Symbols with limits behave differently for in-line formulas or for displayed equations. 
+% In the latter case, `limits' are placed under or above the symbol 
+% whereas for in-line math mode, 
+% they are placed on the right, as a subscript or exponent. Compare:
+% $\zeta(s)=\sum_{n=1}^{\infty    }\frac{1}{n^s}$ with
+% \[\zeta(s)=\sum_{n=1}^{\infty}\frac{1}{n^s}.\]
+%
+% \DescribeMacro{\dlim} \DescribeMacro{\dsum} \DescribeMacro{\dprod}
+% \DescribeMacro{\dcup} \DescribeMacro{\dcap}
+% With in-line math mode, displaymath can be forced with |\displaystyle|
+% or its alias |\ds|. However, when using these commands, all the rest of the current
+% mathematical environment will be set in displaymath mode 
+% (as shown in the previous example, where the fraction is expanded).
+% To limit the display style effect to the affected symbol only, 
+% similar to the  \textsf{amsmath} command |\dfrac|, 
+% we can use the following macros:
+% |\dlim|, |\dsum|, |\dprod|, |\dcup|, |\dcap|.
+% So 
+% \begin{center}
+% |$\dlim_{x\to +\infty}\frac{1}{x}$| \quad  yields \quad  $\dlim_{x \to +\infty}\frac{1}{x}$.
+% \end{center}
+%
+% \DescribeMacro{\lbar} \DescribeMacro{\hlbar}
+% Large bars over expressions are obtained with |\overline|
+% or its alias |\lbar|, to get for instance $\lbar{z_1z_2}$.
+% Similar to vectors, you can raise the bar (from the height of `$A$') with
+% the |\hlbar| command, to correct uneven bars heights.
+% \begin{center}
+% $\lbar{z+z'}=\hlbar{z}+\lbar{z'}$, obtained with |\hlbar{z}|,
+% looks better than $\lbar{z+z'}=\lbar{z}+\lbar{z'}$.
+% \end{center}
+%
+% \DescribeMacro{\eqdef} \DescribeMacro{\eqdef*}
+% The |\eqdef| macro writes the equality symbol topped with `def',
+% or with `$\scriptstyle \Delta$' for |\eqdef*|
+% (thanks to the \LaTeX\ command |\stackrel|):\\[2ex] 
+% \begin{minipage}{7cm}
+% \begin{verbatim} 
+%\[ \e^{\i\theta} \eqdef 
+%   \cos\theta + \i\sin\theta \]
+% \end{verbatim}
+% \end{minipage}
+% \begin{minipage}{5cm}\vspace{-3ex}
+% \[\e^{\i\theta}\eqdef\cos\theta + \i\sin\theta\]
+% \end{minipage}
+%
+% \noindent\begin{minipage}{7cm}
+% \begin{verbatim} 
+%\[ \e^{\i\theta} \eqdef* 
+%   \cos\theta + \i\sin\theta \]
+% \end{verbatim}
+% \end{minipage}
+% \begin{minipage}{5cm}\vspace{-3ex}
+% \[\e^{\i\theta}\eqdef*\cos\theta + \i\sin\theta\]
+% \end{minipage}
+%
+% \DescribeMacro{\unbr}
+% |\unbr| is an alias for |\underbrace|
+% \footnote{The \textsf{mathtools} package by Morten Høgholm 
+% and Lars Madsen~\cite{TOOL} provides a new and improved version 
+% of the \texttt{\string \underbrace} command, along with many other useful macros.
+% It is loaded by \textsf{mismath}.}, 
+% making source code more compact.\\[2ex]
+% \begin{minipage}{6.4cm}
+% \begin{verbatim}
+%\[ (QAP)^n = \unbr{QAP\mul QAP\mul
+%   \cdots\mul QAP}_{n\text{ times}} \]
+% \end{verbatim}
+% \end{minipage}
+% \begin{minipage}{6cm}\vspace{-3ex}
+% \[ (QAP)^n = \unbr{QAP\mul QAP\mul\cdots\mul QAP}_{n\text{ times}} \]
+% \end{minipage}
+%
+% \DescribeMacro{\iif}
+% |\iif| is an alias for ``\iif'', to be used in text mode.
+%
+% \medskip
+% \DescribeMacro{\then} 
+% This macro produces the symbol $\Longrightarrow$ surrounded by large spaces,
+% like the standard macro |\iff| does it with $\Longleftrightarrow$.
+% It's just an alias for the \textsf{amsmath} |\implies| macro.
+%
+% \subsection{Improved spacing in mathematical formulas}
+%
+% \DescribeMacro{\txt}
+% The |\txt| macro, based on |\text| from the \textsf{amstext} package
+% (loaded by \textsf{amsmath}),
+% leaves em quad spaces (|\quad|) around the text. See the following example:
+% \begin{center}
+% |\[ \ln x=a \then x=\e^a, \txt{rather than}| \\
+% | \ln x=a \Longrightarrow x=\e^a \]| \\[1ex]
+% $ \ln x=a \then x=\e^a, \txt{rather than}    \ln x=a \Longrightarrow x=\e^a$
+% \end{center}
+%
+% \DescribeMacro{\mul}
+% The multiplication symbol obtained with |\times| produces the same spacing as addition
+% or subtraction operators, whereas division obtained with $/$ is closer to its operands.
+% This actually hides the priority of multiplication over $+$ and $-$.
+% That's why we provide the |\mul| macro, to avoid the large space surrounding |\times|:
+% \begin{center}
+% $\lambda+\alpha \mul b-\beta \mul c$, obtained with |\mul|,
+% looks better than $\lambda+\alpha \times b-\beta \times c$.
+% \end{center}
+%
+% Using |\mul| before a function name works also fine (since v3.1) without the need 
+% of curly braces to avoid the additional space before the operator name:
+% |$x\mul\sin x$| yields $x\mul{\sin x}$.
+%
+% \medskip
+% When using a |\left| \ldots |\right| structure, 
+% \TeX\ sets additional surrounding space in some situations.
+% The \textsf{mleftright}~\cite{MLR} package, loaded by \textsf{mismath},
+% offers the variants |\mleft| and |\mright|
+% to address these spacing issues of inner formulas.
+% It also provides the |\mleftright| macro that redefines |\left| as |\mleft|
+% and |\right| as |\mright|.
+% 
+% \begin{center}
+% Compare $\sin\left(\frac{\pi}{3}\right)\mul 2$ with
+% $\sin\mleft(\frac{\pi}{3}\mright)\mul 2$ obtained with
+% |$\sin\mleft(\frac{\pi}{3}\mright)}\mul 2$|.
+% \end{center}
+%
+% \DescribeMacro{\pow}
+% In the same way, when typesetting an exponent after a closing \emph{big} 
+% parenthesis produced by |\right)|,
+% the exponent appears to be a little to far from the parenthesis.
+% To address this issue, the |\pow|\marg{expr}\marg{pow} command is provided
+% \footnote{This macro gives bad results with \emph{normal-sized} parenthesis.},
+% which places \meta{expr} in a pair of parenthesis and
+% sets the positioning of the exponent \meta{pow}
+% slightly closer to the right parenthesis.
+% Compare:
+% \[ \e^a =\lim_{n \to +\infty}\pow{1+\frac{a}{n}}{n} 
+% \txt{obtained with \texttt{\string \pow}, rather than} 
+% \e^a =\lim_{n \to +\infty}\left(1+\frac{a}{n}\right)^{n}.\]
+%
+% \DescribeMacro{\abs} \DeleteShortVerb{\|}
+% The \cs{abs} command typesets the absolute value while properly managing the spacing, 
+% which \texttt{|}\ldots\texttt{|} does not. Compare $\abs{-x}$, 
+% obtained with \cs{abs}, to $|-x|$ without. 
+% Using the delimiters \cs{lvert} and \cs{rvert} presents another issue when 
+% the absolute value follows a function name; \eg \verb@\ln\lvert x\rvert@ yields 
+% $\ln \lvert x\rvert$
+% instead of $\ln\abs{x}$ (with \verb@\ln\abs{x}@). 
+% Moreover, with \cs{abs}, the size of the delimiters adapts to the content
+% \footnote{We could also define \texttt{\string \abs} 
+% using \texttt{\string \DeclarePairedDelimiter} 
+% from the \mbox{\textsf{mathtools}} package~\cite{TOOL}.}.
+% \MakeShortVerb{\|}
+%
+% \medskip
+% \DescribeMacro{\lfrac}
+% The |\lfrac| macro behaves like |\frac|
+% but with additional spacing around the arguments,
+% making the corresponding fraction bar slightly longer. 
+% This macro has an optional parameter |\lfrac|\oarg{space}\marg{num}\marg{denom}
+% to adjust the length of the fraction bar. The optional \meta{space} argument must be given
+% with \emph{math units} (\texttt{mu}); 
+% the default value is \texttt{7mu} (equivalent to |\:\,|).
+% See the following examples;
+% the last one is obtained with |\lfrac[4mu]{1}{\sqrt{x}}|.
+% \[ \lbar{Z} = \lfrac{\lbar{z_1-z_2}}{\lbar{z_1+z_2}} \qquad
+%  u(x)= \lfrac{\frac{1-2x}{5}}{x^2+1} \qquad
+% y'+xy=\lfrac[4mu]{1}{\sqrt{x}}
+% \]
+% \pagebreak ^^A to get footnotes at the right page
+% \hypertarget{ibrackets}{}
+%
+% \DescribeMacro{[ibrackets]}
+% Open intervals are commonly represented with parenthesis, \eg $(0, +\infty)$,
+% but sometimes square brackets are used, especially in French mathematics: $]0, +\infty[$.
+% In that case, the space around the square brackets is generally inappropriate, 
+% as in the expression $x \in \mathclose{]} 0, +\infty[$.
+% To address this issue, we have redefined the brackets in the \mbox{\textsf{ibrackets}}
+% package~\cite{BRACKET}.
+% This one can be optionally
+% loaded by \textsf{mismath} using the \texttt{ibrackets} package option.
+% Thus |$x\in ]-\pi,0[ \cup ]2\pi,3\pi[$|
+% \begin{align*}
+% \mbox{yields \ } 
+% x\in ]-\pi, 0[ \cup ]2\pi, 3\pi[ & \mbox{\ with \textsf{ibrackets}}, \\
+% \mbox{instead of \ }
+% x\in \mathclose{]}-\pi, 0 \mathopen{[} \cup 
+% \mathclose{]} 2\pi, 3\pi \mathopen{[} 
+% &\mbox{\ without \textsf{ibrackets}}.
+% \end{align*}
+%
+% In our code, the symbols $[$ and $]$ are set as `active' characters, 
+% behaving like ordinary characters and not as delimiters in most cases. 
+% Therefore, a line break could occur between the two brackets, but
+% it is always possible to transform them 
+% into delimiters using |\left| and |\right|.
+%
+% However, when a bracket is \emph{immediately} followed by a + or - character,
+% it becomes an open delimiter.
+% Therefore, when the left bound contains an operator sign,
+% \emph{you don't have to leave a space between the first bracket and the sign},
+% otherwise, the spaces surrounding the operator will be too large.
+% For example if you write |$x \in ] -\infty, 0]$|, it yields $x \in  ] -\infty, 0]$
+% instead of $x \in  ]-\infty, 0]$.
+% Conversely, when dealing with algebraic expressions involving intervals,
+% \emph{you must leave a blank space between the second bracket and the} +/- 
+% \emph{operation}.
+% For instance |$[a,b] +[c,d]$| yields $[a,b] +[c,d]$
+% but |$[a,b]+ [c,d]$| yields $[a, b]+ [c, d]$.
+%
+% \medskip
+% Note that there are other ways to proceed,
+% for example with |\interval|,
+% from the \textsf{interval} package~\cite{INT},
+% or with |\DeclarePairedDelimiter|
+% \footnote{You cannot use \texttt{\string\DeclarePairedDelimiter} with square brackets 
+% when \textsf{ibrackets} is loaded.}
+% from \mbox{\textsf{mathtools}}~\cite{TOOL}.
+% \hypertarget{decimalcomma}{}
+%
+% \medskip
+%\DescribeMacro{[decimalcomma]}
+% In many countries, except notably in English-speaking countries, 
+% the comma is used as a decimal separator for numbers. 
+% However, in the math mode of \LaTeX, the comma is always, by default, 
+% treated as a punctuation symbol and therefore is followed by a space. 
+% This is appropriate in intervals: |$[a,b]$| results in $[a,b]$,
+% but not for numbers where the comma represents the decimal separator. 
+% For example, |$12,5$| is displayed as $12, 5$ instead of $12{,}5$.
+%
+% Two very convenient packages allow handling the decimal comma in math mode:
+% \textsf{icomma} by Walter Schmidt~\cite{ICOMMA} and 
+% \textsf{ncccomma} by Alexander I.~Rozhenko~\cite{NCC}.
+% The second package takes a more generic approach,
+% however it poses several compatibility issues, 
+% in particular when running through Lua\LaTeX, using \textsf{unicode-math}
+% and calling |\setmathfont|.
+% Therefore we propose the \textsf{decimalcomma} package~\cite{DEC},
+% functionally identical to that of \textsf{ncccomma} but 
+% without the aforementioned incompatibility.
+% It can be loaded by \textsf{mismath} using the \texttt{decimalcomma}
+% package option.
+%
+% \subsection{Environments for systems of equations and small matrices}
+%
+% \DescribeEnv{system}
+% The \texttt{system} environment, defined in the \textsf{mismath} package, 
+% is used to represent a system of equations:\\[2ex]
+% \begin{minipage}{6.5cm}
+% \begin{verbatim}
+%\[ \begin{system} 
+%       x=1+2t \\ y=2-t \\ z=-3-t 
+%   \end{system} \]
+% \end{verbatim}
+% \end{minipage}
+% \begin{minipage}{5cm} \vspace{-3ex}
+% \[ \begin{system} x=1+2t \\ y=2-t \\z=-3-t \end{system} \]
+% \end{minipage}
+%
+% \medskip
+% \DescribeMacro{\systemsep}
+% This first example could also have been achieved using the \texttt{cases} environment
+% from the \textsf{amsmath} package, although \texttt{cases} places mathematical expressions 
+% closer to the curly brace.
+% The |\systemsep| length allows to adjust the gap between 
+% the bracket and the math expressions. 
+% By default, the gap is set to |\medspace|. You can reduce this gap by redefining 
+% the command, \eg |\renewcommand{\systemsep}{\thinspace}|.
+% Alternatively you can increase the gap using |\thickspace|;
+% the same spacing as of the \texttt{cases} environment 
+% being obtained with |\renewcommand{\systemsep}{}|.
+% So the |\systemsep| command allows for greater flexibility in adjusting the spacing 
+% within the \texttt{system} environment.
+%
+% \medskip
+% \DescribeEnv{system\oarg{coldef}}
+% By default, a system is written like an \texttt{array} environment with only one column, 
+% left aligned. However the \texttt{system} environment has an optional 
+% argument that allows to create systems with multiple columns,
+% specifying their alignment using the same syntax as the \texttt{array} environment in
+% \LaTeX. For instance, using |\begin{system}[cl]| will produce a two-column system, 
+% with the first column centered and
+% the second column left-aligned, as shown in the following example:\\[2ex]
+% \begin{minipage}{7cm}
+% \begin{verbatim}
+%\[ \begin{system}[cl] 
+%       y & =\dfrac{1}{2}x-2 \\[1ex] 
+%       (x,y) & \neq (0,-2) 
+%   \end{system} \]
+% \end{verbatim}
+% \end{minipage}
+% \begin{minipage}{5cm}\vspace{-2ex}
+% \[ \begin{system}[cl] y&=\dfrac{1}{2}x-2 \\[1ex] (x,y)&\neq (0,-2) \end{system}\]
+% \end{minipage}
+%
+% \DescribeMacro{\systemstretch}
+% The default spacing between the lines of a \texttt{system} environment has been slightly 
+% enlarged compared to the one used in \texttt{array} environments (using a factor of 1.2). 
+% This can be adjusted by using
+% |\renewcommand{\systemstretch}|\marg{stretch}, where \meta{stretch} is the desired factor
+% for the spacing. You can place this command 
+% inside the current mathematical environment for a local change, or outside 
+% for a global change. The default value for is 1.2.
+% Furthermore you can also use the end of the line with a spacing option, as 
+% demonstrated above with |\\[1ex]|, to control the spacing between specific lines in
+% the system.
+%
+% Another example with |\begin{system}[rl@{\quad}l]|
+% \footnote{\texttt{@\{\ldots\}} sets inter-column space.}:
+% \begin{equation*}
+%    \begin{system}[rl@{\quad}l]
+%        x+3y+5z&=0 & R_1\\ 2x+2y-z&=3 & R_2\\ 3x-y+z&=2 & R_3
+%    \end{system}
+%    \iff
+%    \begin{system}[rl@{\quad}l]
+%        x+3y+5z&=0 & R_1\\
+%        4y+11z&=3 & R_2 \gets 2R_1-R_2 \\
+%        5y+7z&=-1 & R_3 \gets \frac{1}{2}\left(3R_1-R_3\right)
+%    \end{system}
+% \end{equation*}
+% 
+% Let's also mention the \textsf{systeme} package~\cite{SYST} which provides 
+% a lighter syntax and automatic alignments for linear systems.
+% Additionally, there is the \textsf{spalign} package~\cite{SPAL},
+% which offers a convenient and easy syntax for systems and matrices with
+% visually appealing alignments.
+%
+% \medskip
+% \DescribeEnv{spmatrix}
+% The \textsf{amsmath} package offers several environments to typeset matrices :
+% For example, the \texttt{pmatrix} environment surrounds the matrix with parenthesis,
+% and the \texttt{smallmatrix} environment creates a smaller matrix suitable for insertion 
+% within a text line. We provide a combination of the these both 
+% functionalities with the \texttt{spmatrix} environment:
+% |$\vec{u}\begin{spmatrix}-1\\2\end{spmatrix}$| yielding
+% $\vec{u}\begin{spmatrix}-1\\2\end{spmatrix}$.
+%
+% The \textsf{mathtools} package enhances the \textsf{amsmath} matrix environments
+% and also provides a small matrix environment with parenthesis: \texttt{psmallmatrix}.
+% Moreover, with the starred version |\begin{psmallmatrix*}|\oarg{col},
+% you can choose the alignment inside the columns (\texttt{c}, \texttt{l} or \texttt{r}).
+% However, the space before the left parenthesis is unfortunately too narrow
+% compared to the space inside the parenthesis.
+% To illustrate this, consider the following comparison:
+% $\vec{u}\begin{spmatrix}-1\\2\end{spmatrix}$ (using \textsf{mismath}'s \texttt{spmatrix})
+% vs.\@ $\vec{u}\begin{psmallmatrix}-1\\2\end{psmallmatrix}$ 
+% (using \textsf{mathtools} \texttt{psmallmatrix}).
+%
+% \medskip
+% For typesetting  various kinds of matrices, let's mention the excellent 
+% \textsf{nicematrix} package by François Pantigny~\cite{NMATX}.
+%
+% \subsection{Displaymath in double columns}
+%
+% \DescribeEnv{mathcols}
+% The \texttt{mathcols} environment allows you to arrange 
+% lengthy calculations with short expressions across two columns
+% separated by a vertical line, 
+% as shown in the following example.
+% However, to use this feature, the \textsf{multicol} package must be loaded in the preamble.
+% The \texttt{mathcols} environment activates mathematical mode
+% in display style and uses the \texttt{aligned} environment (from \textsf{amsmath}).
+% \begin{mathcols}
+%           & \frac{1}{2 \mul {\pow{\frac{1}{4}}{n}} + 1} \geq 0.999 \\
+%     \iff\ & 1 \geq 1.998  \pow{\frac{1}{4}}{n} + 0.999 \\
+%     \iff\ & 0.001 \geq \frac{1.998}{4^n} \\
+% \changecol
+%     & \iff 4^n \geq 1998 \\
+%     & \iff n \ln 4 \geq \ln(1998) \\
+%     & \iff n \geq \frac{\ln(1998)}{\ln 4} \approx 5.4 \\
+%     & \iff n \geq 6
+% \end{mathcols}
+%
+% \DescribeMacro{\changecol}
+% The |\changecol| macro is used to switch to the next column,
+% and alignments within the columns is done using the classic delimiters 
+% |&|, to separate entries, and |\\|, to start a new row.
+% 
+% \begin{verbatim}
+%\begin{mathcols}
+%          & \frac{1}{2 \mul {\pow{\frac{1}{4}}{n}} + 1} \geq 0.999 \\
+%    \iff\ & 1 \geq 1.998  \pow{\frac{1}{4}}{n} + 0.999 \\
+%    \iff\ & 0.001 \geq \frac{1.998}{4^n} \\
+%\changecol
+%    & \iff 4^n \geq 1998 \\
+%    & \iff n \ln 4 \geq \ln(1998) \\
+%    & \iff n \geq \frac{\ln(1998)}{\ln 4} \approx 5.4 \\
+%    & \iff n \geq 6
+%\end{mathcols}
+% \end{verbatim}
+%
+% \vspace{-4ex}
+% \subsection{Summary of the package options}
+%
+% The following table summarizes the possible package options. 
+% You can add to them any option you want to pass to \textsf{amsmath} or \textsf{mathtools}.
+% The hyperlinks (in blue) redirect to the paragraphs in the documentation 
+% where these options are described.
+% \begin{center}
+% \setlength{\extrarowheight}{1pt}
+% \begin{tabular}{>{\ttfamily}ll}
+% \hline
+% \normalfont Option & \mbox{Effect} \\
+% \hline
+% \hyperlink{nofunction}{nofunction} & don't load some additional function definitions \\
+% \hyperlink{classicReIm}{otherReIm} & typesets |\Re| and |\Im| as $\Re$ and $\Im$ \\
+% \hyperlink{classicReIm}{classicReIm} & preserves |\Re| and |\Im| as $\oldRe$ and $\oldIm$ \\
+% \hyperlink{ibrackets}{ibrackets} & loads the \textsf{ibrackets} package\\
+% \hyperlink{decimalcomma}{decimalcomma} & loads the \textsf{decimalcomma} package \\
+% \hline
+% \end{tabular}
+% \end{center}
+% \StopEventually{}
+%
+% \section{Implementation}
+%
+% We load certain packages conditionally to avoid `option clash' errors in cases
+% where these packages have been previously loaded with other options.
+% The \textsf{amsmath} package is loaded by \textsf{mathtools}.
+% The \textsf{xparse} package provides |\NewDocumentCommand|, 
+% redefined in \LaTeX3 kernel. So this package is obsolete
+% with the October 2020 \LaTeX\ release.
+%    \begin{macrocode}
+\newif\ifmm@ibrackets % initialized to false
+\DeclareOption{ibrackets}{\mm@ibracketstrue}
+\newif\ifmm@decimalcomma
+\DeclareOption{decimalcomma}{\mm@decimalcommatrue}
+\newif\ifmm@nofunction
+\DeclareOption{nofunction}{\mm@nofunctiontrue}
+\newif\ifmm@otherReIm
+\DeclareOption{otherReIm}{\mm@otherReImtrue}
+\newif\ifmm@classicReIm
+\DeclareOption{classicReIm}{\mm@classicReImtrue}
+\DeclareOption*{\PassOptionsToPackage{\CurrentOption}{mathtools}}
+\ProcessOptions \relax
+
+%\@ifpackageloaded{amsmath}{}{\RequirePackage{amsmath}}
+\@ifpackageloaded{mathtools}{}{\RequirePackage{mathtools}}
+\@ifpackageloaded{esvect}{}{\RequirePackage[b]{esvect}}
+\RequirePackage{mleftright}
+\RequirePackage{ifthen}
+\providecommand\IfFormatAtLeastTF{\@ifl@t@r\fmtversion}
+\IfFormatAtLeastTF{2020-10-01}{}{\RequirePackage{xparse}}
+% xparse provides \NewDocumentCommand, now in LaTeX3
+\RequirePackage{xspace} % for \iif command
+\RequirePackage{iftex}
+\RequirePackage{etoolbox} % provides \AtEndPreamble
+\RequirePackage{xkeyval} % for \pinumber options
+
+%    \end{macrocode}
+%
+% The package \textsf{unicode-math} causes some compatibility issues
+% with \textsf{ibrackets} and \textsf{decimalcomma}: theses packages
+% must be loaded \emph{after} \textsf{unicode-math},
+% but \textsf{mismath} (like \textsf{amsmath}) should be loaded \emph{before} 
+% \textsf{unicode-math}.
+% And to complicate matters, \mbox{\textsf{unicode-math}} defines all its commands 
+% by |\AtBeginDocument|.
+% Therefore we used the command |\AtEndPreamble|, from the \textsf{etoolbox} package,
+% which makes the job (because both \textsf{ibrackets} and \textsf{decimalcomma}
+% work also in |\AtBeginDocument|).
+%
+% Moreover the command |\mathbfsfit| (used for tensors) is already defined
+% in \textsf{unicode-math} and will not be redefined if \textsf{unicode-math}
+% is loaded.
+%    \begin{macrocode}
+\@ifpackageloaded{unicode-math}{
+    \PackageWarningNoLine{mismath}{The package unicode-math\MessageBreak 
+        should be loaded after mismath}
+}{}
+\newif\ifmm@unicodemath
+\newif\ifmm@multicol
+\AtEndPreamble{% necessary to work with unicode-math
+    \ifmm@decimalcomma\RequirePackage{decimalcomma}\fi
+    \ifmm@ibrackets\RequirePackage{ibrackets}\fi
+    \@ifpackageloaded{multicol}{\mm@multicoltrue}{}
+    \@ifpackageloaded{unicode-math}{\mm@unicodemathtrue}{
+        \DeclareMathAlphabet{\mathbfsfit}{\encodingdefault}%
+            {\sfdefault}{bx}{it}}
+}
+
+%    \end{macrocode}
+%
+% \medskip
+% \DescribeMacro{\bslash}
+% The |\bslash| macro originates from Frank Mittelbach's \textsf{doc.sty} package. 
+% It can be employed in other documents as an alternative to |\textbackslash|,
+% especially in situations where |\textbackslash| does not work correctly, such as
+% inside warning messages.
+%    \begin{macrocode}
+{\catcode`\|=\z@ \catcode`\\=12 |gdef|bslash{\}} % \bslash command
+
+%    \end{macrocode}
+%
+% \DescribeMacro{\mm@warning} \DescribeMacro{\mm@macro} \DescribeMacro{\mm@operator} 
+% The next three internal macros serve as meta commands for
+% conditionally defining macros while providing a warning message if the macro already exists.
+%
+% \medskip
+%    \begin{macrocode}
+\newcommand\mm@warning[1]{
+    \PackageWarningNoLine{mismath}{Command \bslash #1 already exist 
+        \MessageBreak and will not be redefined}
+}
+\newcommand\mm@macro[2]{
+    \@ifundefined{#1}{
+        \expandafter\def\csname #1\endcsname{#2}
+    }{\mm@warning{#1}}
+}
+\NewDocumentCommand\mm@operator{O{#3}mm}{%
+    \@ifundefined{#1}{
+        \DeclareMathOperator{#2}{#3}
+    }{\mm@warning{#1}}
+}
+    
+%    \end{macrocode}
+%
+% To produce the correct upright shape font when working 
+% with the \textsf{beamer} package, you don't have to use |\mathrm|
+% but rather |\mathup| (based on |\operatorfont| from the \textsf{amsopn} package).
+% This command also works fine with other sans serif fonts like \textsf{cmbright}.
+%
+% Moreover for \textsf{beamer}, which changes the default font family (to sans serif),
+% |\e|, |\i|, |\j| have no effect without |\AtBeginDocument| and
+% |\AtBeginDocument| is also necessary to redefine |\i| when calling 
+% the \textsf{hyperref} package which overwrites the |\i| definition.
+% \medskip
+%    \begin{macrocode}
+\@ifundefined{mathup}{
+    \providecommand*{\mathup}[1]{{\operatorfont #1}}
+    }{\mm@warning{mathup} } % also in kpfonts and unicode-math
+\mm@macro{e}{\mathup{e}}
+\AtBeginDocument{\let\oldi\i \let\oldj\j
+    \renewcommand{\i}{\TextOrMath{\oldi}{\mathup{i}}}
+    \renewcommand{\j}{\TextOrMath{\oldj}{\mathup{j}}} }
+
+%    \end{macrocode}
+%
+% \DescribeMacro{\MathFamily}
+% The following macros |\MathUp| and |\MathIt| are toggles that transform 
+% any chosen letter in math mode to roman or italic style. 
+% These switches can be used anywhere in the document or the preamble.
+% They are based on the generic macro |\MathFamily|.
+% To obtain a letter in roman style instead of italic, we need to change the 
+% mathcode digit that represents the font family: 1 to 0.
+%
+% For example, except for \LuaLaTeX, mathcode of the `e' letter is:
+% e="7165 (decimal 29029), with the second digit `1' indicating ``italic'' style.
+% To get a roman `e', we need to change its mathcode to "7065.
+%
+% When used in the preamble, we call |\MathFamily| by |\AtBeginDocument|
+% for working with the \textsf{beamer} package.
+% Let's notice that |\MathFamily| has an erratic behavior when \textsf{unicode-math}
+% is loaded, but fortunately, in that case, the |\DeclareMathSymbol| can be
+% used instead, even outside the preamble.
+% \medskip
+%    \begin{macrocode}
+\newcount\mm@charcode
+\newcount\mm@charclass
+\newcount\mm@charfam
+\newcount\mm@charslot
+
+\newcommand*\MathFamily[2]{%
+    \mm@charfam=#2
+    \ifluatex
+        \mm@charclass=\Umathcharclass`#1
+        %\mm@charfam=\Umathcharfam`#1
+        \mm@charslot=\Umathcharslot`#1
+        \Umathcode`#1= \mm@charclass \mm@charfam \mm@charslot
+    \else
+        \mm@charcode=\mathcode`#1
+        % extract charclass
+        \@tempcnta=\mm@charcode
+        \divide\@tempcnta by "1000
+        \multiply\@tempcnta by "1000 % charclass
+        \mm@charclass=\@tempcnta
+        % extract charslot
+        \@tempcnta=\mm@charcode
+        \@tempcntb=\mm@charcode
+        \divide\@tempcnta by "100
+        \multiply\@tempcnta by "100 % charclass + charfam
+        \advance\@tempcntb by -\@tempcnta % charslot
+        \mm@charslot=\@tempcntb
+        % construct charcode
+        \mm@charcode=\mm@charclass
+        \multiply\mm@charfam by "100
+        \advance\mm@charcode by \mm@charfam
+        \advance\mm@charcode by \mm@charslot
+        \mathcode`#1=\mm@charcode
+    \fi
+}
+
+\newcommand*\MathUp[1]{%
+    \ifx\@onlypreamble\@notprerr % not in preamble
+        \ifmm@unicodemath
+            \DeclareMathSymbol{#1}{\mathalpha}{operators}{`#1}
+        \else
+            \MathFamily{#1}{0}
+        \fi
+    \else % in preamble
+      \AtBeginDocument{
+        \ifmm@unicodemath
+            \DeclareMathSymbol{#1}{\mathalpha}{operators}{`#1}
+        \else
+            \MathFamily{#1}{0}
+        \fi
+      }
+    \fi
+}
+
+\newcommand*\MathIt[1]{%
+    \ifx\@onlypreamble\@notprerr % not in preamble
+        \ifmm@unicodemath
+            \DeclareMathSymbol{#1}{\mathalpha}{letters}{`#1}
+        \else
+            \MathFamily{#1}{1}
+        \fi
+    \else % in preamble
+      \AtBeginDocument{
+        \ifmm@unicodemath
+            \DeclareMathSymbol{#1}{\mathalpha}{letters}{`#1}
+        \else
+            \MathFamily{#1}{1}
+        \fi
+      }
+    \fi
+}
+
+%    \end{macrocode}
+% With a similar approach we could also create additional macros to set any letter
+% in bold or sans serif. However, there is no default family number associated 
+% with these typefaces. The family number depends on the font package being loaded and
+% may vary depending on specific |\DeclareSymbolFont| used.
+% Therefore, setting letters in bold or sans serif requires additional consideration 
+% and may not have a straightforward solution.
+%
+% \medskip
+% In addition to |\MathUp| and |\MathIt|, we also offer the following command
+% to set a group of letters, among `e, i, j', in roman typeface.
+%    \begin{macrocode}
+\newcommand*\MathNumbers[1]{%
+    \in@{e}{#1} \ifin@ \MathUp{e} \fi
+    \in@{i}{#1} \ifin@ \MathUp{i} \fi
+    \in@{j}{#1} \ifin@ \MathUp{j} \fi
+}
+
+%    \end{macrocode}
+% \DescribeMacro{\apply}
+% With the inverse switch |\MathNormal|, you can apply the normal (italic) style 
+% on any comma-separated list of characters. This is achieved using
+% the |\apply| macro, \eg |\apply\macro{arg1,arg2}|
+% expands to |\macro{arg1}\macro{arg2}|.
+% Thus |\apply\MathUp{e,i,j}| is equivalent to |\MathUp{e}\MathUp{i}\MathUp{j}|.
+% I discovered this powerfull macro on \texttt{iterate190.rssing.com} by searching for 
+% ``TeX How to iterate over a comma separated list''.
+% The answer was posted under the pseudonym `wipet' on 2021/02/26.
+% Let its author, Petr Ol\v{s}ák, be thanked.
+% This macro allows to accomplish tasks that
+% usual loop instructions like |\@for| or |\foreach| cannot achieve due to
+% errors like ``\texttt{!~Improper alphabetic constant}''.
+% For instance, if you try |\def\letter{A} \MathUp{\letter}| it will fail
+% because the control sequence |\letter| is not strictly
+% equivalent here to the single character `A'.
+%
+% \medskip
+%    \begin{macrocode}
+\def\apply#1#2{\apply@#1#2,\apply@,}
+\def\apply@#1#2,{\ifx\apply@#2\empty
+    \else #1{#2}\afterfi@{\apply@#1}\fi}
+\def\afterfi@#1#2\fi{\fi#1}
+
+\newcommand*\MathNormal[1]{% list argument
+    \apply\MathIt{#1} 
+}
+
+%    \end{macrocode}
+%
+% The following commands were used originally (until version 2.2)
+% to set the math letters e, i or j in upright shape,
+% but only worked in the preamble.
+% This is now managed by the more powerful |\MathUp| command, but
+% the old commands are maintained as alias for |\MathUp|. 
+% \medskip
+%
+%    \begin{macrocode}
+\newcommand{\enumber}{\MathUp{e}}
+\newcommand{\inumber}{\MathUp{i}}
+\newcommand{\jnumber}{\MathUp{j}}
+
+%    \end{macrocode}
+%
+% Obtaining an upright Greek letter $\pi$ must be handled differently. 
+% The toggles are called |\pinumber| and |\pinormal| 
+% and can be used anywhere in the document.
+%
+% But |\pinumber| must be called first in the preamble with an optional argument.
+% This argument can be a valid command name that produces an upright pi letter
+% (after having loading an appropriate package).
+% Compatibility with \textsf{unicode-math} is a bit tricky!
+% When given without an argument in the preamble, 
+% |\pinumber| uses an LGR font encoding called \texttt{lmr}.
+% A new feature (v2.11) for |\pinumber| is provided with keyval options to 
+% use many other Greek pi letters without loading
+% a whole package, thus without altering the other (italic) Greek letters. 
+% We achieve this with |\DeclareSymbolFont| and |\DeclareMathSymbol|.
+% We just have to know the `name' of the desired symbol font.
+% 
+% \medskip
+%    \begin{macrocode}
+\newif\ifmm@lgr
+\define@cmdkey{pifonts}[mm@]{lgrmath}[lmr]{\mm@lgrtrue}
+\newif\ifmm@upgreek
+\define@choicekey{pifonts}{upgreek}[\mm@upgreek@option]%
+    {Euler,Symbol,Symbolsmallscale}[Symbol]{\mm@upgreektrue}
+\newif\ifmm@mathdesign
+\define@choicekey{pifonts}{mathdesign}[\mm@mathdesign@option]%
+    {Utopia,Garamond,Charter}[Charter]{\mm@mathdesigntrue}
+\newif\ifmm@kpfonts
+\define@choicekey{pifonts}{kpfonts}[\mm@kp@option]%
+    {normal,light}[normal]{\mm@kpfontstrue}
+\define@boolkeys{pifonts}[mm@]{fourier,pxfonts,txfonts}[true]
+\newif\ifmm@fontspec
+\define@cmdkey{pifonts}[mm@]{fontspec}[GFS Didot]{\mm@fontspectrue}
+  
+\newcommand*\pifonts[1]{%
+    \setkeys{pifonts}{#1}
+    \let\pi\relax
+       
+    \ifmm@lgr
+        \DeclareFontEncoding{LGR}{}{}
+        \DeclareSymbolFont{mmupgr}{LGR}{\mm@lgrmath}{m}{n}
+        % may work with bold (b) instead of m
+        \DeclareMathSymbol{\pi}{\mathord}{mmupgr}{112}
+
+    \else\ifmm@fontspec
+        \@ifpackageloaded{fontspec}{}{
+            \PackageError{mismath}{\string\pinumber\space with
+                the `fontspec' option\MessageBreak
+                needs the fontspec package,\MessageBreak
+                which must be run with LuaLaTeX or XeLaTeX}{}
+        }
+        \newfontfamily\mismathgreekfont{\mm@fontspec}[NFSSFamily=mgr]
+        \DeclareSymbolFont{mmupgr}{TU}{mgr}{m}{n}
+        \Umathchardef\pi="7 \symmmupgr "03C0
+         
+    \else\ifmm@upgreek
+        \ifdefstring{\mm@upgreek@option}{Euler}{
+            \DeclareFontFamily{U}{eur}{\skewchar\font'177}
+            \DeclareFontShape{U}{eur}{m}{n}{%
+              <-6> eurm5 <6-8> eurm7 <8-> eurm10}{}
+            \DeclareSymbolFont{mmupgr}{U}{eur}{m}{n}
+            \DeclareMathSymbol{\pi}{\mathord}{mmupgr}{"19}
+        }{
+        \ifdefstring{\mm@upgreek@option}{Symbol}{
+            \DeclareSymbolFont{mmupgr}{U}{psy}{m}{n}
+            \DeclareMathSymbol{\pi}{\mathord}{mmupgr}{`p}
+        }{
+        \ifdefstring{\mm@upgreek@option}{Symbolsmallscale}{
+            \DeclareFontFamily{U}{fsy}{}
+            \DeclareFontShape{U}{fsy}{m}{n}{<->s*[.9]psyr}{}
+            \DeclareSymbolFont{mmupgr}{U}{fsy}{m}{n}
+            \DeclareMathSymbol{\pi}{\mathord}{mmupgr}{`p}          
+        }{}}}
+          
+    \else\ifmm@mathdesign
+        \ifdefstring{\mm@mathdesign@option}{Utopia}{
+            \DeclareSymbolFont{mmupgr}{OML}{mdput}{m}{n}
+        }{
+        \ifdefstring{\mm@mathdesign@option}{Garamond}{
+            \DeclareSymbolFont{mmupgr}{OML}{mdugm}{m}{n}
+        }{
+        \ifdefstring{\mm@mathdesign@option}{Charter}{
+            \DeclareSymbolFont{mmupgr}{OML}{mdbch}{m}{n}
+        }{}}}
+
+    \else\ifmm@fourier
+        \DeclareFontEncoding{FML}{}{}
+        \DeclareSymbolFont{mmupgr}{FML}{futm}{m}{it}
+
+    \else\ifmm@kpfonts
+        \ifdefstring{\mm@kp@option}{normal}{
+            \DeclareSymbolFont{mmupgr}{U}{jkpmia}{m}{it}
+        }{
+        \ifdefstring{\mm@kp@option}{light}{
+            \DeclareSymbolFont{mmupgr}{U}{jkplmia}{m}{it}
+        }{}}
+
+    \else\ifmm@pxfonts
+        \DeclareSymbolFont{mmupgr}{U}{pxmia}{m}{it}
+
+    \else\ifmm@txfonts
+        \DeclareSymbolFont{mmupgr}{U}{txmia}{m}{it}
+            
+    \fi\fi\fi\fi\fi
+        \DeclareMathSymbol{\pi}{\mathord}{mmupgr}{"19}    
+    \fi\fi\fi
+}
+
+\newcommand*\pinumber[1][]{%
+    \ifthenelse{\equal{#1}{}}{% no argument given
+        \ifx\@onlypreamble\@notprerr % not in preamble
+            \@ifundefined{savedpi}{
+                \PackageWarning{mismath}{%
+                    \string\pinumber\space
+                    must be used in the preamble first}
+            }{\let\pi\savedpi}
+        \else % in the preamble
+            \AtEndPreamble{\AtBeginDocument{
+                \let\itpi\pi
+                \pifonts{lgrmath}
+                \let\savedpi\pi
+            }}
+        \fi
+    }{% command name or keyval options, necessarily in the preamble
+        \AtEndPreamble{\AtBeginDocument{% must be here with unicode-math
+            \let\itpi\pi
+            \@ifundefined{#1}{%
+                \pifonts{#1}
+            }{
+                \ifmm@unicodemath
+                    \ifthenelse{\equal{#1}{uppi}}{% or "1D70B
+                        \renewcommand\pi{\symup{\symbol{"03C0}}}
+                        \renewcommand\itpi{\symit{\symbol{"03C0}}}
+                    }{\renewcommand{\pi}{\csname #1\endcsname}}
+                \else
+                    \renewcommand{\pi}{\csname #1\endcsname}
+                \fi
+            }
+            \let\savedpi\pi
+        }}
+      }
+}
+
+\newcommand{\pinormal}{%
+  \@ifundefined{itpi}{
+    \PackageWarning{mismath}{Command \string\itpi\space undefined,
+    \MessageBreak
+    use \string\pinumber\space in the preamble first}
+  }{
+    \ifmm@unicodemath
+      \@ifundefined{savedpi}{
+        \PackageError{mismath}{Before using \string \pinormal,
+        \MessageBreak
+        you must call \string\pinumber\space in the preamble}{}}
+    \fi
+    \let\pi\itpi
+  }
+}
+
+%    \end{macrocode}
+% When |\pinumber|\oarg{keyval} has been called, you can also get 
+% some other mathematical constants using Greek letters in the same font (\texttt{mmupgr}) 
+% \eg $\othergamma$, the Euler-Mascheroni constant:
+% \begin{verbatim}
+% \let\gamma\relax
+% \DeclareMathSymbol{\gamma}{\mathord}{mmupgr}{"0D}
+% \end{verbatim}
+% \vspace{-2ex}
+% If \textsf{unicode-math} is used, you must put these commands inside
+% |\AtBeginDocument|.
+% The hexadecimal code |"0D| depends on the option passed to |\pinumber|
+% in the preamble (see the command |\pifonts| above and search in package docs).
+% And to get the golden ratio $\othervarphi$:
+% \begin{verbatim}
+% \let\varphi\relax
+% \DeclareMathSymbol{\varphi}{\mathord}{mmupgr}{"27}
+% \end{verbatim}
+% \vspace{-2ex}
+% I you want to preserve the original $\gamma$ or $\varphi$, 
+% you can define |\upgamma| or |\upvarphi| instead.
+%
+% \medskip
+% Commands for vectors and tensors follow.
+% \medskip
+%    \begin{macrocode}
+\newboolean{arrowvect}
+\setboolean{arrowvect}{true}
+\newcommand{\arrowvect}{\setboolean{arrowvect}{true}} 
+\newcommand{\boldvect}{\setboolean{arrowvect}{false}}
+\newcommand{\boldvectcommand}{\boldsymbol} % from amsbsy package
+\mm@macro{vect}{\ifthenelse{\boolean{arrowvect}}{
+    \vv}{\boldvectcommand}} % doesn't work well with \if... \fi
+\newcommand*{\hvect}[1]{\vect{\vphantom{A}#1}}
+\newcommand*{\hvec}[1]{\vec{\vphantom{A}#1}}
+
+\newcommand*{\@norm}[1]{
+    \mbox{\raisebox{1.75pt}{\small$\bigl\Vert$}} #1
+    \mbox{\raisebox{1.75pt}{\small$\bigr\Vert$}} }
+% works better than with relative length
+\newcommand*{\@@norm}[1]{
+    \mbox{\footnotesize\raisebox{1pt}{$\Vert$}} #1
+    \mbox{\footnotesize\raisebox{1pt}{$\Vert$}} }
+\newcommand*{\@@@norm}[1]{
+    \mbox{\tiny\raisebox{1pt}{$\Vert$}} #1
+    \mbox{\tiny\raisebox{1pt}{$\Vert$}} }
+\@ifundefined{norm}{\providecommand*{\norm}[1]{
+    \mathchoice{\@norm{#1}}{\@norm{#1}}{\@@norm{#1}}{\@@@norm{#1}} 
+    }
+}{\mm@warning{norm}} % bad result with libertinust1math
+
+\newcommand{\tensor}{\mathbfsfit} % isomath uses \mathsfbfit
+
+%    \end{macrocode}
+%
+% `Operators', as for example common function names, are generally defined 
+% using the |\DeclareMathOperator| command or |\operatorname| for occasional use. 
+% Operators are then typeset in roman (upright) shape and with appropriate thin space 
+% before and after the operator name.
+% However, for the `differential' operator d, no space should be left after it 
+% to obtain, for example, `$\di x$' instead of `$\operatorname{d} x$'.
+%
+% \medskip
+% Two other operators, suggested by `quark67', representing differences 
+% or variations are defined by the macros |\opDelta| and |\opdelta|. 
+% They use the Greek letters $\upDelta$ and $\updelta$ with appropriate spacing, 
+% similar to |\di|. 
+% By default |\upDelta| will be an alias for |\Delta|.
+% Generally, the uppercase Delta is upright 
+% unless a package is loaded to change this, but the lowercase delta 
+% is italic by default. 
+%
+% To use the |\opdelta| macro, it is therefore necessary 
+% to load a package that provides the lowercase delta in upright shape, 
+% such as \textsf{mathgreeks} or \textsf{unicode-math},
+% or you can use the same symbol font \texttt{mmupgr} as seen above for the upright pi 
+% (if |\pinumber|\oarg{keyval} has been called previously).
+% So you could get the upright delta with:
+% \begin{verbatim}
+% \DeclareMathSymbol{\updelta}{\mathord}{mmupgr}{"0E}
+% \end{verbatim} \vspace{-2ex}
+% The hexadecimal code |"0E| depends on the option passed to |\pinumber|.
+% If you have loaded a package that provides upright shapes of Delta and delta, 
+% it may be necessary to create new aliases for |\upDelta| or |\updelta|,
+% \eg |\let\updelta\|\meta{mydelta}.
+%    \begin{macrocode}
+\mm@macro{di}{\operatorname{d}\mathopen{}}
+\mm@macro{upDelta}{\Delta}
+\mm@macro{opDelta}{\operatorname{\upDelta}\mathopen{}}
+\mm@macro{opdelta}{\operatorname{\updelta}\mathopen{}}
+
+%    \end{macrocode}
+% For the field of probability, we provide the macros |\P|, |\E|, and |\V|, 
+% which are defined as operators. They are typeset in normal roman font, 
+% but can be changed to double-struck style (or another style) if desired.
+%    \begin{macrocode}
+\newcommand\probastyle{}
+\let\Par\P % end of paragraph symbol
+\renewcommand{\P}{\operatorname{\probastyle{P}}}
+\mm@macro{E}{\operatorname{\probastyle{E}}}
+\mm@macro{V}{\operatorname{\probastyle{V}}}
+
+\newcommand*\MathProba[1]{%
+    \in@{P}{#1} \ifin@ \MathUp{P} \fi
+    \in@{E}{#1} \ifin@ \MathUp{E} \fi
+    \in@{V}{#1} \ifin@ \MathUp{V} \fi
+}
+
+%    \end{macrocode}
+% Classic operators or function identifiers are presented below. They will be defined only
+% if the option \texttt{nofunction} has not been activated.
+% As for |\DeclareMathOperator| both arguments are generally similar.
+% \medskip
+%    \begin{macrocode}
+\ifmm@nofunction\else
+    \mm@operator{\adj}{adj}
+    \mm@operator{\Aut}{Aut}
+    \mm@operator{\codim}{codim}
+    \mm@operator{\coker}{coker}
+    \mm@operator{\Conv}{Conv}
+    \mm@operator{\cov}{cov}
+    \mm@operator{\Cov}{Cov}
+    \mm@macro{curl}{\operatorname{\vect{\mathup{curl}}}}
+    \mm@operator[divg]{\divg}{div}
+    
+    \mm@operator{\End}{End}    
+    \mm@operator{\erf}{erf}
+    \mm@macro{grad}{\operatorname{\vect{\mathup{grad}}}}
+    \mm@operator{\id}{id} % mathop or mathord?
+    \mm@operator{\Id}{Id}
+    \mm@operator{\im}{im}
+    \mm@operator{\lb}{lb}
+    \mm@operator{\lcm}{lcm}    
+    \mm@operator{\rank}{rank}
+    
+    \mm@operator{\Res}{Res}
+    \mm@macro{rot}{\operatorname{\vect{\mathup{rot}}}}
+    \mm@operator{\sgn}{sgn}
+    \mm@operator{\sinc}{sinc}
+    \mm@operator[spa]{\spa}{span}
+    \mm@operator{\tr}{tr}
+    \mm@operator{\var}{var}
+    \mm@operator{\Var}{Var}
+    \mm@operator[Zu]{\Zu}{Z}
+    
+    \mm@operator{\arccot}{arccot}
+    \mm@operator{\sech}{sech}
+    \mm@operator{\csch}{csch}
+    \mm@operator{\arsinh}{arsinh}
+    \mm@operator{\arcosh}{arcosh}
+    \mm@operator{\artanh}{artanh}
+    \mm@operator{\arcoth}{arcoth}
+    \mm@operator{\arsech}{arsech}
+    \mm@operator{\arcsch}{arcsch}
+\fi
+
+%    \end{macrocode}
+%
+% The |\mathcal| alphabet, from the original Computer Modern font family,
+% is used here to produce $\Re$, $\Im$ and $\bigO$.
+% Several font packages redefine this alphabet producing glyphs that may seem less 
+% suitable for the commands below.
+% We have therefore retained the original |\cmmathcal| math alphabet, 
+% which can be used for other letters.
+% If \textsf{unicode-math} is called, it will redefine the commands |\Re| and |\Im|
+% in |\AtBeginDocument|, hence the use of |\AtEndPreamble{\AtBeginDocument{|\ldots
+% to ensure that the \textsf{mismath} redefinitions occur after the actions 
+% of \textsf{unicode-math}.
+%
+%    \begin{macrocode}
+\DeclareFontFamily{U}{cmsy}{\skewchar\font48 }
+\DeclareFontShape{U}{cmsy}{m}{n}{% from mathalpha
+    <-5.5> cmsy5%
+    <5.5-6.5> cmsy6%
+    <6.5-7.5> cmsy7%
+    <7.5-8.5> cmsy8%
+    <8.5-9.5> cmsy9%
+    <9.5-> cmsy10}{}
+\DeclareMathAlphabet{\cmmathcal}{U}{cmsy}{m}{n}
+
+\AtEndPreamble{\AtBeginDocument{
+    \ifmm@classicReIm\else
+        \let\oldRe\Re
+        \let\oldIm\Im
+    \ifmm@otherReIm
+        \renewcommand{\Re}{\cmmathcal{R}\mathit{e}}
+        \renewcommand{\Im}{\cmmathcal{I}\mathit{m}}    
+    \else      
+        \renewcommand{\Re}{\operatorname{Re}}
+        \renewcommand{\Im}{\operatorname{Im}}
+    \fi\fi 
+}}
+
+\mm@operator[bigO]{\bigO}{\cmmathcal{O}} 
+\mm@operator[bigo]{\bigo}{O}
+\mm@operator[lito]{\lito}{o}
+
+%    \end{macrocode}
+% And finally we present the remaining macros.
+%
+% With Cyrillic languages, the command |\C| may already be defined 
+% but works only in text mode.
+% Then, it will not be redefined by \textsf{mismath}. However, the command
+% |\onlymathC| allows to use our |\C| macro in math mode,
+% without interfering the definition of the text |\C| that is already defined.
+%
+% When using \XeTeX\ or \LuaTeX\ engines with the \textsf{hyperref} package,
+% |\C| will be already defined and
+% you get the message ``\texttt{Command \string\C\space unavailable in encoding TU}''.
+% Therefore |\onlymathC| is automatically called in that case.
+% \medskip
+%    \begin{macrocode}
+\mm@macro{mathset}{\mathbf}
+\mm@macro{R}{\mathset{R}}
+\mm@macro{C}{\mathset{C}}
+\AtBeginDocument{% \iftutex = LuaTex or XeTeX engines
+    \@ifpackageloaded{hyperref}{\iftutex\onlymathC\fi}{} }
+\providecommand\onlymathC{\let\oldC\C 
+    \renewcommand{\C}{\TextOrMath{\oldC}{\mathset{C}}} }
+\mm@macro{N}{\mathset{N}}
+\mm@macro{Z}{\mathset{Z}}
+\mm@macro{Q}{\mathset{Q}}
+\mm@macro{F}{\mathset{F}}
+\mm@macro{K}{\mathset{K}}
+
+\mm@macro{ds}{\displaystyle}
+\mm@macro{dlim}{\lim\limits}
+\mm@macro{dsum}{\sum\limits}
+\mm@macro{dprod}{\prod\limits}
+\mm@macro{dcup}{\bigcup\limits}
+\mm@macro{dcap}{\bigcap\limits}
+
+\mm@macro{lbar}{\overline}
+\@ifundefined{hlbar}{
+    \providecommand*{\hlbar}[1]{\overline{\vphantom{A}#1}}}{
+    \mm@warning{hlbar} }
+\newcommand\@eqdef{\stackrel{\mathup{def}}{=}}
+\newcommand\@@eqdef{\stackrel{\upDelta}{=}}
+\mm@macro{eqdef}{\@ifstar{\@@eqdef}{\@eqdef}}
+\mm@macro{unbr}{\underbrace}
+\mm@macro{iif}{if and only if\xspace}
+\mm@macro{then}{\implies} 
+
+\@ifundefined{txt}{
+    \providecommand*{\txt}[1]{\quad\text{#1}\quad} }{
+    \mm@warning{txt} }
+\mm@macro{mul}{\mathclose{}\mathord{\times}\mathopen{}}
+\@ifundefined{pow}{
+    \providecommand*{\pow}[2]{\left( #1 \right)^{\!#2}} }{
+    \mm@warning{pow} }
+%    \end{macrocode}
+% For |\abs|, the |\left...\right| structure is inserted within a pair of curly braces
+% to prevent incorrect spacing before the first delimiter when it follows a function name,
+% in cases where the package \textsf{mleftright} is used 
+% with the command |\mleftright| activated.
+% This issue was pointed out by `quark67'.
+%     \begin{macrocode}
+\@ifundefined{abs}{
+    \providecommand*{\abs}[1]{{\left\vert#1\right\vert}} }{
+    \mm@warning{abs} }
+\@ifundefined{lfrac}{
+    \providecommand*{\lfrac}[3][7mu]{%
+        \frac{\mkern#1#2\mkern#1}{\mkern#1#3\mkern#1}} }{
+    \mm@warning{lfrac} }
+
+\newcommand{\systemstretch}{1.2}
+\newcommand{\systemsep}{\medspace}
+\newenvironment{system}[1][l]{
+    \renewcommand{\arraystretch}{\systemstretch}
+    \setlength{\arraycolsep}{0.15em}
+    \left\{\begin{array}{@{\systemsep}#1@{}} %
+}{\end{array}\right.}
+
+\newenvironment{spmatrix}{
+    \left(\begin{smallmatrix}
+}{\end{smallmatrix}\right)}
+
+\newenvironment{mathcols}{% needs multicol package
+  \ifmm@multicol
+    \renewcommand{\columnseprule}{0.1pt}
+    \begin{multicols}{2}
+        \par\noindent\hfill
+        \begin{math}\begin{aligned}\displaystyle
+  \else
+    \PackageError{mismath}{The mathcols environment
+        needs the multicol package}{Call the package multicol
+        in your preamble.}
+  \fi
+}{       \end{aligned}\end{math} \hfill\mbox{}
+    \end{multicols}
+}
+\newcommand{\changecol}{%
+    \end{aligned}\end{math} \hfill\mbox{}
+    \par\noindent\hfill
+    \begin{math}\begin{aligned}\displaystyle}   
+%    \end{macrocode}
+%
+% \section*{Change History}
+%
+% \begin{multicols}{2}\begin{raggedright}
+% \renewcommand\changes[3]{\item[#1 \ (#2)] \mbox{}\\ #3}
+% \setlength{\compactlistindent}{-1em}
+% \begin{list}{}{\setlength\labelwidth{1.4em}\setlength{\leftmargin}{2em}
+%     \setlength{\parsep}{0pt}}
+%
+% \changes{v0.1}{2011/12/27}{First personal version.}
+%
+% \changes{v1.0}{2019/04/11}{Initial published version.}
+%
+% \changes{v1.1}{2019/04/20}{
+%    Changing the default font for \cs{pinumber} from Euler to Symbol.}
+%
+% \changes{v1.2}{2019/04/27}{
+%  \begin{compactlist}
+%    \item commands \cs{enumber}, \cs{inumber}, \cs{jnumber} in \cs{AtBeginDocument}\\
+%    \hand works fine with \textsf{beamer} now, 
+%    \item new general \cs{mm@operator} macro, 
+%    \item using \cs{mathup} instead of \cs{mathrm},
+%    \item including \textsf{mathtools}, 
+%    \item in \cs{DeclareSymbolFont} 'Roman' changed to 'up', 
+%    \item changes in the documentation, 
+%    \item replacing \cs{PEroman} by \cs{PEupright}.
+%  \end{compactlist}}
+%
+% \changes{v1.3}{2019/05/08}{
+%  \begin{compactlist}
+%    \item using \cs{bslash} in the internal \cs{mm@warning} macro
+%    to type out a control sequence whose name is given as parameter, 
+%    \item including the \textsf{mathfixs} package,
+%    \item many corrections in the documentation.
+%  \end{compactlist}}
+%
+% \changes{v1.4}{2019/05/22}{
+%    In \cs{DeclareSymbolFont} 'up' chan\-ged to 'UpSh'
+%        to prevent incompatibility with \textsf{unicode-math}.}
+%
+% \changes{v1.5}{2019/05/30}{
+%  \begin{compactlist}
+%    \item a solution for using \cs{mul} with \cs{frac} \hand use braces, 
+%    \item addition of the \cs{paren} macro.
+%  \end{compactlist}}
+%
+% \changes{v1.6}{2019/09/06}{
+%    Removing the \textsf{mathfixs} package because of problems with fractions.}
+%
+% \changes{v1.7}{2019/12/27}{
+%    Adding a table of contents to the documentation.}
+%
+% \changes{v1.8}{2020/11/15}{
+%    Small changes in the documentation, in particular
+%    an incompatibility is mentioned when using `i' with accent in \textsf{beamer} titles: 
+%        (use \texttt{\textbackslash\textasciicircum i} instead of î).}
+%
+% \changes{v1.9}{2022/10/17}{
+%  \begin{compactlist}
+%    \item in \cs{DeclareSymbolFont} 'UpSh' replaced by 'operators'
+%    \item\cs{PackageWarning} replaced by \cs{PackageWarningNoLine} for existing macros,
+%    \item \cs{thickspace}  replaces \cs{medspace} in \cs{lfrac},
+%    \item changing the documentation font: from lmodern to Palatino (\textsf{mathpazo}).
+%  \end{compactlist}}
+%
+% \changes{v1.10}{2022/10/25}{
+%    \cs{pinumber} code updated to prevent incompatibility 
+%        with the new version of the \textsf{frenchmath} package
+%        (in which the default 'upgreek' option has been changed from Symbol to Euler).}
+%
+% \changes{v2.0}{2022/11/11}{
+%  \begin{compactlist}
+%    \item enhancing \cs{pinumber} to use other Greek letters packages
+%        (it is no longer compatible with the older), 
+%    \item \cs{paren} has been removed (useless), 
+%    \item \cs{hvect} and \cs{hlbar} have been slightly modified (\cs{phantom}\texttt{\{t\}}
+%        instead of \cs{phantom}\texttt{\{h\}}),
+%    \item several changes in the documentation 
+%    (now the Charter font is used, with the \textsf{mathdesign} package).
+%  \end{compactlist}}
+%
+% \changes{v2.1}{2022/12/26}{
+%  \begin{compactlist}
+%    \item including the \textsf{ibrackets} package to improve 
+%    the management of square brackets,
+%    \item new macros \cs{codim}, \cs{sinc}, \cs{var}, \cs{eqdef*}, 
+%    \item removing the warning for the obsolete \cs{paren} command,
+%    \item a small change in the \cs{norm} command (bars in small size),
+%    \item several changes in documentation.
+%  \end{compactlist}}
+%
+% \changes{v2.2}{2023/01/06}{
+%    New option \texttt{ibrackets} to load the \textsf{ibrackets} package
+%    \emph{optionally} because of errors
+%    when using \cs{DeclarePairedDelimiter} with square brackets.}
+%
+% \changes{v2.3}{2023/02/09}{
+%    Introducing keyval options as an alternative to \cs{enumber}, 
+%    \cs{inumber}, \cs{jnumber}, \cs{PEupright},
+%    and also for using ibrackets, \cs{boldvect} and \cs{arrowvect}.}
+%
+% \changes{v2.4}{2023/02/18}{
+%  \begin{compactlist}
+%    \item new powerful macros \cs{MathUp}, \cs{MathIt}, 
+%    (and \cs{MathNumbers}, \cs{MathProba}, \cs{MathNormal}),
+%    \item keyval options are no longer useful and have been removed,
+%    \item loading the package \textsf{ifthen} has been forgotten in v2.3 
+%    (causing possible issues),
+%    \item no more incompatibility when using `i' with accent in \textsf{beamer} titles.
+%  \end{compactlist}}
+%
+% \changes{v2.5}{2023/02/23}{
+%  \begin{compactlist}
+%    \item unification of the code of \cs{MathUp} and \cs{MathIt},
+%    \item a new powerful macro \cs{apply} is used in \cs{MathNormal} to act on a list,
+%    \item new \cs{tensor} command.
+%  \end{compactlist}}
+%
+% \changes{v2.6}{2023/03/01}{
+%  \begin{compactlist}
+%    \item bug fix in \cs{mm@macro},
+%    \item solving incompatibility of the \cs{C} macro when using \textsf{babel} with Russian
+%        (thanks to Murray Eisenberg for this bug report on TeX StackExchange),
+%    \item \cs{mathrm} added in the macro \cs{eqdef*}.
+%  \end{compactlist}}
+%
+% \changes{v2.7}{2023/03/05}{
+%  \begin{compactlist}
+%    \item macros for sets of numbers (\cs{R}, \cs{C}\ldots) now available only in math mode
+%        (following remarks by David Carlisle and Enrico Gregorio),
+%    \item special warning when loading \textsf{babel} with Russian
+%        (\cs{C} will not be defined in that case).
+%  \end{compactlist}}
+%
+% \changes{v2.8}{2023/07/26}{
+%    New macro \cs{onlymathC} designed for using \cs{C} in pmath mode
+%    when Russian language is loaded.}
+%
+% \changes{v2.9}{2023/12/19}{
+%    New option \texttt{decimalcomma}.}
+%
+% \changes{v2.10}{2024/02/20}{
+%  \begin{compactlist}
+%    \item better compatibility with \textsf{unicode-math}: 
+%        for the options \texttt{ibrackets}, \texttt{decimalcomma}
+%        and the commands \cs{MathUp}, \cs{MathIt},
+%    \item explicit error message when using \texttt{mathcols}
+%        without loading the \textsf{multicol} package.
+%  \end{compactlist}} 
+%
+% \changes{v2.11}{2024/02/26}{
+%  \begin{compactlist}\setlength\compactlistindent{-0.5em}
+%    \item enhancements of the \cs{pinumber} macro with keyval options:       
+%        \begin{compactlist}[\dash]
+%        \item no necessity to load a Greek letters package,
+%        \item improvements of compatibility with \textsf{unicode-math};
+%        \end{compactlist}
+%    \item changing the font to Adobe Utopia with the package \textsf{fourier}.
+%  \end{compactlist}}
+%
+% \changes{v2.12}{2024/02/29}{
+%  \begin{compactlist}
+%    \item the \textsf{xparse} package has been removed by mistake in v2.11,
+%        causing some compatibility issues, it is loaded again by \textsf{mismath},
+%    \item improvements to make \cs{pinumber} work better with \textsf{unicode-math}.
+%  \end{compactlist}}
+%
+% \changes{v3.0}{2024/03/15}{
+%  \begin{compactlist}
+%    \item rewriting the \cs{pinumber} command with a new \cs{pifonts} macro,
+%    \item presenting other \texttt{lgrmath} values for \cs{pinumber} in the doc,
+%    \item The \cs{C} macro is now inside \cs{AtBeginDocument},
+%    \item \textsf{amsmath} isn't loaded explicitly because \textsf{mathtools} loads it,
+%    \item bug fix with options \texttt{decimalcomma} and \texttt{ibrackets},
+%    \item new option \texttt{nofunction} to lighten the package loading,
+%    \item addition of macros \cs{coker} and \cs{Res} as standard operator names,
+%    \item new option \texttt{classicReIm} to deactivate \cs{Im} and \cs{Re} redefinition,
+%    \item new option \texttt{otherReIm} to provide an alternative writing 
+%        with \texttt{cmsy} font,
+%    \item removing  the \cs{PEupright} command,
+%    \item default space in the \cs{lfrac} macro increased from \texttt{\textbackslash:}
+%        (5mu) to 7mu,
+%    \item new optional parameter for adjusting the space in \cs{lfrac},
+%    \item changing the \cs{vphantom} argument in \cs{hvect}, \cs{hvec} and \cs{lbar} 
+%        from `t' to `A', looks better.
+%  \end{compactlist}}
+%
+% \changes{v3.1}{2024/06/16}{
+%  \begin{compactlist}\setlength\compactlistindent{-0.5em}
+%    \item adding a change history,
+%    \item bug fix with the \cs{C} macro when using \textsf{hyperref} with 
+%        \LuaTeX{} or \XeTeX{} engines,
+%    \item the $\upDelta$ produced in \cs{eqdef*} is now obtained with \cs{upDelta}
+%         (\cs{mathrm}, used before, doesn't work generally),
+%    \item several relevant suggestions and remarks by `quark67':
+%        \begin{compactlist}[\dash]
+%            \item new macros for variations \cs{opDelta} and small variations \cs{opdelta},
+%            \item redefinition of \cs{then} as an alias for \cs{implies},
+%            \item improvement of the \cs{abs} macro,
+%            \item including the \textsf{mleftright} package;
+%        \end{compactlist}
+%    \item new implementation of \cs{di},
+%    \item improvement of the \cs{mul} macro.
+%  \end{compactlist}}
+%
+% \changes{v3.2}{2025/10/08}{
+%  \begin{compactlist}
+%    \item conditional loading of the \textsf{xparse} package since it is obsolete
+%        with the October 2020 \LaTeX\ release,
+%    \item when used in the preamble \cs{pinumber} in now called within \cs{AtEndPreamble}
+%        to preserve its effect when used in combination with the \textsf{mathgreeks} package.
+%   \end{compactlist}}
+%
+% \end{list}\end{raggedright}
+% \end{multicols}
+%
+% \begin{thebibliography}{35}
+% \begin{raggedright}
+% \bibitem{TYPMA} \emph{Typesetting mathematics for science and technology according 
+% to ISO 31/XI}, Claudio Beccari, TUGboat Volume 18 (1997), No.~1.
+% \url{http://www.tug.org/TUGboat/tb18-1/tb54becc.pdf}.
+% \bibitem{NIST} \emph{Typefaces for Symbols in Scientific Manuscripts},
+% \url{https://www.physics.nist.gov/cuu/pdf/typefaces.pdf}.
+% \bibitem{SI} \emph{Guide for the Use of the International System of Units (SI)},
+% NIST (National Institute of Standards and Technology), updated March 4, 2020 
+% \url{https://www.nist.gov/pml/special-publication-811}.
+% \bibitem{ICTNS} \emph{On the Use of Italic and up Fonts for Symbols in Scientific Text},
+% I.M.~Mills and W.V.~Metanomski, ICTNS (Interdivisional Committee 
+% on Terminology, Nomenclature and Symbols), dec 1999,
+% \url{https://old.iupac.org/standing/idcns/italic-roman_dec99.pdf}.
+% \bibitem{VECT} \emph{\textsf{esvect}  -- Typesetting vectors with beautiful 
+% arrow with \LaTeXe}, Eddie Saudrais, CTAN, v1.3 2013/07/11.
+% \bibitem{MLR} \emph{The \textsf{mleftright} package}, Heiko Oberdiek, CTAN, v1.2 2019/12/03.
+% \bibitem{TOOL} \emph{The \textsf{mathtools} package}, Morten Høgholm, Lars Madsen, CTAN,
+% v1.29 2022/06/29.
+% \bibitem{AMS} \emph{\textsf{amsmath} -- \AmS\ mathmatical facilities for \LaTeX},
+% Frank Mittelbach, Rainer Schöpf, Michael Downes, Davis M.~Jones, David Carlisle, 
+% CTAN, v2.17n 2022/04/08.
+% \bibitem{UNIC} \emph{Experimental Unicode mathematical typesetting: 
+% The \textsf{unicode-math} package}, Will Robertson, Philipp Stephani, Joseph Wright, 
+% Khaled Hosny, and others, CTAN, v0.8r 2023/08/13.
+% \bibitem{FIXM} \emph{The \textsf{fixmath} package for \LaTeXe}, Walter Schmidt, 
+% CTAN, v0.9 2000/04/11.
+% \bibitem{ISOM} \emph{\textsf{isomath} -- Mathematical style for science and technology},
+% Günter Milde, CTAN, v0.6.1 2012/09/04.
+% \bibitem{PMISO} \emph{\textsf{PM-ISOmath}, The Poor Man ISO math bundle}, 
+% the \textsf{pm-isomath} package by Claudio Beccari, CTAN, v1.2.00 2021/08/04.
+% \bibitem{MGREEK} \emph{The \textsf{mathgreeks} package}, Antoine Missier, CTAN,
+% v1.2 2024/05/07.
+% \bibitem{GREEK} \emph{The \textsf{upgreek} package for \LaTeXe}, Walter Schmidt,
+% CTAN, v2.0 2003/02/12.
+% \bibitem{DESIGN} \emph{The \textsf{mathdesign} package},
+% Paul Pichaureau, CTAN, v2.31 2013/08/29.
+% \bibitem{KPF} \emph{\textsf{Kp-Fonts} -- The Johannes Kepler project},
+% Christophe Caignaert, CTAN, v3.34 20/09/2022.
+% \bibitem{FOUR} \textsf{Fourier-GUT\hspace{-0.1em}\emph{enberg}},
+% Michel Bovani, CTAN, v1.3 2005/01/30.
+% \bibitem{PX} \emph{\textsf{PX Fonts} -- Palatino-like fonts in support of mathematics}, 
+% Young Ryu, CTAN, 2000/12/14.
+% \bibitem{TX} \emph{\textsf{TX Fonts} -- Times-like fonts in support of mathematics}, 
+% Young Ryu, CTAN, 2000/12/15.
+% \bibitem{LIB} \emph{The LibertinusT1 Math Package}, Michael Sharpe, CTAN, v2.0.4 2024/01/14.
+% \bibitem{LGR} \emph{The \textsf{lgrmath} package}, Jean-François B., CTAN, v1.0 2022/11/16.
+% \bibitem{NTX} \emph{New TX font package}, Micahel Sharpe, CTAN, v1.735 2024/03/01.
+% \bibitem{ALPHA} \emph{The \textsf{textalpha} package}
+% (part of the \textsf{greek-fontenc} bundle), Günter Milde, CTAN, v2.1 2022/06/14.
+% \bibitem{SPA} \emph{The \textsf{spacingtricks} package}, Antoine Missier, CTAN,
+% v1.8 2023/12/06.
+% \bibitem{BRACKET} \emph{Intelligent brackets -- The \textsf{ibrackets} package},
+% Antoine Missier, CTAN, v1.2, 2023/07/26.
+% \bibitem{INT} \emph{The \textsf{interval} package}, Lars Madsen, CTAN,
+% v0.4 2019/03/06.
+% \bibitem{ICOMMA} \emph{The \textsf{icomma} package for \LaTeXe},
+% Walter Schmidt, CTAN, v2.0 2002/03/10.
+% \bibitem{NCC} \emph{The \textsf{ncccomma} package}, Alexander I.~Rozhenko, 
+% CTAN, v1.0 2005/02/10.
+% \bibitem{DEC} \emph{The \textsf{decimalcomma} package}, Antoine Missier,
+% CTAN, v1.4 2023/12/30.
+% \bibitem{SYST} \emph{L'extension pour \TeX\ et \LaTeX\ \textsf{systeme}},
+% Christian Tellechea, CTAN, v0.32 2019/01/13.
+% \bibitem{SPAL} \emph{The \textsf{spalign} package}, Joseph Rabinoff, CTAN, 2016/10/05.
+% \bibitem{NMATX} \emph{The package \textsf{nicematrix}}, François Pantigny, CTAN,
+% v6.14 2023/02/18.
+% \bibitem{FR} \emph{L'extension \textsf{frenchmath}}, Antoine Missier, CTAN, v3.0 2024/05/04.
+% \bibitem{LSHORT} \emph{The Not So Short Introduction to \LaTeXe}, 
+% the \textsf{lshort} package by
+% Tobias Oetiker, Hubert Partl, Irene Hyna and Elisabeth Schlegl, CTAN, v6.4 2021/04/09.
+% \url{http://tug.ctan.org/info/lshort/english/lshort.pdf}.
+% \bibitem{COMP} \emph{The \LaTeX\ Companion}, Frank Mittelbach, Michel Goossens, 
+% Johannes Braams, David Carlisle, Chris Rowley, 2nd edition, Pearson Education, 2004.
+% \end{raggedright}
+% \end{thebibliography}
+
+% \Finale
+\endinput

@@ -1,0 +1,27 @@
+
+\let\DUMP=\dump
+\let\dump=\endinput
+
+\input lualatex.ini
+
+\catcode`\@=11
+% see minim-lamp.mp
+\def\providebegindocument{%
+    \ifx\@onlypreamble\@notprerr
+    \else\expandafter\document\fi}
+\catcode`\@=12
+
+\toksapp\everyjob{%
+    \documentclass{article}
+    \usepackage{polyglossia, minim-mp}
+    \message{This is the minim-latex metapost processor.}\relax
+    \directlua {require('minim-mp').on_line = true}%
+    \newmetapostinstance[jobname="\jobname", mathmode="scaled"]\MP
+    \runmetapost\MP{input "minim-lamp.mp"; input "\jobname";}%
+    \directlua {require('minim-mp').shipout(\the\MP)}%
+    \closemetapostinstance\MP
+    \csname @fileswfalse\endcsname\end{document}}
+
+\let\dump=\DUMP
+\dump
+

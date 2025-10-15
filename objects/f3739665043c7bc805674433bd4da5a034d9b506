@@ -1,0 +1,759 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2020-2021 by S. Vandevelde, F. Pantigny
+% ------------------------------------------------
+%
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in:
+%
+% http://www.latex-project.org/lppl.txt
+%
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+% \fi
+% \iffalse
+%
+\def\dmnfileversion{0.0.4}
+\def\dmnfiledate{2021/10/01}
+%
+%<*batchfile>
+\begingroup
+\input l3docstrip.tex
+\keepsilent
+\usedir{tex/latex/cascade}
+\preamble
+
+Copyright (C) 2020-2021 by S.Vandevelde, F. Pantigny
+-----------------------------------
+
+This file may be distributed and/or modified under the
+conditions of the LaTeX Project Public License, either version 1.3
+of this license or (at your option) any later version.
+The latest version of this license is in:
+
+http://www.latex-project.org/lppl.txt
+
+and version 1.3c or later is part of all distributions of LaTeX
+version 2005/12/01 or later.
+
+\endpreamble
+\askforoverwritefalse
+\endgroup
+%</batchfile>
+%
+%<@@=cascade>
+%<*driver>
+\documentclass[dvipsnames]{l3doc}% option dvipsnames is for xcolor (loaded by tikz)
+\usepackage{xltxtra}
+\usepackage{geometry}
+\geometry{left=2.8cm,right=2.8cm,top=2.5cm,bottom=2.5cm,papersize={21cm,29.7cm}}
+\setlength{\fboxsep}{0pt}
+\usepackage{tikz}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{float}
+\usetikzlibrary{calc}
+\usepackage{decision-table}
+\hfuzz=5cm
+\def\interitem{\vskip 7mm plus 2 mm minus 3mm}          
+\def\emphase{\bgroup\color{RoyalPurple}\let\next=}
+\fvset{commandchars=\~\#\@,formatcom={\color{gray}}}
+\parindent 0pt
+\skip\footins = 2\bigskipamount
+
+
+
+\begin{document}
+\DocInput{decision-table.dtx}
+\end{document}
+%</driver>
+% \fi
+% \title{The package \pkg{decision-table}\thanks{This document corresponds to the
+% version~\dmnfileversion\space of \pkg{decision-table}, at the date of~\dmnfiledate.}} 
+% \author{S. Vandevelde, F. Pantigny \\ \texttt{s.vandevelde@kuleuven.be} \\ \texttt{fpantigny@wanadoo.fr}}
+%
+% \maketitle
+%
+% \begin{abstract}
+% The LaTeX package \pkg{decision-table} provides a command |\dmntable|, which allows for an easy way to generate decision tables in the Decision Model and Notation (DMN) format. (See Fig.~\ref{ex1})
+% This package ensures consistency in the tables (i.e. fontsize), and is thus a better alternative to inserting tables via images.
+% Besides pure DMN tables, it also supports the tables used in the cDMN and pDMN extensions, namely glossary and probability tables.
+% \end{abstract}
+% 
+%
+%
+% \vspace{1cm}
+% \section{Description}
+% 
+% The \texttt{decision-table} package allows for easy and straightforward generation of decision tables (with or without input columns) in the Decision Model and Notation (DMN) format, as demonstrated in Fig.~\ref{ex1}.
+% Additionally, it also supports glossary and goal tables as defined by cDMN\footnote{https://cdmn.be}, and probability tables as defined by pDMN\footnote{Vandevelde S., et al., ``A Table-Based Representation for Probabilistic Logic: Preliminary Result''.}.
+% Usage of this package ensures consistency in tables (i.e. font type, font size, color, $\ldots$), and is thus a better alternative to inserting tables via images.
+% 
+% \begin{figure}[H]
+%     \centering
+%     \dmntable{BMI Level}{U}{BMI}{BMILevel}
+%              {$< 18.5$, Underweight,
+%               $[18.5..25]$, Normal,
+%               $(25..30]$, Overweight,
+%               $> 30$, Obese}
+%     \caption{Example of a DMN table}
+%     \label{ex1}
+% \end{figure}
+% \section{Usage}
+%
+% In total, the \texttt{decision-table} package adds 5 new commands.
+% \begin{itemize}
+%     \item \texttt{dmntable}: basic DMN table.
+%     \item \texttt{dmnoutputtable}: basic DMN table, but without input columns.
+%     \item \texttt{dmnglossarytable}: glossary table, as defined by cDMN.
+%     \item \texttt{goaltable}: goal table, as defined by cDMN.
+%     \item \texttt{pdmntable}: probability table, as defined by pDMN.
+%     \item \texttt{pdmnoutputtable}: probability table, but without input columns.
+% \end{itemize}
+
+% \subsection{dmntable}
+% The \texttt{dmntable} command generates standard DMN decision tables.
+% This command expands into a \texttt{tabular}, so it can be used within a \texttt{table} or \texttt{figure} environment.
+% Furthermore, this allows labels and captions to be added seamlessly, and allows placing multiple DMN tables in the same environment.
+% These tables will automatically arrange themselves based on size.
+% 
+% The \texttt{dmntable} command has the following inputs:
+% \begin{itemize}
+%     \item title
+%     \item hit policy
+%     \item input column headers
+%     \item output column headers
+%     \item the table values
+% \end{itemize}
+% The command is used as follows:
+% \iffalse
+%<*example>
+% \fi
+\begin{lstlisting}[language=tex, frame=single]
+\dmntable{title}{hitpolicy}{input}{output}{values}
+\end{lstlisting}
+% \iffalse
+%</example>
+% \fi
+% 
+% The input, output and cell values are split by a comma.
+% It is not necessary to include the row numbers for the cell values.
+% For example, Fig.~\ref{ex1} is generated by the following code:
+
+% \iffalse
+%<*example>
+% \fi
+\begin{lstlisting}[language=tex, frame=single, basicstyle=\small]
+\begin{figure}[H]
+    \centering
+    \dmntable{BMI Level}{U}{BMI}{BMILevel}
+             {$< 18.5$, Underweight,
+              $[18.5..25]$, Normal,
+              $(25..30]$, Overweight,
+              $> 30$, Obese}
+    \caption{Example of a DMN table}
+    \label{ex1}
+\end{figure}
+\end{lstlisting}
+% \iffalse
+%</example>
+% \fi
+% 
+% If a cell value contains multiple values (e.g. multiple string values), then accolades should be written around them.
+% See the example shown in Fig.~\ref{ex2}.
+
+% It is also possible to have cells be multiline using the \texttt{makecell} package. This is useful in cases where large text causes page overflow.
+% \iffalse
+%<*example>
+% \fi
+\begin{lstlisting}[language=tex, frame=single, basicstyle=\small]
+\include{makecell} % This should be somewhere at the top of document
+\begin{figure}[H]
+    \centering
+    \dmntable{BMI Level}{U}{BMI}{\makecell{BMI \\ Level}}
+             {$< 18.5$, Underweight,
+              $[18.5..25]$, Normal,
+              $(25..30]$, Overweight,
+              $> 30$, Obese}
+    \caption{Example of a DMN table with multiline cell}
+    \label{ex1}
+\end{figure}
+\end{lstlisting}
+% \iffalse
+%</example>
+% \fi
+% 
+% \subsection{dmnoutputtable}
+% Decision tables that have no input columns can be created using the \texttt{dmnoutputtable} command.
+% Its usage is the same as the standard decision table, except that no input columns should be given.
+% For example, the following code generates the table shown in Fig.~\ref{outputtable}.
+% \iffalse
+%<*example>
+% \fi
+\begin{lstlisting}[language=tex, frame=single, basicstyle=\small]
+\begin{figure}[H]
+    \centering
+    \dmnoutputtable{BMI Level}{U}{BMI}{5}
+    \caption{Example of a DMN output table}
+    \label{ex1}
+\end{figure}
+\end{lstlisting}
+% \iffalse
+%</example>
+% \fi
+% \begin{figure}[H]
+%     \centering
+%     \dmnoutputtable{BMI Level}{U}{BMI}{5}
+%     \caption{Example of a DMN output table}
+%     \label{outputtable}
+% \end{figure}
+% 
+% \subsection{dmnglossarytable}
+% Glossary tables are added by using the \texttt{glossarytable} command.
+% This command accepts three inputs: the title, the sub-titles of the columns, and the actual elements.
+% See Fig. \ref{glos1} for an example.
+% \iffalse
+%<*example>
+% \fi
+\begin{lstlisting}[language=tex, frame=single, basicstyle=\small]
+\begin{figure}[H]
+   \centering
+   \glossarytable{Type}{Name, DataType, Possible Values}
+                       {Country, String, {Belgium, France, Germany}}
+   \glossarytable{Function}{Name, DataType}{color of Country, Color}
+   \glossarytable{Relation}{Name}{Country borders Country}
+   \caption{Example glossary}
+   \label{glos1}
+\end{figure}
+\end{lstlisting}
+% \iffalse
+%</example>
+% \fi
+%
+%
+% \begin{figure}[H]
+%    \centering
+%    \glossarytable{Type}{Name, DataType, Possible Values}
+%                        {Country, String, {Belgium, France, Germany}}
+%    \glossarytable{Function}{Name, DataType}{color of Country, Color}
+%    \glossarytable{Relation}{Name}{Country borders Country}
+%    \caption{Example glossary}
+%    \label{glos1}
+% \end{figure}
+
+% \subsection{goaltable}
+
+% Generating a \texttt{Goal} table is straightforward:
+
+% \iffalse
+%<*example>
+% \fi
+\begin{lstlisting}[language=tex, frame=single]
+\goaltable{tablename}{values}
+\end{lstlisting}
+% \iffalse
+%</example>
+% \fi
+
+% \begin{figure}[H]
+%     \centering
+%     \goaltable{tablename}{value1, value2}
+% \end{figure}
+
+% \subsection{pdmntable}
+
+% pDMN probability tables are similar to standard DMN tables, but with a few changes.
+% The biggest change is the addition of probabilities. The syntax of \texttt{pdmntable} is as follows:
+
+% \iffalse
+%<*example>
+% \fi
+\begin{lstlisting}[language=tex, frame=single]
+\pdmntable{title}{hitpolicy}{inputs}{outputs}{output values}{cell values}
+\end{lstlisting}
+% \iffalse
+%</example>
+% \fi
+
+%For example, a table expressing the probabilities of an unbiased and biased dice throw can be expressed as follows:
+
+% \iffalse
+%<*example>
+% \fi
+\begin{lstlisting}[language=tex, frame=single]
+\pdmntable{Throwing Dice}{Ch}{biased}{die value}
+          {one, two, three, four, five, six}
+          {No, $1/6$, $1/6$, $1/6$, $1/6$, $1/6$, $1/6$,
+           Yes, $0.1$, $0.1$, $0.1$, $0.1$, $0.1$, $0.5$}
+\end{lstlisting}
+% \iffalse
+%</example>
+% \fi
+
+% \begin{figure}[H]
+%     \centering
+% \pdmntable{Throwing Dice}{Ch}{biased}{die value}
+%           {one, two, three, four, five, six}
+%           {No, $1/6$, $1/6$, $1/6$, $1/6$, $1/6$, $1/6$,
+%            Yes, $0.1$, $0.1$, $0.1$, $0.1$, $0.1$, $0.5$}
+% \end{figure}
+
+
+% \subsection{pdmnoutputtable}
+% The final type of table, \texttt{pdmnoutputtable}, is the same as the one shown in the previous subsection but without any input columns.
+
+% \iffalse
+%<*example>
+% \fi
+\begin{lstlisting}[language=tex, frame=single]
+\pdmnoutputtable{tablename}{hitpolicy}{output}{outputvalue}{probabilities}
+\end{lstlisting}
+% \iffalse
+%</example>
+% \fi
+
+% \begin{figure}[H]
+%     \centering
+%     \pdmnoutputtable{h1}{U}{heads1}{Yes}{0.5}
+% \end{figure}
+
+% \section{Contributing}
+% 
+% Contributions are always welcome.
+% The project is hosted at \url{https://gitlab.com/Vadevesi/dmn-tex}
+
+%
+% \newgeometry{left=4cm}
+%
+% \section{Implementation}
+%
+%<@@=dmn>
+% 
+% \bigskip
+%
+% 
+% We give the traditional declaration of a package written with |expl3|:
+%    \begin{macrocode}
+\RequirePackage{l3keys2e}
+\ProvidesExplPackage
+  {decision-table}
+  {\dmnfiledate}
+  {\dmnfileversion}
+  {Table of decision}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\RequirePackage { nicematrix }
+%    \end{macrocode}
+%
+% \bigskip
+% We define the command |\dmntable| with the tools of \pkg{xparse}.
+%    \begin{macrocode}
+\NewDocumentCommand \dmntable { m m m m m }
+  {
+%    \end{macrocode}
+% The clist (\emph{comma separated list}) |\l_@@_input_clist| is for the list
+% of the names of the input fields. 
+%    \begin{macrocode}
+    \clist_clear_new:N \l_@@_input_clist
+    \clist_set:Nn \l_@@_input_clist { #3 }
+%    \end{macrocode}
+%
+% \bigskip
+% The clist |\l_@@_output_clist| is for the list of the names of the output fields.
+%    \begin{macrocode}
+    \clist_clear_new:N \l_@@_output_clist
+    \clist_set:Nn \l_@@_output_clist { #4 }
+%    \end{macrocode}
+%
+% \bigskip
+% The integer |\l_@@_input_int| is the number of the input fields.
+%    \begin{macrocode}
+    \int_zero_new:N \l_@@_input_int
+    \int_set:Nn \l_@@_input_int { \clist_count:N \l_@@_input_clist }
+%    \end{macrocode}
+%
+% \bigskip
+% The integer |\l_@@_output_int| is the number of the output fields.
+%    \begin{macrocode}
+    \int_zero_new:N \l_@@_output_int
+    \int_set:Nn \l_@@_output_int { \clist_count:N \l_@@_output_clist }
+%    \end{macrocode}
+% 
+%
+% \bigskip
+% The sequence |\l_@@_cells_seq| is the sequence of all the cells of the
+% ``body'' of the tabular. 
+%    \begin{macrocode}
+    \seq_clear_new:N \l_@@_cells_seq
+    \seq_set_split:Nnn \l_@@_cells_seq { , } { #5 }
+%    \end{macrocode}
+% 
+% 
+% \vspace{1cm}
+% Now, we will begin the construction of the tabular (a |{NiceTabular}| of
+% \pkg{nicematrix}). 
+% 
+% \bigskip
+% The command |\use:x| will expand its argument. Indeed, the preamble of the
+% |{NiceTabular}| (which has the same format as a preamble of |{tabular}| must
+% be computed before the execution of the |\begin{NiceTabular}|.
+%    \begin{macrocode}
+    \use:x
+      {
+        \exp_not:N \begin { NiceTabular } 
+%    \end{macrocode}
+% Here is the preamble of the tabular. The command |\prg_replicate:nn| is
+% expandable and hence will be expanded by the |use:x|.
+%    \begin{macrocode}
+        { r \prg_replicate:nn { \l_@@_input_int + \l_@@_output_int } l }
+%    \end{macrocode}
+% Here is the list of options of the |{NiceTabular}| (a standard tabular of
+% |{array}| don't have such list of options. Once again, we have to compute some
+% quantities in this list of options before the execution of |\begin{NiceTabular}|.
+%    \begin{macrocode}
+        [ 
+%    \end{macrocode}
+% The key |hvlines-except-corners| will draw all the rules of the tabular,
+% excepted in the (upper right) corner.
+%    \begin{macrocode}
+          hvlines-except-corners ,
+%    \end{macrocode}
+% The key |code-before| of |{NiceTabular}| contains instructions to color the
+% cells \emph{before} the rules (doing so, the resulting \textsc{pdf} gives
+% better results in the \textsc{pdf} viewers).
+%    \begin{macrocode}
+          code-before = 
+%    \end{macrocode}
+% First, a |\rectanglecolor| for the labels of the ``input'' fields. The command
+% |\int_eval:n| is expandable and, hence, will be expanded by the |\use:x|. On
+% the other side, we have to prevent the expansion of |\rectanglecolor| which,
+% in fact, at that point is not defined (it will be defined by \pkg{nicematrix}
+% after the construction of the array).
+%    \begin{macrocode}
+           \exp_not:N \rectanglecolor 
+             { blue!10!green!60!black!30 }
+             { 2 - 2 }
+             { 2 - \int_eval:n { \l_@@_input_int + 1 } }
+%    \end{macrocode}
+% A |\rectanglecolor| for the labels of the ``output'' fields.
+%    \begin{macrocode}
+           \exp_not:N \rectanglecolor 
+             { green!30!blue!15 }
+             { 2 - \int_eval:n { \l_@@_input_int + 2 } }
+             { 2 - \int_eval:n { \l_@@_input_int + \l_@@_output_int + 1 } }
+        ]
+      }
+%    \end{macrocode}
+% Now, we begin the body of the tabular (the environment |{NiceTabular}|).
+% 
+% \medskip
+% The body begins by a |\multicolumn| for the title. However, we have to compute
+% the number of cells of that |\multicolumn|. That's why we have to expand the
+% first argument of the |\multicolumn| before executing the |\multicolumn|.
+% However, we have to do that in an expandable way in order to prevent the
+% functionnality of the |\multicolumn| (which internally give a |\omit| of TeX).
+% That's why we have to use |\exp_args:Ne| (|\exp_args:Nx| would not do the job).
+%    \begin{macrocode}
+    \exp_args:Ne \multicolumn 
+      { \int_eval:n { \l_@@_input_int + 1 } } 
+      { l } 
+      { #1 } \\
+%    \end{macrocode}
+% |#2| is the \emph{hit policy}.
+%    \begin{macrocode}
+    #2 & 
+%    \end{macrocode}
+% Now, the fields (``input fields'' and ``output fields''). By using
+% |\clist_use:Nn|, we replace the commas by ampersands (|&|).
+%    \begin{macrocode}
+    \clist_use:Nn \l_@@_input_clist { & } & 
+    \clist_use:Nn \l_@@_output_clist { & } \\
+%    \end{macrocode}
+% Now, all the rows corresponding to the rules. We begin a loop over all the
+% cells with |\seq_map_inline:Nn|. 
+%    \begin{macrocode}
+    1 & 
+    \seq_map_inline:Nn \l_@@_cells_seq
+      {
+%    \end{macrocode}
+% |\c@jCol| and |\c@iRow| are counters provided by |{NiceTabular}| for the
+% current column and the current row. If you are in the first column, we insert
+% the number of rule.
+%    \begin{macrocode}
+        \int_compare:nT { \c@jCol = 0 } { \int_eval:n { \c@iRow - 1 } & } 
+%    \end{macrocode}
+% Now, we add one composante of |\l_@@_cells_seq|.
+%    \begin{macrocode}
+        ##1
+%    \end{macrocode}
+% Before the following cell, we have, of course, to add |\\| (if we are at the
+% end of the row) or |&| (elsewhere).
+%    \begin{macrocode}
+        \int_compare:nTF { \c@jCol = \l_@@_input_int + \l_@@_output_int + 1 } 
+          { \\ } 
+          { & }
+      }
+    \end { NiceTabular }
+  }
+%    \end{macrocode}
+% The other two commands are simply more of the same.
+%    \begin{macrocode}
+\NewDocumentCommand \dmnoutputtable { m m m m }
+  {
+    \clist_clear_new:N \l__dmn_output_clist
+    \clist_set:Nn \l__dmn_output_clist { #3 }
+    \int_zero_new:N \l__dmn_output_int
+    \int_set:Nn \l__dmn_output_int { \clist_count:N \l__dmn_output_clist }
+    \seq_clear_new:N \l__dmn_cells_seq
+    \seq_set_split:Nnn \l__dmn_cells_seq { , } { #4 }
+    \use:x
+      {
+        \exp_not:N \begin { NiceTabular }
+        { r \prg_replicate:nn { \l__dmn_output_int } l }
+        [
+          hvlines-except-corners ,
+          code-before =
+           \exp_not:N \rectanglecolor
+             { blue!10!green!60!black!30 }
+             { 2 - 2 }
+             { 2 - \int_eval:n { 1 } }
+           \exp_not:N \rectanglecolor
+             { green!30!blue!15 }
+             { 2 - \int_eval:n { 2 } }
+             { 2 - \int_eval:n { \l__dmn_output_int + 1 } }
+        ]
+      }
+    \exp_args:Ne \multicolumn
+      { \int_eval:n { 1 } }
+      { l }
+      { #1 } \\
+    #2 &
+    \clist_use:Nn \l__dmn_output_clist { & } \\
+    1 &
+    \seq_map_inline:Nn \l__dmn_cells_seq
+      {
+        \int_compare:nT { \c@jCol = 0 } { \int_eval:n { \c@iRow - 1 } & }
+        ##1
+        \int_compare:nTF { \c@jCol = \l__dmn_output_int + 1 }
+          { \\ }
+          { & }
+      }
+    \end { NiceTabular }
+  }
+
+\NewDocumentCommand \glossarytable { m m m }
+  {
+    \clist_clear_new:N \l__clist
+    \clist_set:Nn \l__clist { #2 }
+    \int_zero_new:N \l__cint
+    \int_set:Nn \l__cint { \clist_count:N \l__clist }
+    \seq_clear_new:N \l__dmn_cells_seq
+    \seq_set_split:Nnn \l__dmn_cells_seq { , } { #3 }
+    \use:x
+      {
+        \exp_not:N \begin { NiceTabular }
+        { c \prg_replicate:nn { \l__cint -1 } c }
+        [
+          hvlines-except-corners ,
+          code-before =
+           \exp_not:N \rectanglecolor
+             { blue!30!green!10!red!40 }
+             { 1 - \int_eval:n { 1 } }
+             { 1 - \int_eval:n { \l__cint} }
+        ]
+      }
+    \exp_args:Ne \multicolumn
+      { \int_eval:n { \l__cint } }
+      { c }
+      { \textbf{#1} } \\
+    \bf \clist_use:Nn \l__clist { & \bf } \\
+    \seq_map_inline:Nn \l__dmn_cells_seq
+      {
+        \int_compare:nT { \c@jCol = 0 } { }
+        ##1
+        \int_compare:nTF { \c@jCol = \l__cint }
+          { \\ }
+          { & }
+      }
+    \end { NiceTabular }
+  }
+\NewDocumentCommand \pdmntable { m m m m m m}
+  {
+    \clist_clear_new:N \l__dmn_input_clist
+    \clist_set:Nn \l__dmn_input_clist { #3 }
+    \clist_clear_new:N \l__dmn_output_clist
+    \clist_set:Nn \l__dmn_output_clist { #4 }
+    \clist_clear_new:N \l__suboutput_clist
+    \clist_set:Nn \l__dmn_suboutput_clist { #5 }
+    \int_zero_new:N \l__dmn_input_int
+    \int_set:Nn \l__dmn_input_int { \clist_count:N \l__dmn_input_clist }
+    \int_zero_new:N \l__dmn_output_int
+    \int_set:Nn \l__dmn_output_int { \clist_count:N \l__dmn_output_clist }
+    \int_zero_new:N \l__dmn_suboutput_int
+    \int_set:Nn \l__dmn_suboutput_int { \clist_count:N \l__dmn_suboutput_clist }
+    \seq_clear_new:N \l__dmn_cells_seq
+    \seq_set_split:Nnn \l__dmn_cells_seq { , } { #6 }
+    \seq_clear_new:N \l__dmn_inputcells_seq
+    \seq_set_split:Nnn \l__dmn_inputcells_seq { , } { #3 }
+    \use:x
+      {
+        \exp_not:N \begin { NiceTabular }
+        { r \prg_replicate:nn { \l__dmn_input_int + \l__dmn_suboutput_int  + 1} l }
+        [
+          hvlines-except-corners ,
+          code-before =
+           \exp_not:N \rectanglecolor
+             { blue!10!green!60!black!30 }
+             { 2 - 2 }
+             { 2 - \int_eval:n { \l__dmn_input_int + 1 } }
+           \exp_not:N \rectanglecolor
+             { green!30!blue!15 }
+             { 2 - \int_eval:n { \l__dmn_input_int + 2 } }
+             { 2 - \int_eval:n { \l__dmn_input_int + \l__dmn_suboutput_int + 1 } }
+          \exp_not:N \rectanglecolor
+             { red!60!green!60!blue!15}
+             { 3 - \int_eval:n { 1 } }
+             { 3 - \int_eval:n { \l__dmn_input_int + \l__dmn_suboutput_int + 1 } }
+        ]
+      }
+    \exp_args:Ne \multicolumn
+      { \int_eval:n { \l__dmn_input_int + 1 } }
+      { l }
+      { #1 } \\
+    #2 &
+    \clist_use:Nn \l__dmn_input_clist { & } &
+    \exp_args:Ne \multicolumn
+      { \int_eval:n {\l__dmn_suboutput_int}} 
+      { c }
+      { #4 } \\
+    \seq_map_inline:Nn \l__dmn_inputcells_seq 
+      { & }
+    & \clist_use:Nn \l__dmn_suboutput_clist { & } & \\
+    %\clist_use:Nn \l__dmn_output_clist { & } \\
+    1 &
+    \seq_map_inline:Nn \l__dmn_cells_seq
+      {
+        \int_compare:nT { \c@jCol = 0 } { \int_eval:n { \c@iRow - 2 } & }
+        ##1
+        \int_compare:nTF { \c@jCol = \l__dmn_input_int + \l__dmn_suboutput_int + 1 }
+          { \\ }
+          { & }
+      }
+    \end { NiceTabular }
+  }
+\NewDocumentCommand \pdmnoutputtable { m m m m m }
+  {
+    \clist_clear_new:N \l__dmn_output_clist
+    \clist_set:Nn \l__dmn_output_clist { #3 }
+    \clist_clear_new:N \l__suboutput_clist
+    \clist_set:Nn \l__dmn_suboutput_clist { #4 }
+    \int_zero_new:N \l__dmn_output_int
+    \int_set:Nn \l__dmn_output_int { \clist_count:N \l__dmn_output_clist }
+    \int_zero_new:N \l__dmn_suboutput_int
+    \int_set:Nn \l__dmn_suboutput_int { \clist_count:N \l__dmn_suboutput_clist }
+    \seq_clear_new:N \l__dmn_cells_seq
+    \seq_set_split:Nnn \l__dmn_cells_seq { , } { #5 }
+    \use:x
+      {
+        \exp_not:N \begin { NiceTabular }
+        { r \prg_replicate:nn { \l__dmn_suboutput_int } l }
+        [
+          hvlines-except-corners ,
+          code-before =
+           \exp_not:N \rectanglecolor
+             { blue!10!green!60!black!30 }
+             { 2 - 2 }
+             { 2 - \int_eval:n { 1 } }
+           \exp_not:N \rectanglecolor
+             { green!30!blue!15 }
+             { 2 - \int_eval:n { 2 } }
+             { 2 - \int_eval:n { \l__dmn_suboutput_int + 1 } }
+          \exp_not:N \rectanglecolor
+             { red!60!green!60!blue!15}
+             { 3 - \int_eval:n { 1 } }
+             { 3 - \int_eval:n { \l__dmn_suboutput_int + 1 } }
+        ]
+      }
+    \exp_args:Ne \multicolumn
+      { \int_eval:n { 1 } }
+      { l }
+      { #1 } \\
+    #2 &
+    \exp_args:Ne \multicolumn
+      { \int_eval:n {\l__dmn_suboutput_int}} 
+      { c }
+      { #3 } \\
+    & \clist_use:Nn \l__dmn_suboutput_clist { & } \\
+    1 &
+    \seq_map_inline:Nn \l__dmn_cells_seq
+      {
+        \int_compare:nT { \c@jCol = 0 } { \int_eval:n { \c@iRow - 1 } & }
+        ##1
+        \int_compare:nTF { \c@jCol = \l__dmn_suboutput_int + 1 }
+          { \\ }
+          { & }
+      }
+    \end { NiceTabular }
+  }
+
+\NewDocumentCommand \goaltable { m m }
+  {
+    \seq_clear_new:N \l__dmn_cells_seq
+    \seq_set_split:Nnn \l__dmn_cells_seq { , } { #2 }
+    \use:x
+      {
+        \exp_not:N \begin { NiceTabular }
+        { \prg_replicate:nn { 1 } c }
+        [
+          hvlines-except-corners ,
+          code-before =
+           \exp_not:N \rectanglecolor
+             { blue!30!green!10!red!20 }
+             { 1 - \int_eval:n { 1 } }
+             { 1 - \int_eval:n { 1} }
+        ]
+      }
+    \textbf{#1} \\
+    %\exp_args:Ne \multicolumn
+    %  { \int_eval:n { 1 } }
+    %  { c }
+    %  { \textbf{#1} } \\
+    \seq_map_inline:Nn \l__dmn_cells_seq
+      {
+        \int_compare:nT { \c@jCol = 0 } { }
+        ##1
+        \int_compare:nTF { \c@jCol = 1 }
+          { \\ }
+          { & }
+      }
+    \end { NiceTabular }
+  }
+
+\endinput
+%%
+%% End of file `decision-table.sty'.
+
+%    \end{macrocode}
+% 
+%
+%
+% \tableofcontents
+%
+% \end{document}
+% 
+% Local Variables:
+% TeX-fold-mode: t
+% TeX-fold-preserve-comments: nil
+% flyspell-mode: nil
+% fill-column: 80
+% End:
+
+
+
+
+
+

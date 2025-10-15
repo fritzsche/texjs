@@ -1,0 +1,99 @@
+% ==============================================
+%  linkedthm.sty — Linked Theorem ↔ Proof helpers
+%  v1.0 — 2025/07/21 — Luis A. Ortega
+%  License: LPPL 1.3c
+% ==============================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{linkedthm}[2025/07/21 v1.0 Linked theorem–proof hyperlinks]
+
+% ==============================================
+% Requirements
+% ==============================================
+\RequirePackage{amsthm}    % For theorem-like environments
+\RequirePackage{xparse}    % For parsing environments
+\RequirePackage{hyperref}  % For hyperlinks
+
+% ==============================================
+% Internal storage helpers
+% ==============================================
+\makeatletter
+
+% Save a labeled statement's body and type
+\newcommand{\lthm@savestmt}[3]{% #1=label, #2=env type, #3=body
+  \expandafter\gdef\csname lthm@body@#1\endcsname{#3}%
+  \expandafter\gdef\csname lthm@type@#1\endcsname{#2}%
+}
+
+% Retrieve the body of a saved statement
+\newcommand{\lthm@getbody}[1]{%
+  \@ifundefined{lthm@body@#1}{%
+    \PackageWarning{linkedthm}{No body stored for #1}%
+  }{%
+    \csname lthm@body@#1\endcsname}}
+
+% Retrieve the type of a saved statement
+\newcommand{\lthm@gettype}[1]{%
+  \@ifundefined{lthm@type@#1}{%
+    \PackageWarning{linkedthm}{No type stored for #1}%
+    ???%
+  }{%
+    \csname lthm@type@#1\endcsname}}
+
+\makeatother
+
+% ==============================================
+% Define linked theorem environments
+% \DeclareLinkedTheorem{linked-env}{base-env}{Printable Name}
+% ==============================================
+\makeatletter
+\NewDocumentCommand{\DeclareLinkedTheorem}{mmm}{%
+  % Store printable name for use in proof heading
+  \@ifundefined{lthm@name@#2}{%
+    \expandafter\newcommand\csname lthm@name@#2\endcsname{#3}%
+  }{}%
+
+  % Define new linked environment
+  \NewDocumentEnvironment{#1}{m +b}{%
+    \lthm@savestmt{##1}{#2}{##2}% store statement
+    \begin{#2}\label{##1}%
+      ##2\ %
+      \textup{[\hyperref[proof:##1]{Proof}]}% backlink to proof
+    \end{#2}%
+  }{}%
+}
+\makeatother
+
+% ==============================================
+% Define linked proof environment
+% \begin{linkedproof}{label} ... \end{linkedproof}
+% ==============================================
+\makeatletter
+\NewDocumentEnvironment{linkedproof}{m +b}{%
+  \def\lthm@thislabel{#1}%
+  \edef\lthm@thistype{\lthm@gettype{#1}}%
+
+  % Resolve printable name
+  \@ifundefined{lthm@name@\lthm@thistype}{%
+    \def\lthm@printname{\lthm@thistype}%
+  }{%
+    \edef\lthm@printname{\csname lthm@name@\lthm@thistype\endcsname}%
+  }%
+
+  % Hyperlink target and restated heading
+  \par\medskip
+  \phantomsection
+  \label{proof:#1}%
+  \noindent\textbf{\lthm@printname~\ref{#1}}%
+  \ \textup{[\hyperref[\lthm@thislabel]{Return}]}\textbf{. }%
+  \lthm@getbody{#1}\par\medskip
+
+  % Begin actual proof
+  \begin{proof}%
+    #2%
+}{%
+  \end{proof}%
+  \par\medskip
+}
+\makeatother
+
+\endinput

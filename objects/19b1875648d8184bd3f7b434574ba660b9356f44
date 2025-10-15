@@ -1,0 +1,136 @@
+% file `diffcoef5.def'
+% definitions for variant forms
+% 2023/01/03
+% Andrew Parsloe ajparsloe@gmail.com
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% material derivative
+\difdef { f, s } { D }
+  { op-symbol = \mathrm{D} }
+% math italic
+\difdef { f, s, c } { d' } 
+  {
+    op-symbol      = d,
+    op-order-nudge = 1 mu 
+  }
+\difdef { f, s, c } { D' } 
+  {
+    op-symbol  = D,
+    op-order-nudge = 1 mu
+  }
+% Greek 
+\difdef { f, s } { gd }
+  { op-symbol = \delta }
+\difdef { f, s } { gD }
+  { op-symbol = \Delta }
+% spaceless appending
+\difdef { f, fp } { *0 }
+  { 
+    *derivand-sep = 0 mu     ,
+    outer-Ldelim  = \mleft ( ,
+    outer-Rdelim  = \mright )
+  }
+% tfrac, nonscalable
+\difdef { f, fp } { t }
+  {
+    style             = tfrac  ,
+    derivand-sep      = 1 mu plus 1 mu minus 1 mu,
+    multi-term-sep    = 0 mu   ,
+    term-sep-adjust   = 0 mu   ,
+    lvwrap-sup-nudge  = 0 mu   ,
+    outer-Ldelim      = \bigl (,
+    outer-Rdelim      = \bigr ),
+    elbowroom         = -2 mu  ,
+    sub-nudge         = -3 mu
+  }
+% slash fractions: 0=scalable,
+% 1=big, 2=Big, 3=bigg, 4=Bigg
+% but > 1 gives eyesores
+\difdef { s, sp } { 0 }
+  {
+    style         = auto     ,
+    outer-Ldelim  = \left [  ,
+    outer-Rdelim  = \right ] ,
+    sub-nudge     = 0 mu     ,
+    *inner-Ldelim = \mleft ( ,
+    *inner-Rdelim = \mright ),
+    *outer-Ldelim = \left [  ,
+    *outer-Rdelim = \right ]
+  }
+\difdef { s, sp } { 1 }
+  {
+    style          =  big   ,
+    outer-Ldelim   = \bigl (,
+    outer-Rdelim   = \bigr ),
+    sub-nudge      = -2 mu  ,
+    *inner-Ldelim  = \bigl (,
+    *inner-Rdelim  = \bigr ),
+    *outer-Ldelim  = \bigl [,
+    *outer-Rdelim  = \bigr ]
+  }
+% vrule point of evaluation 
+\difdef { f, fp, s, sp } { | } 
+  {
+    outer-Ldelim = \left . ,
+    outer-Rdelim = \right |,
+    sub-nudge    = 0 mu
+  }
+% sq. bracket pt of eval.
+\difdef { f, fp, s, sp } { ] } 
+  {
+    outer-Ldelim = \left [ ,
+    outer-Rdelim = \right ],
+    elbowroom    = 1 mu,
+    sub-nudge    = 0 mu
+  }
+% long var wrap
+\difdef { f, fp } { (dv) } 
+  { long-var-wrap = (dv) }
+\difdef { f, fp } { dv } 
+  { long-var-wrap = dv }
+% compact, D operator
+\difdef { c } { D }
+  { 
+    op-symbol    = \mathrm{D}, 
+    op-sub-nudge = -2mu
+  }
+\difdef { c } { D' }
+  { 
+    op-symbol    = D, 
+    op-sub-nudge = -2mu
+  }
+% bold
+\difdef { c } { bD } 
+  { 
+    op-symbol    = \mathbf{D}, 
+    op-sub-nudge = -2mu
+  }
+% differential style
+\difdef { c, cp } { dl } 
+  { style = dl }
+%%%%%%%%%%% differential %%%%%%%%%%
+% partial
+\difdef { l } { p }
+  { op-symbol = \partial }
+% bold
+\difdef { l } { b }
+  { op-symbol = \mathrm{d}\mathbf }
+  
+% line elements: Pythagoras
+\difdef { l } { + }
+  {
+    multi-term-sep  = 0 mu +,
+    term-sep-adjust = 0 mu  ,
+    outer-Ldelim    =
+  }
+% Minkowski
+\difdef { l } { - }
+  {
+    multi-term-sep  = 0 mu -,
+    term-sep-adjust = 0 mu  ,
+    outer-Ldelim    =
+  }
+%%%%%%%%%% jacobian %%%%%%%%%%
+% slash fraction
+\difdef { j } { s }
+  { style = / }

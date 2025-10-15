@@ -1,0 +1,265 @@
+%%%
+% Dessin Gradue
+%%%
+\def\filedateDessinGradue{2025/05/26}%
+\def\fileversionDessinGradue{0.1}%
+\message{-- \filedateDessinGradue\space v\fileversionDessinGradue}%
+%
+\setKVdefault[DessinGradue]{Lignes=10,Debut=-5,Fin=5,Pas=10,Solution=false,EcartVertical=1.5,LignesIdentiques,Longueur=10,Echelle=1,Droites=false,DemiDroites=false,OrigineVariable=false,Code=false,Traces={}}
+\defKV[DessinGradue]{Traces=\ifempty{#1}{}{\setKV[DessinGradue]{Code}}}%
+
+\def\TraceDessinGradueCompletCode{%
+  % Paramètres
+  LongueurLigne=\useKV[DessinGradue]{Longueur};
+  EcartVertical=\useKV[DessinGradue]{EcartVertical};
+  Pas:=\useKV[DessinGradue]{Pas};
+  NbLignes=\useKV[DessinGradue]{Lignes};
+  Echelle=\useKV[DessinGradue]{Echelle};
+  Debut:=\useKV[DessinGradue]{Debut};
+  Fin:=\useKV[DessinGradue]{Fin};
+  % 
+  boolean Solution,Droites,DemiDroites,LignesIdentiques,OrigineVariable,Code;
+  Solution=\useKV[DessinGradue]{Solution};
+  LignesIdentiques:=\useKV[DessinGradue]{LignesIdentiques};
+  OrigineVariable:=\useKV[DessinGradue]{OrigineVariable};
+  Droites=\useKV[DessinGradue]{Droites};
+  DemiDroites=\useKV[DessinGradue]{DemiDroites};
+  Code=\useKV[DessinGradue]{Code};
+  vardef EffectuerLesTraces=
+  if Code:
+  \useKV[DessinGradue]{Traces};
+  fi;
+  enddef;
+  % 
+  pair La,Lb,Lab[];
+  pair A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,A',B',C',D',E',F',G',H',I',J',K',L',M',N',O',P',Q',R',S',T',U',V',W',X',Y',Z',A'',B'',C'',D'',E'',F'',G'',H'',I'',J'',K'',L'',M'',N'',O'',P'',Q'',R'',S'',T'',U'',V'',W'',X'',Y'',Z'';
+  % 
+  La=(0,0);
+  Lb-La=u*(LongueurLigne,0);
+  % 
+  % On définit une fonction pour tracer les lignes en fonction du pas "Partage"
+  vardef TraceLignes(expr Partage)=
+  save RecupLigne;
+  picture RecupLigne;
+  RecupLigne=image(
+  if Droites:
+  drawarrow 1.05[Lb,La]--1.05[La,Lb];
+  elseif DemiDroites:
+  drawarrow La--1.05[La,Lb];
+  else:
+  trace segment(La,Lb);
+  fi;
+  for kl=0 upto Partage:
+  Lab[kl]:=(kl/Partage)[La,Lb];
+  trace (Lab[kl]+u*(0,-0.1))--(Lab[kl]+u*(0,0.1));
+  endfor;
+  );
+  RecupLigne
+  enddef;
+  % On définit une fonction pour nommer les points nécessaires.
+  vardef DefinirPoints(text t)=
+  numeric nblignes,nbpas;
+  n:=0;
+  for p_=t:
+  n:=n+1;
+  if (n mod 3)=1:
+  nblignes:=p_;
+  elseif (n mod 3)=2:
+  nbpas:=p_;
+  elseif (n mod 3)=0:
+  p_=(nbpas/TotalPas[nblignes])[La,Lb] shifted(u*(0,(nblignes-1)*(-EcartVertical)));
+  fi;
+  endfor;
+  enddef;
+}
+
+\def\TraceDessinGradueComplet#1#2#3{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    \TraceDessinGradueCompletCode%
+    % On détermine le nombre de lignes et les origines particulières
+    pair OrigA[],OrigB[];
+    if LignesIdentiques:
+    for k=1 upto NbLignes:
+    TotalPas[k]:=Pas;
+    OrigA[k]=(Debut,0);
+    OrigB[k]=(Fin,TotalPas[k]);
+    endfor;
+    else:
+    if OrigineVariable:
+    n:=0;
+    for p_=#1:
+    n:=n+1;
+    OrigA[n]:=p_;
+    TotalPas[n]:=Pas;
+    endfor;
+    NbLignes:=n/2;
+    else:
+    n:=0;
+    for p_=#1:
+    n:=n+1;
+    TotalPas[n]=bluepart(p_);
+    OrigA[n]=(redpart(p_),0);
+    OrigB[n]=(greenpart(p_),TotalPas[n]);
+    endfor;
+    NbLignes:=n;
+    fi;
+    fi;
+
+    picture EnsembleLignes;
+
+    DefinirPoints(#2);
+    
+    EnsembleLignes=image(
+    if Solution:
+    drawoptions(withcolor 0.5white);
+    fi;
+    % On trace les lignes et on labelise le numéro de la ligne.
+    for k=0 upto NbLignes-1:
+    trace TraceLignes(TotalPas[k+1]) shifted(k*u*(0,-EcartVertical));
+    if Droites:
+    label.lft(TEX("(\num{"&decimal(k+1)&"})"),1.05[Lb,La] shifted(k*u*(0,-EcartVertical)));
+    else:
+    label.lft(TEX("(\num{"&decimal(k+1)&"})"),La shifted(k*u*(0,-EcartVertical)));
+    fi;
+    endfor;
+    % On labelise les origines
+    labeloffset:=labeloffset*1.5;
+    for k=0 upto NbLignes-1:
+    if OrigineVariable:
+    label.top(TEX("\num{"&decimal(xpart(OrigA[2*k+1]))&"}"),(ypart(OrigA[2*k+1])/Pas)[La,Lb]+u*(0,-k*EcartVertical));
+    label.top(TEX("\num{"&decimal(xpart(OrigA[2*(k+1)]))&"}"),(ypart(OrigA[2*(k+1)])/Pas)[La,Lb]+u*(0,-k*EcartVertical));
+    else:
+    label.top(TEX("\num{"&decimal(xpart(OrigA[k+1]))&"}"),La+u*(0,-k*EcartVertical));
+    label.top(TEX("\num{"&decimal(xpart(OrigB[k+1]))&"}"),Lb+u*(0,-k*EcartVertical));
+    fi;
+    endfor;
+    drawoptions();
+    labeloffset:=labeloffset/1.5;
+
+    % On trace la solution
+    if Solution:
+    for p_=#3:
+    trace p_ withpen pencircle scaled 1.5;
+    endfor;
+    fi;
+    % On ajoute des tracés si nécessaire
+    if Code:
+    \useKV[DessinGradue]{Traces};
+    fi;
+    );
+    trace EnsembleLignes scaled \useKV[DessinGradue]{Echelle};
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={\TraceDessinGradueCompletCode}]
+    % On détermine le nombre de lignes et les origines particulières
+    pair OrigA[],OrigB[];
+    if LignesIdentiques:
+    for k=1 upto NbLignes:
+    TotalPas[k]:=Pas;
+    OrigA[k]=(Debut,0);
+    OrigB[k]=(Fin,TotalPas[k]);
+    endfor;
+    else:
+    if OrigineVariable:
+    n:=0;
+    for p_=#1:
+    n:=n+1;
+    OrigA[n]:=p_;
+    TotalPas[n]:=Pas;
+    endfor;
+    NbLignes:=n/2;
+    else:
+    n:=0;
+    for p_=#1:
+    n:=n+1;
+    TotalPas[n]=bluepart(p_);
+    OrigA[n]=(redpart(p_),0);
+    OrigB[n]=(greenpart(p_),TotalPas[n]);
+    endfor;
+    NbLignes:=n;
+    fi;
+    fi;
+
+    picture EnsembleLignes;
+
+    DefinirPoints(#2);
+    
+    EnsembleLignes=image(
+    if Solution:
+    drawoptions(withcolor 0.5white);
+    fi;
+    % On trace les lignes et on labelise le numéro de la ligne.
+    for k=0 upto NbLignes-1:
+    trace TraceLignes(TotalPas[k+1]) shifted(k*u*(0,-EcartVertical));
+    if Droites:
+    label.lft(LATEX("(\num{"&decimal(k+1)&"})"),1.05[Lb,La] shifted(k*u*(0,-EcartVertical)));
+    else:
+    label.lft(LATEX("(\num{"&decimal(k+1)&"})"),La shifted(k*u*(0,-EcartVertical)));
+    fi;
+    endfor;
+    % On labelise les origines
+    labeloffset:=labeloffset*1.5;
+    for k=0 upto NbLignes-1:
+    if OrigineVariable:
+    label.top(LATEX("\num{"&decimal(xpart(OrigA[2*k+1]))&"}"),(ypart(OrigA[2*k+1])/Pas)[La,Lb]+u*(0,-k*EcartVertical));
+    label.top(LATEX("\num{"&decimal(xpart(OrigA[2*(k+1)]))&"}"),(ypart(OrigA[2*(k+1)])/Pas)[La,Lb]+u*(0,-k*EcartVertical));
+    else:
+    label.top(LATEX("\num{"&decimal(xpart(OrigA[k+1]))&"}"),La+u*(0,-k*EcartVertical));
+    label.top(LATEX("\num{"&decimal(xpart(OrigB[k+1]))&"}"),Lb+u*(0,-k*EcartVertical));
+    fi;
+    endfor;
+    drawoptions();
+    labeloffset:=labeloffset/1.5;
+    
+    % On trace la solution
+    if Solution:
+    for p_=#3:
+    trace p_ withpen pencircle scaled 1.5;
+    endfor;
+    fi;
+    % On ajoute des tracés si nécessaire
+    if Code:
+    EffectuerLesTraces;
+    fi;
+    );
+    trace EnsembleLignes scaled \useKV[DessinGradue]{Echelle};
+  \end{mpost}
+  \fi
+}%
+
+\def\UpdateLignes#1/#2/#3\nil{\addtotok\toklisteptsgrad{#1,#3,#2,}}%
+\def\UpdateTraces#1\nil{\addtotok\toklistetracesgrad{#1,}}%
+\def\UpdateDefLignes#1/#2/#3\nil{\addtotok\toklistedefligne{(#1,#2,#3),}}%
+
+\newcommand\DessinGradue[4][]{%
+  \useKVdefault[DessinGradue]%
+  \setKV[DessinGradue]{#1}%
+  \newtoks\toklisteptsgrad%
+  \newtoks\toklistetracesgrad%
+  % On retiens les données pour la solution
+  \setsepchar[*]{,*/}%
+  \readlist\ListePG{#3}%
+  \setsepchar[*]{§*/}%
+  \readlist\ListeTraces{#4}%
+  \foreachitem\compteur\in\ListePG{\expandafter\UpdateLignes\compteur\nil}%
+  \foreachitem\compteur\in\ListeTraces{\expandafter\UpdateTraces\compteur\nil}%
+  \ifboolKV[DessinGradue]{LignesIdentiques}{%
+    \TraceDessinGradueComplet{}{\the\toklisteptsgrad}{\the\toklistetracesgrad}%
+  }{%
+    \setsepchar[*]{,*/}%
+    \readlist\ListeDefLigne{#2}%
+    \xdef\toklistedefligne{}%
+    \ifboolKV[DessinGradue]{OrigineVariable}{%
+      \foreachitem\compteur\in\ListeDefLigne{%
+        \xdef\toklistedefligne{\toklistedefligne (\ListeDefLigne[\compteurcnt,1],\ListeDefLigne[\compteurcnt,2]),(\ListeDefLigne[\compteurcnt,3],\ListeDefLigne[\compteurcnt,4]),}%
+      }%
+    }{%
+      \foreachitem\compteur\in\ListeDefLigne{%
+        \xdef\toklistedefligne{\toklistedefligne (\ListeDefLigne[\compteurcnt,1],\ListeDefLigne[\compteurcnt,2],\ListeDefLigne[\compteurcnt,3]),}%
+      }%
+    }%
+    \TraceDessinGradueComplet{\toklistedefligne}{\the\toklisteptsgrad}{\the\toklistetracesgrad}%
+  }%
+}%

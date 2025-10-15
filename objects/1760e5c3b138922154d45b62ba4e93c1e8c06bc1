@@ -1,0 +1,182 @@
+%%
+%% This is file `csthm.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% csthm.dtx  (with options: `package')
+%% 
+%% This is a generated file.
+%% 
+%% Copyright (C) 2024 by Agni Datta <agnidatta.org@gmail.com>
+%% 
+%% This file may be distributed and/or modified under the conditions of
+%% the LaTeX Project Public License, either version 1.3c of this license
+%% or (at your option) any later version. The latest version of this
+%% license is in:
+%% 
+%%    http://www.latex-project.org/lppl.txt
+%% 
+%% and version 1.3c or later is part of all distributions of LaTeX
+%% version 2008/05/04 or later.
+%% 
+\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+\ProvidesPackage{csthm}[2025/01/16 v1.3 Theorem Environments for Computer Science]
+\newif\if@csthm@loadcleveref
+
+\DeclareOption{cleveref}{\@csthm@loadclevereftrue}
+\ProcessOptions\relax
+
+\RequirePackage{amsmath}
+\RequirePackage{amssymb}
+\RequirePackage{amsthm}
+\RequirePackage{enumitem}
+\RequirePackage{thmtools}
+\RequirePackage{xcolor}
+
+\providecommand{\accentcolor}{blue!50!black}
+\providecommand{\setaccentcolor}[1]{\renewcommand{\accentcolor}{#1}}
+
+\providecommand{\commonfont}{\color{\accentcolor}\sffamily}
+\providecommand{\commonsymb}{\ensuremath{\color{\accentcolor}\lrcorner}}
+
+\if@csthm@loadcleveref
+  \AtBeginDocument{%
+    \@ifpackageloaded{hyperref}{%
+      \RequirePackage{cleveref}%
+    }{%
+      \PackageWarning{csthm}{%
+        The 'cleveref' option was set, but 'hyperref' is not loaded.
+        Skipping 'cleveref' loading.%
+      }%
+    }%
+  }%
+\fi
+\declaretheoremstyle[
+  spaceabove=\topsep,
+  spacebelow=\topsep,
+  headfont=\commonfont\ensuremath{\scriptstyle\blacktriangleright}~,
+  notefont=\commonfont,
+  bodyfont=\normalfont,
+  postheadspace=5pt,
+  numberwithin=section,
+  qed=\commonsymb,
+  headpunct={.}
+]{thmstyle}
+
+\declaretheoremstyle[
+  spaceabove=\topsep,
+  spacebelow=\topsep,
+  headfont=\commonfont\ensuremath{\scriptstyle\blacksquare}~,
+  notefont=\commonfont,
+  bodyfont=\normalfont,
+  postheadspace=5pt,
+  numberwithin=section,
+  qed=\commonsymb,
+  headpunct={.}
+]{defstyle}
+
+\declaretheoremstyle[
+  spaceabove=\topsep,
+  spacebelow=\topsep,
+  headfont=\commonfont\ensuremath{\scriptstyle\vartriangleright}~,
+  notefont=\commonfont,
+  bodyfont=\normalfont,
+  postheadspace=5pt,
+  numberwithin=section,
+  qed=\commonsymb,
+  headpunct={.}
+]{remarkstyle}
+
+\declaretheoremstyle[
+  spaceabove=\topsep,
+  spacebelow=\topsep,
+  headfont=\commonfont\ensuremath{\scriptstyle\square}~,
+  notefont=\commonfont,
+  bodyfont=\normalfont\sffamily,
+  postheadspace=5pt,
+  numberwithin=section,
+  qed=\commonsymb,
+  headpunct={.}
+]{hltstyle}
+
+\declaretheoremstyle[
+  headfont=\commonfont,
+  notefont=\commonfont,
+  bodyfont=\normalfont,
+  postheadspace=5pt,
+  numbered=no,
+  headpunct={.},
+  qed=$\color{\accentcolor}\scriptstyle\blacktriangleleft$
+]{proofstyle}
+\declaretheorem[style=thmstyle,name=Theorem]{theorem}
+\declaretheorem[style=thmstyle,sibling=theorem]{assumption}
+\declaretheorem[style=thmstyle,sibling=theorem]{axiom}
+\declaretheorem[style=thmstyle,sibling=theorem]{claim}
+\declaretheorem[style=thmstyle,sibling=theorem]{conjecture}
+\declaretheorem[style=thmstyle,sibling=theorem]{corollary}
+\declaretheorem[style=thmstyle,sibling=theorem]{fact}
+\declaretheorem[style=thmstyle,sibling=theorem]{hypothesis}
+\declaretheorem[style=thmstyle,sibling=theorem]{lemma}
+\declaretheorem[style=thmstyle,sibling=theorem]{property}
+\declaretheorem[style=thmstyle,sibling=theorem]{proposition}
+
+\declaretheorem[style=thmstyle,unnumbered,name=Theorem]{theorem*}
+\declaretheorem[style=thmstyle,unnumbered,name=Assumption]{assumption*}
+\declaretheorem[style=thmstyle,unnumbered,name=Axiom]{axiom*}
+\declaretheorem[style=thmstyle,unnumbered,name=Claim]{claim*}
+\declaretheorem[style=thmstyle,unnumbered,name=Conjecture]{conjecture*}
+\declaretheorem[style=thmstyle,unnumbered,name=Corollary]{corollary*}
+\declaretheorem[style=thmstyle,unnumbered,name=Fact]{fact*}
+\declaretheorem[style=thmstyle,unnumbered,name=Hypothesis]{hypothesis*}
+\declaretheorem[style=thmstyle,unnumbered,name=Lemma]{lemma*}
+\declaretheorem[style=thmstyle,unnumbered,name=Property]{property*}
+\declaretheorem[style=thmstyle,unnumbered,name=Proposition]{proposition*}
+
+\declaretheorem[style=defstyle,sibling=theorem]{definition}
+\declaretheorem[style=defstyle,sibling=theorem]{notation}
+\declaretheorem[style=defstyle,sibling=theorem]{problem}
+\declaretheorem[style=defstyle,sibling=theorem]{protocol}
+
+\declaretheorem[style=defstyle,unnumbered,name=Definition]{definition*}
+\declaretheorem[style=defstyle,unnumbered,name=Notation]{notation*}
+\declaretheorem[style=defstyle,unnumbered,name=Problem]{problem*}
+\declaretheorem[style=defstyle,unnumbered,name=Protocol]{protocol*}
+
+\declaretheorem[style=remarkstyle,sibling=theorem]{example}
+\declaretheorem[style=remarkstyle,sibling=theorem]{note}
+\declaretheorem[style=remarkstyle,sibling=theorem]{remark}
+
+\declaretheorem[style=remarkstyle,unnumbered,name=Example]{example*}
+\declaretheorem[style=remarkstyle,unnumbered,name=Note]{note*}
+\declaretheorem[style=remarkstyle,unnumbered,name=Remark]{remark*}
+
+\declaretheorem[style=hltstyle,sibling=theorem]{exercise}
+\declaretheorem[style=hltstyle,sibling=theorem]{highlight}
+\declaretheorem[style=hltstyle,sibling=theorem]{important}
+\declaretheorem[style=hltstyle,sibling=theorem]{keypoint}
+
+\declaretheorem[style=hltstyle,unnumbered,name=Exercise]{exercise*}
+\declaretheorem[style=hltstyle,unnumbered,name=Highlight]{highlight*}
+\declaretheorem[style=hltstyle,unnumbered,name=Important]{important*}
+\declaretheorem[style=hltstyle,unnumbered,name=Key Point]{keypoint*}
+\let\proof\relax
+\let\endproof\relax
+\declaretheorem[style=proofstyle]{proof}
+
+\newlist{caseList}{enumerate}{1}
+\setlist[caseList]{label=\textbf{Case~\arabic*:}, leftmargin=*}
+
+\NewDocumentEnvironment{case}{O{}}{%
+  \begin{caseList}[#1]%
+}{%
+  \end{caseList}%
+}
+
+\renewcommand\qedsymbol{$\scriptstyle\color{\accentcolor}\blacksquare$}
+
+\providecommand{\csthmpkg}{\textsf{csthm}}
+\providecommand{\email}[1]{\href{mailto:#1}{\texttt{#1}}}
+\endinput
+%%
+%% End of file `csthm.sty'.

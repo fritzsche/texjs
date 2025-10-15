@@ -1,0 +1,38 @@
+-----------------------------------------------------------------------
+--         FILE:  xindex-RU.lua
+--  DESCRIPTION:  configuration file for xindex.lua
+-- REQUIREMENTS:  
+--       AUTHOR:  Alexey Kuznetzov
+--      LICENSE:  LPPL1.3
+--
+-- $Id: xindex-RU.lua 2 2025-08-02 11:30:20Z herbert $
+-----------------------------------------------------------------------
+
+if not modules then modules = { } end modules ['xindex-RU'] = {
+      version = 1.02,
+      comment = "configuration to xindex.lua",
+       author = "Alexey Kuznetzov",
+    copyright = "Herbert Voß",
+      license = "LPPL 1.3"
+}
+
+
+
+itemPageDelimiter = ","     -- Hello, 14
+compressPages     = true    -- something like 12--15, instead of 12,13,14,15. the |( ... |) syntax is still valid
+fCompress         = false    -- 3f -> page 3, 4 and 3ff -> page 3, 4, 5
+minCompress       = 2       -- 1--3 
+rangeSymbol       = "--"
+numericPage       = true    -- for non numerical pagenumbers, like "VI-17"
+sublabels         = {"", "--- \\-", "--- --- \\-", "--- --- --- \\-"}  -- Russian (sub(sub(sub-items 
+pageNoPrefixDel   = ""     -- a delimiter for page numbers like "VI-17"  -- not used !!!
+idxnewletter      = "\\textbf"  -- Only valid if -n is not set
+envStart          = "\\begin{theindex}"  
+indexOpening      = "\\makeatletter\\def\\subitem{\\@idxitem}\\def\\subsubitem{\\@idxitem}\\def\\subsubsubitem{\\@idxitem}\\makeatother" -- Russian (sub(sub(sub-items
+envStop           = "\\end{theindex}"
+
+-- indexheader = { ru = {"Символы", "Числа", "russian"}, } -- Russian headers
+
+-- There is no folio abbreviation in Russian
+-- folium = { ru = { "" , "" }, } -- Is this correct? 
+

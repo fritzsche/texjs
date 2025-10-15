@@ -1,0 +1,593 @@
+% \iffalse meta-comment
+%
+% File: cmftbl.dtx
+%
+% Copyright (C) 2024 Dominik Schmid and Till Schallau
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3c
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+% http://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+% This work has the LPPL maintenance status "maintained".
+%
+% The current maintainer of this work is Dominik Schmid
+% <dominik.schmid@tu-dortmund.de>.
+%
+% This work consists of the files temporal-logic.dtx and temporal-logic.ins
+% and the derived file temporal-logic.sty.
+%
+% \fi
+%
+% \iffalse
+%<*driver>
+\documentclass{l3doc}
+\usepackage{temporal-logic}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \title{temporal-logic}
+% \author{Dominik Schmid and Till Schallau}
+% \date{Version 1.0}
+%
+% \maketitle
+%
+% \begin{documentation}
+%
+% \begin{abstract}
+%  The \emph{temporal-logic} package defines functions for rendering temporal
+%  operators defined in \emph{Linear Temporal Logic} (LTL)\footnote{Pnueli, A.
+%  (1977). The temporal logic of programs. In: 18th Annual Symposium on
+%  Foundations of Computer Science (SFCS 1977). IEEE.
+%  \url{https://doi.org/10.1109/SFCS.1977.32}.}, \emph{Metric
+%  Temporal Logic} (MTL)\footnote{Alur, R., Henzinger, T. A. (1993). Real-time
+%  logics: Complexity and expressiveness. In: Proceedings of the Fifth Annual
+%  Symposium on Logic in Computer Science (LICS 1990). Elsevier.
+%  \url{https://doi.org/10.1006/inco.1993.1025}.}, \emph{Metric
+%  First-order Temporal Logic} (MFOTL)\footnote{Basin, David, Klaedtke, Felix,
+%  Müller, Samuel, and Zălinescu, Eugen. (2015). Monitoring Metric First-order
+%  Temporal Properties. In: Journal of the ACM (J. ACM). Association for
+%  Computing Machinery. \url{https://doi.org/10.1145/2699444}.}, and the
+%  \emph{Counting Metric First-order Temporal Binding Logic}
+%  (CMFTBL)\footnote{Schallau, T., Naujokat, S., Kullmann, F., Howar, F.
+%  (2024). Tree-Based Scenario Classification. In: NASA Formal Methods (NFM
+%  2024). Lecture Notes in Computer Science, vol 14627. Springer, Cham.
+%  \url{https://doi.org/10.1007/978-3-031-60698-4\_15}.}. The package defines
+%  various functions with variants in order to include or omit optional
+%  parameters of the operators like the optional interval.
+% \end{abstract}
+%
+% \clearpage
+% \tableofcontents
+% \clearpage
+%
+% \section{Introduction}
+% \subsection{Counting Metric First-order Temporal Logic}
+%  \emph{Counting Metric First-order Temporal Logic} (CMFTBL) argues about
+%  finite traces of states. It is an extension of \emph{Metric First-order
+%  Temporal Logic} (MFOTL), which itself is based on \emph{Metric Temporal
+%  Logic} (MTL) and ultimately on \emph{Linear Temporal Logic} (LTL). All these
+%  logics extend the base with further operators and features.
+%
+% \subsection{Basic usage}
+%  This package defines the symbols used in Temporal logics as
+%  \emph{MathOperators}. Therefore, the symbols, as well as the commands, have
+%  to be used in math mode. To use normal text in the parameters \cs{mathrm}
+%  or \cs{text} may be used to switch back to text mode.
+%
+%  The symbols come in two variants. A standalone version for mentioning logic
+%  symbols in text without additional formula spacing is described in
+%  Sect.~\ref{sec:standalone_symbols} and a formula version, also providing
+%  additional parameters, is described in Sect.~\ref{sec:future_ltl} --
+%  Sect.~\ref{sec:cmftbl_extension}. The formula version should always be
+%  preferred over the standalone symbols in formulas as they provide
+%  additional spaces and explicitly enforce the correct usage of superscript
+%  and subscript via mandatory parameters. The naming scheme of the operators
+%  is chosen such that each command reflects the name of the temporal operator
+%  prefixed with a ``c'' for \textit{\underline{C}MFTBL}. Standalone symbols, as described
+%  in Sect.~\ref{sec:standalone_symbols}, are prefixed with ``csymb''. Those
+%  prefixes are necessary to prevent name clashes with built-in \LaTeX commands.
+%
+% \subsection{Manual structure}
+%  This manual is structured as follows. First, the symbols for \emph{Future
+%  LTL} and \emph{Past LTL} are introducted in Sect.~\ref{sec:future_ltl} and
+%  Sect.~\ref{sec:past_ltl}. The additional intervals from \emph{MTL} are
+%  described in Sect.~\ref{sec:mtl_extension}. The operators introduced
+%  in \emph{MFOTL} and \emph{CMFTBL} are described in
+%  Sect.~\ref{sec:mfotl_extension} and Sect.~\ref{sec:cmftbl_extension}.
+%  Section~\ref{sec:usage} shows the usage of the symbols in formulas.
+%  Section~\ref{sec:standalone_symbols} closes the
+%  command definitions with the standalone symbols for usage in text.
+%  Finally, Sect.~\ref{sec:operator_scaling} demonstrates the automatic scaling
+%  of the operators.
+%
+% \subsection{Dependencies}
+%   The package loads the following dependencies:
+%   \begin{itemize}
+%     \item \emph{expl3} For \LaTeX 3 support.
+%     \item \emph{xparse} For parsing the mandatory and optional arguments.
+%     \item \emph{amsmath} For symbol definitions.
+%     \item \emph{tikz} For rendering of symbols.
+%   \end{itemize}
+%
+% \clearpage
+% \section{Symbol definitions}
+% \subsection{Future LTL symbols}
+% \label{sec:future_ltl}
+%   \emph{Future LTL}, or simply \emph{LTL}, defines operators to argue about
+%   the future. This includes the following operators.
+% \begin{function}{
+%   \ceventually,
+%   \cglobally,
+%   \cnext,
+%   \cuntil}
+%   \begin{syntax}
+%   \begin{tabular}{lc}
+%     \cs{ceventually} & $\ceventually$\\
+%     \cs{cglobally}   & $\cglobally$\\
+%     \cs{cnext}       & $\cnext$\\
+%     \cs{cuntil}      & $\cuntil$\\
+% \end{tabular}
+% \end{syntax}
+% \end{function}
+%
+%  \noindent The semantics of the operators are commonly defined as follows:
+% \begin{itemize}
+%   \item $\ceventually \phi$ expresses that $\phi$ must hold at least once in
+%   the future.
+%  \item $\cglobally \phi$ expresses that $\phi$ must hold from now for the
+%   entire trace.
+%  \item $\cnext \phi$ expresses that $\phi$ must hold at the next state.
+%  \item $\phi \cuntil \psi$ expresses that $\phi$ must hold until $\psi$
+%   holds.
+% \end{itemize}
+%
+% \subsection{Past LTL symbols}
+% \label{sec:past_ltl}
+%  \emph{Past LTL} defines operators analogous to \emph{Future LTL} to argue
+%  about the past. The symbols are identical but are filled solid black.
+%  \begin{function}{ ,
+%   \conce,
+%   \chistorically,
+%   \cprevious,
+%   \csince}
+%   \begin{syntax}
+%   \begin{tabular}{lc}
+%     \cs{conce}         & $\conce$\\
+%     \cs{chistorically} & $\chistorically$\\
+%     \cs{cprevious}     & $\cprevious$\\
+%     \cs{csince}        & $\csince$\\
+%   \end{tabular}
+%   \end{syntax}
+%  \end{function}
+%
+%  \noindent The semantics of the operators are commonly defined as follows:
+%  \begin{itemize}
+%   \item $\conce \phi$ expresses that $\phi$ must have held at least once
+%   in the past.
+%   \item $\chistorically \phi$ expresses that $\phi$ must have held until
+%   now for the entire past trace.
+%   \item $\cprevious \phi$ expresses that $\phi$ must have held at the previous
+%   state.
+%   \item $\phi \csince \psi$ expresses that $\phi$ must have held since $\psi$
+%   has held.
+%  \end{itemize}
+%
+% \clearpage
+% \subsection{MTL extension}
+% \label{sec:mtl_extension}
+%  The \emph{Future LTL} and \emph{Past LTL} operators may be extended with an
+%  optional interval to form \emph{MTL}.
+%  \begin{function}{
+%   \ceventually,
+%   \conce,
+%   \cglobally,
+%   \chistorically,
+%   \cnext,
+%   \cprevious,
+%   \cuntil,
+%   \csince}
+%   \begin{syntax}
+%    \begin{tabular}{lc}
+%     \cs{ceventually}\oarg{Interval} & $\ceventually[[0,1]]$\\
+%     \cs{conce}\oarg{Interval} & $\conce[[0,1]]$\\
+%     \cs{cglobally}\oarg{Interval} & $\cglobally[[0,1]]$\\
+%     \cs{chistorically}\oarg{Interval} & $\chistorically[[0,1]]$\\
+%     \cs{cnext}\oarg{Interval} & $\cnext[[0,1]]$\\
+%     \cs{cprevious}\oarg{Interval} & $\cprevious[[0,1]]$\\
+%     \cs{cuntil}\oarg{Interval} & $\cuntil[[0,1]]$\\
+%     \cs{csince}\oarg{Interval} & $\csince[[0,1]]$\\
+%   \end{tabular}
+%  \end{syntax}
+% \end{function}
+%
+%  \noindent The semantics of the intervals are commonly defined as follows:
+%  The trace is only evaluated in the given interval. An empty interval is
+%  considered to be $[0, \infty)$ for future and $(\infty, 0]$ for past
+%  operators. The first component of the interval always indicates the earlier
+%  state for both future and past operators.
+%
+% \subsection{MFOTL extension}
+% \label{sec:mfotl_extension}
+%  \emph{MFOTL} introduces the first-order quantifiers $\exists$ and $\forall$.
+%  This package does not provide additional symbols, as the built-in ones
+%  already contained in \LaTeX~may be used.
+%
+%  \begin{function}{
+%   \exists,
+%   \forall}
+%   \begin{syntax}
+%    \begin{tabular}{lc}
+%     \cs{exists} & $\exists$\\
+%     \cs{forall} & $\forall$\\
+%    \end{tabular}
+%   \end{syntax}
+%  \end{function}
+%
+% \clearpage
+% \subsection{CMFTBL extension}
+% \label{sec:cmftbl_extension}
+%  \emph{CMFTBL} extends \emph{MFOTL} by the operators \emph{minPrevalence},
+%  \emph{maxPrevalence}, their past forms, and the \emph{bind} operator.
+%
+%  \begin{function}{
+%   \cminprevalence,
+%   \cpastminprevalence,
+%   \cmaxprevalence,
+%   \cpastmaxprevalence,
+%   \cbind}
+%   \begin{syntax}
+%    \begin{tabular}{lc}
+%     \cs{cminprevalence}\marg{Percentage}\oarg{Interval} &
+%     $\cminprevalence{0.8}[[0,1]]$\\
+%     \cs{cpastminprevalence}\marg{Percentage}\oarg{Interval} &
+%     $\cpastminprevalence{0.8}[[0,1]]$\\
+%     \cs{cmaxprevalence}\marg{Percentage}\oarg{Interval} &
+%     $\cmaxprevalence{0.8}[[0,1]]$\\
+%     \cs{cpastmaxprevalence}\marg{Percentage}\oarg{Interval} &
+%     $\cpastmaxprevalence{0.8}[[0,1]]$\\
+%     \cs{cbind}\marg{Valuation}\marg{Variable} &
+%     $\cbind{v.id}{i}$\\
+%    \end{tabular}
+%   \end{syntax}
+%  \end{function}
+%
+%  \noindent The semantics of the operators are defined as follows. Let $p$ be a
+%  fraction of states in the interval $[0,1]$:
+%  \begin{itemize}
+%   \item $\cminprevalence{p}[I] \phi$ expresses that $\phi$ must hold in at
+%   least fraction $p$ of the future states in the interval $I$.
+%   \item $\cpastminprevalence{p}[I] \phi$ expresses that $\phi$ must have held
+%   in at least fraction $p$ of the past states in the interval $I$.
+%   \item $\cmaxprevalence{p}[I] \phi$ expresses that $\phi$ must hold in at
+%   most fraction $p$ of the future states in the interval $I$.
+%   \item $\cpastmaxprevalence{p}[I] \phi$ expresses that $\phi$ must have held
+%   in at most fraction $p$ of the past states in the interval $I$.
+%   \item $\cbind{v.id}{i}$ saves the valuation $v.id$ to the variable $i$ for
+%   later use in a nested formula, where $v$ already has a new value.
+%  \end{itemize}
+%
+%  \emph{minPrevalence} and \emph{maxPrevalence} take the desired precentage as
+%  another mandatory parameter. These operators may only be defined on finite
+%  traces since they argue about numbers of states. \emph{bind} has no optional
+%  interval but two mandatory arguments: the value to bind and the target
+%  variable.
+%
+% \section{Usage in formulas}
+% \label{sec:usage}
+%  The commands may be directly used in math mode to create composite formulas.
+%  For the unary formulas, the term $\phi$ should directly follow the symbol:
+%  \begin{syntax}
+%   \begin{tabular}{ll}
+%    \cs{ceventually}\cs{phi} & $\ceventually \phi$\\
+%    \cs{cglobally}[[0,1]]\cs{phi} & $\cglobally[[0,1]] \phi$
+%   \end{tabular}
+%  \end{syntax}
+%
+%  \noindent The binary symbols \emph{until} and \emph{since} should be used
+%  with two formulas $\phi$ and $\psi$ directly before and after the symbol:
+%  \begin{syntax}
+%   \begin{tabular}{ll}
+%    \cs{phi}\cs{cuntil}\cs{psi} & $\phi \cuntil \psi$\\
+%    \cs{phi}\cs{csince}[[0,1]]\cs{psi} & $\phi \csince[[0,1]] \psi$
+%   \end{tabular}
+%  \end{syntax}
+%
+% \noindent
+% The new \emph{CMFTBL} operators my be used as the unary ones:
+% \begin{syntax}
+% \begin{tabular}{ll}
+%   \cs{cminprevalence}\{0.8\}\cs{phi} &
+%   $\cminprevalence{0.8} \phi$\\
+%   \cs{cmaxprevalence}\{0.8\}[[0,1]]\cs{phi} &
+%   $\cmaxprevalence{0.8}[[0,1]] \phi$\\
+%   \cs{cbind}\{v.id\}\{i\}\cs{phi} &
+%   $\cbind{v.id}{i} \phi$
+% \end{tabular}
+% \end{syntax}
+%
+% \section{Standalone symbols}
+% \label{sec:standalone_symbols}
+% The package defines all symbols as a standalone version as
+% \emph{MathOperators} without additional spacing around for the usage in text.
+%
+% \begin{function}{
+%   \csymbeventually,
+%   \csymbonce,
+%   \csymbglobally,
+%   \csymbhistorically,
+%   \csymbnext,
+%   \csymbprevious,
+%   \csymbuntil,
+%   \csymbsince,
+%   \csymbminprevalence,
+%   \csymbpastminprevalence,
+%   \csymbmaxprevalence,
+%   \csymbpastmaxprevalence,
+%   \csymbbind}
+%   \begin{syntax}
+%   \begin{tabular}{lc}
+%     \cs{csymbeventually} & $\csymbeventually$\\
+%     \cs{csymbonce} & $\csymbonce$\\
+%     \cs{csymbglobally} & $\csymbglobally$\\
+%     \cs{csymbhistorically} & $\csymbhistorically$\\
+%     \cs{csymbnext} & $\csymbnext$\\
+%     \cs{csymbprevious} & $\csymbprevious$\\
+%     \cs{csymbuntil} & $\csymbuntil$\\
+%     \cs{csymbsince} & $\csymbsince$\\
+%     \cs{csymbminprevalence} & $\csymbminprevalence$\\
+%     \cs{csymbpastminprevalence} & $\csymbpastminprevalence$\\
+%     \cs{csymbmaxprevalence} & $\csymbmaxprevalence$\\
+%     \cs{csymbpastmaxprevalence} & $\csymbpastmaxprevalence$\\
+%     \cs{csymbbind} & $\csymbbind$
+% \end{tabular}
+% \end{syntax}
+% \end{function}
+%
+% \section{Operator scaling}
+% \label{sec:operator_scaling}
+% The operators scale automatically with the current text size:\\[\baselineskip]
+%
+% \begin{tabular}{ll}
+%   \Huge\cs{Huge} & \Huge$\ceventually[[0,1]] \phi$\\
+%   \huge\cs{huge} & \huge$\ceventually[[0,1]] \phi$\\
+%   \LARGE\cs{LARGE} & \LARGE$\ceventually[[0,1]] \phi$\\
+%   \Large\cs{Large} & \Large$\ceventually[[0,1]] \phi$\\
+%   \large\cs{large} & \large$\ceventually[[0,1]] \phi$\\
+%   \normalsize\cs{normalsize} & \normalsize$\ceventually[[0,1]] \phi$\\
+%   \small\cs{small} & \small$\ceventually[[0,1]] \phi$\\
+%   \footnotesize\cs{footnotesize} & \footnotesize$\ceventually[[0,1]] \phi$\\
+%   \scriptsize\cs{scriptsize} & \scriptsize$\ceventually[[0,1]] \phi$\\
+%   \tiny\cs{tiny} & \tiny$\ceventually[[0,1]] \phi$
+% \end{tabular}
+%
+% \normalsize
+% \clearpage
+%
+% \section{License}
+% \begin{center}
+%   Copyright (C) 2024\\
+%   Dominik Schmid and Till Schallau\\[\baselineskip]
+%
+%   This work may be distributed and/or modified under the conditions of the\\ %   \LaTeX~Project Public License, either version 1.3c of this license\\
+%   or (at your option) any later version.\\[\baselineskip]
+%
+%   The latest version of this license is in
+%   \url{http://www.latex-project.org/lppl.txt}\\
+%   and version 1.3c or later is part of all distributions of
+%   \LaTeX~version 2005/12/01 or later.\\[\baselineskip]
+%
+%   This work has the LPPL maintenance status ''maintained''.\\[\baselineskip]
+%
+%   The current maintainer of this work is\\
+%   Dominik Schmid <\href{mailto:dominik.schmid@tu-dortmund.de}
+%   {dominik.schmid@tu-dortmund.de>}.\\[\baselineskip]
+%
+%   This work consists of the files temporal-logic.dtx, temporal-logic.ins,\\
+%   and the derived file temporal-logic.sty.
+% \end{center}
+% \section{Sourcecode}
+% \label{sec:sourcecode}
+% \end{documentation}
+% \begin{implementation}
+%    \begin{macrocode}
+% <*package>
+% <@@=cmftbl>
+
+\RequirePackage{amsmath}
+\RequirePackage{expl3}
+\RequirePackage{xparse}
+\RequirePackage{tikz}
+
+\ProvidesExplPackage {temporal-logic} { 2024-10-17 } { v1.0 }{
+  Symbols for Temporal Logics
+}
+
+\cs_new:Nn \__@@_op_sup_sub:Nnn {
+      \ensuremath {
+        #1
+        \tl_if_empty:nF { #2 } { \c_math_superscript_token { \,#2 } }
+        \tl_if_empty:nF { #3 } { \c_math_subscript_token { \,#3 } }
+        \,
+      }
+}
+\cs_generate_variant:Nn \__@@_op_sup_sub:Nnn { cnn }
+
+\cs_new:Nn \__@@_op_sup:Nn { \__@@_op_sup_sub:Nnn { #1 } { #2 } {} }
+\cs_generate_variant:Nn \__@@_op_sup:Nn { cn }
+
+\cs_new:Nn \__@@_op_sub:Nn { \__@@_op_sup_sub:Nnn { #1 } { } { #2 } }
+\cs_generate_variant:Nn \__@@_op_sub:Nn { cn }
+
+\cs_new:Nn \__@@_op:N { \__@@_op_sup_sub:Nnn { #1 } { } { } }
+\cs_generate_variant:Nn \__@@_op:N { c }
+
+\dim_new:N \__@@_fht_dim
+\cs_new:Nn \__@@_ex: { \dim_use:N \__@@_fht_dim }
+
+\cs_new:Nn \__@@_render_op:n {
+  \dim_set:Nn \__@@_fht_dim {\fontcharht\font`X}
+  \tikz[execute~at~end~picture={
+       \useasboundingbox (0, 0) rectangle (\__@@_ex:, \__@@_ex:);
+  }]{
+    \group_begin:
+      \cs_set_eq:NN \EX \__@@_ex:
+      #1
+    \group_end:
+  }
+}
+
+\DeclareMathOperator { \csymbeventually } {
+  \__@@_render_op:n {
+     \draw
+       (.5*\EX, 0) --
+       (.2*\EX, .5*\EX) --
+       (.5*\EX, \EX) --
+       (.8*\EX, .5*\EX) --
+       cycle;
+  }
+}
+\DeclareMathOperator { \csymbonce } {
+  \__@@_render_op:n {
+    \draw[fill]
+    (.5*\EX, 0) --
+    (.2*\EX, .5*\EX) --
+    (.5*\EX, \EX) --
+    (.8*\EX, .5*\EX) --
+    cycle;
+}
+}
+\DeclareMathOperator { \csymbglobally } {
+  \__@@_render_op:n {
+    \draw
+    (.15*\EX, .15*\EX)
+    rectangle
+    (.85*\EX, .85*\EX);
+  }
+}
+\DeclareMathOperator { \csymbhistorically } {
+  \__@@_render_op:n {
+    \draw[fill]
+    (.15*\EX, .15*\EX)
+    rectangle
+    (.85*\EX, .85*\EX);
+  }
+}
+\DeclareMathOperator { \csymbnext } {
+  \__@@_render_op:n {
+    \draw
+    (.5*\EX, .5*\EX)
+    circle
+    (.4*\EX);
+  }
+}
+\DeclareMathOperator { \csymbprevious } {
+  \__@@_render_op:n {
+    \draw[fill]
+    (.5*\EX, .5*\EX)
+    circle
+    (.4*\EX);
+  }
+}
+\DeclareMathOperator { \csymbuntil } {
+  \ensuremath\mathcal{U}
+}
+\DeclareMathOperator { \csymbsince } {
+  \ensuremath\mathcal{S}
+}
+\DeclareMathOperator { \csymbminprevalence } {
+  \__@@_render_op:n {
+    \draw
+      (.1*\EX, .9*\EX) --
+      (.9*\EX, .9*\EX) --
+      (.5*\EX, .1*\EX) --
+      cycle;
+  }
+}
+\DeclareMathOperator { \csymbpastminprevalence } {
+  \__@@_render_op:n {
+    \draw[fill]
+    (.1*\EX, .9*\EX) --
+    (.9*\EX, .9*\EX) --
+    (.5*\EX, .1*\EX) --
+    cycle;
+  }
+}
+\DeclareMathOperator { \csymbmaxprevalence } {
+  \__@@_render_op:n {
+    \draw
+    (.1*\EX, .1*\EX) --
+    (.9*\EX, .1*\EX) --
+    (.5*\EX, .9*\EX) --
+    cycle;
+}
+  }
+\DeclareMathOperator { \csymbpastmaxprevalence } {
+  \__@@_render_op:n {
+    \draw[fill]
+    (.1*\EX, .1*\EX) --
+    (.9*\EX, .1*\EX) --
+    (.5*\EX, .9*\EX) --
+    cycle;
+  }
+}
+\DeclareMathOperator { \csymbbind } {
+  \__@@_render_op:n {
+    \draw (.5*\EX, \EX) -- (.5*\EX, 0);
+    \draw
+      (.2*\EX, .3*\EX) ..
+      controls (.4*\EX, .2*\EX) ..
+      (.5*\EX, 0) ..
+      controls (.6*\EX, .2*\EX) ..
+      (.8*\EX, .3*\EX);
+  }
+}
+
+\ProvideDocumentCommand { \ceventually } { O{} } {
+  \__@@_op_sub:cn { csymbeventually } { #1 }
+}
+\ProvideDocumentCommand { \conce } { O{} } {
+  \__@@_op_sub:cn { csymbonce } { #1 }
+}
+\ProvideDocumentCommand { \cglobally } { O{} } {
+  \__@@_op_sub:cn { csymbglobally } { #1 }
+}
+\ProvideDocumentCommand { \chistorically } { O{} } {
+  \__@@_op_sub:cn { csymbhistorically } { #1 }
+}
+\ProvideDocumentCommand { \cnext } { O{} } {
+  \__@@_op_sub:cn { csymbnext } { #1 }
+}
+\ProvideDocumentCommand { \cprevious } { O{} } {
+  \__@@_op_sub:cn { csymbprevious } { #1 }
+}
+\ProvideDocumentCommand { \cuntil } { O{} } {
+  \__@@_op_sub:Nn { \;\csymbuntil } { #1 }
+}
+\ProvideDocumentCommand { \csince } { O{} } {
+  \__@@_op_sub:Nn { \;\csymbsince } { #1 }
+}
+\ProvideDocumentCommand { \cminprevalence } { m O{} } {
+  \__@@_op_sup_sub:cnn { csymbminprevalence } { #1 } { #2 }
+}
+\ProvideDocumentCommand { \cpastminprevalence } { m O{} } {
+  \__@@_op_sup_sub:cnn { csymbpastminprevalence } { #1 } { #2 }
+}
+\ProvideDocumentCommand { \cmaxprevalence } { m O{} } {
+  \__@@_op_sup_sub:cnn { csymbmaxprevalence } { #1 } { #2 }
+}
+\ProvideDocumentCommand { \cpastmaxprevalence } { m O{} } {
+  \__@@_op_sup_sub:cnn { csymbpastmaxprevalence } { #1 } { #2 }
+}
+\ProvideDocumentCommand { \cbind } { m m } {
+  \__@@_op_sup_sub:cnn { csymbbind } { #1 } { #2 }
+}
+% </package>
+%    \end{macrocode}
+% \end{implementation}

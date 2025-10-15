@@ -1,0 +1,60 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2018 - 2021 by ChairX
+%
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either
+% version 1.3 of this license or (at your option) any later
+% version.  The latest version of this license is in:
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of
+% LaTeX version 2005/12/01 or later.
+%
+% This file contains the documentation of all general mathematics macros .
+%
+% Macros have to be described by (delete the first %)
+% \DescribeMacro{\macro}
+% Description and usage of the macro.
+%
+% The description will appear in the usage
+% part of the documentation. Use \subsubsection{} etc. for structuring.
+%
+% The implementation of the macros defined here has to be written in
+% chairxmathGeneral.dtx
+%\fi
+%
+%
+% We use the |tensor| package and modify things slightly to fit our
+% needs: we provide a decoration command that allows to decorate
+% arbitrary math symbols from left and right, top and bottom with
+% other math symbols. This can be used to produce tensors with many
+% indices. However, this is far too useful to be restricted to tensors
+% only. The original |\tensor| macro from the |tensor package| is
+% still available under the name |\originaltensor|. Note, that the 
+% |\tensor| command in |nchairx| is intended for the symbol of tensor
+% product, and not for decorating a symbol with indices.
+%
+% \DescribeMacro{\decorate}
+% Decorate a symbol from all sides. The option argument gives the
+% decoration in front of the symbol, the first argument the symbol,
+% the second (mandatory) argument the decoration after the symbol. For
+% each decoration several superscripts and subscripts can be used like
+% |\decorate[^a_b^c]{S}{_d^{rt}_e}|:
+% $\decorate[^a_b^c]{S}{_d^{rt}_e}$.
+%
+% \DescribeMacro{\deco}
+% We also provide a simpler version of |\decorate| called |\deco|
+% which takes five usual arguments and sets them as sub- and
+% superscripts before and after the middle symbol
+% |\deco{a}{b}{c}{d}{e}|:$\deco{a}{b}{c}{d}{e}$ This can be used to
+% define your own macros with decoration.  E.g. for bimodules over
+% rings one could define
+% |\newcommand{\bimodule}[3]{\deco{}{\ring{#1}{\module{#2}}{}{\ring{#3}}}}|
+% which can then be used as |\bimodule{R}{E}{S}|:
+% $\deco{}{\ring{R}}{\module{E}}{}{\ring{S}}$.
+%
+% \DescribeMacro{\script}
+% Sets the argument in the |scriptfont| and hence allows to create macros
+% with fonts consistent with the other |nchairx| macros.

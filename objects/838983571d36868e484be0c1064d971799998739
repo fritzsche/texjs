@@ -1,0 +1,286 @@
+%%%
+% Shikaku
+%%%
+\def\filedateShikaku{2025/05/28}%
+\def\fileversionShikaku{0.1b}%
+\message{-- \filedateShikaku\space v\fileversionShikaku}%
+%
+
+\setKVdefault[Shikaku]{Couleur=Purple,Taille=4,Largeur=2em,Solution=false,CodeAfter={},Creation=false,TailleHor=10,TailleVer=10,TailleHorMax=5,TailleVerMax=5,Graines=false,Graine={}}%
+\defKV[Shikaku]{Graine=\ifempty{#1}{}{\setKV[Shikaku]{Graines}}}%
+
+\newlength\PfCShikakuh
+\newlength\PfCShikakuv
+
+\NewDocumentCommand\Shikaku{o m}{%
+  \useKVdefault[Shikaku]%
+  \setKV[Shikaku]{#1}%
+  \ifboolKV[Shikaku]{Creation}{%
+    \ifluatex\else\PackageWarning{ProfCollege}{La création automatique de Shikaku n'est disponible qu'avec LuaLaTeX.}\fi%
+    \ShikakuCreation%
+  }{%
+    \setlength{\PfCShikakuv}{\useKV[Shikaku]{Largeur}+\tabcolsep}%
+    \setlength{\PfCShikakuh}{\useKV[Shikaku]{Largeur}}%
+    \colorlet{PfCCouleurShikaku}{\useKV[Shikaku]{Couleur}}%
+    \setsepchar[*]{,*/}%
+    \readlist*\ListeCasesSKK{#2}%
+    \savecomparemode%
+    \comparestrict%
+    \begin{NiceTabular}{*{\useKV[Shikaku]{Taille}}{m{\PfCShikakuh}}}[hvlines]
+      \xintFor* ##1 in {\xintSeq{0}{\fpeval{\useKV[Shikaku]{Taille}-1}}}\do{%
+        \xintFor* ##2 in {\xintSeq{1}{\useKV[Shikaku]{Taille}}}\do{%
+          \rule{0pt}{\PfCShikakuv}%
+          \StrCompare{\ListeCasesSKK[\fpeval{\useKV[Shikaku]{Taille}*##1+##2},1]}{b}[\PfCTestb]%
+          \StrCompare{\ListeCasesSKK[\fpeval{\useKV[Shikaku]{Taille}*##1+##2},1]}{l}[\PfCTestl]%
+          \StrCompare{\ListeCasesSKK[\fpeval{\useKV[Shikaku]{Taille}*##1+##2},1]}{lb}[\PfCTestlb]%
+          \xintifboolexpr{\PfCTestb==0}{%
+            \ifboolKV[Shikaku]{Solution}{%
+              \Block[borders={bottom,tikz=PfCCouleurShikaku},line-width=2pt]{1-1}{%
+                \ListeCasesSKK[\fpeval{\useKV[Shikaku]{Taille}*##1+##2},2]%
+              }%
+            }{%
+              \Block[]{1-1}{%
+                \ListeCasesSKK[\fpeval{\useKV[Shikaku]{Taille}*##1+##2},2]%
+              }%
+            }%
+          }{% Testl
+            \xintifboolexpr{\PfCTestl==0}{%
+              \ifboolKV[Shikaku]{Solution}{%
+                \Block[borders={left,tikz=PfCCouleurShikaku},line-width=2pt]{1-1}{%
+                  \ListeCasesSKK[\fpeval{\useKV[Shikaku]{Taille}*##1+##2},2]%
+                }%
+              }{%
+                \Block[]{1-1}{%
+                  \ListeCasesSKK[\fpeval{\useKV[Shikaku]{Taille}*##1+##2},2]%
+                }%
+              }%
+            }{% Testlb
+              \xintifboolexpr{\PfCTestlb==0}{%
+                \ifboolKV[Shikaku]{Solution}{%
+                  \Block[borders={left,bottom,tikz=PfCCouleurShikaku},line-width=2pt]{1-1}{%
+                    \ListeCasesSKK[\fpeval{\useKV[Shikaku]{Taille}*##1+##2},2]%
+                  }%
+                }{%
+                  \Block[]{1-1}{%
+                    \ListeCasesSKK[\fpeval{\useKV[Shikaku]{Taille}*##1+##2},2]%
+                  }%
+                }%
+              }{%
+                \Block[]{1-1}{%
+                  \ListeCasesSKK[\fpeval{\useKV[Shikaku]{Taille}*##1+##2},2]%
+                }%
+              }%
+            }%
+          }%
+          \xintifForLast{\\}{&}%
+        }%
+      }%
+      \CodeAfter%
+      \useKV[Shikaku]{CodeAfter}%
+      \ifboolKV[Shikaku]{Solution}{%
+        \tikz\draw[line width=2pt,PfCCouleurShikaku] (1-|1) rectangle (last-|last);%
+      }{}%
+    \end{NiceTabular}%
+    \restorecomparemode%
+  }%
+}%
+
+\NewDocumentCommand\ShikakuCreation{}{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}%
+    boolean Graines,Solution;
+    Graines=\useKV[Shikaku]{Graines};
+    if Graines:
+    randomseed:=\useKV[Shikaku]{Graine};
+    fi;
+    Solution=\useKV[Shikaku]{Solution};
+    %
+    Taillehor=\useKV[Shikaku]{TailleHor};
+    Taillever=\useKV[Shikaku]{TailleVer};
+    
+    TailleMaxh=\useKV[Shikaku]{TailleHorMax};
+    TailleMaxv=\useKV[Shikaku]{TailleVerMax};
+
+    u:=5mm;
+    
+    path R[],S[],RIso[],SIso[];
+    numeric RAire[],SAire[];
+    numeric RHor[],RVer[],SHor[],SVer[],RAngle[],SAngle[];
+    
+    vardef RetiensLesInfosGenerales(expr depart,Lhor,Lver)=
+    R[k]:=polygone(depart,depart+u*(Lhor,0),depart+u*(Lhor,-Lver),depart+u*(0,-Lver));
+    RIso[k]=iso(depart,depart+u*(Lhor,0),depart+u*(Lhor,-Lver),depart+u*(0,-Lver));
+    RHor[k]=Lhor;
+    RVer[k]=Lver;
+    RAire[k]=Lhor*Lver;
+    RAngle[k]=ANGLE;
+    enddef;
+    
+    vardef RetiensLesInfosPourLaSuite(expr depart,Lhor,Lver)=
+    if Lver>0:
+    S[k]=polygone(depart,depart+u*(Lhor,0),depart+u*(Lhor,-Lver),depart+u*(0,-Lver));
+    SIso[k]=iso(depart,depart+u*(Lhor,0),depart+u*(Lhor,-Lver),depart+u*(0,-Lver));
+    SHor[k]=Lhor;
+    SVer[k]=Lver;
+    SAire[k]=Lhor*Lver;
+    SAngle[k]=ANGLE;
+    fi;
+    enddef;
+    
+    vardef RectangleAuto(expr aa,bb)=
+    save $;
+    path $;
+    $=polygone(aa,aa+(xpart(bb-aa),0),bb,bb-(xpart(bb-aa),0));
+    $
+    enddef;
+
+    pair T[];
+    
+    pair A[],B[];
+  
+    A1=u*(0,Taillever);
+    A2-A1=u*(Taillehor,0);
+    A4=(0,0);
+    A3-A4=A2-A1;
+    
+    nbh=Taillehor div TailleMaxh;
+    nbv=Taillever div TailleMaxv;
+    
+    p:=0;
+    for l=0 upto nbv:
+    for k=0 upto nbh:
+    p:=p+1;
+    T[p]=A1+u*(k*TailleMaxh,-l*TailleMaxv);
+    if k<nbh:
+    Hor[p]=TailleMaxh;
+    else:
+    Hor[p]=Taillehor mod TailleMaxh;
+    fi;
+    if l<nbv:
+    Ver[p]=TailleMaxv;
+    else:
+    Ver[p]=Taillever mod TailleMaxv;
+    fi;
+    endfor;
+    endfor;
+    
+    Total:=p;
+    
+    vardef DecomposeUnRectangle(expr BASEA,THOR,TVER)=
+    TMAXV:=TVER;
+    pair BBASEA;
+    BTHOR:=THOR;
+    BTVER:=TVER;
+    BBASEA:=BASEA;
+    forever:
+    k:=k+1;
+    hor:=floor(1+uniformdeviate(BTHOR));
+    ver:=floor(1+uniformdeviate(BTVER));
+    RetiensLesInfosGenerales(BBASEA,hor,ver);
+    RetiensLesInfosPourLaSuite(BBASEA+u*(0,-ver),hor,TMAXV-ver);
+    BTHOR:=BTHOR-hor;
+    BTVER:=ver;
+    BBASEA:=BBASEA+u*(hor,0);
+    exitif BTHOR<1;
+    endfor;
+    enddef;
+    
+    k=0;
+    for l=1 upto Total:
+    if uniformdeviate(1)>0.5:
+    Angle[l]=180;
+    ANGLE:=Angle[l];
+    else:
+    Angle[l]=0;
+    ANGLE:=Angle[l];
+    fi;
+    DecomposeUnRectangle(T[l],Hor[l],Ver[l]);
+    endfor;
+    Totalk=k;
+
+    picture RTEXT[],STEXT[];
+    
+    drawoptions(withpen pencircle scaled 2);
+    for n=1 upto Totalk:
+    trace R[n] withcolor white;
+    RTEXT[n]=image(
+    label(decimal(RAire[n]),(0,0));
+    );
+    RTEXT[n]:=image(
+    trace rotation(RTEXT[n],center RTEXT[n],RAngle[n]) shifted ((point(0) of R[n]) shifted(u*(0.5+floor(uniformdeviate(RHor[n])),-0.5-floor(uniformdeviate(RVer[n])))));
+    );
+    trace RTEXT[n];
+    endfor;
+    for n=1 upto Totalk:
+    if unknown S[n]:
+    else:
+    trace S[n] withcolor white;
+    STEXT[n]=image(
+    label(decimal(SAire[n]),(0,0));
+    );
+    STEXT[n]:=image(
+    trace rotation(STEXT[n],center STEXT[n],SAngle[n]) shifted ((point(0) of S[n]) shifted(u*(0.5+floor(uniformdeviate(SHor[n])),-0.5-floor(uniformdeviate(SVer[n])))));
+    );
+    trace STEXT[n];
+    fi;
+    endfor;
+    clip currentpicture to polygone(A1,A2,A3,A4);
+    
+    picture CasesAvant[],CasesApres[];
+    CasesAvant[0]=currentpicture;
+    
+    currentpicture:=nullpicture;
+
+    drawoptions(withpen pencircle scaled 2);
+    for n=1 upto Totalk:
+    trace R[n];
+    trace RTEXT[n];
+    endfor;
+    for n=1 upto Totalk:
+    if unknown S[n]:
+    else:
+    trace S[n];
+    trace STEXT[n];
+    fi;
+    endfor;
+    clip currentpicture to polygone(A1,A2,A3,A4);
+    CasesApres[0]:=currentpicture;
+    
+    currentpicture:=nullpicture;
+        
+    for l=1 upto Total:
+    CasesAvant[l]=image(%
+    trace CasesAvant[0];
+    clip currentpicture to polygone(T[l],T[l]+u*(Hor[l],0),T[l]+u*(Hor[l],-Ver[l]),T[l]+u*(0,-Ver[l]));
+    );
+    currentpicture:=nullpicture;
+    CasesApres[l]=image(
+    trace CasesApres[0];
+    clip currentpicture to polygone(T[l],T[l]+u*(Hor[l],0),T[l]+u*(Hor[l],-Ver[l]),T[l]+u*(0,-Ver[l]));
+    );
+    currentpicture:=nullpicture;
+    endfor;
+    
+    if Solution:
+      for l=1 upto Total:
+        trace rotation(CasesApres[l],center CasesApres[l],Angle[l]);
+      endfor;
+    else:
+      for l=1 upto Total:
+        trace rotation(CasesAvant[l],center CasesAvant[l],Angle[l]);
+      endfor;
+    fi;
+    drawoptions(withpen pencircle scaled 2);
+    trace RectangleAuto(A1,A3);
+    drawoptions();
+    for k=1 upto Taillehor-1:
+    trace (k/Taillehor)[A4,A3]--(k/Taillehor)[A1,A2];
+    endfor;
+    
+    for k=1 upto Taillever-1:
+    trace (k/Taillever)[A4,A1]--(k/Taillever)[A3,A2];
+    endfor;
+  \end{mplibcode}%
+  \fi%
+}%

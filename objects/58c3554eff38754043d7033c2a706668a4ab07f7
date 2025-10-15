@@ -1,0 +1,669 @@
+%%%
+% Trigonom\'etrie
+%%%
+\def\filedateTrigo{2024/08/04}%
+\def\fileversionTrigo{0.1}%
+\message{-- \filedateTrigo\space v\fileversionTrigo}%
+%
+\def\MPFigTrigo#1#2#3#4#5#6#7#8{%
+  \ifluatex
+%  \mplibcodeinherit{enable}
+  \mplibforcehmode
+  \begin{mplibcode}
+    defaultcolormodel := \useKV[ClesTrigo]{ModeleCouleur};
+    u:=\useKV[ClesTrigo]{Echelle};
+    pair A,B,C,O,I,D,E,F;%
+    % On place les points A,B,C sur le cercle de mani\`ere \`a faciliter la rotation de la figure
+    A=u*(1,1);
+    B-A=u*(3,0);
+    C=(A--2[A,B rotatedabout(A,50)]) intersectionpoint (B--2[B,A rotatedabout(B,-90)]);
+    % On d\'efinit le centre du cercle circonscrit
+    O - .5[A,B] = whatever * (B-A) rotated 90;
+    O - .5[B,C] = whatever * (C-B) rotated 90;
+    % On tourne pour \'eventuellement moins de lassitude :)
+    A:=A rotatedabout(O,#8);
+    B:=B rotatedabout(O,#8);
+    C:=C rotatedabout(O,#8);
+    % On d\'efinit le centre du cercle inscrit
+    (I-C) rotated ((angle(A-C)-angle(B-C))/2) shifted C=whatever[A,C];
+    (I-B) rotated ((angle(C-B)-angle(A-B))/2) shifted B=whatever[B,C];
+    % on dessine \`a main lev\'ee :)
+    path triangle;
+    triangle=A{dir(angle(B-A)+5)}..B{dir(angle(B-A)+5)}--B{dir(angle(C-B)+5)}..C{dir(angle(C-B)+5)}--C{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)}--cycle;
+    % on d\'efinit l'angle droit
+    D-B=7*unitvector(C-B);
+    F-B=7*unitvector(A-B);
+    E-D=F-B;
+    draw D{dir(angle(E-D)+5)}..E{dir(angle(E-D)+5)}--E{dir(angle(F-E)+5)}..F{dir(angle(F-E)+5)};
+    % L'angle :)
+    path cc;
+    cc=fullcircle scaled 1u;
+    % on marque les angles
+    picture MAngle;
+    MAngle=image(
+    draw (cc shifted A);
+    );
+    draw MAngle;
+    clip currentpicture to triangle;
+    draw A{dir(angle(B-A)+5)}..B{dir(angle(B-A)+5)};
+    draw B{dir(angle(C-B)+5)}..C{dir(angle(C-B)+5)};
+    draw C{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)};
+    % on labelise
+    picture z;
+    label(btex #1 etex,1.15[O,A]);
+    label(btex #2 etex,1.15[O,B]);
+    label(btex #3 etex,1.15[O,C]);
+    label(btex \ang{#7} etex,A+0.95u*unitvector(I-A));
+    decalage:=3mm;
+    if #6<0:
+    else:
+    if angle(1/2[A,C]-B)>0:
+      if #6=0:
+        label(btex ? etex,1.1[B,1/2[A,C]]);
+      else:
+        label(btex \num{#6} etex,1.2[B,1/2[A,C]]);
+      fi;
+    else:
+      if #6=0:
+        label(btex ? etex,1.1[B,1/2[A,C]]);
+      else:
+        label(btex \num{#6} etex,1.2[B,1/2[A,C]]);
+      fi;
+    fi;
+  fi;   
+  if #4<0:
+  else:
+    if angle(1/2[B,C]-A)>0:
+      if #4=0:
+        label(btex ? etex,1/2[B,C]-decalage*(unitvector(A-B)));
+      else:
+        label(btex \num{#4} etex,1/2[B,C]-decalage*(unitvector(A-B)));
+      fi;
+    else:
+      if #4=0:
+        label(btex ? etex,1/2[B,C]-decalage*(unitvector(A-B)));
+      else:
+        label(btex \num{#4} etex,1/2[B,C]-decalage*(unitvector(A-B)));
+      fi;
+    fi;
+  fi;
+  if #5<0:
+  else:
+    if angle(1/2[A,B]-C)>0:
+      if #5=0:
+        label(btex ? etex,1/2[A,B]-decalage*(unitvector(C-B)));
+      else:
+        label(btex \num{#5} etex,1/2[A,B]-decalage*(unitvector(C-B)));
+      fi;
+    else:
+      if #5=0:
+        label(btex ? etex,1/2[A,B]-decalage*(unitvector(C-B)));
+      else:
+        label(btex \num{#5} etex,1/2[A,B]-decalage*(unitvector(C-B)));
+      fi;
+    fi;
+    fi;
+  \end{mplibcode}
+%  \mplibcodeinherit{disable}
+  \else
+  \begin{mpost}[mpsettings={u:=\useKV[ClesTrigo]{Echelle};}]
+    pair A,B,C,O,I,D,E,F;%
+    % On place les points A,B,C sur le cercle de mani\`ere \`a faciliter la rotation de la figure
+    A=u*(1,1);
+    B-A=u*(3,0);
+    C=(A--2[A,B rotatedabout(A,50)]) intersectionpoint (B--2[B,A rotatedabout(B,-90)]);
+    % On d\'efinit le centre du cercle circonscrit
+    O - .5[A,B] = whatever * (B-A) rotated 90;
+    O - .5[B,C] = whatever * (C-B) rotated 90;
+    % On tourne pour \'eventuellement moins de lassitude :)
+    A:=A rotatedabout(O,#8);
+    B:=B rotatedabout(O,#8);
+    C:=C rotatedabout(O,#8);
+    % On d\'efinit le centre du cercle inscrit
+    (I-C) rotated ((angle(A-C)-angle(B-C))/2) shifted C=whatever[A,C];
+    (I-B) rotated ((angle(C-B)-angle(A-B))/2) shifted B=whatever[B,C];
+    % on dessine \`a main lev\'ee :)
+    path triangle;
+    triangle=A{dir(angle(B-A)+5)}..B{dir(angle(B-A)+5)}--B{dir(angle(C-B)+5)}..C{dir(angle(C-B)+5)}--C{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)}--cycle;
+    % on d\'efinit l'angle droit
+    D-B=7*unitvector(C-B);
+    F-B=7*unitvector(A-B);
+    E-D=F-B;
+    draw D{dir(angle(E-D)+5)}..E{dir(angle(E-D)+5)}--E{dir(angle(F-E)+5)}..F{dir(angle(F-E)+5)};
+    % L'angle :)
+    path cc;
+    cc=fullcircle scaled 1u;
+    % on marque les angles
+    picture MAngle;
+    MAngle=image(
+    draw (cc shifted A);
+    % draw (cc shifted B);
+    % draw (cc shifted C);
+    );
+    draw MAngle;
+    clip currentpicture to triangle;
+    draw A{dir(angle(B-A)+5)}..B{dir(angle(B-A)+5)};
+    draw B{dir(angle(C-B)+5)}..C{dir(angle(C-B)+5)};
+    draw C{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)};
+    % on labelise
+    picture z;
+    label(btex #1 etex,1.15[O,A]);
+    label(btex #2 etex,1.15[O,B]);
+    label(btex #3 etex,1.15[O,C]);
+    label(btex \ang{#7} etex,A+0.95u*unitvector(I-A));
+    decalage:=3mm;
+    if #6<0:
+    else:
+    if angle(1/2[A,C]-B)>0:
+      if #6=0:
+        label(btex ? etex rotated angle(C-A),1.1[B,1/2[A,C]]);
+      else:
+        label(btex \num{#6} etex rotated angle(C-A),1.2[B,1/2[A,C]]);
+      fi;
+    else:
+      if #6=0:
+        label(btex ? etex rotated angle(A-C),1.1[B,1/2[A,C]]);
+      else:
+        label(btex \num{#6} etex rotated angle(A-C),1.2[B,1/2[A,C]]);
+      fi;
+    fi;
+  fi;   
+  if #4<0:
+  else:
+    if angle(1/2[B,C]-A)>0:
+      if #4=0:
+        label(btex ? etex rotated(angle(B-C)),1/2[B,C]-decalage*(unitvector(A-B)));
+      else:
+        label(btex \num{#4} etex rotated(angle(B-C)),1/2[B,C]-decalage*(unitvector(A-B)));
+      fi;
+    else:
+      if #4=0:
+        label(btex ? etex rotated(angle(C-B)),1/2[B,C]-decalage*(unitvector(A-B)));
+      else:
+        label(btex \num{#4} etex rotated(angle(C-B)),1/2[B,C]-decalage*(unitvector(A-B)));
+      fi;
+    fi;
+  fi;
+  if #5<0:
+  else:
+    if angle(1/2[A,B]-C)>0:
+      if #5=0:
+        label(btex ? etex rotated angle(A-B),1/2[A,B]-decalage*(unitvector(C-B)));
+      else:
+        label(btex \num{#5} etex rotated angle(A-B),1/2[A,B]-decalage*(unitvector(C-B)));
+      fi;
+    else:
+      if #5=0:
+        label(btex ? etex rotated angle(B-A),1/2[A,B]-decalage*(unitvector(C-B)));
+      else:
+        label(btex \num{#5} etex rotated angle(B-A),1/2[A,B]-decalage*(unitvector(C-B)));
+      fi;
+    fi;
+  fi;
+\end{mpost}
+\fi
+}
+
+\def\MPFigTrigoAngle#1#2#3#4#5#6#7{%
+  % #1 A
+  % #2 B
+  % #3 C
+  % #4 opp
+  % #5 adj
+  % #6 hyp
+  % #7 angle de rotation
+  \ifluatex
+%  \mplibcodeinherit{enable}
+   \mplibforcehmode
+   \begin{mplibcode}
+     defaultcolormodel := \useKV[ClesTrigo]{ModeleCouleur};
+    u:=\useKV[ClesTrigo]{Echelle};
+  pair A,B,C,O,I,D,E,F;%
+  % On place les points A,B,C sur le cercle de mani\`ere \`a faciliter la rotation de la figure
+  A=u*(1,1);
+  B-A=u*(3,0);
+  C=(A--2[A,B rotatedabout(A,50)]) intersectionpoint (B--2[B,A rotatedabout(B,-90)]);
+    % On d\'efinit le centre du cercle circonscrit
+  O - .5[A,B] = whatever * (B-A) rotated 90;
+  O - .5[B,C] = whatever * (C-B) rotated 90;
+  % On tourne pour \'eventuellement moins de lassitude :)
+  A:=A rotatedabout(O,#7);
+  B:=B rotatedabout(O,#7);
+  C:=C rotatedabout(O,#7);
+  % On d\'efinit le centre du cercle inscrit
+  (I-C) rotated ((angle(A-C)-angle(B-C))/2) shifted C=whatever[A,C];
+  (I-B) rotated ((angle(C-B)-angle(A-B))/2) shifted B=whatever[B,C];
+    %on dessine \`a main lev\'ee :)
+  path triangle;
+  triangle=A{dir(angle(B-A)+5)}..B{dir(angle(B-A)+5)}--B{dir(angle(C-B)+5)}..C{dir(angle(C-B)+5)}--C{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)}--cycle;
+  %on d\'efinit l'angle droit
+  D-B=7*unitvector(C-B);
+  F-B=7*unitvector(A-B);
+  E-D=F-B;
+  draw D{dir(angle(E-D)+5)}..E{dir(angle(E-D)+5)}--E{dir(angle(F-E)+5)}..F{dir(angle(F-E)+5)};
+  %L'angle :)
+  path cc;
+  cc=fullcircle scaled 1u;
+  % on marque les angles
+  picture MAngle;
+  MAngle=image(
+  draw (cc shifted A);
+  );
+  draw MAngle;
+  clip currentpicture to triangle;
+  draw A{dir(angle(B-A)+5)}..B{dir(angle(B-A)+5)};
+  draw B{dir(angle(C-B)+5)}..C{dir(angle(C-B)+5)};
+  draw C{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)};
+  % on labelise
+  label(btex #1 etex,1.15[O,A]);
+  label(btex #2 etex,1.15[O,B]);
+  label(btex #3 etex,1.15[O,C]);
+  label(btex ? etex,A+0.95u*unitvector(I-A));
+  decalage:=3mm;
+  if #6>0:
+  if angle(1/2[A,C]-B)>0:
+    label(btex \num{#6} etex,1.2[B,1/2[A,C]]);
+  else:
+  label(btex \num{#6} etex,1.2[B,1/2[A,C]]);
+  fi;
+  fi;
+  if #4>0:
+  if angle(1/2[B,C]-A)>0:
+   label(btex \num{#4} etex,1/2[B,C]-decalage*(unitvector(A-B)));
+  else:
+    label(btex \num{#4} etex,1/2[B,C]-decalage*(unitvector(A-B)));
+    fi;
+    fi;
+    if #5>0:
+  if angle(1/2[A,B]-C)>0:
+    label(btex \num{#5} etex,1/2[A,B]-decalage*(unitvector(C-B)));
+  else:
+  label(btex \num{#5} etex,1/2[A,B]-decalage*(unitvector(C-B)));
+  fi;
+  fi;
+\end{mplibcode}
+%\mplibcodeinherit{disable}
+  \else
+  \begin{mpost}[mpsettings={u:=\useKV[ClesTrigo]{Echelle};}]
+      u:=1cm;
+  pair A,B,C,O,I,D,E,F;%
+    %On place les points A,B,C sur le cercle de mani\`ere \`a faciliter la rotation de la figure
+  A=u*(1,1);
+  B-A=u*(3,0);
+  C=(A--2[A,B rotatedabout(A,50)]) intersectionpoint (B--2[B,A rotatedabout(B,-90)]);
+    % On d\'efinit le centre du cercle circonscrit
+  O - .5[A,B] = whatever * (B-A) rotated 90;
+  O - .5[B,C] = whatever * (C-B) rotated 90;
+    % On tourne pour \'eventuellement moins de lassitude :)
+  A:=A rotatedabout(O,#7);
+  B:=B rotatedabout(O,#7);
+  C:=C rotatedabout(O,#7);
+    % On d\'efinit le centre du cercle inscrit
+  (I-C) rotated ((angle(A-C)-angle(B-C))/2) shifted C=whatever[A,C];
+  (I-B) rotated ((angle(C-B)-angle(A-B))/2) shifted B=whatever[B,C];
+    %on dessine \`a main lev\'ee :)
+  path triangle;
+  triangle=A{dir(angle(B-A)+5)}..B{dir(angle(B-A)+5)}--B{dir(angle(C-B)+5)}..C{dir(angle(C-B)+5)}--C{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)}--cycle;
+  %on d\'efinit l'angle droit
+  D-B=7*unitvector(C-B);
+  F-B=7*unitvector(A-B);
+  E-D=F-B;
+  draw D{dir(angle(E-D)+5)}..E{dir(angle(E-D)+5)}--E{dir(angle(F-E)+5)}..F{dir(angle(F-E)+5)};
+  %L'angle :)
+  path cc;
+  cc=fullcircle scaled 1u;
+    % on marque les angles
+  picture MAngle;
+  MAngle=image(
+      draw (cc shifted A);
+    );
+  draw MAngle;
+  clip currentpicture to triangle;
+  draw A{dir(angle(B-A)+5)}..B{dir(angle(B-A)+5)};
+  draw B{dir(angle(C-B)+5)}..C{dir(angle(C-B)+5)};
+  draw C{dir(angle(A-C)+5)}..A{dir(angle(A-C)+5)};
+    %on labelise
+  label(btex #1 etex,1.15[O,A]);
+  label(btex #2 etex,1.15[O,B]);
+  label(btex #3 etex,1.15[O,C]);
+  label(btex ? etex,A+0.95u*unitvector(I-A));
+  decalage:=3mm;
+  if #6>0:
+  if angle(1/2[A,C]-B)>0:
+    label(btex \num{#6} etex,1.2[B,1/2[A,C]]);
+  else:
+  label(btex \num{#6} etex,1.2[B,1/2[A,C]]);
+  fi;
+  fi;
+  if #4>0:
+  if angle(1/2[B,C]-A)>0:
+   label(btex \num{#4} etex,1/2[B,C]-decalage*(unitvector(A-B)));
+  else:
+    label(btex \num{#4} etex,1/2[B,C]-decalage*(unitvector(A-B)));
+    fi;
+    fi;
+    if #5>0:
+  if angle(1/2[A,B]-C)>0:
+    label(btex \num{#5} etex,1/2[A,B]-decalage*(unitvector(C-B)));
+  else:
+  label(btex \num{#5} etex,1/2[A,B]-decalage*(unitvector(C-B)));
+  fi;
+  fi;
+\end{mpost}
+\fi
+}
+
+\setKVdefault[ClesTrigo]{Angle=0,Propor=false,Figure=false,FigureSeule=false,ValeurExacte=false,Precision=2,Unite=cm,Sinus=false,Cosinus=false,Tangente=false,Perso=false,Echelle=1cm,ModeleCouleur=5}%
+
+\newcommand\RedactionTrigo{}%
+
+\newcommand\TrigoCalculs[5][]{%
+  \setKV[ClesTrigo]{#1}%
+  % #1 Cl\'es
+  % #2 Nom du triangle ABC, rectangle en B, angle connu ou pas : BAC
+  % #3 Longueur #4 Longueur #5 angle
+  % On d\'efinit les points
+  \DeclareSIUnit{\PfCTrigoUnit}{\useKV[ClesTrigo]{Unite}}%
+  \StrMid{#2}{1}{1}[\NomA]%
+  \StrMid{#2}{2}{2}[\NomB]%
+  \StrMid{#2}{3}{3}[\NomC]%
+  \xdef\NomTriangle{\NomA\NomB\NomC}%
+  \xdef\NomAngleDroit{\NomB}%
+  \xdef\NomSommetA{\NomA}%
+  \xdef\NomSommetB{\NomB}%
+  \xdef\NomSommetC{\NomC}%
+  \ifboolKV[ClesTrigo]{Perso}{%
+    \RedactionTrigo%
+  }{%
+    Dans le triangle $\NomA\NomB\NomC$, rectangle en $\NomB$, on a :%
+  }%
+  \ifboolKV[ClesTrigo]{Cosinus}{%
+    \ifx\bla#3\bla%on calcule le c\^ot\'e adjacent
+    \xdef\ResultatTrigo{\fpeval{round(#4*cosd(#5),\useKV[ClesTrigo]{Precision})}}%
+   \ifboolKV[ClesTrigo]{Propor}{%
+     \begin{align*}
+       \NomA\NomC\times\cos(\widehat{\NomB\NomA\NomC})&=\NomA\NomB\\
+       \num{#4}\times\cos(\ang{#5})&=\NomA\NomB%\\
+       \ifboolKV[ClesTrigo]{ValeurExacte}{}{\\
+       \SI{\fpeval{round(#4*cosd(#5),\useKV[ClesTrigo]{Precision})}}{\PfCTrigoUnit}&\IfInteger{\fpeval{round(#4*cosd(#5),9)}}{=}{\approx}\NomA\NomB}
+      \end{align*}%
+    }{%
+      \begin{align*}
+        \cos(\widehat{\NomB\NomA\NomC})&=\frac{\NomA\NomB}{\NomA\NomC}\\
+        \cos(\ang{#5})&=\frac{\NomA\NomB}{\num{#4}}\\
+        \num{#4}\times\cos(\ang{#5})&=\NomA\NomB%\\
+        \ifboolKV[ClesTrigo]{ValeurExacte}{}{\\%
+        \SI{\fpeval{round(#4*cosd(#5),\useKV[ClesTrigo]{Precision})}}{\PfCTrigoUnit}&\IfInteger{\fpeval{round(#4*cosd(#5),9)}}{=}{\approx}\NomA\NomB}%
+      \end{align*}
+    }%
+    \else%
+    \ifx\bla#4\bla%on calcule l'hypoth\'enuse
+    \xdef\ResultatTrigo{\fpeval{round(#3/cosd(#5),\useKV[ClesTrigo]{Precision})}}%
+    \ifboolKV[ClesTrigo]{Propor}{%
+      \begin{align*}
+        \NomA\NomC\times\cos(\widehat{\NomB\NomA\NomC})&=\NomA\NomB\\
+        \NomA\NomC\times\cos(\ang{#5})&=\num{#3}\\
+        \NomA\NomC&=\frac{\num{#3}}{\cos(\ang{#5})}%\\
+        \ifboolKV[ClesTrigo]{ValeurExacte}{}{\\%
+        \NomA\NomC&\IfInteger{\fpeval{round(#3/cosd(#5),9)}}{=}{\approx}\SI{\fpeval{round(#3/cosd(#5),\useKV[ClesTrigo]{Precision})}}{\PfCTrigoUnit}}%
+      \end{align*}
+    }{%
+      \begin{align*}
+        \cos(\widehat{\NomB\NomA\NomC})&=\frac{\NomA\NomB}{\NomA\NomC}\\
+        \cos(\ang{#5})&=\frac{\num{#3}}{\NomA\NomC}\\
+        \NomA\NomC&=\frac{\num{#3}}{\cos(\ang{#5})}%\\
+        \ifboolKV[ClesTrigo]{ValeurExacte}{}{\\%
+        \NomA\NomC&\IfInteger{\fpeval{round(#3/cosd(#5),9)}}{=}{\approx}\SI{\fpeval{round(#3/cosd(#5),\useKV[ClesTrigo]{Precision})}}{\PfCTrigoUnit}}%
+      \end{align*}%
+    }%
+    \else%on calcule l'angle
+    \xdef\ResultatTrigo{\fpeval{round(acosd(#3/#4),\useKV[ClesTrigo]{Precision})}}%
+    \setKV[ClesTrigo]{Precision=0}%
+    \setKV[ClesTrigo]{#1}%
+    \ifboolKV[ClesTrigo]{Propor}{%
+      \begin{align*}
+        \NomA\NomC\times\cos(\widehat{\NomB\NomA\NomC})&=\NomA\NomB\\
+        \num{#4}\times\cos(\widehat{\NomB\NomA\NomC})&=\num{#3}\\
+        \cos(\widehat{\NomB\NomA\NomC})&=\frac{\num{#3}}{\num{#4}}\\
+        \widehat{\NomB\NomA\NomC}&\IfInteger{\fpeval{round(acosd(#3/#4),9)}}{=}{\approx}\ang{\fpeval{round(acosd(#3/#4),\useKV[ClesTrigo]{Precision})}}%
+      \end{align*}%
+    }{%
+      \begin{align*}
+        \cos(\widehat{\NomB\NomA\NomC})&=\frac{\NomA\NomB}{\NomA\NomC}\\
+        \cos(\widehat{\NomB\NomA\NomC})&=\frac{\num{#3}}{\num{#4}}\\
+        \widehat{\NomB\NomA\NomC}&\IfInteger{\fpeval{round(acosd(#3/#4),9)}}{=}{\approx}\ang{\fpeval{round(acosd(#3/#4),\useKV[ClesTrigo]{Precision})}}%
+      \end{align*}%
+    }%
+    \fi%
+    \fi%
+  }{}%
+  \ifboolKV[ClesTrigo]{Sinus}{%
+    \ifx\bla#3\bla%on calcule le c\^ot\'e oppos\'e
+    \xdef\ResultatTrigo{\fpeval{round(#4*sind(#5),\useKV[ClesTrigo]{Precision})}}%
+    \ifboolKV[ClesTrigo]{Propor}{%
+      \begin{align*}
+        \NomA\NomC\times\sin(\widehat{\NomB\NomA\NomC})&=\NomB\NomC\\
+        \num{#4}\times\sin(\ang{#5})&=\NomB\NomC%\\
+        \ifboolKV[ClesTrigo]{ValeurExacte}{}{\\%
+        \SI{\fpeval{round(#4*sind(#5),\useKV[ClesTrigo]{Precision})}}{\PfCTrigoUnit}&\IfInteger{\fpeval{round(#4*sind(#5),9)}}{=}{\approx}\NomB\NomC}%
+      \end{align*}%
+    }{%
+      \begin{align*}
+        \sin(\widehat{\NomB\NomA\NomC})&=\frac{\NomB\NomC}{\NomA\NomC}\\
+        \sin(\ang{#5})&=\frac{\NomB\NomC}{\num{#4}}\\
+        \num{#4}\times\sin(\ang{#5})&=\NomB\NomC%\\
+        \ifboolKV[ClesTrigo]{ValeurExacte}{}{\\%
+        \SI{\fpeval{round(#4*sind(#5),\useKV[ClesTrigo]{Precision})}}{\PfCTrigoUnit}&\IfInteger{\fpeval{round(#4*sind(#5),9)}}{=}{\approx}\NomB\NomC}%
+      \end{align*}%
+    }%
+    \else
+    \ifx\bla#4\bla%on calcule l'hypoth\'enuse
+    \xdef\ResultatTrigo{\fpeval{round(#3/sind(#5),\useKV[ClesTrigo]{Precision})}}%
+    \ifboolKV[ClesTrigo]{Propor}{%
+      \begin{align*}
+        \NomA\NomC\times\sin(\widehat{\NomB\NomA\NomC})&=\NomB\NomC\\
+        \NomA\NomC\times\sin(\ang{#5})&=\num{#3}\\
+        \NomA\NomC&=\frac{\num{#3}}{\sin(\ang{#5})}%\\
+        \ifboolKV[ClesTrigo]{ValeurExacte}{}{\\%
+        \NomA\NomC&\IfInteger{\fpeval{round(#3/sind(#5),9)}}{=}{\approx}\SI{\fpeval{round(#3/sind(#5),\useKV[ClesTrigo]{Precision})}}{\PfCTrigoUnit}}%
+      \end{align*}%
+    }{%
+      \begin{align*}
+        \sin(\widehat{\NomB\NomA\NomC})&=\frac{\NomB\NomC}{\NomA\NomC}\\
+        \sin(\ang{#5})&=\frac{\num{#3}}{\NomA\NomC}\\
+        \NomA\NomC&=\frac{\num{#3}}{\sin(\ang{#5})}%\\
+        \ifboolKV[ClesTrigo]{ValeurExacte}{}{\\%
+        \NomA\NomC&\IfInteger{\fpeval{round(#3/sind(#5),9)}}{=}{\approx}\SI{\fpeval{round(#3/sind(#5),\useKV[ClesTrigo]{Precision})}}{\PfCTrigoUnit}}%
+      \end{align*}%
+    }%
+    \else%on calcule l'angle
+    \xdef\ResultatTrigo{\fpeval{round(asind(#3/#4),\useKV[ClesTrigo]{Precision})}}%
+    \setKV[ClesTrigo]{Precision=0}%
+    \setKV[ClesTrigo]{#1}%
+    \ifboolKV[ClesTrigo]{Propor}{%
+      \begin{align*}
+        \NomA\NomC\times\sin(\widehat{\NomB\NomA\NomC})&=\NomB\NomC\\
+        \num{#4}\times\sin(\widehat{\NomB\NomA\NomC})&=\num{#3}\\
+        \sin(\widehat{\NomB\NomA\NomC})&=\frac{\num{#3}}{\num{#4}}\\
+        \widehat{\NomB\NomA\NomC}&\IfInteger{\fpeval{round(asind(#3/#4),9)}}{=}{\approx}\ang{\fpeval{round(asind(#3/#4),\useKV[ClesTrigo]{Precision})}}%
+      \end{align*}%
+    }{%
+      \begin{align*}
+        \sin(\widehat{\NomB\NomA\NomC})&=\frac{\NomB\NomC}{\NomA\NomC}\\
+        \sin(\widehat{\NomB\NomA\NomC})&=\frac{\num{#3}}{\num{#4}}\\
+        \widehat{\NomB\NomA\NomC}&\IfInteger{\fpeval{round(asind(#3/#4),9)}}{=}{\approx}\ang{\fpeval{round(asind(#3/#4),\useKV[ClesTrigo]{Precision})}}%
+      \end{align*}%
+    }%
+    \fi%
+    \fi%
+  }{}%
+  \ifboolKV[ClesTrigo]{Tangente}{%
+    \ifx\bla#3\bla%on calcule le c\^ot\'e oppos\'e
+    \xdef\ResultatTrigo{\fpeval{round(#4*tand(#5),\useKV[ClesTrigo]{Precision})}}%
+    \ifboolKV[ClesTrigo]{Propor}{%
+      \begin{align*}
+        \NomA\NomB\times\tan(\widehat{\NomB\NomA\NomC})&=\NomB\NomC\\%
+        \num{#4}\times\tan(\ang{#5})&=\NomB\NomC%\\%
+        \ifboolKV[ClesTrigo]{ValeurExacte}{}{\\%
+        \SI{\fpeval{round(#4*tand(#5),\useKV[ClesTrigo]{Precision})}}{\PfCTrigoUnit}&\IfInteger{\fpeval{round(#4*tand(#5),9)}}{=}{\approx}\NomB\NomC}%
+      \end{align*}%
+    }{%
+      \begin{align*}
+        \tan(\widehat{\NomB\NomA\NomC})&=\frac{\NomB\NomC}{\NomA\NomB}\\
+        \tan(\ang{#5})&=\frac{\NomB\NomC}{\num{#4}}\\
+        \num{#4}\times\tan(\ang{#5})&=\NomB\NomC%\\
+        \ifboolKV[ClesTrigo]{ValeurExacte}{}{\\%
+        \SI{\fpeval{round(#4*tand(#5),\useKV[ClesTrigo]{Precision})}}{\PfCTrigoUnit}&\IfInteger{\fpeval{round(#4*tand(#5),9)}}{=}{\approx}\NomB\NomC}%
+      \end{align*}%
+    }%
+    \else
+    \ifx\bla#4\bla%on calcule l'adjacent
+    \xdef\ResultatTrigo{\fpeval{round(#3/tand(#5),\useKV[ClesTrigo]{Precision})}}%
+    \ifboolKV[ClesTrigo]{Propor}{%
+      \begin{align*}
+        \NomA\NomB\times\tan(\widehat{\NomB\NomA\NomC})&=\NomB\NomC\\
+        \NomA\NomB\times\tan(\ang{#5})&=\num{#3}\\
+        \NomA\NomB&=\frac{\num{#3}}{\tan(\ang{#5})}%\\
+        \ifboolKV[ClesTrigo]{ValeurExacte}{}{\\%
+        \NomA\NomB&\IfInteger{\fpeval{round(#3/tand(#5),9)}}{=}{\approx}\SI{\fpeval{round(#3/tand(#5),\useKV[ClesTrigo]{Precision})}}{\PfCTrigoUnit}}%
+      \end{align*}%
+    }{%
+      \begin{align*}
+        \tan(\widehat{\NomB\NomA\NomC})&=\frac{\NomB\NomC}{\NomA\NomB}\\
+        \tan(\ang{#5})&=\frac{\num{#3}}{\NomA\NomB}\\
+        \NomA\NomB&=\frac{\num{#3}}{\tan(\ang{#5})}%\\
+        \ifboolKV[ClesTrigo]{ValeurExacte}{}{\\%
+        \NomA\NomB&\IfInteger{\fpeval{round(#3/tand(#5),9)}}{=}{\approx}\SI{\fpeval{round(#3/tand(#5),\useKV[ClesTrigo]{Precision})}}{\PfCTrigoUnit}}%
+      \end{align*}%
+    }%
+    \else%on calcule l'angle
+    \setKV[ClesTrigo]{Precision=0}%
+    \setKV[ClesTrigo]{#1}%
+    \xdef\ResultatTrigo{\fpeval{round(atand(#3/#4),\useKV[ClesTrigo]{Precision})}}%
+    \ifboolKV[ClesTrigo]{Propor}{%
+      \begin{align*}
+        \NomA\NomB\times\tan(\widehat{\NomB\NomA\NomC})&=\NomB\NomC\\
+        \num{#4}\times\tan(\widehat{\NomB\NomA\NomC})&=\num{#3}\\
+        \tan(\widehat{\NomB\NomA\NomC})&=\frac{\num{#3}}{\num{#4}}\\
+        \widehat{\NomB\NomA\NomC}&\IfInteger{\fpeval{round(atand(#3/#4),9)}}{=}{\approx}\ang{\fpeval{round(atand(#3/#4),\useKV[ClesTrigo]{Precision})}}%
+      \end{align*}%
+    }{%
+      \begin{align*}
+        \tan(\widehat{\NomB\NomA\NomC})&=\frac{\NomB\NomC}{\NomA\NomB}\\
+        \tan(\widehat{\NomB\NomA\NomC})&=\frac{\num{#3}}{\num{#4}}\\
+        \widehat{\NomB\NomA\NomC}&\IfInteger{\fpeval{round(atand(#3/#4),9)}}{=}{\approx}\ang{\fpeval{round(atand(#3/#4),\useKV[ClesTrigo]{Precision})}}%
+      \end{align*}%
+    }%
+    \fi%
+    \fi%
+  }{}%
+}%
+
+\newcommand\Trigo[5][]{%
+  \useKVdefault[ClesTrigo]%
+  \setKV[ClesTrigo]{#1}%
+  % #1 Cl\'es
+  % #2 Nom du triangle ABC, rectangle en B, angle connu ou pas : BAC
+  % #3 Longueur #4 Longueur #5 angle
+  % On d\'efinit les points
+  \StrMid{#2}{1}{1}[\NomA]%
+  \StrMid{#2}{2}{2}[\NomB]%
+  \StrMid{#2}{3}{3}[\NomC]%
+  % On r\'edige
+  \ifboolKV[ClesTrigo]{FigureSeule}{%
+    \ifx\bla#5\bla%
+    \ifboolKV[ClesTrigo]{Cosinus}{%
+      \MPFigTrigoAngle{\NomA}{\NomB}{\NomC}{-1}{#3}{#4}{\useKV[ClesTrigo]{Angle}}
+    }{}%
+    \ifboolKV[ClesTrigo]{Sinus}{%
+      \MPFigTrigoAngle{\NomA}{\NomB}{\NomC}{#3}{-1}{#4}{\useKV[ClesTrigo]{Angle}}
+    }{}%
+    \ifboolKV[ClesTrigo]{Tangente}{%
+      \MPFigTrigoAngle{\NomA}{\NomB}{\NomC}{#3}{#4}{-1}{\useKV[ClesTrigo]{Angle}}
+    }{}%
+    \else%}{%figure pour calculer une longueur
+    \ifboolKV[ClesTrigo]{Cosinus}{%
+      \ifx\bla#3\bla%adjacent inconnu
+      \MPFigTrigo{\NomA}{\NomB}{\NomC}{-1}{0}{#4}{#5}{\useKV[ClesTrigo]{Angle}}
+      \else
+      \MPFigTrigo{\NomA}{\NomB}{\NomC}{-1}{#3}{0}{#5}{\useKV[ClesTrigo]{Angle}}
+      \fi
+    }{}%
+    \ifboolKV[ClesTrigo]{Sinus}{%
+      \ifx\bla#3\bla%adjacent inconnu
+      \MPFigTrigo{\NomA}{\NomB}{\NomC}{0}{-1}{#4}{#5}{\useKV[ClesTrigo]{Angle}}
+      \else
+      \MPFigTrigo{\NomA}{\NomB}{\NomC}{#3}{-1}{0}{#5}{\useKV[ClesTrigo]{Angle}}
+      \fi
+    }{}%
+    \ifboolKV[ClesTrigo]{Tangente}{%
+      \ifx\bla#3\bla%adjacent inconnu
+      \MPFigTrigo{\NomA}{\NomB}{\NomC}{0}{#4}{-1}{#5}{\useKV[ClesTrigo]{Angle}}
+      \else%
+      \MPFigTrigo{\NomA}{\NomB}{\NomC}{#3}{0}{-1}{#5}{\useKV[ClesTrigo]{Angle}}
+      \fi%
+    }{}%
+    \fi%
+  }{%
+    \ifboolKV[ClesTrigo]{Figure}{%
+      \begin{multicols}{2}%
+        {\em La figure est donn\'ee \`a titre indicatif.}%
+        \ifx\bla#5\bla%
+        \ifboolKV[ClesTrigo]{Cosinus}{%
+          \begin{center}
+            \MPFigTrigoAngle{\NomA}{\NomB}{\NomC}{-1}{#3}{#4}{\useKV[ClesTrigo]{Angle}}
+          \end{center}
+        }{}%
+        \ifboolKV[ClesTrigo]{Sinus}{%
+          \begin{center}
+            \MPFigTrigoAngle{\NomA}{\NomB}{\NomC}{#3}{-1}{#4}{\useKV[ClesTrigo]{Angle}}
+          \end{center}
+        }{}%
+        \ifboolKV[ClesTrigo]{Tangente}{%
+          \begin{center}
+            \MPFigTrigoAngle{\NomA}{\NomB}{\NomC}{#3}{#4}{-1}{\useKV[ClesTrigo]{Angle}}
+          \end{center}
+        }{}%
+        \else%}{%figure pour calculer une longueur
+        \ifboolKV[ClesTrigo]{Cosinus}{%
+          \ifx\bla#3\bla%adjacent inconnu
+          \begin{center}
+            \MPFigTrigo{\NomA}{\NomB}{\NomC}{-1}{0}{#4}{#5}{\useKV[ClesTrigo]{Angle}}
+          \end{center}
+          \else
+          \begin{center}
+            \MPFigTrigo{\NomA}{\NomB}{\NomC}{-1}{#3}{0}{#5}{\useKV[ClesTrigo]{Angle}}
+          \end{center}
+          \fi
+        }{}%
+        \ifboolKV[ClesTrigo]{Sinus}{%
+          \ifx\bla#3\bla%adjacent inconnu
+          \begin{center}
+            \MPFigTrigo{\NomA}{\NomB}{\NomC}{0}{-1}{#4}{#5}{\useKV[ClesTrigo]{Angle}}
+          \end{center}
+          \else
+          \begin{center}
+            \MPFigTrigo{\NomA}{\NomB}{\NomC}{#3}{-1}{0}{#5}{\useKV[ClesTrigo]{Angle}}
+          \end{center}
+          \fi
+        }{}%
+        \ifboolKV[ClesTrigo]{Tangente}{%
+          \ifx\bla#3\bla%adjacent inconnu
+          \begin{center}
+            \MPFigTrigo{\NomA}{\NomB}{\NomC}{0}{#4}{-1}{#5}{\useKV[ClesTrigo]{Angle}}
+          \end{center}
+          \else%
+          \begin{center}
+            \MPFigTrigo{\NomA}{\NomB}{\NomC}{#3}{0}{-1}{#5}{\useKV[ClesTrigo]{Angle}}
+          \end{center}
+          \fi%
+        }{}%
+        \fi%
+        \par\columnbreak\par
+        \TrigoCalculs[#1]{#2}{#3}{#4}{#5}%
+      \end{multicols}
+    }{%
+      \TrigoCalculs[#1]{#2}{#3}{#4}{#5}%
+    }%
+  }%
+}%

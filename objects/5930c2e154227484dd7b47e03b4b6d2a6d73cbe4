@@ -1,0 +1,646 @@
+%%%
+% Rose
+%%%
+\def\filedateRose{2025/05/27}%
+\def\fileversionRose{0.1}%
+\message{-- \filedateRose\space v\fileversionRose}%
+%
+\setKVdefault[ClesRose]{Vide=false,Couleur=white,Produits=false,Solution=false,Rayon=2cm,Petales=7,Aide=false,FacteurMin=2,FacteurMax=10,ProduitVide=false,CaseVide=false,Polygone=false,Nom=Rose1,Creation=false,Addition=false,Melange=false,CDot=false,LesNombres={},LesProduits={},LesSommes={}}%
+\defKV[ClesRose]{%
+  LesNombres=\ifempty{#1}{}{\setKV[ClesRose]{Creation}},%
+  LesProduits=\ifempty{#1}{}{\setKV[ClesRose]{Creation}},%
+  LesSommes=\ifempty{#1}{}{\setKV[ClesRose]{Addition}}%
+}%
+%
+\def\UpdatetoksRM#1\nil{\addtotok\toklisterosemul{"#1",}}%
+
+\NewDocumentCommand\RoseMul{o}{%
+  \newtoks\toklisterosemul%
+  \useKVdefault[ClesRose]%
+  \setKV[ClesRose]{#1}%
+  \ifboolKV[ClesRose]{Creation}{%
+    \xdef\PfCFooRoseMul{\useKV[ClesRose]{LesNombres}}%
+    \ifboolKV[ClesRose]{Addition}{%
+      \xdef\PfCFooRoseMul{\PfCFooRoseMul,\useKV[ClesRose]{LesSommes}}%
+    }{%
+      \xdef\PfCFooRoseMul{\PfCFooRoseMul,\useKV[ClesRose]{LesProduits}}%
+    }%
+    \setsepchar{,}\reademptyitems%
+    \readlist*\ListeCompleteRoseMul{\PfCFooRoseMul}%
+    \ignoreemptyitems
+    \foreachitem\compteur\in\ListeCompleteRoseMul{\expandafter\UpdatetoksRM\compteur\nil}%
+    \xdef\PfCRetiensLesFacteurs{}%
+    \foreachitem\compteur\in\ListeCompleteRoseMul{%
+      \StrLen{\ListeCompleteRoseMul[\compteurcnt]}[\PfCLongueurArg]%
+      \ifnum\PfCLongueurArg>0\relax%
+        \xdef\PfCRetiensLesFacteurs{\PfCRetiensLesFacteurs \ListeCompleteRoseMul[\compteurcnt],}%
+      \else%
+        \xdef\PfCRetiensLesFacteurs{\PfCRetiensLesFacteurs "a",}%
+      \fi%
+    }%
+    \DessineRoseMulPerso{\the\toklisterosemul}{\PfCRetiensLesFacteurs}%
+  }{%
+    \ifluatex%
+      \ifboolKV[ClesRose]{Solution}{%
+        \DessineRoseMulSol%
+      }{%
+        \DessineRoseMul%
+      }%
+    \else%
+      \DessineRoseMul%
+    \fi%
+  }%
+}%
+
+\def\DessineRoseMulPersoCode{%
+  pair A[],B[],O;
+  O=(0,0);
+  path cc;
+  cc=cercles(O,Rayon);
+  for k=0 upto Petales:
+  A[k]=pointarc(cc,(360/Petales)*k);
+  endfor;
+  for k=0 upto Petales-1:
+  B[k]=iso(A[k],A[k+1]);
+  endfor;
+  B[Petales]=B[0];
+  path BoiteRec;
+  if Polygone:
+  BoiteRec=(pointarc(fullcircle,0) for k=1 upto Petales:--pointarc(fullcircle,k*(360/Petales)) endfor --cycle) scaled 1u;
+  else:
+  BoiteRec=((-0.4,-0.5)--(0.4,-0.5){dir0}..{dir90}(0.5,-0.4)--(0.5,0.4){dir90}..{dir180}(0.4,0.5)--(-0.4,0.5){dir180}..{dir-90}(-0.5,0.4)--(-0.5,-0.4){dir-90}..cycle) scaled 1u;
+  fi;
+  % On récupère la liste des nombres et facteurs
+  vardef RecupListe(text t)=
+  nbpetales:=0;
+  nbfacteur:=0;
+  nbproduit:=0;
+  numfacteurconnu:=0;
+  for p_=t:
+  if nbpetales<Petales:
+  if string p_:
+  else:
+  Facteur[nbfacteur]=p_;
+  NumFacteurConnu[numfacteurconnu]=nbfacteur;
+  FacteurConnu[numfacteurconnu]=p_;
+  numfacteurconnu:=numfacteurconnu+1;
+  fi;
+  nbfacteur:=nbfacteur+1;
+  else:
+  if string p_:
+  else:
+  Produit[nbproduit]=p_;
+  fi;
+  nbproduit:=nbproduit+1;
+  fi;
+  nbpetales:=nbpetales+1;
+  endfor;
+  if unknown Facteur[0]:
+  else:
+  Facteur[Petales]=Facteur[0];
+  fi;
+  if unknown Produit[0]:
+  else:
+  Produit[Petales]=Produit[0];
+  fi;
+  TotalFacteursConnus:=numfacteurconnu;
+  enddef;
+  %
+  vardef RechercheFacteurs=
+  if Solution:
+  for k=1 upto TotalFacteursConnus:
+  for l=(NumFacteurConnu[k-1]) downto 0:
+  if (known Produit[l-1]):
+  if (known Facteur[l]):
+  FacteurSol[l-1]:=Produit[l-1]/Facteur[l];
+  Facteur[l-1]:=FacteurSol[l-1];
+  fi;
+  fi;
+  endfor;
+  for l=(NumFacteurConnu[k-1]) upto Petales-1:
+  if (known Produit[l]):
+  if (known Facteur[l]):
+  FacteurSol[l+1]:=Produit[l]/Facteur[l];
+  Facteur[l+1]:=FacteurSol[l+1];
+  fi;
+  fi;
+  endfor;
+  endfor;
+  fi;
+  enddef;
+  vardef RechercheTermes=
+  if Solution:
+  for k=1 upto TotalFacteursConnus:
+  for l=(NumFacteurConnu[k-1]) downto 0:
+  if (known Produit[l-1]):
+  if (known Facteur[l]):
+  FacteurSol[l-1]:=Produit[l-1]-Facteur[l];
+  Facteur[l-1]:=FacteurSol[l-1];
+  fi;
+  fi;
+  endfor;
+  for l=(NumFacteurConnu[k-1]) upto Petales-1:
+  if (known Produit[l]):
+  if (known Facteur[l]):
+  FacteurSol[l+1]:=Produit[l]-Facteur[l];
+  Facteur[l+1]:=FacteurSol[l+1];
+  fi;
+  fi;
+  endfor;
+  endfor;
+  fi;
+  enddef;
+  % on labelise
+  vardef AffichagedelaListe(text t)=
+  nbpetales:=0;
+  for p_=t:
+  if nbpetales<Petales:
+  if p_="":
+  if Solution:
+  fill rotation(polygone(O,B[Petales-1],A[0],B[Petales]),O,nbpetales*(360/Petales)) withcolor Fond;
+  if unknown FacteurSol[nbpetales]:
+  else:
+  label(TEX("\num{"&decimal(FacteurSol[nbpetales])&"}"),(0.5[O,A[nbpetales]]-center BoiteRec));
+  fi;
+  fi;
+  else:
+  label(TEX("\num{"&p_&"}"),(0.5[O,A[nbpetales]]-center BoiteRec));
+  fi;
+  else:
+  if p_="":
+  if Solution:
+  fill (BoiteRec shifted (B[nbpetales-Petales]+0.5*Rayon*unitvector(B[nbpetales-Petales]))) withcolor Fond;
+  if Addition:
+  label(TEX("\num{\noexpand\fpeval{"&decimal(Facteur[nbpetales-Petales])&"+"&decimal(Facteur[nbpetales+1-Petales])&"}}"),(B[nbpetales-Petales]+0.5*Rayon*unitvector(B[nbpetales-Petales])));
+  else:
+  label(TEX("\num{\noexpand\fpeval{"&decimal(Facteur[nbpetales-Petales])&"*"&decimal(Facteur[nbpetales+1-Petales])&"}}"),(B[nbpetales-Petales]+0.5*Rayon*unitvector(B[nbpetales-Petales])));
+  fi;
+  fi;
+  else:
+  label(TEX("\num{"&p_&"}"),(B[nbpetales-Petales]+0.5*Rayon*unitvector(B[nbpetales-Petales])));
+  fi;
+  fi;
+  nbpetales:=nbpetales+1;
+  endfor;
+  enddef;
+  %
+  vardef AffichagedelaListePDF(text t)=
+  nbpetales:=0;
+  for p_=t:
+  if nbpetales<Petales:
+  if p_="":
+  if Solution:
+  fill rotation(polygone(O,B[Petales-1],A[0],B[Petales]),O,nbpetales*(360/Petales)) withcolor Fond;
+  if unknown FacteurSol[nbpetales]:
+  else:
+  label(LATEX("\num{"&decimal(FacteurSol[nbpetales])&"}"),(0.5[O,A[nbpetales]]-center BoiteRec));
+  fi;
+  fi;
+  else:
+  label(LATEX("\num{"&p_&"}"),(0.5[O,A[nbpetales]]-center BoiteRec));
+  fi;
+  else:
+  if p_="":
+  if Solution:
+  fill (BoiteRec shifted (B[nbpetales-Petales]+0.5*Rayon*unitvector(B[nbpetales-Petales]))) withcolor Fond;
+  if Addition:
+  label(LATEX("\num{\noexpand\fpeval{"&decimal(Facteur[nbpetales-Petales])&"+"&decimal(Facteur[nbpetales+1-Petales])&"}}"),(B[nbpetales-Petales]+0.5*Rayon*unitvector(B[nbpetales-Petales])));
+  else:
+  label(LATEX("\num{\noexpand\fpeval{"&decimal(Facteur[nbpetales-Petales])&"*"&decimal(Facteur[nbpetales+1-Petales])&"}}"),(B[nbpetales-Petales]+0.5*Rayon*unitvector(B[nbpetales-Petales])));
+  fi;
+  fi;
+  else:
+  label(LATEX("\num{"&p_&"}"),(B[nbpetales-Petales]+0.5*Rayon*unitvector(B[nbpetales-Petales])));
+  fi;
+  fi;
+  nbpetales:=nbpetales+1;
+  endfor;
+  enddef;
+}
+
+\NewDocumentCommand\DessineRoseMulPerso{mm}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      Rayon=\useKV[ClesRose]{Rayon};
+      boolean Aide,Solution,Polygone,Addition,CDot;
+      CDot=\useKV[ClesRose]{CDot};
+      Aide=\useKV[ClesRose]{Aide};
+      Solution=\useKV[ClesRose]{Solution};
+      Addition=\useKV[ClesRose]{Addition};
+      Polygone=\useKV[ClesRose]{Polygone};
+      Petales=\useKV[ClesRose]{Petales};
+      color Fond;
+      Fond=\useKV[ClesRose]{Couleur};
+      \DessineRoseMulPersoCode
+      RecupListe(#2);
+      if Addition:
+      RechercheTermes;
+      else:
+      RechercheFacteurs;
+      fi;
+      AffichagedelaListe(#1);
+      if Aide:
+      for k=0 upto Petales-1:
+      drawarrow (0.5[O,A[k]]--1.75[O,B[k]]) cutbefore segment(A[k],A[k+1]) cutafter BoiteRec shifted (B[k]+0.5*Rayon*unitvector(B[k])) dashed evenly scaled 0.5;
+      drawarrow (0.5[O,A[k+1]]--1.75[O,B[k]]) cutbefore segment(A[k],A[k+1]) cutafter BoiteRec shifted (B[k]+0.5*Rayon*unitvector(B[k])) dashed evenly scaled 0.5;
+      endfor;
+      fi;
+      trace A0 for k=1 upto Petales:--A[k] endfor --cycle;
+      for k=0 upto Petales-1:
+      trace segment(O,B[k]) dashed withdots scaled 0.25;
+      draw BoiteRec shifted (B[k]+0.5*Rayon*unitvector(B[k])) dashed evenly scaled 0.5;
+      endfor;
+      fill cercles(O,3mm) withcolor white;
+      draw cercles(O,3mm);
+      if Addition:
+      label(TEX("\Large$+$"),O);
+      else:
+      if CDot:
+      label(TEX("\Large$\cdot$"),O);
+      else:
+      label(TEX("\Large$\times$"),O);
+      fi;
+      fi;
+    \end{mplibcode}
+  \else
+    \begin{mpost}[mpsettings={Rayon:=\useKV[ClesRose]{Rayon};
+        boolean Aide,Solution,Polygone,CDot;
+        CDot=\useKV[CleSRose]{Aide};
+        Aide:=\useKV[ClesRose]{Aide};
+        Solution:=\useKV[ClesRose]{Solution};
+        Polygone:=\useKV[ClesRose]{Polygone};
+        Petales:=\useKV[ClesRose]{Petales};
+        color Fond;
+        Fond:=\useKV[ClesRose]{Couleur};
+        \PfCDessineRoseMulPersoCode
+      }]
+      RecupListe(#2);
+      RechercheFacteurs;
+      AffichagedelaListePDF(#1);
+      if Aide:
+      for k=0 upto Petales-1:
+      drawarrow (0.5[O,A[k]]--1.75[O,B[k]]) cutbefore segment(A[k],A[k+1]) cutafter BoiteRec shifted (B[k]+0.5*Rayon*unitvector(B[k])) dashed evenly scaled 0.5;
+      drawarrow (0.5[O,A[k+1]]--1.75[O,B[k]]) cutbefore segment(A[k],A[k+1]) cutafter BoiteRec shifted (B[k]+0.5*Rayon*unitvector(B[k])) dashed evenly scaled 0.5;
+      endfor;
+      fi;
+      trace A0 for k=1 upto Petales:--A[k] endfor --cycle;
+      for k=0 upto Petales-1:
+      trace segment(O,B[k]) dashed withdots scaled 0.25;
+      draw BoiteRec shifted (B[k]+0.5*Rayon*unitvector(B[k])) dashed evenly scaled 0.5;
+      endfor;
+      fill cercles(O,4mm) withcolor white;
+      draw cercles(O,4mm);
+      if Addition:
+      label(LATEX("\Huge$+$"),O);
+      else:
+      if CDot:
+      label(LATEX("\Huge$\cdot$"),O);
+      else:
+      label(LATEX("\Huge$\times$"),O);
+      fi;
+      fi;
+    \end{mpost}
+  \fi
+}%
+
+\newcommand\DessineRoseMulSol{%
+  \ifluatex%
+  \mplibforcehmode%
+  \xdef\PfCNomRose{\useKV[ClesRose]{Nom}}%
+  \begin{mplibcode}[\PfCNomRose]
+    boolean Aide,Produits,Solution,Vide,ProduitVide,CaseVide,Polygone,Addition,CDot;
+    CDot=\useKV[ClesRose]{CDot};
+    Addition=\useKV[ClesRose]{Addition};
+    Aide:=\useKV[ClesRose]{Aide};
+    Vide:=\useKV[ClesRose]{Vide};
+    Solution:=\useKV[ClesRose]{Solution};
+    Produits:=\useKV[ClesRose]{Produits};
+    ProduitVide:=\useKV[ClesRose]{ProduitVide};
+    CaseVide:=\useKV[ClesRose]{CaseVide};
+    if ProduitVide:Solution:=true fi;
+    if CaseVide:Solution:=true fi;
+    % on labelise
+    for k=0 upto Petales-1:
+    label(TEX("\num{"&decimal(Facteur[k])&"}"),(0.5[O,A[k]]-center BoiteRec));
+    endfor;
+    for k=0 upto Petales-1:
+    label(TEX("\num{"&decimal(Produit[k])&"}"),(B[k]+0.5*Rayon*unitvector(B[k])));
+    endfor;
+    % On trace
+    if Aide:
+    for k=0 upto Petales-1:
+    drawarrow (0.5[O,A[k]]--1.75[O,B[k]]) cutbefore segment(A[k],A[k+1]) cutafter BoiteRec shifted (B[k]+0.5*Rayon*unitvector(B[k])) dashed evenly scaled 0.5;
+    drawarrow (0.5[O,A[k+1]]--1.75[O,B[k]]) cutbefore segment(A[k],A[k+1]) cutafter BoiteRec shifted (B[k]+0.5*Rayon*unitvector(B[k])) dashed evenly scaled 0.5;
+    endfor;
+    fi;
+    trace A0 for k=1 upto Petales:--A[k] endfor --cycle;
+    for k=0 upto Petales-1:
+    trace segment(O,B[k]) dashed withdots scaled 0.25;
+    draw BoiteRec shifted (B[k]+0.5*Rayon*unitvector(B[k])) dashed evenly scaled 0.5;
+    endfor;
+    fill cercles(O,3mm) withcolor white;
+    draw cercles(O,3mm);
+    if Addition:
+    label(TEX("\Large$+$"),O);
+    else:
+    if CDot:
+    label(TEX("\Large$\cdot$"),O);
+    else:
+    label(TEX("\Large$\times$"),O);
+    fi;
+    fi;
+  \end{mplibcode}
+  \fi
+}
+\newcommand\DessineRoseMul{%
+  \ifluatex%
+  \mplibforcehmode%
+  \xdef\PfCNomRose{\useKV[ClesRose]{Nom}}%
+  \begin{mplibcode}[\PfCNomRose]
+    vardef ExtraireListe(expr nbmin,nbmax,nbfacteurs)=
+    numeric ElementE[],ElementS[];
+    boolean VueE[];
+    %% éléments d'entrée
+    nbe:=1;
+    for k=nbmin upto nbmax:
+    ElementE[nbe]=k;
+    nbe:=nbe+1;
+    endfor;
+    totalE:=(nbmax-nbmin)+1;
+    numeric rec;
+    for k=1 upto nbfacteurs:
+    VueE[k-1]=true;
+    rec:=ceiling(uniformdeviate(totalE+1-k));
+    ElementS[k]=ElementE[rec];
+    numeric ElementI[];
+    p:=0;
+    for l=1 upto totalE+1-k:
+    if l<>rec:
+    p:=p+1;
+    ElementI[p]=ElementE[l];
+    fi;
+    endfor;
+    VueE[Petales]:=true;
+    numeric ElementE[];
+    for l=1 upto p:
+    ElementE[l]=ElementI[l];
+    endfor;
+    endfor;
+    enddef;
+    pair A[],B[],O;
+    Rayon:=\useKV[ClesRose]{Rayon};
+    boolean Aide,Produits,Solution,Vide,ProduitVide,CaseVide,Polygone,Addition,Melange,CDot;
+    CDot=\useKV[ClesRose]{CDot};
+    Melange:=\useKV[ClesRose]{Melange};
+    Addition=\useKV[ClesRose]{Addition};
+    Aide:=\useKV[ClesRose]{Aide};
+    Vide:=\useKV[ClesRose]{Vide};
+    Solution:=\useKV[ClesRose]{Solution};
+    Produits:=\useKV[ClesRose]{Produits};
+    ProduitVide:=\useKV[ClesRose]{ProduitVide};
+    CaseVide:=\useKV[ClesRose]{CaseVide};
+    if ProduitVide:Solution:=true fi;
+    if CaseVide:Solution:=true fi;
+    Polygone:=\useKV[ClesRose]{Polygone};
+    Petales:=\useKV[ClesRose]{Petales};
+    FacteurMin:=\useKV[ClesRose]{FacteurMin};
+    FacteurMax:=\useKV[ClesRose]{FacteurMax};
+    color Fond;
+    Fond:=\useKV[ClesRose]{Couleur};
+    O=(0,0);
+    ExtraireListe(FacteurMin,FacteurMax,Petales);
+    path cc;
+    cc=cercles(O,Rayon);
+    for k=0 upto Petales:
+    A[k]=pointarc(cc,(360/Petales)*k);
+    endfor;
+    for k=0 upto Petales-1:
+    B[k]=iso(A[k],A[k+1]);
+    endfor;
+    path BoiteRec;
+    if Polygone:
+    BoiteRec=(pointarc(fullcircle,0) for k=1 upto Petales:--pointarc(fullcircle,k*(360/Petales)) endfor --cycle) scaled 1u;
+    else:
+    BoiteRec=((-0.4,-0.5)--(0.4,-0.5){dir0}..{dir90}(0.5,-0.4)--(0.5,0.4){dir90}..{dir180}(0.4,0.5)--(-0.4,0.5){dir180}..{dir-90}(-0.5,0.4)--(-0.5,-0.4){dir-90}..cycle) scaled 1u;
+    fi;    
+    %On détermine les facteurs et produits
+    for k=0 upto Petales-1:
+    Facteur[k]:=ElementS[k+1];
+    endfor;
+    Facteur[Petales]:=Facteur[0];
+    for k=0 upto Petales-1:
+    if Addition:
+    Produit[k]:=Facteur[k]+Facteur[k+1];
+    else:
+    Produit[k]:=Facteur[k]*Facteur[k+1];
+    fi;
+    endfor;
+    %on labelise
+    if Vide=false:
+    if Produits:
+    else:
+    for k=0 upto Petales-1:
+    label(TEX("\num{"&decimal(Facteur[k])&"}"),(0.5[O,A[k]]-center BoiteRec));
+    endfor;
+    fi;
+    if Produits or Solution:
+    for k=0 upto Petales-1:
+    label(TEX("\num{"&decimal(Produit[k])&"}"),(B[k]+0.5*Rayon*unitvector(B[k])));
+    endfor;
+    fi;
+    fi;
+    % On trace et on affiche...éventuellement :)
+    if Aide:
+    for k=0 upto Petales-1:
+    drawarrow (0.5[O,A[k]]--1.75[O,B[k]]) cutbefore segment(A[k],A[k+1]) cutafter BoiteRec shifted (B[k]+0.5*Rayon*unitvector(B[k])) dashed evenly scaled 0.5;
+    drawarrow (0.5[O,A[k+1]]--1.75[O,B[k]]) cutbefore segment(A[k],A[k+1]) cutafter BoiteRec shifted (B[k]+0.5*Rayon*unitvector(B[k])) dashed evenly scaled 0.5;
+    endfor;
+    fi;
+    if Melange:
+    % on gère les "oublis"
+    nbvide:=0;
+    for k=0 step 2 until Petales-1:
+    if uniformdeviate(1)<0.5:
+    nbk:=k;
+    else:
+    nbk:=k+1
+    fi;
+    VueE[nbk]:=false;
+    endfor;
+    VueE[Petales]:=VueE[0];
+    for k=0 upto Petales-1:
+    fill rotation(polygone(O,B0,A1,B1),O,(k-1)*(360/Petales)) withcolor Fond;
+    if VueE[k]:
+     label(TEX("\num{"&decimal(Facteur[k])&"}"),(0.5[O,A[k]]-center BoiteRec));
+    fi;
+    endfor;
+    % on affiche les produits pour les effacer
+    for k=0 upto Petales-1:
+    if VueE[k]:
+    if VueE[k+1]=false:
+    label(TEX("\num{"&decimal(Produit[k])&"}"),(B[k]+0.5*Rayon*unitvector(B[k])));
+    fi;
+    else:
+    if VueE[k+1]=false:
+    label(TEX("\num{"&decimal(Produit[k])&"}"),(B[k]+0.5*Rayon*unitvector(B[k])));
+    fi;
+    fi;
+    endfor;    
+    else:
+    if ProduitVide:
+    choix:=floor(uniformdeviate(Petales-1));
+    fill (BoiteRec shifted (1.75[O,B[choix]]-center BoiteRec)) withcolor Fond;
+    fill rotation(polygone(O,B0,A1,B1),O,(choix-1)*(360/Petales)) withcolor Fond;
+    fill rotation(polygone(O,B0,A1,B1),O,choix*(360/Petales)) withcolor Fond;
+    fi;
+    if CaseVide:
+    choix:=floor(uniformdeviate(Petales-1));
+    for k=0 upto Petales-1:
+    if k<>choix:
+    fill rotation(polygone(O,B0,A1,B1),O,k*(360/Petales)) withcolor Fond;
+    fi;
+    endfor;
+    fi;
+    fi;
+    trace A0 for k=1 upto Petales:--A[k] endfor --cycle;
+    for k=0 upto Petales-1:
+    trace segment(O,B[k]) dashed withdots scaled 0.25;
+    draw BoiteRec shifted (B[k]+0.5*Rayon*unitvector(B[k])) dashed evenly scaled 0.5;
+    endfor;
+    fill cercles(O,3mm) withcolor white;
+    draw cercles(O,3mm);
+    if Addition:
+    label(TEX("\Large$+$"),O);
+    else:
+    if CDot:
+    label(TEX("\Large$\cdot$"),O);
+    else:
+    label(TEX("\Large$\times$"),O);
+    fi;
+    fi;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={Rayon:=\useKV[ClesRose]{Rayon};
+      boolean Aide,Produits,Solution,Vide,ProduitVide,CaseVide,Polygone,CDot;
+      CDot:=useKV[ClesRose]{CDot};
+    Aide:=\useKV[ClesRose]{Aide};
+    Vide:=\useKV[ClesRose]{Vide};
+    Solution:=\useKV[ClesRose]{Solution};
+    Produits:=\useKV[ClesRose]{Produits};
+    ProduitVide:=\useKV[ClesRose]{ProduitVide};
+    CaseVide:=\useKV[ClesRose]{CaseVide};
+    if ProduitVide:Solution:=true fi;
+    if CaseVide:Solution:=true fi;
+    Polygone:=\useKV[ClesRose]{Polygone};
+    Petales:=\useKV[ClesRose]{Petales};
+    FacteurMin:=\useKV[ClesRose]{FacteurMin};
+    FacteurMax:=\useKV[ClesRose]{FacteurMax};
+    color Fond;
+    Fond:=\useKV[ClesRose]{Couleur};}]
+    vardef ExtraireListe(expr nbmin,nbmax,nbfacteurs)=
+    numeric ElementE[],ElementS[];
+    %% éléments d'entrée
+    nbe=1;
+    for k=nbmin upto nbmax:
+    ElementE[nbe]=k;
+    nbe:=nbe+1;
+    endfor;
+    totalE=(nbmax-nbmin)+1;
+    numeric rec;
+    for k=1 upto nbfacteurs:
+    rec:=ceiling(uniformdeviate(totalE+1-k));
+    ElementS[k]=ElementE[rec];
+    numeric ElementI[];
+    p:=0;
+    for l=1 upto totalE+1-k:
+    if l<>rec:
+    p:=p+1;
+    ElementI[p]=ElementE[l];
+    fi;
+    endfor;
+    numeric ElementE[];
+    for l=1 upto p:
+    ElementE[l]=ElementI[l];
+    endfor;
+    endfor;
+    enddef;
+    pair A[],B[],O;
+    O=(0,0);
+    ExtraireListe(FacteurMin,FacteurMax,Petales);
+    path cc;
+    cc=cercles(O,Rayon);
+    for k=0 upto Petales:
+    A[k]=pointarc(cc,(360/Petales)*k);
+    endfor;
+    for k=0 upto Petales-1:
+    B[k]=iso(A[k],A[k+1]);
+    endfor;
+    path BoiteRec;
+    if Polygone:
+    BoiteRec=(pointarc(fullcircle,0) for k=1 upto Petales:--pointarc(fullcircle,k*(360/Petales)) endfor --cycle) scaled 1u;
+    else:
+    BoiteRec=((-0.4,-0.5)--(0.4,-0.5){dir0}..{dir90}(0.5,-0.4)--(0.5,0.4){dir90}..{dir180}(0.4,0.5)--(-0.4,0.5){dir180}..{dir-90}(-0.5,0.4)--(-0.5,-0.4){dir-90}..cycle) scaled 1u;
+    fi;    
+    %On détermine les facteurs et produits
+    for k=0 upto Petales-1:
+    Facteur[k]=ElementS[k+1];
+    endfor;
+    Facteur[Petales]=Facteur[0];
+    for k=0 upto Petales-1:
+    Produit[k]=Facteur[k]*Facteur[k+1];
+    endfor;
+    %on labelise
+    if Vide=false:
+    if Produits:
+    else:
+    for k=0 upto Petales-1:
+    label(LATEX("\num{"&decimal(Facteur[k])&"}"),(0.5[O,A[k]]-center BoiteRec));
+    endfor;
+    fi;
+    if Produits or Solution:
+    for k=0 upto Petales-1:
+    label(LATEX("\num{"&decimal(Produit[k])&"}"),(B[k]+0.5*Rayon*unitvector(B[k])));
+    endfor;
+    fi;
+    fi;
+    % On trace et on affiche...éventuellement :)
+    if Aide:
+    for k=0 upto Petales-1:
+    drawarrow (0.5[O,A[k]]--1.75[O,B[k]]) cutbefore segment(A[k],A[k+1]) cutafter BoiteRec shifted (B[k]+0.5*Rayon*unitvector(B[k])) dashed evenly scaled 0.5;
+    drawarrow (0.5[O,A[k+1]]--1.75[O,B[k]]) cutbefore segment(A[k],A[k+1]) cutafter BoiteRec shifted (B[k]+0.5*Rayon*unitvector(B[k])) dashed evenly scaled 0.5;
+    endfor;
+    fi;
+    if ProduitVide:
+    choix=floor(uniformdeviate(Petales-1));
+    fill (BoiteRec shifted (1.75[O,B[choix]]-center BoiteRec)) withcolor Fond;
+    fill rotation(polygone(O,B0,A1,B1),O,(choix-1)*(360/Petales)) withcolor Fond;
+    fill rotation(polygone(O,B0,A1,B1),O,choix*(360/Petales)) withcolor Fond;
+    fi;
+    if CaseVide:
+    choix:=floor(uniformdeviate(Petales-1));
+    for k=0 upto Petales-1:
+    if k<>choix:
+    fill rotation(polygone(O,B0,A1,B1),O,k*(360/Petales)) withcolor Fond;
+    fi;
+    endfor;
+    fi;
+    trace A0 for k=1 upto Petales:--A[k] endfor --cycle;
+    for k=0 upto Petales-1:
+    trace segment(O,B[k]) dashed withdots scaled 0.25;
+    draw BoiteRec shifted (B[k]+0.5*Rayon*unitvector(B[k])) dashed evenly scaled 0.5;
+    endfor;
+    fill cercles(O,3mm) withcolor white;
+    draw cercles(O,3mm);
+    if Addition:
+    label(LATEX("\noexpand\Large$+$"),O);
+    else:
+    if CDot:
+    label(LATEX("\noexpand\Large$\cdot$"),O);
+    else:
+    label(LATEX("\noexpand\Large$\times$"),O);
+    fi;
+    fi;
+  \end{mpost}
+  \fi
+}%

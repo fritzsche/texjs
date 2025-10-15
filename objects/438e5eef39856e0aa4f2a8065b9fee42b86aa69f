@@ -1,0 +1,231 @@
+%%%
+% Calculs fractions
+%
+\def\filedateCalculsFractions{2025/08/23}%
+\def\fileversionCalculsFractions{0.1b}%
+\message{-- \filedateCalculsFractions\space v\fileversionCalculsFractions}%
+%
+\setKVdefault[CalculsFractions]{Couleurs=false,Negatif=false,Seul=false,Couleur={}}%
+\defKV[CalculsFractions]{%
+Couleur=\ifempty{#1}{}{\setKV[CalculsFractions]{Couleurs}\setKV[ClesSimplification]{Couleur=#1}}%
+}
+%
+\NewDocumentCommand\tofrac{m}{%
+  \IfDecimal{#1}{#1}{%
+    \StrBefore{#1}{/}[\PfCnum]%
+    \StrBehind{#1}{/}[\PfCden]%
+    \ifnum\PfCden=1\relax%
+    \num{\PfCnum}%
+    \else%
+    \frac{\num{\PfCnum}}{\num{\PfCden}}%
+    \fi%
+  }%
+}%
+
+\NewDocumentCommand\Tofrac{m}{%
+  \IfDecimal{#1}{#1}{%
+    \StrBefore{#1}{/}[\PfCnum]%
+    \StrBehind{#1}{/}[\PfCden]%
+    \ifnum\PfCden=1\relax%
+    \num{\PfCnum}%
+    \else%
+    %\PGCD{\PfCnum}{\PfCden}%
+    %\ifnum\the\pgcd>1\relax%
+    \Simplification{\PfCnum}{\PfCden}%\frac{\num{\PfCnum}}{\num{\PfCden}}%
+    %\else%
+    %\frac{\num{\PfCnum}}{\num{\PfCden}}%
+    %\fi%
+    \fi%
+  }%
+}%
+
+\NewDocumentCommand\AddFraction{soommo}{%
+  \useKVdefault[CalculsFractions]%
+  \setKV[CalculsFractions]{#2}%
+  \ifboolKV[CalculsFractions]{Couleurs}{\colorlet{CouleurDenoCom}{\useKV[CalculsFractions]{Couleur}}}{\colorlet{CouleurDenoCom}{black}}%
+  \IfBooleanTF{#1}{%
+    \xdef\PfCFractionOp{-}%
+  }{%
+    \xdef\PfCFractionOp{+}%
+  }%
+  \IfDecimal{#4}{%
+    \xdef\PfCNumA{#4}%
+    \xdef\PfCNumB{1}%
+  }{%
+    \StrCut{#4}{/}\PfCNumA\PfCNumB%
+  }%
+  \IfDecimal{#5}{%
+    \xdef\PfCNumC{#5}%
+    \xdef\PfCNumD{1}%
+  }{%
+    \StrCut{#5}{/}\PfCNumC\PfCNumD%
+  }%
+  \xdef\PfCAddFoo{\PfCNumA/\PfCNumB,\PfCNumC/\PfCNumD}%
+  \setsepchar[*]{,*/}\ignoreemptyitems%
+  \readlist*\ListeFractions{\PfCAddFoo}%
+  \reademptyitems%
+  \setsepchar{,}%
+  % Partie calculs
+  \PGCD{\fpeval{abs(\ListeFractions[1,2])}}{\fpeval{abs(\ListeFractions[2,2])}}%
+%  pgcd=\the\pgcd%
+  \xdef\PfCPremierMul{\fpeval{\ListeFractions[2,2]/\the\pgcd}}%
+%  PfCPremierMul=\PfCPremierMul
+  \xdef\PfCDeuxiemeMul{\fpeval{\ListeFractions[1,2]/\the\pgcd}}%
+  \xdef\PfCAddNumFin{\fpeval{(\ListeFractions[1,1])*(\PfCPremierMul)\PfCFractionOp(\ListeFractions[2,1])*(\PfCDeuxiemeMul)}}%
+  \xdef\PfCAddDenoFin{\fpeval{(\ListeFractions[1,2])*(\PfCPremierMul)}}%
+  \ifnum\PfCAddNumFin=0\relax
+    \xdef\PfCAddNumSimp{0}%
+    \xdef\PfCAddDenoSimp{\PfCAddDenoFin}%
+    \xdef\PfCAddSumSimp{0}%
+  \else%
+    \PGCD{\fpeval{abs(\PfCAddNumFin)}}{\fpeval{abs(\PfCAddDenoFin)}}\xdef\PfCAddPgcd{\the\pgcd}%
+    \xdef\PfCAddNumSimp{\fpeval{\PfCAddNumFin/\PfCAddPgcd}}%
+    \xdef\PfCAddDenoSimp{\fpeval{\PfCAddDenoFin/\PfCAddPgcd}}%
+    \xdef\PfCAddSumSimp{\PfCAddNumSimp/\PfCAddDenoSimp}%
+  \fi
+  \IfValueT{#6}{\xdef#6{\PfCAddSumSimp}}%
+  \ifboolKV[CalculsFractions]{Seul}{}{%
+  % Partie affichage
+  \ensuremath{%
+    \IfValueTF{#3}{%
+      \ifnum#3=4\relax%
+      %test
+      \ifboolKV[CalculsFractions]{Negatif}{%
+      \xintifboolexpr{\fpeval{\PfCAddNumSimp/\PfCAddDenoSimp}<0}{-\tofrac{\fpeval{abs(\PfCAddNumSimp)}/\fpeval{abs(\PfCAddDenoSimp)}}}{\tofrac{\PfCAddSumSimp}}%
+      }{\tofrac{\PfCAddSumSimp}}%
+      \else%
+      \ifnum#3=3\relax%
+      \SSimpliTest{\fpeval{abs(\PfCAddNumFin)}}{\fpeval{abs(\PfCAddDenoFin)}}\ifthenelse{\boolean{Simplification}}{\tofrac{\PfCAddNumFin/\PfCAddDenoFin}}{\tofrac{\PfCAddSumSimp}}%
+      \else%
+      \ifnum#3=1\relax%
+      \ifnum\fpeval{abs(\PfCPremierMul)}>1\relax%
+      \frac{\ListeFractions[1,1]_{\mathcolor{CouleurDenoCom}{\times\NumMA{\PfCPremierMul}}}}{\ListeFractions[1,2]_{\mathcolor{CouleurDenoCom}{\times\NumMA{\PfCPremierMul}}}}
+      \else%
+      \tofrac{#4}%
+      \fi%
+      \PfCFractionOp%
+      \ifnum\fpeval{abs(\PfCDeuxiemeMul)}>1\relax%
+      \frac{\ListeFractions[2,1]_{\mathcolor{CouleurDenoCom}{\times\NumMA{\PfCDeuxiemeMul}}}}{\ListeFractions[2,2]_{\mathcolor{CouleurDenoCom}{\times\NumMA{\PfCDeuxiemeMul}}}}%
+      \else%
+      \tofrac{#5}%
+      \fi%
+      \else%
+      \ifnum#3=2\relax%
+      \frac{\num{\fpeval{\ListeFractions[1,1]*\PfCPremierMul}}}{\num{\fpeval{\ListeFractions[1,2]*\PfCPremierMul}}}\PfCFractionOp\frac{\num{\fpeval{\ListeFractions[2,1]*\PfCDeuxiemeMul}}}{\num{\fpeval{\ListeFractions[2,2]*\PfCDeuxiemeMul}}}%
+      \fi%
+      \fi%
+      \fi%
+      \fi%
+    }{\tofrac{#4}\PfCFractionOp\tofrac{#5}
+    }%
+  }%
+  }%
+}%
+
+\NewDocumentCommand\SousFraction{oommo}{%
+  \AddFraction*[#1][#2]{#3}{#4}[#5]%
+}%
+
+\NewDocumentCommand\MulFraction{oommo}{%
+  \useKVdefault[CalculsFractions]%
+  \setKV[CalculsFractions]{#1}%
+  \IfDecimal{#3}{%
+    \xdef\PfCNumA{#3}%
+    \xdef\PfCNumB{1}%
+  }{%
+    \StrCut{#3}{/}{\PfCNumA}{\PfCNumB}%
+  }%
+  \IfDecimal{#4}{%
+    \xdef\PfCNumC{#4}%
+    \xdef\PfCNumD{1}%
+  }{%
+    \StrCut{#4}{/}{\PfCNumC}{\PfCNumD}%
+  }%
+  \xdef\PfCMulFoo{\PfCNumA/\PfCNumB,\PfCNumC/\PfCNumD}%
+  \setsepchar[*]{,*/}\ignoreemptyitems%
+  \readlist*\ListeFractions{\PfCMulFoo}%
+  \reademptyitems%
+  \setsepchar{,}%
+  % Calculs
+  \xdef\PfCMulNumFin{\fpeval{(\ListeFractions[1,1])*(\ListeFractions[2,1])}}%
+  \xdef\PfCMulDenoFin{\fpeval{\ListeFractions[1,2]*\ListeFractions[2,2]}}%
+  \PGCD{\fpeval{abs(\PfCMulNumFin)}}{\fpeval{abs(\PfCMulDenoFin)}}\xdef\PfCMulPgcd{\pgcd}%
+  \xdef\PfCMulNumSimp{\fpeval{\PfCMulNumFin/\PfCMulPgcd}}%
+  \xdef\PfCMulDenoSimp{\fpeval{\PfCMulDenoFin/\PfCMulPgcd}}%
+  \xdef\PfCMulPdtSimp{\PfCMulNumSimp/\PfCMulDenoSimp}%
+  \IfValueT{#5}{\xdef#5{\PfCMulPdtSimp}}%
+  \ifboolKV[CalculsFractions]{Seul}{}{%
+    \ensuremath{%
+    \IfValueTF{#2}{%
+      \ifnum#2=3\relax
+        \ifboolKV[CalculsFractions]{Negatif}{%
+           \xintifboolexpr{\fpeval{\PfCMulNumSimp/\PfCMulDenoSimp}<0}{-\tofrac{\fpeval{abs(\PfCMulNumSimp)}/\fpeval{abs(\PfCMulDenoSimp)}}}{\tofrac{\PfCMulPdtSimp}}%
+           }{\tofrac{\PfCMulPdtSimp}}%
+      \else
+      \ifnum#2=2\relax%
+      %\SSimpliTest{\PfCMulNumFin}{\PfCMulDenoFin}\ifthenelse{\boolean{Simplification}}{\frac{\ifnum\PfCMulNumFin<0\relax-\fi\Decomposition[Longue]{\fpeval{abs(\PfCMulNumFin)}}}{\ifnum\PfCMulDenoFin<0\relax-\fi\Decomposition[Longue]{\fpeval{abs(\PfCMulDenoFin)}}}}{\tofrac{\PfCMulPdtSimp}}%
+      \DecompositionSimplificationSeule{\PfCMulNumFin}{\PfCMulDenoFin}%
+      \else%
+      \ifnum#2=1\relax%
+       \frac{\ListeFractions[1,1]\times\ifnum\ListeFractions[2,1]<0\relax(\fi\ListeFractions[2,1]\ifnum\ListeFractions[2,1]<0\relax)\fi}{\ListeFractions[1,2]\times\ifnum\ListeFractions[2,2]<0\relax(\fi\ListeFractions[2,2]\ifnum\ListeFractions[2,2]<0\relax)\fi}
+      \fi
+      \fi
+      \fi
+    }{\tofrac{#3}\times\tofrac{#4}
+    }%
+  }%
+  }%
+}%
+
+\NewDocumentCommand\DivFraction{oommo}{%
+  \useKVdefault[CalculsFractions]%
+  \setKV[CalculsFractions]{#1}%
+  \IfDecimal{#3}{%
+    \xdef\PfCNumA{#3}%
+    \xdef\PfCNumB{1}%
+  }{%
+    \StrCut{#3}{/}{\PfCNumA}{\PfCNumB}%
+  }%
+  \IfDecimal{#4}{%
+    \xdef\PfCNumC{#4}%
+    \xdef\PfCNumD{1}%
+  }{%
+    \StrCut{#4}{/}{\PfCNumC}{\PfCNumD}%
+  }%
+  \xdef\PfCDivFoo{\PfCNumA/\PfCNumB,\PfCNumC/\PfCNumD}%
+  \setsepchar[*]{,*/}\ignoreemptyitems%
+  \readlist*\ListeFractions{\PfCDivFoo}%
+  \reademptyitems%
+  \setsepchar{,}%
+  % Calculs
+  \xdef\PfCDivNumFin{\fpeval{(\ListeFractions[1,1])*(\ListeFractions[2,2])}}%
+  \xdef\PfCDivDenoFin{\fpeval{\ListeFractions[1,2]*\ListeFractions[2,1]}}%
+  \PGCD{\fpeval{abs(\PfCDivNumFin)}}{\fpeval{abs(\PfCDivDenoFin)}}\xdef\PfCDivPgcd{\pgcd}%
+  \xdef\PfCDivNumSimp{\fpeval{\PfCDivNumFin/\PfCDivPgcd}}%
+  \xdef\PfCDivDenoSimp{\fpeval{\PfCDivDenoFin/\PfCDivPgcd}}%
+  \xdef\PfCDivPdtSimp{\PfCDivNumSimp/\PfCDivDenoSimp}%
+  \IfValueT{#5}{\xdef#5{\PfCDivPdtSimp}}%
+  \ifboolKV[CalculsFractions]{Seul}{}{%
+  \ensuremath{%
+    \IfValueTF{#2}{%
+      \ifnum#2=4\relax
+      \ifboolKV[CalculsFractions]{Negatif}{%
+           \xintifboolexpr{\fpeval{\PfCDivNumSimp/\PfCDivDenoSimp}<0}{-\tofrac{\fpeval{abs(\PfCDivNumSimp)}/\fpeval{abs(\PfCDivDenoSimp)}}}{\tofrac{\PfCDivPdtSimp}}%
+           }{\tofrac{\PfCDivPdtSimp}}%
+      \else\ifnum#2=3\relax
+      \MulFraction[][\fpeval{#2-1}]{\ListeFractions[1,1]/\ListeFractions[1,2]}{\ListeFractions[2,2]/\ListeFractions[2,1]}%
+      \else
+      \ifnum#2=2\relax%
+      \MulFraction[][\fpeval{#2-1}]{\ListeFractions[1,1]/\ListeFractions[1,2]}{\ListeFractions[2,2]/\ListeFractions[2,1]}%
+      \else%
+      \ifnum#2=1\relax%
+      \tofrac{\ListeFractions[1,1]/\ListeFractions[1,2]}\times\tofrac{\ListeFractions[2,2]/\ListeFractions[2,1]}
+      \fi
+      \fi
+      \fi
+      \fi
+    }{\tofrac{#3}\div\tofrac{#4}
+    }
+  }%
+  }%
+}%

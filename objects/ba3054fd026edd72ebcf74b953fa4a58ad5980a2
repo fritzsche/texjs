@@ -1,0 +1,277 @@
+% \iffalse meta-
+%
+% Copyright (C) 2018 - 2021 by ChairX
+%
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either
+% version 1.3 of this license or (at your option) any later
+% version.  The latest version of this license is in:
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of
+% LaTeX version 2005/12/01 or later.
+%
+% This file contains the implementation of all category theory related macros .
+%
+% Macros have to be described by (delete the first %)
+% %\begin{macro}{\macro}
+% % Description of the implementation.
+% %    \begin{macrocode}
+%\newcommand{\macro}[]         {}
+% %    \end{macrocode}
+% %\end{macro}
+%
+% The implementation and description will appear in the implementation
+% part of the documentation. Use \subsubsection{} etc. for structuring.
+%
+% The documentation of the macros defined here has to be written in
+% chairxmathGeneralDoc.dtx
+% \fi
+%
+% First we check of macros should be included:
+%    \begin{macrocode}
+\if@loadmath
+%    \end{macrocode}
+%
+% \subsubsection{General Math Commands} \label{sec:GeneralMathCommands}
+%
+%\begin{macro}{\I}
+%    \begin{macrocode}
+\newcommand{\I}{\mathrm{i}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\E}
+%    \begin{macrocode}
+\newcommand{\E}{\mathrm{e}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\D}
+%    \begin{macrocode}
+\newcommand{\D}{\mathop{}\!\mathrm{d}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\cc}
+%    \begin{macrocode}
+\newcommand{\cc}[1]{\overline{{#1}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\sign}
+%    \begin{macrocode}
+\newcommand{\sign}{\operatorname{\ch@irxoperatorfont{sign}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\RE}
+%    \begin{macrocode}
+\newcommand{\RE}{\operatorname{\ch@irxoperatorfont{Re}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\IM}
+%    \begin{macrocode}
+\newcommand{\IM}{\operatorname{\ch@irxoperatorfont{Im}}}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\Unit}
+%    \begin{macrocode}
+\newcommand{\Unit}{\mathbb{1}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\const}
+%    \begin{macrocode}
+\newcommand{\const}{\operatorname{\mathit{const}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\canonical}
+%    \begin{macrocode}
+\newcommand{\canonical}{\ch@irxscriptfont{can}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\pt}
+%    \begin{macrocode}
+\newcommand{\pt}{\ch@irxoperatorfont{pt}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\subsubsection{Restrictions} \label{sec:Restrictions}
+%
+%\begin{macro}{\at}
+%    \begin{macrocode}
+\newcommand{\at}[2][\big]{#1\vert_{#2}}
+%    \end{macrocode}
+%\end{macro}
+%
+%
+% \subsubsection{Maps and Related Stuff} \label{sec:MapsandRelatedStuff}
+%
+%\begin{macro}{\Map}
+%    \begin{macrocode}
+\newcommand{\Map}{\ch@irxoperatorfont{Map}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Bij}
+%    \begin{macrocode}
+\newcommand{\Bij}{\ch@irxoperatorfont{Bij}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\argument}
+%    \begin{macrocode}
+\newcommand{\argument}{\,\cdot\,}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\domain}
+%    \begin{macrocode}
+\newcommand{\domain}{\operatorname{\ch@irxoperatorfont{dom}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\range}
+%    \begin{macrocode}
+\newcommand{\range}{\operatorname{\ch@irxoperatorfont{range}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\id}
+%    \begin{macrocode}
+\newcommand{\id}{\operatorname{\ch@irxoperatorfont{id}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\pr}
+%    \begin{macrocode}
+\newcommand{\pr}{\operatorname{\ch@irxoperatorfont{pr}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\inv}
+%    \begin{macrocode}
+\newcommand{\inv}{\operatorname{\ch@irxoperatorfont{inv}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\ev}
+%    \begin{macrocode}
+\newcommand{\ev}{\operatorname{\ch@irxoperatorfont{ev}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\image}
+%    \begin{macrocode}
+\newcommand{\image}{\operatorname{\ch@irxoperatorfont{im}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\graph}
+%    \begin{macrocode}
+\newcommand{\graph}{\operatorname{\ch@irxoperatorfont{graph}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\coimage}
+%    \begin{macrocode}
+\newcommand{\coimage}{\operatorname{\ch@irxoperatorfont{coim}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\coker}
+%    \begin{macrocode}
+\newcommand{\coker}{\operatorname{\ch@irxoperatorfont{coker}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\operator}
+%    \begin{macrocode}
+\newcommand{\operator}[1]{\operatorname{\ch@irxoperatorfont{#1}}}
+%    \end{macrocode}
+%\end{macro}
+%
+% \subsubsection{Relations} \label{sec:Relations}
+%
+%\begin{macro}{\later}
+%    \begin{macrocode}
+\newcommand{\later}{\mathrel{\succcurlyeq}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\earlier}
+%    \begin{macrocode}
+\newcommand{\earlier}{\mathrel{\preccurlyeq}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\subsubsection{Sums and Products}
+%
+%\begin{macro}{\bigop}
+% To define sum-like operators that are scaled up in displaystyle we define the following command taken
+% from tex.stackexchange.com/questions/23432/how-to-create-my-own-math-operator-with-limits
+%    \begin{macrocode}
+\DeclareRobustCommand\big@p[2][1]{%
+	\mathop{\vphantom{\sum}\mathpalette\bigop@{{#1}{#2}}}\slimits@
+}
+\newcommand{\bigop@}[2]{\bigop@@#1#2}
+\newcommand{\bigop@@}[3]{%
+	\vcenter{
+		\sbox\z@{$#1\sum$}
+		\hbox{\resizebox{\ifx#1\displaystyle#2\fi\dimexpr\ht\z@+\dp\z@}{!}{$\m@th#3$}}
+	}
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\bigplus}
+% The command |\DOTSB| is used for correct behaviour of |\dots| before or after the command.
+%    \begin{macrocode}
+\newcommand{\bigplus}{\DOTSB\big@p{+}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\bigtimes}
+%    \begin{macrocode}
+\newcommand{\bigtimes}{\DOTSB\big@p{\times}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\biprod}
+%    \begin{macrocode}
+\newcommand{\biprod}{\DOTSB\big@p{\mathrel{\prod\hspace{-0.4cm}\coprod}}}
+%    \end{macrocode}
+%\end{macro}
+%
+% \subsubsection{Labels} \label{sec:Labels}
+%
+% Smiley from |wasysym|
+%
+% \begin{macro}{\smiley}
+%    \begin{macrocode}
+\newcommand{\smiley}{\ch@irxmathsymbol[\mathord]{wasy}{44}}
+%    \end{macrocode}
+% \end{macro}
+%
+% Frownie from |wasysym|
+%
+% \begin{macro}{\frownie}
+%    \begin{macrocode}
+\newcommand{\frownie}{\ch@irxmathsymbol[\mathord]{wasy}{47}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\heart}
+%    \begin{macrocode}
+\newcommand{\heart}{\heartsuit}
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+\fi
+%    \end{macrocode}

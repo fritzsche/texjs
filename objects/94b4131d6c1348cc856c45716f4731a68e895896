@@ -1,0 +1,574 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2018 - 2021 by ChairX
+%
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either
+% version 1.3 of this license or (at your option) any later
+% version.  The latest version of this license is in:
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of
+% LaTeX version 2005/12/01 or later.
+%
+% This file contains the implementation of all differential geometry related macros .
+%
+% Macros have to be described by (delete the first %)
+% %\begin{macro}{\macro}
+% % Description of the implementation.
+% %    \begin{macrocode}
+%\newcommand{\macro}[]         {}
+% %    \end{macrocode}
+% %\end{macro}
+%
+% The implementation and description will appear in the implementation
+% part of the documentation. Use \subsubsection{} etc. for structuring.
+%
+% The documentation of the macros defined here has to be written in
+% chairxmathDiffgeoDoc.dtx
+%\fi
+%
+% First we check of macros should be included:
+%    \begin{macrocode}
+\if@loadmath
+%    \end{macrocode}
+%
+% \subsubsection{General Differential Geometry} \label{sec:GeneralMacrosDiffGeo}
+%
+%\begin{macro}{\Lie}
+%    \begin{macrocode}
+\newcommand{\Lie}{\mathscr{L}}
+%    \end{macrocode}
+%\end{macro}
+%
+% A generic bracket as paired delimiter, used in several other macros
+%
+%\begin{macro}{\ch@irxbbracket}
+%    \begin{macrocode}
+\DeclarePairedDelimiter{\ch@irxbracket}{[}{]}
+%    \end{macrocode}
+% \end{macro}
+%
+% A generic double bracket as paired delimiter, used in several other macros
+%
+%\begin{macro}{\ch@irxbbracket}
+%    \begin{macrocode}
+\DeclareMathDelimiter\ch@irxllbbracket{\mathopen}{stmry}{"4A}{stmry}{"71}
+\DeclareMathDelimiter\ch@irxrrbbracket{\mathclose}{stmry}{"4B}{stmry}{"79}
+\DeclarePairedDelimiter{\ch@irxbbracket}{\ch@irxllbbracket}{\ch@irxrrbbracket}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\Schouten}
+%    \begin{macrocode}
+\newcommand{\@schoutenstar}[1]{\ch@irxbbracket*{#1}_{\scriptscriptstyle\ch@irxscriptfont{S}}}
+\newcommand{\@schoutennostar}[2][]{\ch@irxbbracket[#1]{#2}_{\scriptscriptstyle\ch@irxscriptfont{S}}}
+\newcommand{\Schouten}{\@ifstar\@schoutenstar\@schoutennostar}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Forms}
+%    \begin{macrocode}
+\newcommand{\Forms}{\Omega}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\ZdR}
+%    \begin{macrocode}
+\newcommand{\ZdR}{\ch@irxoperatorfont{Z}_{\scriptscriptstyle\mathrm{dR}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\BdR}
+%    \begin{macrocode}
+\newcommand{\BdR}{\ch@irxoperatorfont{B}_{\scriptscriptstyle\ch@irxscriptfont{dR}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\HdR}
+%    \begin{macrocode}
+\newcommand{\HdR}{\ch@irxoperatorfont{H}_{\scriptscriptstyle\ch@irxscriptfont{dR}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Diffeo}
+%    \begin{macrocode}
+\newcommand{\Diffeo}{\operatorname{\ch@irxoperatorfont{Diffeo}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Diffop}
+%    \begin{macrocode}
+\newcommand{\Diffop}{\operatorname{\ch@irxoperatorfont{DiffOp}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\loc}
+%    \begin{macrocode}
+\newcommand{\loc}{\ch@irxscriptfont{loc}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\germ}
+%    \begin{macrocode}
+\newcommand{\germ}{\operatorname{\ch@irxoperatorfont{germ}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\prol}
+%    \begin{macrocode}
+\newcommand{\prol}{\ch@irxoperatorfont{prol}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\NRbracket}
+%    \begin{macrocode}
+\newcommand{\@nrbracketstar}[1]{\ch@irxbracket*{#1}_{\scriptscriptstyle\ch@irxscriptfont{NR}}}
+\newcommand{\@nrbracketnostar}[2][]{\ch@irxbracket[#1]{#2}_{\scriptscriptstyle\ch@irxscriptfont{NR}}}
+\newcommand{\NRbracket}{\@ifstar\@nrbracketstar\@nrbracketnostar}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\FNbracket}
+%    \begin{macrocode}
+\newcommand{\@fnbracketstar}[1]{\ch@irxbracket*{#1}_{\scriptscriptstyle\ch@irxscriptfont{FN}}}
+\newcommand{\@fnbracketnostar}[2][]{\ch@irxbracket[#1]{#2}_{\scriptscriptstyle\ch@irxscriptfont{FN}}}
+\newcommand{\FNbracket}{\@ifstar\@fnbracketstar\@fnbracketnostar}
+%    \end{macrocode}
+%\end{macro}
+%
+% \begin{macro}{\Manifold}
+%    \begin{macrocode}
+\newcommand{\Manifolds}{\categoryname{\categoryname{Manifold}}}
+%    \end{macrocode}
+% \end{macro}
+%
+%\subsubsection{Lie Groups and Principal Fiber Bundles}
+%
+%\begin{macro}{\lefttriv}
+%    \begin{macrocode}
+\newcommand{\lefttriv}{\ch@irxoperatorfont{left}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\righttriv}
+%    \begin{macrocode}
+\newcommand{\righttriv}{\ch@irxoperatorfont{right}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Gau}
+%    \begin{macrocode}
+\newcommand{\Gau}{\operatorname{\ch@irxoperatorfont{Gau}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Conn}
+%    \begin{macrocode}
+\newcommand{\Conn}{\operatorname{\ch@irxoperatorfont{Conn}}}
+%    \end{macrocode}
+% \end{macro}
+%
+%\begin{macro}{\ratio}
+%    \begin{macrocode}
+\newcommand{\ratio}{\ch@irxoperatorfont{r}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Parallel}
+%    \begin{macrocode}
+\newcommand{\Parallel}{\operatorname{\ch@irxoperatorfont{P}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\CE}
+%    \begin{macrocode}
+\newcommand{\CE}{{\scriptscriptstyle{\ch@irxscriptfont{CE}}}}
+%    \end{macrocode}
+%\end{macro}
+%
+% \begin{macro}{\HCE}
+%    \begin{macrocode}
+\newcommand{\HCE}{\ch@irxoperatorfont{H}_\CE}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\fund}
+%    \begin{macrocode}
+\newcommand{\fund}{\ch@irxoperatorfont{fund}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\Universal}
+%    \begin{macrocode}
+\newcommand{\Universal}{\operatorname{\ch@irxoperatorfont{U}}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\BCH}
+%    \begin{macrocode}
+\newcommand{\BCH}{\ch@irxscriptfont{\scriptscriptstyle{BCH}}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\LieGroups}
+%    \begin{macrocode}
+\newcommand{\LieGroups}{\categoryname{\categoryname{LieGroup}}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\Principal}
+%    \begin{macrocode}
+\newcommand{\Principal}{\categoryname{\categoryname{Principal}}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\GPrincipal}
+%    \begin{macrocode}
+\newcommand{\GPrincipal}[1][G]{#1\categoryname{\textrm{-}\categoryname{Principal}}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\Fiber}
+%    \begin{macrocode}
+\newcommand{\Fiber}{\categoryname{Fiber}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\FFiber}
+%    \begin{macrocode}
+\newcommand{\FFiber}[1][F]{#1\categoryname{\textrm{-}\categoryname{Fiber}}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\Pin}
+%    \begin{macrocode}
+\newcommand{\Pin}{\group{Pin}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\Spin}
+%    \begin{macrocode}
+\newcommand{\Spin}{\group{Spin}}
+%    \end{macrocode}
+% \end{macro}
+
+%
+%\subsubsection{(Pseudo) Riemannian Geometry }
+%
+%\begin{macro}{\nablaLC}
+%    \begin{macrocode}
+\newcommand{\nablaLC}{\nabla^{\scriptscriptstyle\ch@irxscriptfont{LC}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Laplace}
+%    \begin{macrocode}
+\newcommand{\Laplace}{\Delta}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\dAlembert}
+%    \begin{macrocode}
+\DeclareMathSymbol\dAlembert{\mathord}{AMSa}{"03}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\feynman}
+%    \begin{macrocode}
+\newcommand{\feynman}[1]{\ooalign{$#1$\cr\hidewidth$\raise0.19ex\hbox{/}$\hidewidth\cr}}
+%    \end{macrocode}
+%\end{macro}
+
+%\begin{macro}{\Dirac}
+%    \begin{macrocode}
+\newcommand{\Dirac}{\feynman{D}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\rotation}
+%    \begin{macrocode}
+\newcommand{\rotation}{\operatorname{\ch@irxoperatorfont{rot}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\curl}
+%    \begin{macrocode}
+\newcommand{\curl}{\operatorname{\ch@irxoperatorfont{curl}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\divergence}
+%    \begin{macrocode}
+\newcommand{\divergence}{\operatorname{\ch@irxoperatorfont{div}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\gradient}
+%    \begin{macrocode}
+\newcommand{\gradient}{\operatorname{\ch@irxoperatorfont{grad}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Tor}
+%    \begin{macrocode}
+\newcommand{\Tor}{\operatorname{\ch@irxoperatorfont{Tor}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Ric}
+%    \begin{macrocode}
+\newcommand{\Ric}{\operatorname{\ch@irxoperatorfont{Ric}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\scal}
+%    \begin{macrocode}
+\newcommand{\scal}{\operatorname{\ch@irxoperatorfont{scal}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Riem}
+%    \begin{macrocode}
+\newcommand{\Riem}{\operatorname{\ch@irxoperatorfont{Riem}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Hessian}
+%    \begin{macrocode}
+\newcommand{\Hessian}{\ch@irxoperatorfont{Hessian}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\hodge}
+%    \begin{macrocode}
+\newcommand{\hodge}{\operatorname{\star}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\subsubsection{Complex Geometry}
+%
+%\begin{macro}{\Nijenhuis}
+%    \begin{macrocode}
+\newcommand{\Nijenhuis}{\operatorname{\ch@irxoperatorfont{Nij}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\del}
+%    \begin{macrocode}
+\newcommand{\del}{\mathop{}\!\partial}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\delbar}
+%    \begin{macrocode}
+\newcommand{\delbar}{\mathop{}\!\cc{\partial}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\FS}
+%    \begin{macrocode}
+\newcommand{\FS}{{\scriptscriptstyle{\ch@irxscriptfont{FS}}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%
+%\subsubsection{Vector Bundles}
+%
+% \begin{macro}{\Lift}
+%    \begin{macrocode}
+\newcommand{\Lift}{{\scriptscriptstyle{\ch@irxscriptfont{Lift}}}}
+%    \end{macrocode}
+% \end{macro}
+%
+%\begin{macro}{\ver}
+%    \begin{macrocode}
+\newcommand{\ver}{\ch@irxscriptfont{ver}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\hor}
+%    \begin{macrocode}
+\newcommand{\hor}{\ch@irxscriptfont{hor}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Ver}
+%    \begin{macrocode}
+\newcommand{\Ver}{\operatorname{\ch@irxoperatorfont{Ver}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Hor}
+%    \begin{macrocode}
+\newcommand{\Hor}{\operatorname{\ch@irxoperatorfont{Hor}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Sec}
+%    \begin{macrocode}
+\newcommand{\Sec}[1][k]{\Gamma^{#1}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Secinfty}
+%    \begin{macrocode}
+\newcommand{\Secinfty}{\Sec[\infty]}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\HolSec}
+%    \begin{macrocode}
+\newcommand{\HolSec}{\Sec[]_{\ch@irxscriptfont{hol}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\SymD}
+%    \begin{macrocode}
+\newcommand{\SymD}{\mathop{}\!\ch@irxoperatorfont{D}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Densities}
+%    \begin{macrocode}
+\newcommand{\Densities}[1][n]{\abs{\Lambda^{#1}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\MeasurableSections}
+%    \begin{macrocode}
+\newcommand{\MeasurableSections}{\ch@irxspacefont{M}\Sec[]}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\IntpSections}
+%    \begin{macrocode}
+\newcommand{\IntpSections}[1][p]{\Intp[#1]\Sec[]}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\IntegrableSections}
+%    \begin{macrocode}
+\newcommand{\IntegrableSections}{\IntpSections[1]}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Translation}
+%    \begin{macrocode}
+\newcommand{\Translation}{\ch@irxoperatorfont{T}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\frames}
+%    \begin{macrocode}
+\newcommand{\frames}[1]{\ch@irxoperatorfont{#1}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Frames}
+%    \begin{macrocode}
+\newcommand{\Frames}{\operatorname{\ch@irxoperatorfont{Frames}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\FDiff}
+%    \begin{macrocode}
+\newcommand{\FDiff}{\ch@irxoperatorfont{F}}
+%    \end{macrocode}
+%\end{macro}
+%
+%
+%\subsubsection{Symplectic and Poisson Geometry}
+%
+%\begin{macro}{\Sympl}
+%    \begin{macrocode}
+\newcommand{\Sympl}{\operatorname{\ch@irxgroupfont{Sympl}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Jacobiator}
+%    \begin{macrocode}
+\newcommand{\Jacobiator}[1][\pi]{\operatorname{\ch@irxoperatorfont{Jac}}_{#1}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\red}
+%    \begin{macrocode}
+\newcommand{\red}{\ch@irxscriptfont{red}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Hess}
+%    \begin{macrocode}
+\newcommand{\Hess}{\ch@irxoperatorfont{Hess}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\KKS}
+%    \begin{macrocode}
+\newcommand{\KKS}{{\scriptscriptstyle\ch@irxscriptfont{KKS}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Courant}
+%    \begin{macrocode}
+\newcommand{\@courantstar}[1]{\ch@irxbbracket*{#1}_{\scriptscriptstyle\ch@irxscriptfont{C}}}
+\newcommand{\@courantnostar}[2][]{\ch@irxbbracket[#1]{#2}_{\scriptscriptstyle\ch@irxscriptfont{C}}}
+\newcommand{\Courant}{\@ifstar\@courantstar\@courantnostar}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Dorfman}
+%    \begin{macrocode}
+\newcommand{\@dorfmanstar}[1]{\ch@irxbbracket*{#1}_{\scriptscriptstyle\ch@irxscriptfont{D}}}
+\newcommand{\@dorfmannostar}[2][]{\ch@irxbbracket[#1]{#2}_{\scriptscriptstyle\ch@irxscriptfont{D}}}
+\newcommand{\Dorfman}{\@ifstar\@dorfmanstar\@dorfmannostar}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Dir}
+%    \begin{macrocode}
+\newcommand{\Dir}{\operatorname{\ch@irxoperatorfont{Dir}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Forward}
+%    \begin{macrocode}
+\newcommand{\Forward}{\mathcal{F}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Backward}
+%    \begin{macrocode}
+\newcommand{\Backward}{\mathcal{B}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Tangent}
+%    \begin{macrocode}
+\newcommand{\Tangent}{\mathbb{T}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\MWreduction}
+%    \begin{macrocode}
+\newcommand{\MWreduction}{\big/\!\!\big/}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Mon}
+%    \begin{macrocode}
+\newcommand{\Mon}{\ch@irxoperatorfont{Mon}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Hol}
+%    \begin{macrocode}
+\newcommand{\Hol}{\ch@irxoperatorfont{Hol}}
+%    \end{macrocode}
+%\end{macro}
+%
+%    \begin{macrocode}
+\fi
+%    \end{macrocode}

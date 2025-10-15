@@ -1,0 +1,1811 @@
+%%%
+% Panneaux routiers
+%%%
+\def\filedatePanneauxRoutiers{2025/05/19}%
+\def\fileversionPanneauxRoutiers{0.1b}%
+\message{-- \filedatePanneauxRoutiers\space v\fileversionPanneauxRoutiers}%
+%
+\setKVdefault[Panneaux]{Echelle=0.4,Impression=false,AB1=false,AB2=false,AB3a=false,AB3b=false,AB25=false,AB4=false,AB5=false,AB6=false,AB7=false,A1a=false,A1b=false,A1c=false,A1d=false,A2a=false,A2b=false,A3=false,A3a=false,A3b=false,A14=false,A16=false,A17=false,A18=false,B0=false,B1=false,B11=false,B12=false,B13=false,B14110=false,B14130=false,B1415=false,B1430=false,B1450=false,B1470=false,B1480=false,B1490=false,B14100=false,B15=false,B16=false,B2a=false,B2b=false,B2c=false,B31=false,B33110=false,B33130=false,B3315=false,B3330=false,B3350=false,B3370=false,B3380=false,B3390=false,B33100=false,B35=false,B6a1=false,B6a2=false,B6a3=false,B6d=false,B211=false,B212=false,B21a1=false,B21a2=false,B21b=false,B21c1=false,B21c2=false,B21d1=false,B21d2=false,B21e=false,B25=false,B43=false,C12=false,C13a=false,C13b=false,C18=false,C1a=false,C27=false,C4a50=false,C4b50=false,PrioriteDroite=false,VoiePrioritaire=false,SensGiratoire=false,CedezlePassageA=false,CedezlePassageB=false,StopA=false,StopB=false,RoutePrioritaire=false,FinRoutePrioritaire=false,VirageDroite=false,VirageDroite=false,VirageGauche=false,ViragesDroite=false,ViragesGauche=false,Cassis=false,Ralentisseur=false,Retrecissement=false,RetrecissementGauche=false,RetrecissementDroite=false,AutreDanger=false,DescenteDanger=false,FeuTricolore=false,CirculationDeuxSens=false,InterdictionCirculer=false,LimitationLargeurs=false,LimitationHauteurs=false,LimitationMasses=false,LimitationVitesses=false,CedezSensInverse=false,InterditKlaxonner=false,SensInterdit=false,InterditTournerG=false,InterditTournerD=false,InterditDemiTour=false,FinToutesInterdictions=false,FinLimitationVitesses=false,FinInterdictionKlaxonner=false,StationnementInterdit=false,StationnementInterdit15=false,StationnementInterdit31=false,ArretStationnementInterdit=false,ObligationDroite=false,ObligationGauche=false,ObligationToutDroit=false,ObligationTournerDroite=false,ObligationTournerGauche=false,ObligationToutDroitOuDroite=false,ObligationToutDroitOuGauche=false,ObligationGaucheOuDroite=false,ObligationContournementDroite=false,ObligationContournementGauche=false,ObligationVitesseMinis=false,FinVitesseMinis=false,SensUnique=false,Impasse=false,ImpasseB=false,PrioriteFaceSensInverse=false,Parking=false,ChausseeSurElevee=false,VitesseConseillees=false,FinVitesseConseillees=false,LimitationLargeur={},LimitationHauteur={},LimitationMasse={},LimitationVitesse={},FinLimitationVitesse={},ObligationVitesseMini={},FinVitesseMini={},VitesseConseillee={},FinVitesseConseillee={}}
+\defKV[Panneaux]{%
+  LimitationLargeur=\ifempty{#1}{}{\setKV[Panneaux]{LimitationLargeurs}},%
+  LimitationHauteur=\ifempty{#1}{}{\setKV[Panneaux]{LimitationHauteurs}},%
+  LimitationMasse=\ifempty{#1}{}{\setKV[Panneaux]{LimitationMasses}},%
+  LimitationVitesse=\ifempty{#1}{}{\setKV[Panneaux]{LimitationVitesses}},%
+  FinLimitationVitesse=\ifempty{#1}{}{\setKV[Panneaux]{FinLimitationVitesses}},%
+  ObligationVitesseMini=\ifempty{#1}{}{\setKV[Panneaux]{ObligationVitesseMinis}},%
+  FinVitesseMini=\ifempty{#1}{}{\setKV[Panneaux]{FinVitesseMinis}},%
+  VitesseConseillee=\ifempty{#1}{}{\setKV[Panneaux]{VitesseConseillees}},%
+  FinVitesseConseillee=\ifempty{#1}{}{\setKV[Panneaux]{FinVitesseConseillees}}%
+}%
+
+\NewDocumentCommand\PfCPanneaux{o}{%
+  \useKVdefault[Panneaux]%
+  \setKV[Panneaux]{#1}%
+  \ifboolKV[Panneaux]{AB1}{\MPABUn}{}%
+  \ifboolKV[Panneaux]{PrioriteDroite}{\MPABUn}{}%
+  \ifboolKV[Panneaux]{AB2}{\MPABDeux}{}%
+  \ifboolKV[Panneaux]{VoiePrioritaire}{\MPABDeux}{}%
+  \ifboolKV[Panneaux]{AB25}{\MPABVingtCinq}{}%
+  \ifboolKV[Panneaux]{SensGiratoire}{\MPABVingtCinq}{}%
+  \ifboolKV[Panneaux]{AB3a}{\MPABTroisa}{}%
+  \ifboolKV[Panneaux]{CedezlePassageA}{\MPABTroisa}{}%
+  \ifboolKV[Panneaux]{AB3b}{\MPABTroisb}{}%
+  \ifboolKV[Panneaux]{CedezlePassageB}{\MPABTroisb}{}%
+  \ifboolKV[Panneaux]{AB4}{\MPABQuatre}{}%
+  \ifboolKV[Panneaux]{StopA}{\MPABQuatre}{}%
+  \ifboolKV[Panneaux]{AB5}{\MPABCinq}{}%
+  \ifboolKV[Panneaux]{StopB}{\MPABCinq}{}%
+  \ifboolKV[Panneaux]{AB6}{\MPABSix}{}%
+  \ifboolKV[Panneaux]{RoutePrioritaire}{\MPABSix}{}%
+  \ifboolKV[Panneaux]{AB7}{\MPABSept}{}%
+  \ifboolKV[Panneaux]{FinRoutePrioritaire}{\MPABSept}{}%
+  \ifboolKV[Panneaux]{A1a}{\MPAUna}{}%
+  \ifboolKV[Panneaux]{VirageDroite}{\MPAUna}{}%
+  \ifboolKV[Panneaux]{A1b}{\MPAUnb}{}%
+  \ifboolKV[Panneaux]{VirageGauche}{\MPAUnb}{}%
+  \ifboolKV[Panneaux]{A1c}{\MPAUnc}{}%
+  \ifboolKV[Panneaux]{ViragesDroite}{\MPAUnc}{}%
+  \ifboolKV[Panneaux]{A1d}{\MPAUnd}{}%
+  \ifboolKV[Panneaux]{ViragesGauche}{\MPAUnd}{}%
+  \ifboolKV[Panneaux]{A2a}{\MPADeuxa}{}%
+  \ifboolKV[Panneaux]{Cassis}{\MPADeuxa}{}%
+  \ifboolKV[Panneaux]{A2b}{\MPADeuxb}{}%
+  \ifboolKV[Panneaux]{Ralentisseur}{\MPADeuxb}{}%
+  \ifboolKV[Panneaux]{A3}{\MPATrois}{}%
+  \ifboolKV[Panneaux]{Retrecissement}{\MPATrois}{}%
+  \ifboolKV[Panneaux]{A3a}{\MPATroisa}{}%
+  \ifboolKV[Panneaux]{RetrecissementDroite}{\MPATroisa}{}%
+  \ifboolKV[Panneaux]{A3b}{\MPATroisb}{}%
+  \ifboolKV[Panneaux]{RetrecissementGauche}{\MPATroisb}{}%
+  \ifboolKV[Panneaux]{A14}{\MPAQuatorze}{}%
+  \ifboolKV[Panneaux]{AutreDanger}{\MPAQuatorze}{}%
+  \ifboolKV[Panneaux]{A16}{\MPASeize}{}%
+  \ifboolKV[Panneaux]{DescenteDanger}{\MPASeize}{}%
+  \ifboolKV[Panneaux]{A17}{\MPADixSept}{}%
+  \ifboolKV[Panneaux]{FeuTricolore}{\MPADixSept}{}%
+  \ifboolKV[Panneaux]{A18}{\MPADixHuit}{}%
+  \ifboolKV[Panneaux]{CirculationDeuxSens}{\MPADixHuit}{}%
+  \ifboolKV[Panneaux]{B0}{\MPBZero}{}%
+  \ifboolKV[Panneaux]{InterdictionCirculer}{\MPBZero}{}%
+  \ifboolKV[Panneaux]{B11}{\MPBOnze}{}%
+  \ifboolKV[Panneaux]{LimitationLargeurs}{\MPBOnze[{\useKV[Panneaux]{LimitationLargeur}}]}{}%
+  \ifboolKV[Panneaux]{B12}{\MPBDouze}{}%
+  \ifboolKV[Panneaux]{LimitationHauteurs}{\MPBDouze[{\useKV[Panneaux]{LimitationHauteur}}]}{}%
+  \ifboolKV[Panneaux]{B13}{\MPBTreize}{}%
+  \ifboolKV[Panneaux]{LimitationMasses}{\MPBTreize[{\useKV[Panneaux]{LimitationMasse}}]}{}%
+  \ifboolKV[Panneaux]{B14110}{\MPBQuatorze[110]}{}%
+  \ifboolKV[Panneaux]{B14130}{\MPBQuatorze[130]}{}%
+  \ifboolKV[Panneaux]{B1415}{\MPBQuatorze[15]}{}%
+  \ifboolKV[Panneaux]{B1430}{\MPBQuatorze[30]}{}%
+  \ifboolKV[Panneaux]{B1450}{\MPBQuatorze[50]}{}%
+  \ifboolKV[Panneaux]{B1470}{\MPBQuatorze[70]}{}%
+  \ifboolKV[Panneaux]{B1480}{\MPBQuatorze[80]}{}%
+  \ifboolKV[Panneaux]{B1490}{\MPBQuatorze[90]}{}%
+  \ifboolKV[Panneaux]{B14100}{\MPBQuatorze[100]}{}%
+  \ifboolKV[Panneaux]{LimitationVitesses}{\MPBQuatorze[{\useKV[Panneaux]{LimitationVitesse}}]}{}%
+  \ifboolKV[Panneaux]{B15}{\MPBQuinze}{}%
+  \ifboolKV[Panneaux]{CedezSensInverse}{\MPBQuinze}{}%
+  \ifboolKV[Panneaux]{B16}{\MPBSeize}{}%
+  \ifboolKV[Panneaux]{InterditKlaxonner}{\MPBSeize}{}%
+  \ifboolKV[Panneaux]{B1}{\MPBUn}{}%
+  \ifboolKV[Panneaux]{SensInterdit}{\MPBUn}{}%
+  \ifboolKV[Panneaux]{B2a}{\MPBDeuxa}{}%
+  \ifboolKV[Panneaux]{InterditTournerG}{\MPBDeuxa}{}%
+  \ifboolKV[Panneaux]{B2b}{\MPBDeuxb}{}%
+  \ifboolKV[Panneaux]{InterditTournerD}{\MPBDeuxb}{}%
+  \ifboolKV[Panneaux]{B2c}{\MPBDeuxc}{}%
+  \ifboolKV[Panneaux]{InterditDemiTour}{\MPBDeuxc}{}%
+  \ifboolKV[Panneaux]{B31}{\MPBTroisUn}{}%
+  \ifboolKV[Panneaux]{FinToutesInterdictions}{\MPBTroisUn}{}%
+  \ifboolKV[Panneaux]{B33110}{\MPBTrenteTrois[110]}{}%
+  \ifboolKV[Panneaux]{B33130}{\MPBTrenteTrois[130]}{}%
+  \ifboolKV[Panneaux]{B3315}{\MPBTrenteTrois[15]}{}%
+  \ifboolKV[Panneaux]{B3330}{\MPBTrenteTrois[30]}{}%
+  \ifboolKV[Panneaux]{B3350}{\MPBTrenteTrois[50]}{}%
+  \ifboolKV[Panneaux]{B3370}{\MPBTrenteTrois[70]}{}%
+  \ifboolKV[Panneaux]{B3380}{\MPBTrenteTrois[80]}{}%
+  \ifboolKV[Panneaux]{B3390}{\MPBTrenteTrois[90]}{}%
+  \ifboolKV[Panneaux]{B33100}{\MPBTrenteTrois[100]}{}%
+  \ifboolKV[Panneaux]{FinLimitationVitesses}{\MPBTrenteTrois[{\useKV[Panneaux]{FinLimitationVitesse}}]}{}%
+  \ifboolKV[Panneaux]{B35}{\MPBTrenteCinq}{}%
+  \ifboolKV[Panneaux]{FinInterdictionKlaxonner}{\MPBTrenteCinq}{}%
+  \ifboolKV[Panneaux]{B6a1}{\MPBSixAUn}{}%
+  \ifboolKV[Panneaux]{StationnementInterdit}{\MPBSixAUn}{}%
+  \ifboolKV[Panneaux]{B6a2}{\MPBSixADeux}{}%
+  \ifboolKV[Panneaux]{StationnementInterdit15}{\MPBSixADeux}{}%
+  \ifboolKV[Panneaux]{B6a3}{\MPBSixATrois}{}%
+  \ifboolKV[Panneaux]{StationnementInterdit31}{\MPBSixATrois}{}%
+  \ifboolKV[Panneaux]{B6d}{\MPBSixD}{}%
+  \ifboolKV[Panneaux]{ArretStationnementInterdit}{\MPBSixD}{}%
+  \ifboolKV[Panneaux]{B211}{\MPBVingtEtUnUn}{}%
+  \ifboolKV[Panneaux]{ObligationDroite}{\MPBVingtEtUnUn}{}%
+  \ifboolKV[Panneaux]{B212}{\MPBVingtEtUnDeux}{}%
+  \ifboolKV[Panneaux]{ObligationGauche}{\MPBVingtEtUnDeux}{}%
+  \ifboolKV[Panneaux]{B21a1}{\MPBVingtEtUnAUn}{}%
+  \ifboolKV[Panneaux]{ObligationContournementDroite}{\MPBVingtEtUnAUn}{}%
+  \ifboolKV[Panneaux]{B21a2}{\MPBVingtEtUnADeux}{}%
+  \ifboolKV[Panneaux]{ObligationContournementGauche}{\MPBVingtEtUnADeux}{}%
+  \ifboolKV[Panneaux]{B21b}{\MPBVingtEtUnB}{}%
+  \ifboolKV[Panneaux]{ObligationToutDroit}{\MPBVingtEtUnB}{}%
+  \ifboolKV[Panneaux]{B21c1}{\MPBVingtEtUnCUn}{}%
+  \ifboolKV[Panneaux]{ObligationTournerDroite}{\MPBVingtEtUnCUn}{}%
+  \ifboolKV[Panneaux]{B21c2}{\MPBVingtEtUnCDeux}{}%
+  \ifboolKV[Panneaux]{ObligationTournerGauche}{\MPBVingtEtUnCDeux}{}%
+  \ifboolKV[Panneaux]{B21d1}{\MPBVingtEtUnDUn}{}%
+  \ifboolKV[Panneaux]{ObligationToutDroitOuDroite}{\MPBVingtEtUnDUn}{}%
+  \ifboolKV[Panneaux]{B21d2}{\MPBVingtEtUnDDeux}{}%
+  \ifboolKV[Panneaux]{ObligationToutDroitOuGauche}{\MPBVingtEtUnDDeux}{}%
+  \ifboolKV[Panneaux]{B21e}{\MPBVingtEtUnE}{}%
+  \ifboolKV[Panneaux]{ObligationGaucheOuDroite}{\MPBVingtEtUnE}{}%
+  \ifboolKV[Panneaux]{B25}{\MPBVingtCinq[30]}{}%
+  \ifboolKV[Panneaux]{ObligationVitesseMinis}{\MPBVingtCinq[{\useKV[Panneaux]{ObligationVitesseMini}}]}{}%
+  \ifboolKV[Panneaux]{B43}{\MPBQuaranteTrois[30]}{}%
+  \ifboolKV[Panneaux]{FinVitesseMinis}{\MPBVingtCinq[{\useKV[Panneaux]{FinVitesseMini}}]}{}%
+  \ifboolKV[Panneaux]{C12}{\MPCDouze}{}%
+  \ifboolKV[Panneaux]{SensUnique}{\MPCDouze}{}%
+  \ifboolKV[Panneaux]{C13a}{\MPCTreizeA}{}%
+  \ifboolKV[Panneaux]{Impasse}{\MPCTreizeA}{}%
+  \ifboolKV[Panneaux]{C13b}{\MPCTreizeB}{}%
+  \ifboolKV[Panneaux]{ImpasseB}{\MPCTreizeB}{}%
+  \ifboolKV[Panneaux]{C18}{\MPCDixHuit}{}%
+  \ifboolKV[Panneaux]{PrioriteFaceSensInverse}{\MPCDixHuit}{}%
+  \ifboolKV[Panneaux]{C1a}{\MPCUnA}{}%
+  \ifboolKV[Panneaux]{Parking}{\MPCUnA}{}%
+  \ifboolKV[Panneaux]{C27}{\MPCVingtSept}{}%
+  \ifboolKV[Panneaux]{ChausseeSurElevee}{\MPCVingtSept}{}%
+  \ifboolKV[Panneaux]{C4a50}{\MPCQuatreACinquante[50]}{}%
+  \ifboolKV[Panneaux]{VitesseConseillees}{\MPCQuatreACinquante[{\useKV[Panneaux]{VitesseConseillee}}]}{}%
+  \ifboolKV[Panneaux]{C4b50}{\MPCQuatreBCinquante[50]}{}%
+  \ifboolKV[Panneaux]{FinVitesseConseillees}{\MPCQuatreBCinquante[{\useKV[Panneaux]{FinVitesseConseillee}}]}{}%
+}%
+
+\def\MPPanneauCode{%
+  %
+  boolean Impression;
+  Impression=\useKV[Panneaux]{Impression};
+  if Impression:
+  red:=0.5white;
+  Yellow:=0.7white;
+  LightGreen:=0.9white;
+  blue:=0.7white;
+  fi;
+  %
+  vardef MiseEchelle=
+    if \useKV[Panneaux]{Echelle}<>1:
+      picture RetiensPicture;
+      RetiensPicture:=currentpicture;
+      currentpicture:=nullpicture;
+      draw RetiensPicture scaled \useKV[Panneaux]{Echelle};
+      %
+    fi;
+  enddef;
+  %
+  vardef CadrePanneauTri(expr ptaa,ptbb,ptcc,arc)=
+  save $;
+  path $;
+  $=(ptaa+arc*unitvector(ptbb-ptaa))--(ptbb+arc*unitvector(ptaa-ptbb)){dir0}..{dir120}(ptbb+arc*unitvector(ptcc-ptbb))--(ptcc+arc*unitvector(ptbb-ptcc)){dir120}..{dir-120}(ptcc+arc*unitvector(ptaa-ptcc))--(ptaa+arc*unitvector(ptcc-ptaa))..{dir0}cycle;
+  $
+  enddef;
+  %
+  vardef DisqueInterdiction(expr ptaa,ptbb)=
+    save $;
+    picture $;
+    $=image(%
+    path cdinterne;
+    cdinterne=homothetie(cercles(ptaa,ptbb),ptaa,0.7);
+    trace cercles(ptaa,ptbb);
+    fill cercles(ptaa,ptbb) withcolor white;
+    fill homothetie(cercles(ptaa,ptbb),ptaa,0.95) withcolor red;
+    fill cdinterne withcolor white;
+    );
+  $
+  enddef;
+  %
+  vardef DisqueFinInterdiction(expr ptaa,ptbb)=
+    save $;
+    picture $;
+    $=image(%
+    path lisseretinterne;
+    lisseretinterne=homothetie(cercles(ptaa,ptbb),ptaa,0.95);
+    trace cercles(ptaa,ptbb);
+    fill cercles(ptaa,ptbb);
+    fill lisseretinterne withcolor white;
+    trace 0.065[pointarc(lisseretinterne,45),pointarc(lisseretinterne,225)]--0.935[pointarc(lisseretinterne,45),pointarc(lisseretinterne,225)] withpen pensquare rotated 45 scaled 20;
+    );
+  $
+  enddef;
+  % 
+  vardef DisqueObligation(expr ptaa,ptbb)=
+    save $;
+    picture $;
+    $=image(%
+    path cdinterne;
+    cdinterne=homothetie(cercles(ptaa,ptbb),ptaa,0.95);
+    trace cercles(ptaa,ptbb);
+    fill cercles(ptaa,ptbb) withcolor white;
+    fill homothetie(cercles(ptaa,ptbb),ptaa,0.95) withcolor blue;
+    );
+  $
+  enddef;
+  %
+  vardef CadrePanneauPrio(expr ptaa,ptbb,ptcc,ptdd,arc)=
+  save $;
+  path $;
+  $=(ptaa+arc*unitvector(ptbb-ptaa))--(ptbb+arc*unitvector(ptaa-ptbb)){dir0}..{dir90}(ptbb+arc*unitvector(ptcc-ptbb))--(ptcc+arc*unitvector(ptbb-ptcc)){dir90}..{dir180}(ptcc+arc*unitvector(ptdd-ptcc))--(ptdd+arc*unitvector(ptcc-ptdd)){dir180}..{dir-90}(ptdd+arc*unitvector(ptaa-ptdd))--(ptaa+arc*unitvector(ptdd-ptaa))..{dir0}cycle;
+  $
+  enddef;
+  %
+  vardef CadreOcto(expr ptcc,ptaa)=
+  save $;
+  path $;
+  $=pointarc(cercles(ptcc,ptaa),22.5) for k=2 upto 8:--pointarc(cercles(ptcc,ptaa),22.5+(k-1)*45) endfor --cycle;
+  $
+  enddef;
+  %
+  vardef CadreBox(expr Texte)=
+  pair PfMA,PfMB,PfMC,PfMD;
+  bboxmargin:=2pt;
+  PfMA=llcorner bbox Texte;
+  PfMB=lrcorner bbox Texte;
+  PfMC=urcorner bbox Texte;
+  PfMD=ulcorner bbox Texte;
+  save $;
+  path $;
+  $=(PfMA+1mm*unitvector(PfMB-PfMA))--(PfMB+1mm*unitvector(PfMA-PfMB)){dir 0}..{dir90}(PfMB+1mm*unitvector(PfMC-PfMB))--(PfMC+1mm*unitvector(PfMB-PfMC)){dir90}..{dir180}(PfMC+1mm*unitvector(PfMD-PfMC))--(PfMD+1mm*unitvector(PfMC-PfMD)){dir180}..{dir-90}(PfMD+1mm*unitvector(PfMA-PfMD))--(PfMA+1mm*unitvector(PfMD-PfMA))..{dir0}cycle;
+  $
+  enddef;
+  %
+}%
+
+\NewDocumentCommand\MPABUn{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,O,Aa,Bb,Cc,I,J,K;
+    A=(0,0);
+    B-A=u*(5,0);
+    C=rotation(B,A,60);
+    O=iso(A,B,C);
+    Aa=homothetie(A,O,0.9);
+    Bb=homothetie(B,O,0.9);
+    Cc=homothetie(C,O,0.9);
+    I=homothetie(A,O,0.7);
+    J=homothetie(B,O,0.7);
+    K=homothetie(C,O,0.7);
+    trace CadrePanneauTri(A,B,C,5mm);
+    fill CadrePanneauTri(Aa,Bb,Cc,2.5mm) withcolor red;
+    fill polygone(I,J,K) withcolor white;
+    trace ((O+u*(-0.5,0.5))--(O+u*(0.5,-0.5))) shifted (u*(0,-0.1)) withpen (pensquare rotated 45 scaled 8);
+    trace ((O+u*(-0.5,-0.5))--(O+u*(0.5,0.5))) shifted (u*(0,-0.1)) withpen (pensquare rotated 45 scaled 8);
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+
+\NewDocumentCommand\MPABDeux{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,O,Aa,Bb,Cc,I,J,K;
+    A=(0,0);
+    B-A=u*(5,0);
+    C=rotation(B,A,60);
+    O=iso(A,B,C);
+    Aa=homothetie(A,O,0.9);
+    Bb=homothetie(B,O,0.9);
+    Cc=homothetie(C,O,0.9);
+    I=homothetie(A,O,0.7);
+    J=homothetie(B,O,0.7);
+    K=homothetie(C,O,0.7);
+    trace CadrePanneauTri(A,B,C,5mm);
+    fill CadrePanneauTri(Aa,Bb,Cc,2.5mm) withcolor red;
+    fill polygone(I,J,K) withcolor white;
+    O:=O+u*(0,0.25);
+trace ((O+u*(-0.5,0))--(O+u*(0.5,0))) shifted (u*(0,-0.1)) withpen (pensquare scaled 8);
+fill (O+u*(0,1))--(O+u*(-0.25,0.5))--(O+u*(-0.25,-1))--(O+u*(0,-0.9))--(O+u*(0.25,-1))--(O+u*(0.25,0.5))--cycle;
+  MiseEchelle;
+  \end{mplibcode}%
+}%
+
+\NewDocumentCommand\MPABTroisa{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,O,Aa,Bb,Cc,I,J,K;
+    A=(0,0);
+    B-A=u*(5,0);
+    C=rotation(B,A,60);
+    O=iso(A,B,C);
+    Aa=homothetie(A,O,0.9);
+    Bb=homothetie(B,O,0.9);
+    Cc=homothetie(C,O,0.9);
+    I=homothetie(A,O,0.7);
+    J=homothetie(B,O,0.7);
+    K=homothetie(C,O,0.7);
+    trace rotation(CadrePanneauTri(A,B,C,5mm),O,180);
+    fill rotation(CadrePanneauTri(Aa,Bb,Cc,2.5mm),O,180) withcolor red;
+    fill rotation(polygone(I,J,K),O,180) withcolor white;
+    picture Indications;
+    Indications=image(
+    label(TEX("\setlength{\tabcolsep}{0pt}\begin{tabular}{c}CÉDEZ LE\\PASSAGE\\\end{tabular}"),(0,0));
+    );
+    trace Indications shifted(rotation(homothetie(C,O,0.9),O,180)-iso(urcorner Indications,ulcorner Indications)-(0,2pt));
+    trace CadreBox(Indications) shifted(rotation(homothetie(C,O,0.9),O,180)-iso(urcorner Indications,ulcorner Indications)-(0,2pt));
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+
+\NewDocumentCommand\MPABTroisb{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,O,Aa,Bb,Cc,I,J,K;
+    A=(0,0);
+    B-A=u*(5,0);
+    C=rotation(B,A,60);
+    O=iso(A,B,C);
+    Aa=homothetie(A,O,0.9);
+    Bb=homothetie(B,O,0.9);
+    Cc=homothetie(C,O,0.9);
+    I=homothetie(A,O,0.7);
+    J=homothetie(B,O,0.7);
+    K=homothetie(C,O,0.7);
+    trace rotation(CadrePanneauTri(A,B,C,5mm),O,180);
+    fill rotation(CadrePanneauTri(Aa,Bb,Cc,2.5mm),O,180) withcolor red;
+    fill rotation(polygone(I,J,K),O,180) withcolor white;
+    picture Indications;
+    Indications=image(
+    label(TEX("\Lg[m]{150}"),(0,0));
+    );
+    trace Indications shifted(rotation(homothetie(C,O,0.9),O,180)-iso(urcorner Indications,ulcorner Indications)-(0,2pt));
+    trace CadreBox(Indications) shifted(rotation(homothetie(C,O,0.9),O,180)-iso(urcorner Indications,ulcorner Indications)-(0,2pt));
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+
+\NewDocumentCommand\MPABVingtCinq{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,O,Aa,Bb,Cc,I,J,K;
+    A=(0,0);
+    B-A=u*(5,0);
+    C=rotation(B,A,60);
+    O=iso(A,B,C);
+    Aa=homothetie(A,O,0.9);
+    Bb=homothetie(B,O,0.9);
+    Cc=homothetie(C,O,0.9);
+    I=homothetie(A,O,0.7);
+    J=homothetie(B,O,0.7);
+    K=homothetie(C,O,0.7);
+    trace CadrePanneauTri(A,B,C,5mm);
+    fill CadrePanneauTri(Aa,Bb,Cc,2.5mm) withcolor red;
+    fill polygone(I,J,K) withcolor white;
+    drawoptions(withpen pencircle scaled 4);
+    path rond;
+    rond=cercles(O,0.7u);
+    picture branch;
+    branch=image(
+    draw subpath(0.25,2.25) of rond;
+    draw (point(2.25) of rond)--(1/5[point(2.25) of rond,point(7.25) of rond]);
+    draw symetrie((point(2.25) of rond)--(1/5[point(2.25) of rond,point(7.25) of rond]),point(2.25) of rond,(point(2.25) of rond)+u*(1,0));
+    );
+    trace branch;
+    trace rotation(branch,O,120);
+    trace rotation(branch,O,240);
+    drawoptions();
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+
+\NewDocumentCommand\MPABQuatre{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,O,Aa,Bb,Cc,I,J,K;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    Bb=homothetie(B,A,0.9);
+    trace CadreOcto(A,B);
+    fill CadreOcto(A,Bb) withcolor red;
+    drawoptions(withcolor white);
+    label(TEX("\fontsize{40}{40}\selectfont\sffamily\bfseries STOP"),A);
+    drawoptions();
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+
+\NewDocumentCommand\MPABCinq{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,O,Aa,Bb,Cc,I,J,K;
+    A=(0,0);
+    B-A=u*(5,0);
+    C=rotation(B,A,60);
+    O=iso(A,B,C);
+    Aa=homothetie(A,O,0.9);
+    Bb=homothetie(B,O,0.9);
+    Cc=homothetie(C,O,0.9);
+    I=homothetie(A,O,0.7);
+    J=homothetie(B,O,0.7);
+    K=homothetie(C,O,0.7);
+    trace rotation(CadrePanneauTri(A,B,C,5mm),O,180);
+    fill rotation(CadrePanneauTri(Aa,Bb,Cc,2.5mm),O,180) withcolor red;
+    fill rotation(polygone(I,J,K),O,180) withcolor white;
+    picture Indications;
+    Indications=image(
+    label(TEX("\setlength{\tabcolsep}{10pt}\begin{tabular}{c}STOP\\\Lg[m]{150}\\\end{tabular}"),(0,0));
+    );
+    trace Indications shifted(rotation(homothetie(C,O,0.9),O,180)-iso(urcorner Indications,ulcorner Indications)-(0,2pt));
+    trace CadreBox(Indications) shifted(rotation(homothetie(C,O,0.9),O,180)-iso(urcorner Indications,ulcorner Indications)-(0,2pt));
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+
+\NewDocumentCommand\MPABSix{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,D,O,Aa,Bb,Cc,I,J,K,L;
+    A=(0,0);
+    B-A=u*(5,0);
+    D=rotation(B,A,90);
+    C-D=B-A;
+    O=iso(A,B,C,D);
+    I=homothetie(A,O,0.7);
+    J=homothetie(B,O,0.7);
+    K=homothetie(C,O,0.7);
+    L=homothetie(D,O,0.7);
+    trace rotation(CadrePanneauPrio(A,B,C,D,2mm),O,45);
+    fill rotation(polygone(I,J,K,L),O,45) withcolor Yellow;
+    trace rotation(polygone(I,J,K,L),O,45);
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+
+\NewDocumentCommand\MPABSept{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,D,O,Aa,Bb,Cc,I,J,K,L;
+    A=(0,0);
+    B-A=u*(5,0);
+    D=rotation(B,A,90);
+    C-D=B-A;
+    O=iso(A,B,C,D);
+    I=homothetie(A,O,0.7);
+    J=homothetie(B,O,0.7);
+    K=homothetie(C,O,0.7);
+    L=homothetie(D,O,0.7);
+    fill rotation(polygone(I,J,K,L),O,45) withcolor Yellow;
+    trace rotation(iso(A,D)--iso(B,C),O,45) withpen (pensquare rotated 45 scaled 20);
+    clip currentpicture to rotation(polygone(A,B,C,D),O,45);
+    trace rotation(CadrePanneauPrio(A,B,C,D,2mm),O,45);
+    trace rotation(polygone(I,J,K,L),O,45);
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+
+\NewDocumentCommand\MPAUna{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,O,Aa,Bb,Cc,I,J,K;
+    A=(0,0);
+    B-A=u*(5,0);
+    C=rotation(B,A,60);
+    O=iso(A,B,C);
+    Aa=homothetie(A,O,0.9);
+    Bb=homothetie(B,O,0.9);
+    Cc=homothetie(C,O,0.9);
+    I=homothetie(A,O,0.7);
+    J=homothetie(B,O,0.7);
+    K=homothetie(C,O,0.7);
+    trace CadrePanneauTri(A,B,C,5mm);
+    fill CadrePanneauTri(Aa,Bb,Cc,2.5mm) withcolor red;
+    fill polygone(I,J,K) withcolor white;
+    path rond;
+    rond=cercles(O+u*(0.3,-0.1),1u);
+    picture branch;
+    branch=image(
+    drawoptions(withpen pencircle scaled 8);
+    draw reverse(subpath(2,4) of rond);
+    draw (point(4) of rond)--((point(4) of rond)+u*(0,-0.65));
+    drawoptions(withpen pensquare rotated 45 scaled 8 withcolor white);
+    draw ((point(4) of rond)+u*(0,-0.7))--((point(4) of rond)+u*(0,-0.65));
+    drawoptions(withpen ((pensquare rotated 45) scaled 5.75) withcolor black);
+    draw (point(2) of rond)--((point(2) of rond)+u*(0.1,0));
+    drawoptions();
+    );
+    trace branch;
+    drawoptions();
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+
+\NewDocumentCommand\MPAUnb{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,O,Aa,Bb,Cc,I,J,K;
+    A=(0,0);
+    B-A=u*(5,0);
+    C=rotation(B,A,60);
+    O=iso(A,B,C);
+    Aa=homothetie(A,O,0.9);
+    Bb=homothetie(B,O,0.9);
+    Cc=homothetie(C,O,0.9);
+    I=homothetie(A,O,0.7);
+    J=homothetie(B,O,0.7);
+    K=homothetie(C,O,0.7);
+    trace CadrePanneauTri(A,B,C,5mm);
+    fill CadrePanneauTri(Aa,Bb,Cc,2.5mm) withcolor red;
+    fill polygone(I,J,K) withcolor white;
+    path rond;
+    rond=cercles(O+u*(0.3,-0.1),1u);
+    picture branch;
+    branch=image(
+    drawoptions(withpen pencircle scaled 8);
+    draw reverse(subpath(2,4) of rond);
+    draw (point(4) of rond)--((point(4) of rond)+u*(0,-0.65));
+    drawoptions(withpen pensquare rotated 45 scaled 8 withcolor white);
+    draw ((point(4) of rond)+u*(0,-0.7))--((point(4) of rond)+u*(0,-0.65));
+    drawoptions(withpen ((pensquare rotated 45) scaled 5.75) withcolor black);
+    draw (point(2) of rond)--((point(2) of rond)+u*(0.1,0));
+    drawoptions();
+    );
+    trace symetrie(branch,C,iso(A,B));
+    drawoptions();
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+
+\NewDocumentCommand\MPAUnc{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,O,Aa,Bb,Cc,I,J,K;
+    A=(0,0);
+    B-A=u*(5,0);
+    C=rotation(B,A,60);
+    O=iso(A,B,C);
+    Aa=homothetie(A,O,0.9);
+    Bb=homothetie(B,O,0.9);
+    Cc=homothetie(C,O,0.9);
+    I=homothetie(A,O,0.7);
+    J=homothetie(B,O,0.7);
+    K=homothetie(C,O,0.7);
+    trace CadrePanneauTri(A,B,C,5mm);
+    fill CadrePanneauTri(Aa,Bb,Cc,2.5mm) withcolor red;
+    fill polygone(I,J,K) withcolor white;
+    path rond;
+    rond=cercles(O+u*(0.3,-0.1),0.8u);
+    picture branch;
+    branch=image(
+    drawoptions(withpen pencircle scaled 8);
+    draw ((point(4) of rond)+u*(0,0.4))--((point(4) of rond)+u*(0,-0.65));
+    draw ((point(4) of rond)+u*(0,0.4))--((point(4) of rond)+u*(0.8,-0.05));
+    draw ((point(4) of rond)+u*(0.8,-0.05))--((point(4) of rond)+u*(0.8,1.1));
+    drawoptions(withpen pensquare rotated 45 scaled 8 withcolor white);
+    draw ((point(4) of rond)+u*(0,-0.7))--((point(4) of rond)+u*(0,-0.65));
+    drawoptions(withpen ((pensquare rotated 45) scaled 5.7) withcolor black);
+    draw ((point(4) of rond)+u*(0.8,1.185))--((point(4) of rond)+u*(0.8,1.1));
+    drawoptions();
+    );
+    % trace symetrie(branch,C,iso(A,B));
+    trace branch;
+    drawoptions();
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPAUnd{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,O,Aa,Bb,Cc,I,J,K;
+    A=(0,0);
+    B-A=u*(5,0);
+    C=rotation(B,A,60);
+    O=iso(A,B,C);
+    Aa=homothetie(A,O,0.9);
+    Bb=homothetie(B,O,0.9);
+    Cc=homothetie(C,O,0.9);
+    I=homothetie(A,O,0.7);
+    J=homothetie(B,O,0.7);
+    K=homothetie(C,O,0.7);
+    trace CadrePanneauTri(A,B,C,5mm);
+    fill CadrePanneauTri(Aa,Bb,Cc,2.5mm) withcolor red;
+    fill polygone(I,J,K) withcolor white;
+    path rond;
+    rond=cercles(O+u*(0.3,-0.1),0.8u);
+    picture branch;
+    branch=image(
+    drawoptions(withpen pencircle scaled 8);
+    draw ((point(4) of rond)+u*(0,0.4))--((point(4) of rond)+u*(0,-0.65));
+    draw ((point(4) of rond)+u*(0,0.4))--((point(4) of rond)+u*(0.8,-0.05));
+    draw ((point(4) of rond)+u*(0.8,-0.05))--((point(4) of rond)+u*(0.8,1.1));
+    drawoptions(withpen pensquare rotated 45 scaled 8 withcolor white);
+    draw ((point(4) of rond)+u*(0,-0.7))--((point(4) of rond)+u*(0,-0.65));
+    drawoptions(withpen ((pensquare rotated 45) scaled 5.7) withcolor black);
+    draw ((point(4) of rond)+u*(0.8,1.185))--((point(4) of rond)+u*(0.8,1.1));
+    drawoptions();
+    );
+    trace symetrie(branch,C,iso(A,B));
+    drawoptions();
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPADeuxa{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,O,Aa,Bb,Cc,I,J,K;
+    A=(0,0);
+    B-A=u*(5,0);
+    C=rotation(B,A,60);
+    O=iso(A,B,C);
+    Aa=homothetie(A,O,0.9);
+    Bb=homothetie(B,O,0.9);
+    Cc=homothetie(C,O,0.9);
+    I=homothetie(A,O,0.7);
+    J=homothetie(B,O,0.7);
+    K=homothetie(C,O,0.7);
+    trace CadrePanneauTri(A,B,C,5mm);
+    fill CadrePanneauTri(Aa,Bb,Cc,2.5mm) withcolor red;
+    fill polygone(I,J,K) withcolor white;
+    pair M[];
+    M0=O+u*(-1.25,-0.75);
+    M1=O+u*(1.25,-0.75);
+    M2-M1=u*(0,0.3);
+    M3-M2=u*(-0.2,0.125);
+    M4-M3=u*(-0.7,0);
+    M5-M4=M4-M3;
+    M6-M5=M5-M4;
+    M7-M6=u*(-0.2,-0.125);;
+    fill M0--M1--M2{dir180}..{dir120}M3{dir120}..{dir-120}M4{dir-120}..{dir120}M5{dir120}..{dir-120}M6{dir-120}..{dir180}M7--cycle;
+    drawoptions();
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPADeuxb{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,O,Aa,Bb,Cc,I,J,K;
+    A=(0,0);
+    B-A=u*(5,0);
+    C=rotation(B,A,60);
+    O=iso(A,B,C);
+    Aa=homothetie(A,O,0.9);
+    Bb=homothetie(B,O,0.9);
+    Cc=homothetie(C,O,0.9);
+    I=homothetie(A,O,0.7);
+    J=homothetie(B,O,0.7);
+    K=homothetie(C,O,0.7);
+    trace CadrePanneauTri(A,B,C,5mm);
+    fill CadrePanneauTri(Aa,Bb,Cc,2.5mm) withcolor red;
+    fill polygone(I,J,K) withcolor white;
+    pair M[];
+    M0=O+u*(-1.25,-0.75);
+    M1=O+u*(1.25,-0.75);
+    M2-M1=u*(0,0.1);
+    M3-M2=u*(-0.2,0);
+    M4-M3=u*(-1.05,0.5);
+    M5-M4=u*(-1.05,-0.5);;
+    M6-M5=M3-M2;
+    fill M0--M1--M2--M3{dir180}..{dir180}M4{dir180}..{dir-180}M5--M6--cycle;
+    drawoptions();
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+%%%
+\NewDocumentCommand\MPATroisa{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,O,Aa,Bb,Cc,I,J,K;
+    A=(0,0);
+    B-A=u*(5,0);
+    C=rotation(B,A,60);
+    O=iso(A,B,C);
+    Aa=homothetie(A,O,0.9);
+    Bb=homothetie(B,O,0.9);
+    Cc=homothetie(C,O,0.9);
+    I=homothetie(A,O,0.7);
+    J=homothetie(B,O,0.7);
+    K=homothetie(C,O,0.7);
+    trace CadrePanneauTri(A,B,C,5mm);
+    fill CadrePanneauTri(Aa,Bb,Cc,2.5mm) withcolor red;
+    fill polygone(I,J,K) withcolor white;
+    pair M[];
+    M0=O+u*(-0.25,-0.75);
+    M1-M0=u*(0,1.75);
+    M5=O+u*(0.25,1);
+    M4-M5=u*(0,-0.6);
+    M3-M4=u*(0.25,-0.55);
+    M2-M3=u*(0,-0.6);
+    draw M0--M1 withpen pensquare scaled 8;
+    draw M2--0.825[M2,M3] withpen pensquare scaled 8;
+    draw 0.2[M4,M5]--M5 withpen pensquare scaled 8;
+    draw 0.175[M4,M3]--0.175[M3,M4] withpen pensquare rotated angle(M3-M4) scaled 8;
+    drawoptions();
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPATroisb{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,O,Aa,Bb,Cc,I,J,K;
+    A=(0,0);
+    B-A=u*(5,0);
+    C=rotation(B,A,60);
+    O=iso(A,B,C);
+    Aa=homothetie(A,O,0.9);
+    Bb=homothetie(B,O,0.9);
+    Cc=homothetie(C,O,0.9);
+    I=homothetie(A,O,0.7);
+    J=homothetie(B,O,0.7);
+    K=homothetie(C,O,0.7);
+    trace CadrePanneauTri(A,B,C,5mm);
+    fill CadrePanneauTri(Aa,Bb,Cc,2.5mm) withcolor red;
+    fill polygone(I,J,K) withcolor white;
+    pair M[];
+    M0=O+u*(-0.25,-0.75);
+    M1-M0=u*(0,1.75);
+    M5=O+u*(0.25,1);
+    M4-M5=u*(0,-0.6);
+    M3-M4=u*(0.25,-0.55);
+    M2-M3=u*(0,-0.6);
+    draw symetrie(M0--M1,O,iso(A,B)) withpen pensquare scaled 8;
+    draw symetrie(M2--0.825[M2,M3],O,iso(A,B)) withpen pensquare scaled 8;
+    draw symetrie(0.2[M4,M5]--M5,O,iso(A,B)) withpen pensquare scaled 8;
+    draw symetrie(0.175[M4,M3]--0.175[M3,M4],O,iso(A,B)) withpen pensquare rotated (90-angle(M3-M4)) scaled 8;
+    drawoptions();
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPATrois{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,O,Aa,Bb,Cc,I,J,K;
+    A=(0,0);
+    B-A=u*(5,0);
+    C=rotation(B,A,60);
+    O=iso(A,B,C);
+    Aa=homothetie(A,O,0.9);
+    Bb=homothetie(B,O,0.9);
+    Cc=homothetie(C,O,0.9);
+    I=homothetie(A,O,0.7);
+    J=homothetie(B,O,0.7);
+    K=homothetie(C,O,0.7);
+    trace CadrePanneauTri(A,B,C,5mm);
+    fill CadrePanneauTri(Aa,Bb,Cc,2.5mm) withcolor red;
+    fill polygone(I,J,K) withcolor white;
+    pair M[];
+    M0=O+u*(-0.25,-0.75);
+    M1-M0=u*(0,1.75);
+    M5=O+u*(0.25,1);
+    M4-M5=u*(0,-0.6);
+    M3-M4=u*(0.25,-0.55);
+    M2-M3=u*(0,-0.6);
+    %draw symetrie(M0--M1,O,iso(A,B)) withpen pensquare scaled 8;
+    draw symetrie(M2--0.825[M2,M3],O,iso(A,B)) withpen pensquare scaled 8;
+    draw symetrie(0.2[M4,M5]--M5,O,iso(A,B)) withpen pensquare scaled 8;
+    draw symetrie(0.175[M4,M3]--0.175[M3,M4],O,iso(A,B)) withpen pensquare rotated (90-angle(M3-M4)) scaled 8;
+    draw M2--0.825[M2,M3] withpen pensquare scaled 8;
+    draw 0.2[M4,M5]--M5 withpen pensquare scaled 8;
+    draw 0.175[M4,M3]--0.175[M3,M4] withpen pensquare rotated angle(M3-M4) scaled 8;
+    drawoptions();
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+
+\NewDocumentCommand\MPAQuatorze{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,O,Aa,Bb,Cc,I,J,K;
+    A=(0,0);
+    B-A=u*(5,0);
+    C=rotation(B,A,60);
+    O=iso(A,B,C);
+    Aa=homothetie(A,O,0.9);
+    Bb=homothetie(B,O,0.9);
+    Cc=homothetie(C,O,0.9);
+    I=homothetie(A,O,0.7);
+    J=homothetie(B,O,0.7);
+    K=homothetie(C,O,0.7);
+    trace CadrePanneauTri(A,B,C,5mm);
+    fill CadrePanneauTri(Aa,Bb,Cc,2.5mm) withcolor red;
+    fill polygone(I,J,K) withcolor white;
+    label(TEX("\fontsize{90}{90}\selectfont\bfseries !"),O+u*(0,0.25));
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPASeize{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,O,Aa,Bb,Cc,I,J,K,L,M,N,H;
+    A=(0,0);
+    B-A=u*(5,0);
+    C=rotation(B,A,60);
+    O=iso(A,B,C);
+    Aa=homothetie(A,O,0.9);
+    Bb=homothetie(B,O,0.9);
+    Cc=homothetie(C,O,0.9);
+    I=homothetie(A,O,0.7);
+    J=homothetie(B,O,0.7);
+    K=homothetie(C,O,0.7);
+    L=homothetie(A,O,0.68);
+    N=homothetie(B,O,0.68);
+    M=homothetie(C,O,0.68);
+    H=0.75[L,projection(N,L,M)];
+    trace CadrePanneauTri(A,B,C,5mm);
+    fill CadrePanneauTri(Aa,Bb,Cc,2.5mm) withcolor red;
+    fill polygone(I,J,K) withcolor white;
+    fill polygone(L,H,N);
+    drawoptions(withcolor white);
+    labeloffset:=0pt;
+    label.bot(TEX("\Large\bfseries \SI{10}{\percent}") rotated angle(N-H),1/6[H,N]);
+    drawoptions();
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPADixSept{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,O,Aa,Bb,Cc,I,J,K,L,M,N,H;
+    A=(0,0);
+    B-A=u*(5,0);
+    C=rotation(B,A,60);
+    O=iso(A,B,C);
+    Aa=homothetie(A,O,0.9);
+    Bb=homothetie(B,O,0.9);
+    Cc=homothetie(C,O,0.9);
+    I=homothetie(A,O,0.7);
+    J=homothetie(B,O,0.7);
+    K=homothetie(C,O,0.7);
+    trace CadrePanneauTri(A,B,C,5mm);
+    fill CadrePanneauTri(Aa,Bb,Cc,2.5mm) withcolor red;
+    fill polygone(I,J,K) withcolor white;
+    drawoptions(withpen pencircle scaled 18);
+    draw (O+u*(0,-0.45))--(O+u*(0,0.95));
+    drawoptions();
+    fill (fullcircle scaled 15) shifted(O+u*(0,-0.375)) withcolor LightGreen;
+    fill (fullcircle scaled 15) shifted(O+u*(0,0.25)) withcolor Yellow;
+    fill (fullcircle scaled 15) shifted(O+u*(0,0.875)) withcolor red;
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+%
+\NewDocumentCommand\MPADixHuit{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,O,Aa,Bb,Cc,I,J,K,L,M,N,P;
+    A=(0,0);
+    B-A=u*(5,0);
+    C=rotation(B,A,60);
+    O=iso(A,B,C);
+    Aa=homothetie(A,O,0.9);
+    Bb=homothetie(B,O,0.9);
+    Cc=homothetie(C,O,0.9);
+    I=homothetie(A,O,0.7);
+    J=homothetie(B,O,0.7);
+    K=homothetie(C,O,0.7);
+    L=homothetie(A,O,0.15);
+    M=homothetie(B,O,0.15);
+    N=homothetie(C,O,0.15);
+    trace CadrePanneauTri(A,B,C,5mm);
+    fill CadrePanneauTri(Aa,Bb,Cc,2.5mm) withcolor red;
+    fill polygone(I,J,K) withcolor white;
+    pair M[];
+%    M0=O+u*(-0.35,-0.5);
+%    M1-M0=u*(0,1);
+    M5=O+u*(0.35,0.6);
+    % M4-M5=M0-M1;
+    M4-M5=u*(0,-1.2);
+    picture fleche;
+    fleche=image(
+    draw M4--M5 withpen pensquare scaled 8;
+    fill polygone(L,M,N) shifted(M5-O);
+    );
+    P=O+(0,(abs(ulcorner fleche-(xpart(ulcorner fleche),ypart(O)))-abs(llcorner fleche-(xpart(llcorner fleche),ypart(O))))/2);
+    draw fleche;
+    draw symetrie(fleche,P);
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+%
+\NewDocumentCommand\MPBZero{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueInterdiction(A,B);
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBOnze{O{2.5}}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueInterdiction(A,B);
+    fill arccercle(pointarc(cdinterne,170),pointarc(cdinterne,190),A)--(pointarc(cdinterne,180)+u*(0.35,0))--cycle;
+    fill arccercle(pointarc(cdinterne,350),pointarc(cdinterne,10),A)--(pointarc(cdinterne,0)+u*(-0.35,0))--cycle;
+    label(TEX("\sffamily\bfseries\fontsize{40}{40}\selectfont\num{#1}\si{\meter}"),A);
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBDouze{O{3.5}}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueInterdiction(A,B);
+    fill arccercle(pointarc(cdinterne,80),pointarc(cdinterne,100),A)--(pointarc(cdinterne,90)+u*(0,-0.35))--cycle;
+    fill arccercle(pointarc(cdinterne,260),pointarc(cdinterne,280),A)--(pointarc(cdinterne,270)+u*(0,0.35))--cycle;
+    label(TEX("\sffamily\bfseries\fontsize{40}{40}\selectfont\num{#1}\si{\meter}"),A);
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBTreize{O{5.5}}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueInterdiction(A,B);
+    label(TEX("\sffamily\bfseries\fontsize{40}{40}\selectfont\num{#1}\si{\tonne}"),A);
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBQuatorze{O{90}}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueInterdiction(A,B);
+    label(TEX("\sffamily\bfseries\fontsize{60}{60}\selectfont\num{#1}"),A);
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBQuinze{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueInterdiction(A,B);
+    pair M[],P,L,O,N;
+    L=homothetie(pointarc(cdinterne,210),A,sqrt(3)/5);
+    O=homothetie(pointarc(cdinterne,330),A,sqrt(3)/5);
+    N=homothetie(pointarc(cdinterne,90),A,sqrt(3)/5);
+    M5=A+u*(0.65,0.6);
+    % M4-M5=M0-M1;
+    M4-M5=u*(0,-1.4);
+    picture fleche;
+    fleche=image(
+    draw M4--M5 withpen pensquare scaled 12;
+    fill polygone(L,O,N) shifted(M5-A);
+    );
+    P=A+(0,(abs(ulcorner fleche-(xpart(ulcorner fleche),ypart(A)))-abs(llcorner fleche-(xpart(llcorner fleche),ypart(A))))/2);
+    draw fleche;
+    draw symetrie(fleche,P) xscaled 0.75 withcolor red;
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBSeize{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueInterdiction(A,B);
+    pair M[];
+    M0=A+u*(1.15,0);
+    M1-M0=u*(0,0.375);
+    M2-M1=u*(-0.125,0);
+    M3-A=u*(-1.15,0.75);
+    M4-A=u*(-1.15,0);
+    path klaxon[];
+    klaxon1=M0--M1--M2{dir-135}..{dir135}M3--M4;
+    klaxon2=klaxon1--symetrie(reverse(klaxon1),A,M0)--cycle;
+    fill klaxon2;
+    trace pointarc(cdinterne,135)--pointarc(cdinterne,315) withpen pensquare scaled 8 withcolor red;
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBUn{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueInterdiction(A,B);
+    fill cdinterne withcolor red;
+    trace cdinterne withpen pencircle scaled 2 withcolor red;
+    draw (A+u*(-1.15,0))--(A+u*(1.15,0))  withpen pensquare scaled 20 withcolor white;
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBDeuxa{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueInterdiction(A,B);
+    pair M[],L,O,N;
+    L=homothetie(pointarc(cdinterne,210),A,sqrt(3)/8);
+    O=homothetie(pointarc(cdinterne,330),A,sqrt(3)/8);
+    N=homothetie(pointarc(cdinterne,90),A,sqrt(3)/8);
+    M0-A=u*(0.5,-1.15);
+    M1-A=u*(0.5,-0.1);
+    M2-A=u*(0,0.4);
+    M3-A=u*(-1,0.4);
+    trace M0--M1{dir90}..{dir180}M2--M3 withpen pencircle scaled 10;
+    trace (M0+u*(0,-0.01))--(M0+u*(0,0.2)) withpen pensquare scaled 10;
+    fill rotation(polygone(L,N,O),A,90) shifted (M3-rotation(iso(L,O),A,90));
+    trace pointarc(cdinterne,135)--pointarc(cdinterne,315) withpen pensquare scaled 8 withcolor red;
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBDeuxb{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueInterdiction(A,B);
+    pair M[],L,O,N;
+    L=homothetie(pointarc(cdinterne,210),A,sqrt(3)/8);
+    O=homothetie(pointarc(cdinterne,330),A,sqrt(3)/8);
+    N=homothetie(pointarc(cdinterne,90),A,sqrt(3)/8);
+    M0-A=u*(0.5,-1.15);
+    M1-A=u*(0.5,-0.1);
+    M2-A=u*(0,0.4);
+    M3-A=u*(-1,0.4);
+    picture Tournergroute;
+    Tournergroute=image(
+    trace M0--M1{dir90}..{dir180}M2--M3 withpen pencircle scaled 10;
+    trace (M0+u*(0,-0.01))--(M0+u*(0,0.2)) withpen pensquare scaled 10;
+    fill rotation(polygone(L,N,O),A,90) shifted (M3-rotation(iso(L,O),A,90));
+    );
+    trace symetrie(Tournergroute,A,A+u*(0,1));
+    trace pointarc(cdinterne,135)--pointarc(cdinterne,315) withpen pensquare scaled 8 withcolor red;
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBDeuxc{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueInterdiction(A,B);
+    pair M[],L,O,N;
+    L=homothetie(pointarc(cdinterne,210),A,sqrt(3)/8);
+    O=homothetie(pointarc(cdinterne,330),A,sqrt(3)/8);
+    N=homothetie(pointarc(cdinterne,90),A,sqrt(3)/8);
+    M0-A=u*(0.65,-1.15);
+    M1-A=u*(0.65,0.55);
+    M2-A=u*(-0.65,0.55);
+    M3-A=u*(-0.65,-0.35);
+    trace M0--M1{dir90}..{dir-90}M2--M3 withpen pencircle scaled 10;
+    trace (M0+u*(0,-0.01))--(M0+u*(0,0.2)) withpen pensquare scaled 10;
+    fill rotation(polygone(L,N,O),A,180) shifted (M3-rotation(iso(L,O),A,180));
+    trace pointarc(cdinterne,135)--pointarc(cdinterne,315) withpen pensquare scaled 8 withcolor red;
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBTroisUn{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueFinInterdiction(A,B);
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBTrenteTrois{O{90}}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueFinInterdiction(A,B);
+    picture Vitesse;
+    Vitesse=image(
+      label(TEX("\sffamily\bfseries\fontsize{80}{80}\selectfont\num{#1}"),A);
+      );
+    bboxmargin:=10;
+    pair M[];
+    M0=droite(urcorner bbox Vitesse,ulcorner bbox Vitesse) intersectionpoint lisseretinterne;
+    M1=symetrie(M0,A,B);
+    M3=symetrie(M1,A);
+    M2=symetrie(M0,A);
+    fill polygone(M0,M1,M2,M3) withcolor white;
+    trace Vitesse;
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBTrenteCinq{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueFinInterdiction(A,B);
+    pair M[];
+    M0=A+u*(1.15,0);
+    M1-M0=u*(0,0.375);
+    M2-M1=u*(-0.125,0);
+    M3-A=u*(-1.15,0.75);
+    M4-A=u*(-1.15,0);
+    path klaxon[];
+    klaxon1=M0--M1--M2{dir-135}..{dir135}M3--M4;
+    klaxon2=klaxon1--symetrie(reverse(klaxon1),A,M0)--cycle;
+    picture BlocKlaxon;
+    BlocKlaxon=image(
+    fill klaxon2;
+    );
+    bboxmargin:=10;
+    pair M[];
+    M0=droite(urcorner bbox BlocKlaxon,ulcorner bbox BlocKlaxon) intersectionpoint lisseretinterne;
+    M1=symetrie(M0,A,B);
+    M3=symetrie(M1,A);
+    M2=symetrie(M0,A);
+    fill polygone(M0,M1,M2,M3) withcolor white;
+    trace BlocKlaxon;
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBSixAUn{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueInterdiction(A,B);
+    fill cdinterne withcolor blue;
+    trace cdinterne withcolor blue;
+    trace pointarc(cdinterne,135)--pointarc(cdinterne,315) withpen pensquare scaled 8 withcolor red;
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBSixADeux{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueInterdiction(A,B);
+    fill cdinterne withcolor blue;
+    trace cdinterne withcolor blue;
+    trace pointarc(cdinterne,135)--pointarc(cdinterne,315) withpen pensquare scaled 8 withcolor red;
+    drawoptions(withcolor white);
+    label(TEX("\sffamily\bfseries\fontsize{22}{22}\selectfont1.15"),A+u*(0.5,0.85));
+    drawoptions();
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBSixATrois{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueInterdiction(A,B);
+    fill cdinterne withcolor blue;
+    trace cdinterne withcolor blue;
+    trace pointarc(cdinterne,135)--pointarc(cdinterne,315) withpen pensquare scaled 8 withcolor red;
+    drawoptions(withcolor white);
+    label(TEX("\sffamily\bfseries\fontsize{22}{22}\selectfont16.31"),A+u*(-0.5,-0.85));
+    drawoptions();
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBSixD{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueInterdiction(A,B);
+    fill cdinterne withcolor blue;
+    trace cdinterne withcolor blue;
+    trace pointarc(cdinterne,135)--pointarc(cdinterne,315) withpen pensquare scaled 8 withcolor red;
+    trace pointarc(cdinterne,45)--pointarc(cdinterne,225) withpen pensquare scaled 8 withcolor red;
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBVingtEtUnUn{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueObligation(A,B);
+    pair M[];
+    M0-A=u*(-1.5,0);
+    M1-A=u*(1.15,0);
+    M2-(M1+u*(0.45,0))=u*(-0.85,0.85);
+    M3-(M1+u*(0.45,0))=u*(-0.85,-0.85);
+    trace M1--M0 withpen pensquare scaled 12 withcolor white;
+    trace M2--(M1+u*(0.45,0)) withpen pensquare rotated(90+angle(M2-(M1+u*(0.45,0)))) scaled 10 withcolor white;
+    trace M3--(M1+u*(0.45,0)) withpen pensquare rotated(angle((M1+u*(0.45,0))-M3)) scaled 10 withcolor white;
+    trace (M3+u*(-0.125,-0.125))--(M3+u*(-0.125,-0.12)) withpen pensquare scaled 7 withcolor white;
+    trace symetrie((M3+u*(-0.125,-0.125))--(M3+u*(-0.125,-0.12)),A,B) withpen pensquare scaled 7 withcolor white;
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBVingtEtUnDeux{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueObligation(A,B);
+    pair M[];
+    M0-A=u*(-1.5,0);
+    M1-A=u*(1.15,0);
+    M2-(M1+u*(0.45,0))=u*(-0.85,0.85);
+    M3-(M1+u*(0.45,0))=u*(-0.85,-0.85);
+    picture fleche;
+    fleche=image(
+    trace M1--M0 withpen pensquare scaled 12 withcolor white;
+    trace M2--(M1+u*(0.45,0)) withpen pensquare rotated(90+angle(M2-(M1+u*(0.45,0)))) scaled 10 withcolor white;
+    trace M3--(M1+u*(0.45,0)) withpen pensquare rotated(angle((M1+u*(0.45,0))-M3)) scaled 10 withcolor white;
+    trace (M3+u*(-0.125,-0.125))--(M3+u*(-0.125,-0.12)) withpen pensquare scaled 7 withcolor white;
+    trace symetrie((M3+u*(-0.125,-0.125))--(M3+u*(-0.125,-0.12)),A,B) withpen pensquare scaled 7 withcolor white;
+    );
+    trace rotation(fleche,A,180);
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBVingtEtUnAUn{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueObligation(A,B);
+    pair M[];
+    M0-A=u*(-1.5,0);
+    M1-A=u*(1.15,0);
+    M2-(M1+u*(0.45,0))=u*(-0.85,0.85);
+    M3-(M1+u*(0.45,0))=u*(-0.85,-0.85);
+    picture fleche;
+    fleche=image(
+    trace M1--M0 withpen pensquare scaled 12 withcolor white;
+    trace M2--(M1+u*(0.45,0)) withpen pensquare rotated(90+angle(M2-(M1+u*(0.45,0)))) scaled 10 withcolor white;
+    trace M3--(M1+u*(0.45,0)) withpen pensquare rotated(angle((M1+u*(0.45,0))-M3)) scaled 10 withcolor white;
+    trace (M3+u*(-0.125,-0.125))--(M3+u*(-0.125,-0.12)) withpen pensquare scaled 7 withcolor white;
+    trace symetrie((M3+u*(-0.125,-0.125))--(M3+u*(-0.125,-0.12)),A,B) withpen pensquare scaled 7 withcolor white;
+    );
+    trace rotation(fleche,A,-45);
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBVingtEtUnADeux{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueObligation(A,B);
+    pair M[];
+    M0-A=u*(-1.5,0);
+    M1-A=u*(1.15,0);
+    M2-(M1+u*(0.45,0))=u*(-0.85,0.85);
+    M3-(M1+u*(0.45,0))=u*(-0.85,-0.85);
+    picture fleche;
+    fleche=image(
+    trace M1--M0 withpen pensquare scaled 12 withcolor white;
+    trace M2--(M1+u*(0.45,0)) withpen pensquare rotated(90+angle(M2-(M1+u*(0.45,0)))) scaled 10 withcolor white;
+    trace M3--(M1+u*(0.45,0)) withpen pensquare rotated(angle((M1+u*(0.45,0))-M3)) scaled 10 withcolor white;
+    trace (M3+u*(-0.125,-0.125))--(M3+u*(-0.125,-0.12)) withpen pensquare scaled 7 withcolor white;
+    trace symetrie((M3+u*(-0.125,-0.125))--(M3+u*(-0.125,-0.12)),A,B) withpen pensquare scaled 7 withcolor white;
+    );
+    trace rotation(fleche,A,-135);
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBVingtEtUnB{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueObligation(A,B);
+    pair M[];
+    M0-A=u*(-1.5,0);
+    M1-A=u*(1.15,0);
+    M2-(M1+u*(0.45,0))=u*(-0.85,0.85);
+    M3-(M1+u*(0.45,0))=u*(-0.85,-0.85);
+    picture fleche;
+    fleche=image(
+    trace M1--M0 withpen pensquare scaled 12 withcolor white;
+    trace M2--(M1+u*(0.45,0)) withpen pensquare rotated(90+angle(M2-(M1+u*(0.45,0)))) scaled 10 withcolor white;
+    trace M3--(M1+u*(0.45,0)) withpen pensquare rotated(angle((M1+u*(0.45,0))-M3)) scaled 10 withcolor white;
+    trace (M3+u*(-0.125,-0.125))--(M3+u*(-0.125,-0.12)) withpen pensquare scaled 7 withcolor white;
+    trace symetrie((M3+u*(-0.125,-0.125))--(M3+u*(-0.125,-0.12)),A,B) withpen pensquare scaled 7 withcolor white;
+    );
+    trace rotation(fleche,A,90);
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBVingtEtUnCUn{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueObligation(A,B);
+    pair M[];
+    M0-A=u*(1,-1.15);
+    M1-A=u*(1,-0.25);
+    M2-A=u*(-0.25,0.75);
+    M3-A=u*(-0.75,0.75);
+    M4-M3=u*(0.5,0.65);
+    picture fleche;
+    fleche=image(
+    drawoptions(withcolor white);
+    trace M0--M1{dir90}..{dir180}M2--M3 withpen pencircle scaled 10;
+    trace (M0+u*(0,-0.01))--(M0+u*(0,0.2)) withpen pensquare scaled 10;
+    trace 0.05[M3,M4]--M4 withpen pensquare rotated(angle(M4-M3)) scaled 10;
+    trace symetrie(0.05[M3,M4]--M4,M3,M2) withpen pensquare rotated(-angle(M4-M3)) scaled 10;
+    drawoptions();
+    );
+    trace symetrie(fleche,A,A+u*(0,1));
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBVingtEtUnCDeux{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueObligation(A,B);
+    pair M[];
+    M0-A=u*(1,-1.15);
+    M1-A=u*(1,-0.25);
+    M2-A=u*(-0.25,0.75);
+    M3-A=u*(-0.75,0.75);
+    M4-M3=u*(0.5,0.65);
+    drawoptions(withcolor white);
+    trace M0--M1{dir90}..{dir180}M2--M3 withpen pencircle scaled 10;
+    trace (M0+u*(0,-0.01))--(M0+u*(0,0.2)) withpen pensquare scaled 10;
+    trace 0.05[M3,M4]--M4 withpen pensquare rotated(angle(M4-M3)) scaled 10;
+    trace symetrie(0.05[M3,M4]--M4,M3,M2) withpen pensquare rotated(-angle(M4-M3)) scaled 10;
+    drawoptions();
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBVingtEtUnDUn{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueObligation(A,B);
+    pair M[];
+    M0-A=u*(0.5,-1.75);
+    M1-M0=u*(0,0.75);
+    M2-M1=u*(-0.75,0.5);
+    M3-M2=u*(-1.25,0);
+    M4-M3=u*(0.5,0.65);
+    M5-M0=u*(0,3.25);
+    M6-M5=u*(0.65,-0.5);
+    picture fleche;
+    fleche=image(
+    drawoptions(withcolor white);
+    trace M0--M1{dir90}..{dir180}M2--M3 withpen pencircle scaled 9.75;
+    trace (M0+u*(0,-0.01))--(M0+u*(0,0.2)) withpen pensquare scaled 10;
+    trace 0.05[M3,M4]--M4 withpen pensquare rotated(angle(M4-M3)) scaled 10;
+    trace symetrie(0.05[M3,M4]--M4,M3,M2) withpen pensquare rotated(-angle(M4-M3)) scaled 10;
+    % direct
+    trace M0--M5 withpen pencircle scaled 10;
+    trace 0.05[M5,M6]--M6 withpen pensquare rotated(angle(M6-M5)) scaled 10;
+    trace symetrie(0.05[M5,M6]--M6,M0,M5) withpen pensquare rotated(-angle(M6-M5)) scaled 10;
+    drawoptions();
+    );
+    trace symetrie(fleche,A,A+u*(0,1));
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBVingtEtUnDDeux{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueObligation(A,B);
+    pair M[];
+    M0-A=u*(0.5,-1.75);
+    M1-M0=u*(0,0.75);
+    M2-M1=u*(-0.75,0.5);
+    M3-M2=u*(-1.25,0);
+    M4-M3=u*(0.5,0.65);
+    M5-M0=u*(0,3.25);
+    M6-M5=u*(0.65,-0.5);
+    picture fleche;
+    fleche=image(
+    drawoptions(withcolor white);
+    trace M0--M1{dir90}..{dir180}M2--M3 withpen pencircle scaled 9.75;
+    trace (M0+u*(0,-0.01))--(M0+u*(0,0.2)) withpen pensquare scaled 10;
+    trace 0.05[M3,M4]--M4 withpen pensquare rotated(angle(M4-M3)) scaled 10;
+    trace symetrie(0.05[M3,M4]--M4,M3,M2) withpen pensquare rotated(-angle(M4-M3)) scaled 10;
+    % direct
+    trace M0--M5 withpen pencircle scaled 10;
+    trace 0.05[M5,M6]--M6 withpen pensquare rotated(angle(M6-M5)) scaled 10;
+    trace symetrie(0.05[M5,M6]--M6,M0,M5) withpen pensquare rotated(-angle(M6-M5)) scaled 10;
+    drawoptions();
+    );
+    trace fleche;
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBVingtEtUnE{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueObligation(A,B);
+    pair M[];
+    M0-A=u*(0,-1.75);
+    M1-M0=u*(0,1.5);
+    M2-M1=u*(-0.5,0.5);
+    M3-M2=u*(-1.25,0);
+    M4-M3=u*(0.5,0.65);
+    % M5-M0=u*(0,3.25);
+    % M6-M5=u*(0.65,-0.5);
+    drawoptions(withcolor white);
+    trace M0--M1 withpen pencircle scaled 10;
+    trace (M0+u*(0,-0.01))--(M0+u*(0,0.2)) withpen pensquare scaled 10;
+    picture fleche;
+    fleche=image(
+      trace M1{dir90}..{dir180}M2--M3 withpen pencircle scaled 9.75;
+      trace 0.05[M3,M4]--M4 withpen pensquare rotated(angle(M4-M3)) scaled 10;
+      trace symetrie(0.05[M3,M4]--M4,M3,M2) withpen pensquare rotated(-angle(M4-M3)) scaled 10;
+    );
+    trace fleche;
+    trace symetrie(fleche,A,A+(0,1));
+    drawoptions();
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBVingtCinq{O{30}}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueObligation(A,B);
+    drawoptions(withcolor white);
+    picture Vitesse;
+    Vitesse=image(
+      label(TEX("\sffamily\bfseries\fontsize{80}{80}\selectfont\num{#1}"),A);
+    );
+    draw Vitesse;
+    drawoptions();
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPBQuaranteTrois{O{30}}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B;
+    A=(0,0);
+    B-A=u*(2.5,0);
+    trace DisqueObligation(A,B);
+    drawoptions(withcolor white);
+    picture Vitesse;
+    Vitesse=image(
+      label(TEX("\sffamily\bfseries\fontsize{80}{80}\selectfont\num{#1}"),A);
+    );
+    draw Vitesse;
+    drawoptions();
+    draw 0.0375[pointarc(cdinterne,45),pointarc(cdinterne,225)]--0.9625[pointarc(cdinterne,45),pointarc(cdinterne,225)] withpen pensquare scaled 10 rotated 45 withcolor red;
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+%
+\NewDocumentCommand\MPCDouze{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,D,O,Aa,Bb,Cc,I,J,K,L;
+    A=(0,0);
+    B-A=u*(5,0);
+    D=rotation(B,A,90);
+    C-D=B-A;
+    O=iso(A,B,C,D);
+    I=homothetie(A,O,0.9);
+    J=homothetie(B,O,0.9);
+    K=homothetie(C,O,0.9);
+    L=homothetie(D,O,0.9);
+    trace CadrePanneauPrio(A,B,C,D,2mm);
+    fill polygone(I,J,K,L) withcolor blue;
+    pair M[];
+    M0-O=u*(0,-2);
+    M1-M0=u*(-0.75,0);
+    M2-M1=u*(0,2.25);
+    M3-M2=u*(-1,-0.125);
+    M4-O=u*(0,2);
+    path Fleche;
+    Fleche=M0--M1--M2--M3--M4--symetrie(reverse(M0--M1--M2--M3--M4),M0,M4)--cycle;
+    fill Fleche withcolor white;
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+%
+\NewDocumentCommand\MPCTreizeA{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,D,O,Aa,Bb,Cc,I,J,K,L;
+    A=(0,0);
+    B-A=u*(5,0);
+    D=rotation(B,A,90);
+    C-D=B-A;
+    O=iso(A,B,C,D);
+    I=homothetie(A,O,0.9);
+    J=homothetie(B,O,0.9);
+    K=homothetie(C,O,0.9);
+    L=homothetie(D,O,0.9);
+    trace CadrePanneauPrio(A,B,C,D,2mm);
+    fill polygone(I,J,K,L) withcolor blue;
+    pair M[];
+    M0-O=u*(0,-2);
+    M1-M0=u*(-0.25,0);
+    M2-M1=u*(0,2.75);
+    M3-M2=u*(-0.5,0);
+    M4-M3=u*(0,1);
+    M5=(xpart(O),ypart(M4));
+    M6=symetrie(M4,O,M5);
+    M7=symetrie(M3,O,M5);
+    path Fleche;
+    Fleche=M0--M1--M2--M3--M4--M5--symetrie(reverse(M0--M1--M2--M3--M4--M5),M0,M5)--cycle;
+    fill Fleche withcolor white;
+    fill homothetie(polygone(M3,M4,M6,M7),iso(M3,M4,M6,M7),0.9) withcolor red;
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+%
+\NewDocumentCommand\MPCTreizeB{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,D,O,Aa,Bb,Cc,I,J,K,L;
+    A=(0,0);
+    B-A=u*(5,0);
+    D=rotation(B,A,90);
+    C-D=B-A;
+    O=iso(A,B,C,D);
+    I=homothetie(A,O,0.9);
+    J=homothetie(B,O,0.9);
+    K=homothetie(C,O,0.9);
+    L=homothetie(D,O,0.9);
+    trace CadrePanneauPrio(A,B,C,D,2mm);
+    fill polygone(I,J,K,L) withcolor blue;
+    pair M[];
+    M0-O=u*(0,-1.75);
+    M1-M0=u*(-0.25,0);
+    M2-M1=u*(0,2.75);
+    M3-M2=u*(-0.5,0);
+    M4-M3=u*(0,1);
+    M5=(xpart(O),ypart(M4));
+    M6=symetrie(M4,O,M5);
+    M7=symetrie(M3,O,M5);
+    M8-O=u*(-1.5,-1.75);
+    M9-M8=u*(0,3.5);
+    picture Titi;
+    Titi=image(
+    path Fleche;
+    Fleche=M0--M1--M2--M3--M4--M5--symetrie(reverse(M0--M1--M2--M3--M4--M5),M0,M5)--cycle;
+    fill Fleche withcolor white;
+    fill homothetie(polygone(M3,M4,M6,M7),iso(M3,M4,M6,M7),0.9) withcolor red;
+    );
+    draw rotation(Titi,O,-90);
+    draw M8--M9 withpen pensquare scaled 15 withcolor white;
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPCDixHuit{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,D,O,Aa,Bb,Cc,I,J,K,L;
+    A=(0,0);
+    B-A=u*(5,0);
+    D=rotation(B,A,90);
+    C-D=B-A;
+    O=iso(A,B,C,D);
+    I=homothetie(A,O,0.9);
+    J=homothetie(B,O,0.9);
+    K=homothetie(C,O,0.9);
+    L=homothetie(D,O,0.9);
+    trace CadrePanneauPrio(A,B,C,D,2mm);
+    fill polygone(I,J,K,L) withcolor blue;
+    pair M[];
+    Aa-O=u*(0.75,0);
+    Bb-O=u*(-1.25,0);
+    M0-Aa=u*(0,-2);
+    M1-M0=u*(-0.5,0);
+    M2-M1=u*(0,2.25);
+    M3-M2=u*(-0.5,0);
+    M4-Aa=u*(0,2);
+    M5-Bb=u*(0,-2);
+    M6-M5=u*(-0.25,0);
+    M7-M6=u*(0,2.75);
+    M8-M7=u*(-0.25,0);
+    M9-Bb=u*(0,2);
+    path Fleche,FlecheR;
+    Fleche=M0--M1--M2--M3--M4--symetrie(reverse(M0--M1--M2--M3--M4),M0,M4)--cycle;
+    FlecheR=M5--M6--M7--M8--M9--symetrie(reverse(M5--M6--M7--M8--M9),M5,M9)--cycle;
+    fill Fleche withcolor white;
+    trace Fleche withpen pencircle scaled 3 withcolor white;
+    fill symetrie(FlecheR,Bb) withcolor red;
+    trace symetrie(FlecheR,Bb) withpen pencircle scaled 3 withcolor red;
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPCUnA{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,D,O,Aa,Bb,Cc,I,J,K,L;
+    A=(0,0);
+    B-A=u*(5,0);
+    D=rotation(B,A,90);
+    C-D=B-A;
+    O=iso(A,B,C,D);
+    I=homothetie(A,O,0.9);
+    J=homothetie(B,O,0.9);
+    K=homothetie(C,O,0.9);
+    L=homothetie(D,O,0.9);
+    trace CadrePanneauPrio(A,B,C,D,2mm);
+    fill polygone(I,J,K,L) withcolor blue;
+    drawoptions(withcolor white);
+    label(TEX("\bfseries\sffamily\fontsize{150}{150}\selectfont P"),O);
+    drawoptions();
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPCVingtSept{}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,D,O,Aa,Bb,Cc,I,J,K,L;
+    A=(0,0);
+    B-A=u*(5,0);
+    D=rotation(B,A,90);
+    C-D=B-A;
+    O=iso(A,B,C,D);
+    I=homothetie(A,O,0.9);
+    J=homothetie(B,O,0.9);
+    K=homothetie(C,O,0.9);
+    L=homothetie(D,O,0.9);
+    trace CadrePanneauPrio(A,B,C,D,2mm);
+    fill polygone(I,J,K,L) withcolor blue;
+    drawoptions(withcolor white);
+    Aa=A+u*(0.5,0.75);%pointarc(cercles(O,2u),210);
+    Bb=B+u*(-0.5,0.75);%pointarc(cercles(O,2u),330);
+    Cc=rotation(Bb,Aa,60);%pointarc(cercles(O,2u),90);
+    fill polygone(Aa,Bb,Cc) withcolor white;
+    drawoptions();
+    pair M[];
+    M0=O+u*(-1.25,-1.5);
+    M1=O+u*(1.25,-1.5);
+    M2-M1=u*(0,0.1);
+    M3-M2=u*(-0.2,0);
+    M4-M3=u*(-1.05,0.5);
+    M5-M4=u*(-1.05,-0.5);;
+    M6-M5=M3-M2;
+    fill M0--M1--M2--M3{dir180}..{dir180}M4{dir180}..{dir-180}M5--M6--cycle;
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+%
+\NewDocumentCommand\MPCQuatreACinquante{O{30}}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,D,O,Aa,Bb,Cc,I,J,K,L;
+    A=(0,0);
+    B-A=u*(5,0);
+    D=rotation(B,A,90);
+    C-D=B-A;
+    O=iso(A,B,C,D);
+    I=homothetie(A,O,0.9);
+    J=homothetie(B,O,0.9);
+    K=homothetie(C,O,0.9);
+    L=homothetie(D,O,0.9);
+    trace CadrePanneauPrio(A,B,C,D,2mm);
+    fill polygone(I,J,K,L) withcolor blue;
+    drawoptions(withcolor white);
+    picture Vitesse;
+    Vitesse=image(
+      label(TEX("\sffamily\bfseries\fontsize{100}{100}\selectfont\num{#1}"),O);
+    );
+    draw Vitesse;
+    drawoptions();
+    MiseEchelle;
+  \end{mplibcode}%
+}%
+\NewDocumentCommand\MPCQuatreBCinquante{O{30}}{%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPanneauCode
+    pair A,B,C,D,O,Aa,Bb,Cc,I,J,K,L;
+    A=(0,0);
+    B-A=u*(5,0);
+    D=rotation(B,A,90);
+    C-D=B-A;
+    O=iso(A,B,C,D);
+    I=homothetie(A,O,0.9);
+    J=homothetie(B,O,0.9);
+    K=homothetie(C,O,0.9);
+    L=homothetie(D,O,0.9);
+    trace I--K withpen pensquare scaled 10 rotated 45 withcolor red;
+    clip currentpicture to polygone(I,J,K,L);
+    picture RetiensPicture;
+    RetiensPicture=currentpicture;
+    currentpicture:=nullpicture;
+    trace CadrePanneauPrio(A,B,C,D,2mm);
+    fill polygone(I,J,K,L) withcolor blue;
+    drawoptions(withcolor white);
+    picture Vitesse;
+    Vitesse=image(
+      label(TEX("\sffamily\bfseries\fontsize{100}{100}\selectfont\num{#1}"),O);
+    );
+    draw Vitesse;
+    drawoptions();
+    draw RetiensPicture;
+    MiseEchelle;
+  \end{mplibcode}%
+}%

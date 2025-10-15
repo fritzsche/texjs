@@ -1,0 +1,148 @@
+%%% Copyright (C) 2015-2024 Vincent Goulet
+%%%
+%%% Ce fichier fait partie du projet
+%%% «Rédaction avec LaTeX»
+%%% https://gitlab.com/vigou3/formation-latex-ul
+%%%
+%%% Cette création est mise à disposition sous licence
+%%% Attribution-Partage dans les mêmes conditions 4.0
+%%% International de Creative Commons.
+%%% https://creativecommons.org/licenses/by-sa/4.0/
+
+\section{Organisation d'un document}
+
+\begin{frame}[plain]
+  \tipbox{Utilisez impérativement les commandes {\LaTeX} pour
+    identifier les différentes parties (la structure) d'un document.}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Titre et page de titre}
+  {\LaTeX} peut composer une page de titre automatiquement à partir
+  des informations pertinentes.
+
+  \begin{lstlisting}
+%% préambule
+\title{`\meta{Titre du document}'}
+\author{`\meta{Prénom Nom}'}
+\date{`\meta{date du jour}'}          % automatique si omise
+
+%% corps du document
+\maketitle
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]
+  \frametitle{Sections}
+  \begin{itemize}
+  \item Découpage du document en sections
+\begin{lstlisting}
+\part{`\meta{titre}'}
+\chapter{`\meta{titre}'}
+\section{`\meta{titre}'}
+\subsection{`\meta{titre}'}
+\end{lstlisting}
+  \item Numérotation automatique
+    \begin{demo}
+      \begin{minipage}{0.45\linewidth}
+\begin{lstlisting}
+\section{Hypothèses}
+\end{lstlisting}
+      \end{minipage}
+      \hfill
+      \begin{minipage}{0.45\linewidth}
+        \includegraphics[height=0.8\baselineskip,keepaspectratio]{images/section-num}
+      \end{minipage}
+    \end{demo}
+  \item Sans la numérotation
+    \begin{demo}
+      \begin{minipage}{0.45\linewidth}
+\begin{lstlisting}
+\section*{Hypothèses}
+\end{lstlisting}
+      \end{minipage}
+      \hfill
+      \begin{minipage}{0.45\linewidth}
+        \includegraphics[height=0.8\baselineskip,keepaspectratio]{images/section-non-num}
+      \end{minipage}
+    \end{demo}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]
+  \frametitle{Annexes}
+
+  Les annexes sont des sections ou des chapitres avec une numérotation
+  alphanumérique (A, A.1, ...)
+  \begin{itemize}
+  \item \cs{appendix} identifie les sections suivantes comme des annexes
+  \item Dans le titre, «Chapitre» changé pour «Annexe» le cas échéant
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]
+  \frametitle{Table des matières}
+
+  La commande \cs{tableofcontents} produit automatiquement la table
+  des matières.
+
+  \begin{itemize}
+  \item Requiert plusieurs compilations
+  \item Sections non numérotées pas incluses
+  \item Avec \pkg{hyperref}, produit également la table des
+    matières du fichier PDF
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Étiquettes et renvois automatiques}
+
+  Ne \alert{jamais} renvoyer manuellement à un numéro de section,
+  d'équation, de tableau, etc.
+
+  \begin{itemize}
+  \item Étiquetter un élément avec \cs{label}
+  \item Faire référence par son étiquette avec \cs{ref}
+  \item Requiert 2 à 3 compilations
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]
+  \frametitle{Exemple (code source)}
+
+  \begin{lstlisting}[emph={\label,\ref}]
+\section{Définitions}
+\label{sec:definitions}
+
+Lorem ipsum dolor sit amet, consectetur
+adipiscing elit. Duis in auctor dui. Vestibulum
+ut, placerat ac, adipiscing vitae, felis.
+
+\section{Historique}
+
+Tel que vu à la section \ref{sec:definitions},
+on a...
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Exemple (résultat)}
+
+  \fbox{\includegraphics[viewport=124 550 484 664,clip=true,width=0.98\linewidth]{auxdoc/exemple-renvoi}}
+\end{frame}
+
+\begin{exercice}
+  Utiliser le fichier \fichier{exercice-renvois.tex}.
+  \begin{enumerate}
+  \item Insérer dans le texte un renvoi au numéro d'une section.
+  \item Activer le paquetage \pkg{hyperref} avec l'option
+    \code{colorlinks} et comparer l'effet d'utiliser \cs{ref} ou
+    \cs{autoref} pour le renvoi.
+  \end{enumerate}
+\end{exercice}
+
+%%% Local Variables:
+%%% TeX-master: "formation-latex-ul-diapos"
+%%% TeX-engine: xetex
+%%% coding: utf-8
+%%% End:

@@ -1,0 +1,42 @@
+%%%
+% Bonbon
+%%%
+\def\filedateBonbon{2025/05/27}%
+\def\fileversionBonbon{0.1a}%
+\message{-- \filedateBonbon\space v\fileversionBonbon}%
+%
+\setKVdefault[Bonbon]{CouleurUn=red,Bicolore=false,Echelle=1,CouleurDeux={}}%
+\defKV[Bonbon]{CouleurDeux=\ifempty{#1}{}{\setKV[Bonbon]{Bicolore}}}%
+%
+\NewDocumentCommand\Bonbon{o}{%
+  \useKVdefault[Bonbon]%
+  \setKV[Bonbon]{#1}%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      boolean Bicolore;
+      Bicolore:=\useKV[Bonbon]{Bicolore};
+      color CouleurUn,CouleurDeux;
+      CouleurUn:=\useKV[Bonbon]{CouleurUn};
+      if Bicolore:
+      CouleurDeux:=\useKV[Bonbon]{CouleurDeux};
+      fi;
+      Echelle:=\useKV[Bonbon]{Echelle};
+      input PfCSolid;
+      
+      pas:=0.25132;
+      
+      Initialisation(10,50,50,15);
+      incolor:=CouleurUn;
+      outcolor:=CouleurUn;
+      if Bicolore:
+      draw Sparam("Echelle*(u,cos(u)*cos(v),cos(u)*sin(v))",0,pi,pas,0,2*pi,pas);
+      incolor:=CouleurDeux;
+      outcolor:=CouleurDeux;
+      draw Sparam("Echelle*(u,cos(u)*cos(v),cos(u)*sin(v))",pi,2*pi,pas,0,2*pi,pas);
+      else:
+      draw Sparam("Echelle*(u,cos(u)*cos(v),cos(u)*sin(v))",0,2*pi,pas,0,2*pi,pas);
+      fi;
+    \end{mplibcode}
+  \fi%
+}%

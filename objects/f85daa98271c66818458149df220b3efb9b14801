@@ -1,0 +1,268 @@
+%%%
+% Numerations anciennes
+%%%
+\def\filedateNumAnciennes{2024/10/14}%
+\def\fileversionNumAnciennes{0.1a}%
+\message{-- \filedateNumAnciennes\space v\fileversionNumAnciennes}%
+%
+\setKVdefault[NumerationAncienne]{Couleur=black,Echelle=1}%
+
+\NewDocumentCommand\Chinoise{om}{%
+  \useKVdefault[NumerationAncienne]%
+  \setKV[NumerationAncienne]{#1}%
+  \BuildNumerationChinoise{#2}%
+}%
+
+\NewDocumentCommand\Maya{om}{%
+  \useKVdefault[NumerationAncienne]%
+  \setKV[NumerationAncienne]{#1}%
+  \BuildNumerationMaya{#2}%
+}%
+
+\NewDocumentCommand\Babylone{om}{%
+  \useKVdefault[NumerationAncienne]%
+  \setKV[NumerationAncienne]{#1}%
+  \BuildNumerationBabylone{#2}%
+}%
+
+\NewDocumentCommand\BuildNumerationChinoise{m}{%
+  \ifluatex
+    \mplibnumbersystem{double}%
+    \mplibforcehmode
+    \begin{mplibcode}
+      color CouleurTrace;
+      CouleurTrace=\useKV[NumerationAncienne]{Couleur};
+      drawoptions(withpen pencircle scaled 1.5 withcolor CouleurTrace);
+      u:=\useKV[NumerationAncienne]{Echelle}*1cm;
+      ecart:=0.15u;
+      vardef Chiffre(expr t,a)=
+      picture Chinois;
+      Chinois=image(
+      if t<6:
+        if (a mod 2)=1:
+          if (t mod 2)=0:
+            for k=0 upto t-1:
+              draw ((0,0)--(u,0)) shifted(k*(0,ecart));
+            endfor;
+          else:
+            for k=1 upto t:
+              draw ((0,0)--(u,0)) shifted((k-1)*(0,ecart));
+            endfor;
+          fi;
+        else:
+          for k=0 upto t-1:
+            draw ((0,0)--(0,u)) shifted(k*(ecart,0));
+          endfor;
+        fi;
+      else:%t>5
+      if (a mod 2)=1:
+      for k=1 upto (t-5):
+      draw ((0,0)--(1u,0)) shifted((k-1)*(0,ecart));
+      endfor;
+      draw ((0.5u,(t-5-1)*ecart))--(0.5u,u);
+      else:
+      if ((t-5) mod 2)=0:
+      for k=1 upto ((t-5) div 2):
+      draw ((0,0)--(0,u)) shifted((3*ecart,0)+(k-1)*(ecart,0));
+      draw ((0,0)--(0,u)) shifted((2*ecart,0)-(k-1)*(ecart,0));
+      endfor;
+      else:
+      draw ((2.5*ecart,0)--(2.5*ecart,u));
+      for k=1 upto ((t-5) div 2):
+      draw ((0,0)--(0,u)) shifted((2.5*ecart,0)+k*(ecart,0));
+      draw ((0,0)--(0,u)) shifted((2.5*ecart,0)-k*(ecart,0));
+      endfor;
+      fi;
+      draw ((0,u)--(5*ecart,u));
+      fi;
+      fi;
+      );
+      if (a mod 2)=0:
+      Chinois:=Chinois shifted(u*(0.5,0.5)-center Chinois);
+      fi;
+      Chinois
+      enddef;
+      % On détermine l'exposant de la base le plus petit tel que 10^a>nombre
+      exposant=0;
+      Power=1;
+      forever: exitif Power>#1;
+      exposant:=exposant+1;
+      Power:=1 for l=1 upto exposant:*10 endfor;
+      endfor;
+      % On détermine les chiffres
+      Depart=#1;
+      %
+      for k=exposant-1 downto 0:
+      Power:=1 for l=1 upto k:*10 endfor;
+      Retiens:=Depart div Power;
+      RetiensChiffre[exposant-1-k]=Retiens;
+      Depart:=Depart-(Retiens*Power);
+      endfor;
+      %On affiche
+      for k=exposant-1 downto 0:
+      draw Chiffre(RetiensChiffre[exposant-1-k],k) shifted((exposant-1-k)*7*ecart,0);
+      endfor;
+    \end{mplibcode}
+    \mplibnumbersystem{scaled}%
+  \fi%
+}%
+
+\NewDocumentCommand\BuildNumerationMaya{m}{%
+  \ifluatex
+    \mplibnumbersystem{double}%
+    \mplibforcehmode
+    \begin{mplibcode}
+      color CouleurTrace;
+      CouleurTrace=\useKV[NumerationAncienne]{Couleur};
+      drawoptions(withpen pencircle scaled 1.5 withcolor CouleurTrace);
+      %
+      u:=\useKV[NumerationAncienne]{Echelle}*1cm;
+      %
+      picture MayaZero;
+      MayaZero=image(
+      path cc,cd;
+      cc=cercles((0,0),0.3u);
+      cc:=cc yscaled 0.4;
+      cd=(point(0.45*length cc) of cc){dir-30}..{dir30}(point(0.05*length cc) of cc);
+      trace cd;
+      trace (point(0.2*length cc) of cc){dir-130}..{dir-50}(point(0.65*length cd) of cd);
+      trace (point(0.25*length cc) of cc){dir-130}..{dir-50}(point(0.5*length cd) of cd);
+      trace (point(0.3*length cc) of cc){dir-130}..{dir-50}(point(0.35*length cd) of cd);      
+      trace cc;
+      );
+      % 
+      vardef Chiffre(expr t,a)=
+      picture Maya;
+      Maya=image(%
+        if t=0:
+          trace MayaZero;
+          else:
+          drawoptions(withpen pensquare);
+          for k=1 upto (t div 5):
+          draw ((-0.3u,0)--(0.3u,0)) shifted ((k-1)*u*(0,0.15));
+          endfor;
+          drawoptions();
+          if (t mod 5)>0:
+          if ((t mod 5) mod 2)=0:
+          for k=0 upto (t mod 5)-1:
+          fill (fullcircle scaled 1mm) shifted(k*u*(0.15,0)+(t div 5)*u*(0,0.15)-0.5*u*((t mod 5)-1)*(0.15,0));
+          endfor;
+          else:
+          for k=0 upto ((t mod 5)-1):
+          fill (fullcircle scaled 1mm) shifted((t div 5)*u*(0,0.15)+k*u*(0.15,0)-0.5*((t mod 5)-1)*u*(0.15,0));
+          endfor;
+          fi;
+          fi;
+        fi;
+      );
+      Maya
+      enddef;
+      % On détermine l'exposant de la base le plus petit tel que 10^a>nombre
+      exposant=0;
+      Power=1;
+      if #1=0:
+      exposant:=1;
+      else:
+      forever: exitif Power>#1;
+      exposant:=exposant+1;
+      Power:=1 for l=1 upto exposant:*20 endfor;
+      endfor;
+      fi;
+      % On détermine les chiffres
+      Depart=#1;
+      %
+      for k=exposant-1 downto 0:
+      Power:=1 for l=1 upto k:*20 endfor;
+      Retiens:=Depart div Power;
+      RetiensChiffre[exposant-1-k]=Retiens;
+      Depart:=Depart-(Retiens*Power);
+      endfor;
+      % On affiche
+      for k=exposant-1 downto 0:
+      draw Chiffre(RetiensChiffre[exposant-1-k],exposant-1-k) shifted(u*(0,-(exposant-1-k)*4*0.25));
+      endfor;
+    \end{mplibcode}
+    \mplibnumbersystem{scaled}%
+  \fi%
+}%
+
+\NewDocumentCommand\BuildNumerationBabylone{m}{%
+  \ifluatex%
+    \mplibnumbersystem{double}%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      Echelle=\useKV[NumerationAncienne]{Echelle}*1cm;
+      u:=0.8*Echelle;
+      color CouleurTrace;
+      CouleurTrace=\useKV[NumerationAncienne]{Couleur};
+      drawoptions(withpen pencircle scaled 1.5 withcolor CouleurTrace);
+      %
+      picture Chevron,Clou;
+      Chevron=image(%
+      draw chemin(u*(0.4,0.4),(0,0),u*(0.4,-0.4));%
+      draw segment(u*(0.15,0.15),u*(0.15,-0.15));%
+      );%
+      Clou=image(%
+      draw chemin(u*(0.4,0.3),u*(0.3,0.4),u*(0.5,0.4),u*(0.4,0.3),u*(0.4,-0.4));
+      );
+      vardef Chiffre(expr t)=
+      picture Babylone;
+      Babylone=image(%
+      diz:=t div 10;
+      un:=t-diz*10;
+      k:=0;
+      forever: exitif k>diz-1;
+      g:=k div 2;
+      h:=k mod 2;
+      draw Chevron shifted(u*(0.5*h,g));
+      k:=k+1;
+      endfor;
+      %
+      ecartH:=ecartH+ecart+ecartu+1;% pour avoir un ecart entre les divers exposants
+      %
+      k:=0;
+      ecart:=if diz<2: diz else:2 fi;
+      forever: exitif k>un-1;
+      g:=k div 3;
+      h:=k mod 3;
+      draw Clou shifted(u*(0.5*(h+ecart),g));
+      k:=k+1;
+      endfor;
+      ecartu:=if un<3: un else:3 fi;
+%      label.top(TEX("e="&decimal(ecart)&";eu"&decimal(ecartu)),u*(ecartH*0.5,5));
+      );
+      Babylone
+      enddef;
+      % On détermine l'exposant de la base le plus petit tel que 60^a>nombre
+      exposant=0;
+      Power=1;
+      forever: exitif Power>#1;
+      exposant:=exposant+1;
+      Power:=1 for l=1 upto exposant:*60 endfor;
+      endfor;
+      % On détermine les chiffres
+      Depart=#1;
+      %
+      if Depart=0:
+      RetiensChiffre[0]=Retiens;
+      else:
+      for k=exposant-1 downto 0:
+      Power:=1 for l=1 upto k:*60 endfor;
+      Retiens:=Depart div Power;
+      RetiensChiffre[exposant-1-k]=Retiens;
+      Depart:=Depart-(Retiens*Power);
+      endfor;
+      fi;
+      % On affiche
+      ecart:=0;
+      ecartu:=0;
+      ecartH:=0;
+      for k=exposant-1 downto 0:
+      gg:=RetiensChiffre[exposant-1-k];
+      draw Chiffre(gg) shifted(u*(ecartH*0.5,0));
+%      draw (u*(ecartH*0.5,0)--u*(ecartH*0.5,5)) withcolor blue;
+      endfor;
+    \end{mplibcode}
+    \mplibnumbersystem{scaled}%
+  \fi%
+}%

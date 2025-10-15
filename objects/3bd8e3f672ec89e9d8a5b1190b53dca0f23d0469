@@ -1,0 +1,72 @@
+%%%
+% Rapido
+%%%
+\def\filedateRapido{2025/05/26}%
+\def\fileversionRapido{0.1a}%
+\message{-- \filedateRapido\space v\fileversionRapido}%
+%
+%% D'après https://www.facebook.com/groups/994675223903586/user/100017057226847
+%% et une programmation de Laurent Lassale-Carrere
+\newcounter{PfCnexo}
+\newtcolorbox[use counter=PfCnexo,number format=\arabic]{RapidoBox}{%
+  % Titre
+  colbacktitle=white,
+  fonttitle=\color{black}\Large\bfseries,
+  toptitle=1mm,
+  bottomtitle=1mm,
+  bottom=1mm,
+  title={\useKV[ClesRapido]{Titre}},
+  %% Cadre principal
+  enhanced,
+  width=\WidthRapido,
+  colback=white,
+  valign=top,
+  drop lifted shadow
+}
+\newtcolorbox{QuestionBox}{enhanced,nobeforeafter,size=small,sidebyside adapt=left}
+\newtcolorbox{QuestionReponse}{enhanced,nobeforeafter,upperbox=invisible,colback=white,width=1.5cm,grow to left by=3mm,grow to right by=3mm,height=10mm}
+
+\setKVdefault[ClesRapido]{Debut=false,Largeur=0.9\linewidth,Titre={Rapido n°\thetcbcounter\hfill Date :\hspace*{2.5cm}}Numero={}}%
+\defKV[ClesRapido]{Numero=\ifempty{#1}{}{\setKV[ClesRapido]{Debut=true}}}
+
+\newlength{\WidthRapido}
+
+\newcommand\Rapido[2][]{% numéro
+\useKVdefault[ClesRapido]%
+\setKV[ClesRapido]{#1}%
+%
+\ifboolKV[ClesRapido]{Debut}{%
+  \setcounter{PfCnexo}{\fpeval{\useKV[ClesRapido]{Numero}-1}}
+}{}%
+\setlength{\WidthRapido}{\useKV[ClesRapido]{Largeur}}%
+%
+\reademptyitems
+\setsepchar[*]{§*/}%
+\readlist*\ListeRapido{#2}%
+\begin{RapidoBox}
+  \xintFor* ##1 in {\xintSeq {1}{\ListeRapidolen}}\do{%
+    \tcbsidebyside[%
+    sidebyside adapt=right,
+    bicolor,
+    colback=white,colbacklower=yellow!10!white,
+    nobeforeafter,
+    top=0mm,left=1mm,
+    grow to left by=3mm,
+    grow to right by=3mm,
+    bottom=0mm
+    ]{%
+      \ListeRapido[##1,1]
+    }{%
+      \ListeRapido[##1,2]
+    }
+  }%
+\end{RapidoBox}
+}%
+
+\newcommand\BoiteRapido[1]{%
+  \ifx\bla#1\bla%
+  \tcbox[BoiteExpression]{\phantom{100000}}%
+  \else%
+  \tcbox[BoiteExpression]{#1}%
+  \fi
+}%

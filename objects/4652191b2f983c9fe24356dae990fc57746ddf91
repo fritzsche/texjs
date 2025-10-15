@@ -1,0 +1,377 @@
+%%%
+% Dessin Algo
+%%%
+\def\filedateDessinAlgo{2025/05/26}%
+\def\fileversionDessinAlgo{0.1}%
+\message{-- \filedateDessinAlgo\space v\fileversionDessinAlgo}%
+%
+\newtoks\tokDessinAlgo%
+\def\UpdatetoksDA#1\nil{\addtotok\tokDessinAlgo{#1,}}%
+
+\setKVdefault[DessinAlgo]{Solution=false,Largeur=14,Hauteur=14,Origine={(0,0)},Consignes=8,Enonce=false,Code=false,Relatif=false,Symbole,Traces={},Couleur={}}%
+\defKV[DessinAlgo]{%
+  Traces=\ifempty{#1}{}{\setKV[DessinAlgo]{Code}},%
+  Couleur=\ifempty{#1}{}{\setKV[DessinAlgo]{Solution}}%
+}%
+
+\NewDocumentCommand\DessinAlgo{om}{%
+  \tokDessinAlgo{}%
+  \useKVdefault[DessinAlgo]%
+  \setKV[DessinAlgo]{#1}%
+  \setsepchar[*]{/}\ignoreemptyitems%
+  \readlist*\PfCListeDessinAlgo{#2}%
+  \reademptyitems%
+  \foreachitem\compteur\in\PfCListeDessinAlgo{\expandafter\UpdatetoksDA\compteur\nil}%
+  \ifboolKV[DessinAlgo]{Relatif}{%
+    \BuildDessinAlgoRelatif{\the\tokDessinAlgo}%
+  }{%
+    \BuildDessinAlgo{\the\tokDessinAlgo}%
+  }%
+}%
+
+\NewDocumentCommand\BuildDessinAlgoRelatif{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      u:=1cm;
+      LongueurConsigne=\useKV[DessinAlgo]{Consignes};
+      LargeurQuad=\useKV[DessinAlgo]{Largeur};
+      HauteurQuad=\useKV[DessinAlgo]{Hauteur};
+      pair A[][],B[];
+      path zone;
+      zone=unitsquare scaled 3.5mm;
+      boolean Enonce,Code,Solution,Symbole;
+      Enonce=\useKV[DessinAlgo]{Enonce};
+      Code=\useKV[DessinAlgo]{Code};
+      Solution=\useKV[DessinAlgo]{Solution};
+      Symbole=\useKV[DessinAlgo]{Symbole};
+      color Couleur;
+      if Solution:
+      Couleur=\useKV[DessinAlgo]{Couleur};
+      fi;
+      %
+      vardef DessineConsigne(text t)=
+      n:=0;
+      nborig:=0;
+      k=1;
+      l:=1;
+      %On détermine les points de départs;
+      for p_=t:
+      if pair p_:
+      nborig:=nborig+1;
+      if (n mod LongueurConsigne)>0:
+      l:=l-1;
+      elseif nborig=2:
+      l:=l-1;
+      fi;
+      k:=1;
+      n:=0;
+      B[nborig]=0.35*u*(k,2*l+0.5);
+      else:
+      if numeric p_:
+      n:=n+1;
+      NBorig[nborig]:=n;
+      if (n mod 2)=1:
+      Deplacement[nborig][(n+1) div 2]=p_;
+      else:
+      TourneAngle[nborig][n div 2]=p_
+      fi;
+      fi;
+      fi;
+      endfor;
+      % On affiche
+      picture RetiensLong;
+      r:=0;
+      Long:=0;
+      h:=0;
+      for k=1 upto nborig:
+      if k>1:
+      r:=r-2;
+      Long:=0;
+      h:=0;
+      fi;
+      for l=1 step 2 until NBorig[nborig]-1:
+      if l=1:
+      RetiensLong:=image(label.rt(TEX("av "&decimal(Deplacement[k][(l+1) div 2])),(0,0)));
+      draw RetiensLong shifted (Long,5mm*r);
+      if nborig=1:
+      %
+      else:
+      label.lft(TEX("D$_"&decimal(k)&"$"),(Long,5mm*r));
+      fi;% label(TEX(decimal(h)),3.5mm*(0,-h)) withcolor red;
+      Long:=Long+abs(lrcorner RetiensLong-llcorner RetiensLong)+1mm;
+      h:=h+1;
+      else:
+      EcartAngle:=TourneAngle[k][(l+1) div 2]-TourneAngle[k][(l-1) div 2];
+      if EcartAngle>0:
+        if EcartAngle<180:
+          if Symbole:
+            RetiensLong:=image(
+            drawarrow ((point(1) of zone){dir90}..{dir180}(point(3) of zone)) shifted(1mm,-1mm);
+            label.rt(TEX("\ang{"&decimal(EcartAngle)&"}"),point(1) of zone);
+            );
+          else:
+            RetiensLong:=image(label.rt(TEX("TG \ang{"&decimal(EcartAngle)&"}"),(0,0)));
+          fi;
+        else:
+          if Symbole:
+            RetiensLong:=image(
+            drawarrow ((point(0) of zone){dir90}..{dir0}(point(2) of zone)) shifted(1mm,-1mm);
+            label.rt(TEX("\ang{"&decimal(360-EcartAngle)&"}"),point(1) of zone);
+            );
+          else:
+            RetiensLong:=image(label.rt(TEX("TD \ang{"&decimal(360-EcartAngle)&"}"),(0,0)));
+          fi;
+        fi;
+      else:
+      if abs(EcartAngle)<180:
+      if Symbole:
+      RetiensLong:=image(
+      drawarrow ((point(0) of zone){dir90}..{dir0}(point(2) of zone)) shifted(1mm,-1mm);
+      label.rt(TEX("\ang{"&decimal(abs(EcartAngle))&"}"),point(1) of zone);
+      );
+      else:
+      RetiensLong:=image(label.rt(TEX("TD \ang{"&decimal(abs(EcartAngle))&"}"),(0,0)));
+      fi;
+      else:
+      if Symbole:
+      RetiensLong:=image(
+      drawarrow ((point(1) of zone){dir90}..{dir180}(point(3) of zone)) shifted(1mm,-1mm);
+      label.rt(TEX("\ang{"&decimal(360-abs(EcartAngle))&"}"),point(1) of zone);
+      );
+      else:
+      RetiensLong:=image(label.rt(TEX("TG \ang{"&decimal(360-abs(EcartAngle))&"}"),(0,0)));
+      fi;
+      fi;
+      fi;
+      draw RetiensLong shifted (Long,5mm*r);
+      Long:=Long+abs(lrcorner RetiensLong-llcorner RetiensLong)+1mm;
+      %label(TEX(decimal(h)),3.5mm*(0,-h)) withcolor blue;
+      RetiensLong:=image(label.rt(TEX("Av "&decimal(Deplacement[k][(l+1) div 2])),(0,0)));
+      draw RetiensLong shifted (Long,5mm*r);
+      Long:=Long+abs(lrcorner RetiensLong-llcorner RetiensLong)+1mm;
+      h:=h+1;
+      %label(TEX(decimal(h)),3.5mm*(0,-h)) withcolor green;
+      fi;
+%      label(TEX(decimal(h mod 8)),3.5mm*(0,-h)) withcolor Purple;
+      if ((h mod LongueurConsigne)=0):% and (h>0):
+      %label(TEX("OKAYYYYYYY"),3.5mm*(0,-h)) withcolor Purple;
+      Long:=0;
+     r:=r-1;
+      h:=0;
+      fi;
+      endfor;
+      endfor;
+      enddef;
+      %
+      vardef DessinQuadrillage(text t)=
+      drawoptions(withcolor 0.7white);
+      for k=0 upto LargeurQuad:
+      trace (3.5mm*(k,0))--(3.5mm*(k,HauteurQuad));
+      endfor;
+      for k=0 upto HauteurQuad:
+      trace (3.5mm*(0,k))--(3.5mm*(LargeurQuad,k));
+      endfor;
+      drawoptions();
+      % On détermine les points
+      n=0;
+      nborig:=0;
+      for p_=t:
+      if pair p_:
+      nborig:=nborig+1;
+      A[nborig][0]=3.5mm*p_;
+      n:=0;
+      else:
+      n:=n+1;
+      NombreOrig[nborig]:=n;
+      Nombre[nborig][n]=p_;
+      fi;
+      endfor;
+      for l=1 upto nborig:
+      for k=1 step 2 until NombreOrig[l]:
+      if (Nombre[l][k+1] mod 90)=0:
+      long:=3.5mm
+      else:
+      long:=sqrt(2)*3.5mm
+      fi;
+      A[l][(k+1) div 2]-A[l][k div 2]=long*Nombre[l][k]*(unitvector((1,0)-(0,0)) rotated Nombre[l][k+1]);
+      endfor;
+      endfor;
+      if nborig=1:
+      dotlabel("",A[nborig][0]);
+      label.ulft(TEX("D"),symetrie(A[nborig][1],A[nborig][0]));
+      drawarrow A[nborig][0]--(0.75[A[nborig][0],A[nborig][1]]);
+      else:
+      for k=1 upto nborig:
+      label(TEX("D$_"&decimal(k)&"$"),symetrie(A[k][1],A[k][0]));
+      dotlabel("",A[k][0]);
+      drawarrow A[k][0]--(0.75[A[k][0],A[k][1]]);
+      endfor;
+      fi;
+      enddef;
+      %
+      vardef DessineSolution=
+      for l=1 upto nborig:
+      for k=1 step 2 until NombreOrig[l]:
+      draw A[l][(k div 2)]--A[l][(k+1) div 2] withpen pencircle scaled 2 withcolor Couleur;
+      endfor;
+      endfor;
+      enddef;
+      if Enonce:
+      DessineConsigne(#1);
+      else:
+      DessinQuadrillage(#1);
+      if Code:
+      \useKV[DessinAlgo]{Traces};
+      fi;
+      if Solution:
+      DessineSolution;
+      fi;
+      fi;
+    \end{mplibcode}
+  \fi%
+}%
+
+\NewDocumentCommand\BuildDessinAlgo{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      u:=1cm;
+      LongueurConsigne=\useKV[DessinAlgo]{Consignes};
+      LargeurQuad=\useKV[DessinAlgo]{Largeur};
+      HauteurQuad=\useKV[DessinAlgo]{Hauteur};
+      pair A[][],B[];
+      path zone;
+      zone=unitsquare scaled 3.5mm;
+      boolean Enonce,Code,Solution;
+      Enonce=\useKV[DessinAlgo]{Enonce};
+      Code=\useKV[DessinAlgo]{Code};
+      Solution=\useKV[DessinAlgo]{Solution};
+      color Couleur;
+      if Solution:
+      Couleur=\useKV[DessinAlgo]{Couleur};
+      fi;
+      %
+      vardef DessineConsigne(text t)=
+      n:=0;
+      nborig:=0;
+      k=1;
+      l:=1;
+      for p_=t:
+      if pair p_:
+      nborig:=nborig+1;
+      if (n mod LongueurConsigne)>0:
+      l:=l-1;
+      elseif nborig=2:
+      l:=l-1;
+      fi;
+      k:=1;
+      n:=0;
+      B[nborig]=0.35*u*(k,2*l+0.5);
+      else:
+      n:=n+1;
+%      draw (zone shifted(0.35*u*(k,2*l)));
+      if (n mod 2)=1:
+      label(TEX(decimal(p_)),(center zone) shifted(0.35*u*(k,2*l)));
+      k:=k+1;
+      else:
+      if p_=0:
+      drawarrow ((point(0) of (unitsquare scaled 3.5mm))--(point(1) of (unitsquare scaled 3.5mm))) shifted ((center zone) shifted(u*(0.35*k-0.175,0.35*2*l)));
+      elseif p_=45:
+      drawarrow ((point(0) of (unitsquare scaled 3.5mm))--(point(2) of (unitsquare scaled 3.5mm))) shifted ((llcorner zone) shifted(u*0.35*(k,2*l)));
+      elseif p_=90:
+      drawarrow ((point(0) of (unitsquare scaled 3.5mm))--(point(3) of (unitsquare scaled 3.5mm))) shifted ((llcorner zone) shifted(u*(0.35*k+0.175,0.35*2*l)));
+      elseif p_=135:
+      drawarrow ((point(1) of (unitsquare scaled 3.5mm))--(point(3) of (unitsquare scaled 3.5mm))) shifted ((llcorner zone) shifted(u*0.35*(k,2*l)));
+      elseif p_=180:
+      drawarrow ((point(1) of (unitsquare scaled 3.5mm))--(point(0) of (unitsquare scaled 3.5mm))) shifted ((center zone) shifted(u*(0.35*k-0.175,0.35*2*l)));
+      elseif p_=-45:
+      drawarrow ((point(3) of (unitsquare scaled 3.5mm))--(point(1) of (unitsquare scaled 3.5mm))) shifted ((llcorner zone) shifted(u*0.35*(k,2*l)));
+      elseif p_=-90:
+      drawarrow ((point(3) of (unitsquare scaled 3.5mm))--(point(0) of (unitsquare scaled 3.5mm))) shifted ((llcorner zone) shifted(u*(0.35*k+0.175,0.35*2*l)));
+      elseif p_=-135:
+      drawarrow ((point(2) of (unitsquare scaled 3.5mm))--(point(0) of (unitsquare scaled 3.5mm))) shifted ((llcorner zone) shifted(u*0.35*(k,2*l)));
+      fi;
+      drawoptions();
+      k:=k+2;
+      fi;
+      if (k mod (2*LongueurConsigne+(LongueurConsigne)+1))>0:
+      else:
+      l:=l-1;
+      k:=1;
+      fi;
+      fi;
+      endfor;
+      if nborig=1:
+      label.lft(TEX("D"),B[1]);
+      else:
+      for k=1 upto nborig:
+      label.lft(TEX("D$_"&decimal(k)&"$"),B[k]);
+      endfor;
+      fi;
+      enddef;
+      %
+      vardef DessinQuadrillage(text t)=
+      drawoptions(withcolor 0.7white);
+      for k=0 upto LargeurQuad:
+      trace (3.5mm*(k,0))--(3.5mm*(k,HauteurQuad));
+      endfor;
+      for k=0 upto HauteurQuad:
+      trace (3.5mm*(0,k))--(3.5mm*(LargeurQuad,k));
+      endfor;
+      drawoptions();
+      % Les points
+      n=0;
+      nborig:=0;
+      for p_=t:
+      if pair p_:
+      nborig:=nborig+1;
+      A[nborig][0]=3.5mm*p_;
+      n:=0;
+      else:
+      n:=n+1;
+      NombreOrig[nborig]:=n;
+      Nombre[nborig][n]=p_;
+      fi;
+      endfor;
+      for l=1 upto nborig:
+      for k=1 step 2 until NombreOrig[l]:
+      if (Nombre[l][k+1] mod 90)=0:
+      long:=3.5mm
+      else:
+      long:=sqrt(2)*3.5mm
+      fi;
+      A[l][(k+1) div 2]-A[l][k div 2]=long*Nombre[l][k]*(unitvector((1,0)-(0,0)) rotated Nombre[l][k+1]);
+      endfor;
+      endfor;
+      %
+      if nborig=1:
+      dotlabel.ulft(TEX("D"),A[nborig][0]);
+      else:
+      for k=1 upto nborig:
+      dotlabel.ulft(TEX("D$_"&decimal(k)&"$"),A[k][0]);
+      endfor;
+      fi;
+      enddef;
+      %
+      vardef DessineSolution=
+      for l=1 upto nborig:
+      for k=1 step 2 until NombreOrig[l]:
+      draw A[l][(k div 2)]--A[l][(k+1) div 2] withpen pencircle scaled 2 withcolor Couleur;
+      endfor;
+      endfor;
+      enddef;
+      if Enonce:
+      DessineConsigne(#1);
+      else:
+      DessinQuadrillage(#1);
+      if Code:
+      \useKV[DessinAlgo]{Traces};
+      fi;
+      if Solution:
+      DessineSolution;
+      fi;
+      fi;
+    \end{mplibcode}
+  \fi%
+}%

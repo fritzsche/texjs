@@ -1,0 +1,62 @@
+%%%
+% Tableau Double Entree
+%%%
+\def\filedateTDE{2024/08/15}%
+\def\fileversionTDE{0.1a}%
+\message{-- \filedateTDE\space v\fileversionTDE}%
+
+\setKVdefault[TDE]{Colonnes=5,Lignes=4,Legende={},LegendesH={B,C,D,Total},LegendesV={1,2,Total},Couleur=Cornsilk,Vide=false,Totaux,Questions=false,Stretch=1}%
+
+\NewDocumentCommand\TableauDoubleEntree{om}{%
+  \useKVdefault[TDE]%
+  \setKV[TDE]{#1}%
+  \xdef\PfCFooH{\useKV[TDE]{LegendesH}}%
+  \xdef\PfCFooV{\useKV[TDE]{LegendesV}}%
+  \setsepchar{,}\reademptyitems%
+  \readlist*\ListeH{\PfCFooH}%
+  \readlist*\ListeV{\PfCFooV}%
+  \readlist*\ListeDonnees{#2}%
+  \ifboolKV[TDE]{Totaux}{}{%
+    % Vider les lignes du total
+    \xintFor* ##1 in{\xintSeq{1}{\fpeval{\ListeVlen-1}}}\do{%
+      \xintFor* ##2 in{\xintSeq{1}{\fpeval{\ListeHlen-0}}}\do{%
+        \modulo{\fpeval{##2+(##1-1)*(\ListeHlen-0)}}{\fpeval{\ListeHlen-0}}%
+        \ifnum\remainder=0\relax%
+          \xdef\ListeDonneesSansTotauxAv{\ListeDonneesSansTotauxAv,}%
+        \else%
+          \ifnum\fpeval{##2+(##1-1)*(\ListeHlen-0)}=1\relax%
+            \xdef\ListeDonneesSansTotauxAv{\ListeDonnees[\fpeval{##2+(##1-1)*(\ListeHlen-0)}]}%
+          \else%
+            \xdef\ListeDonneesSansTotauxAv{\ListeDonneesSansTotauxAv,\ListeDonnees[\fpeval{##2+(##1-1)*(\ListeHlen-0)}]}%
+          \fi%
+        \fi%
+      }%
+    }%
+    % On ajoute la dernière ligne qui est vide
+    \xintFor* ##2 in{\xintSeq{1}{\fpeval{\ListeHlen-0}}}\do{%
+      \xdef\ListeDonneesSansTotauxAv{\ListeDonneesSansTotauxAv,}%
+    }%
+    % On relit la liste des données.
+    \setsepchar{,}\reademptyitems%
+    \readlist*\ListeDonnees{\ListeDonneesSansTotauxAv}%
+    \reademptyitems%
+  }%
+  %
+  % Pour vider le tableau, on utilise la clé <Vide>.
+  % On choisit quelques éléments ^^ à écrire
+  \ifboolKV[TDE]{Questions}{%
+    %en réflexion (voir v5)
+  }{}%
+  %
+  \colorlet{PfCColorTDE}{\useKV[TDE]{Couleur}}%
+  \renewcommand{\arraystretch}{\useKV[TDE]{Stretch}}%
+  \begin{tabular}{|*{\fpeval{\ListeHlen+1}}{c|}}
+    \hline
+    \cellcolor{PfCColorTDE}\useKV[TDE]{Legende}\xintFor*##1 in{\xintSeq{1}{\ListeHlen}}\do{\uppercase{&}\cellcolor{PfCColorTDE}\ListeH[##1]}\\
+    \hline
+    \xintFor* ##1 in{\xintSeq{1}{\ListeVlen}}\do{
+    \cellcolor{PfCColorTDE}\ListeV[##1]\xintFor*##2 in{\xintSeq{1}{\ListeHlen}}\do{\uppercase{&}\ifboolKV[TDE]{Vide}{}{\ListeDonnees[\fpeval{(##2-0)+(##1-1)*(\ListeHlen-0)}]}}\\
+    \hline
+    }
+  \end{tabular}
+}%

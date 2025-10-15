@@ -1,0 +1,176 @@
+% \iffalse meta-comment
+%
+% File: ltx-talk-required.dtx Copyright (C) 2025 Joseph Wright
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+% This file is part of the "ltx-talk bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% The released version of this bundle is available from CTAN.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/josephwright/ltx-talk
+%
+% for those people who are interested.
+%
+% -----------------------------------------------------------------------
+%
+%<*driver>
+\documentclass{l3doc}
+% Additional commands needed in this source
+\NewDocumentCommand\email{m}{\href{mailto:#1}{\nolinkurl{#1}}}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% ^^A As we are dealing with a class, this has to be done manually
+% \def\filedate{2025-10-10}
+% \def\fileversion{v0.2.3}
+%
+% \title{^^A
+%   \pkg{ltx-talk-required} -- \enquote{Required} definitions^^A
+%   \thanks{This file describes \fileversion,
+%     last revised \filedate.}^^A
+% }
+%
+% \author{^^A
+%  Joseph Wright^^A
+%  \thanks{^^A
+%    E-mail: \email{joseph@texdev.net}^^A
+%   }^^A
+% }
+%
+% \date{Released \filedate}
+%
+% \maketitle
+%
+% \begin{documentation}
+%
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{ltx-talk-required} implementation}
+%
+% Start the \pkg{DocStrip} guards.
+%    \begin{macrocode}
+%<*class>
+%    \end{macrocode}
+%
+% Identify the internal prefix.
+%    \begin{macrocode}
+%<@@=talk>
+%    \end{macrocode}
+%
+% Here we collect up things that are more-or-less required to create a useful
+% class but are not defined by the \LaTeX{} kernel for historical reasons. They
+% are therefore largely copies from \texttt{article.cls} and contain
+% \enquote{classical} definitions so that they follow the expectations of
+% third-party code.
+%
+% \begin{macro}{\today}
+%   This is the definition as done in the standard classes.
+%    \begin{macrocode}
+\cs_new_nopar:Npn \today
+  {
+    \ifcase \month \or
+      January \or
+      February \or
+      March \or
+      April \or
+      May \or
+      June \or
+      July \or
+      August \or
+      September \or
+      October \or
+      November \or
+      December
+    \fi
+    \space
+    \number \day ,
+    \space
+    \number \year
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Standard design settings}
+%
+%    \begin{macrocode}
+\setcounter { tocdepth } { 3 }
+\setlength \arraycolsep { 5pt }
+\setlength \tabcolsep { 6pt }
+\setlength \arrayrulewidth { 0.4pt }
+\setlength \doublerulesep { 2pt }
+\setlength \tabbingsep { \labelsep }
+\skip \@mpfootins = \skip \footins
+\setlength \fboxsep { 3pt }
+\setlength \fboxrule { 0.4pt }
+%    \end{macrocode}
+%
+% \subsection{List support}
+%
+%    \begin{macrocode}
+\setlength  \labelsep  { 0.5em }
+\cs_new:Npn \labelenumi { \theenumi . }
+\cs_new:Npn \labelenumii { ( \theenumii ) }
+\cs_new:Npn \labelenumiii { \theenumiii . }
+\cs_new:Npn \labelenumiv { \theenumiv . }
+\cs_new:Npn \labelitemi  { \labelitemfont \textbullet }
+\cs_new:Npn \labelitemii { \labelitemfont \bfseries \textendash }
+\cs_new:Npn \labelitemiii { \labelitemfont \textasteriskcentered }
+\cs_new:Npn \labelitemiv  { \labelitemfont \textperiodcentered }
+\cs_new:Npn \labelitemfont { \normalfont }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\setlength \leftmargini   { 2em }
+\setlength \leftmarginii  { 2em }
+\setlength \leftmarginiii { 2em }
+\setlength  \labelsep  { 0.5em }
+\setlength  \labelwidth { \leftmargini }
+\addtolength \labelwidth { -\labelsep }
+\cs_gset_nopar:Npn \@listi
+  {
+    \leftmargin \leftmargini
+    \topsep 3pt plus 2pt minus 2.5pt
+    \parsep 0pt
+    \itemsep 3pt plus 2pt minus 3pt
+  }
+\cs_gset_eq:NN \@listI \@listi
+\cs_gset_nopar:Npn \@listii
+  {
+    \leftmargin \leftmarginii
+    \topsep    2pt plus 1pt minus 2pt
+    \parsep    0pt plus 1pt
+    \itemsep   \parsep
+  }
+\cs_gset_nopar:Npn \@listiii
+  {
+    \leftmargin \leftmarginiii
+    \topsep    2pt plus 1pt minus 2pt
+    \parsep    0pt plus 1pt
+    \itemsep   \parsep
+  }
+\setlength \partopsep { 0pt }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%</class>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \PrintIndex

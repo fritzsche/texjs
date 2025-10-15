@@ -1,0 +1,258 @@
+%%%
+% Nombre Astral
+%%%
+\def\filedateNombreAstral{2025/05/27}%
+\def\fileversionNombreAstral{0.1a}%
+\message{-- \filedateNombreAstral\space v\fileversionNombreAstral}%
+%
+\setKVdefault[NombreAstral]{Solution=false,Graines=false,Echelle=1,Couleur=LightSteelBlue,Horizontal=false,Graine={}}
+\defKV[NombreAstral]{Graine=\ifempty{#1}{}{\setKV[NombreAstral]{Graines}\PfCGraineAlea{\useKV[NombreAstral]{Graine}}}}%
+
+\newtoks\toklisteNANombres%
+\newtoks\toklisteNAMelange%
+\def\UpdatetoksNANombres#1\nil{\addtotok\toklisteNANombres{"#1",}}%
+\def\UpdatetoksNAMelange#1\nil{\addtotok\toklisteNAMelange{#1,}}%
+
+\NewDocumentCommand\NombreAstral{o}{%
+  \toklisteNANombres{}%
+  \toklisteNAMelange{}%
+  \useKVdefault[NombreAstral]%
+  \setKV[NombreAstral]{#1}%
+  \xdef\PfCNACible{\fpeval{2*randint(25,45)}}%
+  \xdef\PfCNAListeNombres{}%
+  \xintFor* ##1 in{\xintSeq{11}{\fpeval{floor(\PfCNACible/3)}}}\do{%
+    \xdef\PfCNAListeNombres{\PfCNAListeNombres ##1,}%
+  }%
+  \MelangeListe{\PfCNAListeNombres}{5}%
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\PfCNAListeNombresBase{\faa}%
+  \reademptyitems%
+  \readlist*\PfCNAListeNombres{%
+    \PfCNAListeNombresBase[1],%
+    \PfCNAListeNombresBase[2],%
+    \fpeval{0.5*\PfCNACible+\PfCNAListeNombresBase[5]-\PfCNAListeNombresBase[4]-\PfCNAListeNombresBase[3]},%
+    \fpeval{0.5*\PfCNACible+\PfCNAListeNombresBase[4]-\PfCNAListeNombresBase[2]-\PfCNAListeNombresBase[5]},%
+    \PfCNAListeNombresBase[3],%
+    \fpeval{0.5*\PfCNACible+\PfCNAListeNombresBase[3]-\PfCNAListeNombresBase[5]-\PfCNAListeNombresBase[1]},%
+    \fpeval{0.5*\PfCNACible+\PfCNAListeNombresBase[2]-\PfCNAListeNombresBase[4]-\PfCNAListeNombresBase[1]},%
+    \fpeval{0.5*\PfCNACible+\PfCNAListeNombresBase[1]-\PfCNAListeNombresBase[2]-\PfCNAListeNombresBase[3]},%
+    \PfCNAListeNombresBase[4],%
+    \PfCNAListeNombresBase[5]%
+  }%
+  \foreachitem\compteur\in\PfCNAListeNombres{\expandafter\UpdatetoksNANombres\compteur\nil}%
+  \xdef\PfCNAListeAEffacer{1,2,3,4,5,6,7,8,9,10}%
+  \MelangeListe{\PfCNAListeAEffacer}{6}%
+  \ignoreemptyitems%
+  \readlist*\PfCNAListeMelange{\faa}%
+  \reademptyitems%
+  \foreachitem\compteur\in\PfCNAListeMelange{\expandafter\UpdatetoksNAMelange\compteur\nil}%
+  \BuildNombreAstral{\the\toklisteNANombres}{\the\toklisteNAMelange}%
+}%
+
+\NewDocumentCommand\BuildNombreAstral{m m}{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    Cible=\PfCNACible;
+
+    color MiseEnValeurSol;
+    MiseEnValeurSol=\useKV[NombreAstral]{Couleur};
+    
+    boolean Solution,Horizontal;
+    Solution=\useKV[NombreAstral]{Solution};
+    Horizontal=\useKV[NombreAstral]{Horizontal};
+
+    Echelle:=\useKV[NombreAstral]{Echelle};
+    
+    string Rappel[];
+    Rayon:=4cm;
+    
+    path cc,ca[];
+    cc=cercles((0,0),Rayon);
+    
+    pair A[],C[],D[];
+    for k=1 upto 5:
+    C[k]=pointarc(cc,90+(k-1)*72);
+    endfor;
+    
+    D1=C2+30*unitvector(C2-C4);
+    D2=C2+30*unitvector(C2-C5);
+    D3=C3+30*unitvector(C3-C1);
+    D4=C4+30*unitvector(C4-C1);
+    D5=C5+30*unitvector(C5-C3);
+    
+    drawarrow C2--D1;
+    drawarrow C2--D2;
+    drawarrow C3--D3;
+    drawarrow C4--D4;
+    drawarrow C5--D5;
+    
+    label.ulft(TEX("\bfseries\Large"&decimal(Cible)),D1);
+    label.lft(TEX("\bfseries\Large"&decimal(Cible)),D2);
+    label.llft(TEX("\bfseries\Large"&decimal(Cible)),D3);
+    label.lrt(TEX("\bfseries\Large"&decimal(Cible)),D4);
+    label.urt(TEX("\bfseries\Large"&decimal(Cible)),D5);
+    
+    trace polygone(C1,C3,C5,C2,C4) withpen (pencircle scaled 8);
+    A1=C1;
+    A2=C2;
+    A9=C3;
+    A10=C4;
+    A5=C5;
+    A3=segment(C1,C3) intersectionpoint segment(C2,C5);
+    A4=segment(C1,C4) intersectionpoint segment(C2,C5);
+    A6=segment(C1,C3) intersectionpoint segment(C2,C4);
+    A7=segment(C1,C4) intersectionpoint segment(C3,C5);
+    A8=segment(C2,C4) intersectionpoint segment(C3,C5);
+    for k=1 upto 10:
+    ca[k]=cercles(A[k],0.6u);
+    fill ca[k] withcolor white;
+    trace ca[k];
+    endfor;
+
+    vardef DefinirRappel(text t)=
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    Rappel[n]=p_;
+    endfor;
+    enddef;
+    
+    vardef Affichage(text t)=
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    label(TEX("\Large"&p_),A[n]);
+    endfor;
+    enddef;
+    
+    vardef Suppression(text t)=
+    k:=0;
+    for p_=t:
+    k:=k+1;
+    fill ca[p_] withcolor if Solution=false: white else: MiseEnValeurSol fi;
+    trace ca[p_];
+    if Horizontal:
+    label(TEX("\Large"&Rappel[p_]),(xpart(C2)+1.5*(k-1)*u,ypart(C2)-7.5u));
+    trace cercles((xpart(C2)+1.5*(k-1)*u,ypart(C2)-7.5u),0.6u);
+    else:
+    label(TEX("\Large"&Rappel[p_]),u*(-7,5.6-1.5k));
+    trace cercles(u*(-7,5.6-1.5k),0.6u);
+    fi;
+    endfor;
+    enddef;
+
+    DefinirRappel(#1);
+    if Solution=false:
+    Affichage(#1);
+    Suppression(#2);
+    else:
+    Suppression(#2);
+    Affichage(#1);
+    fi;
+    picture recap;%
+    recap:=currentpicture scaled Echelle;%
+    currentpicture:=nullpicture;%
+    draw recap;%
+  \end{mplibcode}
+  \else%
+  \begin{mpost}[mpsettings={%
+      Echelle:=\useKV[NombreAstral]{Echelle};
+      color MiseEnValeurSol;
+      MiseEnValeurSol=\useKV[NombreAstral]{Couleur};
+      Cible=\PfCNACible;boolean Solution;Solution:=\useKV[NombreAstral]{Solution};
+      string Rappel[];
+      n:=0;
+      for p_=#1:
+      n:=n+1;
+      Rappel[n]=p_;
+      endfor;
+    }]
+    
+    Rayon:=4cm;
+    
+    path cc,ca[];
+    cc=cercles((0,0),Rayon);
+    
+    pair A[],C[],D[];
+    for k=1 upto 5:
+    C[k]=pointarc(cc,90+(k-1)*72);
+    endfor;
+    
+    D1=C2+30*unitvector(C2-C4);
+    D2=C2+30*unitvector(C2-C5);
+    D3=C3+30*unitvector(C3-C1);
+    D4=C4+30*unitvector(C4-C1);
+    D5=C5+30*unitvector(C5-C3);
+    
+    drawarrow C2--D1;
+    drawarrow C2--D2;
+    drawarrow C3--D3;
+    drawarrow C4--D4;
+    drawarrow C5--D5;
+    
+    label.ulft(LATEX("\noexpand\bfseries\noexpand\Large"&decimal(Cible)&""),D1);
+    label.lft(LATEX("\noexpand\bfseries\noexpand\Large"&decimal(Cible)),D2);
+    label.llft(LATEX("\noexpand\bfseries\noexpand\Large"&decimal(Cible)),D3);
+    label.lrt(LATEX("\noexpand\bfseries\noexpand\Large"&decimal(Cible)),D4);
+    label.urt(LATEX("\noexpand\bfseries\noexpand\Large"&decimal(Cible)),D5);
+    
+    trace polygone(C1,C3,C5,C2,C4) withpen (pencircle scaled 8);
+    A1=C1;
+    A2=C2;
+    A9=C3;
+    A10=C4;
+    A5=C5;
+    A3=segment(C1,C3) intersectionpoint segment(C2,C5);
+    A4=segment(C1,C4) intersectionpoint segment(C2,C5);
+    A6=segment(C1,C3) intersectionpoint segment(C2,C4);
+    A7=segment(C1,C4) intersectionpoint segment(C3,C5);
+    A8=segment(C2,C4) intersectionpoint segment(C3,C5);
+    for k=1 upto 10:
+    ca[k]=cercles(A[k],0.6u);
+    fill ca[k] withcolor white;
+    trace ca[k];
+    endfor;
+
+    vardef DefinirRappel(text t)=
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    Rappel[n]=p_;
+    endfor;
+    enddef;
+    
+    vardef Affichage(text t)=
+    n:=0;
+    for p_=t:
+    n:=n+1;
+    label(LATEX("\noexpand\Large"&p_),A[n]);
+    endfor;
+    enddef;
+    
+    vardef Suppression(text t)=
+    k:=0;
+    for p_=t:
+    k:=k+1;
+    fill ca[p_] withcolor if Solution=false: white else: MiseEnValeurSol fi;
+    trace ca[p_];
+    label(LATEX("\noexpand\Large"&Rappel[p_]),u*(-7,5.6-1.5k));
+    trace cercles(u*(-7,5.6-1.5k),0.6u);
+    endfor;
+    enddef;
+
+    DefinirRappel(#1);
+    if Solution=false:
+    Affichage(#1);
+    Suppression(#2);
+    else:
+    Suppression(#2);
+    Affichage(#1);
+    fi;
+    picture recap;%
+    recap:=currentpicture scaled Echelle;%
+    currentpicture:=nullpicture;%
+    draw recap;%
+  \end{mpost}%
+  \fi%
+}%

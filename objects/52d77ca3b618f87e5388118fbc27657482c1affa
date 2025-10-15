@@ -1,0 +1,203 @@
+%%%
+% Ne compte pas
+%%%
+\def\filedateDontCount{2025/05/28}%
+\def\fileversionDontCount{0.1a}%
+\message{-- \filedateDontCount\space v\fileversionDontCount}%
+% D'après twitter : https://twitter.com/DavidKButlerUoA/status/1700612346258002030/photo/1
+\setKVdefault[NCPP]{Largeur=5,Longueur=7,Unite=5mm,Rayon=1mm,Multiple=3,Couleur=black,Solution=false,Graines=false,Graine={}}%
+\defKV[NCPP]{Graine=\ifempty{#1}{}{\setKV[NCPP]{Graines}\PfCGraineAlea{#1}}}%
+
+\newtoks\tokcentre%
+\def\updatetokscentre#1\nil{\addtotok\tokcentre{#1,}}%
+
+\NewDocumentCommand\NeComptePasPoints{o}{%
+  \tokcentre{}%
+  \useKVdefault[NCPP]%
+  \setKV[NCPP]{#1}%
+  % on crée la liste de tous les numéros des points.
+  \def\NCPPLongueur{\useKV[NCPP]{Longueur}}%
+  \def\NCPPLargeur{\useKV[NCPP]{Largeur}}%
+  \xdef\PfCFooListeCentres{1}%
+  \xintFor* ##1 in{\xintSeq{2}{\fpeval{\NCPPLargeur*\NCPPLongueur}}}\do{%
+    \xdef\PfCFooListeCentres{\PfCFooListeCentres,##1}%
+  }%
+  \ChoixAlea{\fpeval{ceil(0.6*\NCPPLargeur*\NCPPLongueur)}}{\fpeval{floor(0.8*\NCPPLargeur*\NCPPLongueur)}}{\Titi}%
+  \MelangeListe{\PfCFooListeCentres}{\Titi}%
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\ListeCentres{\faa}%
+  \ignoreemptyitems%
+  \foreachitem\compteur\in\ListeCentres{\expandafter\updatetokscentre\compteur\nil}%
+  \modulo{\Titi}{\useKV[NCPP]{Multiple}}%
+  \ifboolKV[NCPP]{Solution}{%
+    Il faut faire des paquets de \useKV[NCPP]{Multiple} points. Il existe plusieurs schémas expliquant la réponse. En voici un qui regroupe tous les points.
+   }{%
+     \textbf{Ne Compte pas les points !}\\
+     Montre que le nombre de points \ifnum\remainder=0\relax%
+       est
+     \else
+       n'est pas\fi{} un multiple de \num{\useKV[NCPP]{Multiple}}.
+    }%
+  \begin{center}
+    \BuildNCPP{\the\tokcentre}%
+  \end{center}
+  \ifboolKV[NCPP]{Solution}{%
+      En faisant des paquets de \useKV[NCPP]{Multiple} points, on montre que le nombre de points \ifnum\remainder=0\relax%
+        est
+      \else
+        n'est pas\fi{} un multiple de \num{\useKV[NCPP]{Multiple}}.
+  }{}%
+}%
+
+\NewDocumentCommand\BuildNCPP{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      Unite=\useKV[NCPP]{Unite};
+      Rayon=\useKV[NCPP]{Rayon};
+      Longueur=\useKV[NCPP]{Longueur};
+      Largeur=\useKV[NCPP]{Largeur};
+      Multiple=\useKV[NCPP]{Multiple};
+      
+      boolean Choisi,Graines,Solution;
+      Solution=\useKV[NCPP]{Solution};
+      
+      color CouleurCercle;
+      CouleurCercle=\useKV[NCPP]{Couleur};
+      
+      TotalPoints=Longueur*Largeur;
+      
+      nbnoir:=0;%compte les noirs
+      nbblanc:=0;%compte les blancs
+      zr:=0;%pour compter les centres des points
+
+      vardef Allumage(text t)=
+      nbnoirs:=0;
+      for p_=t:
+      nbnoirs:=nbnoirs+1;
+      Allume[p_]:=true;
+      fill cercles(A[p_],Rayon) withcolor CouleurCercle;
+      endfor;
+      enddef;
+      
+      pair A[];
+
+      boolean Allume[];
+      for k=0 upto Largeur-1:
+      for l=1 upto Longueur:
+      Allume[k*Longueur+l]=false;
+      A[k*Longueur+l]=Unite*(l,-k);
+      endfor;
+      endfor;
+
+      Allumage(#1);
+      
+      if Solution:
+      nbdeplaces:=0;
+      zmontant=0;
+      zdescendant=TotalPoints;
+      for k=0 upto Largeur-1:
+      for l=1 upto Longueur:
+      zmontant:=zmontant+1;
+      if zmontant<zdescendant:
+      if Allume[zmontant]:
+      forever: exitif Allume[zdescendant]=false;
+      zdescendant:=zdescendant-1;
+      endfor;
+      nbdeplaces:=nbdeplaces+1;
+      if (zdescendant>zmontant) and (nbdeplaces<nbnoirs):
+      Allume[zmontant]:=false;
+      Allume[zdescendant]:=true;
+      fill cercles(A[zmontant],Rayon) withcolor white;
+      fill cercles(A[zdescendant],Rayon) withcolor LightSteelBlue;
+%      label.top(TEX("?"),A[zdescendant]);
+      zdescendant:=zdescendant-1;
+      fi;
+      fi;
+      fi;
+      endfor;
+      endfor;
+      %
+      %nbcases:=0;
+      %for k=0 upto Largeur-1:
+      %for l=1 upto Longueur:
+      %nbcases:=nbcases+1;
+      %if Allume[nbcases]:
+      %fill cercles(A[nbcases],Rayon) withcolor Gold;
+      %fi;
+      %endfor;
+      %endfor;
+      etape=1;
+      forever: exitif Allume[etape]=true;
+      etape:=etape+1;
+      endfor;
+%      label.top(TEX("!"),A[etape]);
+      for k=0 upto (TotalPoints-etape):
+      if ((k+1) mod Multiple)=0:
+      draw (A[etape+k]+Unite*(-0.25,-0.25))--(A[etape+k]+Unite*(0.25,0.25));
+      fi;
+      endfor;
+      for k=1 upto ((TotalPoints-etape-Multiple+1) mod Multiple):
+      fill cercles(A[TotalPoints-k+1],Rayon) withcolor red;
+      endfor;
+      fi;      
+    \end{mplibcode}
+  \else%
+    \begin{mpost}[mpsettings={Unite=\useKV[NCPP]{Unite};Rayon=\useKV[NCPP]{Rayon};Longueur=\useKV[NCPP]{Longueur};Largeur=\useKV[NCPP]{Largeur};Multiple=\useKV[NCPP]{Multiple};boolean Solution;Solution=\useKV[NCPP]{Solution};color CouleurCercle;CouleurCercle=\useKV[NCPP]{Couleur};}]
+      TotalPoints=Longueur*Largeur;
+      %
+      nbnoir:=0;%compte les noirs
+      nbblanc:=0;%compte les blancs
+      zr:=0;%pour compter les centres des points
+      %
+      vardef Allumage(text t)=
+      for p_=t:
+      Allume[p_]:=true;
+      fill cercles(A[p_],Rayon) withcolor CouleurCercle;
+      endfor;
+      enddef;
+      %
+      pair A[];
+      %
+      boolean Allume[];
+      for k=0 upto Largeur-1:
+      for l=1 upto Longueur:
+      Allume[k*Longueur+l]=false;
+      A[k*Longueur+l]=Unite*(l,-k);
+      endfor;
+      endfor;
+      %
+      Allumage(#1);
+      %
+      if Solution:
+      zmontant=0;
+      zdescendant=TotalPoints;
+      for k=0 upto Largeur-1:
+      for l=1 upto Longueur:
+      zmontant:=zmontant+1;
+      if zmontant<zdescendant:
+      if Allume[zmontant]:
+      forever: exitif Allume[zdescendant]=false;
+      zdescendant:=zdescendant-1;
+      endfor;
+      if zdescendant>zmontant:
+      fill cercles(A[zmontant],Rayon) withcolor white;
+      fill cercles(A[zdescendant],Rayon) withcolor LightSteelBlue;
+      zdescendant:=zdescendant-1;
+      fi;
+      fi;
+      fi;
+      endfor;
+      endfor;
+      for k=0 upto (TotalPoints-zdescendant):
+      if ((k+1) mod Multiple)=0:
+      drawarrow A[zdescendant+k+1]--(A[zdescendant+k+1]+Unite*(0.5,0));
+      fi;
+      endfor;
+      for k=1 upto ((TotalPoints-zdescendant) mod Multiple):
+      fill cercles(A[TotalPoints-k+1],Rayon) withcolor red;
+      endfor;
+      fi;      
+    \end{mpost}%
+  \fi%
+}%

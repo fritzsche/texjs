@@ -1,0 +1,266 @@
+%%
+%% This is file `semesterplannerlua.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% semesterplannerlua.dtx  (with options: `package')
+%% 
+%% This is a generated file.
+%% 
+%% Copyright (C) 2024 by Lukas Heindl <oss.heindl+latex@protonmail.com>
+%% --------------------------------------------------------------------------
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either version 1.3
+%% of this license or (at your option) any later version.
+%% The latest version of this license is in
+%%   http://www.latex-project.org/lppl.txt
+%% and version 1.3 or later is part of all distributions of LaTeX
+%% version 2005/12/01 or later.
+%% 
+\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+\ProvidesPackage{semesterplannerlua}
+   [2024/05/19 v1.1.2 Semesterplanner package in lua with tikz only]
+
+\RequirePackage{tikz}
+\usetikzlibrary{calendar, positioning, shapes.misc, backgrounds}
+\RequirePackage{pgfkeys}
+\RequirePackage{xcolor}
+\RequirePackage{fontawesome}
+\RequirePackage{luapackageloader} % use the default lua path as well
+\definecolor{seminar}{rgb}{1.0, 0.8, 0.0}
+\definecolor{lecture}{rgb}{0.2, 0.7, 1.0}
+\definecolor{tutorial}{rgb}{0.0, 0.8, 0.0}
+\definecolor{meeting}{rgb}{0.8, 0.0, 0.0}
+\definecolor{laboratory}{rgb}{0.8, 0.0, 0.0}
+\definecolor{fieldstudy}{rgb}{0.8, 0.0, 0.0}
+\definecolor{officehour}{rgb}{0.0, 0.4, 0.6}
+\definecolor{DodgerBlue}{HTML}{1E90FF}
+    \newcommand*{\semesterplannerLua@encircle}[1]{
+        \begin{minipage}[b][1em][c]{1.5em}
+            \begin{tikzpicture}
+                \node[fill,circle,inner sep=1pt, color = white] {#1};
+            \end{tikzpicture}
+        \end{minipage}
+    }
+\protected\def\oral{\faComment}
+\protected\def\written{\faPencil}
+    \protected\def\pmandatory{\semesterplannerLua@encircle{\textcolor{red}{\faWarning}}}
+    \protected\def\phigh{\semesterplannerLua@encircle{\textcolor{red}{\faFlag}}}
+    \protected\def\pmid{\semesterplannerLua@encircle{\textcolor{yellow}{\faFlag}}}
+    \protected\def\plow{\semesterplannerLua@encircle{\textcolor{green}{\faFlag}}}
+    \protected\def\pnone{\semesterplannerLua@encircle{\textcolor{gray}{\faTimesCircle}}}
+
+    \protected\def\teams{\semesterplannerLua@encircle{\textcolor{DodgerBlue}{\faWindows}}}
+    \protected\def\zoom{\semesterplannerLua@encircle{\textcolor{DodgerBlue}{\faCamera}}}
+    \protected\def\youtube{\semesterplannerLua@encircle{\textcolor{red}{\faYoutubePlay}}}
+    \protected\def\BBB{\semesterplannerLua@encircle{\textcolor{DodgerBlue}{\faBold}}}
+
+    \protected\def\tbd{\faQuestion}
+    \protected\def\tba{\faBullhorn}
+
+\directlua{sp = require("semesterplannerLua_timetable.lua")}
+\directlua{cal = require("semesterplannerLua_calendar.lua")}
+    \pgfkeys{
+        /semesterplannerLua/timetable/env/.cd,
+        days/.initial={Mon,Tue,Wend,Thur,Fri}, days/.default={Mon,Tue,Wend,Thur,Fri},
+        dayse/.initial={M,T,W,Th,F}, dayse/.default={M,T,W,Th,F},
+        %
+        start time/.initial=, start time/.default=,
+        end time/.initial=, end time/.default=,
+        %
+        width/.initial=\textwidth, width/.default=\textwidth,
+        length/.initial=10, length/.default=10,
+        %
+        /semesterplannerLua/timetable/event/.cd,
+        % event arguments
+        content/.initial=, content/.default=,
+        %
+        time/.initial=, time/.default=,
+        day/.initial=, day/.default=,
+        %
+        tikz/.initial=, tikz/.default=,
+        scale width/.initial=1, scale width/.default=1,
+        offset/.initial=0, offset/.default=0,
+        %
+        textcolor/.initial=, textcolor/.default=,
+        title/.initial=, title/.default=,
+        speaker/.initial=, speaker/.default=,
+        location/.initial=, location/.default=,
+        password/.initial=, password/.default=,
+        prio/.initial=, prio/.default=,
+        type/.initial=, type/.default=,
+        formatter/.initial=timetableformatter, formatter/.default=timetableformatter,
+        %
+        /semesterplannerLua/calendar/.cd,
+        draw/.initial={true}, draw/.default={true},
+        room/.initial={}, room/.default={},
+        time/.initial={}, time/.default={},
+        prio/.initial={}, prio/.default={},
+        course/.initial={}, course/.default={},
+        desc/.initial={}, desc/.default={},
+        type/.initial={}, type/.default={},
+        date/.initial={}, date/.default={},
+        end/.initial={}, end/.default={},
+        tikz/.initial={}, tikz/.default={},
+        period/.initial={nil}, period/.default={nil},
+        shift/.initial={true}, shift/.default={true},
+        print/.initial={true}, print/.default={true},
+    }
+\tikzoption{day headings}{\tikzstyle{day heading}=[#1]}
+\tikzstyle{day heading}=[]
+\tikzstyle{day letter headings}=[
+    execute before day scope={ \ifdate{day of month=1}{%
+      \pgfmathsetlength{\pgf@ya}{\tikz@lib@cal@yshift}%
+      \pgfmathsetlength\pgf@xa{\tikz@lib@cal@xshift}%
+      \pgftransformyshift{-\pgf@ya}
+      \foreach \d/\l in {0/M,1/T,2/W,3/T,4/F,5/S,6/S} {
+        \pgf@xa=\d\pgf@xa%
+        \pgftransformxshift{\pgf@xa}%
+        \pgftransformyshift{\pgf@ya}%
+        \node[every day,day heading]{\l};%
+      }
+    }{}%
+  }%
+]
+\newenvironment{timetable}[1][]{
+    \section*{\faClockO~Timetable}
+    \pgfkeys{/semesterplannerLua/timetable/env/.cd,days,dayse,start time,end time,width,length,#1}
+    \directlua{sp.init{
+        days=[[\pgfkeysvalueof{/semesterplannerLua/timetable/env/days}]],
+        min=[[\pgfkeysvalueof{/semesterplannerLua/timetable/env/start time}]],
+        max=[[\pgfkeysvalueof{/semesterplannerLua/timetable/env/end time}]],
+        dayse=[[\pgfkeysvalueof{/semesterplannerLua/timetable/env/dayse}]]}}
+    \newcommand{\semesterplannerLua@event}[1][]{
+        \pgfkeys{/semesterplannerLua/timetable/event/.cd,content,time,day,tikz,scale
+        width,offset,textcolor,title,speaker,type,location,password,prio,formatter, ##1}
+        \directlua{
+            sp.addEvent{
+                time="\pgfkeysvalueof{/semesterplannerLua/timetable/event/time}",
+                day="\pgfkeysvalueof{/semesterplannerLua/timetable/event/day}",
+                tikz=[[\pgfkeysvalueof{/semesterplannerLua/timetable/event/tikz}]],
+                offset=\pgfkeysvalueof{/semesterplannerLua/timetable/event/offset},
+                scale_width=\pgfkeysvalueof{/semesterplannerLua/timetable/event/scale width},
+                formatter=\pgfkeysvalueof{/semesterplannerLua/timetable/event/formatter},
+                textcolor=[[\pgfkeysvalueof{/semesterplannerLua/timetable/event/textcolor}]],
+                title=[[\pgfkeysvalueof{/semesterplannerLua/timetable/event/title}]],
+                speaker=[[\pgfkeysvalueof{/semesterplannerLua/timetable/event/speaker}]],
+                location=[[\pgfkeysvalueof{/semesterplannerLua/timetable/event/location}]],
+                password=[[\pgfkeysvalueof{/semesterplannerLua/timetable/event/password}]],
+                prio=[[\pgfkeysvalueof{/semesterplannerLua/timetable/event/prio}]],
+                type=[[\pgfkeysvalueof{/semesterplannerLua/timetable/event/type}]],
+            }
+        }
+    }
+    \newcommand{\lecture}[1][]{
+        \semesterplannerLua@event[tikz={fill=lecture,}, textcolor=white, type=lect, ##1]
+        \ignorespaces
+    }
+    \newcommand{\seminar}[1][]{
+        \semesterplannerLua@event[tikz={fill=seminar,}, textcolor=white, type=sem, ##1]
+        \ignorespaces
+    }
+    \newcommand{\tutorial}[1][]{
+        \semesterplannerLua@event[tikz={fill=tutorial,}, textcolor=white, type=tut, ##1]
+        \ignorespaces
+    }
+    \newcommand{\meeting}[1][]{
+        \semesterplannerLua@event[tikz={fill=meeting,}, textcolor=white, type=meet, ##1]
+        \ignorespaces
+    }
+    \newcommand{\officehour}[1][]{
+        \semesterplannerLua@event[tikz={fill=officehour,}, textcolor=white, type=office, ##1]
+        \ignorespaces
+    }
+    \newcommand{\laboratory}[1][]{
+        \semesterplannerLua@event[tikz={fill=laboratory,}, textcolor=white, type=lab, ##1]
+        \ignorespaces
+    }
+    \newcommand{\fieldstudy}[1][]{
+        \semesterplannerLua@event[tikz={fill=fieldstudy,}, textcolor=white, type=fieldstudy, ##1]
+        \ignorespaces
+    }
+}{
+    \directlua{sp.draw(
+        [[\pgfkeysvalueof{/semesterplannerLua/timetable/env/length}]],
+        [[\pgfkeysvalueof{/semesterplannerLua/timetable/env/width}]])}
+}
+
+\newcommand{\printSpCalendar}[3][3]{\directlua{cal.drawCalendar("#2", "#3", #1)}}
+
+\newenvironment{appointments}[2][Room]{
+    \directlua{cal.init(#2)}
+    \newcommand{\appointment}[1][]{%
+        \pgfkeys{/semesterplannerLua/calendar/.cd,draw,room,time,prio,course,desc,date,end,tikz,period,type,shift,print, ##1}%
+        \directlua{
+            cal.addAppointment{draw=\pgfkeysvalueof{/semesterplannerLua/calendar/draw},
+            room=[[\pgfkeysvalueof{/semesterplannerLua/calendar/room}]],
+            time=[[\pgfkeysvalueof{/semesterplannerLua/calendar/time}]],
+            prio=[[\pgfkeysvalueof{/semesterplannerLua/calendar/prio}]],
+            course=[[\pgfkeysvalueof{/semesterplannerLua/calendar/course}]],
+            desc=[[\pgfkeysvalueof{/semesterplannerLua/calendar/desc}]],
+            date=[[\pgfkeysvalueof{/semesterplannerLua/calendar/date}]],
+            endDate=[[\pgfkeysvalueof{/semesterplannerLua/calendar/end}]],
+            tikz=[[\pgfkeysvalueof{/semesterplannerLua/calendar/tikz}]],
+            period=\pgfkeysvalueof{/semesterplannerLua/calendar/period},
+            shift=\pgfkeysvalueof{/semesterplannerLua/calendar/shift},
+            print=\pgfkeysvalueof{/semesterplannerLua/calendar/print}}}%
+        \ignorespaces
+        }
+    \section*{\faCalendar~Appointments}
+    \begin{tabular}{rlllll}
+        \textbf{Date}&\textbf{Time}&\textbf{Course}&\textbf{Description}&\textbf{#1}&\textbf{Prio.}\\
+}{
+    \end{tabular}
+}
+
+\newenvironment{exams}[1]{
+    \directlua{cal.init(#1)}
+    \newcommand{\exam}[1][]{%
+        \pgfkeys{/semesterplannerLua/calendar/.cd,draw,room,time,prio,course,desc,date,end,tikz,period,type,shift,print, ##1}%
+        \directlua{
+            cal.addExam{
+                draw=\pgfkeysvalueof{/semesterplannerLua/calendar/draw},
+                room=[[\pgfkeysvalueof{/semesterplannerLua/calendar/room}]],
+                time=[[\pgfkeysvalueof{/semesterplannerLua/calendar/time}]],
+                course=[[\pgfkeysvalueof{/semesterplannerLua/calendar/course}]],
+                desc=[[\pgfkeysvalueof{/semesterplannerLua/calendar/desc}]],
+                date=[[\pgfkeysvalueof{/semesterplannerLua/calendar/date}]],
+                tikz=[[\pgfkeysvalueof{/semesterplannerLua/calendar/tikz}]],
+                type=[[\pgfkeysvalueof{/semesterplannerLua/calendar/type}]],
+                shift=\pgfkeysvalueof{/semesterplannerLua/calendar/shift},
+                print=\pgfkeysvalueof{/semesterplannerLua/calendar/print}}}%
+        \ignorespaces
+        }
+    \section*{\faStickyNoteO~Exams}
+    \begin{tabular}{rllll}
+        \textbf{Date}&\textbf{Time}&\textbf{Course}&\textbf{Type}&\textbf{Note}\\
+}{
+    \end{tabular}
+}
+
+\newenvironment{deadlines}[1]{
+    \directlua{cal.init(#1)}
+    \newcommand{\deadline}[1][]{%
+        \pgfkeys{/semesterplannerLua/calendar/.cd,draw,room,time,prio,course,desc,date,end,tikz,period,type,shift,print, ##1}%
+        \directlua{
+            cal.addDeadline{
+                draw=\pgfkeysvalueof{/semesterplannerLua/calendar/draw},
+                course=[[\pgfkeysvalueof{/semesterplannerLua/calendar/course}]],
+                desc=[[\pgfkeysvalueof{/semesterplannerLua/calendar/desc}]],
+                date=[[\pgfkeysvalueof{/semesterplannerLua/calendar/date}]],
+                tikz=[[\pgfkeysvalueof{/semesterplannerLua/calendar/tikz}]],
+                prio=[[\pgfkeysvalueof{/semesterplannerLua/calendar/prio}]],
+                shift=\pgfkeysvalueof{/semesterplannerLua/calendar/shift},
+                print=\pgfkeysvalueof{/semesterplannerLua/calendar/print}}}%
+        \ignorespaces
+        }
+    \section*{\faStickyNoteO~Deadlines}
+    \begin{tabular}{rlll}
+        \textbf{Date}&\textbf{Course}&\textbf{Description}&\textbf{Prio}\\
+}{
+    \end{tabular}
+}
+\endinput
+%%
+%% End of file `semesterplannerlua.sty'.

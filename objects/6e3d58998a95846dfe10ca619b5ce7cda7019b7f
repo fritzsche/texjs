@@ -1,0 +1,441 @@
+# Copyright (C) 2025 by Charles P. Schaum <charles[dot]schaum@comcast.net>
+# -----------------------------------------------
+#
+# This file may be distributed and/or modified under the
+# conditions of the LaTeX Project Public License, either
+# version 1.3 of this license or (at your option) any
+# later version. The latest version of this license is in:
+#
+#   http://www.latex-project.org/lppl.txt
+#
+# and version 1.3 or later is part of all distributions
+# of LaTeX version 2005/12/01 or later.
+#
+# This work includes all source and generated files
+# described as such in README.md, included herein.  
+#
+# -----------------------------------------------
+#
+# Usage:
+#
+# 	Delete all generated files, do clean build on
+# 	POSIX--compliant systems, WSL, or Cygwin.
+#
+# 		make
+#
+#	This target does the same default build as above.
+#
+# 		make release
+#
+# 	Just do a quick rebuild; keep generated files.
+# 	One must edit or touch `$(NAME).dtx'.
+#
+#		make package
+#
+#	Install/remove supplied files into the user's texmf tree.
+#	These targets only work in a POSIX environment and do not
+#	install from WSL or Cygwin into a Windows environment
+#	They have not been tested on MikTeX for Linux.
+#
+#		make inst
+#		make uninst
+#
+#	Install/remove supplied files into the local texmf tree.
+#	Needs an appropriate level of permission. These targets
+#	only work in a fully POSIX environment. They have not
+#	been tested on MikTeX for Linux. Note that one should
+#	not put "sudo" before these commands because they will
+#	not find the proper path variables. Just let the make
+#	target ask for the password.
+#
+#		make install
+#		make uninstall
+#
+#	Add options if needed, such as
+#
+#		make ADDOPTS="--synctex=1"
+#
+#	Compile test file with pdflatex.
+#
+#		make test
+#
+#	Compile test file with different engines.
+#
+#		make test ENGINE=xelatex
+#		make test ENGINE=lualatex
+#		make test ENGINE=pdflatex
+#		make test ENGINE=latex
+#
+#		make test ENGINE=xetex
+#		make test ENGINE=luatex
+#		make test ENGINE=dviluatex
+#		make test ENGINE=pdftex
+#		make test ENGINE=tex
+#		make test ENGINE=eplain
+#		make test ENGINE=lollipop
+#
+#	The dvilualatex engine is not available due to manual font setup prerequisites.
+#
+#	Clean up auxiliary files for the package, examples, and tests.
+#
+#		make clean
+#		make testclean
+#
+#	Remove all generated files.
+#
+#		make distclean
+#
+#	Regenerate files from the dtx file if needed. This target
+#	does not build the package. It is handy when editing the
+#	dtx to work on README.md, examples.tex, and the like.
+#
+#		make unpack
+#
+#	Do a clean package build and create a zip archive
+#	ready for distribution.
+#
+#		make zip
+#
+# -----------------------------------------------
+#
+# Programs necessary to make this package:
+#
+#	POSIX Build Utilities
+#		bash
+#		make
+#		sed
+#		zip
+#
+#	TeX Distro Programs
+#		pdflatex
+#		pdftex
+#		kpsewhich
+#		makeindex
+#
+# -----------------------------------------------
+#
+# Recommended prerequisites, primary tier:
+#
+#	TeX Distro Programs
+#		xelatex
+#		lualatex
+#		latex
+#		xetex
+#		luatex
+#		pdftex
+#		tex
+#		ltxfileinfo
+#		dvipdfmx
+#
+# -----------------------------------------------
+#
+# Recommended prerequisites, secondary tier:
+#
+#	POSIX Build Utilities
+#		dvipdf
+#
+#	TeX Distro Programs
+#		dviluatex
+#		eplain
+#		lollipop
+#
+# -----------------------------------------------
+#
+
+#
+# Assign most variables in this section. Here we determine what
+# programs exist and choices related to that.
+#
+
+# Name of package
+
+NAME = schemata
+
+# Shell to use; default is bash
+
+SHELL = bash
+
+# Value of current working directory
+
+PWD = $(shell pwd)
+
+# LaTeX engines to use for building the package and for typesetting
+# the examples file and testing files; below is the default.
+
+# We ttest if we are on Windows by adding a .exe extension.
+
+EXT = .exe
+
+ENGINE ?= pdflatex
+BUILDENGINE := $(shell command -v pdflatex$(EXT) 2> /dev/null)
+TESTENGINE := $(shell command -v $(ENGINE)$(EXT) 2> /dev/null)
+
+# If we cannot find the engine, try the version without an extension.
+
+ifeq ($(strip $(BUILDENGINE)),)
+EXT =
+BUILDENGINE := $(shell command -v pdflatex$(EXT) 2> /dev/null)
+endif
+
+ifeq ($(strip $(TESTENGINE)),)
+EXT =
+TESTENGINE := $(shell command -v $(ENGINE)$(EXT) 2> /dev/null)
+endif
+
+# Get package version info; check if not available in some environments.
+# Create a zip file name that will not cause problems, e.g., in Windows.
+
+DOVERSION := $(shell command -v ltxfileinfo 2> /dev/null)
+
+ifeq ($(strip $(DOVERSION)),)
+	ZIPNAME = $(NAME)
+else
+	ZIPNAME = $(NAME)-$(shell ltxfileinfo -v $(NAME).dtx|sed -e 's/^v//')
+endif
+
+# Determine which dvi to pdf converter to use. If Ghostscript is installed
+# use dvipdf, otherwise dvipdfmx. Do not use Ghostscript on Windows.
+
+DVIPDF := $(shell command -v dvipdf 2> /dev/null)
+
+ifeq ($(strip $(DVIPDF)),)
+	DVIPDF = dvipdfmx
+else
+ifneq ($(strip $(EXT)),)
+	DVIPDF = dvipdfmx
+else
+	DVIPDF = dvipdf
+endif
+endif
+
+# Build options are in this variable.
+
+BUILDOPTS = --recorder --interaction=nonstopmode
+
+# Test and example options are in this variable.
+
+TESTOPTS = --interaction=nonstopmode
+
+# Add options with this variable, e.g.: make ADDOPTS="--synctex=1"
+
+ADDOPTS ?= 
+
+# Core options for generating the sty file and included files
+# the normal way. Alternate is via make unpack.
+
+COREOPTS = --shell-escape --recorder --interaction=batchmode
+
+# Local, system-wide tex tree
+
+LOCAL = $(shell kpsewhich$(EXT) --var-value TEXMFLOCAL)
+
+# Tex tree in user's home directory
+
+UTREE = $(shell kpsewhich$(EXT) --var-value TEXMFHOME)
+
+# Used when testing for formats that are hard to deal with.
+
+DVILUALATEX = dvilualatex
+EPLAIN = eplain
+
+#
+# Package Building Section
+#
+
+# Default make target is the package release and its dependencies.
+# When building, erase all generated files to make a fresh build.
+
+release : distclean package clean
+
+# Use this recipe to make the package without removing all prior files.
+
+package : $(NAME).pdf
+	@echo "Package has been made successfully."
+
+# This is the recipe for the package and the docs.
+
+$(NAME).pdf : $(NAME).sty
+ifeq ($(strip $(BUILDENGINE)),)
+	$(error Cannot find engine for building.\
+	Please check your installation)
+endif
+	$(BUILDENGINE) $(BUILDOPTS) $(ADDOPTS) $(NAME).dtx > /dev/null
+	makeindex$(EXT) -q -s gglo.ist -o $(NAME).gls $(NAME).glo
+	makeindex$(EXT) -q -s gind.ist -o $(NAME).ind $(NAME).idx
+	$(BUILDENGINE) $(BUILDOPTS) $(ADDOPTS) $(NAME).dtx > /dev/null
+	$(BUILDENGINE) $(BUILDOPTS) $(ADDOPTS) $(NAME).dtx > /dev/null
+
+# This is the core dependency. When run we get all extracted files:
+# README.md, nameauth.ins, nameauth.sty, examples.tex, and the test
+# files as well.
+
+$(NAME).sty : $(NAME).dtx
+	$(BUILDENGINE) $(COREOPTS) $(ADDOPTS) $(NAME).dtx > /dev/null
+
+#
+# Testing Section
+#
+
+# Make schematest pdf using the TeX to pdf pattern rule.
+# Ensure that at least the style file exists when doing so.
+# Show success messages for only allowed engines.
+
+test : $(NAME).sty schematest.pdf
+	@echo "Test file has been made successfully."
+
+# Pattern for pdf files.
+
+%.pdf : %.tex
+ifeq ($(strip $(TESTENGINE)),)
+ifeq ($(ENGINE), $(EPLAIN))
+	pdftex$(EXT) --jobname=$* "\input eplain \input $*"
+else
+	$(error $(ENGINE) may not be available in some cases.\
+	Check documentation. Cannot find engine for testing;\
+	please check your installation)
+endif
+else
+ifeq ($(ENGINE), $(DVILUALATEX))
+	$(error $(ENGINE) requires manual font installation.\
+	This make file does not process it)
+else
+	$(TESTENGINE) $(TESTOPTS) $< > /dev/null
+	if [ -f $*.dvi ]; then $(DVIPDF)$(EXT) $*; fi
+	if [ -f $*.out.ps ]; then rm $*.out.ps; fi
+endif
+endif
+
+#
+# Utility Section
+#
+
+# Set up phony targets that do not depend on any specific files.
+
+.PHONY: test unpack clean testclean distclean uninst ununstall
+
+# Simply unpack the other supplied files from the dtx file.
+# Not usually needed to build the package, but can be used,
+# for example, in case one accidentally deletes a file.
+
+unpack :
+	pdftex$(EXT) $(NAME).dtx
+
+# Delete all auxiliary and log files for the package; prep for
+# re-running building and packaging targets. The file
+# "nameauth.dtx.aux" has appeared in some systems. Just in case
+# someone tries to create a "nameauth.dvi" file, we delete it.
+
+clean :
+	rm -f $(NAME).{aux,glo,gls,idx,rdx,ilg,ind,rnd,toc}
+	rm -f $(NAME).{dvi,fls,hd,log,out,tmp}
+	rm -f $(NAME).synctex.gz
+	rm -f $(NAME).'synctex(busy)'
+	rm -f $(NAME).dtx.aux
+
+# Delete all auxiliary and log files for the test file; leave
+# just the TeX file for re-running the test target.
+
+testclean :
+	rm -f schematest.{aux,glo,gls,idx,rdx,ilg,ind,rnd,toc}
+	rm -f schematest.{dvi,fls,hd,log,out,pdf,tmp}
+	rm -f schematest.synctex.gz
+	rm -f schematest.'synctex(busy)'
+
+# Delete all generated files related to package building except zip.
+
+distclean : clean testclean
+	rm -f $(NAME).{pdf,ins,sty,zip}
+	rm -f README.md
+	rm -f schemata-eps-converted-to.pdf
+	rm -f schematest.tex
+
+# Install the package release into the user's tree.
+# Note that this target depends on the "package" target,
+# so we do not do a clean build. This may aid testing.
+
+inst : package
+ifeq ($(strip $(UTREE)),)
+	$(error "Unable to install; no path to user tree." )
+else
+	mkdir -p $(UTREE)/{tex,source,doc}/generic/$(NAME)
+	cp $(NAME).dtx $(UTREE)/source/generic/$(NAME)
+	cp $(NAME).eps $(UTREE)/source/generic/$(NAME)
+	cp Makefile $(UTREE)/source/generic/$(NAME)
+	cp $(NAME).sty $(UTREE)/tex/generic/$(NAME)
+	cp $(NAME).pdf $(UTREE)/doc/generic/$(NAME)
+	cp schematest.tex $(UTREE)/doc/generic/$(NAME)
+	cp README.md $(UTREE)/doc/generic/$(NAME)
+endif
+
+# Install the package release into the system tree.
+# Note that this target depends on the "package" target,
+# so we do not do a clean build. This may aid testing.
+
+install : package
+ifeq ($(strip $(LOCAL)),)
+	$(error "Unable to install; no path to local tree." )
+else
+	sudo mkdir -p $(LOCAL)/{tex,source,doc}/generic/$(NAME)
+	sudo cp $(NAME).dtx $(LOCAL)/source/generic/$(NAME)
+	sudo cp $(NAME).eps $(LOCAL)/source/generic/$(NAME)
+	sudo cp Makefile $(LOCAL)/source/generic/$(NAME)
+	sudo cp $(NAME).sty $(LOCAL)/tex/generic/$(NAME)
+	sudo cp $(NAME).pdf $(LOCAL)/doc/generic/$(NAME)
+	sudo cp schematest.tex $(LOCAL)/doc/generic/$(NAME)
+	sudo cp README.md $(LOCAL)/doc/generic/$(NAME)
+endif
+
+# Uninstall the package release from the user's tree.
+# Show the state of the texmf tree thereafter.
+
+uninst : 
+ifeq ($(strip $(LOCAL)),)
+	$(error "Unable to uninstall; no path to user tree." )
+else
+	rm -f $(UTREE)/source/generic/$(NAME)/$(NAME).dtx 
+	rm -f $(UTREE)/source/generic/$(NAME)/Makefile
+	rm -f $(UTREE)/tex/source/$(NAME)/$(NAME).sty
+	rm -f $(UTREE)/doc/generic/$(NAME)/$(NAME).pdf 
+	rm -f $(UTREE)/doc/generic/$(NAME)/*.tex
+	rm -f $(UTREE)/doc/generic/$(NAME)/README.md 
+	rmdir $(UTREE)/{tex,source,doc}/generic/$(NAME)
+	@echo "The texmf tree now looks like:"
+	ls $(UTREE)/source/generic/
+	ls $(UTREE)/tex/generic/
+	ls $(UTREE)/doc/generic/
+endif
+
+# Uninstall the package release from the system tree.
+
+uninstall : 
+ifeq ($(strip $(LOCAL)),)
+	$(error "Unable to uninstall; no path to local tree." )
+else
+	sudo rm -f $(LOCAL)/source/generic/$(NAME)/$(NAME).dtx 
+	sudo rm -f $(LOCAL)/source/generic/$(NAME)/Makefile
+	sudo rm -f $(LOCAL)/tex/generic/$(NAME)/$(NAME).sty
+	sudo rm -f $(LOCAL)/doc/generic/$(NAME)/$(NAME).pdf
+	sudo rm -f $(LOCAL)/doc/generic/$(NAME)/*.tex
+	sudo rm -f $(LOCAL)/doc/generic/$(NAME)/README.md
+	sudo rmdir $(LOCAL)/{tex,source,doc}/generic/$(NAME)
+	@echo "The texmf tree now looks like:"
+	ls $(LOCAL)/source/generic/
+	ls $(LOCAL)/tex/generic/
+	ls $(LOCAL)/doc/generic/
+endif
+
+# Create a zip file for upload to CTAN. On systems where ltxfileinfo
+# cannot be found, we create a zip file without a version in its name
+# instead of a zip file with a dash at the end, which can cause some
+# problems on Windows in certain cases.
+
+zip : release
+	rm -f $(NAME)*.zip
+	ln -sf . $(NAME)
+	zip -Drq $(PWD)/$(ZIPNAME).zip \
+	$(NAME)/{Makefile,README.md,\
+	schematest.tex,\
+	$(NAME).{dtx,pdf,eps,sty}}
+	rm $(NAME)
+	@echo "Zip file has been made successfully."
+

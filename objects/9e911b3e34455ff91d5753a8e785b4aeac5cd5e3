@@ -1,0 +1,1735 @@
+% \iffalse meta-comment
+%
+%% File: simples-matrices.dtx 
+%% Copyright (C) 2022 Yvon Henel aka Le TeXnicien de surface
+%%
+%% It may be distributed and/or modified under the conditions of the
+%% LaTeX Project Public License (LPPL), either version 1.3c of this
+%% license or (at your option) any later version.  The latest version
+%% of this license is in the file
+%%
+%%    http://www.latex-project.org/lppl.txt
+%%
+%
+%<*driver|package|doc>
+\RequirePackage{expl3}[2020/01/12]
+\GetIdInfo$Id: simples-matrices.dtx 1.0.1 2022-07-03 TdS $
+  {}
+%</driver|package|doc>
+%<*driver>
+\documentclass[full]{l3doc}
+% \usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage[french,main=english]{babel}
+\usepackage{simples-matrices}
+\usepackage{xspace}
+\usepackage{csquotes}
+
+\providecommand\darg[3]{\texttt{#1}\meta{#2}\texttt{#3}}
+
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \title{^^A
+%   The \pkg{simples-matrices} package^^A
+%   \thanks{This file describes v\ExplFileVersion, last revised \ExplFileDate.}^^A
+% }
+%
+% \author{^^A
+%  Yvon Henel\thanks^^A
+%    {^^A
+%      E-mail:
+%        \href{mailto:le.texnicien.de.surface@yvon-henel.fr}
+%          {le.texnicien.de.surface@yvon-henel.fr}^^A
+%    }^^A
+% }
+%
+% \date{Released \ExplFileDate}
+%
+% \maketitle
+% 
+% \changes{v1.0}{2022/06/08}{First public version.\foreignlanguage{french}{\emph{Première version publique.}}}
+% \changes{v1.0.1}{2022/07/03}{Some improvements in the documentation.\foreignlanguage{french}{\emph{Quelques améliorations dans la documentation.}}} 
+%
+% \thispagestyle{empty}
+% 
+% \noindent\hrulefill
+%
+% \begin{otherlanguage}{french}
+% \begin{abstract}
+%   Cette extension fournit des commandes pour définir et écrire des matrices en
+%   donnant leurs coefficients, par ligne, dans une vliste (liste de valeurs
+%   séparées par des virgules).
+% 
+%   La documentation française pour l'utilisateur de l'extension
+%   \pkg{simples-matrices} est disponible sous le nom de
+%   \texttt{simples-matrices-fra}. 
+% \end{abstract}
+% \end{otherlanguage}
+% 
+% \noindent\hrulefill
+%
+% \begin{abstract}
+%   This package provides macros to define and write matrices the coefficients
+%   of which are given, row by row, in a clist (list of values separated by
+%   commas).
+%   
+%   The English documentation for the final user of the package
+%   \pkg{simples-matrices} is available in the file
+%   \texttt{simples-matrices-eng}.
+% \end{abstract}
+% 
+% \noindent\hrulefill
+% 
+% \begin{documentation}
+%
+%
+%\section{Summary of Syntax of Document Commands}
+%\label{sec:summary}
+%
+%
+% 
+% \begin{function}{\matrice}
+% \begin{syntax}
+% \cs{matrice}\parg{prefix}\darg{\string<}{clist of key-value pairs}{\string>}\oarg{type}\marg{clist of coefficients}
+% \end{syntax}
+% \end{function}
+% 
+% \begin{function}{\declarermatrice}
+%   \begin{syntax}
+%     \cs{declarermatrice*}\parg{prefix}\darg{\string<}{clist of key-value pairs}{\string>}\marg{matrix name}\oarg{type}\marg{clist of coefficients}
+%   \end{syntax}
+% \end{function}
+% 
+% \begin{function}{\lamatrice}
+%   \begin{syntax}
+%     \cs{lamatrice}\parg{prefix}\darg{\string<}{clist of key-value pairs}{\string>}\marg{matrix name}
+%   \end{syntax}
+% \end{function}
+%
+% \begin{function}{\MatriceInterieur}
+%   \begin{syntax}
+%     \cs{MatriceInterieur}
+%   \end{syntax}
+% \end{function}
+%
+% \begin{function}{\LaMatriceInterieur}
+%   \begin{syntax}
+%     \cs{LaMatriceInterieur}\marg{matrix name}
+%   \end{syntax}
+% \end{function}
+% 
+% \begin{function}{\simplesmatricessetup}
+%   \begin{syntax}
+%     \cs{simplesmatricessetup}\marg{clist of key-value pairs}
+%   \end{syntax}
+% \end{function}
+% 
+% \begin{function}{\matid}
+%   \begin{syntax}
+%     \cs{matid}\oarg{diagonal coefficient, default \(1\)}\marg{size of the square matrix}
+%   \end{syntax}
+% \end{function}
+% 
+% \begin{function}{\matnulle}
+%   \begin{syntax}
+%     \cs{matid}\oarg{diagonal coefficient, default \(0\)}\marg{size of the square matrix}
+%   \end{syntax}
+% \end{function}
+% 
+% \end{documentation}
+%
+% \iffalse
+%<*doc> 
+\documentclass[full]{l3doc}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+%<FRA>\usepackage[english,main=french]{babel}
+%<ENG>\usepackage[french,main=english]{babel}
+\usepackage{xparse}
+\usepackage{simples-matrices}
+\newcommand\BOP{\discretionary{}{}{}}
+\usepackage{xspace}
+\usepackage{csquotes}
+\usepackage{fancyvrb,fancyvrb-ex}
+\usepackage{listings}
+\usepackage{mathtools}
+\usepackage{delarray}
+\usepackage{nicematrix}
+
+\providecommand\darg[3]{ \texttt{#1} \meta{#2} \texttt{#3} }
+
+% \colorlet{option}{olive!75!black}
+% Couleur des mots-clés de niveau 1
+\colorlet{keyword20}{cyan} %!75!black
+% Couleur des mots-clés de niveau 2
+\colorlet{keyword30}{teal}
+\colorlet{keycolor}{green!50!black}
+\colorlet{dollarcolor}{violet}
+\colorlet{cmdmuette}{blue}
+\colorlet{cmdcausante}{red}
+
+\lstset{frame=single,%
+  language=[LaTeX]{TeX},%
+  showspaces=false,%
+  breaklines=true,%
+  breakatwhitespace=true,% 
+  basicstyle=\ttfamily\bfseries,%
+  alsoletter={*-$},% 
+  texcsstyle=*[2]\color{cmdcausante},%
+  texcs=[2]{matrice,declarermatrice*,lamatrice,matid,matnulle,MatriceInterieur,LaMatriceInterieur},% 
+  texcsstyle=*[3]\color{cmdmuette},%
+  texcs=[3]{declarermatrice,simplesmatricessetup},% 
+  keywordstyle=[20]\color{keyword20},%
+  keywordstyle=[30]\color{keyword30},%
+  keywordstyle=[40]\color{keycolor},%
+  keywordstyle=[50]\color{dollarcolor},%
+  keywords=[20]{tabular,array,matrix,matrix*,NiceArray},%
+  keywords=[30]{x,S,T,I,J,C,O,D},%
+  keywords=[40]{out-of-box,prefix,envir,typeord,argopt},%
+  keywords=[50]{$},%
+  escapeinside={\%*@}{@*)}%
+}
+
+\newcommand{\MacroPres}[2]{\textcolor{#1}{\textbf{\cs{#2}}}}
+\newcommand{\csmute}{\MacroPres{cmdmuette}}
+\newcommand{\csprint}{\MacroPres{cmdcausante}}
+\newcommand{\ObjetPres}[2]{\textcolor{#1}{\textbf{\texttt{#2}}}}
+\newcommand{\keyname}{\ObjetPres{keycolor}}
+\newcommand{\envir}{\ObjetPres{keyword20}}
+\newcommand{\TypeMat}{\ObjetPres{keyword30}}
+
+\newcommand{\UnExemple}{%
+  \par \medskip \par \noindent
+  \begin{minipage}[c]{0.66\linewidth}
+    \lstinputlisting[gobble=0, frame=single, numbers=left, numberstyle={\small}]{code00.tex}
+  \end{minipage}
+  \hspace{\stretch{1}}
+  \begin{minipage}[c]{0.32\linewidth}
+    \small 
+    \input{code00}
+  \end{minipage}
+  \par \medbreak}
+
+\newcommand*{\vliste}{liste\xspace}
+
+%<FRA> \newcommand{\VoirEx}[1]{(voir exemple en page~\pageref{#1})}
+%<ENG> \newcommand{\VoirEx}[1]{(see example on page~\pageref{#1})}
+
+\begin{document}
+%<*FRA>
+\title{Guide de l'utilisateur de \pkg{simples-matrices}\thanks{Ce fichier décrit
+    la version~\ExplFileVersion, dernière révision~\ExplFileDate.\\
+    \emph{En souvenir de ma grand-mère maternelle}, Adrienne \textsc{Binaut}
+    (1908-03-23 -- 1997-06-08).}  }
+%</FRA>
+%<*ENG>
+\title{\pkg{simples-matrices} user guide\thanks{This file describes
+    version~\ExplFileVersion, last revised~\ExplFileDate.\\
+    \emph{In memory of my maternal grandmother} Adrienne \textsc{Binaut}
+    (1908-03-23 -- 1997-06-08).}  }
+%</ENG>
+\author{Yvon Henel\thanks{E-mail:
+    \href{mailto:le.texnicien.de.surface@yvon-henel.fr}
+    {le.texnicien.de.surface@yvon-henel.fr}}}
+\maketitle
+\noindent\hrulefill
+
+\begin{abstract}
+%<*FRA>
+Une extension pour écrire des matrices en donnant les coefficients par ligne
+sous la forme d'une liste de valeurs séparées par des virgules.
+
+Une macro permet de définir des matrices nommées et une autre permet d'écrire
+les matrices nommées. L'extension fournit également quelques raccourcis pour les
+matrices identité et les matrices nulles.
+%</FRA>
+%<*ENG>
+A package to write matrices which are defined with a list of comma separated
+coefficients read by row.
+
+A macro enables the definition of a named matrix, another enables the writing of
+a named matrix. This package provides also some shortcuts for identity matrices
+and null matrices.
+
+The name of this package and of its macros are French based for there are
+already too many macros using the word ``matrix'' itself. The French
+``\foreignlanguage{french}{simples matrices}'' means ``simple
+matrices''. \emph{Just a letter apart!}
+%</ENG>
+\end{abstract}
+
+\noindent\hrulefill
+
+%<FRA> \begin{otherlanguage}{english}
+%<ENG> \begin{otherlanguage}{french}
+\begin{abstract}
+%<*FRA> 
+A package to write matrices which are defined with a list of comma separated
+coefficients read by row.
+
+A macro enables the definition of a named matrix, another enables the writing of
+a named matrix. This package provides also some shortcuts for identity matrices
+and null matrices.
+
+The name of this package and of its macros are French based for there are
+already too many macros using the word ``matrix'' itself. The French
+``\foreignlanguage{french}{simples matrices}'' means ``simple
+matrices''. \emph{Just a letter apart!}
+
+The English documentation for the final user of the package
+\pkg{simples-matrices} is available in the file \texttt{simples-matrices-eng}. 
+%</FRA>
+%<*ENG>
+Une extension pour écrire des matrices en donnant les coefficients par ligne
+sous la forme d'une liste de valeurs séparées par des virgules.
+
+Une macro permet de définir des matrices nommées et une autre permet d'écrire
+les matrices nommées. L'extension fournit également quelques raccourcis pour les
+matrices identité et les matrices nulles.
+
+
+La documentation française pour l'utilisateur de l'extension
+\pkg{simples-matrices} est disponible sous le nom de \texttt{simples-matrices-fra}. 
+%</ENG>
+\end{abstract}
+\end{otherlanguage}
+
+\noindent\hrulefill
+
+\tableofcontents{}
+
+\vspace{3\baselineskip}
+
+
+%<*ENG>
+The package \pkg{simples-matrices} requires \pkg{xparse} and \pkg{l3keys2e} used
+to define macros and manage key-options. It loads \pkg{amsmath} as well for
+ensuring a correct presentation of matrices.
+
+\textbf{Beware}: you have to provide the suitable mathematical environment to
+use the macros which print a matrix. Only the unstarred version of
+\csmute{declarermatrice} may be used outside math-mode.
+
+%</ENG>
+%<*FRA>
+L'extension \pkg{simples-matrices} utilise \pkg{xparse} et \pkg{l3keys2e} pour
+définir ses macros et gérer les clés d'option. Elle charge également
+\pkg{amsmath} pour obtenir une présentation convenable des matrices.
+
+\textbf{Attention}: vous devez fournir l'environnement mathématique adéquat pour
+utiliser les macros qui écrivent les matrices. Seule la version non-étoilée de
+\csmute{declarermatrice} peut être utilisée en dehors du mode mathématique.
+%</FRA>
+
+%<*ENG>
+\section{The Macros}
+\label{sec:macros}
+
+\pkg{simples-matrices} offers nine document macros.
+
+%</ENG>
+%<*FRA>
+\section{Les macros}
+\label{sec:macros}
+
+L'extension \pkg{simples-matrices} offre neuf macros de document.
+
+%</FRA>
+
+%<*ENG>
+In the main text (syntaxes and examples), the name of a macro of this package is
+printed in red if the macro produces some text in the document, otherwise it is
+printed in blue.
+%</ENG>
+%<*FRA>
+Dans le texte principal (syntaxes et exemples), le nom d'une macro de cette
+extension est écrit en rouge si la macro produit du texte dans le document,
+autrement il est écrit en bleu.
+%</FRA>
+
+%<*ENG>
+\subsection{Main Macros}
+\label{sec:main}
+
+The six main document macros are the following: 
+%</ENG>
+%<*FRA>
+\subsection{Macros principales}
+\label{sec:principales}
+
+Les six macros principales sont les suivantes: 
+%</FRA> 
+%<*ENG>
+
+\begin{function}{\matrice}
+  \begin{syntax}
+    \csprint{matrice}\parg{prefix}\darg{\string<}{clist of key-value pairs}{\string>}\oarg{type}\marg{clist of coefficients}
+  \end{syntax}
+  where \meta{prefix} has the same meaning as the key \keyname{prefix} (see page~\pageref{key-prefix});
+  \meta{clist of key-value pairs} ---optional and void by default--- can be used to
+  redefined the \envir{matrix}-like environment; \meta{type} is a string of character
+  the usage of which is explained later ---see \ref{sec:matrix-type}--- and
+  \meta{clist of coefficients} is a clist of the coefficients of the matrix
+  given by row order.
+
+  The French \emph{matrice} means ``matrix''.
+\end{function}
+%</ENG>
+%<*FRA>
+\begin{function}{\matrice}
+  \begin{syntax}
+    \csprint{matrice}\parg{prefixe}\darg{\string<}{\vliste de paires de clé-valeur}{\string>}\oarg{type}\marg{\vliste des coefficients}
+  \end{syntax}
+  où \meta{prefixe} a la même fonction que la clé \keyname{prefix} (voir page~\pageref{key-prefix});
+  \meta{\vliste de paires de clé-valeur} --- optionnel et vide par défaut ---
+  peut être utilisé pour redéfinir l'environnement de type \envir{matrix};
+  \meta{type} est une chaine de caractère dont l'utilisation sera expliquée
+  ci-dessous --- voir~\ref{sec:matrix-type} --- et \meta{\vliste des
+    coefficients} est la \vliste des coefficients de la matrice donnés ligne par
+  ligne.
+\end{function}
+%</FRA>
+
+%<ENG> With
+%<FRA> Avec
+\lstinline+$\matrice{1, 2, 3, 4}$+
+%<ENG> we obtain 
+%<FRA> on obtient 
+\(\matrice{1, 2, 3, 4}\).
+
+%<ENG> With
+%<FRA> Avec
+\lstinline+$\matrice(b)[3]{1, 2, 3, 4, 5, 6}$+
+%<ENG> we obtain 
+%<FRA> on obtient 
+\(\matrice(b)[3]{1, 2, 3, 4, 5, 6}\).
+
+%<*ENG>
+\begin{function}{\declarermatrice}
+  \begin{syntax}
+    \csmute{declarermatrice}\parg{prefix}\darg{\string<}{clist of key-value pairs}{\string>}\marg{matrix name}\oarg{type}\marg{clist of coefficients}
+  \end{syntax}
+\end{function}
+
+\begin{function}{\declarermatrice*}
+  \begin{syntax}
+    \csprint{declarermatrice*}\parg{prefix}\darg{\string<}{clist of key-value pairs}{\string>}\marg{matrix name}\oarg{type}\marg{clist of coefficients}
+  \end{syntax}
+  where \meta{matrix name} is the name of the matrix to be used afterwards. The
+  other arguments, optional or mandatory, have the same meaning than above. The
+  starred version defines and prints the matrix. The unstarred version only
+  defines it.
+
+  The definition is global but one can redefine an existing named matrix with
+  the same function. \textbf{No check is done} to ensure that one is not
+  redefining a previously defined matrix.
+
+  With the macro \csmute{declarermatrice}, the first two optional arguments have
+  no effect for they are not take into account to define the matrix \VoirEx{sec:declar}.
+
+  The French \emph{déclarer une matrice} means ``declare a matrix''.
+\end{function}
+%</ENG>
+
+%<*FRA>
+\begin{function}{\declarermatrice}
+  \begin{syntax}
+    \csmute{declarermatrice}\parg{prefixe}\darg{\string<}{\vliste de paires de clé-valeur}{\string>}\marg{nom}\oarg{type}\marg{\vliste des coefficients}
+  \end{syntax}
+\end{function}
+
+
+\begin{function}{\declarermatrice*}
+  \begin{syntax}
+    \csprint{declarermatrice*}\parg{prefixe}\darg{\string<}{\vliste de paires de clé-valeur}{\string>}\marg{nom}\oarg{type}\marg{\vliste des coefficients}
+  \end{syntax}
+  où \meta{nom} est le nom de la matrice pour utilisation future. Les autres
+  arguments, optionnels ou obligatoires, ont la même signification que
+  ci-dessus. La version étoilée définit et écrit la matrice. La version
+  non-étoilée ne fait que la définir.
+
+  La définition est globale mais on peut redéfinir une matrice nommée existante
+  avec la même fonction. \textbf{Aucun contrôle} n'est exercé pour s'assurer que
+  l'on n'est pas en train de redéfinir une matrice nommée précédemment définie.
+
+  Avec la macro \csmute{declarermatrice}, les deux premiers arguments optionnels
+  n'ont aucun effet car la définition de la matrice n'en tient pas compte \VoirEx{sec:declar}.
+\end{function}
+%</FRA> 
+
+%<*ENG> 
+\begin{function}{\lamatrice}
+  \begin{syntax}
+    \csprint{lamatrice}\parg{prefix}\darg{\string<}{clist of key-value pairs}{\string>}\marg{matrix name}
+  \end{syntax}
+  prints the previously defined matrix the name of which is given by
+  \meta{matrix name}. The two optional arguments have the meaning as before \VoirEx{sec:declar}.
+
+  The French \emph{la matrice} means ``the matrix''.
+\end{function}
+%</ENG>
+%<*FRA>
+\begin{function}{\lamatrice}
+  \begin{syntax}
+    \csprint{lamatrice}\parg{prefixe}\darg{\string<}{\vliste de paires de clé-valeur}{\string>}\marg{nom}
+  \end{syntax}
+  écrit la matrice nommée de nom \meta{nom}.
+  Les deux arguments optionnels ont la même signification que ci-dessus \VoirEx{sec:declar}.
+\end{function}
+%</FRA>
+
+%<*ENG>
+\begin{function}{\MatriceInterieur}
+  \begin{syntax}
+    \csprint{MatriceInterieur}
+  \end{syntax}
+  gives the inner part of the last printed ---via \csprint{matrice} or
+  \csprint{declarermatrice*}--- or defined ---via \csmute{declarermatrice}---
+  matrix. It can be used inside an \envir{array}-like environment
+  \VoirEx{sec:matint}.
+
+  The French should be \emph{\foreignlanguage{french}{intérieur de la matrice}}
+  which means ``inside of the matrix''. What is implicit is the adjective
+  ``anonymous''. For named matrix see below.
+\end{function}
+%</ENG>
+%<*FRA>
+\begin{function}{\MatriceInterieur}
+  \begin{syntax}
+    \csprint{MatriceInterieur}
+  \end{syntax}
+  donne l'intérieur de la dernière matrice écrite --- via \csprint{matrice} ou
+  \csprint{declarermatrice*} --- ou définie --- via \csmute{declarermatrice}. On
+  peut l'utiliser dans un environnement du genre \envir{array} \VoirEx{sec:matint}.
+\end{function}
+%</FRA>
+
+%<*ENG>
+\begin{function}{\LaMatriceInterieur}
+  \begin{syntax}
+    \csprint{LaMatriceInterieur}\marg{matrix name}
+  \end{syntax}
+  gives the inner part of the matrix with name \meta{matrix name}. It can be
+  used inside an \envir{array}-like environment \VoirEx{sec:matint}.
+
+  Again false French but the parallel with \csprint{lamatrice} should suggest that,
+  now, the matrix has a name and we have to use it. 
+\end{function}
+
+%</ENG>
+%<*FRA>
+\begin{function}{\LaMatriceInterieur}
+  \begin{syntax}
+    \csprint{LaMatriceInterieur}\marg{nom}
+  \end{syntax}
+  donne l'intérieur de la matrice de nom \meta{nom}. On peut l'utiliser dans un
+  environnement du genre \envir{array} \VoirEx{sec:matint}.
+\end{function}
+
+%</FRA> 
+
+%<*ENG>
+\subsection{Setting the Keys}
+\label{sec:setting-keys}
+
+One can change the values of the keys of \pkg{simples-matrices} with 
+\begin{function}{\simplesmatricessetup}
+  \begin{syntax}
+    \csmute{simplesmatricessetup}\marg{clist of key-value pairs}
+  \end{syntax}
+  where \meta{clist of key-value pairs} is the usual clist of key-value pairs
+  setting one or many of the three keys of the package as presented on
+  page~\pageref{sec:keys}.
+
+  To stick to established convention the name of this macro is created from the
+  name of the package (reduced to \TeX{} letters) followed by \emph{setup}. I
+  apologize for that strange linguistic mixture.
+\end{function}
+%</ENG>
+%<*FRA>
+\subsection{Valuer les clés}
+\label{sec:setting-keys}
+
+On peut changer les valeurs des clés de \pkg{simples-matrices} avec
+\begin{function}{\simplesmatricessetup}
+  \begin{syntax}
+    \csmute{simplesmatricessetup}\marg{\vliste de paires de clé-valeur}
+  \end{syntax}
+  où \meta{\vliste de paires de clé-valeur} est l'habituelle \vliste de paires de
+  clé-valeur valuant une ou plusieurs des trois clés de cette extension
+  telles que présentées ci-dessous en page~\pageref{sec:clefs}. 
+
+  Pour suivre une convention désormais bien établie le nom de cette macro
+  consiste en le nom de l'extension --- réduite à ces lettres \TeX{}iennes ---
+  suivi de l'anglais \emph{setup}. Je demande pardon pour cette étrange mixture
+  linguistique. 
+\end{function}
+%</FRA>
+
+%<*ENG>
+\newpage{}
+\subsection{Shortcuts}
+\label{sec:shortcuts}
+
+There are also two \emph{shortcut} macros: 
+%</ENG>
+%<*FRA>
+\subsection{Raccourcis}
+\label{sec:shortcuts}
+
+L'extension propose deux macros \emph{raccourcis}:
+%</FRA>
+
+%<*ENG>
+\begin{function}{\matid}
+  \begin{syntax}
+    \csprint{matid}\parg{prefix}\darg{\string<}{clist of key-value pairs}{\string>}\oarg{coefficient}\marg{number of columns}
+  \end{syntax}
+  which write the identity matrix --- by default --- with \meta{number of
+    columns} columns. If \meta{coefficient} is given, we obtain a diagonal
+  matrix with all its coefficients equal to \meta{coefficient}.
+
+  The two first optional arguments have the same functionality as in the
+  preceding macros.
+
+  \emph{matid} stands for \emph{\foreignlanguage{French}{matrice identité}} which means
+  ``identity matrix''.
+\end{function}
+%</ENG>
+%<*FRA>
+\begin{function}{\matid}
+  \begin{syntax}
+    \csprint{matid}\parg{prefixe}\darg{\string<}{\vliste de paires de clé-valeur}{\string>}\oarg{coefficient}\marg{nombre de colonnes}
+  \end{syntax}
+  qui imprime la matrice identité --- par défaut --- avec
+  \meta{nombre de colonnes} colonnes.
+  Si \meta{coefficient} est fourni, on obtient une matrice diagonale
+  dont tous les coefficients non-nuls sont égaux à \meta{coefficient}.
+
+  Les deux premiers arguments optionnels ont la même fonction que dans les
+  macros précédentes.
+\end{function}
+%</FRA>
+
+%<*ENG>
+\begin{function}{\matnulle}
+  \begin{syntax}
+    \csprint{matnulle}\parg{prefix}\darg{\string<}{clist of key-value pairs}{\string>}\oarg{coefficient}\marg{number of columns}
+  \end{syntax}
+  writes the null matrix with \meta{number of columns} columns ---by default---
+  or a matrix containing with \meta{number of columns} columns and all
+  coefficients equal to \meta{coefficient}.
+
+  The two first optional arguments have the same functionality as in the
+  preceding macros.
+
+  \emph{matnulle} stands for \emph{\foreignlanguage{French}{matrice nulle}} which means
+  ``null matrix''.
+\end{function}
+%</ENG>
+%<*FRA>
+\begin{function}{\matnulle}
+  \begin{syntax}
+    \csprint{matnulle}\parg{prefixe}\darg{\string<}{\vliste de paires de clé-valeur}{\string>}\oarg{coefficient}\marg{nombre de colonnes}
+  \end{syntax}
+  imprime la matrice nulle \meta{nombre de colonnes} colonnes --- par défaut ---
+  ou une matrice de \meta{nombre de colonnes} colonnes dont tous les
+  coefficients sont égaux à \meta{coefficient}.
+
+  Les deux premiers arguments optionnels ont la même fonction que dans les
+  macros précédentes.
+\end{function}
+%</FRA>
+
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+$\matid{3}$\qquad $\matid[9]{3}$
+\par \medskip
+$\matnulle{3}$\qquad $\matnulle[2]{3}$
+\end{VerbatimOut}
+\UnExemple{}
+
+%<*ENG>
+\section{The Package Options}
+\label{sec:keys}
+
+The package uses key-value options. There are four keys:
+\keyname{envir}, 
+\keyname{prefix},
+\keyname{typeord}
+and
+\keyname{argopt}.
+
+\begin{description}
+\item[\keyname{envir} (\textit{\texttt{string}})] the main and last part of the
+  name of the environment used to print the matrix. Its initial value is
+  \texttt{matrix}.\label{key-envir}
+  
+\item[\keyname{prefix} (\textit{\texttt{string}})] a string which is prefixed to
+  \texttt{envir} to obtain the complete name of the environment. Its initial
+  value is \texttt{p}. Therefore, by default, the environment used to print the
+  matrix is \envir{pmatrix} as defined by \pkg{amsmath}.\label{key-prefix}
+
+\item[\keyname{typeord} (\textit{\texttt{string}})] a string which is the
+  ordinary ---i.~e. default--- value of the \meta{type} optional argument. The
+  initial value of the key is \TypeMat{C}.\label{key-typeord}
+
+\item[\keyname{argopt} (\textit{\texttt{token list}})] for French
+  \foreignlanguage{french}{\emph{argument optionnel}} (optional argument). That
+  key is initially void. See page~\pageref{sec:delarray} for usage.\label{key-argopt}
+\end{description}
+
+Moreover, an other key is available which is not an option of the package:
+\keyname{out-of-box} which is a metakey.
+%</ENG>
+
+%<*FRA>
+\section{Les options de l'extension} 
+\label{sec:clefs} 
+
+L'extension utilise le système de clefs-valeurs pour ses options. Elle possède
+quatre clés: \keyname{envir}, \keyname{prefix}, \keyname{typeord} et \keyname{argopt}.
+
+\begin{description}
+\item[\keyname{envir} (\textit{\texttt{chaine de caractères}})] est la partie
+  finale du nom de l'environnement utilisé pour imprimer la matrice. Sa valeur
+  initiale est \texttt{matrix}.\label{key-envir}
+  
+\item[\keyname{prefix} (\textit{\texttt{chaine de caractères}})] contient les
+  caractères placés devant \texttt{envir} pour fournir le nom complet de
+  l'environnement utilisé pour imprimer la matrice. Sa valeur initiale est
+  \texttt{p}. Cela fait que l'environnement par défaut est \envir{pmatrix}
+  fourni par \pkg{amsmath}.\label{key-prefix}
+
+\item[\keyname{typeord} (\textit{\texttt{chaine de caractères}})] définit la
+  valeur ordinaire --- c.-à-d. par défaut --- de l'argument optionnel
+  \meta{type}. La valeur initiale de la clé est \TypeMat{C}.\label{key-typeord}
+
+\item[\keyname{argopt} (\textit{\texttt{liste de lexèmes}}, anglais:
+  \foreignlanguage{english}{token list})] est vide par défaut. Voir
+  page~\pageref{sec:delarray} pour son utilisation.\label{key-argopt}
+\end{description}
+
+De plus, une clé supplémentaire existe qui est une métaclé:
+\keyname{out-of-box}.
+%</FRA>
+
+
+%<ENG> With 
+%<FRA> Avec
+\lstinline|\simplesmatricessetup{out-of-box}| 
+%<ENG> we obtain the same effect as with
+%<FRA> on obtient le même effet qu'avec
+\lstinline|\simplesmatricessetup{prefix=p,|\BOP\lstinline| envir=matrix,|%
+  \BOP\lstinline| argopt=,|\BOP\lstinline| typeord=C}|.
+
+%<*ENG>
+\newpage{}
+\section{Examples}
+\label{sec:examples}
+\subsection{Without any special package}
+\label{sec:amsmath}
+
+That is with only \pkg{amsmath} loaded as done by this package.
+
+\subsubsection{Declaration and Usage}
+\label{sec:declar}
+%</ENG>
+%<*FRA>
+\section{Exemples}
+\label{sec:exemples}
+\subsection{Sans extension particulière}
+\label{sec:amsmath}
+
+C'est-à-dire en chargeant uniquement \pkg{amsmath} comme le fait cette extension.
+
+\subsubsection{Déclaration et utilisation}
+\label{sec:declar}
+%</FRA> 
+
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\declarermatrice{A}{1, 2, 300, 400}
+$\declarermatrice*{B}{a, b, c, d}$
+\quad $\lamatrice{A}$ \par \bigskip
+$\lamatrice(V){A}$
+\quad $\lamatrice(b){B}$
+\end{VerbatimOut}
+\UnExemple{}
+
+%<*ENG>
+On the first line of this example, the matrix~\texttt{A} is defined but not
+printed. Then, on the second line, the matrix~\texttt{B} is defined and
+printed. We can afterwards call the~\texttt{A} or \texttt{B}-matrix with
+\csprint{lamatrice}.
+%</ENG>
+%<*FRA>
+Sur la première ligne de l'exemple, la matrice~\texttt{A} est définie mais pas
+écrite. Ensuite, sur la seconde ligne, la matrice~\texttt{B} est définie et
+écrite. Nous pouvons ensuite appeler les matrices~\texttt{A} ou~\texttt{B} à
+l'aide de \csprint{lamatrice}.
+%</FRA>
+
+%<*ENG>
+\subsubsection{The ``\texttt{type}'' argument}
+\label{sec:matrix-type}
+
+The last but one --- optional --- argument of macros \csprint{matrice}, 
+\csmute{declarermatrice} and \csprint{declarermatrice*}
+defaults to \TypeMat{O}. In that case the value of the key
+\keyname{typeord} is used to determine the \emph{type} of the matrix input,
+see~\pageref{sec:matrix-type-key}.
+
+Its value can be a number, in which case it is the number of columns, or a
+string ---presently a one letter string--- among: \TypeMat{C}, \TypeMat{D},
+\TypeMat{I}, \TypeMat{J}, \TypeMat{S}, \TypeMat{T} and \TypeMat{x}.
+%</ENG>
+
+%<*FRA>
+\subsubsection{L'argument \og \texttt{type}\fg}
+\label{sec:matrix-type}
+
+L'avant dernier argument --- optionnel --- des macros \csprint{matrice},
+\csmute{declarermatrice} et \csprint{declarermatrice*} vaut par défaut
+\TypeMat{O}. Dans ce cas, c'est la valeur de la clé \keyname{typeord} qui est
+utilisée pour déterminer le \emph{type} des données de la matrice,
+voir~\pageref{sec:matrix-type-key}.
+
+Sinon, il peut prendre une valeur numérique qui est le nombre de colonnes de la
+matrice ou encore une chaine de caractères --- à ce jour, une seule lettre ---
+parmi: \TypeMat{C}, \TypeMat{D}, \TypeMat{I}, \TypeMat{J}, \TypeMat{S}, \TypeMat{T} et
+\TypeMat{x}.
+%</FRA>
+
+\medskip{}
+
+%<FRA> \TypeMat{C} signifie matrice \textbf{carrée}.
+%<ENG> \TypeMat{C} means square matrix for French ``\texttt{C}arré'' means ``square''.
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\[
+ \matrice{1, 2, 3, 4, 5, 6, 7, 8, 9}
+ \quad 
+ \matrice[C]{1, 2, 3, 4, 5, 6, 7, 8, 9}
+\]
+\end{VerbatimOut}
+\UnExemple{}
+
+%<FRA> \TypeMat{D} signifie matrice \textbf{diagonale}.
+%<ENG> \TypeMat{D} means \textbf{diagonal} matrix.
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\[
+ \matrice{1, 2, 3, 4}\quad 
+ \matrice[D]{1, 2, 3, 4}
+\]
+\end{VerbatimOut}
+\UnExemple{}
+
+%<*FRA>
+\TypeMat{I} signifie matrice triangulaire \textbf{inférieure}; \TypeMat{J}
+signifie matrice triangulaire inférieure avec des zéros sur la diagonale.
+%</FRA>
+%<*ENG>
+\TypeMat{I} means lower triangular matrix. French ``\texttt{I}nférieur'' means
+``lower''; \TypeMat{J} means lower triangular matrix with zeros on the diagonal.
+%</ENG>
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\[
+ \matrice[I]{1, 2, 3}\quad 
+ \matrice[J]{1, 2, 3}
+\]
+\end{VerbatimOut}
+\UnExemple{}
+
+%<*FRA>
+\TypeMat{S} signifie matrice triangulaire \textbf{supérieure}; \TypeMat{T}
+signifie matrice triangulaire supérieure avec des zéros sur la diagonale.
+%</FRA>
+%<*ENG>
+\TypeMat{S} means upper triangular matrix. French ``\texttt{S}upérieur'' means
+``upper''; \TypeMat{T} means upper triangular matrix with zeros on the diagonal.
+%</ENG>
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\[
+ \matrice[S]{1, 2, 3}\quad 
+ \matrice[T]{1, 2, 3}
+\]
+\end{VerbatimOut}
+\UnExemple{}
+
+%<*FRA>
+\TypeMat{x} signifie \texttt{xcas}\footnote{Système de calcul formel libre
+  disponible ici:
+  \url{https://www-fourier.univ-grenoble-alpes.fr/~parisse/giac_fr.html}}. Avec
+cette valeur, on peut copier-coller de \texttt{xcas} dans le document \LaTeX{}.
+%</FRA>
+%<*ENG>
+\TypeMat{x} means \texttt{xcas}\footnote{Free computer algebra system, see here:
+\url{https://www-fourier.univ-grenoble-alpes.fr/~parisse/giac.html}.}. With that value, one can copy-paste from
+\texttt{xcas} into the \LaTeX{} document.
+%</ENG>
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\[
+ \matrice[x]{[[7,1,3],[1,0,3],[5,1,2]]}
+\]
+\end{VerbatimOut}
+\UnExemple{}
+
+\pagebreak[3]
+%<*FRA>
+Un nombre donne le nombre de colonnes de la matrice.
+%</FRA>
+%<*ENG>
+A number sets up the number of columns of the matrix.
+%</ENG>
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\[
+ \matrice[2]{1, 2, 3, 4, 5, 6}
+ \quad
+ \matrice[3]{1, 2, 3, 4, 5, 6}
+\]
+\end{VerbatimOut}
+\UnExemple{}
+
+
+%<*ENG>
+\subsubsection{Using the ``\keyname{typeord}'' Key}
+\label{sec:matrix-type-key}
+
+In this document, the key \keyname{typeord} has the initial value of~\TypeMat{C}.
+%</ENG>
+
+%<*FRA>
+\subsubsection{Utilisation de la clé \og \keyname{typeord}\fg}
+\label{sec:matrix-type-key}
+
+Dans ce document, la clé \keyname{typeord} a comme valeur initiale~\TypeMat{C}.
+%</FRA>
+
+\medskip{}
+
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\simplesmatricessetup{typeord=3}
+$\matrice{1, 2, 3, 4, 5, 6}$\quad 
+\simplesmatricessetup{typeord=2}
+$\matrice{1, 2, 3, 4, 5, 6}$\quad  
+\simplesmatricessetup{typeord=C}
+$\matrice{1, 2, 3, 4}$
+\end{VerbatimOut}
+\UnExemple{}
+
+%<*FRA>
+Le code précédent n'est, bien entendu, donné qu'à titre d'illustration. Pour une
+déclaration de type ne concernant qu'une seule matrice, on aura intérêt à
+utiliser l'argument optionnel. Cependant si on veut rédiger un cours sur les
+matrices triangulaires supérieures\dots{}
+%</FRA>
+%<*ENG>
+The preceding code is but a mere illustration. In order to declare a type for
+one matrix it's more convenient to use the optional argument. However if one
+wants to write a lesson about upper triangular matrices\dots{}
+%</ENG>
+
+%<*ENG>
+\subsubsection{Using the \csprint{(La)MatriceInterieur} Macros}
+\label{sec:matint}
+%</ENG>
+%<*FRA>
+\subsubsection{Utilisation des macros \csprint{(La)MatriceInterieur}}
+\label{sec:matint}
+%</FRA>
+
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\declarermatrice{B}[4]{
+ \hline ein, zwei, drei, vier, 
+ \hline unos, dos, tres, cuatro, 
+ \hline unu, du, tri, kvar}%
+\declarermatrice{A}[3]{
+ one, two, three, 
+ un, deux, trois, 
+ uno, due, tre}%
+\begin{tabular}{*{3}{l}}
+  \MatriceInterieur %*@\label{anonyme}@*)
+\end{tabular}
+\par \bigskip *** \par \bigskip
+\begin{tabular}{*{3}{l}}
+  \LaMatriceInterieur{A} %*@\label{parnom}@*)
+\end{tabular}
+\par \bigskip
+\begin{tabular}{|*{4}{l|}}
+  \LaMatriceInterieur{B}\hline 
+\end{tabular}
+\end{VerbatimOut}
+\UnExemple{}
+
+%<*ENG>
+On lines~\ref{anonyme} and~\ref{parnom} we use the same \emph{internal} because
+the \texttt{A}-matrix is the last defined before line~\ref{anonyme}. 
+%</ENG>
+%<*FRA>
+En lignes~\ref{anonyme} et~\ref{parnom}, nous accédons aux mêmes
+\emph{entrailles} car la matrice~\texttt{A} est la dernière définie avant la
+ligne~\ref{anonyme}.
+%</FRA>
+
+%<*ENG>
+\subsection{Changing the Look}
+\label{sec:changelook}
+
+We can load other packages which deal with matrices such as \pkg{mathtools}, 
+\pkg{delarray} or \pkg{nicematrix}. In that case we can change the look of our
+matrices thanks to the option-key \keyname{envir}, \keyname{prefix} and
+\keyname{argopt}.
+
+This document loads the three packages \pkg{mathtools}, \pkg{delarray} and
+\pkg{nicematrix} in order to give the following examples.
+
+%</ENG>
+
+%<*FRA>
+\subsection{Changer l'aspect}
+\label{sec:aspect}
+
+On peut charger d'autres extensions qui permettent de présenter des matrices
+comme \pkg{mathtools}, \pkg{delarray} ou \pkg{nicematrix}. Dans ce cas on peut
+changer l'aspect de nos matrices grace aux clés d'option \keyname{envir},
+\keyname{prefix} et \keyname{argopt}.
+
+Ce document charge les trois extensions \pkg{mathtools}, \pkg{delarray} et
+\pkg{nicematrix} pour présenter les exemples suivants.
+
+%</FRA>
+
+%<*ENG>
+\subsubsection{With \pkg{mathtools}}
+\label{sec:mathtools}
+
+As already stated above there are two ways to use the option-keys: through
+\csmute{simples}\BOP\ObjetPres{cmdmuette}{matrices}\BOP\ObjetPres{cmdmuette}{setup}
+or through the optional argument \darg{\string<}{clist of pairs of
+  key-value}{\string>}. I show both.
+%</ENG>
+%<*FRA>
+\subsubsection{Avec \pkg{mathtools}}
+\label{sec:mathtools}
+
+Comme déjà signalé, il y a deux façons d'utiliser les clés d'option: à l'aide de
+\csmute{simplesmatricessetup} ou en utilisant l'argument optionnel
+\darg{\string<}{\vliste de paires de clé-valeur}{\string>}.  Je montre les deux. 
+%</FRA>
+
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\simplesmatricessetup{
+  envir=matrix*, prefix=p, argopt=[r]}
+$\matrice{1, 2, 30, 40}$ \quad
+\simplesmatricessetup{out-of-box}
+$\matrice{1, 2, 30, 40}$ 
+\par \medskip
+$\matrice(b)<envir=matrix*,argopt=[l]> {1, 2, 30, 40}$
+\end{VerbatimOut}
+\UnExemple{}
+
+%<*ENG>
+\subsubsection{With \pkg{delarray}}
+\label{sec:delarray}
+
+%</ENG>
+%<*FRA>
+\subsubsection{Avec \pkg{delarray}}
+\label{sec:delarray}
+
+%</FRA>
+
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+\simplesmatricessetup{
+  envir=array, prefix=, 
+  argopt=[c][{l r}\}}
+$\matrice{1, 2, 30, 40}$ \quad
+$\matid()<envir=array, 
+  argopt={[c][{@{}c c c@{}}\}}>{3}$
+\end{VerbatimOut}
+\UnExemple{}
+\simplesmatricessetup{out-of-box}
+
+
+%<*ENG>
+\subsubsection{With \pkg{nicematrix}}
+\label{sec:nicematrix}
+%</ENG>
+%<*FRA>
+\subsubsection{Avec \pkg{nicematrix}}
+\label{sec:nicematrix}
+%</FRA>
+
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+$\matrice<prefix=b, envir=NiceArray, 
+argopt={ {cc||rl} }>{1, 2, 3, 4, 5, 6, 
+  7, 8, 9, 10, 11, 12, 13, 14, 15, 16}$
+\end{VerbatimOut}
+\UnExemple{}
+
+%<*ENG> 
+In that case we need to double the curly braces around the column descriptors of
+the \envir{array} environment because the first level is stripped off by
+\LaTeX{} when valuating the key.
+
+\medskip{}
+
+In the following example, for the second matrix, it is not necessary to surround
+the value of \keyname{argopt} with an extra pair of curly braces (see
+line~\ref{sansaccol}) ---even if it is not dangerous (see
+line~\ref{avecaccol})--- for the presence of \texttt{[margin]} prevents \LaTeX{}
+to strip off the curly braces.
+%</ENG>
+%<*FRA>
+Dans ce cas il faut doubler les accolades entourant les descripteurs de colonnes
+de l'environnement \envir{array} car \LaTeX{} retire un niveau d'accolades en
+valuant la clé.
+
+\medskip{}
+
+Dans l'exemple suivant, pour la deuxième matrice, il n'est pas nécessaire
+d'entourer la valeur de \keyname{argopt} d'une paire d'accolades (voir
+ligne~\ref{sansaccol}) --- même si ça n'est pas dangereux (voir
+ligne~\ref{avecaccol}) --- car la présence de \texttt{[margin]} empêche \LaTeX{}
+de supprimer une paire d'accolades.
+%</FRA>
+
+\begin{VerbatimOut}[gobble=0]{code00.tex}
+$\matrice<prefix=b, envir=NiceArray, 
+argopt={{l c r}}>{1, 2, 3, 40, 50, 60, 
+  700, 800, 900}$
+\par \medskip
+$\matrice<prefix=b, envir=NiceArray, 
+argopt={l c r}[margin]>{1, 2, 3, %*@\label{sansaccol}@*)
+  40, 50, 60, 700, 800, 900}$
+\par \medskip
+$\matrice<prefix=b, envir=NiceArray, 
+argopt={{l c r}[margin]}>{1, 2, 3, %*@\label{avecaccol}@*)
+  40, 50, 60, 700, 800, 900}$
+\end{VerbatimOut}
+\UnExemple{}
+
+%<ENG> \section{Thanks}
+%<FRA> \section{Remerciements}
+%<*ENG>
+Many thanks to Denis \textsc{Bitouzé} for his remarks about the initial state of
+this documentation. Thanks to him, some colours have appeared on these pages.
+%</ENG>
+%<*FRA>
+Mille mercis à Denis \textsc{Bitouzé} pour ses remarques à propos de l'état
+initial de cette documentation. C'est grâce à lui que quelques couleurs sont 
+apparues sur ces pages.
+%</FRA>
+
+
+\vspace{\stretch{2}}
+
+\noindent\hspace*{0.2\textwidth}\hrulefill\hspace*{0.2\textwidth}
+\begin{center}
+  \textsl{Le TeXnicien de Surface scripsit.}
+\end{center}
+\noindent\hspace*{0.2\textwidth}\hrulefill\hspace*{0.2\textwidth}
+
+\vspace*{\stretch{2}}
+
+\end{document}
+%</doc> 
+% \fi
+% \begin{implementation}
+%
+% \section{\pkg{simples-matrices} implementation}
+%
+% 
+% \iffalse
+%<*package>
+% \fi
+% 
+%\subsection{Loading And Greeting}
+%\label{sec:loading}
+% 
+%    \begin{macrocode}
+%<@@=SMPLMTRC>
+%    \end{macrocode}
+%  
+%    \begin{macrocode}
+\RequirePackage{l3keys2e,xparse}
+\ProvidesExplPackage
+{simples-matrices} {2022/06/08} {1.0} {defining and printing matrices}
+\RequirePackage{amsmath}
+%    \end{macrocode}
+% 
+% \pkg{amsmath} is the only auxiliary package loaded. We need it to write the
+% matrices.
+%
+%\subsection{Keys And Options}
+%\label{sec:keysandoptions}
+%
+% I'm using the key management mechanism of \LaTeX3.  
+% 
+%    \begin{macrocode}
+\keys_define:nn {simples-matrices}
+{
+  envir .tl_set:N = \g_@@_nom_environnement_tl,
+  envir .initial:n = {matrix},  
+  prefix .tl_set:N = \g_@@_prefix_environnement_tl,
+  prefix .initial:n = {p},
+  argopt .tl_set:N = \g@@_argument_environnement_tl,
+  argopt .initial:n = { },
+  typeord .str_set:N = \g_@@_type_ordinaire_str,
+  typeord .initial:n = { C },
+}
+\ProcessKeysOptions {simples-matrices}
+%    \end{macrocode}
+% 
+% The keys above defined the package options. The next one may be usefull to
+% return to a kind of neutral state.
+% 
+%    \begin{macrocode}
+\keys_define:nn {simples-matrices}
+{
+  out-of-box .meta:n = {prefix=p, envir=matrix, argopt=, typeord=C},  
+}
+%    \end{macrocode}
+% 
+%
+%\subsection{Constants And Variables}
+%\label{sec:const-var}
+%
+% To handle the syntax of \texttt{xcas} matrices, I resort to \emph{regex} so I
+% have to create some constant \emph{regexes}. Some comments are just there to
+% prevent \texttt{emacs} to go too far in formating the code.
+% 
+%    \begin{macrocode}
+\regex_const:Nn \c_@@_xcas_debut_regexp {\[\[} %\]\]
+\regex_const:Nn \c_@@_xcas_fin_regexp {\]\]}
+\regex_const:Nn \c_@@_xcas_milieu_regexp{\],\ *\[} %\]
+%    \end{macrocode}
+% 
+% Now come error messages: the first deals with bad numbers of coefficient for
+% matrices of type I, J, S or T; the second appears when dealing with an x~type
+% matrix.
+% 
+%    \begin{macrocode}
+\msg_new:nnnn{simples-matrices}{errorIJST}
+{The~number~of~coefficients~does~not~fit~the~matrix-type}
+{I~was~expecting~#1~coefficients~and~obtain~only~#2.}
+
+\msg_new:nnnn{simples-matrices}{errorx}
+{The~data~do~not~seem~to~match~the~x-type}
+{I~was~expecting~the~data~to~begin~with~"[["}
+%    \end{macrocode}
+% 
+% To contain the inner part of the matrix, we need a token list global
+% variable. I chose to built it with a non-letter to try to prevent name clash.
+% 
+%    \begin{macrocode}
+\tl_new:c {g_@@_contenu_anonyme*_tl}
+%    \end{macrocode}
+% 
+% \begin{macro}{\@@_creer_matrice_aux:}
+% 
+% When this macro is called, \cs{g_tmpa_int} contains the number of columns of
+% the matrix and \cs{g_tmpa_seq} the \emph{sequence} of coefficients.
+% 
+%    \begin{macrocode}
+\cs_new:Nn \@@_creer_matrice_aux:
+{
+  \tl_gclear:c {g_@@_contenu_anonyme*_tl}
+
+  \seq_map_indexed_inline:Nn \g_tmpa_seq
+  {
+    \tl_gput_right:cn {g_@@_contenu_anonyme*_tl} { ##2  }
+    \int_compare:nNnTF { \int_mod:nn {##1} { \g_tmpa_int } } = { 0 }
+    {
+      \tl_gput_right:cn {g_@@_contenu_anonyme*_tl} { \\ }
+    }
+    {
+      \tl_gput_right:cn {g_@@_contenu_anonyme*_tl} { &  }
+    }
+  }
+}
+%    \end{macrocode}
+% 
+% At the end of this macro, \cs{g_@@_contenu_anonyme*_tl} contains the inner
+% part of the matrix.
+% 
+% \end{macro}  
+% 
+% For I need to match a text against a regex constant, I create a variant of one
+% of the function of \LaTeX3: 
+%    \begin{macrocode}
+\cs_generate_variant:Nn \regex_match:nnF { nVF }
+%    \end{macrocode}
+% 
+% The next macro does the bulk of the work in reading the coefficients in the
+% second argument and managing them according to the data-type which is given in
+% the first argument.
+% 
+% \begin{macro}{\@@_creer_matrice:nn}
+% 
+%  To be on the safe side, I begin with clearing the variable. 
+%    \begin{macrocode}
+\cs_new:Nn \@@_creer_matrice:nn
+{
+  \tl_gclear:c {g_@@_contenu_anonyme*_tl}
+%    \end{macrocode}
+%  I then read the first argument inside \cs{l_tmpa_str} with \cs{str_set:Nx} in
+%  case the string is contained in a variable.
+%    \begin{macrocode}
+  \str_set:Nx \l_tmpa_str { #1 }
+%    \end{macrocode}
+%  If \verb|#1| is equal to \texttt{O}, I fetch the data-type in the string valued
+%  through the key \texttt{typeord}. 
+%    \begin{macrocode}
+  \str_if_eq:VnT \l_tmpa_str { O }
+  {
+    \str_set:NV \l_tmpa_str \g_@@_type_ordinaire_str
+  }
+%    \end{macrocode}
+%  We enter now the first \texttt{case} which depends on the data-type. The
+%  first case deals with the \texttt{x}-type. Here we obtain the inner part of
+%  the matrix by replacing, according to \emph{regex}. There is no need to
+%  calculate anything. 
+% 
+% If ever there are other types of the same kind ---e.~g. to deal with
+% \texttt{maxima} syntax or the like--- those types would be dealt with here. 
+% 
+%    \begin{macrocode}
+  \str_case:VnF \l_tmpa_str
+  { 
+    { x } {
+      \tl_set:Nn \l_tmpa_tl { #2 }
+
+      \regex_match:nVF {\A\s*\[\[} %\]\]
+      \l_tmpa_tl 
+      {
+          \msg_fatal:nn{simples-matrices} {errorx}
+      }
+      
+      \regex_replace_all:NnN \c_@@_xcas_debut_regexp { } \l_tmpa_tl
+      \regex_replace_all:NnN \c_@@_xcas_fin_regexp { \c{\\} } \l_tmpa_tl
+      \regex_replace_all:NnN \c_@@_xcas_milieu_regexp { \c{\\} } \l_tmpa_tl
+      \regex_replace_all:nnN { , }{ & } \l_tmpa_tl
+
+      \tl_set_eq:cN {g_@@_contenu_anonyme*_tl} \l_tmpa_tl
+    } 
+  }
+%    \end{macrocode}
+% The \texttt{x} -type is done. Now for the \texttt{false} part of the
+% \texttt{case} where I will take care of the other kind of data-types, those
+% which require calculations.
+% 
+% I prepare the work by reading the second argument inside the \emph{sequence}
+% \cs{g_tmpa_seq} and cleaning \cs{g_tmpb_seq}.
+%    \begin{macrocode}
+  { 
+    \seq_set_from_clist:Nn \g_tmpa_seq { #2 }
+    \seq_clear:N \l_tmpb_seq
+%    \end{macrocode}
+%  Now come the second \texttt{case}: 
+%    \begin{macrocode}
+    \str_case:VnF \l_tmpa_str
+    { 
+%    \end{macrocode}
+%  The first case is that of the square matrices. I calculate the number of
+%  columns as the square root of the number of coefficients. There is, as for
+%  now, no check for correctness because in case of bad number of coefficients
+%  there will just be a strange matrix, with void cells. 
+%    \begin{macrocode}
+      { C } { 
+        \int_set:Nn \g_tmpb_int { \seq_count:N \g_tmpa_seq }
+        \int_set:Nn \g_tmpa_int { \fp_to_int:n { sqrt(\g_tmpb_int) } }
+      }
+%    \end{macrocode}
+% In case of a diagonal matrix, the number of columns is simply the number of
+% coefficients but we have to create the suitable \emph{sequence}. The trick is
+% just to add as many zeros as there are columns between each given coefficient.
+%    \begin{macrocode}
+      { D } {
+        \int_set:Nn \g_tmpa_int { \seq_count:N \g_tmpa_seq }
+        \seq_pop_left:NN \g_tmpa_seq \l_tmpa_tl
+        \seq_put_right:NV \l_tmpb_seq \l_tmpa_tl
+
+        \bool_until_do:nn { \seq_if_empty_p:N \g_tmpa_seq }
+        {
+          \int_step_inline:nn { \g_tmpa_int } 
+          {
+            \seq_put_right:Nn \l_tmpb_seq { 0 }
+          }
+          \seq_pop:NN \g_tmpa_seq \l_tmpa_tl
+          \seq_put_right:NV \l_tmpb_seq \l_tmpa_tl
+        }
+        \seq_set_eq:NN \g_tmpa_seq \l_tmpb_seq
+      } 
+%    \end{macrocode}
+%  The code for the next four cases is very similar. We have to calculate the
+%  number of columns from the number of coefficient and then complete the
+%  \emph{sequence} of coefficients.
+% 
+%  Here I check the correctness because, otherwise, in case of error \LaTeX{}
+%  doesn't behave kindly.
+% 
+%  The number of coefficients \emph{non-necessarily} null in a triangular matrix
+%  with \(n\)~columns is \(n(n+1)/2\) or \(n(n-1)/2\) if the diagonal is
+%  \emph{null}. Therefore the computing of \cs{g_tmpa_int} from \cs{g_tmpb_int}
+%  which is equal to the number of coefficients, that is the number of items in
+%  the \emph{sequence} \cs{g_tmpa_seq}.
+% 
+% In the first case (upper triangular) there are coefficients on the diagonal so
+% we have to append \(L-1\) zeros before \(N+1-L\) coefficients where \(L\) is
+% the line number and \(N\) the number of columns.
+% 
+%    \begin{macrocode}
+      { S } {
+        \int_set:Nn \g_tmpb_int { \seq_count:N \g_tmpa_seq }
+        \int_set:Nn \g_tmpa_int
+        {
+          \fp_to_int:n { ( sqrt(1 + 8*\g_tmpb_int) - 1 ) / 2 }
+        }
+%    \end{macrocode}
+%  We check for correctness and abort in case of discrepancy.
+%    \begin{macrocode}
+        \int_compare:nNnF
+        {2*\g_tmpb_int} = { \g_tmpa_int * (\g_tmpa_int + 1)}
+        {
+          \msg_fatal:nnxx{simples-matrices}
+          {errorIJST}
+          {\int_to_arabic:n{(\g_tmpa_int * (\g_tmpa_int + 1))/2}}
+          {\int_to_arabic:n{\g_tmpb_int}}
+        }
+%    \end{macrocode}
+%  \verb|##1| is the line number of the matrix
+%    \begin{macrocode}
+        
+        \int_step_inline:nn { \g_tmpa_int } 
+        {
+          \int_step_inline:nn { ##1 - 1 }
+          {
+            \seq_put_right:Nn \l_tmpb_seq {0}
+          }
+          \int_step_inline:nn { \g_tmpa_int - ##1 + 1 }
+          {
+            \seq_pop:NN \g_tmpa_seq \l_tmpa_tl
+            \seq_put_right:NV \l_tmpb_seq \l_tmpa_tl
+          }
+        }
+        
+        \seq_set_eq:NN \g_tmpa_seq \l_tmpb_seq
+        
+      } 
+%    \end{macrocode}
+%  When there are zeros on the diagonal, the formula changes a tiny bit: append
+%  \(L\) zeros before \(N-L\) coefficients. 
+%    \begin{macrocode}
+      { T } {
+        \int_set:Nn \g_tmpb_int { \seq_count:N \g_tmpa_seq }
+        \int_set:Nn \g_tmpa_int
+        {
+          \fp_to_int:n { (1 + sqrt(1 + 8*\g_tmpb_int) ) / 2 }
+        }
+        \int_compare:nNnF
+        {2*\g_tmpb_int} = { \g_tmpa_int * (\g_tmpa_int - 1)}
+        {
+          \msg_fatal:nnxx{simples-matrices}
+          {errorIJST}
+          {\int_to_arabic:n{(\g_tmpa_int * (\g_tmpa_int - 1))/2}}
+          {\int_to_arabic:n{\g_tmpb_int}}
+        }
+        \int_step_inline:nn { \g_tmpa_int } 
+        {
+          \int_step_inline:nn { ##1 }
+          {
+            \seq_put_right:Nn \l_tmpb_seq {0}
+          }
+          \int_step_inline:nn { \g_tmpa_int - ##1 }
+          {
+            \seq_pop:NN \g_tmpa_seq \l_tmpa_tl
+            \seq_put_right:NV \l_tmpb_seq \l_tmpa_tl
+          }
+        }
+        \seq_set_eq:NN \g_tmpa_seq \l_tmpb_seq
+      } 
+%    \end{macrocode}
+%  Now come the cases for lower triangular matrices. First \emph{with diagonal}.
+%    \begin{macrocode}
+      { I } {
+        \int_set:Nn \g_tmpb_int { \seq_count:N \g_tmpa_seq }
+        \int_set:Nn \g_tmpa_int
+        {
+          \fp_to_int:n { ( sqrt(1 + 8*\g_tmpb_int) - 1 ) / 2 }
+        }
+        \int_compare:nNnF
+        {2*\g_tmpb_int} = { \g_tmpa_int * (\g_tmpa_int + 1)}
+        {
+          \msg_fatal:nnxx{simples-matrices}
+          {errorIJST}
+          {\int_to_arabic:n{(\g_tmpa_int * (\g_tmpa_int + 1))/2}}
+          {\int_to_arabic:n{\g_tmpb_int}}
+        }
+        \int_step_inline:nn { \g_tmpa_int } 
+        {
+          \int_step_inline:nn { ##1 }
+          {
+            \seq_pop:NN \g_tmpa_seq \l_tmpa_tl
+            \seq_put_right:NV \l_tmpb_seq \l_tmpa_tl
+          }
+          \int_step_inline:nn { \g_tmpa_int - ##1 }
+          {
+            \seq_put_right:Nn \l_tmpb_seq {0}
+          }
+        }
+        \seq_set_eq:NN \g_tmpa_seq \l_tmpb_seq
+      }
+%    \end{macrocode}
+%  Secondly \emph{without diagonal}.
+%    \begin{macrocode}
+      { J } {
+        \int_set:Nn \g_tmpb_int { \seq_count:N \g_tmpa_seq }
+        \int_set:Nn \g_tmpa_int
+        {
+          \fp_to_int:n { (1 + sqrt(1 + 8*\g_tmpb_int) ) / 2 }
+        }
+        \int_compare:nNnF
+        {2*\g_tmpb_int} = { \g_tmpa_int * (\g_tmpa_int - 1)}
+        {
+          \msg_fatal:nnxx{simples-matrices}
+          {errorIJST}
+          {\int_to_arabic:n{(\g_tmpa_int * (\g_tmpa_int - 1))/2}}
+          {\int_to_arabic:n{\g_tmpb_int}}
+        }
+        \int_step_inline:nn { \g_tmpa_int } 
+        {
+          \int_step_inline:nn { ##1 -1}
+          {
+            \seq_pop:NN \g_tmpa_seq \l_tmpa_tl
+            \seq_put_right:NV \l_tmpb_seq \l_tmpa_tl
+          }
+          \int_step_inline:nn { \g_tmpa_int - ##1 + 1}
+          {
+            \seq_put_right:Nn \l_tmpb_seq {0}
+          }
+        }
+        \seq_set_eq:NN \g_tmpa_seq \l_tmpb_seq
+      }
+    }
+%    \end{macrocode}
+%  Here we attain the \texttt{false} part of the second \texttt{case}. We assume
+%  that we have a number in \verb|#1|.
+%    \begin{macrocode}
+    { 
+      \int_set:Nn \g_tmpa_int { \l_tmpa_str }
+    }
+%    \end{macrocode}
+%  If all is well, here it ends well with the number of columns in
+%  \cs{g_tmpa_int} and all the coefficients of the matrix in \cs{g_tmpa_seq}. So
+%  it's time to call 
+%    \begin{macrocode}
+    \@@_creer_matrice_aux:
+  } 
+}
+%    \end{macrocode}
+% \end{macro} 
+% 
+% \begin{macro}{\MatriceInterieur}
+%   A document command to access the inner part of the \textbf{last} printed
+%   ---via \cs{matrice}--- or defined ---via \cs{declarermatrice}--- matrix. 
+% 
+%   This macro can be placed inside an \env{array}-like environment.
+%    \begin{macrocode}
+\cs_new:Npn \MatriceInterieur
+{
+  \tl_use:c { g_@@_contenu_anonyme*_tl }
+}
+%    \end{macrocode}
+% \end{macro} 
+% 
+% 
+% \begin{macro}{\LaMatriceInterieur}
+% A version to access the inner part of a named matrix: 
+% 
+%    \begin{macrocode}
+\cs_new:Npn \LaMatriceInterieur #1
+{
+  \tl_use:c { g_@@_contenu_nom_#1_tl }
+}
+%    \end{macrocode}
+% \end{macro} 
+% 
+% 
+% The next macro is used to print a matrix. Its name means \emph{prepare (the)
+% presentation} of the matrix. It builds the name of the environment, taking
+% care of possible arguments of the said environment. 
+% 
+% \begin{macro}{\@@_preparer_presentation:nn}
+% At the end of the macro, \cs{g_tmpa_tl} contains the \emph{overture} of the
+% environment and \cs{g_tmpb_tl} the \emph{grand final}.
+% 
+%    \begin{macrocode}
+\cs_new:Nn \@@_preparer_presentation:nn
+{
+  \IfValueT{#1}
+  {
+    \keys_set:nn {simples-matrices} {prefix = #1}
+  }
+  \IfValueT{#2}
+  {
+    \keys_set:nn {simples-matrices} { #2 }
+  }
+  \tl_set:NV \l_tmpa_tl \g_@@_prefix_environnement_tl
+  \tl_put_right:NV \l_tmpa_tl \g_@@_nom_environnement_tl      
+  \tl_set:Nn \g_tmpa_tl { \begin{\l_tmpa_tl} }
+  \tl_put_right:NV \g_tmpa_tl \g@@_argument_environnement_tl
+  \tl_set:Nn \g_tmpb_tl {\end{\l_tmpa_tl} }
+}
+%    \end{macrocode}
+% \end{macro}
+% 
+% Now comes the first main document command which prints the matrix from the
+% data-type and coefficients. It assigns the different arguments to the
+% auxiliary macros and finishes with using the token lists created by the
+% auxiliaries.
+% 
+% \begin{macro}{\matrice}
+%    \begin{macrocode}
+\NewDocumentCommand{\matrice}{ d() d<> O{O} m }
+{
+  \@@_creer_matrice:nn { #3 } { #4 }
+  \@@_preparer_presentation:nn { #1 } { #2 }
+  \tl_use:N \g_tmpa_tl
+  \tl_use:c { g_@@_contenu_anonyme*_tl }
+  \tl_use:N \g_tmpb_tl
+}
+%    \end{macrocode}
+% \end{macro} 
+% 
+% I provide a way of changing the keys inside the document with the usual
+% \emph{setup} macro:
+% \begin{macro}{\simplesmatricessetup}
+%    \begin{macrocode}
+\NewDocumentCommand{\simplesmatricessetup}{m}
+{
+  \keys_set:nn {simples-matrices} { #1 }
+}
+%    \end{macrocode}
+% \end{macro}
+% 
+% Another main document command to define a named matrix. The starred version
+% defines and prints.
+% 
+% The first mandatory argument ---the 4th of all--- should contain the ``name''
+% of the matrix with which one can recall the matrix using \cs{lamatrice}.
+% \begin{macro}{\declarermatrice}
+%    \begin{macrocode}
+\NewDocumentCommand{\declarermatrice}{ s d() d<> m  O{O} m }
+{
+  \@@_creer_matrice:nn { #5 } { #6 }
+  \tl_gset_eq:cc {g_@@_contenu_nom_#4_tl} {g_@@_contenu_anonyme*_tl}
+  \IfBooleanT { #1 }
+  {
+    \@@_preparer_presentation:nn { #2 } { #3 }
+    \tl_use:N \g_tmpa_tl
+    \tl_use:c { g_@@_contenu_anonyme*_tl }
+    \tl_use:N \g_tmpb_tl
+  }
+}
+%    \end{macrocode}
+% \end{macro}
+% 
+% To print a named matrix: 
+% \begin{macro}{\lamatrice}
+%    \begin{macrocode}
+\NewDocumentCommand{\lamatrice}{ d() d<> m }
+{
+  \@@_preparer_presentation:nn { #1 } { #2 }
+  \tl_use:N \g_tmpa_tl
+  \tl_use:c { g_@@_contenu_nom_#3_tl }
+  \tl_use:N \g_tmpb_tl
+}
+%    \end{macrocode}
+% \end{macro}  
+% 
+% For the next commands, I need a variant:  
+%    \begin{macrocode}
+\cs_generate_variant:Nn \@@_creer_matrice:nn { nV }
+%    \end{macrocode}
+% 
+% The auxiliary macro to print an identity matrix. \verb|#1| will receive the value
+% to print in the diagonal ---defaulting to \(1\)--- and \verb|#2| the number of
+% columns. 
+% \begin{macro}{\@@_creer_matrice_identite:nn}
+%    \begin{macrocode}
+\cs_new:Nn \@@_creer_matrice_identite:nn
+{
+  \clist_clear:N \l_tmpa_clist 
+  \int_step_inline:nn { #2 }
+  {
+    \clist_put_left:Nn \l_tmpa_clist { #1 }
+  }
+  \@@_creer_matrice:nV {D} \l_tmpa_clist
+}
+%    \end{macrocode}
+% \end{macro}
+% 
+% I can then use it to define the document command: 
+% \begin{macro}{\matid}
+%    \begin{macrocode}
+\NewDocumentCommand{\matid}{ d() d<> O{1} m}
+{
+  \@@_creer_matrice_identite:nn { #3 } { #4 }
+  \@@_preparer_presentation:nn  { #1 } { #2 }
+  \tl_use:N \g_tmpa_tl
+  \tl_use:c { g_@@_contenu_anonyme*_tl }
+  \tl_use:N \g_tmpb_tl
+}
+%    \end{macrocode}
+% \end{macro}
+% 
+% I follow the same pattern for null matrices. First the auxiliary macro, \verb|#2|
+% is the number of columns, \verb|#1| the value of all the coefficients ---defaulting
+% to \(0\)---.
+% \begin{macro}{\@@_creer_matrice_nulle:nn}
+%    \begin{macrocode}
+\cs_new:Nn \@@_creer_matrice_nulle:nn
+{
+  \clist_clear:N \l_tmpa_clist 
+  \int_step_inline:nn { #2*#2 }
+  {
+    \clist_put_left:Nn \l_tmpa_clist { #1 }
+  }
+  \@@_creer_matrice:nV {C} \l_tmpa_clist
+}
+%    \end{macrocode}
+% \end{macro}
+% 
+% I can again use it to define the document command: 
+% \begin{macro}{\matnulle}
+%    \begin{macrocode}
+\NewDocumentCommand{\matnulle}{ d() d<> O{0} m}
+{
+  \@@_creer_matrice_nulle:nn {#3} {#4}
+  \@@_preparer_presentation:nn { #1 } { #2 }
+  \tl_use:N \g_tmpa_tl
+  \tl_use:c { g_@@_contenu_anonyme*_tl }
+  \tl_use:N \g_tmpb_tl
+}
+%    \end{macrocode}
+% \end{macro}
+% 
+% \iffalse
+%</package>
+% \fi
+% 
+% \end{implementation}
+%
+% \Finale \PrintChanges\PrintIndex
+% 
+\endinput
+%%% Local Variables: 
+%%% mode: doctex
+%%% coding: utf-8
+%%% fill-column: 80
+%%% TeX-master: t
+%%% End: 

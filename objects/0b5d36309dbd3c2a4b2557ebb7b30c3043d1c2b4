@@ -1,0 +1,154 @@
+%%%
+% PatternJeton
+%%%
+\def\filedatePatternJeton{2025/05/28}%
+\def\fileversionPatternJeton{0.1a}%
+\message{-- \filedatePatternJeton\space v\fileversionPatternJeton}%
+%
+\newtoks\tokassonom%
+\newtoks\tokassocol%
+\newtoks\tokassodes%
+\newtoks\tokassocomp%
+\def\UpdatetoksAsso#1/#2\nil{\addtotok\tokassonom{#1,}\addtotok\tokassocomp{"#1",}\addtotok\tokassocol{#2,}}%
+\def\UpdatetoksAssoFinal#1/#2\nil{\addtotok\tokassonom{#1}\addtotok\tokassocomp{"#1",}\addtotok\tokassocol{#2}}%
+\def\UpdatetoksAssoDes#1\nil{\addtotok\tokassodes{"#1",}}%
+
+\setKVdefault[PatternJeton]{Association={B/Blanc},Unite=1cm,Label,Pointilles=false,Codes=false,Traces={}}
+\defKV[PatternJeton]{Traces=\ifempty{#1}{}{\setKV[PatternJeton]{Codes}}}%
+
+\NewDocumentCommand\PatternJeton{om}{%
+  \tokassonom{}%
+  \tokassocol{}%
+  \tokassodes{}%
+  \tokassocomp{}%
+  \useKVdefault[PatternJeton]%
+  \setKV[PatternJeton]{#1}%
+  \xdef\PfMListeAssoAv{\useKV[PatternJeton]{Association}}%
+  \setsepchar[*]{,*/}\ignoreemptyitems%
+  \readlist*\ListeAsso{\PfMListeAssoAv}%
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\ListePatternJeton{#2}%
+  \reademptyitems%
+  \foreachitem\PfMAsso\in\ListeAsso{%
+    \ifnum\PfMAssocnt=\ListeAssolen\relax
+      \expandafter\UpdatetoksAssoFinal\PfMAsso\nil
+    \else%
+      \expandafter\UpdatetoksAsso\PfMAsso\nil
+    \fi%
+  }%
+  \foreachitem\PfMAsso\in\ListePatternJeton{%
+    \expandafter\UpdatetoksAssoDes\PfMAsso\nil
+  }%
+  \BuildPatternCarre{\the\tokassonom}{\the\tokassocol}{\the\tokassodes}{\the\tokassocomp}%
+}%
+
+\NewDocumentCommand\BuildPatternCarre{mmmm}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      u:=\useKV[PatternJeton]{Unite};
+      path Base,Basea,Baseb;
+      Base=unitsquare scaled 0.9u;
+      Basea=(0,0)--(u*(0.9,0))--(u*(0.45,0.9))--cycle;
+      Baseb=(fullcircle scaled 0.9u) shifted(u*(0.45,0.45));
+      
+      color ListeCouleurs[];
+      boolean LABEL,PTLES,Codes;
+      
+      LABEL=\useKV[PatternJeton]{Label};
+      PTLES=\useKV[PatternJeton]{Pointilles};
+      Codes=\useKV[PatternJeton]{Codes};
+
+      if Codes:
+      \useKV[PatternJeton]{Traces};
+      fi;
+      
+      vardef NombreLignes(text t)=
+        nblignes:=0;
+        for p_=t:
+          nblignes:=nblignes+1;
+        endfor;
+      enddef;
+
+      vardef AssocieLesCouleurs(text t)=
+        color t;
+        retiens:=0;
+        for p_=t:
+          retiens:=retiens+1;
+          p_=ListeCouleurs[retiens];
+        endfor;
+      enddef;
+
+      vardef RecupereLesCouleurs(text t)=
+        nbcol=0;
+        for p_=t:
+          if color p_:
+            nbcol:=nbcol+1;
+            ListeCouleurs[nbcol]=p_;
+          fi;
+        endfor;
+      enddef;
+
+      NombreLignes(#3);
+      RecupereLesCouleurs(#2);
+      AssocieLesCouleurs(#1);
+
+      Lignes:=nblignes;
+
+      path Pattern;
+      
+      vardef Affichage(text t)=
+        nbl:=0;
+        for p_=t:
+          for k=0 upto (length p_)-1:
+            if substring(k,k+1)of p_<>"X":
+              if substring(k,k+1) of p_="Y":
+                Pattern:=Basea;
+              elseif substring(k,k+1) of p_="Z":
+                Pattern:=Baseb;
+              else:
+                Pattern:=Base;
+              fi;
+              Test(substring(k,k+1) of p_);
+              fill Pattern shifted (u*(k+0.05,nbl-0.05)) withcolor 0.8white;
+              fill Pattern shifted (u*(k,nbl)) withcolor Coul;
+              trace Pattern shifted (u*(k,nbl));
+              if LABEL:
+                if Coul=(0,0,0):
+                  drawoptions(withcolor white);
+                fi;
+                label(substring(k,k+1) of p_,(center Pattern) shifted (u*(k,nbl)));
+                if Coul=(0,0,0):
+                  drawoptions();
+                fi;
+              fi;
+            else:
+              if PTLES:
+                trace Base shifted (u*(k,nbl)) dashed evenly;
+              fi;
+            fi;
+          endfor;
+          nbl:=nbl-1;
+        endfor;
+      enddef;
+
+      color Coul;
+      boolean STOP;
+   
+      vardef Test(expr tt)=
+        nbretiens:=0;
+        STOP:=false;
+        forever: exitif STOP;
+          for pp_=#4:
+            if pp_=tt:
+              Coul:=scantokens pp_;
+              STOP:=true;
+            fi;
+          endfor;
+        endfor;
+      enddef;
+
+      Affichage(#3);
+    \end{mplibcode}%
+  \fi%
+}%

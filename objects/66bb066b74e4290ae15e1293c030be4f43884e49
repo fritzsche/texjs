@@ -1,0 +1,288 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2018 - 2021 by ChairX
+%
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either
+% version 1.3 of this license or (at your option) any later
+% version.  The latest version of this license is in:
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of
+% LaTeX version 2005/12/01 or later.
+%
+% This file contains the implementation of all algebra related macros.
+%
+% Macros have to be described by (delete the first %)
+% %\begin{macro}{\macro}
+% % Description of the implementation.
+% %    \begin{macrocode}
+%\newcommand{\macro}[]         {}
+% %    \end{macrocode}
+% %\end{macro}
+%
+% The implementation and description will appear in the implementation
+% part of the documentation. Use \subsubsection{} etc. for structuring.
+%
+% The documentation of the macros defined here has to be written in
+% chairxmathFontsDoc.dtx
+%\fi
+%
+% First we check of macros should be included:
+%    \begin{macrocode}
+\if@loadmath
+%    \end{macrocode}
+%
+%
+% We provide several font names for easier usage and
+% customization. The fonts are used in our macro definitions and can
+% be changed by according to the individual needs.
+%
+%
+%
+% \subsubsection{Default Values for some Math Fonts}
+%
+%
+% \begin{macro}{\mathbb}
+%
+%     Redefine |\mathbb| to use the nicer |\mathbbm|.
+%
+%    \begin{macrocode}
+\DeclareMathAlphabet{\ch@airxmathbbm}{U}{bbm}{m}{n}
+\SetMathAlphabet\ch@airxmathbbm{bold}{U}{bbm}{bx}{n}
+\renewcommand{\mathbb}[1]{\ch@airxmathbbm{#1}}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \begin{macro}{\mathscr}
+%
+%     We load a script font and provide the command |\mathscr|
+%
+%    \begin{macrocode}
+\DeclareMathAlphabet{\mathscr}{U}{rsfso}{m}{n}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \begin{macro}{\mathcal}
+%
+%     We redefine the |\mathcal| command using the Euler font.
+%
+%    \begin{macrocode}
+\DeclareSymbolFont{EulerScript}{U}{eus}{m}{n}
+\SetSymbolFont{EulerScript}{bold}{U}{eus}{b}{n}
+\DeclareSymbolFontAlphabet\mathcal{EulerScript}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+%
+% \subsubsection{Setting Fonts for Various Math Groups}
+%
+% Definitions of fonts for the different groups.
+%
+% \begin{macro}{\ch@irxalgebrafont}
+% \begin{macro}{\ch@irxbasisfont}
+% \begin{macro}{\ch@irxcategoryfont}
+% \begin{macro}{\ch@irxcategorynamefont}
+% \begin{macro}{\ch@irxfieldfont}
+% \begin{macro}{\ch@irxfilterfont}
+% \begin{macro}{\ch@irxfunctorfont}
+% \begin{macro}{\ch@irxgerstenhaberfont}
+% \begin{macro}{\ch@irxgroupfont}
+% \begin{macro}{\ch@irxgroupoidfont}
+% \begin{macro}{\ch@irxhilbertfont}
+% \begin{macro}{\ch@irxliealgfont}
+% \begin{macro}{\ch@irxmodulefont}
+% \begin{macro}{\ch@irxprehilbfont}
+% \begin{macro}{\ch@irxoperatorfont}
+% \begin{macro}{\ch@irxringfont}
+% \begin{macro}{\ch@irxscriptfont}
+% \begin{macro}{\ch@irxsheaffont}
+% \begin{macro}{\ch@irxspacesfont}
+% \begin{macro}{\ch@irxtopologyfont}
+%
+%     We use |xkeyval| to define keys setting the different font
+%     groups.  These keys can be used for the macro |\chairxfonts|.
+%     We use |\providecommand| to create the font macros if they do
+%     not already exist.
+%
+%    \begin{macrocode}
+\define@key[chairx]{fonts}{algebrafont}{
+    \providecommand{\ch@irxalgebrafont}[1]{ }
+    \renewcommand{\ch@irxalgebrafont}{#1}
+}
+\define@key[chairx]{fonts}{basisfont}{
+	\providecommand{\ch@irxbasisfont}[1]{ }
+	\renewcommand{\ch@irxbasisfont}{#1}
+}
+\define@key[chairx]{fonts}{categoryfont}{
+    \providecommand{\ch@irxcategoryfont}[1]{ }
+    \renewcommand{\ch@irxcategoryfont}{#1}
+}
+\define@key[chairx]{fonts}{categorynamefont}{
+    \providecommand{\ch@irxcategorynamefont}[1]{ }
+    \renewcommand{\ch@irxcategorynamefont}{#1}
+}
+\define@key[chairx]{fonts}{fieldfont}{
+	\providecommand{\ch@irxfieldfont}[1]{ }
+	\renewcommand{\ch@irxfieldfont}{#1}
+}
+\define@key[chairx]{fonts}{filterfont}{
+	\providecommand{\ch@irxfilterfont}[1]{ }
+	\renewcommand{\ch@irxfilterfont}{#1}
+}
+\define@key[chairx]{fonts}{functorfont}{
+	\providecommand{\ch@irxfunctorfont}[1]{ }
+	\renewcommand{\ch@irxfunctorfont}{#1}
+}
+\define@key[chairx]{fonts}{gerstenhaberfont}{
+	\providecommand{\ch@irxgerstenhaberfont}[1]{ }
+	\renewcommand{\ch@irxgerstenhaberfont}{#1}
+}
+\define@key[chairx]{fonts}{groupfont}{
+	\providecommand{\ch@irxgroupfont}[1]{ }
+	\renewcommand{\ch@irxgroupfont}{#1}
+}
+\define@key[chairx]{fonts}{groupoidfont}{
+	\providecommand{\ch@irxgroupoidfont}[1]{ }
+	\renewcommand{\ch@irxgroupoidfont}{#1}
+}
+\define@key[chairx]{fonts}{hilbertfont}{
+	\providecommand{\ch@irxhilbertfont}[1]{ }
+	\renewcommand{\ch@irxhilbertfont}{#1}
+}
+\define@key[chairx]{fonts}{liealgfont}{
+	\providecommand{\ch@irxliealgfont}[1]{ }
+	\renewcommand{\ch@irxliealgfont}{#1}
+}
+\define@key[chairx]{fonts}{modulefont}{
+	\providecommand{\ch@irxmodulefont}[1]{ }
+	\renewcommand{\ch@irxmodulefont}{#1}
+}
+\define@key[chairx]{fonts}{prehilbfont}{
+	\providecommand{\ch@irxprehilbfont}[1]{ }
+	\renewcommand{\ch@irxprehilbfont}{#1}
+}
+%    \end{macrocode}
+%
+% Here we need to change the default operatorfont in order to get the
+% chairxoperatorfont also for |\operatorname| and
+% |\DeclareMathOperator|.  Note that redefining |\operator@font| with
+% a symbol alphabet and not a symbol font forces us to use an
+% additional bracket in all definitions using |\operatorname| and
+% |\DeclareMathOperator|.
+%
+%    \begin{macrocode}
+\define@key[chairx]{fonts}{operatorfont}{
+    \providecommand{\ch@irxoperatorfont}[1]{ }
+    \renewcommand{\ch@irxoperatorfont}{#1}
+}
+\define@key[chairx]{fonts}{ringfont}{
+	\providecommand{\ch@irxringfont}[1]{ }
+	\renewcommand{\ch@irxringfont}{#1}
+}
+\define@key[chairx]{fonts}{scriptfont}{
+    \providecommand{\ch@irxscriptfont}[1]{ }
+    \renewcommand{\ch@irxscriptfont}{#1}
+}
+\define@key[chairx]{fonts}{sheaffont}{
+	\providecommand{\ch@irxsheaffont}[1]{ }
+	\renewcommand{\ch@irxsheaffont}{#1}
+}
+\define@key[chairx]{fonts}{spacefont}{
+    \providecommand{\ch@irxspacefont}[1]{ }
+    \renewcommand{\ch@irxspacefont}{#1}
+}
+\define@key[chairx]{fonts}{topologyfont}{
+	\providecommand{\ch@irxtopologyfont}[1]{ }
+	\renewcommand{\ch@irxtopologyfont}{#1}
+}
+%    \end{macrocode}
+%
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\chairxfonts}
+%
+%     Command for setting the fonts.
+%
+%    \begin{macrocode}
+\newcommand{\chairxfonts}[1]{
+  \setkeys[chairx]{fonts}{#1}
+}
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% We use the following default settings for fonts.
+%
+%    \begin{macrocode}
+\chairxfonts{
+    algebrafont = \mathscr,
+    basisfont = \mathit,
+    categoryfont = \mathfrak,
+    categorynamefont = \mathsf,
+    fieldfont = \mathbb,
+    filterfont = \mathfrak,
+    functorfont = \mathsf,
+    groupfont = \mathrm,
+    groupoidfont = \mathfrak,
+    gerstenhaberfont = \mathfrak,
+    hilbertfont = \mathfrak,
+    liealgfont = \mathfrak,
+    modulefont = \mathscr,
+    prehilbfont = \mathcal,
+    operatorfont = \mathrm,
+    ringfont = \mathsf,
+    scriptfont = \mathrm,
+    sheaffont = \mathscr,
+    spacefont = \mathscr,
+    topologyfont = \mathscr
+}
+%    \end{macrocode}
+%
+% code for grabbing a single glyph from some random font without
+% investing a new math alphabet: use only the wrapper macro as
+% |\ch@irxmathsymbol[mathtype]{fontname}{glyph}| with |mathtype| being
+% the optional type of the symbol with default being|\mathord|,
+% |fontname| the name of the font where the symbol is to be found and
+% |glyph| the number of the symbol inside the specified font.
+%
+%    \begin{macrocode}
+\newcommand{\ch@irxfont}[1]{\fontfamily{#1}\fontencoding{U}\fontseries{m}\fontshape{n}\selectfont}
+\newcommand{\ch@irxsymbol}[2]{{\ch@irxfont{#1}\char#2}}
+\newcommand\ch@irxmathsymbol[3][\mathord]{%
+  #1{\ch@irxm@thsymbol{#2}{#3}}}
+\def\ch@irxm@thsymbol#1#2{\mathchoice
+  {\@ch@irxm@thsymbol{#1}{#2}\tf@size}
+  {\@ch@irxm@thsymbol{#1}{#2}\tf@size}
+  {\@ch@irxm@thsymbol{#1}{#2}\sf@size}
+  {\@ch@irxm@thsymbol{#1}{#2}\ssf@size}}
+\def\@ch@irxm@thsymbol#1#2#3{\mbox{\fontsize{#3}{#3}\ch@irxsymbol{#1}{#2}}}
+%
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\fi
+%    \end{macrocode}

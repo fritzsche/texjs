@@ -1,0 +1,92 @@
+%%%
+% Boite à dix
+%%%
+\def\filedateBoiteADix{2025/08/24}%
+\def\fileversionBoiteADix{0.1}%
+\message{-- \filedateBoiteADix\space v\fileversionBoiteADix}%
+%
+\makeatletter
+\setKVdefault[BoiteDix]{Couleur=black,CouleurComplement={},Echelle=0.5,Vertical=false}
+
+\NewDocumentCommand\BoiteADix{om}{%
+  \useKVdefault[BoiteDix]%
+  \setKV[BoiteDix]{#1}%
+  \ifx\bla#1\bla%
+    \PfM@BuildBoiteDix{0}%
+  \else
+    \PfM@BuildBoiteDix{#2}%
+  \fi
+}%
+
+\NewDocumentCommand\PfM@BuildBoiteDix{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      u:=\useKV[BoiteDix]{Echelle}*1cm;
+      %
+      path base,disqueh[],disquev[];
+      base=fullcircle scaled u;
+      %
+      color CouleurFond,CouleurComp;
+      CouleurFond=\useKV[BoiteDix]{Couleur};
+      \ifemptyKV[BoiteDix]{CouleurComplement}{CouleurComp=white}{CouleurComp=\useKV[BoiteDix]{CouleurComplement}};%
+      %
+      nb:=0;
+      for k=0 upto 1:
+        for l=0 upto 4:
+          nb:=nb+1;
+          disqueh[nb]=base shifted(1.2*u*(l,-k));
+          disquev[nb]=base shifted(1.2*u*(k,-l));
+        endfor;
+      endfor;
+      %      
+      vardef BoiteDixHorizontale(expr AA)=
+        save BDix;
+        picture BDix;
+        BDix=image(
+          for k=1 upto AA:
+            fill disqueh[k] withcolor CouleurFond;
+            trace disqueh[k];
+          endfor;
+          for k=AA+1 upto 10:
+            fill disqueh[k] withcolor CouleurComp;
+            trace disqueh[k];
+          endfor;
+          trace u*(-0.7,0.7)--u*(5.5,0.7)--u*(5.5,-1.9)--u*(-0.7,-1.9)--cycle;
+        );
+        BDix
+      enddef;
+      %
+      vardef BoiteDixVerticale(expr AA)=
+        save BDixV;
+        picture BDixV;
+        BDixV=image(
+          for k=1 upto AA:
+            fill disquev[k] withcolor CouleurFond;
+            trace disquev[k];
+          endfor;
+          for k=AA+1 upto 10:
+            fill disquev[k] withcolor CouleurComp;
+            trace disquev[k];
+          endfor;
+          trace u*(-0.7,0.7)--u*(1.9,0.7)--u*(1.9,-5.5)--u*(-0.7,-5.5)--cycle;
+        );
+        BDixV
+      enddef;
+      quotient:=#1 div 10;
+      reste:=#1 mod 10;
+      if \useKV[BoiteDix]{Vertical}:
+        for k=1 upto quotient:
+          trace BoiteDixVerticale(10) shifted (k*u*(2.8,0));
+        endfor;
+        trace BoiteDixVerticale(reste) shifted ((quotient+1)*u*(2.8,0));
+      else:
+        for k=1 upto quotient:
+          trace BoiteDixHorizontale(10) shifted (k*u*(0,-2.8));
+        endfor;
+        trace BoiteDixHorizontale(reste) shifted ((quotient+1)*u*(0,-2.8));
+      fi;
+    \end{mplibcode}%
+  \fi%
+}%
+\makeatother

@@ -1,0 +1,73 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2018 - 2021 by ChairX
+%
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either
+% version 1.3 of this license or (at your option) any later
+% version.  The latest version of this license is in:
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of
+% LaTeX version 2005/12/01 or later.
+%
+% This file contains the implementation of all category theory related macros .
+%
+% Macros have to be described by (delete the first %)
+% %\begin{macro}{\macro}
+% % Description of the implementation.
+% %    \begin{macrocode}
+%\newcommand{\macro}[]         {}
+% %    \end{macrocode}
+% %\end{macro}
+%
+% The implementation and description will appear in the implementation
+% part of the documentation. Use \subsubsection{} etc. for structuring.
+%
+% The documentation of the macros defined here has to be written in
+% chairxmathDelimitersDoc.dtx
+% \fi
+%
+% First we check of macros should be included:
+%    \begin{macrocode}
+\if@loadmath
+%    \end{macrocode}
+%
+% \subsubsection{The New Delimiters} \label{sec:NewDelimiters}
+%
+% \begin{macro}{\vast}
+% \begin{macro}{\Vast}
+% \begin{macro}{\vastl}
+% \begin{macro}{\vastm}
+% \begin{macro}{\vastr}
+% \begin{macro}{\Vastl}
+% \begin{macro}{\Vastm}
+% \begin{macro}{\Vastr}
+%
+% Bigger than |\Bigg| commands for explicit re-sizing brackets and things
+% needs left/right version to work with |\DeclarePairedDelimiters|.
+% Hack from http://tex.stackexchange.com/questions/262061
+%
+%    \begin{macrocode}
+\newcommand{\vast}{\bBigg@{4}}
+\newcommand{\Vast}{\bBigg@{5}}
+\newcommand{\vastl}{\mathopen\vast}
+\newcommand{\vastm}{\mathrel\vast}
+\newcommand{\vastr}{\mathclose\vast}
+\newcommand{\Vastl}{\mathopen\Vast}
+\newcommand{\Vastm}{\mathrel\Vast}
+\newcommand{\Vastr}{\mathclose\Vast}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% 
+%    \begin{macrocode}
+\fi
+%    \end{macrocode}

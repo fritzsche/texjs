@@ -1,0 +1,29 @@
+%%%
+% dobble
+%%%
+\def\filedateDobble{2024/08/04}%
+\def\fileversionDobble{0.1}%
+\message{-- \filedateDobble\space v\fileversionDobble}%
+% by Maxime Chupin
+\NewDocumentCommand\dobble{m}{%
+  \directlua{
+    require('PfCdobble.lua')
+    dobble("#1");
+  }%
+}%
+
+\setKVdefault[ClesDobble]{Niveau=5,CouleurCadre=black,Cercle=false}
+
+\NewDocumentCommand\Dobble{o m}{%
+  \useKVdefault[ClesDobble]%
+  \setKV[ClesDobble]{#1}%
+  \colorlet{PfCDobbleColor}{\useKV[ClesDobble]{CouleurCadre}}%
+  \setsepchar{,}%
+  \readlist*\PfCListeSymboleDobble{#2}%
+  \def\PfCDobbleTotalSymboles{\fpeval{1+\useKV[ClesDobble]{Niveau}+\useKV[ClesDobble]{Niveau}^2}}%
+  \xdef\PfCDobbleNiveau{\useKV[ClesDobble]{Niveau}}%
+  \xintifboolexpr{\PfCListeSymboleDobblelen==\PfCDobbleTotalSymboles}{%
+    \dobble{\PfCDobbleNiveau}%
+  }{%
+    Pour un dobble basé sur le nombre premier \useKV[ClesDobble]{Niveau}, le nombre de symboles doit être égal à \num{\PfCDobbleTotalSymboles}.}%
+}%

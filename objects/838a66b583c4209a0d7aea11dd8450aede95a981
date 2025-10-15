@@ -1,0 +1,99 @@
+%%%
+% Bon de sortie
+%%%
+\def\filedateBonSortie{2024/08/04}%
+\def\fileversionBonSortie{0.1}%
+\message{-- \filedateBonSortie\space v\fileversionBonSortie}%
+%
+\newcommand\BonSortieBandeau{%
+  Nom : \hfill Date : \hspace*{3cm}
+}
+
+\newtcolorbox{Sortie}{%
+  %Titre
+  colbacktitle=white,
+  fonttitle=\color{black}\Large\bfseries,
+  toptitle=2mm,
+  bottomtitle=2mm,
+  title={\BonSortieBandeau},
+  %%Cadre principal
+  enhanced,
+  nobeforeafter,
+  width=13.15cm,
+  height=8.8cm,
+  colback=white,
+  valign=top,
+  %Cadre bas
+  sidebyside,
+  righthand width=0.05\linewidth,
+}
+
+\setKVdefault[ClesSortie]{MemeEnonce=false}%
+
+\newcommand\BonSortieSmiley{%
+  \Huge
+  \begin{center}
+    \RKangry
+
+    \vspace{1em}
+    
+    \RKsad
+
+    \vspace{1em}
+    
+    \RKsmallsmile
+    
+    \vspace{1em}
+
+    \RKbigsmile
+  \end{center}
+}
+
+\NewDocumentCommand\BonSortie{o m m m m}{%
+  \clearpage%
+  \useKVdefault[ClesSortie]%
+  \setKV[ClesSortie]{#1}%
+  \begin{tikzpicture}[remember picture, overlay]
+    \draw[dashed] (current page.north) to (current page.south);
+    \draw[dashed] (current page.west) to (current page.east);
+    \coordinate[xshift=7.425cm,yshift=-5.25cm] (A) at (current page.north west);
+    \coordinate[xshift=-7.425cm,yshift=-5.25cm] (B) at (current page.north east);
+    \coordinate[xshift=7.425cm,yshift=5.25cm] (C) at (current page.south west);
+    \coordinate[xshift=-7.425cm,yshift=5.25cm] (D) at (current page.south east);
+    \ifboolKV[ClesSortie]{MemeEnonce}{%
+      \foreach\i\in in {A,B,C,D}{%
+        \node (\i1) at (\i) {\begin{Sortie}
+            #2
+            \tcblower
+            \BonSortieSmiley
+          \end{Sortie}
+        };
+      }
+    }{%
+      \node (A1) at (A) {\begin{Sortie}
+          #2
+          \tcblower
+          \BonSortieSmiley
+        \end{Sortie}
+      };
+      \node (B1) at (B) {\begin{Sortie}
+          #3
+          \tcblower
+          \BonSortieSmiley
+        \end{Sortie}
+      };
+      \node (C1) at (C) {\begin{Sortie}
+          #4
+          \tcblower
+          \BonSortieSmiley
+        \end{Sortie}
+      };
+      \node (D1) at (D) {\begin{Sortie}
+          #5
+          \tcblower
+          \BonSortieSmiley
+        \end{Sortie}
+      };
+    }
+  \end{tikzpicture}
+}%

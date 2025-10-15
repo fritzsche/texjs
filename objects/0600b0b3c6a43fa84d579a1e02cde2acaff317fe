@@ -1,0 +1,108 @@
+%%%
+% Grades
+%%%
+\def\filedateGrades{2025/05/27}%
+\def\fileversionGrades{0.1a}%
+\message{-- \filedateGrades\space v\fileversionGrades}%
+%
+\setKVdefault[Grades]{Solution=false,Longueur=9,Largeur=9,Echelle=8mm,Graines=false,Graine={}}%
+\defKV[Grades]{Graine=\ifempty{#1}{}{\setKV[Grades]{Graines}}}%
+
+\NewDocumentCommand\Grades{o}{%
+  \useKVdefault[Grades]%
+  \setKV[Grades]{#1}%
+  \BuildGrades%
+}%
+
+\NewDocumentCommand\BuildGrades{}{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    boolean Graines,Solution;
+    Graines=\useKV[Grades]{Graines};
+    Solution=\useKV[Grades]{Solution};
+    
+    if Graines:
+    randomseed:=\useKV[Grades]{Graine};
+    fi;
+    
+    numeric Longueur,Largeur;
+    Longueur=\useKV[Grades]{Longueur};
+    Largeur=\useKV[Grades]{Largeur};
+    
+    u:=\useKV[Grades]{Echelle};
+    
+    p:=0;
+    pair A[];%centre des carrés.
+    boolean Allume[][];
+    numeric Nombre[][];
+    
+    for k=-1 upto Largeur+1:
+    for l=-1 upto Longueur+1:
+    Allume[k][l]=false;
+    endfor;
+    endfor;
+    
+    for k=0 upto Longueur-1:
+    for l=0 upto Largeur-1:
+    p:=p+1;
+    A[p]=u*(k,-l);
+    trace (unitsquare scaled u) shifted A[p];
+    endfor;
+    endfor;
+
+    for k=0 upto Largeur-1:
+    for l=0 upto Longueur-1:
+    if Allume[k][l]:
+    else:
+    Allume[k][l]:=true;
+    m:=uniformdeviate(1);
+    if m<0.5:
+    % on ne met pas de nombre
+    else:
+    % on met un nombre
+    Nombre[k][l]=floor(1+uniformdeviate(9));
+    Allume[k][l+1]:=true;
+    Allume[k+1][l-1]:=true;
+    Allume[k+1][l]:=true;
+    Allume[k+1][l+1]:=true;
+    if Solution:
+    label(TEX(decimal(Nombre[k][l])),u*(l+0.5,-k+0.5));
+    fi;
+    fi;
+    fi;
+    endfor;
+    endfor;
+
+    % on compte le nombre de chiffres dans les lignes et on les ajoute
+    for k=0 upto Largeur-1:
+    p:=0;
+    Somme:=0;
+    for l=0 upto Longueur-1:
+    if unknown Nombre[k][l]:
+    else:
+    p:=p+1;
+    Somme:=Somme+Nombre[k][l];
+    fi;
+    endfor;
+    label(TEX(decimal(p)),u*(-0.5,-k+0.5));
+    label(TEX(decimal(Somme)),u*(Longueur+0.5,-k+0.5));
+    endfor;
+
+    % on compte le nombre de chiffres dans les colonnes et on les ajoute
+    for k=0 upto Longueur-1:
+    p:=0;
+    Somme:=0;
+    for l=0 upto Largeur-1:
+    if unknown Nombre[l][k]:
+    else:
+    p:=p+1;
+    Somme:=Somme+Nombre[l][k];
+    fi;
+    endfor;
+    label(TEX(decimal(p)),u*(k+0.5,1.5));
+    label(TEX(decimal(Somme)),u*(k+0.5,-Largeur+0.5));
+    endfor;
+  \end{mplibcode}
+ \fi
+}%

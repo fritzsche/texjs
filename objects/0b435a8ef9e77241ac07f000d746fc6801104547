@@ -1,0 +1,30 @@
+%%%
+% Cartes Mentales
+%%%
+\def\filedateCarteMentale{2024/08/04}%
+\def\fileversionCarteMentale{0.1}%
+\message{-- \filedateCarteMentale\space v\fileversionCarteMentale}%
+%
+\setKVdefault[ClesMentales]{Nom={Bulle}, Largeur=5cm, Ancre={0,0},Pointilles=false,CTrace=black,CFond=white,Epaisseur=1pt,Rayon=1}%
+\newenvironment{Mind}{\begin{tikzpicture}}{\end{tikzpicture}}%
+
+\newlength{\RoundedBoxWidth}%
+
+\NewDocumentEnvironment{Bulle}{o+b}{%
+  \setKV[ClesMentales]{#1}%
+  \setlength{\RoundedBoxWidth}{\useKV[ClesMentales]{Largeur}}%
+  \xdef\Pointilles{\ifboolKV[ClesMentales]{Pointilles}{dashed}{}}%
+  \xdef\CouleurTrace{\useKV[ClesMentales]{CTrace}}%
+  \xdef\CouleurFond{\useKV[ClesMentales]{CFond}}%
+  \xdef\EpaisseurLigne{\useKV[ClesMentales]{Epaisseur}}%
+  \xdef\RayonCoin{\useKV[ClesMentales]{Rayon}}%
+  \node(\useKV[ClesMentales]{Nom}) [align=justify,draw=\CouleurTrace,line width=\EpaisseurLigne,\Pointilles,fill=\CouleurFond,rounded corners=\RayonCoin,text width=\RoundedBoxWidth] at (\useKV[ClesMentales]{Ancre}) {\begin{minipage}{\RoundedBoxWidth}#2\end{minipage}};%
+  % \multido{\i=1+1}{9}{%
+  \xintFor* ##1 in{\xintSeq{1}{9}}\do{%
+    \xdef\x{\fpeval{##1/10}}
+    \coordinate (\useKV[ClesMentales]{Nom}-H-##1) at ($(\useKV[ClesMentales]{Nom}.north west)!\x!(\useKV[ClesMentales]{Nom}.north east)$);
+    \coordinate (\useKV[ClesMentales]{Nom}-D-##1) at ($(\useKV[ClesMentales]{Nom}.north east)!\x!(\useKV[ClesMentales]{Nom}.south east)$);
+    \coordinate (\useKV[ClesMentales]{Nom}-B-##1) at ($(\useKV[ClesMentales]{Nom}.south east)!\x!(\useKV[ClesMentales]{Nom}.south west)$);
+    \coordinate (\useKV[ClesMentales]{Nom}-G-##1) at ($(\useKV[ClesMentales]{Nom}.south west)!\x!(\useKV[ClesMentales]{Nom}.north west)$);
+  }%
+}{}%

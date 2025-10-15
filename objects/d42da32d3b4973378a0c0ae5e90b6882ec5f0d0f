@@ -1,0 +1,63 @@
+%%
+%% This is file `phy-op.legacy.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% physics2-code.dtx  (with options: `op.legacy')
+%% 
+%%   Copyright (C) 2023 by Zhang Tingxuan <alphaztx@163.com>
+%% 
+%%   This work may be distributed and/or modified under the
+%%   conditions of the LaTeX Project Public License, either
+%%   version 1.3c of this license or (at your option) any later
+%%   version. The latest version of this license is in:
+%% 
+%%     http://www.latex-project.org/lppl.txt
+%% 
+%%   and version 1.3 or later is part of all distributions of
+%%   LaTeX version 2005/12/01 or later.
+%% 
+%%   This work has the LPPL maintenance status `maintained'.
+%% 
+%%   The Current Maintainer of this work is Zhang Tingxuan.
+%% 
+%%   This work consists of the files physics2-code.dtx,
+%%             and the derived files physics2.ins,
+%%                                   physics2.sty,
+%%                                   phy-<module>.sty,
+%%                                   physics2-code.pdf,
+%%                               and README.md.
+%% 
+\ProvidesFile{phy-op.legacy.sty}
+  [2023/10/24 `op.legacy' module of physics2]
+\phy@define@key{op.lega}{ReIm}[true]{\def\phy@reserveda{#1}}
+\phy@define@key{op.lega}{PV}{\def\@phy@oplega@PV{#1}}
+\phy@define@key{op.lega}{pv}{\def\@phy@oplega@pv{#1}}
+\phy@setkeys{op.lega}{PV=\mathcal{P},pv={p.v.},ReIm=true}
+\phy@processkeyopt{ab}
+\DeclareRobustCommand\asin{\mathop{\operator@font asin}\nolimits}
+\DeclareRobustCommand\acos{\mathop{\operator@font acos}\nolimits}
+\DeclareRobustCommand\atan{\mathop{\operator@font atan}\nolimits}
+\DeclareRobustCommand\acsc{\mathop{\operator@font acsc}\nolimits}
+\DeclareRobustCommand\asec{\mathop{\operator@font asec}\nolimits}
+\DeclareRobustCommand\acot{\mathop{\operator@font acot}\nolimits}
+\DeclareRobustCommand\Tr{\mathop{\operator@font Tr}\nolimits}
+\DeclareRobustCommand\tr{\mathop{\operator@font tr}\nolimits}
+\DeclareRobustCommand\rank{\mathop{\operator@font rank}\nolimits}
+\DeclareRobustCommand\erf{\mathop{\operator@font erf}\nolimits}
+\DeclareRobustCommand\Res{\mathop{\operator@font Res}\nolimits}
+\DeclareRobustCommand\res{\mathop{\operator@font res}\nolimits}
+\DeclareRobustCommand\PV{\mathord{\@phy@oplega@PV}}
+\DeclareRobustCommand\pv{\mathop{\operator@font\@phy@oplega@pv{}}\nolimits}
+\ifx\phy@reserveda\phy@true
+\AtBeginDocument{%
+  \let\Resymbol\Re%
+  \let\Imsymbol\Im%
+  \DeclareRobustCommand\Re{\mathop{\operator@font Re}\nolimits}%
+  \DeclareRobustCommand\Im{\mathop{\operator@font Im}\nolimits}%
+}
+\fi
+\endinput
+%%
+%% End of file `phy-op.legacy.sty'.

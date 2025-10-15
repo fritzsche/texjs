@@ -1,0 +1,240 @@
+%%
+%% This is file `odesandpdes.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% odesandpdes.dtx  (with options: `package')
+%% ----------------------------------------------------------------
+%% odesandpdes --- A package for the streamlining of the use of
+%% odes and pdes in mathematical texts typset by LaTeX
+%% 
+%% E-mail: anakin@ruc.dk
+%% Released under the LaTeX Project Public License v1.3c or later
+%% See http://www.latex-project.org/lppl.txt
+%% ----------------------------------------------------------------
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{odesandpdes}[2024/01/17 v1.0.0 For streamlining ODE and PDE usage]
+%% ----------------------------------------------------------------
+%% Package initialize
+%% ----------------------------------------------------------------
+\RequirePackage{xkeyval}
+\newcount\m@xm@rk%
+\newcount\exp@c@unt%
+\countdef\@detempv@l=255%
+\newtoks\v@rr@t@ks%
+\newtoks\func@t@ks%
+\newtoks\@tpost@ks%
+\newbox\@dev@rb@x%
+\newbox\@defunb@x%
+\newbox\@deresb@x%
+%% ----------------------------------------------------------------
+%% Package Options
+%% ----------------------------------------------------------------
+\providecommand\@de@option{Leib}
+\DeclareOptionX{notation}[default]%
+    {\def\@de@option{\csname @de@not@#1\endcsname}}
+\def\@de@not@Lagrange{Lagr}
+\def\@de@not@Leibniz{Leib}
+\def\@de@not@Newton{Newt}
+\let\@de@not@default\@de@not@Leibniz
+\DeclareOptionX{maxprimes}[3]{\m@xm@rk=#1\advance\m@xm@rk\@ne}
+\DeclareOptionX*{\PackageWarning{odesandpdes}{`\CurrentOption' ignored}}
+\ExecuteOptionsX{notation,maxprimes}
+\ProcessOptionsX\relax
+\define@key[package]{@de}{notation}
+    {\def\@de@option{\csname @de@not@#1\endcsname}}
+\define@key[package]{@de}{maxprimes}
+    {\m@xm@rk=#1\advance\m@xm@rk\@ne}
+\newcommand\setDE[1]{\setkeys[package]{@de}{#1}}
+\@ifpackageloaded{amsmath}{
+    \let\@de@ver=\@@over%
+    \let\@de@top=\@@atop%
+    \let\@de@bove=\@@above}%
+    {\let\@de@ver=\over%
+    \let\@de@top=\atop%
+    \let\@de@bove=\above}
+%% ----------------------------------------------------------------
+%% Package Macros
+%% ----------------------------------------------------------------
+\def\d@@{\mathrm d}
+\let\d@l=\partial
+\def\@dest@red{st@r@d}
+\def\@den@st@r{n@st@r}
+\def\ode{\csname \@de@option ODE\endcsname}
+\def\pde{\csname \@de@option PDE\endcsname}
+\def\LagrODE{\let\@de@perat@r\d@@% sets the d
+    \let\@dec@mm@nd\@de@not@Lagrange
+    \@de@ifst@r}
+\def\LeibODE{\let\@de@perat@r\d@@%
+    \let\@dec@mm@nd\@de@not@Leibniz
+    \@de@ifst@r}
+\def\NewtODE{\let\@de@perat@r\d@@%
+    \let\@dec@mm@nd\@de@not@Newton
+    \@de@ifst@r}
+\def\LagrPDE{\let\@de@perat@r\d@l% sets the del
+    \let\@dec@mm@nd\@de@not@Lagrange
+    \@de@ifst@r}
+\def\LeibPDE{\let\@de@perat@r\d@l%
+    \let\@dec@mm@nd\@de@not@Leibniz
+    \@de@ifst@r}
+\def\NewtPDE{\let\@de@perat@r\d@l%
+    \let\@dec@mm@nd\@de@not@Newton
+    \@de@ifst@r}
+\def\@dest@r@rg*{\expandafter\@de@ifbr@ck}
+\def\@de@ption@l@rg[#1]{\expandafter\v@rr@t@ks{#1}\relax \@de@ifexp@n}%
+\def\@de@exponent@rg^#1{\exp@c@unt#1\relax \@deifst@rred}
+\def\@dest@r@dy@ink{\expandafter\@dec@mpf@rm}
+\def\@den@st@ry@ink{\expandafter\@dey@inkf@rm}
+\def\@de@func@ther#1{\expandafter\func@t@ks{#1}\relax
+    \expandafter\@de@if@tpos}
+\def\@de@func@Leib{\expandafter\func@t@ks{}\relax
+    \expandafter\@de@ifbrace}
+\let\@de@func@Lagr\@de@func@ther
+\let\@de@func@Newt\@de@func@ther
+\def\@de@tpos@rg#1;{\expandafter\@tpost@ks{#1}\relax \@de@tf@rm}
+\def\@de@ifst@r{\@deifch@r *
+    {\@dest@rgument\@dest@red\@dest@r@rg}
+    {\@dest@rgument\@den@st@r\@dest@r@rg*}}
+\def\@de@ifbr@ck{\@deifch@r [
+    \@de@ption@l@rg
+    {\@de@ption@l@rg[t]}}
+\def\@de@ifexp@n{\@deifch@r ^
+    \@de@exponent@rg
+    {\@de@exponent@rg^\@ne}}
+\def\@de@ifbrace{\@deifch@r \bgroup
+    \@de@func@ther
+    \@de@tilsp@ce}
+\def\@de@if@tpos{\@deifch@r a \@de@tDoubleCheck \@dec@mpf@rm}
+\def\@de@tDoubleCheck a#1 {\ifx t#1\expandafter\@de@tpos@rg\else
+    \@dec@mpf@rm a#1\fi}%
+%% ----------------------------------------------------------------
+%% Ancilliary Package Functions
+%% ----------------------------------------------------------------
+\def\@dest@rgument#1{%
+    \def\@deifst@rred{\csname @de#1y@ink\endcsname}%
+    \def\@dec@mpf@rm{\csname#1@\@dec@mm@nd\endcsname}}
+\def\@de@tf@rm{\csname @de@t@\@dec@mm@nd\endcsname}%
+\def\@dey@inkf@rm{\csname @de@func@\@dec@mm@nd\endcsname}%
+\def\@deifch@r#1#2#3{%
+    \let\@dew@tcht@k=#1\relax
+    \def\@de@tmpA{#2} \def\@de@tmpB{#3}
+    \futurelet\@detesttoken\@denext@rg}
+\def\@denext@rg{%
+    \ifx\@detesttoken\@sptoken\relax
+        \let\@de@nextact\@desp@cegobbler\else
+        \ifx\@detesttoken\@dew@tcht@k\relax  % if
+            \let\@de@nextact\@de@tmpA\else       % ifn't
+            \let\@de@nextact\@de@tmpB\fi\fi
+    \@de@nextact}
+\let\@desavedef\<
+\def\<{\@desp@cegobbler}
+\expandafter\def\< {\futurelet\@detesttoken\@denext@rg}
+\def\@de@tilsp@ce#1 {%
+    \beginnext%
+    \toks0={#1}
+    \edef\next{\func@t@ks=\expandafter{\the\toks0}}
+    \endnext \@de@if@tpos}
+\def\beginnext{\begingroup
+    \let\next\undefined}
+\def\endnext{\expandafter\endgroup\next}
+%% ----------------------------------------------------------------
+%% Package Notations
+%% ----------------------------------------------------------------
+\def\st@r@d@Lagr{%
+    \setbox\@deresb@x\hbox{$
+        {f^{\mkern1mu\@dedr@wm@rk\lagr@prime\lagr@prime\br@ced@xpon}
+        _{\m@kep@rtLagr}}\mkern-\tw@ mu\left(\the\v@rr@t@ks\right)
+        $}%
+    \@derele@se}%
+\def\st@r@d@Leib{%
+    \setbox\@defunb@x\hbox{$\@de@perat@r^{\@deem@rex}$}%
+    \b@se@Leib}%
+\def\st@r@d@Newt{%
+    \setbox\@dev@rb@x\hbox{$\the\v@rr@t@ks$} \b@se@Newt}%
+\def\n@st@r@Lagr{%
+    \setbox\@deresb@x\hbox{$
+        {\the\func@t@ks
+        ^{\mkern\@ne mu\@dedr@wm@rk\lagr@prime\lagr@prime\br@ced@xpon}
+        _{\m@kep@rtLagr}}\mkern\m@ne mu$}%
+    \@derele@se}%
+\def\n@st@r@Leib{%
+    \setbox\@defunb@x\hbox{$
+        \@de@perat@r^{\@deem@rex}\mkern0.40mu\the\func@t@ks$}
+        \b@se@Leib}
+\def\n@st@r@Newt{%
+    \setbox\@dev@rb@x\hbox{$\the\func@t@ks$} \b@se@Newt}%
+\def\@de@t@Lagr{%
+    \noexpand\hbox{$
+        \n@st@r@Lagr\mkern-\thr@@ mu\left(\the\@tpost@ks\right)
+        $}}%
+\def\@de@t@Leib{%
+    \noexpand\hbox{$
+        \left.\n@st@r@Leib\mkern\@ne mu\right|
+        _{\mkern1mu\displaystyle\the\v@rr@t@ks\mkern2mu
+        \rlap{$\scriptstyle=\mkern\thinmuskip\the\@tpost@ks$}}
+        $}%
+    }%
+\def\@de@t@Newt{%
+    \noexpand\hbox{$
+        \n@st@r@Newt\mkern-\tw@ mu\left(\the\@tpost@ks\right)
+        $}}%
+\def\m@kep@rtLagr{\ifx\@de@perat@r\d@l\the\v@rr@t@ks\else\empty\fi}
+\def\b@se@Leib{%
+    \setbox\@dev@rb@x\hbox{$
+        \@de@perat@r\mkern0.40mu\the\v@rr@t@ks^{\@deem@rex}$}%
+    \setbox\@deresb@x\hbox{\kern0.5\p@%
+        $\raise2\p@\box\@defunb@x\@de@ver\lower5\p@\box\@dev@rb@x$%
+        \kern0.5\p@}%
+    \@derele@se}%
+\def\b@se@Newt{%
+    \setbox\@defunb@x\hbox{\vbox{\baselineskip=\z@\lineskip=\m@ne\p@%
+        \@dedr@wm@rk\@de@ned@ts\@detw@d@ts\@denewt@nd@t}}%
+    \setbox\@deresb@x\hbox{\vbox{\baselineskip=\z@\lineskip=-0.5\p@%
+        \hbox to\wd\@dev@rb@x{\hss\raise\z@\box\@defunb@x\hss}%
+        \hbox{\raise\z@\box\@dev@rb@x}}}%
+    \@derele@se}
+\def\m@kep@rtNewt{\ifx\@de@perat@r\d@l\empty\fi}
+\def\lagr@prime{\mkern0.35mu\prime\global\advance\exp@c@unt\m@ne}
+\def\br@ced@xpon{\left(\the\exp@c@unt\right)}
+\def\@detw@d@ts{\ifnum\exp@c@unt>\@ne%
+        \advance\exp@c@unt-\tw@\hbox to 5\p@{\hss$\cdot\cdot$\hss}\fi}%
+\def\@de@ned@ts{\@detempv@l=\the\exp@c@unt%
+    \loop\ifnum\@detempv@l>\tw@%
+        \advance\@detempv@l-\tw@\repeat%
+    \ifnum\@detempv@l<\tw@%
+        \advance\exp@c@unt\m@ne\hbox to 5\p@{\hss$\cdot$\hss}\fi}%
+\def\@denewt@nd@t{\hbox{\vbox{%
+    \hbox to 5\p@{\hss\raise\thr@@\p@\hbox{$\scriptstyle\@deem@rex$}\hss}%
+    \hbox to 5\p@{\hss\hbox{$\displaystyle\cdot$}\hss}}}}%
+\def\@deem@rex{\ifnum\tw@>\exp@c@unt\empty\else\the\exp@c@unt\fi}
+\def\@dedr@wm@rk#1#2#3{
+    \ifnum\exp@c@unt<\m@xm@rk
+        #1\@derepe@tdr@w#2\else
+        #3\fi}
+\def\@derepe@tdr@w#1{\loop\ifnum\exp@c@unt>\z@#1\repeat}
+\def\@derele@se{\noexpand{\box\@deresb@x}}
+\let\<\@desavedef
+\endinput
+%% File: odesandpdes.dtx
+%% 
+%% Copyright (C) 2024 by Anakin anakin@ruc.dk
+%% -----------------------------------------------------------
+%% 
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License (LPPL), either
+%% version 1.3c of this license or (at your option) any later
+%% version. The latest version of this license is in the file:
+%% 
+%%     http://www.latex-project.org/lppl.txt
+%% 
+%% This work is "maintained" (as per LPPL maintenance status) by
+%% Anakin.
+%% 
+%% This work consists of the file  odesandpdes.dtx
+%% and the derived files           odesandpdes.ins,
+%%                                 odesandpdes.pdf and
+%%                                 odesandpdes.sty.
+%% 
+%%
+%% End of file `odesandpdes.sty'.

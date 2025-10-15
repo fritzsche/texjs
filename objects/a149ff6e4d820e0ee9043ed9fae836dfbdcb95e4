@@ -1,0 +1,301 @@
+% The luanumint package
+% version 1.2
+% Licensed under LaTeX Project Public License v1.3c or later. The complete license text is available at http://www.latex-project.org/lppl.txt.
+%Authors: Chetan Shirore and Ajit Kumar
+
+\ProvidesPackage{luanumint}[1.2]
+\RequirePackage{luacode,breqn,xkeyval}
+\begin{luacode*}
+function checksign(x)
+   if x >=0 then
+      return ' + '
+   else
+      return ''
+   end
+end
+-- Function to round off numbers.
+function mathrnd(num, numDecimalPlaces)
+   local mult = 10^(numDecimalPlaces or 0)
+   return math.floor(num * mult + 0.5) / mult
+end
+-- Function for the midpoint rule.
+function luamidpt (f,a,b,n,trun)
+   local trun = trun or 4
+   local h = (b - a) / n
+   local sum = 0
+   local var = a + h/2
+   for i = 1, n do
+      sum = sum + f(var)
+      var = var + h
+   end
+   return mathrnd(sum*h,trun)
+end
+-- Function for the midpoint rule with steps.
+function luamidptSteps (f,a,b,n,nm,trun)
+   local trun = trun or 4
+   local nm = nm or "f"
+   local h = (b - a) / n
+   local sum = 0
+   local var =  a + (h/2)
+   local str = "  = "..mathrnd(h,trun)..'\\left['
+   local otstr = mathrnd(h,trun)..'\\left('
+   for i = 1, n do
+      if i>=1 and i<=n-1   then
+         sum = sum + mathrnd(f(var),trun)
+         str = str ..nm.."("..mathrnd(var,trun)..") + "
+         otstr = otstr ..mathrnd(f(var),trun)..checksign(f(var+h),trun)
+      end
+      if i== n  then
+         sum = sum + mathrnd(f(var),trun)
+         str = str ..nm.."("..var..")"
+         otstr = otstr ..mathrnd(f(var),trun)
+      end
+      var = var + h
+   end
+   return str .."\\right] \\\\ = "..otstr.."\\right) \\\\ = "..mathrnd(sum*mathrnd(h,trun),trun)
+end
+-- Function for the Trapezoidal rule.
+function luatrapz (f,a,b,n,trun)
+   local trun = trun or 4
+   local h = (b - a) / n
+   local sum = 0
+   local var = a
+   for i = 1, n+1 do
+      if i== 1 or i == n+1 then
+         sum = sum + f(var)
+      else
+         sum = sum + 2*f(var)
+      end
+      var = var + h
+   end
+   return mathrnd(sum*h/2,trun)
+end
+-- Function for the Trapezoidal rule with Steps.
+function luatrapzsteps (f,a,b,n,nm,trun)
+   local trun = trun or 4
+   local nm = nm or "f"
+   local h = (b - a) / n
+   local sum = 0
+   local var =  a
+   local str = "  = "..mathrnd(h/2,trun)..'\\left['
+   local otstr = mathrnd(h/2,trun)..'\\left('
+   for i = 0, n do
+      if i== 0  then
+         sum = sum + mathrnd(f(var),trun)
+         str = str ..nm.."("..var..") +"
+         otstr = otstr ..mathrnd(f(var),trun)..checksign(f(var+h),trun)
+      end
+      if i>=1 and i<=n-1   then
+         sum = sum + mathrnd(2*f(var),trun)
+         str = str .."2"..nm.."("..mathrnd(var,trun)..") + "
+         otstr = otstr ..mathrnd(2*f(var),trun)..checksign(f(var+h),trun)
+      end
+      if i== n  then
+         sum = sum + mathrnd(f(var),trun)
+         str = str ..nm.."("..var..")"
+         otstr = otstr ..mathrnd(f(var),trun)
+      end
+      var = var + h
+   end
+   return str .."\\right] \\\\ = "..otstr.."\\right) \\\\ = "..mathrnd(sum*mathrnd(h/2,trun),trun)
+end
+-- Function for the Simpsons one-third rule.
+function luasimpsononethird (f,a,b,n,trun)
+   if (not(n % 2 == 0)) then error("Number of subintervals should be even.") end
+   local trun = trun or 4
+   local h = (b - a) / n
+   local sum = 0
+   local var =  a
+   for i = 0, n do
+      if i== 0 or i ==n  then
+         sum = sum + f(var)
+      end
+      if i>=1 and i<=n-1  and  (i % 2 == 0) then
+         sum = sum + 2*f(var)
+      end
+      if i>=1 and i<=n-1  and  (not(i % 2 == 0)) then
+         sum = sum + 4*f(var)
+      end
+      var = var + h
+   end
+   return mathrnd(sum*h/3,trun)
+end
+-- Function for the Simpsons one-third rule with steps.
+function luasimpsononethirdsteps (f,a,b,n,nm,trun)
+   if (not(n % 2 == 0)) then error("Number of subintervals should be even.") end
+   local trun = trun or 4
+   local nm = nm or "f"
+   local h = (b - a) / n
+   local sum = 0
+   local var =  a
+   local str = "  = "..mathrnd(h/3,trun)..'\\left['
+   local otstr = mathrnd(h/3,trun)..'\\left('
+   for i = 0, n do
+      if i== 0  then
+         sum = sum + mathrnd(f(var),trun)
+         str = str ..nm.."("..var..") +"
+         otstr = otstr ..mathrnd(f(var),trun)..checksign(f(var+h),trun)
+      end
+      if i>=1 and i<=n-1  and  (i % 2 == 0) then
+         sum = sum + mathrnd(2*f(var),trun)
+         str = str .."2"..nm.."("..mathrnd(var,trun)..") + "
+         otstr = otstr ..mathrnd(2*f(var),trun)..checksign(f(var+h),trun)
+      end
+      if i>=1 and i<=n-1  and  (not(i % 2 == 0)) then
+         sum = sum + mathrnd(4*f(var),trun)
+         str = str.."4"..nm.."("..mathrnd(var,trun)..") + "
+         otstr = otstr ..mathrnd(4*f(var),trun)..checksign(f(var+h),trun)
+      end
+      if i== n  then
+         sum = sum + mathrnd(f(var),trun)
+         str = str ..nm.."("..var..")"
+         otstr = otstr ..mathrnd(f(var),trun)
+      end
+      var = var + h
+   end
+   return str .."\\right] \\\\ = "..otstr.."\\right) \\\\ = "..mathrnd(sum*mathrnd(h/3,trun),trun)
+end
+-- Function for the Simpsons three-eighth rule.
+function luasimpsonthreight (f,a,b,n,trun)
+   if (not(n % 3 == 0)) then error("No. of sub-intervals should be multiple of 3.") end
+   local trun = trun or 4
+   local h = (b - a) / n
+   local sum = 0
+   local var =  a
+
+   for i = 0, n do
+      if i== 0 or i ==n  then
+         sum = sum + f(var)
+      end
+      if i>=1 and i<=n-1  and  (i % 3 == 0) then
+         sum = sum + 2*f(var)
+      end
+      if i>=1 and i<=n-1  and  (not(i % 3 == 0)) then
+         sum = sum + 3*f(var)
+      end
+      var = var + h
+   end
+   return mathrnd(sum*3*h/8,trun)
+end
+-- Function for the Simpsons three-eighth rule with steps.
+function luasimpsonthreightsteps (f,a,b,n,nm,trun)
+   if (not(n % 3 == 0)) then error("No. of sub-intervals should be multip.") end
+   local trun = trun or 4
+   local nm = nm or "f"
+   local h = (b - a) / n
+   local sum = 0
+   local var =  a
+   local str = "  = "..mathrnd(3*h/8,trun)..'\\left['
+   local otstr = mathrnd(3*h/8,trun)..'\\left('
+   for i = 0, n do
+      if i== 0  then
+         sum = sum + mathrnd(f(var),trun)
+         str = str ..nm.."("..var..") +"
+         otstr = otstr ..mathrnd(f(var),trun)..checksign(f(var+h),trun)
+      end
+      if i>=1 and i<=n-1  and  (i % 3 == 0) then
+         sum = sum + mathrnd(2*f(var),trun)
+         str = str .."2"..nm.."("..mathrnd(var,trun)..") + "
+         otstr = otstr ..mathrnd(2*f(var),trun)..checksign(f(var+h),trun)
+      end
+      if i>=1 and i<=n-1  and  (not(i % 3 == 0)) then
+         sum = sum + mathrnd(3*f(var),trun)
+         str = str.."3"..nm.."("..mathrnd(var,trun)..") + "
+         otstr = otstr ..mathrnd(3*f(var),trun)..checksign(f(var+h),trun)
+      end
+      if i== n  then
+         sum = sum + mathrnd(f(var),trun)
+         str = str ..nm.."("..var..")"
+         otstr = otstr ..mathrnd(f(var),trun)
+      end
+      var = var + h
+   end
+   return str .."\\right] \\\\ = "..otstr.."\\right) \\\\ = "..mathrnd(sum*mathrnd(3*h/8,trun),trun)
+end
+\end{luacode*}
+
+% ========= KEY DEFINITIONS =========
+\define@key{someop}{a}{\def\mop@onex{#1}}%
+\define@key{someop}{b}{\def\mop@twox{#1}}%
+\define@key{someop}{n}{\def\mop@threex{#1}}%
+\define@key{someop}{func}{\def\mop@fourx{#1}}%
+\define@key{someop}{trun}{\def\mop@fivex{#1}}%
+% ========= KEY DEFAULTS =========
+\setkeys{someop}{a=0}%
+\setkeys{someop}{b=1}%
+\setkeys{someop}{n=6}%
+\setkeys{someop}{func=f}%
+\setkeys{someop}{trun=4}%
+% ========= Defining Command =========
+\newcommand{\luaMidpt}[2][]{{%
+\setkeys{someop}{#1}%
+\directlua{%
+tempsubexp = "("..\luastring{#2}..")"
+local f = load("return function(x) return "  ..tempsubexp.. "end",nil,"t",math)()
+tex.print(luamidpt(f,\mop@onex,\mop@twox,\mop@threex,\mop@fivex))
+}%
+}%
+}%
+
+\newcommand{\luaMidptSteps}[2][]{\begingroup%
+\setkeys{someop}{#1}%
+\directlua{%
+
+tempsubexp = "("..\luastring{#2}..")"
+local f = load("return function(x) return "  ..tempsubexp.. "end",nil,"t",math)()   tex.sprint(luamidptSteps(f,\mop@onex,\mop@twox,\mop@threex,'\mop@fourx',\mop@fivex))
+}%
+\endgroup}%
+
+\newcommand{\luaTrapz}[2][]{{%
+\setkeys{someop}{#1}%
+\directlua{%
+tempsubexp = "("..\luastring{#2}..")"
+local f = load("return function(x) return "  ..tempsubexp.. "end",nil,"t",math)()
+tex.print(luatrapz(f,\mop@onex,\mop@twox,\mop@threex,\mop@fivex))
+}%
+}%
+}%
+
+\newcommand{\luaTrapzSteps}[2][]{\begingroup%
+\setkeys{someop}{#1}%
+\directlua{%
+tempsubexp = "("..\luastring{#2}..")"
+local f = load("return function(x) return "  ..tempsubexp.. "end",nil,"t",math)()   tex.sprint(luatrapzsteps(f,\mop@onex,\mop@twox,\mop@threex,'\mop@fourx',\mop@fivex))
+}%
+\endgroup}%
+
+\newcommand{\luaSimpsonOneThird}[2][]{{%
+\setkeys{someop}{#1}%
+\directlua{%
+tempsubexp = "("..\luastring{#2}..")"
+local f = load("return function(x) return "  ..tempsubexp.. "end",nil,"t",math)() tex.print(luasimpsononethird(f,\mop@onex,\mop@twox,\mop@threex,\mop@fivex))
+}%
+}%
+}%
+
+\newcommand{\luaSimpsonOneThirdSteps}[2][]{\begingroup%
+\setkeys{someop}{#1}%
+\directlua{%
+tempsubexp = "("..\luastring{#2}..")"
+local f = load("return function(x) return "  ..tempsubexp.. "end",nil,"t",math)() tex.sprint(luasimpsononethirdsteps(f,\mop@onex,\mop@twox,\mop@threex,'\mop@fourx',\mop@fivex))
+}%
+\endgroup}%
+
+
+\newcommand{\luaSimpsonThreeEighth}[2][]{{%
+\setkeys{someop}{#1}%
+\directlua{%
+tempsubexp = "("..\luastring{#2}..")"
+local f = load("return function(x) return "  ..tempsubexp.. "end",nil,"t",math)()  tex.print(luasimpsonthreight(f,\mop@onex,\mop@twox,\mop@threex,\mop@fivex))
+}%
+}%
+}%
+
+\newcommand{\luaSimpsonThreeEighthSteps}[2][]{\begingroup%
+\setkeys{someop}{#1}%
+\directlua{%
+tempsubexp = "("..\luastring{#2}..")"
+local f = load("return function(x) return "  ..tempsubexp.. "end",nil,"t",math)() tex.sprint(luasimpsonthreightsteps(f,\mop@onex,\mop@twox,\mop@threex,'\mop@fourx',\mop@fivex))
+}%
+\endgroup}%
+\endinput

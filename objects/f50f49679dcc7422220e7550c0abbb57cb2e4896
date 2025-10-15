@@ -1,0 +1,364 @@
+%%%
+% CAN
+%
+\def\filedateCAN{2024/08/04}%
+\def\fileversionCAN{0.1}%
+\message{-- \filedateCAN\space v\fileversionCAN}%
+%
+% Gestion de l'aléatoire (pour la CAN)
+\newcommand\ChoixAlea[4][]{%
+  \ifx\bla#1\bla%
+  \xdef#4{\fpeval{randint(#2,#3)}}%
+  \else%
+  \xdef#4{\fpeval{round(randint(#2,#3)+rand(),#1)}}%
+  \fi%
+}%
+
+\def\VariableAlea#1#2{%
+  \xdef#1{\fpeval{#2}}%
+}%
+
+% On bloque la graine de fabrication des nombres aléatoires.
+\ExplSyntaxOn
+\cs_new_eq:NN \PfCGraineAlea \sys_gset_rand_seed:n
+\cs_new_eq:NN \PfCGraineAAfficher \sys_rand_seed:
+\ExplSyntaxOff
+%%%
+% Course aux nombres
+%%%
+
+% https://tex.stackexchange.com/questions/642775/when-displaying-a-datatool-database-with-dtldisplaylongdb-how-to-obtain-a-hor
+% Patch éventuel à ajouter
+%\makeatletter
+%\expandafter\patchcmd\expandafter{\csname\string\DTLdisplaylongdb\endcsname}%
+%         {\@dtl@resetdoamp\dtldisplaystarttab}%
+%         {\dtldisplaystarttab\@dtl@resetdoamp}%
+%         {\message{Patching succeeded.}}%
+%         {\message{Patching failed.}}%
+%\makeatother
+
+\setKVdefault[ClesMathAlea]{NbQ=5,ChoixTables=2-9,ValeurMax=20,Classique,Trou=false,Melange=false,Multiple=2,Theme=false,Trous={},Melanges={}}%
+\defKV[ClesMathAlea]{%
+Trous=\ifempty{#1}{}{\setKV[ClesMathAlea]{Classique=false}\setKV[ClesMathAlea]{Trou}},%
+Melanges=\ifempty{#1}{}{\setKV[ClesMathAlea]{Classique=false}\setKV[ClesMathAlea]{Melange}}%
+}%
+
+\newcommand\MathAlea[2][]{%
+  \useKVdefault[ClesMathAlea]%
+  \setKV[ClesMathAlea]{#1}%
+  \input{#2}%
+}%
+
+\newcommand\CourseNombreTotalQuestions[1]{%
+  \setKV[ClesCN]{TotalQ=#1}%
+  \xdef\CNfoo{}%
+  \xintFor* ##1 in{\xintSeq{1}{#1}}\do{%
+    \xdef\CNfoo{\CNfoo ##1,}%
+  }%
+}%
+
+\setKVdefault[ClesCN]{%
+  Stretch=2.5,%Elasticité du tableau
+  NbQ=5,%Nb de questions à poser
+  RAZ=false,%Pour remettre à zéro le compteur des questions
+  Ordre=false,%Pour mettre toutes les questions dans l'ordre des numéros
+  Exercice=false,%Pour utiliser l'aléatoire des questions mais sans habillage particulier, autre que des \item
+  Perso=false,%Pour utiliser un choix personnel des questions
+  Lecture=false,%Pour différencier avec une lecture automatisée sur les numéros de fichiers
+  Maitre=false,%Pour indiquer qu'on prend en compte ou pas les sous-dossiers
+  Nom=false,%Pour afficher le nom des fichiers utilisés.
+  Theme=false,%Pour afficher le theme travaillé dans les fichiers utilisés (à retravailler).
+  AMC=false,%
+  Multi=false,%
+  CAN=false,%Pour compléter la case réponse.
+  CoefQ=0.4,%Coefficient multiplication de \linewidth pour la colonne question
+  CoefR=0.35,%Coefficient multiplication de \linewidth pour la colonne réponse
+  CoefJ=0.15,%Coefficient multiplication de \linewidth pour la colonne jury
+  Liste={},%
+  Dossier={},%
+  Debut={}%
+}%
+\defKV[ClesCN]{%
+Liste=\ifempty{#1}{}{\setKV[ClesCN]{Perso=true}\setKV[ClesCN]{Lecture}},%
+Dossier=\ifempty{#1}{}{\setKV[ClesCN]{Lecture}},%
+Debut=\ifempty{#1}{}{\setKV[ClesCN]{RAZ}}%
+}%
+\setsepchar[*]{,*/}%
+\readlist*\ListeMotsCAN{La moitié de /2,Le double de /1,Le triple de /1, Le tiers de /3,Le nombre dix fois plus grand que /1,Le nombre cent fois plus grand que /1,Le nombre mille fois plus grand que /1,Le nombre dix fois plus petit que /10,Le nombre cent fois plus petit que /100,Le nombre mille fois plus petit que /1000}%
+\readlist*\ListeMulAstucieuxCAN{50/2,25/4,20/5}%
+\readlist*\ListeLieuxObjetsCAN{boulangerie/pains au chocolat/un pain au chocolat,boulangerie/cookies/un cookie,boulangerie/brioches/une brioche,piscine/entrées/une entrée,boucherie/saucisses/une saucisse,boucherie/cuisses de poulet/une cuisse de poulet}%
+\readlist*\ListeNomsCAN{Aude/Elle/d'Aude,Bernard/Il/de Bernard,Céline/Elle/de Céline,Daniel/Il/de Daniel,\'Elise/Elle/d'\'Elise,Fabien/Il/de Fabien,Gérard/Il/de Gérard,Hélène/Elle/d'Hélène,Ilies/Il/d'Ilies,Jasmine/Elle/de Jasmine,Kylian/Il/de Kylian,Laurent/Il/de Laurent,Mathilde/Elle/de Mathilde,Nina/Elle/de Nina,Octave/Il/d'Octave,Philippe/Il/de Philippe,Joachim/Il/de Joachim,Thérèse/Elle/de Thérèse,Nawel/Elle/de Nawel,Alexandre/Il/d'Alexandre,Maxence/Il/de Maxence,Sophie/Elle/de Sophie,Christophe/Il/de Christophe,Myriam/Elle/de Myriam,Nathalie/Elle/de Nathalie}%
+\readlist*\ListeComposantStatCAN{voitures/un garage/Cross-over/Utilitaires/Berlines,fruits/une corbeille/Pommes/Oranges/Bananes,vêtements/une armoire/Pulls/T-shirts/Chemises,couverts/un tiroir/Fourchettes/Couteaux/Cuillères}%
+\readlist*\ListeObjetsSymbolesCAN{fleurs/96,ciseaux/36,crayons/47,enveloppes/41}%uniquement avec pifont
+\setsepchar{,}%
+\readlist*\ListeObjetsCAN{bonbons,billes,jouets,fruits,biscuits,gâteaux,pommes,poires,pains au chocolat,cookies,croissants,muffins,brioches,saucisses,cuisses de poulet}%
+\readlist*\ListePetitsObjetsCAN{bonbons,billes,biscuits,gommes,clous,vis}
+\readlist*\ListeFruitsCAN{pommes,poires,abricots,cerises,fraises,framboises,noix,pêches,nectarines,myrtilles,oranges,mandarines}
+\readlist*\ListeSommetsCAN{A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z}
+\newcommand\ExtraitPetitsObjets[1]{%
+  \xdef\CANSGFoo{}%
+  \foreachitem\compteur\in\ListePetitsObjetsCAN{%
+    \xdef\CANSGFoo{\CANSGFoo \ListePetitsObjetsCAN[\compteurcnt],}%
+  }%
+  \MelangeListe{\CANSGFoo}{#1}%
+  \readlist*\PetitsObjetsMelanges{\faa}%
+}%
+
+\newcommand\ExtraitObjets[1]{%
+  \xdef\CANSGFoo{}%
+  \foreachitem\compteur\in\ListeObjetsCAN{%
+    \xdef\CANSGFoo{\CANSGFoo \ListeObjetsCAN[\compteurcnt],}%
+  }%
+  \MelangeListe{\CANSGFoo}{#1}%
+  \readlist*\ObjetsMelanges{\faa}%
+}%
+
+\newcommand\ExtraitSymboles[1]{%
+  \xdef\CANSGFoo{}%
+  \foreachitem\compteur\in\ListeObjetsSymbolesCAN{%
+    \xdef\CANSGFoo{\CANSGFoo \ListeObjetsSymbolesCAN[\compteurcnt],}%
+  }%
+  \MelangeListe{\CANSGFoo}{#1}%
+  \setsepchar[*]{,*/}%
+  \readlist*\SymbolesMelanges{\faa}%
+  \setsepchar{,}%
+}%
+
+\newcommand\ExtraitSommet[1]{%
+  \xdef\CANSGFoo{}%
+  \foreachitem\compteur\in\ListeSommetsCAN{%
+    \xdef\CANSGFoo{\CANSGFoo \ListeSommetsCAN[\compteurcnt],}%
+  }%
+  \MelangeListe{\CANSGFoo}{#1}%
+  \readlist*\SommetsMelanges{\faa}%
+  \readlist*\PtAlea{\faa}%
+}%
+
+\newcommand\ExtraitFruit[1]{%
+  \xdef\CANSGFoo{}%
+  \foreachitem\compteur\in\ListeFruitsCAN{%
+    \xdef\CANSGFoo{\CANSGFoo \ListeFruitsCAN[\compteurcnt],}%
+  }%
+  \MelangeListe{\CANSGFoo}{#1}%
+  \readlist*\FruitsMelanges{\faa}%
+}%
+
+\newcommand\ExtraitNom[1]{%
+  \xdef\CANSGFoo{}%
+  \foreachitem\compteur\in\ListeNomsCAN{%
+    \xdef\CANSGFoo{\CANSGFoo \ListeNomsCAN[\compteurcnt],}%
+  }%
+  \MelangeListe{\CANSGFoo}{#1}%
+  \setsepchar[*]{,*/}%
+  \readlist*\NomsMelanges{\faa}%
+  \setsepchar{,}%
+}%
+
+\newcommand\ExtraitElements[1]{%
+  \xdef\CANSGFoo{}%
+  \foreachitem\compteur\in\ListeComposantStatCAN{%
+    \xdef\CANSGFoo{\CANSGFoo \ListeComposantStatCAN[\compteurcnt],}%
+  }%
+  \MelangeListe{\CANSGFoo}{#1}%
+  \setsepchar[*]{,*/}%
+  \readlist*\ElementsMelanges{\faa}%
+  \setsepchar{,}%
+}%
+
+\newcounter{CNNumQ}%
+\setcounter{CNNumQ}{1}%
+
+\newcommand\CANNew{%
+  \textcolor{Crimson}{\faCopy}%
+}%
+
+\newread\RecupNbFichiers
+\newread\RecupSSDossiers
+\newread\zzz
+\def\zzpar{\par}%
+
+\makeatletter
+\def\app@exe{\write18}
+% Recuperer les sous-dossiers
+\def\RecupererSousDossiers#1{%#1 est le dossier contenant les fichiers can classés en sous-dossier
+  \app@exe{rm -f RecapSSDossier.tmp ; ls -1 -I "*.tex" #1 > RecapSSDossier.tmp}%
+  \immediate\openin\zzz=RecapSSDossier.tmp
+  \loop%
+  \read\zzz to \tmp%
+  \ifx\tmp\zzpar\else%
+  \xdef\CNFOOSSDossiers{\CNFOOSSDossiers \expandafter\detokenize\expandafter{\tmp},}%
+  \fi%
+  \ifeof\zzz\else%
+  \repeat%
+  \setsepchar{,}\ignoreemptyitems
+  \readlist*\ListeSSDossiers{\CNFOOSSDossiers}
+}
+
+\def\RecupererFichierTeXSSDossier#1#2{%
+  \openin\zzz="|ls #1/#2/*.tex"%
+  \loop%
+  \read\zzz to \tmp%
+  \ifx\tmp\zzpar\else%
+  \xdef\CNFOO{\CNFOO \expandafter\detokenize\expandafter{\tmp},}%
+  \fi%
+  \ifeof\zzz\else%
+  \repeat%
+}
+
+\def\RecupererFichierTeXDossier#1{%
+  \xdef\CNFOO{}%
+  \openin\zzz="|ls #1/*.tex"
+  \loop%
+  \read\zzz to \tmp%
+  \ifx\tmp\zzpar\else%
+  \xdef\CNFOO{\CNFOO \expandafter\detokenize\expandafter{\tmp},}%
+  \fi%
+  \ifeof\zzz\else%
+  \repeat%
+}
+
+\def\DefinirListeFichiers{%
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\ListeFichiers{\CNFOO}%
+}
+
+\def\RecupererFichierTeXAllSSDossier#1{%
+  \RecupererSousDossiers{#1}%
+  \foreachitem\compteur\in\ListeSSDossiers{\RecupererFichierTeXSSDossier{#1}{\ListeSSDossiers[\compteurcnt]}}%
+  \DefinirListeFichiers%
+}
+
+\def\RecupererFichierTeXAllDossier#1{%
+  \RecupererFichierTeXDossier{#1}%
+  \DefinirListeFichiers%
+}
+
+\def\RecupererFichierTeXComplet#1{%
+  \RecupererFichierTeXDossier{#1}%
+  \RecupererSousDossiers{#1}%
+  \foreachitem\compteur\in\ListeSSDossiers{\RecupererFichierTeXSSDossier{#1}{\ListeSSDossiers[\compteurcnt]}}%
+  \DefinirListeFichiers%
+}
+
+\def\RecupererFichierTeXSSDossierPerso#1{%
+  \openin\zzz="|ls #1/*.tex"
+  \loop%
+  \read\zzz to \tmp%
+  \ifx\tmp\zzpar\else%
+  \xdef\CNFOO{\CNFOO \expandafter\detokenize\expandafter{\tmp},}%
+  \fi%
+  \ifeof\zzz\else%
+  \repeat%
+}
+
+\makeatother
+
+\newcommand\PfCJury{Jury}%
+\newcommand\PfCEnonce{Énoncé}%
+\newcommand\PfCReponse{Reponse}%
+\newcommand\CNTheme[1]{}%
+\newcommand\CNReponse{}%
+
+\newlength{\PfCLargeurQuestion}%
+\newlength{\PfCLargeurReponse}%
+\newlength{\PfCLargeurJury}%
+
+\NewDocumentCommand\CourseNombre{o m}{%
+  \useKVdefault[ClesCN]%
+  \setKV[ClesCN]{#1}%
+  \ifboolKV[ClesCN]{Theme}{\renewcommand\CNTheme[1]{{\ttfamily Thème : ##1}\par}}{}%
+  \ifboolKV[ClesCN]{RAZ}{%
+    \setcounter{CNNumQ}{\useKV[ClesCN]{Debut}}%
+  }{}%
+  \setKV[ClesMathAlea]{NbQ=1}%
+  \xdef\CNFOOSSDossiers{}%
+  \xdef\CNFOO{}%
+  \ifboolKV[ClesCN]{Lecture}{%
+    \ifboolKV[ClesCN]{Perso}{%
+      %      % Ici \useKV[ClesCN]{Liste}
+      \xdef\CNFOOListePerso{\useKV[ClesCN]{Liste}}%
+      %      % OK -> Là, normalement, c'est la liste des dossiers choisis par l'utilisateur : \CNFOOListePerso
+      \setsepchar{,}%
+      \readlist*\ListeDesSSDossiersPerso{\CNFOOListePerso}%
+      %      % \par OK -> Là, normalement, c'est la liste des dossiers perso sous forme de liste : \showitems\ListeDesSSDossiersPerso[]%
+      \foreachitem\compteur\in\ListeDesSSDossiersPerso{\RecupererFichierTeXSSDossierPerso{\ListeDesSSDossiersPerso[\compteurcnt]}}%
+      \DefinirListeFichiers%
+      %      % \par OK -> Là, enfin, normalement, c'est la liste des fichiers contenus dans les dossiers perso :
+      %      % \showitems\ListeFichiers[]
+    }{%
+      \ifboolKV[ClesCN]{Maitre}{%
+        %        % On récupère tous les fichiers can dans les sous-dossiers
+        %        % et on construit une liste \ListeFichiers contenant les chemins des fichiers considérés.
+        \RecupererFichierTeXComplet{\useKV[ClesCN]{Dossier}}%
+      }{%
+        %        % Là
+        %        % On récupère seulement les fichiers can de ce dossier
+        %        % et on consruit une liste \ListeFichiers contenant les chemins des fichiers considérés.
+        \RecupererFichierTeXAllDossier{\useKV[ClesCN]{Dossier}}%
+      }%
+    }%
+    %    % On crée la liste du nombre total de questions
+    \xdef\CNfooListe{}%
+    \xintFor* ##1 in{\xintSeq{1}{\ListeFichierslen}}\do{%
+      \xdef\CNfooListe{\CNfooListe ##1,}%
+    }%
+    %    % \par OK -> normalement, on a la liste du nombre de questions : \CNfooListe
+    % On règle maintenant les dimensions nécessaires.
+    % \ifboolKV[ClesCN]{CAN}{
+    \setlength{\PfCLargeurQuestion}{\useKV[ClesCN]{CoefQ}\linewidth}\setlength{\PfCLargeurReponse}{\useKV[ClesCN]{CoefR}\linewidth}\setlength{\PfCLargeurJury}{\useKV[ClesCN]{CoefJ}\linewidth}%
+    %    % On affiche les questions :
+    \ifboolKV[ClesCN]{Ordre}{%
+      %        % soit dans un exercice
+      \ifboolKV[ClesCN]{Exercice}{%
+        %          % Attention le style de l'environnement est à choisir par l'utilisateur
+        \xintFor* ##1 in {\xintSeq{1}{\ListeFichierslen}}\do{%
+        \item\input{\ListeFichiers[##1]}%
+        }%
+      }{% Soit toutes les questions au format course
+        \renewcommand{\arraystretch}{\useKV[ClesCN]{Stretch}}%
+        \begin{longtable}{|c|p{\PfCLargeurQuestion}|>{\centering\arraybackslash}p{\PfCLargeurReponse}|p{\PfCLargeurJury}|}%
+          \hhline{~---}%
+          \multicolumn{1}{c|}{}&\cellcolor{gray!15}\centering\PfCEnonce&\cellcolor{gray!15}\centering\PfCReponse&\cellcolor{gray!15}\centering\arraybackslash\PfCJury\\%
+          \hline%
+          \endhead%
+          \xintFor* ##1 in {\xintSeq{1}{\ListeFichierslen}}\do{%
+            \ttfamily{\theCNNumQ}\stepcounter{CNNumQ}&\xdef\CNReponse{}\input{\ListeFichiers[##1]}\ifboolKV[ClesCN]{Nom}{\par\hfill\footnotesize\ttfamily\ListeFichiers[##1]}{}&\CNReponse%\ifboolKV[ClesCN]{CAN}{\ifboolKV[ClesCN]{Nom}{\multirow{2}{*}{\CNReponse}}{\multirow{1}{*}{\CNReponse}}}{}
+            &\\%
+            \hline%
+          }%
+        \end{longtable}%
+        \renewcommand{\arraystretch}{1}%
+      }%
+    }{%
+      % On prévient l'utilisateur si le nb de questions est inférieur à NbQ
+      \xintifboolexpr{\ListeFichierslen<\useKV[ClesCN]{NbQ}}{%
+        \faExclamationCircle~Le nombre maximal de questions disponibles est inférieur au nombre de questions à afficher. Modifier la clé {\ttfamily NbQ} ou ajouter des questions dans le(s) répertoire(s).%
+      }{%%On choisit NbQ questions parmi la liste de fichiers
+        \MelangeListe{\CNfooListe}{\useKV[ClesCN]{NbQ}}%
+        \setsepchar{,}\ignoreemptyitems%
+        \readlist*\ListeCNQuestions{\faa}
+        \ifboolKV[ClesCN]{Exercice}{%
+          \xintFor* ##1 in {\xintSeq{1}{\useKV[ClesCN]{NbQ}}}\do{%
+          \item\xdef\Numerodelaquestionaposer{\ListeCNQuestions[##1]}\input{\ListeFichiers[\Numerodelaquestionaposer]}%
+          }%
+        }{% On les affiche
+          \renewcommand{\arraystretch}{\useKV[ClesCN]{Stretch}}%
+          \begin{longtable}{|c|p{\PfCLargeurQuestion}|>{\centering\arraybackslash}p{\PfCLargeurReponse}|p{\PfCLargeurJury}|}%
+            \hhline{~---}%
+            \multicolumn{1}{c|}{}&\cellcolor{gray!15}\centering\PfCEnonce&\cellcolor{gray!15}\centering\PfCReponse&\cellcolor{gray!15}\centering\arraybackslash\PfCJury\\%
+            \hline%
+            \endhead%
+            \xintFor* ##1 in {\xintSeq{1}{\useKV[ClesCN]{NbQ}}}\do{%
+              \ttfamily{\theCNNumQ}\stepcounter{CNNumQ}&\xdef\CNReponse{}\xdef\Numerodelaquestionaposer{\ListeCNQuestions[##1]}\input{\ListeFichiers[\Numerodelaquestionaposer]}\ifboolKV[ClesCN]{Nom}{\par\hfill\footnotesize\ttfamily\ListeFichiers[\Numerodelaquestionaposer]}{}&\ifboolKV[ClesCN]{CAN}{\CNReponse}{}&\\
+              \hline
+            }%
+          \end{longtable}%
+          \renewcommand{\arraystretch}{1}%
+        }%
+      }%
+    }%
+  }{%
+    \input{#2}
+  }%
+}%
+% fin course aux nombres

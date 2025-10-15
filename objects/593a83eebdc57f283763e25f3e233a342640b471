@@ -1,0 +1,636 @@
+%%%
+% Questions Flash
+%%%
+\def\filedateQFlash{2024/08/04}%
+\def\fileversionQFlash{0.1}%
+\message{-- \filedateQFlash\space v\fileversionQFlash}%
+%
+\tcbset{Expression/.style={colback=white,valign=center,left=0mm,right=0mm,top=1mm,bottom=1mm,colframe=white}}%
+\tcbset{ExpressionSerie1/.style={colback=\useKV[ClesFlash]{Couleur1},left=0mm,right=0mm,top=1mm,bottom=1mm}}%
+\tcbset{ExpressionSerie2/.style={colback=\useKV[ClesFlash]{Couleur2},left=0mm,right=0mm,top=1mm,bottom=1mm}}%
+\tcbset{ExpressionSerie3/.style={colback=\useKV[ClesFlash]{Couleur3},left=0mm,right=0mm,top=1mm,bottom=1mm}}
+\tcbset{ExpressionSerie4/.style={colback=\useKV[ClesFlash]{Couleur4},left=0mm,right=0mm,top=1mm,bottom=1mm}}
+\tcbset{BoiteExpression/.style={enhanced,nobeforeafter,tcbox raise base,colback=white,right=3.5mm,left=3.5mm,halign=center,colframe=black}}
+\newtcolorbox{CadreNombre}[1][]{%
+  Expression,#1}
+
+\newcommand\BoiteFlash[2][40pt]{%
+  \ifx\bla#2\bla%
+  \tcbox[BoiteExpression]{\hbox to#1{\phantom{A}}}%
+  \else
+  \tcbox[BoiteExpression]{#2}%
+  \fi
+}
+
+\setKVdefault[ClesFlash]{Hauteur=0.2\textheight,Simple=false,Intrus=false,Kahout=false,Daily=false,Expression=false,Mental=false,Mesure=false,Heure=false,Decimal=false,Operation=Multiplie,Numeration=false,Evaluation=false,Pause=false,Couleur1=blue!10,Couleur2=orange!10,Couleur3=green!10,Couleur4=yellow!10,Numerique=false,Seul=false}
+
+\newlength{\HauteurFlash}
+
+\def\MPAfficheur#1#2#3{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    u:=0.5u;
+    draw Afficheur(#1 div10,0);
+    draw Afficheur(#1 mod10,0) shifted(u*(1,0));
+    draw Afficheur(10,0) shifted(u*(2,0));
+    draw Afficheur(#2 div10,0) shifted(u*(3,0));
+    draw Afficheur(#2 mod10,0) shifted(u*(4,0));
+    draw Afficheur(10,0) shifted(u*(5,0));
+    draw Afficheur(#3 div10,0) shifted(u*(6,0));
+    draw Afficheur(#3 mod10,0) shifted(u*(7,0));
+  \end{mplibcode}
+  \else
+  \begin{mpost}
+    u:=0.5u;
+    draw Afficheur(#1 div10,0);
+    draw Afficheur(#1 mod10,0) shifted(u*(1,0));
+    draw Afficheur(10,0) shifted(u*(2,0));
+    draw Afficheur(#2 div10,0) shifted(u*(3,0));
+    draw Afficheur(#2 mod10,0) shifted(u*(4,0));
+    draw Afficheur(10,0) shifted(u*(5,0));
+    draw Afficheur(#3 div10,0) shifted(u*(6,0));
+    draw Afficheur(#3 mod10,0) shifted(u*(7,0));
+  \end{mpost}
+  \fi
+}
+
+\def\MPHorloge#1#2#3{
+  \ifluatex
+   \mplibforcehmode
+  \begin{mplibcode}
+  marque_horloge=1;
+  save Hor;
+  picture Hor;
+  path gdeaig,pteaig,trot;
+  pair centrehorloge;
+  centrehorloge=(0,0);
+  path tourhorloge;
+  tourhorloge=cercles(centrehorloge,marque_horloge*cm);
+  Hor=image(
+  %% dessin de l'horloge
+  draw tourhorloge;
+  for i=0 upto 59:
+  if (i mod 5)=0:
+  if (i mod 15)=0:
+  draw pointarc(tourhorloge,6*i)--(pointarc(tourhorloge,6*i) shifted (7*unitvector(centrehorloge-pointarc(tourhorloge,6*i)))) withpen pencircle scaled 2bp;
+  else:
+  draw pointarc(tourhorloge,6*i)--(pointarc(tourhorloge,6*i) shifted (5*unitvector(centrehorloge-pointarc(tourhorloge,6*i)))) withpen pencircle scaled 1.5bp;
+  fi;
+  else:
+  draw pointarc(tourhorloge,6*i)--(pointarc(tourhorloge,6*i) shifted (3*unitvector(centrehorloge-pointarc(tourhorloge,6*i))));
+  fi;
+  endfor;
+  path graduhorloge;
+  graduhorloge=cercles(centrehorloge,marque_horloge*cm+5*abs(unitvector(centrehorloge-pointarc(tourhorloge,0))));
+  % 
+  marque_p:="plein";
+  pointe(centrehorloge);
+  marque_p:="rien";
+  %% placement des aiguilles
+  gdeaig=centrehorloge--(pointarc(tourhorloge,0) shifted (7*unitvector(centrehorloge-pointarc(tourhorloge,0))));
+  pteaig=centrehorloge--(pointarc(tourhorloge,0) shifted (18*unitvector(centrehorloge-pointarc(tourhorloge,0))));
+  trot=centrehorloge--(pointarc(tourhorloge,0) shifted (10*unitvector(centrehorloge-pointarc(tourhorloge,0))));
+  draw rotation(trot,centrehorloge,90-6*#3) withpen pencircle scaled0.4;
+  draw rotation(gdeaig,centrehorloge,90-6*#2) withpen pencircle scaled1.25;
+  draw rotation(pteaig,centrehorloge,90-30*(#1+#2/60)) withpen pencircle scaled 2bp;
+  );
+  draw Hor;
+  \end{mplibcode}
+\else
+  \begin{mpost}[mpsettings={input PfCGeometrie;}]
+    marque_horloge=1;
+    save Hor;
+    picture Hor;
+    path gdeaig,pteaig,trot;
+    pair centrehorloge;
+    centrehorloge=(0,0);
+    path tourhorloge;
+    tourhorloge=cercles(centrehorloge,marque_horloge*cm);
+    Hor=image(
+    %% dessin de l'horloge
+    draw tourhorloge;
+    for i=0 upto 59:
+    if (i mod 5)=0:
+    if (i mod 15)=0:
+    draw pointarc(tourhorloge,6*i)--(pointarc(tourhorloge,6*i) shifted (7*unitvector(centrehorloge-pointarc(tourhorloge,6*i)))) withpen pencircle scaled 2bp;
+    else:
+    draw pointarc(tourhorloge,6*i)--(pointarc(tourhorloge,6*i) shifted (5*unitvector(centrehorloge-pointarc(tourhorloge,6*i)))) withpen pencircle scaled 1.5bp;
+    fi;
+    else:
+    draw pointarc(tourhorloge,6*i)--(pointarc(tourhorloge,6*i) shifted (3*unitvector(centrehorloge-pointarc(tourhorloge,6*i))));
+    fi;
+    endfor;
+    path graduhorloge;
+    graduhorloge=cercles(centrehorloge,marque_horloge*cm+5*abs(unitvector(centrehorloge-pointarc(tourhorloge,0))));
+    %
+    marque_p:="plein";
+    pointe(centrehorloge);
+    marque_p:="rien";
+    %% placement des aiguilles
+    gdeaig=centrehorloge--(pointarc(tourhorloge,0) shifted (7*unitvector(centrehorloge-pointarc(tourhorloge,0))));
+    pteaig=centrehorloge--(pointarc(tourhorloge,0) shifted (18*unitvector(centrehorloge-pointarc(tourhorloge,0))));
+    trot=centrehorloge--(pointarc(tourhorloge,0) shifted (10*unitvector(centrehorloge-pointarc(tourhorloge,0))));
+    draw rotation(trot,centrehorloge,90-6*#3) withpen pencircle scaled0.4;
+    draw rotation(gdeaig,centrehorloge,90-6*#2) withpen pencircle scaled1.25;
+    draw rotation(pteaig,centrehorloge,90-30*(#1+#2/60)) withpen pencircle scaled 2bp;
+    );
+    draw Hor;
+  \end{mpost}
+  \fi
+}
+
+\newcommand\QFNumeration{%
+  \begin{CadreNombre}
+    {\Large LE NOMBRE DU JOUR est : }
+    \tcbox[BoiteExpression]{\num{\ListeFlash[1,1]}}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie1]
+      $\square$ \textbf{Le chiffre des \ListeFlash[1,2] est :}
+      \tcbox[BoiteExpression]{\phantom{1500000}}
+    \end{tcolorbox}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie2]
+      $\square$ \textbf{Le chiffre \ListeFlash[1,3] repr\'esente le
+        chiffre des :}
+      \tcbox[BoiteExpression]{\phantom{1500000}}
+    \end{tcolorbox}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie3]
+      $\square$ \textbf{Le nombre de \ListeFlash[1,4] est :}
+      \tcbox[BoiteExpression]{\phantom{1500000}}
+    \end{tcolorbox}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie4]
+      $\square$ \textbf{\ListeFlash[1,5] est le nombre des :}
+      \tcbox[BoiteExpression]{\phantom{1500000}}
+    \end{tcolorbox}
+  \end{CadreNombre}
+}
+
+\newcommand\QFHeure{%
+  \begin{CadreNombre}
+    {\Large L'HEURE DU JOUR est : }\ifboolKV[ClesFlash]{Numerique}{\raisebox{-0.3cm}{\MPAfficheur{\NbHeures}{\NbMinutes}{\NbSecondes}}}{\raisebox{-0.9cm}{{\MPHorloge{\NbHeures}{\NbMinutes}{\NbSecondes}}}}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie1]
+      $\square$ \textbf{\ListeFlash[1,2] :}
+      \tcbox[BoiteExpression]{\phantom{1500000000}}
+    \end{tcolorbox}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie2]
+      $\square$ \textbf{\ListeFlash[1,3] :}
+      \tcbox[BoiteExpression]{\phantom{1500000000}}
+    \end{tcolorbox}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie3]
+      $\square$ \textbf{\ListeFlash[1,4] :}
+      \tcbox[BoiteExpression]{\phantom{\hbox to4.5em{15}}}
+    \end{tcolorbox}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie4]
+      $\square$ \textbf{\ListeFlash[1,5] :}
+      \tcbox[BoiteExpression]{\phantom{\hbox to4.5em{1500000}}}
+    \end{tcolorbox}
+  \end{CadreNombre}
+}
+
+\newcommand\QFMesure{%
+  \begin{CadreNombre}
+    {\Large LA MESURE DU JOUR est : }
+    \tcbox[BoiteExpression]{\ListeFlash[1,1]}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie1]
+      $\square$ \textbf{Convertis-la en \ListeFlash[1,2] :}
+      \tcbox[BoiteExpression]{\phantom{1500000000}}
+    \end{tcolorbox}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie2]
+      $\square$ \textbf{Elle peut aussi s'\'ecrire \ListeFlash[1,3] }
+      \tcbox[BoiteExpression]{\phantom{1500000000}}
+    \end{tcolorbox}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie3]
+      $\square$ \textbf{Ajoute-lui \ListeFlash[1,4] :}
+      \tcbox[BoiteExpression]{\phantom{\hbox to5em{1500000}}}
+    \end{tcolorbox}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie4]
+      $\square$ \textbf{Enl\`eve-lui \ListeFlash[1,5] :}
+      \tcbox[BoiteExpression]{\phantom{\hbox to5em{1500000}}}
+    \end{tcolorbox}
+  \end{CadreNombre}
+}
+
+\tikzset{
+  arrow/.style={
+    draw,
+    minimum height=1.25cm,
+    inner sep=0.25em,
+    shape=signal,
+    signal from=west,
+    signal to=east,
+    signal pointer angle=150,
+  }
+}
+
+\newcommand\QFDaily{%
+  \begin{tikzpicture}%
+    \begin{scope}[start chain=transition going right,node distance=-\pgflinewidth]%
+      \foreach \s in {1,...,\ListeFlashlen}{%
+        \xintifboolexpr{\s == 1}{%
+          \node[arrow,on chain] {\Huge\bfseries\ListeFlash[\s]};%
+          \ifboolKV[ClesFlash]{Pause}{\pause}{}%
+        }{%
+          \xintifboolexpr{\s == \ListeFlashlen}{%
+            \node[arrow,on chain] {\Huge\bfseries?};%
+          }{%
+            \node[arrow,on chain] {\ListeFlash[\s]};%
+            \ifboolKV[ClesFlash]{Pause}{\pause}{}%
+          }%
+        }%
+      }%
+    \end{scope}%
+  \end{tikzpicture}%
+}%
+
+\newcommand\QFDecimal{%
+  \begin{CadreNombre}
+    {\Large LE NOMBRE DU JOUR est : }
+    \tcbox[BoiteExpression]{\num{\ListeFlash[1,1]}}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie1]
+      $\square$ \textbf{\'Ecris-le en fraction d\'ecimale :}
+      \tcbox[BoiteExpression]{$\dfrac{\phantom{1000000}}{\phantom{1000000}}$}
+    \end{tcolorbox}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie2]
+      $\square$ \begin{tabular}{c}
+        \textbf{Partie}\\
+        \textbf{enti\`ere}
+      \end{tabular} \textbf{: }
+      \tcbox[BoiteExpression]{\phantom{100000}}\hfill%
+      $\square$ \begin{tabular}{c}
+        \textbf{Partie}\\
+        \textbf{d\'ecimale}
+      \end{tabular} \textbf{: }
+      \tcbox[BoiteExpression]{\phantom{100000}}
+    \end{tcolorbox}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie3]
+      $\square$ \textbf{\useKV[ClesFlash]{Operation}-le par
+        \ListeFlash[1,2] :} \tcbox[BoiteExpression]{\phantom{1000000000}}
+    \end{tcolorbox}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie4]
+      $\square$ \textbf{Trouve le nombre entier le plus proche :} \tcbox[BoiteExpression]{\phantom{10000000}}
+    \end{tcolorbox}
+  \end{CadreNombre}
+}
+
+\newcommand\QFMental{%
+  \begin{CadreNombre}
+    {\Large LE NOMBRE DU JOUR est : }
+    \tcbox[BoiteExpression]{\ListeFlash[1,1]}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie1]
+      $\square$ \textbf{Ajoute-lui}
+      \tcbox[BoiteExpression]{\ListeFlash[1,2]}\hfill$\square$
+      \textbf{Soustrais-lui} \tcbox[BoiteExpression]{\ListeFlash[1,3]}
+    \end{tcolorbox}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie2]
+      $\square$ \textbf{Multiplie-le par }
+      \tcbox[BoiteExpression]{\ListeFlash[1,4]}\hfill$\square$
+      \textbf{Divise-le par } \tcbox[BoiteExpression]{\ListeFlash[1,5]}
+    \end{tcolorbox}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie3]
+      $\square$ \textbf{Trouve}
+      \tcbox[BoiteExpression]{\ListeFlash[1,6]}
+      \textbf{\% de ce nombre.}
+    \end{tcolorbox}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie4]
+      $\square$ \textbf{Trouve } \tcbox[BoiteExpression]{\ListeFlash[1,7]}
+      \textbf{de ce nombre.}
+    \end{tcolorbox}
+  \end{CadreNombre}
+}
+
+\newcommand\QFExpression{%
+  \begin{CadreNombre}
+    {\Large L'EXPRESSION DU JOUR est : }
+    \tcbox[BoiteExpression]{\ListeFlash[1,1]}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie1]
+      $\square$ \textbf{Ajoute-lui}
+      \tcbox[BoiteExpression]{\ListeFlash[1,2]}
+    \end{tcolorbox}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie2]
+      $\square$ \textbf{Soustrais-lui}
+      \tcbox[BoiteExpression]{\ListeFlash[1,3]}
+    \end{tcolorbox}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie3]
+      $\square$ \textbf{Multiplie-la par}
+      \tcbox[BoiteExpression]{\ListeFlash[1,4]}
+    \end{tcolorbox}
+    \ifboolKV[ClesFlash]{Pause}{\pause}{}
+    \begin{tcolorbox}[ExpressionSerie4]
+      $\square$ \textbf{\'Evalue-la lorsque} \tcbox[BoiteExpression]{\ListeFlash[1,5]}
+    \end{tcolorbox}
+  \end{CadreNombre}
+}
+
+
+
+\newcommand\QFVide{%
+  \begin{CadreNombre}
+    {\ListeFlash[1]}
+    \xintFor* ##1 in {\xintSeq {1}{\ListeFlashlen-1}}\do{%
+      \ifboolKV[ClesFlash]{Pause}{\pause}{}
+      \begin{tcolorbox}[ExpressionSerie##1]
+        \ListeFlash[1+##1]
+      \end{tcolorbox}
+    }
+  \end{CadreNombre}
+}
+
+\newcommand\QFlash[2][]{%
+  \useKVdefault[ClesFlash]%
+  \setKV[ClesFlash]{#1}%
+  \setlength{\HauteurFlash}{\useKV[ClesFlash]{Hauteur}}%
+  \colorlet{CouleurUn}{\useKV[ClesFlash]{Couleur1}}%
+  \colorlet{CouleurDeux}{\useKV[ClesFlash]{Couleur2}}%
+  \colorlet{CouleurTrois}{\useKV[ClesFlash]{Couleur3}}%
+  \colorlet{CouleurQuatre}{\useKV[ClesFlash]{Couleur4}}%
+  \reademptyitems%
+  \ifboolKV[ClesFlash]{Evaluation}{%
+    \ifboolKV[ClesFlash]{Seul}{%
+      \setsepchar[*]{/}%
+      \readlist*\ListeFlash{#2}%
+      \QFVide%
+    }{%
+      \ifboolKV[ClesFlash]{Numeration}{%
+        \setsepchar[*]{,*/}%
+        \readlist*\ListeFlash{#2}%
+        \QFNumeration%
+      }{%
+        \ifboolKV[ClesFlash]{Heure}{%
+          \setsepchar[*]{,*/}%
+          \readlist*\ListeFlash{#2}%
+          \StrMid{\ListeFlash[1,1]}{1}{2}[\NbHeures]%
+          \StrMid{\ListeFlash[1,1]}{3}{4}[\NbMinutes]%
+          \StrMid{\ListeFlash[1,1]}{5}{6}[\NbSecondes]%
+          \QFHeure%
+        }{%
+          \ifboolKV[ClesFlash]{Mesure}{%
+            \setsepchar[*]{,*/}%
+            \readlist*\ListeFlash{#2}%
+            \QFMesure%
+          }{%
+            \ifboolKV[ClesFlash]{Daily}{%
+              \setsepchar[*]{/}%
+              \readlist*\ListeFlash{#2}%
+              \QFDaily%
+            }{%
+              \ifboolKV[ClesFlash]{Decimal}{%
+                \setsepchar[*]{,*/}%
+                \readlist*\ListeFlash{#2}%
+                \QFDecimal%
+              }{%
+                \ifboolKV[ClesFlash]{Mental}{%
+                  \setsepchar[*]{,*/}%
+                  \readlist*\ListeFlash{#2}%
+                  \QFMental%
+                }{%
+                  \ifboolKV[ClesFlash]{Expression}{%
+                    \setsepchar[*]{,*/}%
+                    \readlist*\ListeFlash{#2}%
+                    \QFExpression%
+                  }{%
+                    \setsepchar[*]{/}%
+                    \readlist*\ListeFlash{#2}%
+                    \ifboolKV[ClesFlash]{Simple}{%
+                      \ListeFlash[1]
+                      \begin{tcolorbox}[valign=center]
+                        \ListeFlash[2]
+                      \end{tcolorbox}
+                    }{%
+                      \setsepchar[*]{*/}%
+                      \readlist*\ListeFlash{#2}%
+                      \ifboolKV[ClesFlash]{Kahout}{%
+                        \setsepchar[*]{*/}%
+                        \readlist*\ListeFlash{#2}%
+                        \begin{tcolorbox}[halign=center,valign=center]
+                          \ListeFlash[1,1]
+                        \end{tcolorbox}
+                        % \par
+                        \begin{multicols}{4}
+                          \begin{tcolorbox}[height=\HauteurFlash,colframe=CouleurUn!150,colback=CouleurUn,halign=center,valign=center]
+                            \ListeFlash[1,2]
+                          \end{tcolorbox}
+                          % \hfill%
+                          \begin{tcolorbox}[height=\HauteurFlash,colframe=CouleurDeux!150,colback=CouleurDeux,halign=center,valign=center]
+                            \ListeFlash[1,3]
+                          \end{tcolorbox}
+                          % \hfill%
+                          \begin{tcolorbox}[height=\HauteurFlash,colframe=CouleurTrois!150,colback=CouleurTrois,halign=center,valign=center]
+                            \ListeFlash[1,4]
+                          \end{tcolorbox}
+                          % \hfill%
+                          \begin{tcolorbox}[height=\HauteurFlash,colframe=CouleurQuatre!150,colback=CouleurQuatre,halign=center,valign=center]
+                            \ListeFlash[1,5]
+                          \end{tcolorbox}
+                        \end{multicols}
+                      }{%
+                        \setsepchar[*]{*/}%
+                        \readlist*\ListeFlash{#2}%
+                        \begin{tcolorbox}[halign=center,valign=center]
+                          \ListeFlash[1,1]
+                        \end{tcolorbox}
+                        \begin{multicols}{4}
+                          \begin{tcolorbox}[height=\HauteurFlash,colframe=CouleurUn!150,colback=white,boxrule=1mm,halign=center,valign=center]
+                            \ListeFlash[1,2]
+                          \end{tcolorbox}
+                          \begin{tcolorbox}[height=\HauteurFlash,colframe=CouleurDeux!150,colback=white,boxrule=1mm,halign=center,valign=center]
+                            \ListeFlash[1,3]
+                          \end{tcolorbox}
+                          \begin{tcolorbox}[height=\HauteurFlash,colframe=CouleurTrois!150,boxrule=1mm,colback=white,halign=center,valign=center]
+                            \ListeFlash[1,4]
+                          \end{tcolorbox}
+                          \begin{tcolorbox}[height=\HauteurFlash,colframe=CouleurQuatre!150,colback=white,boxrule=1mm,halign=center,valign=center]
+                            \ListeFlash[1,5]
+                          \end{tcolorbox}
+                        \end{multicols}
+                      }%
+                    }%
+                  }%
+                }%
+              }%
+            }%
+          }%
+        }%
+      }%
+    }%
+  }{%
+    \ifboolKV[ClesFlash]{Seul}{%
+      \setsepchar[*]{/}%
+      \readlist*\ListeFlash{#2}%
+      \begin{frame}
+        \QFVide%
+      \end{frame}
+    }{%
+      \ifboolKV[ClesFlash]{Numeration}{%
+        \setsepchar[*]{,*/}%
+        \readlist*\ListeFlash{#2}%
+        \begin{frame}
+          \QFNumeration%
+        \end{frame}
+      }{%
+        \ifboolKV[ClesFlash]{Heure}{%
+          \setsepchar[*]{,*/}%
+          \readlist*\ListeFlash{#2}%
+          \StrMid{\ListeFlash[1,1]}{1}{2}[\NbHeures]%
+          \StrMid{\ListeFlash[1,1]}{3}{4}[\NbMinutes]%
+          \StrMid{\ListeFlash[1,1]}{5}{6}[\NbSecondes]%
+          \begin{frame}
+            \QFHeure%
+          \end{frame}
+        }{%
+          \ifboolKV[ClesFlash]{Mesure}{%
+            \setsepchar[*]{,*/}%
+            \readlist*\ListeFlash{#2}%
+            \begin{frame}
+              \QFMesure%
+            \end{frame}
+          }{%
+            \ifboolKV[ClesFlash]{Daily}{%
+              \setsepchar[*]{/}%
+              \readlist*\ListeFlash{#2}%
+              \begin{frame}
+                \QFDaily%
+              \end{frame}
+            }{%
+              \ifboolKV[ClesFlash]{Decimal}{%
+                \setsepchar[*]{,*/}%
+                \readlist*\ListeFlash{#2}%
+                \begin{frame}
+                  \QFDecimal%
+                \end{frame}
+              }{%
+                \ifboolKV[ClesFlash]{Mental}{%
+                  \setsepchar[*]{,*/}%
+                  \readlist*\ListeFlash{#2}%
+                  \begin{frame}
+                    \QFMental%
+                  \end{frame}
+                }{%
+                  \ifboolKV[ClesFlash]{Expression}{%
+                    \setsepchar[*]{,*/}%
+                    \readlist*\ListeFlash{#2}%
+                    \begin{frame}
+                      \QFExpression%
+                    \end{frame}
+                  }{%
+                    \setsepchar[*]{/}%
+                    \readlist*\ListeFlash{#2}%
+                    \ifboolKV[ClesFlash]{Simple}{%
+                      \begin{frame}
+                        \ListeFlash[1]
+                        \begin{tcolorbox}[valign=center]
+                          \ListeFlash[2]
+                        \end{tcolorbox}
+                      \end{frame}
+                    }{%
+                      \setsepchar[*]{,*/}%
+                      \readlist*\ListeFlash{#2}%
+                      \ifboolKV[ClesFlash]{Kahout}{%
+                        \setsepchar[*]{*/}%
+                        \readlist*\ListeFlash{#2}%
+                        \begin{frame}
+                          \begin{tcolorbox}[valign=center]
+                            \ListeFlash[1,1]
+                          \end{tcolorbox}
+                          \vfill
+                          \ifboolKV[ClesFlash]{Pause}{\pause}{}
+                          \begin{columns}[T]
+                            \begin{column}{0.45\linewidth}
+                              \begin{tcolorbox}[height=\HauteurFlash,colframe=CouleurUn!150,colback=CouleurUn,halign=center,valign=center]
+                                \ListeFlash[1,2]
+                              \end{tcolorbox}
+                            \end{column}
+                            \ifboolKV[ClesFlash]{Pause}{\pause}{}
+                            \begin{column}{0.45\linewidth}
+                              \begin{tcolorbox}[height=\HauteurFlash,colframe=CouleurDeux!150,colback=CouleurDeux,halign=center,valign=center]
+                                \ListeFlash[1,3]
+                              \end{tcolorbox}
+                            \end{column}
+                          \end{columns}
+                          \bigskip
+                          \ifboolKV[ClesFlash]{Pause}{\pause}{}
+                          \begin{columns}[T]
+                            \begin{column}{0.45\linewidth}
+                              \begin{tcolorbox}[height=\HauteurFlash,colframe=CouleurTrois!150,colback=CouleurTrois,halign=center,valign=center]
+                                \ListeFlash[1,4]
+                              \end{tcolorbox}
+                            \end{column}
+                            \ifboolKV[ClesFlash]{Pause}{\pause}{}
+                            \begin{column}{0.45\linewidth}
+                              \begin{tcolorbox}[height=\HauteurFlash,colframe=CouleurQuatre!150,colback=CouleurQuatre,halign=center,valign=center]
+                                \ListeFlash[1,5]
+                              \end{tcolorbox}
+                            \end{column}
+                          \end{columns}
+                        \end{frame}
+                      }{%
+                        \setsepchar[*]{*/}%
+                        \readlist*\ListeFlash{#2}%
+                        \begin{frame}
+                          \begin{tcolorbox}[valign=center]
+                            \ListeFlash[1,1]
+                          \end{tcolorbox}
+                          \vfill
+                          \ifboolKV[ClesFlash]{Pause}{\pause}{}
+                          \begin{columns}[T]
+                            \begin{column}{0.45\linewidth}
+                              \begin{tcolorbox}[height=\HauteurFlash,colframe=CouleurUn!150,colback=white,boxrule=1mm,halign=center,valign=center]
+                                \ListeFlash[1,2]
+                              \end{tcolorbox}
+                            \end{column}
+                            \ifboolKV[ClesFlash]{Pause}{\pause}{}
+                            \begin{column}{0.45\linewidth}
+                              \begin{tcolorbox}[height=\HauteurFlash,colframe=CouleurDeux!150,colback=white,boxrule=1mm,halign=center,valign=center]
+                                \ListeFlash[1,3]
+                              \end{tcolorbox}
+                            \end{column}
+                          \end{columns}
+                          \bigskip
+                          \ifboolKV[ClesFlash]{Pause}{\pause}{}
+                          \begin{columns}[T]
+                            \begin{column}{0.45\linewidth}
+                              \begin{tcolorbox}[height=\HauteurFlash,colframe=CouleurTrois!150,boxrule=1mm,colback=white,halign=center,valign=center]
+                                \ListeFlash[1,4]
+                              \end{tcolorbox}
+                            \end{column}
+                            \ifboolKV[ClesFlash]{Pause}{\pause}{}
+                            \begin{column}{0.45\linewidth}
+                              \begin{tcolorbox}[height=\HauteurFlash,colframe=CouleurQuatre!150,colback=white,boxrule=1mm,halign=center,valign=center]
+                                \ListeFlash[1,5]
+                              \end{tcolorbox}
+                            \end{column}
+                          \end{columns}
+                        \end{frame}
+                      }%
+                    }%
+                  }%
+                }%
+              }%
+            }%
+          }%
+        }%
+      }%
+    }%
+  }%
+}%

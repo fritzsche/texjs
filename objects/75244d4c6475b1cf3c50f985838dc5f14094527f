@@ -1,0 +1,222 @@
+%%
+%%  longmath.sty is part of longmath version 1.0. 
+%%
+%%  (c) 2024 Hans-Jürgen Matschull
+%%
+%%  This work may be distributed and/or modified under the
+%%  conditions of the LaTeX Project Public License, either version 1.3
+%%  of this license or (at your option) any later version.
+%%  The latest version of this license is in
+%%    http://www.latex-project.org/lppl.txt
+%%  and version 1.3 or later is part of all distributions of LaTeX
+%%  version 2005/12/01 or later.
+%% 
+%%  This work has the LPPL maintenance status 'maintained'.
+%%  
+%%  The Current Maintainer of this work is Hans-Jürgen Matschull
+%% 
+%%  see README for a list of files belonging to longmath.
+%%
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{longmath}[2024/07/04]
+
+\RequirePackage{luatexbase}
+
+% generic attribute used to mark special objects and send mathstyle to Lua.
+\newattribute\longmath@info 
+
+% attribute to tag large operators.
+\newattribute\longmath@limits
+\def\ignorelimits{\setattribute{\longmath@limits}{1}}
+\def\includelimits{\unsetattribute{\longmath@limits}}
+
+% Save original primitives. 
+\let \longmath@left   \left 
+\let \longmath@middle \middle 
+\let \longmath@right  \right 
+
+\directlua{ require( 'longmath.lua' ) }
+
+% Registers. 
+\newcount\delimiterscale \delimiterscale 902 
+\newdimen\longmathlinesep \longmathlinesep 3pt 
+
+\newif\iflongmath@star
+\newcount\longmath@lines 
+\newdimen\longmath@extra
+\newdimen\longmath@width 
+\newcount\longmath@xscale 
+\newcount\longmath@yscale 
+\newbox\longmath@box 
+
+% The prefix for tags. 
+\def\longmath@prefix{}
+\def\delimiterprefix#1{\def\longmath@prefix{#1}}
+
+% User macros 
+\def\lleft  {\longmath@delimA \mathopen  {1000}{opn}} 
+\def\rright {\longmath@delimA \mathclose {1000}{cls}} 
+\def\mleft  {\longmath@delimA \mathopen  {1000}{mid}} 
+\def\mright {\longmath@delimA \mathclose {1000}{mid}} 
+\def\mmord  {\longmath@delimA \mathord   \delimiterscale {mid}} 
+\def\mmbin  {\longmath@delimA \mathbin   \delimiterscale {mid}} 
+\def\mmrel  {\longmath@delimA \mathrel   \delimiterscale {mid}} 
+\def\mmpunct{\longmath@delimA \mathpunct \delimiterscale {mid}} 
+\def\mmiddle{\longmath@delimA \mathinner \delimiterscale {mid}} 
+\def\mmop   {\longmath@delimA \mathop    \delimiterscale {mid}} 
+
+% This sets the math atom type, the default scale factor, and the command to be send to Lua, 
+% then checks if a tag in {} is following.  
+\def\longmath@delimA #1#2#3{\begingroup
+  \let\longmath@type #1 \longmath@xscale = #2 \relax \edef\longmath@comm{#3}
+  \futurelet \longmath@token \longmath@delimB }  
+
+% If a tag is following, read it. Otherwise, skip this step. 
+\def\longmath@delimB{\ifx\longmath@token\bgroup \expandafter \longmath@delimC 
+                     \else \expandafter \longmath@delimD \fi }  
+  
+% Read the tag, prepend the prefix and append a @, then add it to the command. 
+\def\longmath@delimC #1{\edef\longmath@comm{\longmath@comm:\longmath@prefix#1@} \longmath@delimD }
+    
+% Read the optional scale factor. If none is given, the scale is set to 0. 
+\def\longmath@delimD #1{\afterassignment\longmath@delimE \longmath@yscale = 0#1} 
+  
+% This creates a \special whatsit with the command as string argument, followed by 
+% a fake delimiter group with the requested delimiter always being the right one.
+% For the delimiter nodes, the info attribute is set to the current math style. 
+% For the empty \hbox, it is set to the requested scale factor.  
+\def\longmath@delimE{
+  \setattribute\longmath@info{\mathstyle} \special{\longmath@comm}
+  \longmath@type\bgroup \longmath@left . \aftergroup\egroup \aftergroup\endgroup
+  \begingroup \setattribute\longmath@info{\ifnum \longmath@yscale < 1 \longmath@xscale \else \longmath@yscale \fi}
+  \hbox{} \endgroup \longmath@right }
+
+
+% magic number to identify the variable delimiter. 
+\delcode`* = "FEFEFE %"
+
+% scanner to read the delimiter sample and create a nested \left-\right-group. 
+\def\longmath@autoL #1#2\relax{\ifx *#1 \longmath@autoR #2\relax 
+                               \else \longmath@left #1 \longmath@autoL #2\relax \fi } 
+\def\longmath@autoR #1#2\relax{\ifx *#1 
+                               \else \longmath@right #1 \longmath@autoR #2\relax \fi} 
+
+% Read the sample provided by the user, insert a set command, and typeset it into a box.   
+\def\autodelimiters #1{\begingroup \longmath@info = 0  
+  \setbox\longmath@box\hbox{$ \special{set} \longmath@autoL #1***\relax $}
+  \endgroup\aftergroup\longmath@autoreset}
+
+% To make the setting local to the current TeX group, send a reset command at the end of the group. 
+\def\longmath@autoreset{\begingroup \longmath@info = 0
+  \setbox\longmath@box\hbox{$ \special{res} {} $}
+  \endgroup}
+  
+
+% Counter for automatic tag generation.
+\newcount\longmath@tagnum  
+
+% Stack to store pushed tags, separated by spaces.      
+\def\longmath@stack{}
+
+% Create a unique tag. 
+\def\longmath@unique{
+  \global\advance\longmath@tagnum\@ne
+  \global\edef\longmath@stack{@\the\longmath@tagnum\space\longmath@stack}
+}
+
+% Create an invisible closing delimiter.  
+\def\pushdelimiter{\longmath@unique 
+  \expandafter\longmath@push\longmath@stack\relax}  
+  
+\def\longmath@push #1 #2\relax{\ifmmode\begingroup
+    \def\longmath@comm{mid:#1} \let\longmath@type\mathclose \longmath@yscale=1\relax 
+    \longmath@delimE . \fi}
+
+% Create an invisible opening delimiter. 
+\def\pulldelimiter{\ifx\longmath@stack\empty \longmath@unique \fi 
+  \expandafter\longmath@pull\longmath@stack\relax} 
+
+\def\longmath@pull #1 #2\relax{\global\edef\longmath@stack{#2}\ifmmode\begingroup  
+    \def\longmath@comm{mid:#1} \let\longmath@type\mathopen  \longmath@yscale=1\relax 
+    \longmath@delimE . \fi}
+
+  
+% Read width argument for the longmath environment. 
+% Expects to numbers or dimensions terminted by +.
+% Numbers are multplied by \hsize. 
+\def\longmath@gobble #1\relax{}
+\def\longmath@setwidth #1+#2+#3\relax{
+  \afterassignment\longmath@gobble \longmath@width = #1 \hsize \relax
+  \afterassignment\longmath@gobble \longmath@extra = #2 \hsize \relax }
+
+% Alignment for the longmath box. 
+\let\longmath@align@t@\vtop
+\let\longmath@align@b@\vbox
+\let\longmath@align@c@\vcenter
+
+% Save and restore the current math style. 
+\newcount\longmath@style 
+\def\longmath@getstyle{\longmath@style = \mathstyle \relax} 
+\def\longmath@setstyle{\ifcase\longmath@style \relax \displaystyle \or \crampeddisplaystyle \or 
+  \textstyle \or \crampedtextstyle \or \scriptstyle \or \crampedscriptstyle \or 
+  \scriptscriptstyle \or \crampedscriptscriptstyle \else \textstyle \fi }   
+
+% Begin of longmath environment. 
+% Set alignment and width and save the current math style. 
+% Then start a horizontal box in math mode. 
+\def\longmath@begin #1#2{\begingroup
+  \expandafter\let\expandafter\longmath@align\csname longmath@align@#1@\endcsname
+  \ifx \longmath@align\relax \let\longmath@align\longmath@align@c@ \fi 
+  \longmath@getstyle  \longmath@setwidth #2+0+\relax
+  %\rlap{\textcolor{green}{\rule{\longmath@width}{0.1pt}}\textcolor{yellow}{\rule{\longmath@extra}{0.1pt}}}
+  \setbox\longmath@box\hbox\bgroup $ \mathpenaltiesmode = 1 \longmath@setstyle
+}
+
+% End of longmath environment.
+% If the width of the box is smaller than the requested width, just use it as is. 
+% Otherwise, modify the requested width if the * version was used. 
+% Then \unhbox the content into a paragraph with the requested width.
+% \box0 and \box1 are used to adapt the baselineskip to the math style. 
+% \leftskip and \rightskip are set such that lines are centered but not justified. 
+% The glue is removed from the beginning of the first line with \hskip,
+%    and from the end of the last line with \parfilskip. 
+% If \longmath@extra is non-zero, Lua will stack the lines of the paragraph. 
+\def\longmath@end{$\egroup
+  \ifdim \wd\longmath@box < \dimexpr \longmath@width + \longmath@extra \relax 
+    \longmath@extra = \z@
+    \box\longmath@box 
+  \else 
+    \iflongmath@star 
+      \longmath@lines = \dimexpr ( 1.1\wd\longmath@box + 0.5\longmath@width ) / \longmath@width \relax
+      \longmath@width = \dimexpr ( 1.1\wd\longmath@box / \longmath@lines ) 
+    \fi 
+    \setbox0\hbox{$1$}
+    \setbox1\hbox{$\longmath@setstyle 1$}
+    \longmath@align{\hsize\longmath@width 
+      \baselineskip \dimexpr \baselineskip * \ht1 / \ht0 \relax  \lineskip\z@ \lineskiplimit\z@
+      \openup \longmathlinesep   
+      \leftskip 0pt plus 0.6\longmath@width 
+      \rightskip 0pt plus 0.6\longmath@width
+      \parfillskip-\rightskip \noindent\hskip-\leftskip \unhbox\longmath@box}
+    \longmath@extra = \z@
+  \fi \endgroup 
+}
+
+\newenvironment{longmath}[2][c]
+  {\longmath@starfalse\longmath@begin{#1}{#2}}{\longmath@end}
+\newenvironment{longmath*}[2][c]
+  {\longmath@startrue\longmath@begin{#1}{#2}}{\longmath@end}
+
+% Read the dimensions of tagged groups from the aux file. 
+\def\longmath@group#1#2{\directlua{longmath.read_group({#1},{#2})}}
+\def\longmath@skip#1#2{}
+
+% Save the dimensions of the tagged groups at the end of the document. 
+\def\longmath@save{\let\longmath@group\longmath@skip\directlua{longmath.save_groups(\the\@auxout)}}
+\AtEndDocument{\longmath@save}
+
+
+
+
+
+

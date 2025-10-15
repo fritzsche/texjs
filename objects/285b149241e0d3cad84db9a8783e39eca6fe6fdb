@@ -1,0 +1,224 @@
+-- lua-placeholders.lua
+-- Copyright 2024 E. Nijenhuis
+--
+-- This work may be distributed and/or modified under the
+-- conditions of the LaTeX Project Public License, either version 1.3c
+-- of this license or (at your option) any later version.
+-- The latest version of this license is in
+-- http://www.latex-project.org/lppl.txt
+-- and version 1.3c or later is part of all distributions of LaTeX
+-- version 2005/12/01 or later.
+--
+-- This work has the LPPL maintenance status ‘maintained’.
+--
+-- The Current Maintainer of this work is E. Nijenhuis.
+--
+-- This work consists of the files lua-placeholders.sty
+-- lua-placeholders-manual.pdf lua-placeholders.lua
+-- lua-placeholders-common.lua lua-placeholders-namespace.lua
+-- lua-placeholders-parser.lua and lua-placeholders-types.lua
+
+if not modules then
+    modules = {}
+end
+
+modules.lua_placeholders = {
+    version = "1.0.3",
+    date = "2024/04/02",
+    comment = 'Lua Placeholders — for specifying and inserting document parameters',
+    author = 'Erik Nijenhuis',
+    license = 'free'
+}
+
+local api = {
+    namespaces = {},
+    parameters = {},
+    strict = false,
+    toks = {
+        is_set_true = token.create('has@param@true'),
+        is_set_false = token.create('has@param@false'),
+    }
+}
+local lua_placeholders = {}
+local lua_placeholders_mt = {
+    __index = api,
+    __newindex = function()
+        tex.error('Cannot override or set actions for this module...')
+    end
+}
+
+setmetatable(lua_placeholders, lua_placeholders_mt)
+
+local lua_placeholders_namespace = require('lua-placeholders-namespace')
+local load_resource = require('lua-placeholders-parser')
+
+local function get_param(key, namespace)
+    namespace = namespace or tex.jobname
+    local _namespace = api.namespaces[namespace]
+    return _namespace and _namespace:param(key)
+end
+
+function api.set_strict()
+    api.strict = true
+end
+
+function api.recipe(path, namespace_name)
+    if namespace_name == '' then
+        namespace_name = nil
+    end
+    local filename, abs_path = lua_placeholders_namespace.parse_filename(path)
+    local raw_recipe = load_resource(abs_path)
+    local name = namespace_name or raw_recipe.namespace or filename
+    local namespace = api.namespaces[name] or lua_placeholders_namespace:new { recipe_file = abs_path, strict = api.strict }
+    if not api.namespaces[name] then
+        api.namespaces[name] = namespace
+    end
+    if raw_recipe.namespace then
+        namespace:load_recipe(raw_recipe.parameters)
+    else
+        namespace:load_recipe(raw_recipe)
+    end
+    tex.print('\\NewHook{namespace/' .. name .. '}')
+    tex.print('\\NewHook{namespace/' .. name .. '/loaded}')
+    tex.print('\\UseOneTimeHook{namespace/' .. name .. '}')
+    texio.write_nl(name)
+    if namespace.payload_file and not namespace.payload_loaded then
+        local raw_payload = load_resource(namespace.payload_file)
+        if raw_payload.namespace then
+            namespace:load_payload(raw_payload.parameters)
+        else
+            namespace:load_payload(raw_payload)
+        end
+        tex.print('\\UseOneTimeHook{namespace/' .. name .. '/loaded}')
+    end
+end
+
+function api.payload(path, namespace_name)
+    if namespace_name == '' then
+        namespace_name = nil
+    end
+    local filename, abs_path = lua_placeholders_namespace.parse_filename(path)
+    local raw_payload = load_resource(abs_path)
+    local name = namespace_name or raw_payload.namespace or filename
+    local namespace = api.namespaces[name] or lua_placeholders_namespace:new { payload_file = abs_path, strict = api.strict }
+    if not api.namespaces[name] then
+        api.namespaces[name] = namespace
+    end
+    if namespace.recipe_loaded then
+        if raw_payload.namespace then
+            namespace:load_payload(raw_payload.parameters)
+        else
+            namespace:load_payload(raw_payload)
+        end
+        tex.print('\\UseOneTimeHook{namespace/' .. name .. '/loaded}')
+    end
+end
+
+function api.param_object(key, namespace)
+    return get_param(key, namespace)
+end
+
+function api.param(key, namespace)
+    local param = get_param(key, namespace)
+    if param then
+        param:print_val()
+    elseif api.strict then
+        tex.error('Error: Parameter not set "' .. key .. '" in namespace "' .. namespace .. '".')
+    else
+        tex.sprint(lua_placeholders_toks.unknown_format, '{', key, '}')
+    end
+end
+
+function api.handle_param_is_set(key, namespace)
+    local param = get_param(key, namespace)
+    if param and param:is_set() then
+        tex.sprint(token.create('has@param@true'))
+    else
+        tex.sprint(token.create('has@param@false'))
+    end
+end
+
+function api.field(object_key, field, namespace)
+    local param = get_param(object_key, namespace)
+    if param then
+        local object = param.fields or param.default or {}
+        local f = object[field]
+        if f then
+            f:print_val()
+        else
+            tex.sprint(lua_placeholders_toks.unknown_format, '{', field, '}')
+        end
+    else
+        tex.error('No such object', object_key)
+    end
+end
+
+function api.with_object(object_key, namespace)
+    local object = get_param(object_key, namespace)
+    for key, param in pairs(object.fields) do
+        local val = param:val()
+        if val then
+            token.set_macro(key, param:val() .. '\\xspace')
+        else
+            token.set_macro(key, '\\paramplaceholder{' .. (param.placeholder or key) .. '}\\xspace')
+        end
+    end
+end
+
+function api.for_item(list_key, namespace, csname)
+    local param = get_param(list_key, namespace)
+    local list = param:val()
+    if #list > 0 then
+        if token.is_defined(csname) then
+            local tok = token.create(csname)
+            for _, item in ipairs(list) do
+                if param.values then
+                    tex.sprint(tok, '{', item:val(), '}')
+                else
+                    tex.sprint(tok, '{', lua_placeholders_toks.placeholder_format, '{', item:val(), '}}')
+                end
+            end
+        else
+            tex.error('No such command ', csname or 'nil')
+        end
+    end
+end
+
+function api.with_rows(key, namespace, csname)
+    local param = get_param(key, namespace)
+    if token.is_defined(csname) then
+        local row_content = token.get_macro(csname)
+        if param then
+            if param.values or api.strict then
+                if #param.values > 0 then
+                    for _, row in ipairs(param.values) do
+                        local format = row_content
+                        for col_key, cell in pairs(row) do
+                            format = format:gsub('\\' .. col_key, cell:val())
+                        end
+                        tex.print(format)
+                    end
+                end
+            elseif param.columns then
+                texio.write_nl("Warning: no values set for " .. param.key)
+                local format = row_content
+                for col_key, col in pairs(param.columns) do
+                    if col.default ~= nil then
+                        format = format:gsub('\\' .. col_key, col:val())
+                    else
+                        format = format:gsub('\\' .. col_key, '{\\paramplaceholder{' .. (col.placeholder or col_key) .. '}}')
+                    end
+                end
+                tex.print(format)
+            else
+                tex.error('No values either columns available')
+            end
+        else
+            tex.error('Error: no such parameter')
+        end
+    else
+        tex.error('Error: no such command: ', csname or 'nil')
+    end
+end
+
+return lua_placeholders

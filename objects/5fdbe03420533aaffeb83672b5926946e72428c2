@@ -1,0 +1,494 @@
+% \iffalse meta-comment
+% (The MIT License)
+%
+% Copyright (c) 2023-2024 Yegor Bugayenko
+%
+% Permission is hereby granted, free of charge, to any person obtaining a copy
+% of this software and associated documentation files (the 'Software'), to deal
+% in the Software without restriction, including without limitation the rights
+% to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+% copies of the Software, and to permit persons to whom the Software is
+% furnished to do so, subject to the following conditions:
+%
+% The above copyright notice and this permission notice shall be included in all
+% copies or substantial portions of the Software.
+%
+% THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+% IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+% FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+% AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+% LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+% SOFTWARE.
+% \fi
+
+% \CheckSum{0}
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+
+% \GetFileInfo{naive-ebnf.dtx}
+% \DoNotIndex{\endgroup,\begingroup,\let,\else,\s,\n,\r,\\,\1,\fi}
+
+% \iffalse
+%<*driver>
+\ProvidesFile{naive-ebnf.dtx}
+%</driver>
+%<package>\NeedsTeXFormat{LaTeX2e}
+%<package>\ProvidesPackage{naive-ebnf}
+%<*package>
+[2024/11/13 0.0.18 EBNF in Plain Text]
+%</package>
+%<*driver>
+\documentclass{ltxdoc}
+\usepackage[T1]{fontenc}
+\usepackage[tt=false, type1=true]{libertine}
+\usepackage{microtype}
+\AddToHook{env/verbatim/begin}{\microtypesetup{protrusion=false}}
+\usepackage{href-ul}
+\usepackage{xcolor}
+\usepackage[dtx]{docshots}
+\PageIndex
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+\begin{document}
+  \DocInput{naive-ebnf.dtx}
+  \PrintChanges
+  \PrintIndex
+\end{document}
+%</driver>
+% \fi
+
+% \title{|naive-ebnf|: \LaTeX{} Package \\ for EBNF in Plain Text\thanks{The sources are in GitHub at \href{https://github.com/yegor256/naive-ebnf}{yegor256/naive-ebnf}}}
+% \author{Yegor Bugayenko \\ \texttt{yegor256@gmail.com}}
+% \date{\filedate, \fileversion}
+%
+% \maketitle
+%
+% \textbf{\color{red}NB!}
+% Large ENBF snippets may take too long to render!
+%
+% \section{Introduction}
+%
+% This package helps render an
+% \href{https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form}{Extended Backus-Naur Form}
+% using plain text notation:
+% \begin{docshot}
+% \documentclass{minimal}
+% \usepackage{naive-ebnf}
+% \usepackage{mathtools}
+% \begin{document}
+% \begin{ebnf}
+% <$\lambda$-Expr> := <Var> \\
+%   || "$\lambda$" <Var> "." <Expr> \\
+%   || "\char`\(" <Expr> <Expr> "\char`\)"
+% \end{ebnf}
+% \end{document}
+% \end{docshot}
+
+% \DescribeMacro{ebnf}
+% The |ebnf| environment \emph{doesn't} add any formatting to the paragraph, but only replaces the plain text symbols, such as ``|:=|'' and ``|<Var>|'' with proper \LaTeX{} commands.
+% The following syntax is understood inside the |ebnf| environment:
+% \begin{itemize}
+% \item |:=| separates the left-hand side from the right-hand side of the production rule;
+% \item |<...>| denotes a non-terminal (variable);
+% \item |"..."| denotes a terminal symbol;
+% \item |'...'| denotes a special non-printable terminal symbol, like |'EOL'|;
+% \item \texttt{(...\char`\|...)} denotes a series of options to choose from;
+% \item |/.../| denotes a regular expression, like |/[a-z]+/|;
+% \item |[...]| denotes an optional substitution;
+% \item |{...}| denotes a zero or more times repetition;
+% \item |{...}+| denotes one or more times repetition;
+% \item \texttt{\char`\|\char`\|\char`\|} denotes an indent at the beginning of the string.
+% \item \texttt{\char`\|\char`\|} denotes an indented vertical bar at the beginning of the string.
+% \end{itemize}
+
+% \textbf{Attention}: The usage of some symbols is prohibited inside terminals. Instead, the following substitutions are recommended:
+% \begin{itemize}
+% \item |$\lparen$| and |$\rparen$| instead of ``|(|'' and ``|)|'' (from the \href{https://ctan.org/pkg/mathtools}{mathtools} package);
+% \item |$\langle$| and |$\rangle$| instead of ``|<|'' and ``|>|'';
+% \item |$\lbrace$| and |$\rbrace$| instead of ``|{|'' and ``|}|'' (also |mathtools|);
+% \item |$\lbrack$| and |$\rbrack$| instead of ``|[|'' and ``|]|'' (also |mathtools|);
+% \item |$\vert$| instead of ``\texttt{\char`\|}''.
+% \end{itemize}
+
+% They would look even better, if the following notation is used:
+% \begin{itemize}
+% \item |\char`\(| and |\char`\)| instead of ``|(|'' and ``|)|'';
+% \item |\char`\<| and |\char`\>| instead of ``|<|'' and ``|>|'';
+% \item |\char`\{| and |\char`\}| instead of ``|{|'' and ``|}|'';
+% \item |\char`\[| and |\char`\]| instead of ``|[|'' and ``|]|''.
+% \end{itemize}
+
+% \DescribeMacro{width}
+% There is an optional argument of |ebnf| environment, which sets the width of the left-hand side of each rule
+% (the default width is |6em|):
+% \docshotOptions{firstline=4,lastline=10}
+% \begin{docshot}
+% \documentclass{minimal}
+% \usepackage{naive-ebnf}
+% \begin{document}\noindent
+% This EBNF has a larger width of \\
+% the left hand side than usual: \par
+% \begin{ebnf}[1.5in]
+% <VeryLongVariable> := <X> | <Y> \\
+% <X> := "X" 'EOL' \\
+% <Y> := "Y" \\
+% \end{ebnf}
+% \end{document}
+% \end{docshot}
+
+% \DescribeMacro{\EbnfTerminal}
+% \DescribeMacro{\EbnfNonTerminal}
+% \DescribeMacro{\EbnfSpecial}
+% Inside the text, terminals, non-terminals, and special terminals may be formatted using three supplementary commands:
+% \docshotOptions{firstline=6,lastline=10}
+% \begin{docshot}
+% \documentclass{article}
+% \pagestyle{empty}
+% \usepackage[paperwidth=3in]{geometry}
+% \usepackage{naive-ebnf}
+% \begin{document}
+% The non-terminal \EbnfNonTerminal{Var}
+% in $\lambda$-calculus may be equal
+% to $v_1, v_2, \dots$. Application
+% starts with \EbnfTerminal{(} and ends
+% with \EbnfTerminal{)}.
+% \end{document}
+% \end{docshot}
+% It's possible to use them in math-mode too, for example:
+% \docshotOptions{firstline=6,lastline=9}
+% \begin{docshot}
+% \documentclass{article}
+% \pagestyle{empty}
+% \usepackage[paperwidth=3in]{geometry}
+% \usepackage{naive-ebnf}
+% \begin{document}
+% If $\EbnfTerminal{(} f_1
+% \EbnfNonTerminal{$\lambda$-Var}
+% \EbnfTerminal{)}$ is always true, then
+% $f_1$ is a tautology.
+% \end{document}
+% \end{docshot}
+
+% \DescribeMacro{\EbnfRegex}
+% A regular expression is possible too:
+% \docshotOptions{firstline=6,lastline=12}
+% \begin{docshot}
+% \documentclass{article}
+% \pagestyle{empty}
+% \usepackage[paperwidth=4in]{geometry}
+% \usepackage{naive-ebnf}
+% \begin{document}
+% \begin{ebnf}
+% <data> := <bool> | <integer> | <byte> \\
+% <bool> := "TRUE" | "FALSE" \\
+% <integer> := /(+\char`\|-)?[0-9]+/ \\
+% <byte> := /[0-9a-f]\char`\{2\char`\}/ \\
+% <number> := /[1-9]+/ /[0-9]+/
+% \end{ebnf}
+% \end{document}
+% \end{docshot}
+
+% Special symbols are interpreted correctly, if they stay inside quotes:
+% \docshotOptions{firstline=5,lastline=9}
+% \begin{docshot}
+% \documentclass{minimal}
+% \usepackage[T1]{fontenc}
+% \usepackage{naive-ebnf}
+% \begin{document}
+% \begin{ebnf}
+% <X> := 'EOL' "'" "|" \\
+% <Y> := ">" "<" "[" "]" "/" "/" \\
+% <Z> := "\LaTeX" "\textdollar" \\
+% \end{ebnf}
+% \end{document}
+% \end{docshot}
+
+% Nested brackets work fine too:
+% \docshotOptions{firstline=5,lastline=11}
+% \begin{docshot}
+% \documentclass{minimal}
+% \usepackage[T1]{fontenc}
+% \usepackage{naive-ebnf}
+% \begin{document}
+% \begin{ebnf}
+% % There is no meaning in this:
+% <x> := ( "x" ( "y" | ( "z" | <z> ) ) ) \\
+% <y> := [ [ "x1" ] { /[a-z]+/ } ] \\
+% <z> := { { { <x> }+ <y> } <z> }+ \\
+% <t> := [ <x> ] [ <y> ] \\
+% \end{ebnf}
+% \end{document}
+% \end{docshot}
+
+
+% The \texttt{\char`\|\char`\|\char`\|} character allows indenting the text on a new line, allowing breaking long expressions:
+% \docshotOptions{firstline=5,lastline=11}
+% \begin{docshot}
+% \documentclass{minimal}
+% \usepackage[T1]{fontenc}
+% \usepackage{naive-ebnf}
+% \begin{document}
+% \begin{ebnf}
+% <x> := "beginning"   \\
+% |||    ( <y> | <z> ) \\
+% |||    "ending"      \\
+% \end{ebnf}
+% \end{document}
+% \end{docshot}
+
+% \section{Package Options}
+
+% It's possible to configure the behavior of the package with the help of a few package options:
+
+% \DescribeMacro{bw}
+% By default, some colors are used in the rendered grammar. However, the |bw| package option disables any colors and makes sure the gammar is black-and-white:
+%\iffalse
+%<*verb>
+%\fi
+\begin{verbatim}
+\usepackage[bw]{naive-ebnf}
+\end{verbatim}
+%\iffalse
+%</verb>
+%\fi
+
+% \DescribeMacro{trail}
+% The |ebnf| environment is doing pre-processing of the \TeX{} commands provided and then let \LaTeX{} render them. It may be useful to see the output generated by the pre-processing. The |trail| option (with a file name) asks the package to save the content of the environment after the pre-processing into the file:
+%\iffalse
+%<*verb>
+%\fi
+\begin{verbatim}
+\usepackage[trail=log.tex]{naive-ebnf}
+\end{verbatim}
+%\iffalse
+%</verb>
+%\fi
+
+% \StopEventually{}
+
+% \section{Implementation}
+% \changes{0.0.1}{2023/01/28}{First draft.}
+% \changes{0.0.2}{2023/01/29}{Proper parsing of grouping.}
+% \changes{0.0.2}{2023/01/29}{Substitutions suggested for special symbols.}
+% \changes{0.0.5}{2023/02/04}{New package option \texttt{trail} added, to enable saving of the generated \TeX{} content to a file, for debugging purposes.}
+
+% First, we process package options:
+%    \begin{macrocode}
+\RequirePackage{pgfopts}
+\pgfkeys{
+  /ebnf/.cd,
+  bw/.store in=\ebnf@bw,
+  trail/.store in=\ebnf@trail,
+  trail/.default=naive-ebnf.tmp.tex,
+}
+\ProcessPgfPackageOptions{/ebnf}
+%    \end{macrocode}
+
+% Then, we include a few packages, mostly to deal with \LaTeX{}3 expressions:
+%    \begin{macrocode}
+\RequirePackage{expl3}
+%    \end{macrocode}
+
+% \begin{macro}{\ebnf@color}
+% Then, we include \href{https://ctan.org/pkg/xcolor}{xcolor} to colorize the output a bit:
+%    \begin{macrocode}
+\makeatletter\ifdefined\ebnf@bw\else
+  \RequirePackage{xcolor}
+\fi
+\newcommand\ebnf@color[2]
+  {\ifdefined\ebnf@bw#2\else\textcolor{#1}{#2}\fi}
+\makeatother
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\EbnfTerminal}
+% \changes{0.0.2}{2023/01/29}{New command \texttt{\char`\\EbnfTerminal} added, to enable rendering terminal symbols outside of the \texttt{ebnf} environment.}
+% \changes{0.0.3}{2023/01/30}{Quotes fixed in both text and math modes.}
+% Then, we define a command to render a single terminal:
+%    \begin{macrocode}
+\makeatletter
+\newcommand\EbnfTerminal[1]{{%
+  \relax\ifmmode\else\ttfamily\fi%
+  \ebnf@color{gray}{\relax\ifmmode\textsf{``}\else{\sffamily``}\fi}%
+  #1%
+  \ebnf@color{gray}{\relax\ifmmode\textsf{''}\else{\sffamily''}\fi}}}
+\makeatother
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\EbnfTerminal}
+% \changes{0.0.2}{2023/01/29}{New command \texttt{\char`\\EbnfNonTerminal} added, to enable rendering non-terminal symbols outside of the \texttt{ebnf} environment.}
+% Then, we define a command to render a single non-terminal:
+%    \begin{macrocode}
+\makeatletter
+\newcommand\EbnfNonTerminal[1]{{%
+  \ebnf@color{gray}{\relax\ifmmode\langle\else\(\langle\)\fi}%
+  \relax\ifmmode\textsf{#1}\else{\sffamily#1}\fi%
+  \ebnf@color{gray}{\relax\ifmmode\rangle\else\(\rangle\)\fi}}}
+\makeatother
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\EbnfSpecial}
+% \changes{0.0.6}{2023/05/27}{New command \texttt{\char`\\EbnfSpecial} added, to enable rendering of special non-printable terminal symbols outside of the \texttt{ebnf} environment.}
+% Then, we define a command to render a single non-terminal:
+%    \begin{macrocode}
+\makeatletter
+\newcommand\EbnfSpecial[1]{{\relax\ifmmode\else\ttfamily\fi#1}}%
+\makeatother
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\EbnfRegex}
+% \changes{0.0.8}{2023/07/11}{New command \texttt{\char`\\EbnfRegex} added, to enable rendering of regular expresions outside of the \texttt{ebnf} environment.}
+% Then, we define a command to render a regular expression:
+%    \begin{macrocode}
+\makeatletter
+\newcommand\EbnfRegex[1]{{\relax\ifmmode\else\ttfamily\fi/#1/}}%
+\makeatother
+%    \end{macrocode}
+% \end{macro}
+
+% Then, we define supplementary commands:
+%    \begin{macrocode}
+\makeatletter
+\newcommand\ebnf@optional[1]
+  {\ebnf@color{gray}{[}#1\ebnf@color{gray}{]}}
+\newcommand\ebnf@repetition[2][]
+  {\ebnf@color{gray}{\{}#2\ebnf@color{gray}{\}\(^{\scriptscriptstyle #1}\)}}
+\newcommand\ebnf@grouping[1]
+  {\ebnf@color{gray}{(}#1\ebnf@color{gray}{)}}
+\ExplSyntaxOn
+\newcommand\ebnf@terminal[1]{
+  \tl_set:Nn \l_ebnf_tl {}
+  \tl_set_rescan:Nnn \l_ebnf_tl {} { #1 }
+  \EbnfTerminal{\l_ebnf_tl}
+}
+\newcommand\ebnf@special[1]{
+  \tl_set:Nn \l_ebnf_tl {}
+  \tl_set_rescan:Nnn \l_ebnf_tl {} { #1 }
+  \EbnfSpecial{\l_ebnf_tl}
+}
+\newcommand\ebnf@nonterminal[1]{
+  \tl_set:Nn \l_ebnf_tl {}
+  \tl_set_rescan:Nnn \l_ebnf_tl {} { #1 }
+  \EbnfNonTerminal{\l_ebnf_tl}
+}
+\newcommand\ebnf@regexp[1]{
+  \tl_set:Nn \l_ebnf_tl {}
+  \tl_set_rescan:Nnn \l_ebnf_tl {} { #1 }
+  \EbnfRegex{\l_ebnf_tl}
+}
+\ExplSyntaxOff
+\newcommand\ebnf@to
+  {\ebnf@color{gray}{\(\to\)}}
+\newcommand\ebnf@alternation
+  {\ebnf@color{gray}{\(\vert\)}}
+\makeatother
+%    \end{macrocode}
+
+% \begin{macro}{ebnf}
+% \changes{0.0.4}{2023/02/03}{Any symbols are allowed inside \texttt{\char`\\EbnfNonTerminal} commands and inside the \texttt{ebnf} environment, where non-terminals are mentioned.}
+% \changes{0.0.11}{2023/07/12}{Many bugs fixed in the area of regular expression matching.}
+% \changes{0.0.14}{2023/08/08}{One-or-more repetition introduced with \texttt{\char`\{...\char`\}+} syntax.}
+% \changes{0.0.15}{2023/08/11}{The \texttt{iteration} removed, only \texttt{repetition} is left, with the second optional parameter.}
+% Then, we define the |ebnf| environment:
+%    \begin{macrocode}
+\ExplSyntaxOn
+\cs_generate_variant:Nn \tl_replace_all:Nnn {Nx}
+\makeatletter
+\NewDocumentEnvironment{ebnf}{O{4em}+b}
+  {\tl_set:Nn\ebnf_tmp{#2}}
+  {%
+  \regex_replace_all:nnN
+    { ([^\s])/([^\s]) } {\1\\slash{}\2} \ebnf_tmp%
+  \regex_replace_all:nnN
+    { ([^\s])< } {\1\\textless{}} \ebnf_tmp%
+  \regex_replace_all:nnN
+    { >([^\s]) } {\\textgreater{}\1} \ebnf_tmp%
+  \regex_replace_all:nnN
+    { ([^\s])'([^\s]) } {\1\\textquotesingle{}\2} \ebnf_tmp%
+  \regex_replace_all:nnN { \|\|\| }%
+    {\c{makebox}[#1][r]{ }} \ebnf_tmp%
+  \regex_replace_all:nnN
+    { ([^\s])\|([^\s]) } {\1\\textbar{}\2} \ebnf_tmp%
+  %
+  \regex_replace_all:nnN
+    { /(.+?)/ }%
+    {\c{ebnf@regexp}{\1}} \ebnf_tmp%
+  \cs_undefine:N\ebnf_curled%
+  \cs_new:Npn\ebnf_curled{%
+    \regex_replace_all:nnNT
+    { \{\s(([^\s]*(\s[^\}\{]|\s(\}|\{)[^\s])?)*)\s\}([\+\*])? }%
+    {\c{ebnf@repetition}[\5]{\1}} \ebnf_tmp \ebnf_curled}%
+  \ebnf_curled%
+  \cs_undefine:N\ebnf_brackets%
+  \cs_new:Npn\ebnf_brackets{%
+    \regex_replace_all:nnNT
+    { \(\s(([^\s]*(\s[^\)\(]|\s(\)|\()[^\s])?)*)\s\) }%
+    {\c{ebnf@grouping}{\1}} \ebnf_tmp \ebnf_brackets}%
+  \ebnf_brackets%
+  \cs_undefine:N\ebnf_squares%
+  \cs_new:Npn\ebnf_squares{%
+    \regex_replace_all:nnNT
+    { \[\s(([^\s]*(\s[^\]\[]|\s(\]|\[)[^\s])?)*)\s\] }%
+    {\c{ebnf@optional}{\1}} \ebnf_tmp \ebnf_squares}%
+  \ebnf_squares%
+  \regex_replace_all:nnN { (<[^>]+?>\s:=) }%
+    {\c{makebox}[#1][r]{\1}} \ebnf_tmp%
+  \regex_replace_all:nnN { <(.+?)> }%
+    {\c{ebnf@nonterminal}{\1}} \ebnf_tmp%
+  \regex_replace_all:nnN { "(.+?)" }%
+    {\c{ebnf@terminal}{\1}} \ebnf_tmp%
+  \regex_replace_all:nnN { '(.+?)' }%
+    {\c{ebnf@special}{\1}} \ebnf_tmp%
+  \regex_replace_all:nnN { \|(\|) }%
+    {\c{makebox}[#1][r]{ \1 }} \ebnf_tmp%
+  \regex_replace_all:nnN { \| }%
+    {\c{ebnf@alternation}{}} \ebnf_tmp%
+  \regex_replace_all:nnN { := }%
+    {\c{ebnf@to}{}} \ebnf_tmp%
+  \tl_put_left:Nn \ebnf_tmp {\noindent}
+  \tl_put_right:Nn \ebnf_tmp {}
+  \ifdefined\ebnf@trail%
+    \newwrite\ebnf@write%
+    \immediate\openout\ebnf@write\ebnf@trail\relax%
+    \immediate\write\ebnf@write{\unexpanded\expandafter{\ebnf_tmp}}%
+    \immediate\closeout\ebnf@write%
+    \message{naive-ebnf:\space pre-processed\space TeX
+      \space saved\space to\space "\ebnf@trail"^^J}%
+  \fi%
+  \ebnf_tmp}
+\makeatother
+\ExplSyntaxOff
+%    \end{macrocode}
+% \end{macro}
+
+%    \begin{macrocode}
+\endinput
+%    \end{macrocode}
+
+% \Finale
+
+% \clearpage
+% \clearpage
+
+% \PrintChanges
+% \clearpage
+% \PrintIndex

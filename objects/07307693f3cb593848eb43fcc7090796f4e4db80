@@ -1,0 +1,300 @@
+%%%
+% Proba
+%%%
+\def\filedateProba{2024/08/15}%
+\def\fileversionProba{0.1a}%
+\message{-- \filedateProba\space v\fileversionProba}%
+%
+\setKVdefault[ClesProba]{Echelle=false,Arbre=false,Branche=2,Angle=60,Rayon=0.25,LongueurEchelle=5,Affichage=0,Grille=1,Incline,SansProba=false}
+
+\def\Updatetoksproba#1/#2\nil{\addtotok\toklistepointproba{"#1","\footnotesize #2",}}
+\def\Updatetoksprobapdf#1/#2\nil{\addtotok\toklistepointproba{"#1","\noexpand\footnotesize #2",}}
+\def\Updatetoksprobaechelle#1/#2/#3\nil{\addtotok\toklistepointproba{#1,#2,"#3",}}
+
+\newtoks\toklistepointproba
+
+% Pour construire l'arbre de probabilit\'e
+\def\buildarbreproba{%
+  \toklistepointproba{}%
+  \ifluatex
+  \foreachitem\compteur\in\ListeProba{\expandafter\Updatetoksproba\compteur\nil}%
+  \else
+  \foreachitem\compteur\in\ListeProba{\expandafter\Updatetoksprobapdf\compteur\nil}%
+  \fi
+  \MPArbreProba{\useKV[ClesProba]{Branche}}{\useKV[ClesProba]{Angle}}{\the\toklistepointproba}{\useKV[ClesProba]{Rayon}}%
+}%
+
+% Pour construire l'\'echelle de probabilit\'e
+\def\buildechelleproba{%
+  \toklistepointproba{}%
+  \foreachitem\compteur\in\ListeProba{\expandafter\Updatetoksprobaechelle\compteur\nil}%
+  \MPEchelleProbaUn{\useKV[ClesProba]{LongueurEchelle}}{\the\toklistepointproba}{\useKV[ClesProba]{Affichage}}{\useKV[ClesProba]{Grille}}%
+}
+
+\def\MPEchelleProbaUn#1#2#3#4{%
+  % #1:longueur du segment repr\'esentant l'\'echelle
+  % #2:Liste des \'ev\`enements/proba
+  % #3: pour l'affichage des labels (0 : rien, 1: fleches, 2 : fleches+ev\`enements, 3: fleches+proba, 4 : tout)
+  % #4 : dimension de "la grille" associ\'ee
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    boolean SansProba;
+    SansProba=\useKV[ClesProba]{SansProba};
+    pair A,B,C[],D[];%les noeuds de l'arbre
+    %Figure(-10u,-10u,10u,10u);
+    A=u*(1,1);
+    B-A=u*(#1,0);
+    draw segment(A,B);
+    draw marquesegment(A,B);
+    marque_s:=marque_s/2;
+    if #4>1:
+      for k=0 upto (#4-1):
+        D[k]=(k/#4)[A,B];
+      endfor;
+      if (#4 mod 2)=0:
+        for k=0 step 2 until (#4-1):
+          draw marquesegment(D[k],D[k+1]);
+        endfor;
+      else:
+        for k=1 step 2 until (#4-1):
+          draw marquesegment(D[k],D[k+1]);
+        endfor;
+      fi;
+    fi;
+    marque_s:=marque_s*2;
+    labeloffset:=labeloffset*3;
+    if SansProba=false:
+    label.bot(btex 0 etex,A);
+    label.bot(btex 1 etex,B);
+    fi;
+    labeloffset:=labeloffset/3;
+    n:=1;%compter les informations
+    k:=1;% compter les informations noeud pour les placer
+    vardef toto(text t)=
+      for p_=t:
+        if (n mod 3)=1:
+          num:=p_;
+        fi;
+        if (n mod 3)=2:
+        deno:=p_;
+        fi;
+        if (n mod 3=0):
+          C[k]=(num/deno)[A,B];
+          if (#3>0):
+          drawarrow (C[k]-u*(0,0.5))--(C[k]-u*(0,0.15));
+          fi;
+          if (#3=2) or (#3=4):
+            dotlabel.top(TEX(p_),C[k]);
+          fi;
+          if (#3=1) or (#3=3):
+            dotlabel.top("",C[k]);
+          fi;
+          if (#3>2):
+            label.bot(TEX("$\frac{"&decimal(num)&"}{"&decimal(deno)&"}$"),C[k]-u*(0,0.5));
+          fi;
+          k:=k+1;
+        fi;
+      n:=n+1;
+      endfor;
+    enddef;
+    toto(#2);
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={input PfCGeometrie;boolean SansProba;SansProba=\useKV[ClesProba]{SansProba};}]
+    pair A,B,C[],D[];%les noeuds de l'arbre
+    Figure(-10u,-10u,10u,10u);
+    A=u*(1,1);
+    B-A=u*(#1,0);
+    draw segment(A,B);
+    draw marquesegment(A,B);
+    marque_s:=marque_s/2;
+    if #4>1:
+      for k=0 upto (#4-1):
+        D[k]=(k/#4)[A,B];
+      endfor;
+      if (#4 mod 2)=0:
+        for k=0 step 2 until (#4-1):
+          draw marquesegment(D[k],D[k+1]);
+        endfor;
+      else:
+        for k=1 step 2 until (#4-1):
+          draw marquesegment(D[k],D[k+1]);
+        endfor;
+      fi;
+    fi;
+    marque_s:=marque_s*2;
+    labeloffset:=labeloffset*3;
+    if SansProba=false:
+    label.bot(btex 0 etex,A);
+    label.bot(btex 1 etex,B);
+    fi;
+    labeloffset:=labeloffset/3;
+    n:=1;%compter les informations
+    k:=1;% compter les informations noeud pour les placer
+    vardef toto(text t)=
+      for p_=t:
+        if (n mod 3)=1:
+          num:=p_;
+        fi;
+        if (n mod 3)=2:
+        deno:=p_;
+        fi;
+        if (n mod 3=0):
+          C[k]=(num/deno)[A,B];
+          if (#3>0):
+          drawarrow (C[k]-u*(0,0.5))--(C[k]-u*(0,0.15));
+          fi;
+          if (#3=2) or (#3=4):
+            dotlabel.top(LATEX(p_),C[k]);
+          fi;
+          if (#3=1) or (#3=3):
+            dotlabel.top("",C[k]);
+          fi;
+          if (#3>2):
+            label.bot(LATEX("$\noexpand\frac{"&decimal(num)&"}{"&decimal(deno)&"}$"),C[k]-u*(0,0.5));%Le \noexpand est n\'ecessaire pour \'eviter un probl\`eme \`a la compilation, dû \`a l'expansion du \frac par gmp.
+          fi;
+          k:=k+1;
+        fi;
+      n:=n+1;
+      endfor;
+    enddef;
+    toto(#2);
+  \end{mpost}
+  \fi
+}
+
+\def\MPArbreProba#1#2#3#4{%
+  % #1:longueur d'une branche
+  % #2:angle entre deux branches de m\^eme origine
+  % #3:Liste des \'ev\`enements/proba
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    boolean Incline;
+    Incline=\useKV[ClesProba]{Incline};
+    pair A[],B[];%les noeuds de l'arbre
+    A0=u*(1,1);
+    B0-A0=u*(#1,0);
+    A1=rotation(B0,A0,#2/2);
+    A2=rotation(B0,A0,-#2/2);
+    B1-A1=B0-A0;
+    A3=rotation(B1,A1,#2/3);
+    A4=rotation(B1,A1,-#2/3);
+    B2-A2=B0-A0;
+    A5=rotation(B2,A2,#2/3);
+    A6=rotation(B2,A2,-#2/3);
+    draw segment(A4,A1);
+    draw segment(A5,A2);
+    draw chemin(A3,A1,A0,A2,A6);
+    for k=1 upto 6:
+    fill cercles(A[k],#4*cm) withcolor white;
+    endfor;
+    n:=1;%compter les informations
+    k:=1;% compter les informations noeud pour les placer
+    l:=1;% compter les informations "num\'eriques"
+    vardef toto(text t)=
+    for p_=t:
+    if (n mod 2)=1:
+    if p_<>"":
+    label(TEX(p_),A[k]);
+    fi;
+    k:=k+1;
+    else:
+    if (l mod 2)=1:
+    if p_<>"":
+    if Incline:
+    draw appelation(A[(l-1) div 2],A[l],4mm,TEX(p_));
+    else:
+    label.ulft(TEX(p_),iso(A[(l-1) div 2],A[l]));
+    fi;
+    fi;
+    else:
+    if p_<>"":
+    if Incline:
+    draw appelation(A[(l-1) div 2],A[l],-4mm,TEX(p_));
+    else:
+    label.llft(TEX(p_),iso(A[(l-1) div 2],A[l]));
+    fi;
+    fi;
+    fi;
+    l:=l+1;
+    fi;
+    n:=n+1;
+    endfor;
+    enddef;
+    toto(#3);
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={%input PfCGeometrie;
+      boolean Incline; Incline=\useKV[ClesProba]{Incline};}]
+    pair A[],B[];%les noeuds de l'arbre
+    %Figure(-10u,-10u,10u,10u);
+    A0=u*(1,1);
+    B0-A0=u*(#1,0);
+    A1=rotation(B0,A0,#2/2);
+    A2=rotation(B0,A0,-#2/2);
+    B1-A1=B0-A0;
+    A3=rotation(B1,A1,#2/3);
+    A4=rotation(B1,A1,-#2/3);
+    B2-A2=B0-A0;
+    A5=rotation(B2,A2,#2/3);
+    A6=rotation(B2,A2,-#2/3);
+    draw segment(A4,A1);
+    draw segment(A5,A2);
+    draw chemin(A3,A1,A0,A2,A6);
+    for k=1 upto 6:
+    fill cercles(A[k],#4*cm) withcolor white;
+    endfor;
+    n:=1;%compter les informations
+    k:=1;% compter les informations noeud pour les placer
+    l:=1;% compter les informations "num\'eriques"
+    vardef toto(text t)=
+    for p_=t:
+    if (n mod 2)=1:
+    if p_<>"":
+    label(LATEX(p_),A[k]);
+    fi;
+    k:=k+1;
+    else:
+    if (l mod 2)=1:
+    if p_<>"":
+    if Incline:
+    draw appelation(A[(l-1) div 2],A[l],4mm,LATEX(p_));
+    else:
+    label.ulft(LATEX(p_),iso(A[(l-1) div 2],A[l]));
+    fi;
+    fi;
+    else:
+    if p_<>"":
+    if Incline:
+    draw appelation(A[(l-1) div 2],A[l],-4mm,LATEX(p_));
+    else:
+    label.llft(LATEX(p_),iso(A[(l-1) div 2],A[l]));
+    fi;
+    fi;
+    fi;
+    l:=l+1;
+    fi;
+    n:=n+1;
+    endfor;
+    enddef;
+    toto(#3);
+  \end{mpost}
+  \fi
+}
+
+\newcommand\Proba[2][]{%
+  \useKVdefault[ClesProba]%
+  \setKV[ClesProba]{#1}%
+  % On liste les diff\'erents \'el\'ements sous la forme Ev\`enement/proba
+  \setsepchar[*]{,*/}\ignoreemptyitems%
+  \readlist*\ListeProba{#2}%
+  \ifboolKV[ClesProba]{Echelle}{%
+    \buildechelleproba%
+  }{\ifboolKV[ClesProba]{Arbre}{%
+      \buildarbreproba%
+    }{}%
+  }%
+  \setsepchar{,}%
+}%

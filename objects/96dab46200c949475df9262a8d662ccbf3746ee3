@@ -1,0 +1,37 @@
+-----------------------------------------------------------------------
+--         FILE:  xindex-DIN2.lua
+--  DESCRIPTION:  configuration file for xindex.lua
+-- REQUIREMENTS:  
+--       AUTHOR:  Herbert Voß
+--      LICENSE:  LPPL1.3
+--
+-- $Id: xindex-DIN2.lua 2 2025-08-02 11:30:20Z herbert $
+-----------------------------------------------------------------------
+
+if not modules then modules = { } end modules ['xindex-DIN2'] = {
+      version = 0.35,
+      comment = "configuration to xindex.lua",
+       author = "Herbert Voss",
+    copyright = "Herbert Voss",
+      license = "LPPL 1.3"
+}
+
+--UCA language = "de_din2" -- 
+languages.de = function(collator_obj)
+  local function tailor(a, b, tbl) 
+    local autf = collator_obj:string_to_codepoints(a)
+    local butf = collator_obj:string_to_codepoints(b)
+    collator_obj:tailor(autf,butf, tbl) 
+  end
+  local tailoring = function(s) collator_obj:tailor_string(s) end
+  languages.de(collator_obj)
+  tailoring("&Ö=Oe")
+  tailoring("&ö=oe")
+  tailoring("&Ä=Ae")
+  tailoring("&ä=ae")
+  tailoring("&Ü=Ue")
+  tailoring("&ü=ue")
+  tailoring("&ß=ss")
+  return collator_obj
+end
+

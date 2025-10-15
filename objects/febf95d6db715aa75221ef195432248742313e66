@@ -1,0 +1,191 @@
+%%%
+% Yohaku
+%%%
+\def\filedateYohaku{2025/05/28}%
+\def\fileversionYohaku{0.1a}%
+\message{-- \filedateYohaku\space v\fileversionYohaku}%
+%
+\setKVdefault[Yohaku]{Taille=2,Largeur=1cm,Hauteur=1cm,Addition,Multiplication=false,Perso=false,Limite=50,Relatif=false,Negatif=false,Pair=false,Impair=false,Premier=false,Solution=false,Visible=false,Bordure=false,CouleurResultat=gray!15,Ligne=0,Colonne=0,PasL=0,PasC=0,CouleurZone=gray!25,Case={}}%
+\defKV[Yohaku]{Case=\ifempty{#1}{}{\setKV[Yohaku]{Visible}}}%
+
+\newlength\PfCYohaku%
+
+\xdef\PfCYHKpremier{2,3,5,7,11,13,17,19,23,29,31,37,41,43,47}%
+
+\NewDocumentCommand\Yohaku{o m}{%
+  \useKVdefault[Yohaku]%
+  \setKV[Yohaku]{#1}%
+  \xdef\PfCYHKlast{\fpeval{\useKV[Yohaku]{Taille}+1}}%
+  \xdef\PfCYHKnombre{1}%
+  \xdef\PfCYHKpair{2}%
+  \xdef\PfCYHKimpair{1}%
+  \xdef\PfCYHKnegatif{}%
+  \xintFor* ##1 in{\xintSeq{2}{\fpeval{\useKV[Yohaku]{Limite}}}}\do{%
+    \xdef\PfCYHKnegatif{\PfCYHKnegatif -##1,}%
+  }%
+  \xintFor* ##1 in{\xintSeq{2}{\fpeval{\useKV[Yohaku]{Limite}}}}\do{%
+    \xdef\PfCYHKnombre{\PfCYHKnombre,##1}%
+  }%
+  \xintFor* ##1 in{\xintSeq{2}{\fpeval{\useKV[Yohaku]{Limite}}}}\do{%
+    \xdef\PfCYHKpair{\PfCYHKpair,\fpeval{##1*2}}%
+  }%
+  \xintFor* ##1 in{\xintSeq{1}{\fpeval{\useKV[Yohaku]{Limite}}}}\do{%
+    \xdef\PfCYHKimpair{\PfCYHKimpair,\fpeval{##1*2+1}}%
+  }%
+  %
+  \ifboolKV[Yohaku]{Perso}{%
+    \setsepchar[*]{,*/}\ignoreemptyitems%
+    \readlist*\PfCYHKListe{#2}%
+    \setsepchar{,}%
+    \xdef\PfCYHKListeFoo{}%
+    \foreachitem\compteur\in\PfCYHKListe[1]{%
+      \xdef\PfCYHKListeFoo{\PfCYHKListeFoo \PfCYHKListe[1,\compteurcnt],}%
+    }%
+    \ignoreemptyitems\readlist*\PfCYHKListeNA{\PfCYHKListeFoo}%
+    \xdef\PfCYHKListeFoo{}%
+    \foreachitem\compteur\in\PfCYHKListe[2]{%
+      \xdef\PfCYHKListeFoo{\PfCYHKListeFoo \PfCYHKListe[2,\compteurcnt],}%
+    }%
+    \ignoreemptyitems\readlist*\PfCYHKListeP{\PfCYHKListeFoo}%
+  }{%
+    \ifboolKV[Yohaku]{Negatif}{%
+      \xdef\PfCYHKListe{\PfCYHKnegatif}%
+    }{%
+      \ifboolKV[Yohaku]{Premier}{%
+        \xdef\PfCYHKListe{\PfCYHKpremier}%
+      }{%
+        \ifboolKV[Yohaku]{Impair}{%
+          \xdef\PfCYHKListe{\PfCYHKimpair}%
+        }{%
+          \ifboolKV[Yohaku]{Pair}{%
+            \xdef\PfCYHKListe{\PfCYHKpair}%
+          }{%
+            \xdef\PfCYHKListe{\PfCYHKnombre}%
+          }%
+        }%
+      }%
+    }%
+    \ifboolKV[Yohaku]{Relatif}{%
+      \xdef\PfCMoitieCase{\fpeval{floor((\useKV[Yohaku]{Taille}**2)/2)}}%
+      \xdef\PfCAutreMoitieCase{\fpeval{\useKV[Yohaku]{Taille}**2-\PfCMoitieCase}}%
+      \xdef\PfCFooRelatifYohaku{}%
+      \xdef\PfCYohakuAlea{\fpeval{randint(1,2)}}%
+      \xintifboolexpr{\PfCYohakuAlea==1}{% on choisit M1 négatifs, M2 positifs
+        \MelangeListe{\PfCYHKnegatif}{\PfCMoitieCase}%
+        \xdef\PfCYohakuInter{\faa}%
+        \MelangeListe{\PfCYHKnombre}{\PfCAutreMoitieCase}%
+        \xdef\PfCYohakuInter{\PfCYohakuInter,\faa}%
+      }{% on choisit M1 positifs, M2 négatifs
+        \MelangeListe{\PfCYHKnombre}{\PfCMoitieCase}%
+        \xdef\PfCYohakuInter{\faa}%
+        \MelangeListe{\PfCYHKnegatif}{\PfCAutreMoitieCase}%
+        \xdef\PfCYohakuInter{\PfCYohakuInter,\faa}%
+      }%
+      \MelangeListe{\PfCYohakuInter}{\fpeval{\useKV[Yohaku]{Taille}**2}}%
+    }{%
+      \MelangeListe{\PfCYHKListe}{\fpeval{\useKV[Yohaku]{Taille}**2}}%
+    }%
+    \ignoreemptyitems\readlist*\PfCYHKListeNA{\faa}%
+    %Sommes/Produits
+    \xdef\PfCYHKListeProduit{}%
+    %verticaux
+    \xintFor* ##2 in {\xintSeq{1}{\fpeval{\useKV[Yohaku]{Taille}}}}\do{%
+      \ifboolKV[Yohaku]{Multiplication}{%
+        \xdef\PfCYHKTampon{1}%
+        \xintFor* ##1 in {\xintSeq{0}{\fpeval{\useKV[Yohaku]{Taille}-1}}}\do{%
+          \xdef\PfCYHKTampon{\fpeval{\PfCYHKTampon*\PfCYHKListeNA[\fpeval{##2+##1*\useKV[Yohaku]{Taille}}]}}%
+        }%
+      }{%
+        \xdef\PfCYHKTampon{0}%
+        \xintFor* ##1 in {\xintSeq{0}{\fpeval{\useKV[Yohaku]{Taille}-1}}}\do{%
+          \xdef\PfCYHKTampon{\fpeval{\PfCYHKTampon+\PfCYHKListeNA[\fpeval{##2+##1*\useKV[Yohaku]{Taille}}]}}%
+        }%
+      }%
+      \xdef\PfCYHKListeProduit{\PfCYHKListeProduit,\PfCYHKTampon}%
+    }%
+    % horizontaux
+    \xintFor* ##2 in {\xintSeq{1}{\fpeval{\useKV[Yohaku]{Taille}}}}\do{%
+      \ifboolKV[Yohaku]{Multiplication}{%
+        \xdef\PfCYHKTampon{1}%
+        \xintFor* ##1 in {\xintSeq{1}{\fpeval{\useKV[Yohaku]{Taille}}}}\do{%
+          \xdef\PfCYHKTampon{\fpeval{\PfCYHKTampon*\PfCYHKListeNA[\fpeval{(\useKV[Yohaku]{Taille}-##2)*\useKV[Yohaku]{Taille}+##1}]}}%
+        }%
+      }{%
+        \xdef\PfCYHKTampon{0}%
+        \xintFor* ##1 in {\xintSeq{1}{\fpeval{\useKV[Yohaku]{Taille}}}}\do{%
+          \xdef\PfCYHKTampon{\fpeval{\PfCYHKTampon+\PfCYHKListeNA[\fpeval{(\useKV[Yohaku]{Taille}-##2)*\useKV[Yohaku]{Taille}+##1}]}}%
+        }%
+      }%
+      \xdef\PfCYHKListeProduit{\PfCYHKListeProduit,\PfCYHKTampon}%
+    }%
+    \readlist*\PfCYHKListeP{\PfCYHKListeProduit}%
+  }%
+  \setlength{\PfCYohaku}{\useKV[Yohaku]{Largeur}-\tabcolsep}%
+  \colorlet{PfCFondYohaku}{\useKV[Yohaku]{CouleurResultat}}%
+  \colorlet{PfCZoneYohaku}{\useKV[Yohaku]{CouleurZone}}%
+  \begin{NiceTabular}{*{\fpeval{\useKV[Yohaku]{Taille}+1}}{m{\PfCYohaku}}}[hvlines-except-borders]
+    \CodeBefore
+    \xintifboolexpr{\useKV[Yohaku]{Ligne}==0 || \useKV[Yohaku]{Colonne}==0}{}{%
+      \tikz\draw[fill=PfCZoneYohaku](row-\fpeval{\useKV[Yohaku]{Ligne}}-|col-\fpeval{\useKV[Yohaku]{Colonne}}) rectangle (row-\fpeval{\useKV[Yohaku]{Ligne}+\useKV[Yohaku]{PasL}}-|col-\fpeval{\useKV[Yohaku]{Colonne}+\useKV[Yohaku]{PasC}});%
+    }%
+    \ifboolKV[Yohaku]{Bordure}{%
+      \tikz\fill[PfCFondYohaku] (last-|1)--(last-|last)--(1-|last)--(1-|\fpeval{\useKV[Yohaku]{Taille}+1})--(\fpeval{\useKV[Yohaku]{Taille}+1}-|\fpeval{\useKV[Yohaku]{Taille}+1})--(\fpeval{\useKV[Yohaku]{Taille}+1}-|1)--cycle;
+    }{}
+    \Body
+    \xintFor* ##2 in {\xintSeq{1}{\fpeval{\useKV[Yohaku]{Taille}+1}}}\do{%
+      \xintFor* ##1 in {\xintSeq{1}{\fpeval{\useKV[Yohaku]{Taille}+1}}}\do{%
+        \xintifForFirst{\rule{0pt}{\useKV[Yohaku]{Hauteur}}}{&}
+      }\\%
+    }%
+    \CodeAfter
+    \ifboolKV[Yohaku]{Bordure}{%
+      \tikz\draw (last-|1)--(last-|last)--(1-|last);
+    }{}%
+    \tikz\draw (1-|1)--(1-|last);
+    \tikz\draw (1-|1)--(last-|1);
+    \tikz\draw[line width=2pt] (1-|1)--(\fpeval{\useKV[Yohaku]{Taille}+1}-|1)--(\fpeval{\useKV[Yohaku]{Taille}+1}-|\fpeval{\useKV[Yohaku]{Taille}+1})--(1-|\fpeval{\useKV[Yohaku]{Taille}+1})--cycle;
+    \tikz\node at (\fpeval{\PfCYHKlast+0.5}-|\fpeval{\PfCYHKlast+0.5}) {\Huge\ifboolKV[Yohaku]{Multiplication}{$\times$}{$+$}};
+    % Affichage des termes/facteurs
+    \ifboolKV[Yohaku]{Solution}{%
+      \ifboolKV[Yohaku]{Perso}{%
+        \xintFor* ##2 in {\xintSeq{1}{\fpeval{\useKV[Yohaku]{Taille}}}}\do{%
+          \xintFor* ##1 in {\xintSeq{1}{\fpeval{\useKV[Yohaku]{Taille}}}}\do{%
+            \tikz\node at (\fpeval{##2+0.5}-|\fpeval{##1+0.5}) {\PfCYHKListeNA[\fpeval{(##2-1)*\useKV[Yohaku]{Taille}+##1}]};
+          }%
+        }%
+      }{%
+        \xintFor* ##2 in {\xintSeq{1}{\fpeval{\useKV[Yohaku]{Taille}}}}\do{
+          \xintFor* ##1 in {\xintSeq{1}{\fpeval{\useKV[Yohaku]{Taille}}}}\do{
+            \tikz\node at (\fpeval{##2+0.5}-|\fpeval{##1+0.5}) {\num{\PfCYHKListeNA[\fpeval{(##2-1)*\useKV[Yohaku]{Taille}+##1}]}};
+          }%
+        }%
+      }%
+    }{}%
+    % Affichage d'un terme/facteur
+    \ifboolKV[Yohaku]{Visible}{%
+      \xdef\PfCYohakuCaseAFL{\fpeval{floor((\useKV[Yohaku]{Case}-1)/\useKV[Yohaku]{Taille})}}%
+      \xdef\PfCYohakuCaseAFC{\fpeval{\useKV[Yohaku]{Case}-\useKV[Yohaku]{Taille}*\PfCYohakuCaseAFL}}%
+      \ifboolKV[Yohaku]{Perso}{%
+        \tikz\node at (\fpeval{\PfCYohakuCaseAFL+1+0.5}-|\fpeval{\PfCYohakuCaseAFC+0.5}) {\PfCYHKListeNA[\fpeval{\useKV[Yohaku]{Case}}]};
+      }{%
+        \tikz\node at (\fpeval{\PfCYohakuCaseAFL+1+0.5}-|\fpeval{\PfCYohakuCaseAFC+0.5}) {\num{\PfCYHKListeNA[\fpeval{\useKV[Yohaku]{Case}}]}};
+      }%
+    }{}%
+    %% Affichage des sommes/produits horizontalement
+    \ifboolKV[Yohaku]{Perso}{%
+      \xintFor* ##2 in {\xintSeq{1}{\fpeval{\useKV[Yohaku]{Taille}}}}\do{%
+        \tikz\node at (\fpeval{\PfCYHKlast+0.5}-|\fpeval{##2+0.5}) {\PfCYHKListeP[##2]};
+      }%
+      \xintFor* ##2 in {\xintSeq{1}{\fpeval{\useKV[Yohaku]{Taille}}}}\do{%
+        \tikz\node at (\fpeval{\useKV[Yohaku]{Taille}+1-##2+0.5}-|\fpeval{\PfCYHKlast+0.5}) {\PfCYHKListeP[\fpeval{\useKV[Yohaku]{Taille}+##2}]};
+      }%
+    }{%
+      \xintFor* ##2 in {\xintSeq{1}{\fpeval{\useKV[Yohaku]{Taille}}}}\do{%
+        \tikz\node at (\fpeval{\PfCYHKlast+0.5}-|\fpeval{##2+0.5}) {\num{\PfCYHKListeP[##2]}};
+      }%
+      \xintFor* ##2 in {\xintSeq{1}{\fpeval{\useKV[Yohaku]{Taille}}}}\do{%
+        \tikz\node at (\fpeval{\useKV[Yohaku]{Taille}+1-##2+0.5}-|\fpeval{\PfCYHKlast+0.5}) {\num{\PfCYHKListeP[\fpeval{\useKV[Yohaku]{Taille}+##2}]}};
+      }%
+    }%
+  \end{NiceTabular}%
+}%

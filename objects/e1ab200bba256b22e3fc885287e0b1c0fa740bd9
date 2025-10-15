@@ -1,0 +1,226 @@
+%%%
+% Grimuku
+%%%
+\def\filedateGrimuku{2025/05/27}%
+\def\fileversionGrimuku{0.1a}%
+\message{-- \filedateGrimuku\space v\fileversionGrimuku}%
+%
+\setKVdefault[Grimuku]{TLargeur=7,Solution=false,Largeur=30pt,CouleurCase=0.7white,CouleurSolution={}}%
+\defKV[Grimuku]{CouleurSolution=\ifempty{#1}{}{\setKV[Grimuku]{Solution}}}%
+
+\newtoks\toklistegrimukupdt
+\newtoks\toklistegrimukunb
+
+\def\UpdatetoksGrimCases#1/#2/#3/#4\nil{\addtotok\toklistegrimukunb{"*",}\addtotok\toklistegrimukupdt{"#1",}\addtotok\toklistegrimukupdt{"#2",}\addtotok\toklistegrimukupdt{"#3",}\addtotok\toklistegrimukupdt{"#4",}}%
+\def\UpdatetoksGrimCasesNb#1\nil{\addtotok\toklistegrimukunb{"#1",}\addtotok\toklistegrimukupdt{"",}\addtotok\toklistegrimukupdt{"",}\addtotok\toklistegrimukupdt{"",}\addtotok\toklistegrimukupdt{"",}}%
+
+\NewDocumentCommand\Grimuku{om}{%
+  \toklistegrimukunb{}%
+  \toklistegrimukupdt{}%
+  \useKVdefault[Grimuku]%
+  \setKV[Grimuku]{#1}%
+  \setsepchar[*]{,*/}\reademptyitems%
+  \readlist*\ListeCasesGrim{#2}%
+  \xdef\PfCGrimLargeur{\useKV[Grimuku]{TLargeur}}%
+  \xdef\PfCGrimHauteur{\fpeval{\ListeCasesGrimlen/\PfCGrimLargeur}}%
+  \savecomparemode%
+  \comparestrict%
+  \foreachitem\compteur\in\ListeCasesGrim{%
+    \StrCount{\ListeCasesGrim[\compteurcnt]}{/}[\PfCTestLongueur]%
+    \xintifboolexpr{\PfCTestLongueur>0}{%
+      \expandafter\UpdatetoksGrimCases\compteur\nil%
+    }{%
+      \expandafter\UpdatetoksGrimCasesNb\compteur\nil%
+    }%
+  }%
+  \restorecomparemode%
+  \BuildGrimuku{\the\toklistegrimukupdt}{\the\toklistegrimukunb}%
+}%
+
+\NewDocumentCommand\BuildGrimuku{mm}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      color CouleurSolution,CouleurCase;
+      
+      boolean Solution;
+      Solution=\useKV[Grimuku]{Solution};
+      if Solution:
+      CouleurSolution=\useKV[Grimuku]{CouleurSolution};
+      fi;
+      Unite=\useKV[Grimuku]{Largeur};
+      Largeur=\useKV[Grimuku]{TLargeur};
+      Hauteur=\PfCGrimHauteur;
+      
+      CouleurCase=\useKV[Grimuku]{CouleurCase};
+      
+      path Base;
+      Base=(unitsquare scaled Unite) shifted ((0,0)-(Unite/2,Unite/2));
+
+
+      vardef TraceFleche(expr a,b,c)=
+      if a="g":
+      drawarrow (Unite*(b-0.4,c))--(Unite*(b-0.75,c));
+      elseif a="gh":
+      drawarrow (Unite*(b-0.4,c))--(Unite*(b-0.6,c))--(Unite*(b-0.6,c+0.5));
+      elseif a="gb":
+      drawarrow (Unite*(b-0.4,c))--(Unite*(b-0.6,c))--(Unite*(b-0.6,c-0.5));
+      elseif a="d":
+      drawarrow (Unite*(b+0.4,c))--(Unite*(b+0.75,c));
+      elseif a="dh":
+      drawarrow (Unite*(b+0.4,c))--(Unite*(b+0.6,c))--(Unite*(b+0.6,c+0.5));
+      elseif a="db":
+      drawarrow (Unite*(b+0.4,c))--(Unite*(b+0.6,c))--(Unite*(b+0.6,c-0.5));
+      elseif a="h":
+      drawarrow (Unite*(b,c+0.15))--(Unite*(b,c+0.5));
+      elseif a="hd":
+      drawarrow (Unite*(b,c+0.15))--(Unite*(b,c+0.35))--(Unite*(b+0.5,c+0.35));
+      elseif a="hg":
+      drawarrow (Unite*(b,c+0.15))--(Unite*(b,c+0.35))--(Unite*(b-0.5,c+0.35));
+      elseif a="b":
+      drawarrow (Unite*(b,c-0.15))--(Unite*(b,c-0.5));
+      elseif a="bd":
+      drawarrow (Unite*(b,c-0.15))--(Unite*(b,c-0.35))--(Unite*(b+0.5,c-0.35));
+      elseif a="bg":
+      drawarrow (Unite*(b,c-0.15))--(Unite*(b,c-0.35))--(Unite*(b-0.5,c-0.35));
+      fi;
+      enddef;
+
+      vardef EcritureProduits(text t)=
+      n:=0;
+      m:=-1;
+      for p_=t:
+      q:=n div Largeur;
+      r:=n mod Largeur;
+      m:=m+1;
+      if (m mod 4)=0:
+      label(TEX(p_),Unite*(r,-q+0.25));
+      elseif (m mod 4)=1:
+      TraceFleche(p_,r,-q+0.25);
+      elseif (m mod 4)=2:
+      label(TEX(p_),Unite*(r,-q-0.25));
+      elseif (m mod 4)=3:
+      TraceFleche(p_,r,-q-0.25);
+      n:=n+1;
+      fi;
+      endfor;
+      enddef;
+      
+      vardef Ecriture(text t)=
+      n=0;
+      for p_=t:
+      q:=n div Largeur;
+      r:=n mod Largeur;
+      if p_="*":
+      fill (Base shifted (Unite*(r,-q))) withcolor CouleurCase;
+      draw (Unite*(r-0.5,-q))--(Unite*(r+0.5,-q));
+      else:
+      if Solution:
+      drawoptions(withcolor CouleurSolution);
+      label(TEX(p_),Unite*(r,-q));
+      drawoptions();
+      fi;
+      fi;
+      n:=n+1;
+      endfor;
+      enddef;
+      
+      Ecriture(#2);
+      EcritureProduits(#1);
+      % On quadrille
+      for k=0 upto Largeur-1:
+      for l=0 upto Hauteur-1:
+      trace Base shifted(Unite*(k,-l));
+      endfor;
+      endfor;
+    \end{mplibcode}
+  \else
+    \begin{mpost}[mpsettings={color CouleurSolution,CouleurCase;boolean Solution;Solution=\useKV[Grimuku]{Solution};      if Solution:
+      CouleurSolution=\useKV[Grimuku]{CouleurSolution};
+      fi;
+      Unite=\useKV[Grimuku]{Largeur};
+      Largeur=\useKV[Grimuku]{TLargeur};
+      Hauteur=\PfCGrimHauteur;
+      CouleurCase=\useKV[Grimuku]{CouleurCase};
+      };]
+      path Base;
+      Base=(unitsquare scaled Unite) shifted ((0,0)-(Unite/2,Unite/2));
+      % 
+      vardef TraceFleche(expr a,b,c)=
+      if a="g":
+      drawarrow (Unite*(b-0.4,c))--(Unite*(b-0.75,c));
+      elseif a="gh":
+      drawarrow (Unite*(b-0.4,c))--(Unite*(b-0.6,c))--(Unite*(b-0.6,c+0.5));
+      elseif a="gb":
+      drawarrow (Unite*(b-0.4,c))--(Unite*(b-0.6,c))--(Unite*(b-0.6,c-0.5));
+      elseif a="d":
+      drawarrow (Unite*(b+0.4,c))--(Unite*(b+0.75,c));
+      elseif a="dh":
+      drawarrow (Unite*(b+0.4,c))--(Unite*(b+0.6,c))--(Unite*(b+0.6,c+0.5));
+      elseif a="db":
+      drawarrow (Unite*(b+0.4,c))--(Unite*(b+0.6,c))--(Unite*(b+0.6,c-0.5));
+      elseif a="h":
+      drawarrow (Unite*(b,c+0.15))--(Unite*(b,c+0.5));
+      elseif a="hd":
+      drawarrow (Unite*(b,c+0.15))--(Unite*(b,c+0.35))--(Unite*(b+0.5,c+0.35));
+      elseif a="hg":
+      drawarrow (Unite*(b,c+0.15))--(Unite*(b,c+0.35))--(Unite*(b-0.5,c+0.35));
+      elseif a="b":
+      drawarrow (Unite*(b,c-0.15))--(Unite*(b,c-0.5));
+      elseif a="bd":
+      drawarrow (Unite*(b,c-0.15))--(Unite*(b,c-0.35))--(Unite*(b+0.5,c-0.35));
+      elseif a="bg":
+      drawarrow (Unite*(b,c-0.15))--(Unite*(b,c-0.35))--(Unite*(b-0.5,c-0.35));
+      fi;
+      enddef;
+      % 
+      vardef EcritureProduits(text t)=
+      n:=0;
+      m:=-1;
+      for p_=t:
+      q:=n div Largeur;
+      r:=n mod Largeur;
+      m:=m+1;
+      if (m mod 4)=0:
+      label(LATEX(p_),Unite*(r,-q+0.25));
+      elseif (m mod 4)=1:
+      TraceFleche(p_,r,-q+0.25);
+      elseif (m mod 4)=2:
+      label(LATEX(p_),Unite*(r,-q-0.25));
+      elseif (m mod 4)=3:
+      TraceFleche(p_,r,-q-0.25);
+      n:=n+1;
+      fi;
+      endfor;
+      enddef;
+      %
+      vardef Ecriture(text t)=
+      n=0;
+      for p_=t:
+      q:=n div Largeur;
+      r:=n mod Largeur;
+      if p_="*":
+      fill (Base shifted (Unite*(r,-q))) withcolor CouleurCase;
+      draw (Unite*(r-0.5,-q))--(Unite*(r+0.5,-q));
+      else:
+      if Solution:
+      drawoptions(withcolor CouleurSolution);
+      label(LATEX(p_),Unite*(r,-q));
+      drawoptions();
+      fi;
+      fi;
+      n:=n+1;
+      endfor;
+      enddef;
+      
+      Ecriture(#2);
+      EcritureProduits(#1);
+      % On quadrille
+      for k=0 upto Largeur-1:
+      for l=0 upto Hauteur-1:
+      trace Base shifted(Unite*(k,-l));
+      endfor;
+      endfor;
+    \end{mpost}
+  \fi
+}

@@ -1,0 +1,829 @@
+--
+-- This is file `marginalia.lua',
+-- generated with the docstrip utility.
+--
+-- The original source files were:
+--
+-- marginalia.dtx  (with options: `lua')
+-- 
+-- This is a generated file.
+-- 
+-- Copyright (C) 2025 Alan J. Cain
+-- 
+-- This file may be distributed and/or modified under the
+-- conditions of the LaTeX Project Public License, either
+-- version 1.3c of this license or (at your option) any later
+-- version. The latest version of this license is in:
+-- 
+-- http://www.latex-project.org/lppl.txt
+-- 
+-- and version 1.3c or later is part of all distributions of
+-- LaTeX version 2008-05-04 or later.
+-- 
+local PAGE_DATA_MAIN_TABLE = {}
+local ITEM_DATA_MAIN_TABLE = {}
+local PROBLEM_REPORT_TABLE = {}
+local PAGE_CHANGE_REPORT_TABLE = {}
+local ITEM_CHANGE_REPORT_TABLE = {}
+local PROBLEM_REPORT_MAX_LENGTH = 40
+local PAGE_CHANGE_REPORT_MAX_LENGTH = 10
+local ITEM_CHANGE_REPORT_MAX_LENGTH = 10
+local TYPE_NORMAL = 1
+local TYPE_FIXED = 2
+local TYPE_OPTFIXED = 3
+local POS_AUTO = 1
+local POS_REVERSE = 2
+local POS_LEFT = 3
+local POS_RIGHT = 4
+local POS_NEAREST = 5
+local KEY_ABSPAGENO = 'abspageno'
+local KEY_CHECKED = 'checked'
+local KEY_PAGEDATANO = 'pagedatano'
+local KEY_HOFFSETORIGIN = 'hoffsetorigin'
+local KEY_VOFFSETORIGIN = 'voffsetorigin'
+local KEY_HOFFSET = 'hoffset'
+local KEY_VOFFSET = 'voffset'
+local KEY_PAGEHEIGHT = 'pageheight'
+local KEY_ODDSIDEMARGIN = 'oddsidemargin'
+local KEY_EVENSIDEMARGIN = 'evensidemargin'
+local KEY_TEXTWIDTH = 'textwidth'
+local KEY_COLUMNWIDTH = 'columnwidth'
+local KEY_COLUMNSEP = 'columnsep'
+local KEY_COLUMNCOUNT = 'columncount'
+local KEY_TWOSIDE = 'twoside'
+local KEY_ITEMNO = 'itemno'
+local KEY_PAGENO = 'pageno'
+local KEY_XPOS = 'xpos'
+local KEY_YPOS = 'ypos'
+local KEY_HEIGHT = 'height'
+local KEY_DEPTH = 'depth'
+local KEY_TYPE = 'type'
+local KEY_POS = 'pos'
+local KEY_COLUMN = 'column'
+local KEY_YSHIFT = 'yshift'
+local KEY_YSEP_ABOVE = 'ysep above'
+local KEY_YSEP_BELOW = 'ysep below'
+local KEY_YSEP_PAGE_TOP = 'ysep page top'
+local KEY_YSEP_PAGE_BOTTOM = 'ysep page bottom'
+local KEY_COLNO_COMPUTED = 'colno computed'
+local KEY_XSHIFT_COMPUTED = 'xshift computed'
+local KEY_YSHIFT_COMPUTED = 'yshift computed'
+local KEY_SIDE_COMPUTED = 'side computed'
+local KEY_MARGINNO_COMPUTED = 'marginno computed'
+local KEY_ENABLED_COMPUTED = 'enabled computed'
+local function list_filter(t, f)
+  local j = 1
+  local n = #t
+
+  for i=1,n do
+    if (f(t[i])) then
+      if (i ~= j) then
+        t[j] = t[i]
+        t[i] = nil
+      end
+      j = j + 1
+    else
+      t[i] = nil
+    end
+  end
+
+end
+local function toboolean(s)
+  return s == "true"
+end
+local function get_data_page_number(data)
+  local pageno = data[KEY_PAGENO]
+  if pageno ~= nil then
+    return 'p' .. pageno .. ' (' .. data[KEY_ABSPAGENO] .. ')'
+  else
+    return data[KEY_ABSPAGENO]
+  end
+end
+local function parse_data(keyvalue_string,conversion_table,defaults_table)
+
+  local key
+  local value
+  local result = {}
+
+  for s in string.gmatch(keyvalue_string,'([^,]+)') do
+
+    key,value = string.match(s,'^(.+)=(.+)$')
+    local conv = conversion_table[key]
+    if conv ~= nil then
+      result[key] = conv(value)
+    end
+
+  end
+
+  for key,value in pairs(defaults_table) do
+    if not(result[key] ~= nil) then
+      result[key] = value
+    end
+  end
+
+  return result
+
+end
+local function check_data(keyvalue_string,conversion_table,defaults_table,
+                          data_table,data_table_key_field,report_table)
+
+  local new_data = parse_data(keyvalue_string,
+                              conversion_table,defaults_table)
+
+  local data_table_key = new_data[data_table_key_field]
+
+  local stored_data = data_table[data_table_key]
+  if stored_data == nil then
+    table.insert(
+      report_table,
+      get_data_page_number(new_data) .. ' New'
+    )
+  else
+    local change_report = ''
+    for k,_ in pairs(conversion_table) do
+      if stored_data[k] ~= new_data[k] then
+        change_report = change_report
+          .. ' ' .. k .. ':' ..
+          tostring(stored_data[k]) .. '->' .. tostring(new_data[k])
+      end
+    end
+    if change_report ~= '' then
+      table.insert(
+        report_table,
+        get_data_page_number(new_data) .. ' ' .. change_report
+      )
+    end
+    stored_data[KEY_CHECKED] = true
+  end
+
+end
+local function check_removed_data(data_table,report_table)
+  for _,data in pairs(data_table) do
+    if not data[KEY_CHECKED] then
+      table.insert(
+        report_table,
+        ' Removed'
+      )
+      break
+    end
+  end
+end
+local PAGE_DATA_CONVERSION_TABLE = {
+  [KEY_PAGEDATANO] = tonumber,
+  [KEY_ABSPAGENO] = tonumber,
+  [KEY_HOFFSETORIGIN] = tonumber,
+  [KEY_VOFFSETORIGIN] = tonumber,
+  [KEY_HOFFSET] = tonumber,
+  [KEY_VOFFSET] = tonumber,
+  [KEY_PAGEHEIGHT] = tonumber,
+  [KEY_ODDSIDEMARGIN] = tonumber,
+  [KEY_EVENSIDEMARGIN] = tonumber,
+  [KEY_COLUMNCOUNT] = tonumber,
+  [KEY_COLUMNWIDTH] = tonumber,
+  [KEY_COLUMNSEP] = tonumber,
+  [KEY_TEXTWIDTH] = tonumber,
+  [KEY_TWOSIDE] = toboolean,
+}
+local PAGE_DATA_DEFAULT_TABLE = {
+  [KEY_PAGEDATANO] = 0,
+  [KEY_ABSPAGENO] = 0,
+  [KEY_HOFFSETORIGIN] = tex.sp('1in'),
+  [KEY_VOFFSETORIGIN] = tex.sp('1in'),
+  [KEY_HOFFSET] = tex.dimen['hoffset'],
+  [KEY_VOFFSET] = tex.dimen['voffset'],
+  [KEY_PAGEHEIGHT] = tex.dimen['pageheight'],
+  [KEY_ODDSIDEMARGIN] = tex.dimen['oddsidemargin'],
+  [KEY_EVENSIDEMARGIN] = tex.dimen['evensidemargin'],
+  [KEY_TEXTWIDTH] = tex.dimen['textwidth'],
+  [KEY_COLUMNWIDTH] = tex.dimen['columnwidth'],
+  [KEY_COLUMNSEP] = tex.dimen['columnsep'],
+  [KEY_COLUMNCOUNT] = 1,
+  [KEY_TWOSIDE] = false,
+  [KEY_CHECKED] = false,
+}
+local function store_page_data(keyvalue_string)
+
+  local page_data = parse_data(keyvalue_string,
+                               PAGE_DATA_CONVERSION_TABLE,
+                               PAGE_DATA_DEFAULT_TABLE)
+
+  PAGE_DATA_MAIN_TABLE[page_data[KEY_PAGEDATANO]] = page_data
+
+end
+local function store_default_page_data()
+
+  default_page_data = parse_data('',
+                                 PAGE_DATA_CONVERSION_TABLE,
+                                 PAGE_DATA_DEFAULT_TABLE)
+
+  default_page_data[KEY_ABSPAGENO] = 1
+  default_page_data[KEY_CHECKED] = true
+
+  PAGE_DATA_MAIN_TABLE[0] = default_page_data
+
+end
+local function check_page_data(keyvalue_string)
+
+  check_data(keyvalue_string,
+             PAGE_DATA_CONVERSION_TABLE,PAGE_DATA_DEFAULT_TABLE,
+             PAGE_DATA_MAIN_TABLE,KEY_PAGEDATANO,
+             PAGE_CHANGE_REPORT_TABLE)
+
+end
+local ITEM_DATA_CONVERSIONS = {
+  [KEY_ITEMNO] = tonumber,
+  [KEY_ABSPAGENO] = tonumber,
+  [KEY_PAGENO] = tonumber,
+  [KEY_XPOS] = tonumber,
+  [KEY_YPOS] = tonumber,
+  [KEY_HEIGHT] = tonumber,
+  [KEY_DEPTH] = tonumber,
+  [KEY_TYPE] = tonumber,
+  [KEY_POS] = tonumber,
+  [KEY_COLUMN] = tonumber,
+  [KEY_YSHIFT] = tonumber,
+  [KEY_YSEP_ABOVE] = tonumber,
+  [KEY_YSEP_BELOW] = tonumber,
+  [KEY_YSEP_PAGE_TOP] = tonumber,
+  [KEY_YSEP_PAGE_BOTTOM] = tonumber,
+  [KEY_CHECKED] = toboolean,
+}
+local ITEM_DATA_DEFAULTS = {
+  [KEY_ITEMNO] = 0,
+  [KEY_ABSPAGENO] = 1,
+  [KEY_PAGENO] = 1,
+  [KEY_XPOS] = 0,
+  [KEY_YPOS] = 0,
+  [KEY_HEIGHT] = 0,
+  [KEY_DEPTH] = 0,
+  [KEY_TYPE] = 0,
+  [KEY_POS] = 0,
+  [KEY_COLUMN] = -1,
+  [KEY_YSHIFT] = 0,
+  [KEY_YSEP_ABOVE] = tex.dimen['marginparpush'],
+  [KEY_YSEP_BELOW] = tex.dimen['marginparpush'],
+  [KEY_YSEP_PAGE_TOP] = tex.dimen['marginparpush'],
+  [KEY_YSEP_PAGE_BOTTOM] = tex.dimen['marginparpush'],
+  [KEY_COLNO_COMPUTED] = 0,
+  [KEY_XSHIFT_COMPUTED] = 0,
+  [KEY_YSHIFT_COMPUTED] = 0,
+  [KEY_SIDE_COMPUTED] = 0,
+  [KEY_MARGINNO_COMPUTED] = 0,
+  [KEY_ENABLED_COMPUTED] = true,
+  [KEY_CHECKED] = false,
+}
+
+local function store_item_data(keyvalue_string)
+
+  local item = parse_data(keyvalue_string,
+                          ITEM_DATA_CONVERSIONS,
+                          ITEM_DATA_DEFAULTS)
+
+  ITEM_DATA_MAIN_TABLE[item[KEY_ITEMNO]] = item
+
+end
+local function check_item_data(keyvalue_string)
+
+  check_data(keyvalue_string,
+             ITEM_DATA_CONVERSIONS,ITEM_DATA_DEFAULTS,
+             ITEM_DATA_MAIN_TABLE,KEY_ITEMNO,
+             ITEM_CHANGE_REPORT_TABLE)
+
+end
+local function write_report(report_table,max_length,noun)
+
+  if #report_table > 0 then
+    local report_text
+    local report_length
+
+    if #report_table <= max_length then
+      report_length = #report_table
+      report_text = ' Here are the ' .. noun .. ':\n'
+    else
+      report_length = max_length
+      report_text = ' Here are the first ' .. report_length .. ' ' .. noun .. ':\n'
+    end
+
+    for i=1,report_length do
+      report_text = report_text .. report_table[i]
+      if i < report_length then
+        report_text = report_text .. '\n'
+      end
+    end
+
+    tex.print(report_text)
+  end
+
+end
+local function write_problem_report()
+
+  write_report(PROBLEM_REPORT_TABLE,PROBLEM_REPORT_MAX_LENGTH,'problems')
+
+end
+local function write_item_change_report()
+
+  check_removed_data(ITEM_DATA_MAIN_TABLE,ITEM_CHANGE_REPORT_TABLE)
+  write_report(ITEM_CHANGE_REPORT_TABLE,ITEM_CHANGE_REPORT_MAX_LENGTH,'changes')
+
+end
+local function write_page_change_report()
+
+  check_removed_data(PAGE_DATA_MAIN_TABLE,PAGE_CHANGE_REPORT_TABLE)
+  write_report(PAGE_CHANGE_REPORT_TABLE,PAGE_CHANGE_REPORT_MAX_LENGTH,'changes')
+
+end
+local RIGHTSIDE_LOOKUP_TABLE = {
+  [true] = {
+    [0] = {
+      [POS_AUTO] = true,
+      [POS_REVERSE] = false,
+    },
+    [1] = {
+      [POS_AUTO] = false,
+      [POS_REVERSE] = true,
+    },
+    [2] = {
+      [POS_AUTO] = true,
+      [POS_REVERSE] = false,
+    },
+  },
+  [false] = {
+    [0] = {
+      [POS_AUTO] = false,
+      [POS_REVERSE] = true,
+    },
+    [1] = {
+      [POS_AUTO] = true,
+      [POS_REVERSE] = false,
+    },
+    [2] = {
+      [POS_AUTO] = false,
+      [POS_REVERSE] = true,
+    },
+  },
+}
+local MARGINNO_LOOKUP_TABLE = {
+  [true] = {
+    [0] = {
+      [false] = 1,
+      [true] = 0,
+    },
+    [1] = {
+      [false] = 1,
+      [true] = 5,
+    },
+    [2] = {
+      [false] = 4,
+      [true] = 0,
+    },
+  },
+  [false] = {
+    [0] = {
+      [false] = 2,
+      [true] = 3,
+    },
+    [1] = {
+      [false] = 2,
+      [true] = 5,
+    },
+    [2] = {
+      [false] = 4,
+      [true] = 3,
+    },
+  },
+}
+local function compute_items_horizontal(item_data_list,page_data)
+  if #item_data_list == 0 then
+    return
+  end
+  local pageno = item_data_list[1][KEY_PAGENO]
+  local twoside = page_data[KEY_TWOSIDE]
+  local recto = ((pageno % 2) == 1) or (not twoside)
+  local columncount = page_data[KEY_COLUMNCOUNT]
+  local x_textleft = {}
+  local x_textright = {}
+  local x_textmiddle = {}
+  if recto then
+    x_textleft[0] = (
+      page_data[KEY_HOFFSETORIGIN]
+      + page_data[KEY_HOFFSET]
+      + page_data[KEY_ODDSIDEMARGIN]
+    )
+    x_textright[0] = (
+      x_textleft[0]
+      + page_data[KEY_TEXTWIDTH]
+    )
+  else
+    x_textleft[0] = (
+      page_data[KEY_HOFFSETORIGIN]
+      + page_data[KEY_HOFFSET]
+      + page_data[KEY_EVENSIDEMARGIN]
+    )
+    x_textright[0] = (
+      x_textleft[0]
+      + page_data[KEY_TEXTWIDTH]
+    )
+  end
+  x_textmiddle[0] = (x_textleft[0] + x_textright[0])/2
+
+  if columncount == 1 then
+    for i=1,#item_data_list do
+      item_data_list[i][KEY_COLNO_COMPUTED] = 0
+    end
+  else
+    x_textleft[1] = x_textleft[0]
+    x_textright[1] = (
+      x_textleft[1]
+      + page_data[KEY_COLUMNWIDTH]
+    )
+    x_textmiddle[1] = (x_textleft[1] + x_textright[1])/2
+
+    x_textleft[2] = (
+      x_textright[1]
+      + page_data[KEY_COLUMNSEP]
+    )
+    x_textright[2] = (
+      x_textleft[2]
+      + page_data[KEY_COLUMNWIDTH]
+    )
+    x_textmiddle[2] = (x_textleft[2] + x_textright[2])/2
+
+    local left_column_x_limit = (
+      x_textright[1]
+      + .5*page_data[KEY_COLUMNSEP]
+    )
+    for i=1,#item_data_list do
+      local item_data = item_data_list[i]
+
+      if item_data[KEY_COLUMN] >= 0 then
+        item_data[KEY_COLNO_COMPUTED] = item_data[KEY_COLUMN]
+      else
+        if item_data[KEY_XPOS] <= left_column_x_limit then
+          item_data[KEY_COLNO_COMPUTED] = 1
+        else
+          item_data[KEY_COLNO_COMPUTED] = 2
+        end
+      end
+    end
+
+  end
+  for i=1,#item_data_list do
+    local item = item_data_list[i]
+
+    local pos = item[KEY_POS]
+    local colnocomputed = item[KEY_COLNO_COMPUTED]
+
+    if pos == POS_LEFT then
+      rightside = false
+    elseif pos == POS_RIGHT then
+      rightside = true
+    elseif pos == POS_NEAREST then
+      rightside = (item[KEY_XPOS] >= x_textmiddle[colnocomputed])
+    else
+      rightside = RIGHTSIDE_LOOKUP_TABLE[recto][colnocomputed][pos]
+    end
+
+    local marginno = MARGINNO_LOOKUP_TABLE[recto][colnocomputed][rightside]
+
+    if rightside then
+      item[KEY_SIDE_COMPUTED] = 0
+      item[KEY_XSHIFT_COMPUTED] = -item[KEY_XPOS]
+                                  + x_textright[colnocomputed]
+    else
+      item[KEY_SIDE_COMPUTED] = 1
+      item[KEY_XSHIFT_COMPUTED] = -item[KEY_XPOS]
+                                  + x_textleft[colnocomputed]
+    end
+    item[KEY_MARGINNO_COMPUTED] = marginno
+
+  end
+
+end
+local function get_y_item_top(item_data)
+  return item_data[KEY_YPOS]
+         + item_data[KEY_YSHIFT_COMPUTED]
+         + item_data[KEY_HEIGHT]
+end
+local function get_y_item_bottom(item_data)
+  return item_data[KEY_YPOS]
+         - item_data[KEY_DEPTH]
+         + item_data[KEY_YSHIFT_COMPUTED]
+end
+local function get_ysep_list(item_data_list)
+
+  local ysep_list = {}
+
+  ysep_list[0] = 0
+  for i=1,#item_data_list-1 do
+    ysep_list[i] = math.max(
+                     item_data_list[i][KEY_YSEP_BELOW],
+                     item_data_list[i+1][KEY_YSEP_ABOVE]
+                   )
+  end
+  ysep_list[#item_data_list] = 0
+
+  return ysep_list
+
+end
+local function compute_items_vertical_optfixed_enabled(item_data_list)
+
+  local optfixed_item_data_list = {}
+  local fixed_item_data_list = {}
+
+  for _,item_data in pairs(item_data_list) do
+    if item_data[KEY_TYPE] == TYPE_OPTFIXED then
+      optfixed_item_data_list[#optfixed_item_data_list+1] = item_data
+    elseif item_data[KEY_TYPE] == TYPE_FIXED then
+      fixed_item_data_list[#fixed_item_data_list+1] = item_data
+    end
+  end
+
+  for _,optfixed_item_data in pairs(optfixed_item_data_list) do
+    local optfixed_y_item_top = get_y_item_top(optfixed_item_data)
+    local optfixed_y_item_bottom = get_y_item_bottom(optfixed_item_data)
+
+    for _,fixed_item_data in pairs(fixed_item_data_list) do
+      local fixed_y_item_top = get_y_item_top(fixed_item_data)
+      local fixed_y_item_bottom = get_y_item_bottom(fixed_item_data)
+
+      if (
+        (
+          (fixed_y_item_bottom - optfixed_y_item_top)
+          <
+          math.max(
+            fixed_item_data[KEY_YSEP_BELOW],
+            optfixed_item_data[KEY_YSEP_ABOVE]
+          )
+        )
+        and
+        (
+          (optfixed_y_item_bottom - fixed_y_item_top)
+          <
+          math.max(
+            optfixed_item_data[KEY_YSEP_BELOW],
+            fixed_item_data[KEY_YSEP_ABOVE]
+          )
+        )
+      ) then
+        optfixed_item_data[KEY_ENABLED_COMPUTED] = false
+        break
+      end
+    end
+  end
+
+end
+local function compute_items_vertical_adjustment(item_data_list,page_data)
+  if #item_data_list == 0 then
+    return
+  end
+
+  local ysep_list = get_ysep_list(item_data_list)
+  local y_limit_above = (
+    page_data[KEY_VOFFSET]
+    + page_data[KEY_PAGEHEIGHT]
+    - item_data_list[1][KEY_YSEP_PAGE_TOP]
+  )
+
+  for i=1,#item_data_list do
+    local item_data = item_data_list[i]
+
+    local y_item_top = get_y_item_top(item_data)
+
+    if y_item_top > y_limit_above then
+      if item_data[KEY_TYPE] == TYPE_NORMAL then
+        item_data[KEY_YSHIFT_COMPUTED] = item_data[KEY_YSHIFT_COMPUTED]
+                                         + (y_limit_above - y_item_top)
+      end
+    end
+
+    y_limit_above = get_y_item_bottom(item_data) - ysep_list[i]
+  end
+  local y_limit_below = (
+    page_data[KEY_VOFFSET]
+    + item_data_list[#item_data_list][KEY_YSEP_PAGE_BOTTOM]
+  )
+
+  for i=#item_data_list,1,-1 do
+    local item_data = item_data_list[i]
+
+    local y_item_bottom = get_y_item_bottom(item_data)
+
+    if y_item_bottom < y_limit_below then
+      if item_data[KEY_TYPE] == TYPE_NORMAL then
+        item_data[KEY_YSHIFT_COMPUTED] = item_data[KEY_YSHIFT_COMPUTED]
+                                         + (y_limit_below - y_item_bottom)
+      end
+    end
+
+    y_limit_below = get_y_item_top(item_data) + ysep_list[i-1]
+  end
+
+end
+local ITEM_PASSED_YSEP_PAGE_TOP_MESSAGES = {
+  [TYPE_NORMAL] = 'Moveable item > ysep page top',
+  [TYPE_FIXED] = 'Topmost fixed item > ysep page top',
+  [TYPE_OPTFIXED] = 'Topmost optfixed item > ysep page top',
+}
+local ITEM_CLASH_MESSAGES = {
+  [TYPE_NORMAL] = {
+    [TYPE_NORMAL] = 'moveable items'
+                    .. ' (this shouldn\'t happen)',
+    [TYPE_FIXED] = 'moveable item above fixed item',
+    [TYPE_OPTFIXED] = 'moveable item above optfixed item',
+  },
+  [TYPE_FIXED] = {
+    [TYPE_NORMAL] = 'moveable item below fixed item',
+    [TYPE_FIXED] = 'fixed items',
+    [TYPE_OPTFIXED] = 'fixed item above optfixed item '
+                      .. '(this shouldn\'t happen)',
+  },
+  [TYPE_OPTFIXED] = {
+    [TYPE_NORMAL] = 'moveable items below optfixed item',
+    [TYPE_FIXED] = 'fixed item below optfixed item '
+                   .. '(this shouldn\'t happen)',
+    [TYPE_OPTFIXED] = 'optfixed items '
+                      .. '(this shouldn\'t happen)',
+  },
+}
+local ITEM_PASSED_YSEP_PAGE_BOTTOM_MESSAGE = {
+  [TYPE_NORMAL] = 'Moveable item < ysep page bottom',
+  [TYPE_FIXED] = 'Bottommost fixed item < ysep page bottom',
+  [TYPE_OPTFIXED] = 'Bottommost optfixed item < ysep page bottom',
+}
+local function check_items_vertical(item_data_list,page_data)
+  if (#item_data_list) == 0 then
+    return
+  end
+
+  local ysep_list = get_ysep_list(item_data_list)
+
+  local item_data
+
+  item_data = item_data_list[1]
+  if (
+       get_y_item_top(item_data) > page_data[KEY_VOFFSET]
+                                 + page_data[KEY_PAGEHEIGHT]
+                                 - item_data[KEY_YSEP_PAGE_TOP]
+  ) then
+    table.insert(
+      PROBLEM_REPORT_TABLE,
+      get_data_page_number(item_data)
+      .. ' ' .. ITEM_PASSED_YSEP_PAGE_TOP_MESSAGES[item_data[KEY_TYPE]]
+    )
+  end
+
+  for i=2,#item_data_list do
+    local item_data = item_data_list[i]
+    local prev_item_data = item_data_list[i-1]
+    if (
+      get_y_item_top(item_data) > get_y_item_bottom(prev_item_data)
+                                  - ysep_list[i-1]
+    ) then
+      table.insert(
+        PROBLEM_REPORT_TABLE,
+        get_data_page_number(item_data)
+        .. ' Clash: ' ..
+        ITEM_CLASH_MESSAGES[prev_item_data[KEY_TYPE]][item_data[KEY_TYPE]]
+      )
+    end
+  end
+  item_data = item_data_list[#item_data_list]
+  if (
+    get_y_item_bottom(item_data) < page_data[KEY_VOFFSET]
+                                   + item_data[KEY_YSEP_PAGE_BOTTOM]
+  ) then
+    table.insert(
+      PROBLEM_REPORT_TABLE,
+      get_data_page_number(item_data)
+      .. ' ' .. ITEM_PASSED_YSEP_PAGE_BOTTOM_MESSAGE[item_data[KEY_TYPE]]
+    )
+  end
+
+end
+local function compute_items_vertical(item_data_list,page_data)
+  for i=1,#item_data_list do
+    local item_data = item_data_list[i]
+
+    item_data[KEY_YSHIFT_COMPUTED] = item_data[KEY_YSHIFT]
+  end
+  compute_items_vertical_optfixed_enabled(item_data_list)
+  list_filter(item_data_list,function(item_data)
+    return item_data[KEY_ENABLED_COMPUTED]
+  end)
+  table.sort(
+    item_data_list,
+    function(left,right)
+      local y_diff = left[KEY_YPOS] - right[KEY_YPOS]
+
+      if y_diff > 0 then
+        return true
+      elseif y_diff < 0 then
+        return false
+      end
+
+      local x_diff = left[KEY_XPOS] - right[KEY_XPOS]
+
+      if x_diff < 0 then
+        return true
+      elseif x_diff > 0 then
+        return false
+      end
+
+      return (left[KEY_ITEMNO] < right[KEY_ITEMNO])
+    end
+  )
+
+  compute_items_vertical_adjustment(item_data_list,page_data)
+
+  check_items_vertical(item_data_list,page_data)
+
+end
+local function compute_items()
+  local max_abspageno = 0
+
+  for k,v in pairs(ITEM_DATA_MAIN_TABLE) do
+    max_abspageno = math.max(v[KEY_ABSPAGENO],max_abspageno)
+  end
+  local per_abspage_item_data_list = {}
+  for i=1,max_abspageno do
+    per_abspage_item_data_list[i] = {}
+  end
+  for _,item_data in pairs(ITEM_DATA_MAIN_TABLE) do
+    local temp_table = per_abspage_item_data_list[item_data[KEY_ABSPAGENO]]
+    temp_table[#temp_table+1] = item_data
+  end
+  local per_abspage_page_data_list = {}
+  local pagedatano = 0
+  for abspageno = 1,max_abspageno do
+    while (
+      PAGE_DATA_MAIN_TABLE[pagedatano+1] ~= nil
+      and
+      PAGE_DATA_MAIN_TABLE[pagedatano+1][KEY_ABSPAGENO] == abspageno
+    ) do
+      pagedatano = pagedatano+1
+    end
+    per_abspage_page_data_list[abspageno] = PAGE_DATA_MAIN_TABLE[pagedatano]
+  end
+  for abspageno=1,#per_abspage_item_data_list do
+    local current_page_data = per_abspage_page_data_list[abspageno]
+    local current_page_item_data_list = per_abspage_item_data_list[abspageno]
+    compute_items_horizontal(current_page_item_data_list,current_page_data)
+    local current_page_item_data_sublists = {}
+
+    for i=0,5 do
+      current_page_item_data_sublists[i] = {}
+    end
+
+    for _,item_data in pairs(current_page_item_data_list) do
+      table.insert(
+        current_page_item_data_sublists[item_data[KEY_MARGINNO_COMPUTED]],
+        item_data
+      )
+    end
+    for i=0,5 do
+      compute_items_vertical(
+        current_page_item_data_sublists[i],
+        current_page_data
+      )
+    end
+  end
+end
+local function load_item_data(itemno)
+
+  item = ITEM_DATA_MAIN_TABLE[tonumber(itemno)]
+  if item == nil then
+    item = ITEM_DATA_DEFAULTS
+  end
+
+  tex.count['l__marginalia_page_int'] = item[KEY_PAGENO]
+  tex.count['l__marginalia_column_computed_int'] = item[KEY_COLNO_COMPUTED]
+  tex.dimen['l__marginalia_xshift_computed_dim'] = item[KEY_XSHIFT_COMPUTED]
+  tex.dimen['l__marginalia_yshift_computed_dim'] = item[KEY_YSHIFT_COMPUTED]
+  tex.count['l__marginalia_side_computed_int'] = item[KEY_SIDE_COMPUTED]
+  tex.count['l__marginalia_marginno_computed_int']
+    = item[KEY_MARGINNO_COMPUTED]
+  if item[KEY_ENABLED_COMPUTED] then
+    tex.count['l__marginalia_enabled_computed_int'] = 1
+  else
+    tex.count['l__marginalia_enabled_computed_int'] = 0
+  end
+
+end
+return {
+  store_default_page_data = store_default_page_data,
+  store_page_data = store_page_data,
+  check_page_data = check_page_data,
+
+  store_item_data = store_item_data,
+  check_item_data = check_item_data,
+
+  compute_items = compute_items,
+
+  load_item_data = load_item_data,
+
+  write_problem_report = write_problem_report,
+
+  write_page_change_report = write_page_change_report,
+  write_item_change_report = write_item_change_report,
+}
+

@@ -1,0 +1,111 @@
+%%%
+% Conversion
+%%%
+\def\filedateConversion{2025/05/27}%
+\def\fileversionConversion{0.1a}%
+\message{-- \filedateConversion\space v\fileversionConversion}%
+
+\setKVdefault[ClesConversion]{Longueur,Aire=false,Vol=false,Masses=false,Capas=false,Sans=false,Completes=false,Complete={},Masse={},Capa={}}%
+\defKV[ClesConversion]{%
+Complete=\ifempty{#1}{}{\setKV[ClesConversion]{Completes}},%
+Masse=\ifempty{#1}{}{\setKV[ClesConversion]{Longueur=false}\setKV[ClesConversion]{Masses}},%
+Capa=\ifempty{#1}{}{\setKV[ClesConversion]{Longueur=false}\setKV[ClesConversion]{Capas}}%
+}%
+%
+\newlength{\PfCConversionLongueur}%
+
+\NewDocumentCommand\ChoixUniteD{m}{%
+  \IfStrEqCase{#1}{%
+    {G}{\DeclareSIUnit{\TempoPrefixeD}{\giga}\xdef\ExposantD{9}}%
+    {M}{\DeclareSIUnit{\TempoPrefixeD}{\mega}\xdef\ExposantD{6}}%
+    {t}{\DeclareSIUnit{\TempoPrefixeD}{\tonne}\xdef\ExposantD{6}}%
+    {q}{\DeclareSIUnit{\TempoPrefixeD}{\quintal}\xdef\ExposantD{5}}%
+    {k}{\DeclareSIUnit{\TempoPrefixeD}{\kilo}\xdef\ExposantD{3}}%
+    {h}{\DeclareSIUnit{\TempoPrefixeD}{\hecto}\xdef\ExposantD{2}}%
+    {da}{\DeclareSIUnit{\TempoPrefixeD}{\deca}\xdef\ExposantD{1}}%
+    {u}{\DeclareSIUnit{\TempoPrefixeD}{}\xdef\ExposantD{0}}%
+    {d}{\DeclareSIUnit{\TempoPrefixeD}{\deci}\xdef\ExposantD{-1}}%
+    {c}{\DeclareSIUnit{\TempoPrefixeD}{\centi}\xdef\ExposantD{-2}}%
+    {m}{\DeclareSIUnit{\TempoPrefixeD}{\milli}\xdef\ExposantD{-3}}%
+    {µ}{\DeclareSIUnit{\TempoPrefixeD}{\micro}\xdef\ExposantD{-6}}%
+    {n}{\DeclareSIUnit{\TempoPrefixeD}{\nano}\xdef\ExposantD{-9}}%
+  }%
+}%
+
+\NewDocumentCommand\ChoixUniteA{m}{%
+  \IfStrEqCase{#1}{%
+    {G}{\DeclareSIUnit{\TempoPrefixeA}{\giga}\xdef\ExposantA{9}}%
+    {M}{\DeclareSIUnit{\TempoPrefixeA}{\mega}\xdef\ExposantA{6}}%
+    {t}{\DeclareSIUnit{\TempoPrefixeA}{\tonne}\xdef\ExposantA{6}}%
+    {q}{\DeclareSIUnit{\TempoPrefixeA}{\quintal}\xdef\ExposantA{5}}%
+    {k}{\DeclareSIUnit{\TempoPrefixeA}{\kilo}\xdef\ExposantA{3}}%
+    {h}{\DeclareSIUnit{\TempoPrefixeA}{\hecto}\xdef\ExposantA{2}}%
+    {da}{\DeclareSIUnit{\TempoPrefixeA}{\deca}\xdef\ExposantA{1}}%
+    {u}{\DeclareSIUnit{\TempoPrefixeA}{}\xdef\ExposantA{0}}%
+    {d}{\DeclareSIUnit{\TempoPrefixeA}{\deci}\xdef\ExposantA{-1}}%
+    {c}{\DeclareSIUnit{\TempoPrefixeA}{\centi}\xdef\ExposantA{-2}}%
+    {m}{\DeclareSIUnit{\TempoPrefixeA}{\milli}\xdef\ExposantA{-3}}%
+    {µ}{\DeclareSIUnit{\TempoPrefixeA}{\micro}\xdef\ExposantA{-6}}%
+    {n}{\DeclareSIUnit{\TempoPrefixeA}{\nano}\xdef\ExposantA{-9}}%
+  }%
+}%
+
+\NewDocumentCommand\Convertir{somm}{%
+  \useKVdefault[ClesConversion]%
+  \setKV[ClesConversion]{#2}%
+  \StrBefore{#3}{>}[\PrefixeDepart]%
+  \StrBehind{#3}{>}[\PrefixeArrivee]%
+  \ChoixUniteD{\PrefixeDepart}%
+  \ChoixUniteA{\PrefixeArrivee}%
+  \ifboolKV[ClesConversion]{Aire}{%
+    \DeclareSIUnit{\TempoAvant}{\square}%
+    \DeclareSIUnit{\TempoBase}{\meter}%
+    \xdef\PfCConvExposant{2}%
+  }{\ifboolKV[ClesConversion]{Vol}{%
+      \DeclareSIUnit{\TempoAvant}{\cubic}%
+      \DeclareSIUnit{\TempoBase}{\meter}
+      \xdef\PfCConvExposant{3}%
+    }{%
+      \DeclareSIUnit{\TempoAvant}{}%
+      \xdef\PfCConvExposant{1}%
+    }%
+  }%
+  \ifboolKV[ClesConversion]{Masses}{%
+    \DeclareSIUnit{\TempoBase}{\gram}%
+  }{}%
+  \ifboolKV[ClesConversion]{Longueur}{%
+    \DeclareSIUnit{\TempoBase}{\meter}%
+  }{}%
+  \ifboolKV[ClesConversion]{Capas}{%
+    \DeclareSIUnit{\TempoBase}{\liter}%
+  }{}%
+  \ensuremath{%
+    \IfBooleanTF{#1}{%
+      \IfStrEq{\PrefixeDepart}{t}{\DeclareSIUnit{\TempoBase}{\relax}}{}\IfStrEq{\PrefixeDepart}{q}{\DeclareSIUnit{\TempoBase}{\relax}}{}
+      \SI{#4}{\TempoAvant\TempoPrefixeD\TempoBase}
+      \IfStrEq{\PrefixeDepart}{t}{\DeclareSIUnit{\TempoBase}{\gram}}{}\IfStrEq{\PrefixeDepart}{q}{\DeclareSIUnit{\TempoBase}{\gram}}{}
+      =
+      \IfStrEq{\PrefixeArrivee}{t}{\DeclareSIUnit{\TempoBase}{\relax}}{}\IfStrEq{\PrefixeArrivee}{q}{\DeclareSIUnit{\TempoBase}{\relax}}{}
+      \ifboolKV[ClesConversion]{Completes}{\setlength{\PfCConversionLongueur}{\useKV[ClesConversion]{Complete}}\pointilles[\PfCConversionLongueur]}{\PointsSuspension{\fpeval{#4*(10**((\ExposantD-(\ExposantA))*\PfCConvExposant))}\fpeval{#4*(10**((\ExposantD-(\ExposantA))*\PfCConvExposant))}}}~\si{\TempoAvant\TempoPrefixeA\TempoBase}
+      \IfStrEq{\PrefixeArrivee}{t}{\DeclareSIUnit{\TempoBase}{\gram}}{}\IfStrEq{\PrefixeArrivee}{q}{\DeclareSIUnit{\TempoBase}{\gram}}{}
+    }{%
+      \ifboolKV[ClesConversion]{Sans}{%
+        \IfStrEq{\PrefixeDepart}{t}{\DeclareSIUnit{\TempoBase}{\relax}}{}\IfStrEq{\PrefixeDepart}{q}{\DeclareSIUnit{\TempoBase}{\relax}}{}
+        \SI{#4}{\TempoAvant\TempoPrefixeD\TempoBase}
+        \IfStrEq{\PrefixeDepart}{t}{\DeclareSIUnit{\TempoBase}{\gram}}{}\IfStrEq{\PrefixeDepart}{q}{\DeclareSIUnit{\TempoBase}{\gram}}{}
+        =
+        \IfStrEq{\PrefixeArrivee}{t}{\DeclareSIUnit{\TempoBase}{\relax}}{}\IfStrEq{\PrefixeArrivee}{q}{\DeclareSIUnit{\TempoBase}{\relax}}{}
+        \num{\fpeval{#4*(10**((\ExposantD-(\ExposantA))*\PfCConvExposant))}}~\pointilles[25pt]
+        \IfStrEq{\PrefixeArrivee}{t}{\DeclareSIUnit{\TempoBase}{\gram}}{}\IfStrEq{\PrefixeArrivee}{q}{\DeclareSIUnit{\TempoBase}{\gram}}{}
+      }{%
+        \IfStrEq{\PrefixeDepart}{t}{\DeclareSIUnit{\TempoBase}{\relax}}{}\IfStrEq{\PrefixeDepart}{q}{\DeclareSIUnit{\TempoBase}{\relax}}{}
+        \SI{#4}{\TempoAvant\TempoPrefixeD\TempoBase}
+        \IfStrEq{\PrefixeDepart}{t}{\DeclareSIUnit{\TempoBase}{\gram}}{}\IfStrEq{\PrefixeDepart}{q}{\DeclareSIUnit{\TempoBase}{\gram}}{}
+        =
+        \IfStrEq{\PrefixeArrivee}{t}{\DeclareSIUnit{\TempoBase}{\relax}}{}\IfStrEq{\PrefixeArrivee}{q}{\DeclareSIUnit{\TempoBase}{\relax}}{}
+        \SI{\fpeval{#4*(10**((\ExposantD-(\ExposantA))*\PfCConvExposant))}}{\TempoAvant\TempoPrefixeA\TempoBase}
+        \IfStrEq{\PrefixeArrivee}{t}{\DeclareSIUnit{\TempoBase}{\gram}}{}\IfStrEq{\PrefixeArrivee}{q}{\DeclareSIUnit{\TempoBase}{\gram}}{}
+      }%
+    }%
+  }%
+}%

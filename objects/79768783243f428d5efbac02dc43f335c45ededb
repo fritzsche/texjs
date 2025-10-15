@@ -1,0 +1,238 @@
+%%%
+% Multiplication Japonaise
+%%%
+\def\filedateMulJap{2025/05/28}%
+\def\fileversionMulJap{0.1a}%
+\message{-- \filedateMulJap\space v\fileversionMulJap}%
+%
+\setKVdefault[MulJap]{Couleur=Orange,Bloc=false,DessinSeul=false,CouleurBloc={}}%
+\defKV[MulJap]{CouleurBloc=\ifempty{#1}{}{\setKV[MulJap]{Bloc}}}%
+
+\newtoks\toksmuljap%
+\def\UpdatetoksMulJap#1\nil{\addtotok\toksmuljap{"#1",#1,}}%
+
+\NewDocumentCommand\MulJaponaise{om}{%
+  \useKVdefault[MulJap]%
+  \setKV[MulJap]{#1}%
+  \setsepchar{x}\ignoreemptyitems%
+  \readlist*\PfCMulJap{#2}%
+  \toksmuljap{}%
+  \foreachitem\compteur\in\PfCMulJap{\expandafter\UpdatetoksMulJap\compteur\nil}%
+  \BuildMulJap{\the\toksmuljap}%
+  \reademptyitems%
+}%
+
+\NewDocumentCommand\BuildMulJap{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \mplibnumbersystem{double}%
+    \begin{mplibcode}
+      boolean Bloc,DessinSeul;
+      Bloc=\useKV[MulJap]{Bloc};
+      if Bloc:
+      color CouleurBloc;
+      CouleurBloc=\useKV[MulJap]{CouleurBloc};
+      fi;
+      DessinSeul=\useKV[MulJap]{DessinSeul};
+      color CoulTraits;
+      CoulTraits=\useKV[MulJap]{Couleur};
+      % On lit les string et les nombres
+      string Sfacteur[];
+      numeric facteur[];
+      vardef LectureDonnees(text t)=
+      n=1;
+      for p_=t:
+      if (n mod 2)=1:
+      Sfacteur[(n+1) div 2]=p_;
+      else:
+      facteur[n div 2]=p_;
+      fi;
+      n:=n+1;
+      endfor;
+      enddef;
+      numeric chiffrea[],chiffreb[];
+      vardef ExtraireChiffre=
+      Reste=facteur[1];
+      for k=length(Sfacteur[1]) downto 1:
+      Diviseur:=1;
+      for l=1 upto k-1:
+      Diviseur:=Diviseur*10;
+      endfor;
+      chiffrea[length(Sfacteur[1])+1-k]=Reste div Diviseur;
+      Reste:=Reste mod Diviseur;
+      endfor;
+      Reste:=facteur[2];
+      for k=length(Sfacteur[2]) downto 1:
+      Diviseur:=1;
+      for l=1 upto k-1:
+      Diviseur:=Diviseur*10;
+      endfor;
+      chiffreb[length(Sfacteur[2])+1-k]=Reste div Diviseur;
+      Reste:=Reste mod Diviseur;
+      endfor;
+      enddef;
+      LectureDonnees(#1);
+      ExtraireChiffre;
+      pair ta,basei,basej;
+      ta=u*(1,5);
+      basei=u*(1,1);
+      basej=u*(1,-1);
+      ecart=2.5;
+      vardef TraitsI(expr nb, lieu)=
+      label.ulft(TEX(decimal(nb)),lieu shifted(-1*basej));
+      if (nb mod 2)=1:%le nombre de traits est impair
+        p:=(nb-1) div 2;
+        for k=-p upto p:
+          trace ((lieu shifted(-1*basej))--(lieu shifted ((length(Sfacteur[2])-0.5)*ecart*basej))) shifted(k*0.1*basei) withcolor CoulTraits;
+        endfor;
+      else:%le nombre de traits est pair
+        p:=nb div 2;
+        if nb=0:
+          trace ((lieu shifted(-1*basej))--(lieu shifted ((length(Sfacteur[2])-0.5)*ecart*basej))) withcolor red;
+        else:
+          for k=-p upto -1:
+          trace ((lieu shifted(-1*basej))--(lieu shifted ((length(Sfacteur[2])-0.5)*ecart*basej))) shifted(k*0.1*basei+0.05*basei) withcolor CoulTraits;
+          endfor;
+          for k=1 upto p:
+          trace ((lieu shifted(-1*basej))--(lieu shifted ((length(Sfacteur[2])-0.5)*ecart*basej))) shifted(k*0.1*basei-0.05*basei) withcolor CoulTraits;
+          endfor;
+        fi;
+      fi;
+      enddef;
+      vardef TraitsJ(expr nb, lieu)=
+      label.urt(TEX(decimal(nb)),lieu shifted((length(Sfacteur[1])-0.5)*ecart*basei));
+      if (nb mod 2)=1:%le nombre de traits est impair
+        p:=(nb-1) div 2;
+        for k=-p upto p:
+          trace ((lieu shifted(-1*basei))--(lieu shifted ((length(Sfacteur[1])-0.5)*ecart*basei))) shifted(k*0.1*basej) withcolor CoulTraits;
+        endfor;
+      else:%le nombre de traits est pair
+        p:=nb div 2;
+        if nb=0:
+          trace ((lieu shifted(-1*basei))--(lieu shifted ((length(Sfacteur[1])-0.5)*ecart*basei))) withcolor red;
+        else:
+%          label(TEX("ici"),lieu);
+          for k=-p upto -1:
+          trace ((lieu shifted(-1*basei))--(lieu shifted ((length(Sfacteur[1])-0.5)*ecart*basei))) shifted(k*0.1*basej+0.05*basej) withcolor CoulTraits;
+          endfor;
+          for k=1 upto p:
+          trace ((lieu shifted(-1*basei))--(lieu shifted ((length(Sfacteur[1])-0.5)*ecart*basei))) shifted(k*0.1*basej-0.05*basej) withcolor CoulTraits;
+          endfor;
+        fi;
+      fi;
+      enddef;
+      % drawoptions(withpen pencircle scaled 1.25 withcolor Orange);
+      for k=1 upto length(Sfacteur[1]):
+       TraitsI(chiffrea[k],ta+ecart*(k-1)*basei);
+       endfor;
+%       drawoptions(withcolor blue);
+      for k=1 upto length(Sfacteur[2]):
+       TraitsJ(chiffreb[k],ta+ecart*(k-1)*basej);
+       endfor;
+       % Les blocs ?
+       pair testi[],testj[];
+       numeric rt,st;
+       rt:=0;st:=0;
+      for k=0 upto (length(Sfacteur[1])-1):
+      rt:=rt+1;
+      testi[rt]=ta shifted(k*ecart*basei);
+      endfor;
+      for k=1 upto (length(Sfacteur[2])-1):
+      rt:=rt+1;
+      testi[rt]=testi[rt-1] shifted(ecart*basej);
+      endfor;
+      %
+      for k=0 upto (length(Sfacteur[2])-1):
+      st:=st+1;
+      testj[st]=ta shifted(k*ecart*basej);
+      endfor;
+      for k=1 upto (length(Sfacteur[1])-1):
+      st:=st+1;
+      testj[st]=testj[st-1] shifted(ecart*basei);
+      endfor;
+      if Bloc:
+      for k=1 upto rt:
+      draw polygone(testi[k]+u*0.5*ecart*(-cosd(45),sind(45)),testi[k]+u*0.5*ecart*(cosd(45),sind(45)),testj[k]+u*0.5*ecart*(cosd(45),-sind(45)),testj[k]+u*0.5*ecart*(-cosd(45),-sind(45)));
+      endfor;
+      fi;
+      % On détaille le calcul
+      for k=1 upto 50:
+      RetiensDecimal[k]=0;
+      endfor;
+      for k=1 upto length(Sfacteur[1]):
+      for l=1 upto length(Sfacteur[2]):
+      RetiensDecimal[k+l]:=RetiensDecimal[k+l]+chiffrea[k]*chiffreb[l];
+      endfor;
+      endfor;
+      %
+      miny=4000;
+      for k=1 upto st:
+      if ypart(testj[k])<miny:
+      miny:=ypart(testj[k]);
+      fi;
+      endfor;
+      pair PointBasea[],PointBaseb[],PointBasec[];
+      for k=1 upto rt:
+      PointBasea[k]=(xpart(testj[k]),miny-ecart*u);
+      PointBaseb[k]=PointBasea[k]+u*ecart*(0,-1);
+      PointBasec[k]=PointBasea[k]+(0,-7.5mm);
+      endfor;
+      numeric NouveauNombre[];
+      if DessinSeul=false:
+      for k=1 upto rt:
+      label(decimal(RetiensDecimal[k+1]),PointBasea[k]);
+      endfor;
+      % Affichage des retenues, des nombres, des unités...
+      Retenue[rt+1]:=0;
+      for k=rt downto 1:
+      NouveauNombre[k]=RetiensDecimal[k+1]+Retenue[k+1];
+      Retenue[k]:=NouveauNombre[k] div 10;
+      endfor;
+      %fleche haut -> bas
+      for k=rt downto 1:
+      drawarrow (PointBasea[k]--PointBaseb[k]) cutbefore cercles(PointBasea[k],if k=rt:5mm else: 10mm fi) cutafter cercles(PointBaseb[k],5mm);
+      endfor;
+      % fleche diag
+      for k=rt downto 2:
+      if Retenue[k]>0:
+      if k=rt:
+      drawarrow (PointBasea[k]--PointBasea[k-1]) cutbefore cercles(PointBasea[k],5mm) cutafter cercles(PointBasea[k-1],5mm);
+      else:
+      drawarrow (PointBasec[k]--PointBasea[k-1]) cutbefore cercles(PointBasec[k],5mm) cutafter cercles(PointBasea[k-1],5mm);
+      fi;
+      fi;
+      endfor;
+      for k=rt downto 1:
+      if k>1:
+      label(decimal(NouveauNombre[k] mod 10),PointBaseb[k]);
+      else:
+      label(decimal(NouveauNombre[k]),PointBaseb[k]);
+      fi;
+      if k>1:
+      if Retenue[k]>0:
+      if k=rt:
+      fill cercles(iso(PointBasea[k],PointBasea[k-1]),5mm) withcolor white;
+      label(TEX("$+"&decimal(Retenue[k])&"$"),iso(PointBasea[k],PointBasea[k-1]));
+      else:
+      fill cercles(iso(PointBasec[k],PointBasea[k-1]),5mm) withcolor white;
+      label(TEX("$+"&decimal(Retenue[k])&"$"),iso(PointBasec[k],PointBasea[k-1]));
+      fi;
+      draw pointarc(cercles(PointBasea[k-1],3mm),45)--pointarc(cercles(PointBasea[k-1],3mm),225);
+      fi;
+      if k<rt:
+      if Retenue[k+1]>0:
+      label(TEX("$"&decimal(NouveauNombre[k])&"$"),PointBasec[k]);
+      fi;
+      fi;
+      elseif k=1:
+      if Retenue[k]>0:
+      draw pointarc(cercles(PointBasea[k],3mm),45)--pointarc(cercles(PointBasea[k],3mm),225);
+      label(TEX("$"&decimal(NouveauNombre[k])&"$"),PointBasec[k]);
+      fi;
+      fi;
+      endfor;
+      fi;
+    \end{mplibcode}%
+    \mplibnumbersystem{scaled}%
+  \fi%
+}%

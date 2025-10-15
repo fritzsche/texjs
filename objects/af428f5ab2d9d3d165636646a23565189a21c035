@@ -1,0 +1,676 @@
+% \iffalse meta-comment
+%
+% File: ltx-talk-structure.dtx Copyright (C) 2024,2025 Joseph Wright
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+% This file is part of the "ltx-talk bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% The released version of this bundle is available from CTAN.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/josephwright/ltx-talk
+%
+% for those people who are interested.
+%
+% -----------------------------------------------------------------------
+%
+%<*driver>
+\documentclass{l3doc}
+% Additional commands needed in this source
+\NewDocumentCommand\email{m}{\href{mailto:#1}{\nolinkurl{#1}}}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% ^^A As we are dealing with a class, this has to be done manually
+% \def\filedate{2025-10-10}
+% \def\fileversion{v0.2.3}
+%
+% \title{^^A
+%   \pkg{ltx-talk-structure} -- Structural commands^^A
+%   \thanks{This file describes \fileversion,
+%     last revised \filedate.}^^A
+% }
+%
+% \author{^^A
+%  Joseph Wright^^A
+%  \thanks{^^A
+%    E-mail: \email{joseph@texdev.net}^^A
+%   }^^A
+% }
+%
+% \date{Released \filedate}
+%
+% \maketitle
+%
+% \begin{documentation}
+%
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{ltx-talk-structure} implementation}
+%
+% Start the \pkg{DocStrip} guards.
+%    \begin{macrocode}
+%<*class>
+%    \end{macrocode}
+%
+% Identify the internal prefix.
+%    \begin{macrocode}
+%<@@=talk>
+%    \end{macrocode}
+%
+% \subsection{Frame title}
+%
+% \begin{variable}{\g_@@_frame_title_tl, \g_@@_frame_subtitle_tl}
+%    \begin{macrocode}
+\tl_new:N \g_@@_frame_title_tl
+\tl_new:N \g_@@_frame_subtitle_tl
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}{\frametitle}
+%   Just data storage: at the present no use of the optional argument.
+%    \begin{macrocode}
+\NewDocumentCommand \frametitle { D <> { all } O {#3} m }
+  {
+    \@@_if_overlay:nT {#1}
+      { \tl_gset:Nn \g_@@_frame_title_tl {#3} }
+  }
+\NewDocumentCommand \framesubtitle { D <> { all } O {#3} m }
+  {
+    \@@_if_overlay:nT {#1}
+      { \tl_gset:Nn \g_@@_frame_subtitle_tl {#3} }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_frame_title:n, \@@_frame_title_tagged:n}
+%   Inserting the frame title requires we deal with tagging as well as
+%   appearance: if there is a title, we need to tag just this part of the
+%   header.
+%    \begin{macrocode}
+\NewTemplateType { frametitle } { 1 }
+\DeclareTemplateInterface { frametitle } { talk } { 1 }
+  {
+    after-vspace  : skip = \bigskipamount ,
+    before-vspace : skip = 0em ,
+    color         : tokenlist = ,
+    font          : tokenlist = \Large \bfseries
+  }
+\DeclareTemplateCode { frametitle } { talk } { 1 }
+  {
+    after-vspace  = \l_@@_frametitle_after_skip ,
+    before-vspace = \l_@@_frametitle_before_skip ,
+    color         = \l_@@_frametitle_color_tl ,
+    font          = \l_@@_frametitle_font_tl
+  }
+  {
+    \noindent
+    \vspace { \l_@@_frametitle_before_skip }
+    \group_begin:
+      \tl_if_empty:NF \l_@@_frametitle_color_tl
+        { \color_select:V \l_@@_frametitle_color_tl }
+      \l_@@_frametitle_font_tl
+      \tl_if_blank:nF {#1}
+        { \@@_frame_title:n {#1} }
+      \par
+    \group_end:
+    \vspace { \l_@@_frametitle_after_skip }
+  }
+\DeclareInstance { frametitle } { header } { talk } { }
+\cs_new_protected:Npn \@@_frame_title:n #1
+  {
+    \bool_if:NTF \g_@@_frame_tag_bool
+      { \@@_frame_title_tagged:n }
+      { \use:n }
+        {#1}
+  }
+\cs_new_protected:Npn \@@_frame_title_tagged:n #1
+  {
+   \@@_header_tag_begin:e
+      {
+        firstkid = true ,
+        parent   = \int_use:N \g_@@_frame_struct_int ,
+        tag      = frametitle ,
+        title    = { \text_purify:n { \g_@@_frame_title_tl } } ,
+      }
+    \group_begin:
+      \tagpdfparaOff
+      #1
+    \group_end:
+    \@@_header_tag_end:
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Sectioning}
+%
+% \begin{variable}
+%   {
+%     \l_@@_section_tl ,
+%     \g_@@_section_tl ,
+%     \l_@@_subsection_tl ,
+%     \g_@@_subsection_tl ,
+%     \l_@@_subsubsection_tl ,
+%     \g_@@_subsubsection_tl
+%   }
+%   Two versions of the data store: one set locally (but at the top level) for
+%   general use, one set (and more importantly cleared) globally to allow
+%   insertion in the header area just once per name.
+%    \begin{macrocode}
+\tl_new:N \l_@@_section_tl
+\tl_new:N \g_@@_section_tl
+\tl_new:N \l_@@_subsection_tl
+\tl_new:N \g_@@_subsection_tl
+\tl_new:N \l_@@_subsubsection_tl
+\tl_new:N \g_@@_subsubsection_tl
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}{\section, \subsection, \subsubsection}
+% \begin{macro}{\thesection, \thesubsection, \thesubsubsection}
+%  Here, we need full \LaTeX{} counters, so create them using the appropriate
+%  mechanism: that also means we can sort out counter dependency and the
+%  appearance (using the same setup as in \pkg{article}). As (subsub)section
+%  numbers never increment inside frames, we remove these counters from the
+%  general tracker.
+%    \begin{macrocode}
+\newcounter { section }
+\newcounter { subsection } [ section ]
+\newcounter { subsubsection } [ subsection ]
+\seq_gremove_all:Nn \l_@@_cnt_reset_seq { section }
+\seq_gremove_all:Nn \l_@@_cnt_reset_seq { subsection }
+\seq_gremove_all:Nn \l_@@_cnt_reset_seq { subsubsection }
+\cs_gset:Npn \thesection { \@arabic \c@section }
+\cs_gset:Npn \thesubsection { \thesection . \@arabic \c@subsection }
+\cs_gset:Npn \thesubsubsection { \thesubsection . \@arabic \c@subsubsection }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\section, \subsection, \subsubsection}
+% \begin{macro}
+%   {
+%     \insertsection       ,
+%     \insertsubsection   ,
+%     \insertsubsubsection
+%   }
+%  The sectioning commands all have essentially the same form: we therefore
+%  create using a generator with the necessary conditionals in place. As we
+%  do not typeset sections at this stage, the code is quite different from
+%  \pkg{article}. This also means that the bookmark links need to point forward
+%  to the next slide: if that doesn't appear, the bookmarks will be out. Using
+%  the general scratch sequence here should be OK: t really is a one-off
+%  setting. We need a sequence to allow indexed mapping to avoid any extra
+%  setup for the depth value.
+%    \begin{macrocode}
+\seq_set_from_clist:Nn \l_tmpa_seq
+  { section , subsection , subsubsection }
+\seq_map_indexed_inline:Nn \l_tmpa_seq
+  {
+    \use:e
+      {
+        \NewDocumentCommand \exp_not:c { insert #2 } { }
+          {
+            \exp_not:N \tl_use:N
+            \exp_not:c { l_@@_ #2 _tl }
+          }
+        \NewDocumentCommand \exp_not:c {#2}
+          { s D <> { all } O {##4} m }
+          {
+            \exp_not:N \refstepcounter {#2}
+            \tag_tool:n { sec-start = #2 , restore-para }
+            \tl_set:Nn \exp_not:c { l_@@_ #2 _tl } {##4}
+            \tl_gset_eq:NN \exp_not:c { g_@@_ #2 _tl }
+              \exp_not:c { l_@@_ #2 _tl }
+            \str_if_eq:nnT {#2} { section }
+              { \tl_clear:N \exp_not:N \l_@@_subsection_tl }
+            \str_if_eq:nnF {#2} { subsubsection }
+              { \tl_clear:N \exp_not:N \l_@@_subsubsection_tl }
+            \exp_not:N \addcontentsline { toc } {#2}
+              {
+                \exp_not:N \int_compare:nNnF {#1} >
+                  { \exp_not:N \value { secnumdepth } }
+                  {
+                    \exp_not:N \protect \exp_not:N \numberline
+                      { \exp_not:c { the #2 } }
+                  }
+                ##4
+              }
+            \hook_use:n { #2 / begin }
+          }
+        \hook_new:n { #2 / begin }
+      }
+}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\@@_section_tagged:}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_section_tagged:
+  {
+    \clist_map_inline:nn { section , subsection , subsubsection }
+      {
+        \tl_if_empty:cF { g_@@_ ##1 _ tl }
+          {
+            \@@_header_tag_begin:e
+              {
+                tag   = ##1 ,
+                title = { \text_purify:v { g_@@_ ##1 _ tl } } ,
+              }
+            \@@_header_tag_end:
+            \tl_gclear:c { g_@@_ ##1 _ tl }
+          }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Table of contents}
+%
+% \begin{macro}{\@starttoc}
+%   The standard kernel implementation here deliberately overwrites the file
+%   as soon as it's read. That's no good for us as the table of contents can
+%   be read multiple times. So we modify the code: we start from the
+%   tagging-aware version (this may need to be revisited). We retain the
+%   \LaTeXe{} code as much as possible.
+%    \begin{macrocode}
+\cs_gset_protected:Npn \@starttoc #1
+  {
+    \begingroup
+      \makeatletter
+      \UseTaggingSocket { toc / starttoc / before } {#1}
+      \@input { \jobname .#1 }
+      \UseTaggingSocket { toc / starttoc / after } {#1}
+      \legacy_if:nT { @filesw }
+        {
+          \AddToHook { enddocument / afterlastpage }
+            {
+              \expandafter \newwrite \csname tf@ #1 \endcsname
+              \immediate \openout \csname tf@ #1 \endcsname \jobname .#1 \relax
+            }
+        }
+      \@nobreakfalse
+    \endgroup
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\tableofcontents}
+%   For the present simply print the output.
+%    \begin{macrocode}
+\NewDocumentCommand \tableofcontents { O { } }
+  {
+    \group_begin:
+      \@starttoc { toc }
+    \group_end:
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\l@section, \l@subsection, \l@subsubsection}
+% \begin{macro}{\@@_toc_aux:nnnn}
+% \begin{macro}{\@@_toc_dest:n}
+% \begin{macro}{\@@_toc_dest:w}
+% \begin{macro}{\@@_toc_level:nnnn}
+%   Initial hard-coded versions to be templated once we have some other effects
+%   also working. We may need to look at this \enquote{higher up} as we will need
+%   to know the section numbers.
+%    \begin{macrocode}
+\cs_new_protected:Npn \l@section #1#2
+  { \@@_toc_aux:nnnn { 1 } { \bfseries \color { structure } } {#1} {#2} }
+\cs_new_protected:Npn \l@subsection #1#2
+  {
+    \@@_toc_aux:nnnn
+      { 2 }
+      {
+        \skip_set:Nn \leftskip { 2em }
+        \color { . }
+      }
+      {#1} {#2}
+  }
+\cs_new_protected:Npn \l@subsubsection #1#2
+  {
+    \@@_toc_aux:nnnn
+      { 3 }
+      {
+        \skip_set:Nn \leftskip { 4em }
+        \color { . }
+        \footnotesize
+      }
+      {#1} {#2}
+  }
+\cs_new_protected:Npn \@@_toc_aux:nnnn #1#2#3#4
+  {
+    \int_compare:nNnTF { \value { section } } < 1
+      { \use:n }
+      { \@@_toc_dest:n }
+        { \@@_toc_level:nnnn {#1} {#2} {#3} {#4} }
+  }
+%    \end{macrocode}
+%   We can extract the details for the TOC levels from
+%   \tn{@contentsline@destination}. At present, that is quite simple-minded:
+%   if we are in the current section, show fully, else make semi-opaque. Needs
+%   a rounded-out interface but the basic idea will be the same.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_toc_dest:n
+  {
+    \exp_after:wN \@@_toc_dest:w \@contentsline@destination
+      . 0 . 0 . 0 . \q_stop
+  }
+\cs_new_protected:Npn \@@_toc_dest:w #1 . #2 . #3 . #4 . #5 \q_stop #6
+  {
+    \int_compare:nNnTF { \value { section } } = {#2}
+      {#6}
+      {
+        \group_begin:
+          \opacity_select:n { 0.2 }
+          #6
+        \group_end:
+      }
+  }
+\cs_new_protected:Npn \@@_toc_level:nnnn #1#2#3#4
+  {
+    \int_compare:nNnF {#1} > { \value { tocdepth } }
+      {
+        \group_begin:
+          \noindent
+          #2
+          \UseHookWithArguments { contentsline / text / before } { 4 }
+            {#1} {#3} {#4} { \@contentsline@destination }
+          #3
+          \UseHookWithArguments { contentsline / text / after } { 4 }
+            {#1} {#3} {#4} { \@contentsline@destination }
+          \UseHookWithArguments { contentsline / page / before } { 4 }
+            {#1} {#3} {#4}
+            { \@contentsline@destination }
+         \UseHookWithArguments { contentsline / page / after } { 4 }
+            {#1} {#3} {#4}
+            { \@contentsline@destination }
+          \par
+        \group_end:
+        \vfil
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+%    \begin{macrocode}
+\setcounter { tocdepth } { 2 }
+%    \end{macrocode}
+%
+% \subsection{Block environments}
+%
+% \begin{environment}{description, quote, quotation, verse}
+% \begin{environment}{stdquote, stdquotation, stdverse}
+%   Stub logical environments: needed as the tagging setup expects these
+%   to exist.
+%    \begin{macrocode}
+\NewDocumentEnvironment { description } { } { } { }
+\NewDocumentEnvironment { quote } { } { } { }
+\NewDocumentEnvironment { quotation } { } { } { }
+\NewDocumentEnvironment { verse } { } { } { }
+\AddToHook { begindocument / before }
+  {
+    \clist_map_inline:nn { quote , quotation , verse }
+      {
+        \NewEnvironmentCopy { std #1 } {#1}
+        \RenewDocumentEnvironment {#1} { D <> { all } !O { } }
+          {
+            \@@_action_begin:n {##1}
+            \begin { std #1 } [ {##2} ]
+              \ignorespaces
+          }
+          {
+            \end { std #1 }
+            \@@_action_end:
+          }
+      }
+  }
+%    \end{macrocode}
+% \end{environment}
+% \end{environment}
+%
+% \begin{environment}{block}
+%    \begin{macrocode}
+\NewDocumentEnvironment { block } { D <> { all } m }
+  {
+    \@@_action_begin:n {#1}
+    \par
+    \vbox_set:Nw \l_@@_tmp_box
+      \group_begin:
+        \medskip
+        \leavevmode
+        \normalfont \large \bfseries
+        \color { structure }
+        #2
+        \par
+        \medskip
+      \group_end:
+  }
+  {
+    \vbox_set_end:
+    \box_use:N \l_@@_tmp_box
+    \par
+    \@@_action_end:
+  }
+%    \end{macrocode}
+% \end{environment}
+%
+% \subsection{Lists}
+%
+% \begin{macro}{\item}
+% \begin{macro}{\@@_item_parse_spec:w}
+% \begin{macro}{\@@_item_parse_spec:n}
+%   Again, add the additional argument: here, we have to do a little
+%   gymnastics. The test for an overlay has to come after the standard item
+%   definition: in a list, items have to \emph{close} the structure before
+%   them first, so if we test too early, we'd end up covering then uncovering
+%   straight away!
+%    \begin{macrocode}
+\AddToHook { begindocument / before }
+  {
+    \NewCommandCopy \stditem \item
+    \RenewDocumentCommand \item { d <> o }
+      {
+        \IfNoValueTF {#2}
+          { \stditem }
+          { \stditem [ {#2} ] }
+        \IfNoValueTF {#1}
+          {
+            \exp_after:wN \@@_item_parse_spec:w
+              \l_@@_action_spec_str < all > \q_stop
+          }
+          { \@@_item_parse_spec:n {#1} }
+      }
+  }
+%    \end{macrocode}
+%   Parsing the spec is a separate function here as there are a couple of
+%   routes to get here. At present we only have a \texttt{false} branch, but
+%   for spacing we likely will need to add something to the \texttt{true}
+%   branch too. The odd stuff with \tn{currentgrouplevel} here is needed
+%   so we only close the item at the correct nesting, allowing for the
+%   group that gets added.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_item_parse_spec:w #1 < #2 > #3 \q_stop
+  { \@@_item_parse_spec:n {#2} }
+\cs_new_protected:Npn \@@_item_parse_spec:n #1
+  {
+    \tl_if_blank:nF {#1}
+      {
+        \tl_set:Ne \l_@@_list_end_tl
+          {
+            \exp_not:N \int_compare:nNnT \tex_currentgrouplevel:D =
+              { \int_use:N \tex_currentgrouplevel:D + 1 }
+              {
+                \@@_action_end:
+                \tl_clear:N \exp_not:N \l_@@_list_end_tl
+              }
+          }
+        \@@_action_begin:n {#1}
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \begin{variable}{\l_@@_list_end_tl}
+%    \begin{macrocode}
+\tl_new:N \l_@@_list_end_tl
+%    \end{macrocode}
+% \end{variable}
+%  \begin{macro}{\__block_inter_item:, \endblockenv}
+%    There are no currently no hooks for insertion at the end of
+%    list items, so we have to do it manually. We cannot target
+%    \cs{__block_list_item_end:}/\cs{__block_list_end:} as these
+%    change definition if tagging is suspended.
+%    \begin{macrocode}
+\cs_gset_protected:Npn \__block_inter_item:
+  {
+    \legacy_if:nT { @inlabel }
+      { \indent \par }
+   \mode_if_horizontal:T
+     {
+       \__block_skip_remove_last:
+       \__block_skip_remove_last:
+       \par
+     }
+    \l_@@_list_end_tl
+    \__kernel_list_item_end:
+    \__kernel_list_item_begin:
+    \addpenalty \@itempenalty 
+    \addvspace \itemsep
+  }
+\cs_gset:Npn \endblockenv
+  {
+    \__block_debug_typeout:n { blockenv~common~ending \on@line }
+    \bool_if:NT \l__block_level_incr_bool
+      { \int_gdecr:N \g_block_nesting_depth_int }
+    \legacy_if:nT { @inlabel }
+      {
+        \mode_leave_vertical: 
+        \legacy_if_gset_false:n { @inlabel }
+      }
+    \__block_if_list:T
+      { \legacy_if:nT { @newlist } { \@noitemerr } }
+    \mode_if_horizontal:TF
+       {
+         \__block_skip_remove_last:
+         \__block_skip_remove_last:
+         \par
+       }
+       { \@inmatherr { \end { \@currenvir } } }
+    \l_@@_list_end_tl
+    \__kernel_displayblock_end:
+    \__block_if_list:T { \legacy_if_gset_false:n { @newlist } }
+    \legacy_if:nF { @noparlist }
+      {
+        \__block_skip_set_to_last:N \l_tmpa_skip
+        \dim_compare:nNnT \l_tmpa_skip > \c_zero_dim
+          {
+            \skip_vertical:n { - \l_tmpa_skip }
+            \skip_vertical:n { \l_tmpa_skip + \parskip - \@outerparskip }
+          }
+        \addpenalty \@endparpenalty
+        \addvspace \l__block_topsepadd_skip
+      }
+    \socket_use:n { block / endpe }
+  }
+%    \end{macrocode}
+%  \end{macro}
+% \begin{environment}{itemize, enumerate, description}
+%   Allow for the classical \cls{beamer} syntax.
+%    \begin{macrocode}
+\AddToHook { begindocument / before }
+  {
+    \clist_map_inline:nn { itemize , enumerate , description }
+      {
+        \RenewDocumentEnvironment {#1} { = { action-spec } !o }
+          {
+            \IfNoValueTF {##1}
+              { \UseInstance { blockenv } {#1} { } }
+              { \UseInstance { blockenv } {#1} {##1} }
+          }
+          { \endblockenv }
+      }
+  }
+%    \end{macrocode}
+% \end{environment}
+% And add the structural color to item labels.
+%    \begin{macrocode}
+\AddToHook { begindocument / before }
+  {
+    \EditInstance { item } { basic }
+      { label-format = \color { structure } #1 }
+    \EditInstance { item } { description }
+      { label-format = \normalfont \bfseries \color { structure } #1 }
+  }
+%    \end{macrocode}
+%
+% \begin{variable}{\l_@@_action_spec_str}
+%   Add an overlay key to the \texttt{block} template.  Placed here, it applies
+%   \emph{before} the \cs{item} starts, so we do not have to redefine the
+%   latter to do actions up-front. This also means it can apply to whatever we
+%   want it to within a block.
+%    \begin{macrocode}
+\keys_define:nn { template / block / display  }
+  { action-spec .str_set:N = \l_@@_action_spec_str }
+%    \end{macrocode}
+% \end{variable}
+%
+% \subsection{Theorems, \foreign{etc.}}
+%
+% \begin{macro}{\newtheorem, \stdnewtheorem}
+%   We need to extend the creation of theorems in two ways: add the overlay
+%   argument, and add the counter to the list of those reset during overlay
+%   creation.
+%    \begin{macrocode}
+\NewCommandCopy \stdnewtheorem \newtheorem
+\RenewDocumentCommand \newtheorem { m O {#1} m o }
+  {
+    \IfNoValueTF {#4}
+      { \stdnewtheorem {#1} [ {#2} ] {#3} }
+      { \stdnewtheorem {#1} [ {#2} ] {#3} [ {#4} ] }
+    \NewEnvironmentCopy { std #1 } {#1}
+    \RenewDocumentEnvironment {#1} { D <> { all } o }
+      {
+        \@@_action_begin:n {##1}
+        \IfNoValueTF {##2}
+          { \begin { std #1 } }
+          { \begin { std #1 } [ {##2} ] }
+            \ignorespaces
+      }
+      {
+        \end { std #1 }
+        \@@_action_end:
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</class>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \PrintIndex

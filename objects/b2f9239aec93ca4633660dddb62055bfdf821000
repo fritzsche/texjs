@@ -1,0 +1,402 @@
+%%%
+% Fonction Affine
+%%%
+\def\filedateAffine{2024/08/04}%
+\def\fileversionAffine{0.1}%
+\message{-- \filedateAffine\space v\fileversionAffine}%
+%
+\setKVdefault[ClesAffine]{Nom=f,Variable=x,CoefDir=a,OrdoOrig=b,Ligne=false,Image=false,Antecedent=false,Graphique=false,Retrouve=false,ProgCalcul=false,Unitex=1,Unitey=1,VoirCoef=false,ACoef=0,Redaction=false,Ecriture=false,Definition=false,Centre=false}%ACoefficient=false%: inutile ?
+
+\newcommand\FonctionAffine[5][]{%
+  % #1 nombre ou abscisse premier point
+  % #2 a ou ordonn\'ee premier point
+  % #3 b ou abscisse deuxi\`eme point
+  % #4 {} ou ordonn\'ee deuxi\`eme point
+  \useKVdefault[ClesAffine]%A supprimer car appel r\'ecursif avec Redaction
+  \setKV[ClesAffine]{#1}%
+  \ifboolKV[ClesAffine]{Image}{%
+    \ifboolKV[ClesAffine]{Ligne}{%
+      \ensuremath{\useKV[ClesAffine]{Nom}(\num{#2})=\num{#3}\times\xintifboolexpr{#2<0}{(\num{#2})}{\num{#2}}\xintifboolexpr{#4==0}{}{\xintifboolexpr{#4>0}{+\num{#4}}{-\num{\fpeval{0-#4}}}}=\num{\fpeval{#2*#3}}\xintifboolexpr{#4==0}{}{\xintifboolexpr{#4>0}{+\num{#4}}{-\num{\fpeval{0-#4}}}}\xintifboolexpr{#4==0}{}{=\num{\fpeval{#2*#3+#4}}}}%
+    }{%
+      \ifboolKV[ClesAffine]{ProgCalcul}{%
+        \begin{align*}
+          \useKV[ClesAffine]{Nom}&:\useKV[ClesAffine]{Variable}\stackrel{\times\xintifboolexpr{#3<0}{(\num{#3})}{\num{#3}}}{\longrightarrow}\num{#3}\useKV[ClesAffine]{Variable}\xintifboolexpr{#4==0}{}{\xintifboolexpr{#4>0}{\stackrel{+\num{#4}}{\longrightarrow}}{\stackrel{\num{#4}}{\longrightarrow}}\num{#3}\useKV[ClesAffine]{Variable}\xintifboolexpr{#4==0}{}{\xintifboolexpr{#4>0}{+\num{#4}}{\num{#4}}}}\\
+          \useKV[ClesAffine]{Nom}&:\num{#2}\stackrel{\times\xintifboolexpr{#3<0}{(\num{#3})}{\num{#3}}}{\longrightarrow}\num{\fpeval{#3*#2}}\xintifboolexpr{#4==0}{}{\xintifboolexpr{#4>0}{\stackrel{+\num{#4}}{\longrightarrow}}{\stackrel{\num{#4}}{\longrightarrow}}\num{\fpeval{#3*#2+#4}}}
+        \end{align*}    
+      }{%
+        \begin{align*}
+          \useKV[ClesAffine]{Nom}(\num{#2})&=\num{#3}\times\xintifboolexpr{#2<0}{(\num{#2})}{\num{#2}}\xintifboolexpr{#4==0}{}{\xintifboolexpr{#4>0}{+\num{#4}}{-\num{\fpeval{0-#4}}}}\\
+          \useKV[ClesAffine]{Nom}(\num{#2})&=\num{\fpeval{#3*#2}}\xintifboolexpr{#4==0}{}{\xintifboolexpr{#4>0}{+\num{#4}}{-\num{\fpeval{0-#4}}}}%\\
+          \xintifboolexpr{#4==0}{}{\\
+          \useKV[ClesAffine]{Nom}(\num{#2})&=\num{\fpeval{#3*#2+#4}}%\\
+          }
+        \end{align*}
+      }%
+    }%
+  }{\ifboolKV[ClesAffine]{Antecedent}{%
+      \ifboolKV[ClesAffine]{ProgCalcul}{%
+        La fonction affine $\useKV[ClesAffine]{Nom}$ est d\'efinie par :
+        \begin{align*}
+          \useKV[ClesAffine]{Nom}&:\useKV[ClesAffine]{Variable}\stackrel{\times\xintifboolexpr{#3<0}{(\num{#3})}{\num{#3}}}{\longrightarrow}\num{#3}\useKV[ClesAffine]{Variable}\xintifboolexpr{#4==0}{}{\xintifboolexpr{#4>0}{\stackrel{+\num{#4}}{\longrightarrow}}{\stackrel{\num{#4}}{\longrightarrow}}\num{#3}\useKV[ClesAffine]{Variable}\xintifboolexpr{#4==0}{}{\xintifboolexpr{#4>0}{+\num{#4}}{\num{#4}}}}.
+        \end{align*}
+        Nous cherchons le nombre $\useKV[ClesAffine]{Variable}$ tel que son image par la fonction $\useKV[ClesAffine]{Nom}$ soit $\num{#2}$. Donc on obtient :
+        \begin{align*}
+          \useKV[ClesAffine]{Nom}&:\frac{\num{\fpeval{#2-#4}}}{\num{#3}}\stackrel{\div\xintifboolexpr{#3<0}{(\num{#3})}{\num{#3}}}{\longleftarrow}\num{\fpeval{#2-#4}}\xintifboolexpr{#4==0}{}{\xintifboolexpr{#4>0}{\stackrel{-\num{#4}}{\longleftarrow}}{\stackrel{+\num{\fpeval{0-#4}}}{\longleftarrow}}\num{#2}}
+        \end{align*}    
+      }{%
+        On cherche l'ant\'ec\'edent de $\num{#2}$ par la fonction
+        $\useKV[ClesAffine]{Nom}$, c'est-\`a-dire le nombre
+        $\useKV[ClesAffine]{Variable}$ tel que
+        $\useKV[ClesAffine]{Nom}(\useKV[ClesAffine]{Variable})=\num{#2}$. Or,
+        la fonction $\useKV[ClesAffine]{Nom}$ est d\'efinie par : \[%
+          \useKV[ClesAffine]{Nom}(\useKV[ClesAffine]{Variable})=\xintifboolexpr{#3==0}{}{\num{#3}\useKV[ClesAffine]{Variable}}\xintifboolexpr{#3==0}{\num{#4}}{\xintifboolexpr{#4==0}{}{\xintifboolexpr{#4>0}{+\num{#4}}{-\num{\fpeval{0-#4}}}}}.
+        \]
+        Par cons\'equent, on a :
+        \begin{align*}
+            \num{#3}\useKV[ClesAffine]{Variable}\xintifboolexpr{#4==0}{}{\xintifboolexpr{#4>0}{+\num{#4}}{-\num{\fpeval{0-#4}}}}&=\num{#2}\\
+          \xintifboolexpr{#4==0}{\useKV[ClesAffine]{Variable}\uppercase{&}=\frac{\num{#2}}{\num{#3}}%\\
+          }{\num{#3}\useKV[ClesAffine]{Variable}&=\num{\fpeval{#2-#4}}\\
+          \useKV[ClesAffine]{Variable}&=\frac{\num{\fpeval{#2-#4}}}{\num{#3}}%\\
+          }%
+          \ifnum\fpeval{abs(#2-#4)}=0\relax
+          \\\useKV[ClesAffine]{Variable}\uppercase{&}=0%\\
+          \else
+          \PGCD{\fpeval{abs(#2-#4)}}{\fpeval{abs(#3)}}%
+          \ifnum\pgcd>1\relax
+          \\\useKV[ClesAffine]{Variable}\uppercase{&}=\Simplification{\fpeval{#2-#4}}{#3}%\\
+          \fi
+          \fi
+        \end{align*}
+      }%
+    }{%
+      \ifboolKV[ClesAffine]{Retrouve}{%
+          \xdef\OrdOrigine{\fpeval{#3-(#3-#5)*#2/(#2-#4)}}%%
+        On sait que $\useKV[ClesAffine]{Nom}$ est une fonction affine. Donc elle s'\'ecrit sous la forme : \[\useKV[ClesAffine]{Nom}(\useKV[ClesAffine]{Variable})=\useKV[ClesAffine]{CoefDir}\useKV[ClesAffine]{Variable}+\useKV[ClesAffine]{OrdoOrig}.\]
+        Or, $\useKV[ClesAffine]{Nom}(\num{#2})=\num{#3}$ et $\useKV[ClesAffine]{Nom}(\num{#4})=\num{#5}$. \ifnum\fpeval{#3-#5}=0
+          Les images de \num{#2} et \num{#4} sont égales à \num{#3}. La fonction affine cherchée est donc constante et s'écrit :
+          \[\useKV[ClesAffine]{Nom}:\useKV[ClesAffine]{Variable}\mapsto\num{\OrdOrigine}.\]
+        \else
+          Par cons\'equent, d'apr\`es la propri\'et\'e des accroissements :
+        \begin{align*}
+          \useKV[ClesAffine]{CoefDir}&=\frac{\useKV[ClesAffine]{Nom}(\num{#2})-\useKV[ClesAffine]{Nom}(\num{#4})}{\num{#2}-\xintifboolexpr{#4<0}{(\num{#4})}{\num{#4}}}\\
+          \useKV[ClesAffine]{CoefDir}&=\frac{\num{#3}-\xintifboolexpr{#5<0}{(\num{#5})}{\num{#5}}}{\num{\fpeval{#2-#4}}}\\
+          \useKV[ClesAffine]{CoefDir}&=\frac{\num{\fpeval{#3-#5}}}{\num{\fpeval{#2-#4}}}%\\
+          \SSimpliTest{\fpeval{#3-#5}}{\fpeval{#2-#4}}\ifthenelse{\boolean{Simplification}}{\\\useKV[ClesAffine]{CoefDir}&=\SSimplifie{\fpeval{#3-#5}}{\fpeval{#2-#4}}}{}%
+        \end{align*}
+        \def\PfCQuotientAffine{\fpeval{(#3-#5)/(#2-#4)}}%
+        La fonction $\useKV[ClesAffine]{Nom}$ s'\'ecrit alors sous la forme $\displaystyle\useKV[ClesAffine]{Nom}(\useKV[ClesAffine]{Variable})=\ifnum\fpeval{abs(\PfCQuotientAffine)}=1\relax\Affichage[Lettre={\useKV[ClesAffine]{Variable}}]{0}{\PfCQuotientAffine}{0}\else\SSimplifie{\fpeval{#3-#5}}{\fpeval{#2-#4}}\useKV[ClesAffine]{Variable}\fi+\useKV[ClesAffine]{OrdoOrig}$.
+        \\De plus, comme $\useKV[ClesAffine]{Nom}(\num{#2})=\num{#3}$, alors :
+        \begin{align*}
+          \ifnum\PfCQuotientAffine=1\relax\else\SSimplifie{\fpeval{#3-#5}}{\fpeval{#2-#4}}\times\xintifboolexpr{#2<0}{(\num{#2})}{\num{#2}}+\useKV[ClesAffine]{OrdoOrig}\uppercase{&}=\num{#3}\\\fi
+          \SSimplifie{\fpeval{(#3-#5)*#2}}{\fpeval{#2-#4}}+\useKV[ClesAffine]{OrdoOrig}&=\num{#3}\\
+          \useKV[ClesAffine]{OrdoOrig}&=\num{\fpeval{#3-(#3-#5)*#2/(#2-#4)}}
+        \end{align*}
+        La fonction affine $\useKV[ClesAffine]{Nom}$ cherch\'ee est :
+        \[\useKV[ClesAffine]{Nom}:\useKV[ClesAffine]{Variable}\mapsto\ifnum\fpeval{abs(\PfCQuotientAffine)}=1\relax\Affichage[Lettre={\useKV[ClesAffine]{Variable}}]{0}{\PfCQuotientAffine}{\OrdOrigine}\else\SSimplifie{\fpeval{#3-#5}}{\fpeval{#2-#4}}\useKV[ClesAffine]{Variable}\xintifboolexpr{\OrdOrigine==0}{}{\xintifboolexpr{\OrdOrigine>0}{+\num{\OrdOrigine}}{-\num{\fpeval{0-\OrdOrigine}}}}\fi.\]
+        \fi
+      }{%
+        %
+      }%
+    }%
+  }%
+  \ifboolKV[ClesAffine]{Graphique}{%
+    \ifboolKV[ClesAffine]{VoirCoef}{%
+      \MPFonctionAffine{\useKV[ClesAffine]{Unitex}}{\useKV[ClesAffine]{Unitey}}{#2}{#3}{#4}{#5}{\useKV[ClesAffine]{ACoef}}%
+    }{%
+      \MPFonctionAffine{\useKV[ClesAffine]{Unitex}}{\useKV[ClesAffine]{Unitey}}{#2}{#3}{#4}{#5}{""}}{}%
+  }{}%
+  \ifboolKV[ClesAffine]{Redaction}{%
+    \xintifboolexpr{#2==0}{Comme la fonction $\useKV[ClesAffine]{Nom}$
+      est une fonction constante, alors sa repr\'esentation graphique est une droite parall\`ele \`a l'axe des abscisses passant par le point de coordonn\'ees $(0;\num{#3})$.}%
+    {\xintifboolexpr{#3==0}{Comme la fonction $\useKV[ClesAffine]{Nom}$ est une fonction lin\'eaire, alors sa repr\'esentation graphique est une droite passant par l'origine du rep\`ere.\\Je choisis $\useKV[ClesAffine]{Variable}=\num{#4}$. Son image est \xdef\NomFonctionA{\useKV[ClesAffine]{Nom}}\FonctionAffine[Nom=\NomFonctionA,Image,Ligne]{#4}{#2}{#3}{#5}. On place le point de coordonn\'ees $(\num{#4}\,;\,\num{\fpeval{#2*#4+#3}})$.
+      }{%
+        Comme $\useKV[ClesAffine]{Nom}$ est une fonction affine, alors sa repr\'esentation graphique est une droite.\\Je choisis $\useKV[ClesAffine]{Variable}=\num{#4}$. Son image est %
+        \xdef\NomVariable{\useKV[ClesAffine]{Variable}}\xdef\NomFonction{\useKV[ClesAffine]{Nom}}%
+        \ifboolKV[ClesAffine]{Centre}{: \[
+           \FonctionAffine[Nom=\NomFonction,Image,Ligne]{#4}{#2}{#3}{#5}.
+         \]}{%
+         \FonctionAffine[Nom=\NomFonction,Image,Ligne]{#4}{#2}{#3}{#5}. %
+       }%
+       On place le point de coordonn\'ees $(\num{#4}\,;\,\num{\fpeval{#2*#4+#3}})$.\\Je choisis \setKV[ClesAffine]{Variable=\NomVariable}$\useKV[ClesAffine]{Variable}=\num{#5}$. Son image est %
+       \ifboolKV[ClesAffine]{Centre}{: \[
+           \FonctionAffine[Nom=\NomFonction,Image,Ligne]{#5}{#2}{#3}{#5}.
+         \]}{%
+         \FonctionAffine[Nom=\NomFonction,Image,Ligne]{#5}{#2}{#3}{#5}. %
+       }%
+       On place le point de coordonn\'ees $(\num{#5}\,;\,\num{\fpeval{#2*#5+#3}})$.%        
+      }%
+    }%
+  }%
+  {}%
+  \ifboolKV[ClesAffine]{Ecriture}{\ensuremath{\useKV[ClesAffine]{Nom}(\useKV[ClesAffine]{Variable})=\xintifboolexpr{#2==0}{}{\num{#2}\useKV[ClesAffine]{Variable}}\xintifboolexpr{#2==0}{\num{#3}}{\xintifboolexpr{#3==0}{}{\xintifboolexpr{#3>0}{+\num{#3}}{-\num{\fpeval{0-#3}}}}}}}{}%
+  \ifboolKV[ClesAffine]{Definition}{\ensuremath{\useKV[ClesAffine]{Nom}:\useKV[ClesAffine]{Variable}\mapsto\xintifboolexpr{#2==0}{}{\num{#2}\useKV[ClesAffine]{Variable}}\xintifboolexpr{#2==0}{\num{#3}}{\xintifboolexpr{#3==0}{}{\xintifboolexpr{#3>0}{+\num{#3}}{-\num{\fpeval{0-#3}}}}}}}{}%
+}%
+
+\def\MPFonctionAffine#1#2#3#4#5#6#7{%
+  % #1 Unitex #2 Unitey
+  % #3 a pour f1 - #4 b pour f1
+  % #5 abscisse du premier point
+  % #6 abscisse du deuxi\`eme point
+  % #7 on affiche ou pas la lecture du coef directeur
+  \ifluatex
+   \mplibforcehmode
+  \begin{mplibcode}
+    XMin=-2;
+    XMax=2;
+    if #5<XMin:
+    XMin:=#5;
+    fi;
+    if #6<XMin:
+    XMin:=#6;
+    fi;
+    if #5>XMax:
+    XMax:=#5;
+    fi;
+    if #6>XMax:
+    XMax:=#6;
+    fi;
+    YMax=2;
+    YMin=-2;
+    if (#5*#3+(#4))>YMax:
+    YMax:=(#5*#3+(#4));
+    fi;
+    if (#6*#3+(#4))>YMax:
+    YMax:=(#6*#3+(#4));
+    fi;
+    if (#5*#3+(#4))<YMin:
+    YMin:=(#5*#3+(#4));
+    fi;
+    if (#6*#3+(#4))<YMin:
+    YMin:=(#6*#3+(#4));
+    fi;
+    unitex:=#1*cm;
+    unitey:=#2*cm;
+    XMax:=XMax+2;
+    XMin:=XMin-2;
+    YMax:=YMax+2;
+    YMin:=YMin-2;
+    %On trace la grille
+    drawoptions(withcolor 0.95white);
+    for k=0 upto (XMax-XMin):
+    draw ((XMin+k)*unitex,YMin*unitey)--((XMin+k)*unitex,YMax*unitey);
+    endfor;
+    for k=0 upto (YMax-YMin):
+    draw (XMin*unitex,(YMin+k)*unitey)--(XMax*unitex,(YMin+k)*unitey);
+    endfor;
+    drawoptions();
+    %On trace les axes
+    drawarrow (XMin*unitex,0)--(XMax*unitex,0);
+    drawarrow (0,YMin*unitey)--(0,YMax*unitey);
+    label.llft(TEX("\footnotesize O"),(0,0));
+    dotlabel.lrt(TEX("1"),(unitex,0));
+    dotlabel.ulft(TEX("1"),(0,unitey));
+    % On trace la droite
+    pair A[];
+    A1=(#5*unitex,(#5*#3+(#4))*unitey);
+    A2=(#6*unitex,(#6*#3+(#4))*unitey);
+    draw 10[A1,A2]--10[A2,A1];
+    clip currentpicture to ((XMin*unitex,YMin*unitey)--(XMax*unitex,YMin*unitey)--(XMax*unitex,YMax*unitey)--(XMin*unitex,YMax*unitey)--cycle);
+    %On labellise les points
+    fill (fullcircle scaled 1mm) shifted A1;
+    fill (fullcircle scaled 1mm) shifted A2;
+    draw (xpart(A1),0)--A1--(0,ypart(A1)) dashed evenly;
+    draw (xpart(A2),0)--A2--(0,ypart(A2)) dashed evenly;
+    if (#5*#3+(#4))=0:
+    else:
+    if #5<>1:
+    if (#5*#3+(#4))<0:
+    label.top(TEX("\num{"&decimal(#5)&"}"),(xpart(A1),0));
+    else:
+    label.bot(TEX("\num{"&decimal(#5)&"}"),(xpart(A1),0));
+    fi;
+    fi;
+    fi;
+    if (#6*#3+(#4))=0:
+    else:
+    if (#6*#3+(#4))<0:
+    if #6<>1:
+    label.top(TEX("\num{"&decimal(#6)&"}"),(xpart(A2),0));
+    fi;
+    else:
+    if #6<>1:
+    label.bot(TEX("\num{"&decimal(#6)&"}"),(xpart(A2),0));
+    fi;
+    fi;
+    fi;
+    if #3=0:
+    label.urt(TEX("\num{"&decimal(#5*#3+(#4))&"}"),(0,ypart(A1)));
+    else:
+    if #3>0:
+    if (#5*#3+(#4))=0:
+    else:
+    if (#5*#3+(#4))<0:
+    if #5<0:
+    label.rt(TEX("\num{"&decimal(#5*#3+(#4))&"}"),(0,ypart(A1)));
+    else:
+    label.lft(TEX("\num{"&decimal(#5*#3+(#4))&"}"),(0,ypart(A1)));
+    fi;
+    fi;
+    fi;
+    if (#6*#3+(#4))=0:
+    else:
+    if (#6*#3+(#4))<0:
+    if #6<0:
+    label.rt(TEX("\num{"&decimal(#6*#3+(#4))&"}"),(0,ypart(A2)));
+    else:
+    label.lft(TEX("\num{"&decimal(#6*#3+(#4))&"}"),(0,ypart(A2)));
+    fi;
+    fi;
+    fi;
+    else:
+    if (#5*#3+(#4))=0:
+    else:
+    if (#5*#3+(#4))<0:
+    label.lft(TEX("\num{"&decimal(#5*#3+(#4))&"}"),(0,ypart(A1)));
+    else:
+    label.rt(TEX("\num{"&decimal(#5*#3+(#4))&"}"),(0,ypart(A1)));
+    fi;
+    fi;
+    if (#6*#3+(#4))=0:
+    else:
+    if (#6*#3+(#4))<0:
+    label.lft(TEX("\num{"&decimal(#6*#3+(#4))&"}"),(0,ypart(A2)));
+    else:
+    label.rt(TEX("\num{"&decimal(#6*#3+(#4))&"}"),(0,ypart(A2)));
+    fi;
+    fi;
+    fi;
+    fi;
+    % On affiche ou pas "la marche" du coef directeur
+    for p_=#7:
+    if numeric p_:
+    draw ((#7*unitex,(#7*#3+(#4))*unitey)--((#7+1)*unitex,(#7*#3+(#4))*unitey)--((#7+1)*unitex,((#7+1)*#3+(#4))*unitey)) withcolor red;
+    fi;
+    endfor;
+  \end{mplibcode}
+  \else
+  \begin{mpost}
+    % On d\'efinit les constantes
+    XMin=-2;
+    XMax=2;
+    if #5<XMin:
+    XMin:=#5;
+    fi;
+    if #6<XMin:
+    XMin:=#6;
+    fi;
+    if #5>XMax:
+    XMax:=#5;
+    fi;
+    if #6>XMax:
+    XMax:=#6;
+    fi;
+    YMax=2;
+    YMin=-2;
+    if (#5*#3+(#4))>YMax:
+    YMax:=(#5*#3+(#4));
+    fi;
+    if (#6*#3+(#4))>YMax:
+    YMax:=(#6*#3+(#4));
+    fi;
+    if (#5*#3+(#4))<YMin:
+    YMin:=(#5*#3+(#4));
+    fi;
+    if (#6*#3+(#4))<YMin:
+    YMin:=(#6*#3+(#4));
+    fi;
+    unitex:=#1*cm;
+    unitey:=#2*cm;
+    XMax:=XMax+2;
+    XMin:=XMin-2;
+    YMax:=YMax+2;
+    YMin:=YMin-2;
+    %On trace la grille
+    drawoptions(withcolor 0.95white);
+    for k=0 upto (XMax-XMin):
+    draw ((XMin+k)*unitex,YMin*unitey)--((XMin+k)*unitex,YMax*unitey);
+    endfor;
+    for k=0 upto (YMax-YMin):
+    draw (XMin*unitex,(YMin+k)*unitey)--(XMax*unitex,(YMin+k)*unitey);
+    endfor;
+    drawoptions();
+    %On trace les axes
+    drawarrow (XMin*unitex,0)--(XMax*unitex,0);
+    drawarrow (0,YMin*unitey)--(0,YMax*unitey);
+    label.llft(btex O etex,(0,0));
+    dotlabel.bot(btex 1 etex,(unitex,0));
+    dotlabel.lft(btex 1 etex,(0,unitey));
+    % On trace la droite
+    pair A[];
+    A1=(#5*unitex,(#5*#3+(#4))*unitey);
+    A2=(#6*unitex,(#6*#3+(#4))*unitey);
+    draw 10[A1,A2]--10[A2,A1];
+    clip currentpicture to ((XMin*unitex,YMin*unitey)--(XMax*unitex,YMin*unitey)--(XMax*unitex,YMax*unitey)--(XMin*unitex,YMax*unitey)--cycle);
+    %On labellise les points
+    fill (fullcircle scaled 1mm) shifted A1;
+    fill (fullcircle scaled 1mm) shifted A2;
+    draw (xpart(A1),0)--A1--(0,ypart(A1)) dashed evenly;
+    draw (xpart(A2),0)--A2--(0,ypart(A2)) dashed evenly;
+    if (#5*#3+(#4))=0:
+    else:
+    if (#5*#3+(#4))<0:
+    label.top(LATEX("\num{"&decimal(#5)&"}"),(xpart(A1),0));
+    else:
+    label.bot(LATEX("\num{"&decimal(#5)&"}"),(xpart(A1),0));
+    fi;
+    fi;
+    if (#6*#3+(#4))=0:
+    else:
+    if (#6*#3+(#4))<0:
+    label.top(LATEX("\num{"&decimal(#6)&"}"),(xpart(A2),0));
+    else:
+    label.bot(LATEX("\num{"&decimal(#6)&"}"),(xpart(A2),0));
+    fi;
+    fi;
+    if #3=0:
+    label.urt(LATEX("\num{"&decimal(#5*#3+(#4))&"}"),(0,ypart(A1)));
+    else:
+    if #3>0:
+    if (#5*#3+(#4))=0:
+    else:
+    if (#5*#3+(#4))<0:
+    label.rt(LATEX("\num{"&decimal(#5*#3+(#4))&"}"),(0,ypart(A1)));
+    else:
+    label.lft(LATEX("\num{"&decimal(#5*#3+(#4))&"}"),(0,ypart(A1)));
+    fi;
+    fi;
+    if (#6*#3+(#4))=0:
+    else:
+    if (#6*#3+(#4))<0:
+    label.rt(LATEX("\num{"&decimal(#6*#3+(#4))&"}"),(0,ypart(A2)));
+    else:
+    label.lft(LATEX("\num{"&decimal(#6*#3+(#4))&"}"),(0,ypart(A2)));
+    fi;
+    fi;
+    else:
+    if (#5*#3+(#4))=0:
+    else:
+    if (#5*#3+(#4))<0:
+    label.lft(LATEX("\num{"&decimal(#5*#3+(#4))&"}"),(0,ypart(A1)));
+    else:
+    label.rt(LATEX("\num{"&decimal(#5*#3+(#4))&"}"),(0,ypart(A1)));
+    fi;
+    fi;
+    if (#6*#3+(#4))=0:
+    else:
+    if (#6*#3+(#4))<0:
+    label.lft(LATEX("\num{"&decimal(#6*#3+(#4))&"}"),(0,ypart(A2)));
+    else:
+    label.rt(LATEX("\num{"&decimal(#6*#3+(#4))&"}"),(0,ypart(A2)));
+    fi;
+    fi;
+    fi;
+    fi;
+    % On affiche ou pas "la marche" du coef directeur
+    for p_=#7:
+    if numeric p_:
+    draw ((#7*unitex,(#7*#3+(#4))*unitey)--((#7+1)*unitex,(#7*#3+(#4))*unitey)--((#7+1)*unitex,((#7+1)*#3+(#4))*unitey)) withcolor red;
+    fi;
+    endfor;
+  \end{mpost}
+  \fi
+}%

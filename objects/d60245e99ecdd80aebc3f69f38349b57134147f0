@@ -1,0 +1,95 @@
+%%%
+% Assemblage Points Blancs
+%%%
+\def\filedateAssemblagePointsBlancs{2025/05/26}%
+\def\fileversionAssemblagePointsBlancs{0.1a}%
+\message{-- \filedateAssemblagePointsBlancs\space v\fileversionAssemblagePointsBlancs}%
+%
+\newtoks\toklistepblancsa%
+
+\def\UpdatetoksPBlancsA#1\nil{\addtotok\toklistepblancsa{"#1",}}%
+
+\setKVdefault[ClesPBlancs]{Solution=false,Unite=1cm,Couleur=LightSteelBlue,Cube=false,CouleurSolution={}}%
+\defKV[ClesPBlancs]{CouleurSolution=\ifempty{#1}{}{\setKV[ClesPBlancs]{Solution}}}%
+%
+\NewDocumentCommand\PBlancs{om}{%
+  \useKVdefault[ClesPBlancs]%
+  \setKV[ClesPBlancs]{#1}%
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\PfCListePBlancs{#2}%
+  \reademptyitems%
+  \StrLen{\PfCListePBlancs[1]}[\TaillePBlancs]%
+  \xdef\HauteurPBlancs{\PfCListePBlancslen}%
+  \toklistepblancsa{}%
+  \foreachitem\compteur\in\PfCListePBlancs{\expandafter\UpdatetoksPBlancsA\compteur\nil}%
+  \BuildPBlancs{\the\toklistepblancsa}%
+}%
+
+\def\BuildPBlancsCode{%
+  vardef DrawPBlancsPiece(expr a,b)=
+    save titi; picture titi;
+    titi=image(
+      fill (unitsquare scaled UnitePB) withcolor CoulFond;
+      draw (unitsquare scaled UnitePB);
+      fill cercles(0.5*UnitePB*(1,1),0.15*UnitePB) withcolor white;
+      draw cercles(0.5*UnitePB*(1,1),0.15*UnitePB);
+    );
+    titi:=titi shifted (UnitePB*(b,a));
+    titi
+  enddef;
+  %  
+  vardef AffichagePiece(text t)=
+    ligne:=Hauteur+1;
+    for p_=t:
+      ligne:=ligne-1;
+      colonne:=0;
+      for k=1 upto Taille:
+        colonne:=colonne+1;
+        if substring(k-1,k) of p_="X":
+          CoulFond:=CoulPB;
+          draw DrawPBlancsPiece(ligne,colonne);
+        else:
+          if Solution:
+            CoulFond:=CoulPBSol;
+            draw DrawPBlancsPiece(ligne,colonne);
+          fi;
+        fi;
+      endfor;
+    endfor;
+  enddef;
+}%
+
+\NewDocumentCommand\BuildPBlancs{m}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      \BuildPBlancsCode
+      Taille:=\TaillePBlancs;
+      Hauteur:=\HauteurPBlancs;
+      UnitePB:=\useKV[ClesPBlancs]{Unite};
+      boolean Solution;
+      Solution=\useKV[ClesPBlancs]{Solution};
+      color CoulPB,CoulPBSol,CoulFond;
+      if Solution:
+        CoulPBSol=\useKV[ClesPBlancs]{CouleurSolution};
+      fi;
+      CoulPB=\useKV[ClesPBlancs]{Couleur};
+      
+      AffichagePiece(#1);
+    \end{mplibcode}
+  \else%
+    \begin{mpost}[mpsettings={\BuildPBlancsCode
+      UniteTaille:=\TaillePBlancs;
+      Hauteur:=\HauteurPBlancs;
+      Unite:=\useKV[ClesPBlancs]{Unite};
+      boolean Solution;
+      Solution=\useKV[ClesPBlancs]{Solution};
+      color CoulPB,CoulPBSol,CoulFond;
+      if Solution:
+        CoulPBSol=\useKV[ClesPBlancs]{CouleurSolution};
+      fi;
+      CoulPB=\useKV[ClesPBlancs]{Couleur};}]      
+      AffichagePiece(#1);
+    \end{mpost}
+  \fi%
+}%

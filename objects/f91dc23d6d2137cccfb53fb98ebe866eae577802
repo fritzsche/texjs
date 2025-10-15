@@ -1,0 +1,299 @@
+%%%%
+% Prog de calculs "simples"
+%%%%
+\def\filedateProgCalcul{2024/08/04}%
+\def\fileversionProgCalcul{0.1}%
+\message{-- \filedateProgCalcul\space v\fileversionProgCalcul}%
+%
+\setKVdefault[ClesProg]{%
+  Ecart=2em,%
+  Direct,%
+  SansCalcul=false,%
+  Application=false,%
+  Details=false,%
+  Enonce=false,%
+  Nom={},%
+  CouleurCadre=black,%
+  CouleurFond=gray!10,%
+  Largeur={.95\linewidth},%
+  Epaisseur=.75pt,%
+  Pointilles=0,%
+  ThemePerso=false,%
+  Vide=false,%pour vider le chemin de flèches
+  Depart=false,%pour indiquer qu'on cherche le nombre de départ (non fractionnaire pour le moment)
+  Retour=false,%on affiche les fleches de retour
+  OpReciproques=false,%on affiche les opérations réciproques
+  Reponses=0,%on affiche les opérations réciproques 1 par 1 :)
+  ReponsesCalculs=0,%on affiche les valeurs 1 par 1 :)
+}
+
+\newcounter{NBprog}%
+\setcounter{NBprog}{0}%
+
+\newlength{\PointillesClesProg}%
+
+\NewDocumentCommand\ProgCalcul{som}{%
+  % #1 : pour l'écriture rapide, linéaire du programme de calcul
+  % #2 : cl\'es
+  % #3 : \'etapes
+  \useKVdefault[ClesProg]%
+  \setKV[ClesProg]{#2}%
+  \IfBooleanTF{#1}{%
+    \setsepchar[*]{,* }\ignoreemptyitems%
+    \readlist*\ListeProg{#3}%
+    \ensuremath{%
+      \xdef\NbDepart{\ListeProg[1]}%
+      \ifboolKV[ClesProg]{SansCalcul}{%
+          \NbDepart\foreachitem\compteur\in\ListeProg[2]{%
+            \edef\Test{\ListeProg[2,\compteurcnt]}%
+            \expandarg%
+            \StrSubstitute{\Test}{^}{\empty\dots{}^}[\tempa]%
+            \StrSubstitute{\tempa}{**}{^}[\tempab]%
+            \StrSubstitute{\tempab}{*}{\times}[\tempac]%
+            \StrSubstitute{\tempac}{/}{\div}[\tempad]%
+            % \hspace{0.2em}
+            \xrightarrow{\tempad}
+            % \hspace{0.2em}
+            \ListeProg[3,\compteurcnt]%
+          }%
+        }{%
+          \num{\NbDepart}~\foreachitem\compteur\in\ListeProg[2]{%
+            \ifboolKV[ClesProg]{Direct}{%
+                \edef\Test{\ListeProg[2,\compteurcnt]}%
+                \expandarg%
+                \StrSubstitute{\Test}{^}{\empty\dots{}^}[\tempa]%
+                \StrSubstitute{\tempa}{**}{^}[\tempab]%
+                \StrSubstitute{\tempab}{*}{\times}[\tempac]%
+                \StrSubstitute{\tempac}{/}{\div}[\tempad]%
+                \StrSubstitute{\tempad}{.}{,}[\tempae]%
+                % \hspace{0.2em}
+                \xdef\NbDepart{\fpeval{(\NbDepart)\ListeProg[2,\compteurcnt]}}
+                % \hspace{0.2em}
+                \xrightarrow{\tempae}~\num{\NbDepart}%
+              }{%
+                \edef\Test{\ListeProg[2,\compteurcnt]}
+                \expandarg%
+                \StrSubstitute{\Test}{^2}{\empty\sqrt{\dots{}}}[\tempa]%
+                \StrSubstitute{\tempa}{**}{^}[\tempab]%
+                \StrSubstitute{\tempab}{*}{\div}[\tempac]%
+                \StrSubstitute{\tempac}{/}{\times}[\tempad]%
+                \StrSubstitute{\tempad}{-}{+}[\tempae]%
+                \StrSubstitute{\tempae}{++}{-}[\tempaf]%
+                \StrSubstitute{\tempaf}{.}{,}[\tempag]%
+                %\hspace{0.2em}
+                \xdef\NbDepart{\fpeval{(\NbDepart)\ListeProg[2,\compteurcnt]}}
+                % \hspace{0.2em}
+                \xleftarrow{\tempag}~\num{\NbDepart}%
+              }%
+            }%
+          }
+        }
+      }{%
+        \ifboolKV[ClesProg]{ThemePerso}{}{%
+      \tcbset{ProgCalcul/.style={%
+          boxsep=1mm,
+          bottom=.75mm,
+          middle=2mm,
+          boxrule={\useKV[ClesProg]{Epaisseur}},
+          text width={\useKV[ClesProg]{Largeur}},
+          colframe={\useKV[ClesProg]{CouleurCadre}},
+          colback={\useKV[ClesProg]{CouleurFond}},
+          halign upper=center
+        }%
+      }%
+    }%
+  \ifboolKV[ClesProg]{Application}{%
+      %    % by Thomas Dehon and cp
+    \setsepchar[*]{§*,}%
+    % \setsepchar[*]{,* }%
+    \ignoreemptyitems%
+    \readlist*\ListeTotale{#3}%
+    \xdef\PfCPCfoo{\ListeTotale[1]}%
+    \xdef\PfCPCfaa{\ListeTotale[2]}%
+    %% 
+    \setsepchar{,}%    \ignoreemptyitems%
+    \readlist*\ListeEtapes{\PfCPCfoo}%
+    \setsepchar[*]{,* }\ignoreemptyitems%
+    \readlist*\ListeProg{\PfCPCfaa}%
+      \begin{tcolorbox}[%
+        ProgCalcul,%
+        ]
+        \ifthenelse{\equal{\useKV[ClesProg]{Nom}}{}}%
+        {}%
+        {%
+          {\color{\useKV[ClesProg]{CouleurCadre}}{\bfseries\useKV[ClesProg]{Nom}}}%
+          \tcblower
+        }%
+        \ifboolKV[ClesProg]{SansCalcul}{%
+          \begin{enumerate}
+          \item Choisir un nombre~\pointilles~$\ListeProg[1]$%
+            \foreachitem\etape\in\ListeEtapes{%
+            \item \etape~\pointilles~$\ListeProg[3,\etapecnt]$
+            }%
+          \end{enumerate}
+        }{\begin{enumerate}
+          \item Choisir un nombre~\pointilles~\xdef\NbDepart{\ListeProg[1]}\num{\NbDepart}
+            \foreachitem\etape\in\ListeEtapes{%
+            \item \etape~\pointilles~\edef\Test{\ListeProg[2,\etapecnt]}%
+              \expandarg%
+              \StrSubstitute{\Test}{^}{\empty\dots{}^}[\tempa]%
+              \StrSubstitute{\tempa}{**}{^}[\tempab]%
+              \StrSubstitute{\tempab}{*}{\times}[\tempac]%
+              \StrSubstitute{\tempac}{/}{\div}[\tempad]%
+              $\ifboolKV[ClesProg]{Details}{\xintifboolexpr{\NbDepart<0}{(\num{\NbDepart})}{\num{\NbDepart}}\tempad=}{}\xdef\NbDepart{\fpeval{(\NbDepart)\ListeProg[2,\etapecnt]}}\num{\NbDepart}$%
+            }%
+          \end{enumerate}
+        }
+      \end{tcolorbox}
+  }{%
+    \ifboolKV[ClesProg]{Enonce}{%
+      % by Thomas Dehon
+      \setsepchar[*]{,* }%
+      \ignoreemptyitems%
+      \readlist*\ListeEtapes{#3}% 
+      \begin{tcolorbox}[%
+        ProgCalcul,%
+        ]
+        \ifthenelse{\equal{\useKV[ClesProg]{Nom}}{}}%
+        {}%
+        {%
+          {\color{\useKV[ClesProg]{CouleurCadre}}{\bfseries\useKV[ClesProg]{Nom}}}%
+          \tcblower
+        }%
+        \begin{enumerate}
+          \foreachitem\etape\in\ListeEtapes{%
+          \item \etape 
+            \ifthenelse{\equal{\useKV[ClesProg]{Pointilles}}{0}}%
+            {}%
+            {%
+              \setlength{\PointillesClesProg}{\useKV[ClesProg]{Pointilles}}
+              \hfill \pointilles[\PointillesClesProg]%
+            }%
+          }
+        \end{enumerate}
+      \end{tcolorbox}
+    }{%
+      \setsepchar[*]{,* }\ignoreemptyitems%
+      \readlist*\ListeProg{#3}%
+      \stepcounter{NBprog}%
+      \ifboolKV[ClesProg]{Vide}{%
+        \xdef\PfCNbDepart{\ListeProg[1]}%
+        \ifnum\fpeval{\useKV[ClesProg]{ReponsesCalculs}}=\listlen\ListeProg[2]\relax%
+          \num{\PfCNbDepart}%
+        \else%
+          \phantom{\num{\PfCNbDepart}}%
+        \fi%
+        \foreachitem\compteur\in\ListeProg[2]{%
+          \xdef\PfCNbDepart{\fpeval{(\PfCNbDepart)\ListeProg[2,\compteurcnt]}}%
+          \hspace{0.2em}\tikzmark{A-\theNBprog-\compteurcnt}\hspace{\useKV[ClesProg]{Ecart}}\tikzmark{B-\theNBprog-\compteurcnt}\hspace{0.2em}%
+          \ifnum\fpeval{\listlen\ListeProg[2]-\compteurcnt}<\fpeval{\useKV[ClesProg]{ReponsesCalculs}+1}\relax%
+            \ifboolKV[ClesProg]{Depart}{\num{\PfCNbDepart}}{\phantom{\num{\PfCNbDepart}}}%\num{\PfCNbDepart}%
+          \else%
+            \ifnum\compteurcnt=\listlen\ListeProg[2]\relax%
+              \ifboolKV[ClesProg]{Depart}{\num{\PfCNbDepart}}{\phantom{\num{\PfCNbDepart}}}%
+            \else%
+              \phantom{\num{\PfCNbDepart}}%
+            \fi%
+          \fi%
+          }%
+          \begin{tikzpicture}[remember picture, overlay]
+           \foreachitem\compteur\in\ListeProg[2]{%
+             \edef\Test{\ListeProg[2,\compteurcnt]}%
+             \expandarg%
+             \StrSubstitute{\Test}{^}{\empty\dots{}^}[\tempa]%
+             \StrSubstitute{\tempa}{**}{^}[\tempab]%
+             \StrSubstitute{\tempab}{*}{\times}[\tempac]%
+             \StrSubstitute{\tempac}{/}{\div}[\tempad]%
+             \draw[-stealth,transform canvas={yshift=0.25em}] (pic cs:A-\theNBprog-\compteurcnt) --
+             node[above]{\scriptsize$\tempad$}(pic cs:B-\theNBprog-\compteurcnt);
+           }%
+         \end{tikzpicture}
+         \ifboolKV[ClesProg]{Retour}{%
+           \begin{tikzpicture}[remember picture, overlay]
+             \foreachitem\compteur\in\ListeProg[2]{%
+               \edef\Test{\ListeProg[2,\compteurcnt]}%
+               \expandarg%
+               \StrSubstitute{\Test}{^2}{\empty\sqrt{\dots{}}}[\tempa]%
+               \StrSubstitute{\tempa}{**}{^}[\tempab]%
+               \StrSubstitute{\tempab}{*}{\div}[\tempac]%
+               \StrSubstitute{\tempac}{/}{\times}[\tempad]%
+               \StrSubstitute{\tempad}{-}{+}[\tempae]%
+               \StrSubstitute{\tempae}{++}{-}[\tempaf]%
+               \ifnum\fpeval{\useKV[ClesProg]{Reponses}}>0\relax%
+                 \ifnum\fpeval{\listlen\ListeProg[2]-\compteurcnt}<\fpeval{\useKV[ClesProg]{Reponses}}\relax%
+                   \ifboolKV[ClesProg]{OpReciproques}{%
+                     \draw[-stealth,out=-150,in=-30,transform canvas={yshift=-0.5em}] (pic cs:B-\theNBprog-\compteurcnt) to  node[below]{\scriptsize$\tempaf$}(pic cs:A-\theNBprog-\compteurcnt);
+                   }{%
+                     \draw[-stealth,out=-150,in=-30,transform canvas={yshift=-0.5em}] (pic cs:B-\theNBprog-\compteurcnt) to  (pic cs:A-\theNBprog-\compteurcnt);
+                   }%
+                 \fi%
+               \else%
+                 \ifboolKV[ClesProg]{OpReciproques}{%
+                     \draw[-stealth,out=-150,in=-30,transform canvas={yshift=-0.5em}] (pic cs:B-\theNBprog-\compteurcnt) to  node[below]{\scriptsize$\tempaf$}(pic cs:A-\theNBprog-\compteurcnt);
+                   }{%
+                     \draw[-stealth,out=-150,in=-30,transform canvas={yshift=-0.5em}] (pic cs:B-\theNBprog-\compteurcnt) to  (pic cs:A-\theNBprog-\compteurcnt);
+                   }%
+                 \fi%
+               }%
+           \end{tikzpicture}%
+         }{}%
+       }{%
+         \xdef\NbDepart{\ListeProg[1]}%
+        \ifboolKV[ClesProg]{SansCalcul}{%
+          $\NbDepart$\foreachitem\compteur\in\ListeProg[2]{%
+            \hspace{0.2em}\tikzmark{A-\theNBprog-\compteurcnt}\hspace{\useKV[ClesProg]{Ecart}}\tikzmark{B-\theNBprog-\compteurcnt}\hspace{0.2em}$\ListeProg[3,\compteurcnt]$%
+          }%
+          \begin{tikzpicture}[remember picture, overlay]
+            \foreachitem\compteur\in\ListeProg[2]{%
+              \edef\Test{\ListeProg[2,\compteurcnt]}
+              \expandarg%
+              \StrSubstitute{\Test}{^}{\empty\dots{}^}[\tempa]%
+              \StrSubstitute{\tempa}{**}{^}[\tempab]%
+              \StrSubstitute{\tempab}{*}{\times}[\tempac]%
+              \StrSubstitute{\tempac}{/}{\div}[\tempad]%
+              \StrSubstitute{\tempad}{.}{,}[\tempae]%
+              \draw[-stealth,transform canvas={yshift=0.25em}] (pic cs:A-\theNBprog-\compteurcnt) --
+              node[above]{\scriptsize$\tempae$}(pic cs:B-\theNBprog-\compteurcnt);
+            }%
+          \end{tikzpicture}%
+        }{%
+          \num{\NbDepart}\foreachitem\compteur\in\ListeProg[2]{%
+            \hspace{0.2em}\tikzmark{A-\theNBprog-\compteurcnt}\hspace{\useKV[ClesProg]{Ecart}}\tikzmark{B-\theNBprog-\compteurcnt}\xdef\NbDepart{\fpeval{(\NbDepart)\ListeProg[2,\compteurcnt]}}\hspace{0.2em}\num{\NbDepart}%
+          }%
+          \ifboolKV[ClesProg]{Direct}{%
+            \begin{tikzpicture}[remember picture, overlay]
+              \foreachitem\compteur\in\ListeProg[2]{%
+                \edef\Test{\ListeProg[2,\compteurcnt]}
+                \expandarg%
+                \StrSubstitute{\Test}{^}{\empty\dots{}^}[\tempa]%
+                \StrSubstitute{\tempa}{**}{^}[\tempab]%
+                \StrSubstitute{\tempab}{*}{\times}[\tempac]%
+                \StrSubstitute{\tempac}{/}{\div}[\tempad]%
+                \StrSubstitute{\tempad}{.}{,}[\tempae]%
+                \draw[-stealth,transform canvas={yshift=0.25em}] (pic cs:A-\theNBprog-\compteurcnt) --
+                node[above]{\scriptsize$\tempae$}(pic
+                cs:B-\theNBprog-\compteurcnt);
+              }%
+            \end{tikzpicture}%
+          }{%
+            \begin{tikzpicture}[remember picture, overlay]
+              \foreachitem\compteur\in\ListeProg[2]{%
+                \edef\Test{\ListeProg[2,\compteurcnt]}
+                \expandarg%
+                \StrSubstitute{\Test}{^2}{\empty\sqrt{\dots{}}}[\tempa]%
+                \StrSubstitute{\tempa}{**}{^}[\tempab]%
+                \StrSubstitute{\tempab}{*}{\div}[\tempac]%
+                \StrSubstitute{\tempac}{/}{\times}[\tempad]%
+                \StrSubstitute{\tempad}{-}{+}[\tempae]%
+                \StrSubstitute{\tempae}{++}{-}[\tempaf]%
+                \StrSubstitute{\tempaf}{.}{,}[\tempag]%
+                \draw[-stealth,transform canvas={yshift=0.25em}] (pic cs:B-\theNBprog-\compteurcnt) --  node[above]{\scriptsize$\tempag$}(pic cs:A-\theNBprog-\compteurcnt);
+              }%
+            \end{tikzpicture}%
+          }%
+        }%
+      }%
+    }%
+  }%
+  }%
+}%

@@ -1,0 +1,199 @@
+%%%
+% Twitter
+%%%
+\def\filedateReseaux{2024/08/04}%
+\def\fileversionReseaux{0.1}%
+\message{-- \filedateReseaux\space v\fileversionReseaux}%
+%
+\setKVdefault[Twitter]{Largeur=0.95\linewidth,Auteur=Christophe,Date=\today,Url=ViveLaTeX,EchelleLogo=0.035,Logo=DrStrange,Publie=false}%
+
+\NewDocumentEnvironment{Twitter}{o+b}{%
+  \useKVdefault[Twitter]%
+  \setKV[Twitter]{#1}%
+  \xdef\EchelleLogo{\useKV[Twitter]{EchelleLogo}}%
+  \begin{tcolorbox}[%
+    enhanced,%
+    overlay unbroken and first={%
+      \node[anchor=west,xshift=3em,yshift=-2em] at (frame.north west) {\textbf{\useKV[Twitter]{Auteur}}~{\color{gray}@\ttfamily \useKV[Twitter]{Url} - \useKV[Twitter]{Date}}};
+      \node[anchor=center,xshift=1em+2mm,yshift=-2em] at (frame.north west) {\LogoTW{\useKV[Twitter]{Logo}}{\EchelleLogo}};
+      \node[xshift=-1em,yshift=-2em] at (frame.north east) {\color{gray}...};
+      \coordinate[yshift=1em] (A) at (frame.south west);
+      \coordinate[yshift=1em] (B) at (frame.south east);
+      \node[] (C1) at ($(A)!0.1!(B)$) {\faComment[regular]\ifboolKV[Twitter]{Publie}{~\fpeval{randint(1,10)}}{}};
+      \node[] (C2) at ($(A)!0.325!(B)$) {\faRetweet\ifboolKV[Twitter]{Publie}{~\fpeval{randint(1,10)}}{}};
+      \node[] (C3) at ($(A)!0.55!(B)$) {\faHeart[regular]\ifboolKV[Twitter]{Publie}{~\fpeval{randint(1,10)}}{}};
+      \node[] (C4) at ($(A)!0.775!(B)$) {\faShareSquare};
+    },
+    colback=white,
+    colframe=gray!15,
+    top=2em,
+    left=3em,
+    bottom=2em]
+    \vspace*{0.5em}\par
+    #2
+  \end{tcolorbox}
+}{}%
+
+%%%
+% Facebook
+%%%
+\setKVdefault[Facebook]{Largeur=0.95\linewidth,Auteur=Christophe,Date=\today,Heure=3:14,EchelleLogo=0.035,Logo=DrStrange,Publie=false}%
+
+\NewDocumentEnvironment{Facebook}{o+b}{%
+  \useKVdefault[Facebook]%
+  \setKV[Facebook]{#1}%
+  \xdef\EchelleLogo{\useKV[Facebook]{EchelleLogo}}%
+  \begin{tcolorbox}[%
+    enhanced,%
+    overlay unbroken and first={%
+      \node[anchor=west,xshift=3em,yshift=-1em] at (frame.north west) {\textbf{\useKV[Facebook]{Auteur}}};
+      \node[anchor=west,xshift=3em,yshift=-2em] at (frame.north west) {\scriptsize\color{gray}\useKV[Facebook]{Date}, \useKV[Facebook]{Heure}};
+      \node[anchor=center,xshift=1em+2mm,yshift=-1.5em] at (frame.north west) {\LogoTW{\useKV[Facebook]{Logo}}{\EchelleLogo}};
+      \node[xshift=-1em,yshift=-1.5em] at (frame.north east) {\bfseries\color{gray}...};
+      \coordinate[yshift=1.15em] (A) at (frame.south west);
+      \coordinate[yshift=1.15em] (B) at (frame.south east);
+      \coordinate[xshift=0.5em,yshift=1.8em] (A1) at (frame.south west);
+      \coordinate[xshift=-0.5em,yshift=1.8em] (B1) at (frame.south east);
+      \coordinate[xshift=0.5em,yshift=0.5em] (A2) at (frame.south west);
+      \coordinate[xshift=-0.5em,yshift=0.5em] (B2) at (frame.south east);
+      \ifboolKV[Facebook]{Publie}{%
+        \coordinate[xshift=1em,yshift=1em] (A3) at (A1);
+        \draw[blue,fill=blue] (A3) circle (1.5mm);
+        \node[] at (A3) {\tiny\color{white}\faThumbsUp};
+        \node[anchor=west] at (A3) {~\scriptsize\fpeval{randint(1,150)}};
+        \node[anchor=east,xshift=-1em,yshift=1em] at (B1) {\scriptsize\fpeval{randint(2,20)} commentaires~\fpeval{randint(2,10)} partages};
+      }{}
+      \draw[gray] (A1)--(B1);
+      \draw[gray] (A2)--(B2);
+      \node[] (C1) at ($(A)!0.15!(B)$) {\footnotesize\faThumbsUp{}~\bfseries J'aime};
+      \node[] (C2) at ($(A)!0.5!(B)$) {\footnotesize\faComment*[regular]~\bfseries Commenter};     \node[] (C3) at ($(A)!0.85!(B)$) {\footnotesize\faShareSquare~\bfseries Partager};
+    },
+    colback=white,
+    colframe=gray!15,
+    top=2em,
+    left=3em,
+    bottom={\ifboolKV[Facebook]{Publie}{4em}{2em}}]
+    #2
+  \end{tcolorbox}
+}{}%
+
+%%%
+% Instagram
+%%%
+\setKVdefault[Instagram]{Largeur=0.95\linewidth,Auteur=Christophe,Expediteur=Pierre,Date=\today,Temps=34,Publie=false,Logo=DrStrange,LogoEx=tiger,EchelleLogo=0.035,Texte={}}%
+
+\NewDocumentEnvironment{Instagram}{o+b}{%
+  \useKVdefault[Instagram]%
+  \setKV[Instagram]{#1}%
+  \xdef\EchelleLogo{\useKV[Instagram]{EchelleLogo}}%
+  \begin{tcolorbox}[%
+    enhanced,%
+    underlay unbroken and first={%
+      \node[anchor=west,xshift=3em,yshift=-1.5em] at (frame.north west) {\textbf{\useKV[Instagram]{Expediteur}}};
+      \node[anchor=center,xshift=1em+2mm,yshift=-1.5em] at (frame.north west) {\LogoTW{\useKV[Instagram]{LogoEx}}{\EchelleLogo}};
+      \node[xshift=-1em,yshift=-1.5em,rotate=90] at (frame.north east) {\bfseries\color{gray}...};
+      \coordinate[yshift=-3em] (HA) at (frame.north west);
+      \coordinate[yshift=-3em] (HB) at (frame.north east);
+      \draw[gray!15] (HA)--(HB);
+      \coordinate[yshift=7em] (BA) at (frame.south west);
+      \coordinate[yshift=7em] (BB) at (frame.south east);
+      \draw[gray!15] (BA)--(BB);
+      \coordinate[xshift=1em,yshift=6em] (A) at (frame.south west);
+      \node[anchor=west] at (A) {\bfseries\faHeart[regular]\quad\faComment[regular]\quad\faPaperPlane};
+      \coordinate[xshift=-1em,yshift=6em] (A1) at (frame.south east);
+      \node[anchor=east] at (A1) {\bfseries\faBookmark[regular]};
+      \coordinate[xshift=1em,yshift=5em] (B) at (frame.south west);
+      \node[anchor=west] at (B) {\footnotesize\bfseries\fpeval{randint(10,30)} J'aime};
+      \coordinate[xshift=1em,yshift=4em] (C) at (frame.south west);
+      \node[anchor=west] at (C) {\textbf{\useKV[Instagram]{Expediteur}}~\useKV[Instagram]{Texte}};
+      \node[anchor=center,xshift=2em,yshift=2.25em] at (frame.south west) {\LogoTW{\useKV[Instagram]{Logo}}{\EchelleLogo}};
+      \node[anchor=west,xshift=4em,yshift=2.25em] at (frame.south west) {\textcolor{gray!50}{Ajouter un commentaire\dots}};
+      \node[anchor=east,xshift=-1em,yshift=2.25em] at (frame.south east) {\textcolor{red}{\faHeart}\quad\textcolor{Gold}{\faHandSpock}\quad\textcolor{gray!50}{\faPlusCircle}};
+      \node[anchor=west,xshift=1em,yshift=0.5em] at (frame.south west) {\scriptsize\color{gray} Il y a \useKV[Instagram]{Temps} secondes};
+    },
+    colback=white,
+    colframe=gray!15,
+    top=3em,
+    left=3em,
+    bottom=7em]
+    #2
+  \end{tcolorbox}
+}{}%
+
+%%%
+% Snapchat
+%%%
+\setKVdefault[Snapchat]{Largeur=0.95\linewidth,Auteur=Christophe,Date=\today,Temps=34,Logo=DrStrange,EchelleLogo=0.035,Texte=Envoyer un Chat}%
+
+\NewDocumentEnvironment{Snapchat}{o+b}{%
+  \useKVdefault[Snapchat]%
+  \setKV[Snapchat]{#1}%
+  \xdef\EchelleLogo{\useKV[Snapchat]{EchelleLogo}}%
+  \begin{tcolorbox}[%
+    enhanced,%
+    underlay unbroken and first={%
+      \node[anchor=west,xshift=3em,yshift=-1em] at (frame.north west) {\textbf{\useKV[Snapchat]{Auteur}}};
+      \node[anchor=west,xshift=3em,yshift=-2em] at (frame.north west) {\scriptsize\color{gray} il y a \useKV[Snapchat]{Temps}~min};
+      \node[anchor=center,xshift=1em+2mm,yshift=-1.5em] at (frame.north west) {\LogoTW{\useKV[Snapchat]{Logo}}{\EchelleLogo}};
+      \node[xshift=-1em,yshift=-1.5em,rotate=90] at (frame.north east) {\bfseries...};
+      \node[xshift=-3em,yshift=-1.5em] at (frame.north east) {\faBell[regular]};
+      \coordinate[xshift=2em,yshift=2em] (P1) at (frame.south west);
+      \coordinate[xshift=4.5em,yshift=2em] (P2) at (frame.south west);
+      \coordinate[xshift=-3em,yshift=2em] (P4) at (frame.south west);
+      \coordinate[xshift=-2em,yshift=2em] (P3) at (frame.south east);
+      \coordinate[xshift=4.5em,yshift=1em] (P5) at (frame.south west);
+      \coordinate[xshift=4.5em,yshift=3em] (P8) at (frame.south west);
+      \coordinate[xshift=-4.5em,yshift=1em] (P6) at (frame.south east);
+      \coordinate[xshift=-4.5em,yshift=3em] (P7) at (frame.south east);
+      \draw (P1) circle (1em);
+      \node at (P1) {\faCamera};
+      \draw (P3) circle (1em);
+      \node[xshift=-0.125em,rotate=-45] at (P3) {\faLocationArrow};
+      \node[anchor=west,inner sep=0pt] at (P2) {\useKV[Snapchat]{Texte}};
+      \draw (P5) -- (P6) arc(270:450:1em) -- (P7) -- (P8) arc(90:270:1em) -- cycle;
+    },
+    colback=white,
+    colframe=gray!15,
+    top=3em,
+    left=3em,
+    bottom=3em]
+    #2
+  \end{tcolorbox}
+}{}%
+
+%%%
+% Mastodon
+%%%
+\setKVdefault[Mastodon]{Largeur=0.95\linewidth,Auteur=Christophe,Date=2~j,Url=ViveLaTeX,EchelleLogo=0.035,Logo=DrStrange,Publie=false}%
+
+\NewDocumentEnvironment{Mastodon}{o+b}{%
+  \useKVdefault[Mastodon]%
+  \setKV[Mastodon]{#1}%
+  \xdef\EchelleLogo{\useKV[Mastodon]{EchelleLogo}}%
+  \begin{tcolorbox}[%
+    enhanced,%
+    overlay unbroken and first={%
+      \node[anchor=west,xshift=3em,yshift=-2em] at (frame.north west) {%
+        \begin{tabular}{l}
+          \textbf{\useKV[Mastodon]{Auteur}}\\
+          {\color{gray}@\ttfamily \useKV[Mastodon]{Url}}
+        \end{tabular}};
+      \node[anchor=center,xshift=1em+2mm,yshift=-2em] at (frame.north west) {\LogoTW{\useKV[Mastodon]{Logo}}{\EchelleLogo}};
+      \node[anchor=center,yshift=-2em,xshift=-2em] at (frame.north east) {\faGlobeAmericas~\useKV[Mastodon]{Date}};                                       
+      \coordinate[yshift=1em] (A) at (frame.south west);
+      \coordinate[yshift=1em] (B) at (frame.south east);
+      \node[] (C1) at ($(A)!0.1!(B)$) {\faReply\ifboolKV[Mastodon]{Publie}{~\fpeval{randint(1,10)}}{}};
+      \node[] (C2) at ($(A)!0.29!(B)$) {\faRetweet};%\ifboolKV[Mastodon]{Publie}{~\fpeval{randint(1,10)}}{}};
+      \node[] (C3) at ($(A)!0.48!(B)$) {\faStar[regular]};%\ifboolKV[Mastodon]{Publie}{~\fpeval{randint(1,10)}}{}};
+        \node[] (C4) at ($(A)!0.67!(B)$) {\faBookmark[regular]};
+        \node[] (C5) at ($(A)!0.85!(B)$) {...};
+    },
+    colback=white,
+    colframe=gray!15,
+    top=2em,
+    left=3em,
+    bottom=2em]
+    \vspace*{1em}\par
+    #2
+  \end{tcolorbox}
+}{}%

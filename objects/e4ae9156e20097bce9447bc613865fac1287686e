@@ -1,0 +1,419 @@
+% Licence    : Released under the LaTeX Project Public License v1.3c
+% or later, see http://www.latex-project.org/lppl.txtf
+\def\MPCodeEqua{%
+  HauteurB=\useKV[ClesEquation]{HauteurBrique};
+  path PfMBloc,PfMBlocIn;
+  PfMBloc=(0,0)--u*(1.25,0)--u*(1.25,HauteurB)--u*(0,HauteurB)--cycle;
+  PfMBlocIn=(0,0)--u*(0.75,0)--u*(0.75,HauteurB-0.1)--u*(0,HauteurB-0.1)--cycle;
+  %
+  vardef PfMBlocEqua(expr coefaa)=
+    save $;
+    picture $;
+    $=image(
+      fill (PfMBlocIn yscaled coefaa) withcolor 0.8white;
+      for k=0 upto (coefaa-1):
+        trace PfMBlocIn shifted(k*u*(0,HauteurB-0.1));
+        label(TEX("$\useKV[ClesEquation]{Lettre}$"),center PfMBlocIn shifted(k*u*(0,HauteurB-0.1)));
+      endfor;
+    );  
+    $
+  enddef;
+  %
+  vardef PfMBlocNum(expr coefbb,coefcc)=
+    save $;
+    picture $;
+    $=image(
+      if abs(coefbb)>0:
+        fill (PfMBloc if abs(coefcc)<1:yscaled 1 else: yscaled coefcc fi) withcolor if coefbb<0:Tomato else: Cornsilk fi;
+        trace (PfMBloc if abs(coefcc)<1:yscaled 1 else: yscaled coefcc fi);
+        label(TEX("\num{"&decimal(coefbb)&"}"),center (PfMBloc if abs(coefcc)<1:yscaled 1 else: yscaled coefcc fi));
+      fi;
+    );  
+    $
+  enddef;
+  %
+  vardef PfMBlocEquaVide(expr coefaa)=
+    save $;
+    picture $;
+    $=image(
+      for k=0 upto (coefaa-1):
+        trace (subpath(1,4) of PfMBlocIn) shifted(k*u*(0,HauteurB-0.1)) dashed evenly withcolor 0.8white;
+      endfor;
+      trace (subpath(0,1) of (PfMBlocIn yscaled coefaa));
+    );  
+    $
+  enddef;
+  %
+  vardef PfMBlocNumVide(expr coefbb,coefcc)=
+    save $;
+    picture $;
+    $=image(
+      if abs(coefbb)>0:
+        trace (subpath(1,4) of (PfMBloc yscaled coefcc)) dashed evenly withcolor 0.8white;
+        trace (subpath(0,1) of (PfMBloc yscaled coefcc));
+      fi;
+    );  
+    $
+  enddef;
+  %  
+  vardef PfMBlocSol(expr coefcc,coefdd)=
+    save $;
+    picture $;
+    $=image(
+      fill PfMBloc withcolor LightSteelBlue;
+      trace PfMBloc;
+      label(TEX("$"&decimal(coefcc)&"\div"&decimal(coefdd)&"$"),center PfMBloc);
+    );  
+    $
+  enddef;
+}%
+%%%%%%%
+\newcounter{PfCEquaBalnumi}%
+%
+\newcommand\EquaBaseBalance[5][]{%type ax=d ou b=cx
+  \useKVdefault[ClesEquation]%
+  \setKV[ClesEquation]{#1}%
+  \setcounter{PfCEquaBalnumi}{0}%
+  \ifnum\fpeval{#2}=0\relax%
+    \ifnum\fpeval{#4}=0\relax%
+      \textbf{??}%% il manque un paramètre
+    \else%
+      \xintifboolexpr{\fpeval{#4}==0}{%
+        \xintifboolexpr{\fpeval{#3}==0}{%
+          L'équation $0\times\useKV[ClesEquation]{Lettre}=0$ a une infinité de solutions.}{L'équation $0\times\useKV[ClesEquation]{Lettre}=\num{\fpeval{#3}}$ n'a aucune solution.}%
+      }{%\else
+        \xintifboolexpr{\fpeval{#3}==0}{L'équation $0=\num{\fpeval{#4}}\times\useKV[ClesEquation]{Lettre}$ a une unique solution : $\useKV[ClesEquation]{Lettre}=0$.}{%\else
+          \ifnum\fpeval{#4}=1\relax
+          \else
+            \stepcounter{PfCEquaBalnumi}%
+            \xintifboolexpr{\thePfCEquaBalnumi<\fpeval{\useKV[ClesEquation]{Etape}+1} 'and' \thePfCEquaBalnumi>\fpeval{\useKV[ClesEquation]{Depart}}}{%
+              
+              \bigskip%
+              
+              \Balance[Traces={%
+                \MPCodeEqua
+                picture bloc,blocn;
+                bloc=PfMBlocEqua(#4);
+                blocn=PfMBlocNum(#3,#3/#4);
+              }]{blocn}{bloc}
+            }{}
+          \fi%
+          
+          \stepcounter{PfCEquaBalnumi}%
+          \xintifboolexpr{\thePfCEquaBalnumi<\fpeval{\useKV[ClesEquation]{Etape}+1} 'and' \thePfCEquaBalnumi>\fpeval{\useKV[ClesEquation]{Depart}}}{%
+
+            \bigskip%
+
+            \Balance[Traces={%
+              \MPCodeEqua
+              picture bloc,blocn;
+              bloc=PfMBlocEqua(1);
+              blocn=PfMBlocSol(#3,#4);
+            }]{blocn}{bloc}
+          }{}%
+        }%
+      }%
+    \fi%
+  \else%
+    % si non, on est dans le cas ax=d
+    \xintifboolexpr{\fpeval{#2}==0}{%
+      \xintifboolexpr{\fpeval{#5}==0}{%
+        L'équation $0\times\useKV[ClesEquation]{Lettre}=0$ a une infinité de solutions.}{L'équation $0\times\useKV[ClesEquation]{Lettre}=\num{\fpeval{#5}}$ n'a aucune solution.}%
+    }{%\else
+      \xintifboolexpr{\fpeval{#5}==0}{L'équation $\num{\fpeval{#2}}\times\useKV[ClesEquation]{Lettre}=0$ a une unique solution : $\useKV[ClesEquation]{Lettre}=0$.}{%\else
+        \ifnum\fpeval{#2}=1\relax%
+        \else%
+          \stepcounter{PfCEquaBalnumi}%
+          \xintifboolexpr{\thePfCEquaBalnumi<\fpeval{\useKV[ClesEquation]{Etape}+1} 'and' \thePfCEquaBalnumi>\fpeval{\useKV[ClesEquation]{Depart}}}{
+            \bigskip%
+                                   
+            \Balance[Traces={
+              \MPCodeEqua
+              picture bloc,blocn;
+              bloc=PfMBlocEqua(#2);
+              blocn=PfMBlocNum(#5,#5/#2);
+            }]{bloc}{blocn}
+          }{}%
+        \fi%
+        
+        \stepcounter{PfCEquaBalnumi}%
+        \xintifboolexpr{\thePfCEquaBalnumi<\fpeval{\useKV[ClesEquation]{Etape}+1} 'and' \thePfCEquaBalnumi>\fpeval{\useKV[ClesEquation]{Depart}}}{%
+
+          \bigskip%
+          
+          \Balance[Traces={%
+            \MPCodeEqua
+            picture bloc,blocn;
+            bloc=PfMBlocEqua(1);
+            blocn=PfMBlocSol(#5,#2);
+          }]{bloc}{blocn}
+        }{}%
+      }%
+    }%
+  \fi%
+}%
+
+\newcommand\EquaDeuxBalance[5][]{%type ax+b=d ou b=cx+d$
+  \useKVdefault[ClesEquation]%
+  \setKV[ClesEquation]{#1}%
+  \setKV[ClesEquation]{Fleches=false,FlecheDiv=false,Terme=false,Decomposition=false}
+  \ifnum\fpeval{#2}=0\relax%On échange en faisant attention à ne pas boucler : c doit être non vide
+    % cas b=cx+d
+    \xintifboolexpr{\fpeval{#4}==0}{%
+      \xintifboolexpr{\fpeval{#3}==\fpeval{#5}}{%b=d
+        L'équation $\num{\fpeval{#3}}=\num{\fpeval{#5}}$ a une infinité de solutions.%
+      }{%b<>d
+        L'équation $\num{\fpeval{#3}}=\num{\fpeval{#5}}$ n'a aucune solution.%
+      }%
+    }{%ELSE
+      \xintifboolexpr{\fpeval{#3}==0}{%0=cx+d
+        \EquaBaseBalance[#1]{0}{\fpeval{-#5}}{\fpeval{#4}}{0}%
+      }{%b=cx+d$ Ici
+        \xintifboolexpr{\fpeval{#5}==0}{}{%
+          \stepcounter{PfCEquaBalnumi}%
+          \xintifboolexpr{\thePfCEquaBalnumi<\fpeval{\useKV[ClesEquation]{Etape}+1} 'and' \thePfCEquaBalnumi>\fpeval{\useKV[ClesEquation]{Depart}}}{%
+            \Balance[Traces={
+              \MPCodeEqua
+              picture bloc,blocng,blocnd;
+              bloc=PfMBlocEqua(#4);
+              blocng=PfMBlocNum(#3,#3/#4);
+              blocnd=PfMBlocNum(#5,#5/#4);
+            }]{blocng}{bloc,blocnd}
+          }{}%
+
+          \stepcounter{PfCEquaBalnumi}%
+          \xintifboolexpr{\thePfCEquaBalnumi<\fpeval{\useKV[ClesEquation]{Etape}+1} 'and' \thePfCEquaBalnumi>\fpeval{\useKV[ClesEquation]{Depart}}}{%
+            \Balance[Traces={
+              \MPCodeEqua
+              picture bloc,blocng,blocnga,blocnd;
+              bloc=PfMBlocEqua(#4);
+              blocng=PfMBlocNum(#5,#5/#4);
+              blocnga=PfMBlocNum(#3-#5,(#3-#5)/#4);
+              blocnd=PfMBlocNum(#5,#5/#4);
+            }]{blocng,blocnga}{bloc,blocnd}
+          }{}%
+        }%
+        
+        \EquaBaseBalance[#1]{0}{(#3-(#5))}{#4}{0}%
+      }%
+    }%
+  \else%cas ax+b=d
+    \xintifboolexpr{\fpeval{#2}==0}{%
+      \xintifboolexpr{\fpeval{#3}==\fpeval{#5}}{%b=d
+        L'équation $\num{\fpeval{#3}}=\num{\fpeval{#5}}$ a une infinité de solutions.%
+      }{%b<>d
+        L'équation $\num{\fpeval{#3}}=\num{\fpeval{#5}}$ n'a aucune solution.%
+      }%
+    }{%ELSE
+      \xintifboolexpr{\fpeval{#3}==0}{%ax=d
+        \EquaBaseBalance[#1]{#2}{0}{0}{#5}%
+      }{%ax+b=d$ Ici
+        \stepcounter{PfCEquaBalnumi}%
+        \xintifboolexpr{\thePfCEquaBalnumi<\fpeval{\useKV[ClesEquation]{Etape}+1} 'and' \thePfCEquaBalnumi>\fpeval{\useKV[ClesEquation]{Depart}}}{%
+          \Balance[Traces={
+            \MPCodeEqua
+            picture bloc,blocng,blocnd;
+            bloc=PfMBlocEqua(#2);
+            blocng=PfMBlocNum(#3,#3/#2);
+            blocnd=PfMBlocNum(#5,#5/#2);
+          }]{bloc,blocng}{blocnd}
+        }{}%
+        
+        \stepcounter{PfCEquaBalnumi}%
+        \xintifboolexpr{\thePfCEquaBalnumi<\fpeval{\useKV[ClesEquation]{Etape}+1} 'and' \thePfCEquaBalnumi>\fpeval{\useKV[ClesEquation]{Depart}}}{%            \ifnum\thePfCEquaBalnumi<\fpeval{\useKV[ClesEquation]{Etape}+1}\relax
+\Balance[Traces={
+           \MPCodeEqua
+              picture bloc,blocng,blocnga,blocnd;
+              bloc=PfMBlocEqua(#2);
+              blocng=PfMBlocNum(#3,#3/#2);
+              blocnga=PfMBlocNum(#5-#3,(#5-#3)/#2);
+              blocnd=PfMBlocNum(#3,#3/#2);
+              }]{bloc,blocng}{blocnd,blocnga}
+              }{}%
+              
+       \EquaBaseBalance[#1]{#2}{0}{0}{(#5-(#3))}%
+      }%
+    }%
+  \fi%
+}%
+
+\newcommand\EquaTroisBalance[5][]{%ax+b=cx ou ax=cx+d
+  \useKVdefault[ClesEquation]%
+  \setKV[ClesEquation]{#1}%
+  \ifnum\fpeval{#3}=0\relax%on inverse en faisant attention à la boucle #3<->#5
+    \ifnum\fpeval{#5}=0\relax%
+      %% paramètre oublié
+    \else
+      \EquaTroisBalance[#1]{#4}{#5}{#2}{0}%
+    \fi
+  \else
+    \xintifboolexpr{\fpeval{#2}==0}{%b=cx
+      \EquaBaseBalance[#1]{#4}{0}{0}{#3}
+    }{%
+      \xintifboolexpr{\fpeval{#4}==0}{%ax+b=0
+        \EquaDeuxBalance[#1]{#2}{#3}{0}{0}
+      }{%ax+b=cx
+        \xintifboolexpr{\fpeval{#2}==\fpeval{#4}}{%
+          \xintifboolexpr{\fpeval{#3}==0}{%ax=ax
+            L'équation $\xintifboolexpr{#2==1}{}{\num{#2}}\useKV[ClesEquation]{Lettre}=\xintifboolexpr{#4==1}{}{\num{#4}}\useKV[ClesEquation]{Lettre}$ a une infinité de solutions.%
+          }{%ax+b=ax
+            L'équation $\xintifboolexpr{#2==1}{}{\num{#2}}\useKV[ClesEquation]{Lettre}\xintifboolexpr{#3>0}{+\num{#3}}{-\num{\fpeval{0-#3}}}=\xintifboolexpr{#4==1}{}{\num{#4}}\useKV[ClesEquation]{Lettre}$ n'a aucune solution.%
+          }
+        }{%% Cas délicat
+          \xintifboolexpr{\fpeval{#2}>\fpeval{#4}}{%ax+b=cx avec a>c
+          \Balance[Traces={
+              \MPCodeEqua
+              picture bloceg,bloced,blocng;
+              bloced=PfMBlocEqua(#4);
+              bloceg=PfMBlocEqua(#2);
+              blocng=PfMBlocNum(#3,#3/(#2-#4));
+            }]{bloceg,blocng}{bloced}
+            
+            \Balance[Traces={
+              \MPCodeEqua
+              picture bloceg,bloced,blocec,blocng;
+              bloced=PfMBlocEqua(#4);
+              blocec=PfMBlocEqua(#2-#4);
+              blocng=PfMBlocNum(#3,#3/(#2-#4));
+            }]{bloced,blocec,blocng}{bloced}
+            
+            \EquaDeuxBalance[#1]{(#2-#4)}{#3}{0}{0}
+          }{%ax+b=cx avec a<c              % Autre cas délicat
+            \Balance[Traces={
+              \MPCodeEqua
+              picture bloceg,bloced,blocng;
+              bloced=PfMBlocEqua(#4);
+              bloceg=PfMBlocEqua(#2);
+              blocng=PfMBlocNum(#3,#3/(#4-#2));
+            }]{bloceg,blocng}{bloced}
+            
+            \Balance[Traces={
+              \MPCodeEqua
+              picture bloceg,bloced,blocec,blocng;
+              bloced=PfMBlocEqua(#2);
+              blocec=PfMBlocEqua(#4-#2);
+              blocng=PfMBlocNum(#3,#3/(#4-#2));
+            }]{bloced,blocng}{bloced,blocec}
+            
+            \EquaDeuxBalance[#1]{0}{#3}{(#4-#2)}{0}
+          }%
+        }%
+      }%
+    }%
+  \fi%
+}%
+
+\newcommand\ResolEquationBalance[5][]{%
+  \setcounter{PfCEquaBalnumi}{0}%
+  \useKVdefault[ClesEquation]%
+  \useKVdefault[Balance]%
+  \setKV[ClesEquation]{#1}%
+  \setKV[Balance]{#1}%
+  \setKV[ClesEquation]{Fleches=false,FlecheDiv=false,Terme=false,Decomposition=false}%
+  \ifboolKV[ClesEquation]{Vide}{%
+    \Balance[Traces={
+      u:=8mm;
+      \MPCodeEqua
+      picture bloceg,bloced,blocng,blocnd;
+      bloced=PfMBlocEquaVide(5);
+      bloceg=PfMBlocEquaVide(5);
+      blocng=PfMBlocNumVide(10,10/2);
+      blocnd=PfMBlocNumVide(10,10/2);
+    }]{bloced,bloceg,blocng,blocnd}{bloced,bloceg,blocng,blocnd}
+  }{%
+    \xintifboolexpr{#2==0}{%
+      \xintifboolexpr{#4==0}{%
+        \xintifboolexpr{#3==#5}{%b=d
+          L'équation $\num{\fpeval{#3}}=\num{\fpeval{#5}}$ a une infinité de solutions.}%
+        {%b<>d
+          L'équation $\num{\fpeval{#3}}=\num{\fpeval{#5}}$ n'a aucune solution.%
+        }%
+      }%
+      {%0x+b=cx+d$
+        \EquaDeuxBalance[#1]{#4}{#5}{#2}{#3}%
+      }%
+    }{%
+      \xintifboolexpr{#4==0}{%ax+b=0x+d
+        \EquaDeuxBalance[#1]{#2}{#3}{0}{#5}%
+      }
+      {%ax+b=cx+d$
+        \xintifboolexpr{#3==0}{%
+          \xintifboolexpr{#5==0}{%ax=cx
+            \EquaTroisBalance[#1]{#2}{0}{#4}{0}%
+          }%
+          {%ax=cx+d
+            \EquaTroisBalance[#1]{#4}{#5}{#2}{0}%
+          }%
+        }%
+        {\xintifboolexpr{#5==0}{%ax+b=cx
+            \EquaTroisBalance[#1]{#2}{#3}{#4}{0}%
+          }%
+          {%ax+b=cx+d -- ici
+            \xintifboolexpr{#2==#4}{%
+              \xintifboolexpr{#3==#5}{%b=d
+                L'équation $\xintifboolexpr{#2==1}{}{\num{#2}}\useKV[ClesEquation]{Lettre}\xintifboolexpr{#3>0}{+\num{#3}}{-\num{\fpeval{0-#3}}}=\xintifboolexpr{#4==1}{}{\num{#4}}\useKV[ClesEquation]{Lettre}\xintifboolexpr{#5>0}{+\num{#5}}{-\num{\fpeval{0-#5}}}$ a une infinité de solutions.}%
+              {%b<>d
+                L'équation $\xintifboolexpr{#2==1}{}{\num{#2}}\useKV[ClesEquation]{Lettre}\xintifboolexpr{#3>0}{+\num{#3}}{-\num{\fpeval{0-#3}}}=\xintifboolexpr{#4==1}{}{\num{#4}}\useKV[ClesEquation]{Lettre}\xintifboolexpr{#5>0}{+\num{#5}}{-\num{\fpeval{0-#5}}}$ n'a aucune solution.%
+              }%
+            }{%
+              %% Cas délicat
+              \xintifboolexpr{#2>#4}{%ax+b=cx+d avec a>c
+                \stepcounter{PfCEquaBalnumi}%
+                \xintifboolexpr{\thePfCEquaBalnumi<\fpeval{\useKV[ClesEquation]{Etape}+1} 'and' \thePfCEquaBalnumi>\fpeval{\useKV[ClesEquation]{Depart}}}{%
+                  \Balance[Traces={
+                    \MPCodeEqua
+                    picture bloceg,bloced,blocng,blocnd;
+                    bloced=PfMBlocEqua(#4);
+                    bloceg=PfMBlocEqua(#2);
+                    blocng=PfMBlocNum(#3,#3/(#2-#4));
+                    blocnd=PfMBlocNum(#5,#5/(#2-#4));
+                  }]{bloceg,blocng}{bloced,blocnd}
+                }{}%
+                
+                \stepcounter{PfCEquaBalnumi}%
+                \xintifboolexpr{\thePfCEquaBalnumi<\fpeval{\useKV[ClesEquation]{Etape}+1} 'and' \thePfCEquaBalnumi>\fpeval{\useKV[ClesEquation]{Depart}}}{%
+                  \Balance[Traces={
+                    \MPCodeEqua
+                    picture bloceg,bloced,blocec,blocng,blocnd;
+                    bloced=PfMBlocEqua(#4);
+                    blocec=PfMBlocEqua(#2-#4);
+                    blocng=PfMBlocNum(#3,#3/(#2-#4));
+                    blocnd=PfMBlocNum(#5,#5/(#2-#4));
+                  }]{bloced,blocec,blocng}{bloced,blocnd}
+                }{}%
+                
+                \EquaDeuxBalance[#1]{(#2-(#4))}{#3}{0}{#5}
+              }{%ax+b=cx+d avec a<c              % Autre cas délicat
+                \stepcounter{PfCEquaBalnumi}%
+                \xintifboolexpr{\thePfCEquaBalnumi<\fpeval{\useKV[ClesEquation]{Etape}+1} 'and' \thePfCEquaBalnumi>\fpeval{\useKV[ClesEquation]{Depart}}}{%
+                  \Balance[Traces={
+                    \MPCodeEqua
+                    picture bloceg,bloced,blocng,blocnd;
+                    bloced=PfMBlocEqua(#4);
+                    bloceg=PfMBlocEqua(#2);
+                    blocng=PfMBlocNum(#3,#3/(#4-#2));
+                    blocnd=PfMBlocNum(#5,#5/(#4-#2));
+                  }]{bloceg,blocng}{bloced,blocnd}
+                }{}%
+                
+                \stepcounter{PfCEquaBalnumi}%
+                \xintifboolexpr{\thePfCEquaBalnumi<\fpeval{\useKV[ClesEquation]{Etape}+1} 'and' \thePfCEquaBalnumi>\fpeval{\useKV[ClesEquation]{Depart}}}{%
+                  \Balance[Traces={
+                    \MPCodeEqua
+                    picture bloceg,bloced,blocec,blocng,blocnd;
+                    bloceg=PfMBlocEqua(#2);
+                    blocec=PfMBlocEqua(#4-#2);
+                    blocng=PfMBlocNum(#3,#3/(#2-#4));
+                    blocnd=PfMBlocNum(#5,#5/(#2-#4));
+                  }]{bloceg,blocng}{bloceg,blocec,blocnd}
+                }{}%
+                
+                \EquaDeuxBalance[#1]{0}{#3}{(#4-(#2))}{#5}
+              }%
+            }%
+          }%
+        }%
+      }%
+    }%
+  }%
+}%

@@ -1,0 +1,131 @@
+%%%
+% Scrabble
+%%%
+\def\filedateScrab{2025/03/19}%
+\def\fileversionScrab{0.1}%
+\message{-- \filedateScrab\space v\fileversionScrab}%
+%
+\newtoks\tokPfMUpdateRedefCM%
+\def\UpdatetoksRedefCM#1\nil{\addtotok\tokPfMUpdateRedefCM{"#1",}}%
+%
+\setKVdefault[PfMScrabble]{ModeleCouleur=5,Impression=false,Numerotation=false,Echelle=1,Dys=false,Plateau=false,Ecart=0,Restreint=false,Ligne=0,Colonne=0,PasL=15,PasC=15,Vide=false,Perso={}}%
+%
+\NewDocumentEnvironment{Scrabble}{o +b}{%
+  \useKVdefault[PfMScrabble]%
+  \setKV[PfMScrabble]{#1}%
+  \ifPfCPfMScratchDys\relax\setKV[PfMScrabble]{Dys}\fi%
+  \mplibforcehmode%
+  \myfontScratch%
+  \tokPfMUpdateRedefCM{}%
+  \ifemptyKV[PfMScrabble]{Perso}{}{%
+      \xdef\PfMScrabbleRedef{\useKV[PfMScrabble]{Perso}}%
+      \setsepchar{,}\ignoreemptyitems\readlist*\PfMListeRedefinition{\PfMScrabbleRedef}
+      \foreachitem\compredef\in\PfMListeRedefinition{%
+        \expandafter\UpdatetoksRedefCM\compredef\nil}%
+    }%
+  \begin{mplibcode}%
+    u:=\useKV[PfMScrabble]{Echelle}*1cm;
+    Ligne:=\useKV[PfMScrabble]{Ligne};
+    PasL:=\useKV[PfMScrabble]{PasL};
+    Colonne:=\useKV[PfMScrabble]{Colonne};
+    PasC:=\useKV[PfMScrabble]{PasC};
+    boolean Plateau,Numerotation,Restreint,Vide,Personnel;
+    Plateau=\useKV[PfMScrabble]{Plateau};
+    Restreint=\useKV[PfMScrabble]{Restreint};
+    Vide=\useKV[PfMScrabble]{Vide};
+    %
+    if Restreint:
+      Plateau:=true;
+    fi;    
+    %
+    boolean print;
+    print:=\useKV[PfMScrabble]{Impression};
+    %
+    input PfCScrabble;
+    %
+    \ifemptyKV[PfMScrabble]{Perso}{}{
+      NbRedef:=0;
+      for p_=\the\tokPfMUpdateRedefCM:
+        if p_<>"false":
+          NbRedef:=NbRedef+1;
+          if NbRedef<2:
+            TexteScore[6]:=image(label(TEX(p_),(0,0)););
+          elseif NbRedef<3:
+            TexteScore[4]:=image(label(TEX(p_),(0,0)););
+          elseif NbRedef<4:
+            TexteScore[3]:=image(label(TEX(p_),(0,0)););
+          elseif NbRedef<5:
+            TexteScore[2]:=image(label(TEX(p_),(0,0)););
+          fi;  
+        fi;
+      endfor;
+    }
+    %
+    Gap:=\useKV[PfMScrabble]{Ecart};
+    %
+    Numerotation:=\useKV[PfMScrabble]{Numerotation};%
+    if \useKV[PfMScrabble]{Dys}:
+      print:=true;
+    fi;
+    if Plateau:
+      trace GrilleCompleteMP(%
+      6,0,0,2,0,0,0,6,0,0,0,2,0,0,6,%
+      0,4,0,0,0,3,0,0,0,3,0,0,0,4,0,%
+      0,0,4,0,0,0,2,0,2,0,0,0,4,0,0,%
+      2,0,0,4,0,0,0,2,0,0,0,4,0,0,2,%
+      0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,%
+      0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,%
+      0,0,2,0,0,0,2,0,2,0,0,0,2,0,0,%
+      6,0,0,2,0,0,0,4,0,0,0,2,0,0,6,
+      0,0,2,0,0,0,2,0,2,0,0,0,2,0,0,%
+      0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,%
+      0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,%
+      2,0,0,4,0,0,0,2,0,0,0,4,0,0,2,%
+      0,0,4,0,0,0,2,0,2,0,0,0,4,0,0,%
+      0,4,0,0,0,3,0,0,0,3,0,0,0,4,0,%
+      6,0,0,2,0,0,0,6,0,0,0,2,0,0,6%
+      );
+      if Restreint:
+        currentpicture:=nullpicture;
+        for k=Ligne upto Ligne+PasL-1:
+         for l=Colonne upto Colonne+PasC-1:
+            trace Case[k][l];
+          endfor;
+        endfor;
+        for k=Ligne upto Ligne+PasL-1:
+          for l=Colonne upto Colonne+PasC-1:
+            trace Marque[k][l];
+         endfor;
+        endfor;
+      fi;
+    fi;
+    if Vide:
+     currentpicture:=nullpicture;
+    fi;
+    #2
+    if Plateau:
+      if Restreint:
+        clip currentpicture to polygone(ulcorner Case[Ligne][Colonne],urcorner Case[Ligne][Colonne+PasC-1],lrcorner Case[Ligne+PasL-1][Colonne+PasC-1],llcorner Case[Ligne+PasL-1][Colonne]);
+      else:
+        bboxmargin:=-0.15u;
+        clip currentpicture to bbox currentpicture;
+      fi;
+      bboxmargin:=0pt;
+      if Vide=false:
+        trace bbox currentpicture;
+      fi;
+    fi;
+    if Plateau:  
+      if Numerotation:
+        for k=1 upto 15:
+          label.top(TEX(decimal(k)),center Case[1][k]+u*(0,0.5));
+        endfor;
+        nbcase=0;
+        for p_="A","B","C","D","E","F","G","H","I","J","K","L","M","N","O":
+          nbcase:=nbcase+1;
+          label.lft(TEX(p_),center Case[nbcase][1]+u*(-0.5,0));
+        endfor;
+      fi;
+    fi;
+  \end{mplibcode}%
+}{}%

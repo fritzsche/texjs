@@ -1,0 +1,275 @@
+%%% Copyright (C) 2015-2024 Vincent Goulet
+%%%
+%%% Ce fichier fait partie du projet
+%%% «Rédaction avec LaTeX»
+%%% https://gitlab.com/vigou3/formation-latex-ul
+%%%
+%%% Cette création est mise à disposition sous licence
+%%% Attribution-Partage dans les mêmes conditions 4.0
+%%% International de Creative Commons.
+%%% https://creativecommons.org/licenses/by-sa/4.0/
+
+\documentclass[aspectratio=169,10pt,xcolor=x11names,french]{beamer}
+  \usepackage{babel}
+  \usepackage[autolanguage]{numprint}
+  \usepackage{amsmath}
+  \usepackage[mathrm=sym]{unicode-math}  % polices math
+  \usepackage{changepage}                % page licence
+  \usepackage{tabularx}                  % page licence
+  \usepackage{booktabs}                  % beaux tableaux
+  \usepackage{fontawesome5}              % icônes
+  \usepackage{awesomebox}                % \tipbox et autres
+  \usepackage{listings}                  % code source
+  \usepackage[export]{adjustbox}         % cadre autour image
+  \usepackage[overlay,absolute]{textpos} % couvertures
+  \usepackage{metalogo}                  % logo \XeLaTeX
+
+  %% ==========================================
+  %%  Informations de publication
+  %%  (titre et al. dans couverture-avant.tex)
+  %% ==========================================
+  \title{Rédaction avec \LaTeX --- Premier pas}
+  \author{Vincent Goulet}
+  \renewcommand{\year}{2024}
+  \renewcommand{\month}{03}
+  \newcommand{\ctanurl}{https://ctan.org/pkg/formation-latex-ul}
+  \newcommand{\reposurl}{https://gitlab.com/vigou3/formation-latex-ul}
+
+  %% =======================
+  %%  Apparence du document
+  %% =======================
+
+  %% Thème Beamer
+  \usetheme{metropolis}
+  \metroset{subsectionpage=progressbar}
+
+  %% Polices de caractères
+  \setsansfont{Fira Sans Book}
+  [
+    BoldFont = {Fira Sans SemiBold},
+    ItalicFont = {Fira Sans Book Italic},
+    BoldItalicFont = {Fira Sans SemiBold Italic}
+  ]
+  \setmathfont{Fira Math}
+  \newfontfamily\titlefontOS{FiraSans}
+  [
+    Extension = .otf,
+    UprightFont = *-Book,
+    BoldFont = *-SemiBold,
+    BoldItalicFont = *-SemiBoldItalic,
+    Scale = 1.0,
+    Numbers = OldStyle
+  ]
+  \newfontfamily\titlefontFC{FiraSans}
+  [
+    Extension = .otf,
+    UprightFont = *-Book,
+    BoldFont = *-SemiBold,
+    BoldItalicFont = *-SemiBoldItalic,
+    Scale = 1.0,
+    Numbers = Uppercase
+  ]
+  \newfontfamily\lucida{Lucida Bright OT}
+  [
+    Scale = 0.92
+  ]
+  \usepackage[babel=true]{microtype}
+
+  %% Police Computer Modern pour exemple de police par défaut
+  \newfontfamily\CM{cmunrm}
+  [
+    Extension = .otf,
+    ItalicFont = cmunci,
+    BoldFont = cmunrb,
+    BoldItalicFont = cmunbi,
+    Scale = 1.1
+  ]
+  \newfontfamily\CMtt{cmuntt}
+  [
+    Extension = .otf,
+    Scale = 1.1
+  ]
+
+  %% Police STIX Two pour exemple de police moderne
+  \newfontfamily\stixtwo{STIXTwoText}
+  [
+    Extension = .otf,
+    UprightFont = *-Regular,
+    Scale = 1,
+  ]
+
+  %% Couleurs
+  \definecolor{comments}{rgb}{0.5,0.55,0.6} % commentaires
+  \definecolor{link}{rgb}{0,0.4,0.6}        % liens internes
+  \definecolor{url}{rgb}{0.6,0,0}           % liens externes
+  \definecolor{rouge}{rgb}{0.9,0,0.1}       % bandeau rouge UL
+  \definecolor{or}{rgb}{1,0.8,0}            % bandeau or UL
+  \colorlet{codebg}{LightYellow1}           % fond code R
+  \colorlet{prompt}{Orchid4}                % invite de commande
+  \colorlet{alert}{mLightBrown} % alias de couleur Metropolis
+  \colorlet{dark}{mDarkTeal}    % alias de couleur Metropolis
+  \colorlet{code}{mLightGreen}  % alias de couleur Metropolis
+  \colorlet{shadecolor}{codebg}
+
+  %% Hyperliens
+  \hypersetup{%
+    pdfauthor = {Vincent Goulet},
+    pdftitle = {Rédaction avec LaTeX - Premiers pas},
+    colorlinks = true,
+    linktocpage = true,
+    urlcolor = {url},
+    linkcolor = {link},
+    citecolor = {citation},
+    pdfpagemode = {UseOutlines},
+    pdfstartview = {Fit}}
+  \setlength{\XeTeXLinkMargin}{1pt}
+
+  %% Affichage de la table des matières du PDF
+  \usepackage{bookmark}
+  \bookmarksetup{%
+    open = true,
+    depth = 3,
+    numbered = true}
+
+  %% Paramétrage de babel pour les guillemets
+  \frenchbsetup{og=«, fg=»}
+
+  %% Sections de code source
+  \lstloadlanguages{[LaTeX]TeX}
+  \lstset{language=[LaTeX]TeX,
+    basicstyle=\small\ttfamily\NoAutoSpacing,
+    keywordstyle=\mdseries,
+    commentstyle=\color{comments},
+    emphstyle=\color{alert}\bfseries,
+    moredelim=[is][\color{prompt}]{---}{-},
+    escapeinside=`',
+    extendedchars=true,
+    showstringspaces=false,
+    backgroundcolor=\color{LightYellow1},
+    frame=leftline,
+    framerule=2pt,
+    framesep=5pt,
+    xleftmargin=7.4pt
+  }
+
+  %%% =========================
+  %%%  Nouveaux environnements
+  %%% =========================
+
+  %% Environnements pour les demo de code; tirés du document
+  %% principal. (L'environnement 'eqxample' ajoute des filets de part
+  %% et d'autre du bloc pour illustrer les marges.)
+  \newenvironment{demo}{%
+    \begin{beamercolorbox}[wd=\linewidth,sep=6pt]{block body example}}
+    {\end{beamercolorbox}}
+  \newenvironment{texample}[1][0.45\linewidth]{%
+    \noindent\begin{minipage}{#1}%
+      \def\producing{\end{minipage}\hfill\begin{minipage}{\dimexpr0.9\linewidth-#1}%
+        \hbox\bgroup\kern-.2pt%
+        \vbox\bgroup\parindent0pt\relax
+        % The 3pt is to cancel the -\lineskip from \displ@y
+        \abovedisplayskip3pt \abovedisplayshortskip\abovedisplayskip
+        \belowdisplayskip0pt \belowdisplayshortskip\belowdisplayskip
+        \noindent}
+    }{%
+      \par
+      % Ensure that a lonely \[\] structure doesn't take up width less than
+      % \hsize.
+      \hrule height0pt width\hsize
+      \egroup\kern-.2pt\egroup
+    \end{minipage}%
+    \par
+  }
+  \newenvironment{eqxample}{%
+    \noindent\begin{minipage}{.45\linewidth}%
+      \def\producing{\end{minipage}\hfill\begin{minipage}{.45\linewidth}%
+        \hbox\bgroup\kern-.2pt\vrule width.2pt%
+        \vbox\bgroup\parindent0pt\relax
+        % The 3pt is to cancel the -\lineskip from \displ@y
+        \abovedisplayskip3pt \abovedisplayshortskip\abovedisplayskip
+        \belowdisplayskip0pt \belowdisplayshortskip\belowdisplayskip
+        \noindent}
+    }{%
+      \par
+      % Ensure that a lonely \[\] structure doesn't take up width less than
+      % \hsize.
+      \hrule height0pt width\hsize
+      \egroup\vrule width.2pt\kern-.2pt\egroup
+    \end{minipage}%
+    \par
+  }
+
+  %% Simplfication de l'environnement 'quote' de beamer
+  \renewenvironment{quote}{%
+    \begin{beamercolorbox}[wd=\linewidth,sep=6pt]{block body example}}
+    {\end{beamercolorbox}}
+
+  %% Exercices
+  \newenvironment{exercice}{%
+    \begin{frame}[fragile=singleslide]
+      \frametitle{\faCogs\; Exercice}}{\end{frame}}
+
+  %% =====================
+  %%  Nouvelles commandes
+  %% =====================
+
+  %% Noms de fonctions, code, environnement, etc.
+  \newcommand{\code}[1]{\textcolor{code}{\texttt{#1}}}
+  \newcommand{\fichier}[1]{\code{#1}}
+  \newcommand{\class}[1]{\textbf{#1}}
+  \newcommand{\pkg}[1]{\textbf{#1}}
+  \newcommand{\link}[2]{\href{#1}{#2~\raisebox{-0.2ex}{\faExternalLink*}}}
+
+  %% Pour documenter des commandes LaTeX; dérivé de memoir.cls
+  \def\bs{\code{\char`\\}}
+  \newcommand{\meta}[1]{%
+    \ensuremath\langle{\normalfont\itshape #1\/}\ensuremath\rangle}
+  \newcommand{\marg}[1]{%
+    {\ttfamily\char`\{}\meta{#1}{\ttfamily\char`\}}}
+  \newcommand{\oarg}[1]{%
+    {\ttfamily\char`\[}\meta{#1}{\ttfamily\char`\]}}
+  \newcommand{\cs}[1]{\code{\char`\\#1}}
+
+  %% Identification de la licence CC BY-SA.
+  \newcommand{\ccbysa}{\mbox{%
+    \faCreativeCommons\kern0.1em%
+    \faCreativeCommonsBy\kern0.1em%
+    \faCreativeCommonsSa}~\faCopyright[regular]\relax}
+
+  %% Lien vers Gitlab dans la page de notices
+  \newcommand{\viewsource}[1]{%
+    \href{#1}{\faGitlab\ Voir sur GitLab}}
+
+  %%% =======
+  %%%  Varia
+  %%% =======
+
+  %% Longueurs pour la composition de la page couverture.
+  \newlength{\banderougewidth} \newlength{\banderougeheight}
+  \newlength{\bandeorwidth}    \newlength{\bandeorheight}
+  \newlength{\imageheight}
+  \newlength{\logoheight}
+
+\begin{document}
+
+\include{couverture-avant-diapos}
+\include{notices-diapos}
+\include{prerequis-diapos}
+
+\include{presentation-diapos}
+\include{bases-diapos}
+\include{organisation-diapos}
+\include{apparence-diapos}
+\include{tableaux-diapos}
+\include{mathematiques-diapos}
+\include{suite-diapos}
+
+\include{colophon-diapos}
+
+\end{document}
+
+%%% Local Variables:
+%%% TeX-master: t
+%%% TeX-engine: xetex
+%%% coding: utf-8
+%%% End:

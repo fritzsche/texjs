@@ -1,0 +1,181 @@
+% \iffalse meta-comment
+%
+% File: ltx-talk-color.dtx Copyright (C) 2025 Joseph Wright
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+% This file is part of the "ltx-talk bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% The released version of this bundle is available from CTAN.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/josephwright/ltx-talk
+%
+% for those people who are interested.
+%
+% -----------------------------------------------------------------------
+%
+%<*driver>
+\documentclass{l3doc}
+% Additional commands needed in this source
+\NewDocumentCommand\email{m}{\href{mailto:#1}{\nolinkurl{#1}}}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% ^^A As we are dealing with a class, this has to be done manually
+% \def\filedate{2025-10-10}
+% \def\fileversion{v0.2.3}
+%
+% \title{^^A
+%   \pkg{ltx-talk-color} -- Color definitions^^A
+%   \thanks{This file describes \fileversion,
+%     last revised \filedate.}^^A
+% }
+%
+% \author{^^A
+%  Joseph Wright^^A
+%  \thanks{^^A
+%    E-mail: \email{joseph@texdev.net}^^A
+%   }^^A
+% }
+%
+% \date{Released \filedate}
+%
+% \maketitle
+%
+% \begin{documentation}
+%
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{ltx-talk-color} implementation}
+%
+% Start the \pkg{DocStrip} guards.
+%    \begin{macrocode}
+%<*class>
+%    \end{macrocode}
+%
+% Identify the internal prefix.
+%    \begin{macrocode}
+%<@@=talk>
+%    \end{macrocode}
+%
+% The aim here is to \emph{test} how well \pkg{l3color} can support the range
+% of color functions that are needed for a presentation. As such, this is
+% very much experimental, but deliberately so. In particular, there is an
+% important question about the need for global colors: used throughout
+% \cls{beamer} but otherwise not widely encountered. At the same time, there is
+% a need to work with packages that expect color to be managed in a
+% predictable way: \pkg{pgf} in particular makes use of \pkg{xcolor} internal
+% as part of color management.
+%
+% Currently, colors defined using \pkg{xcolor} will be passed on to
+% \pkg{l3color} provided \cs{DocumentMetadata} is active. As that is a
+% requirement in any case for \cls{ltx-talk}, some of the setup is relatively
+% easy to do.
+%
+% \subsection{Existing definitions}
+%
+%    \begin{macrocode}
+\RequirePackage { xcolor }
+%    \end{macrocode}
+%
+% \begin{macro}{\stdcolor, \stdmathcolor, \stdtextcolor}
+%   Save the document commands.
+%    \begin{macrocode}
+\NewCommandCopy \stdcolor \color
+\NewCommandCopy \stdmathcolor \mathcolor
+\NewCommandCopy \stdtextcolor \textcolor
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Document commands}
+%
+%    \begin{macrocode}
+\cs_generate_variant:Nn \color_select:n { e }
+\cs_generate_variant:Nn \color_select:nn { ne }
+\cs_generate_variant:Nn \color_math:nn { e }
+\cs_generate_variant:Nn \color_math:nnn { ne }
+%    \end{macrocode}
+%
+% \begin{macro}{\color, \mathcolor, \textcolor}
+%   Add the overlay specification and use \pkg{l3color}.
+%    \begin{macrocode}
+\RenewDocumentCommand \color { D <> { all } o m }
+  {
+    \@@_if_overlay:nT {#1}
+      {
+        \IfNoValueTF {#2}
+          { \color_select:e {#3} }
+          { \color_select:ne {#2} {#3} }
+      }
+  }
+\RenewDocumentCommand \mathcolor { D <> { all } o m +m }
+  {
+    \@@_if_overlay:nT {#1}
+      {
+        \IfNoValueTF {#2}
+          { \color_math:en {#3} {#4} }
+          { \color_math:nen {#2} {#3} {#4} }
+      }
+  }
+\RenewDocumentCommand \textcolor { D <> { all } o m +m }
+  {
+    \@@_if_overlay:nT {#1}
+      {
+        \mode_leave_vertical:
+        \group_begin:
+          \IfNoValueTF {#2}
+            { \color_select:e {#3} }
+            { \color_select:ne {#2} {#3} }
+          #4
+        \group_end:
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Color definition}
+%
+% \begin{macro}{\DeclareColor}
+%   Provide a single interface here: as the data will be passed to
+%   \pkg{l3color} in any case, there is not too much to do.
+%    \begin{macrocode}
+\NewDocumentCommand \DeclareColor { m o m }
+  {
+    \IfNoValueTF {#2}
+      { \colorlet {#1} {#3} }
+      { \definecolor {#1} {#2} {#3} }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Semantic colors}
+%
+% Pick up the standard colors from \pkg{beamer}.
+%    \begin{macrocode}
+\DeclareColor { alert } [ RGB ] { 200 , 0 , 0 }
+\DeclareColor { example } { green!50!black }
+\DeclareColor { structure } [ rgb ] { 0.2 , 0.2 , 0.7 }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%</class>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \PrintIndex

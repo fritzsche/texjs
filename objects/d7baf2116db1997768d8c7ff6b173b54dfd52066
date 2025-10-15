@@ -1,0 +1,890 @@
+% \iffalse meta-comment
+%
+% Copyright © 1989–2005 Johannes L. Braams and any individual authors
+% listed elsewhere in this file.  All rights reserved.
+% Copyright © 2022 by Marcin Woliński
+% 
+% This file is intended to be used with the Babel system.
+% ------------------------------------------------------
+% 
+% It may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2003/12/01 or later.
+% 
+% This work has the LPPL maintenance status "maintained".
+% 
+% The Current Maintainer of this work is Marcin Woliński.
+% 
+% The list of derived (unpacked) files belonging to the distribution
+% and covered by LPPL is defined by the unpacking scripts (with
+% extension .ins) which are part of the distribution.
+% \fi
+% \CheckSum{700}
+%
+% \iffalse
+%    Tell the \LaTeX\ system who we are and write an entry on the
+%    transcript.
+%<*dtx>
+\ProvidesFile{polish.dtx}
+%</dtx>
+%<code|compat>\ProvidesLanguage{polish}
+%\fi
+%\ProvidesFile{polish.dtx}
+        [2022/03/12 1.3 Babel support for Polish]
+%\iffalse
+%<*filedriver>
+\documentclass{ltxdoc}
+\usepackage{lmodern}
+\usepackage[QX]{fontenc}
+\usepackage{array,ot1patch}
+\usepackage[hidelinks]{hyperref}
+\title{Babel support for Polish}
+\author{\normalsize current maintainer: Marcin Woliński}
+\date{Version \fileversion, \filedate}
+\newcommand*\babel{\textsf{babel}}
+\newcommand*\langvar{$\langle \it lang \rangle$}
+\newcommand*\note[1]{}
+\newcommand*\Lopt[1]{\textsf{#1}}
+\newcommand*\file[1]{\texttt{#1}}
+\begin{document}
+ \DocInput{polish.dtx}
+\end{document}
+%</filedriver>
+%\fi
+% \GetFileInfo{polish.dtx}
+% \maketitle
+%
+% \changes{polish-1.1c}{1994/06/26}{Removed the use of \cs{filedate}
+%    and moved identification after the loading of babel.def}
+% \changes{polish-1.2d}{1996/10/10}{Replaced \cs{undefined} with
+%    \cs{@undefined} and \cs{empty} with \cs{@empty} for consistency
+%    with \LaTeX, moved the definition of \cs{atcatcode} right to the
+%    beginning.}
+%
+%    \section{Basic Usage}
+%
+%    Typesetting Polish with \TeX\ is, surprisingly, more difficult
+%    than setting most other European languages.  Polish uses several
+%    accented characters.  Some of them, including \textit{ć, ń, ó, ś,
+%    ź, ż, Ć, Ń, Ó, Ś, Ź, Ż}, can be reasonably rendered by attaching
+%    “floating diacritics” to Latin letters.  More problematic is the
+%    letter \textit{ł/Ł}, but legend has it that Donald Knuth needed
+%    to include the name \textit{Łukasiewicz} in his TAOCP, so he
+%    included a “diacritic” stroke in his Computer Modern fonts.
+%    Unfortunately, he had no reason to mention \textit{Wałęsa}
+%    anywhere in TAOCP, and in result the 
+%    “ogonek\footnote{The Polish name seems to also be the official
+%    English name of the diacritic:\\ 
+%    \url{https://en.wikipedia.org/wiki/Ogonek}.}  accent” is not
+%    present in original \TeX\ fonts.  A different set of fonts is
+%    necessary to properly render Polish characters with ogonek:
+%    \emph{ą, ę, Ą, Ę} (these characters are also used in Lithuanian
+%    along with \textit{į, ų, Į, Ų}).
+%
+%    In Unicode \TeX\ engines (Xe\LaTeX, lua\LaTeX), Latin Modern
+%    fonts are used by default and these include a rich repertoire of
+%    accented Latin characters. With these engines, it’s enough to
+%    load Babel with the Polish module:
+% \begin{verbatim}
+% \usepackage[polish]{babel}
+% \end{verbatim}
+%
+%    The matter is more complicated in the case of classical \LaTeX\
+%    (including pdf\LaTeX).  To obtain correct Polish letters, it is
+%    necessary to switch the document to a suitable font encoding.
+%    One possibility is:
+% \begin{verbatim}
+% \usepackage[OT4]{fontenc}
+% \usepackage[polish]{babel}
+% \end{verbatim}
+%    This will result in a document typeset using the Polish
+%    adaptation of Knuth’s classical Computer Modern fonts.
+%
+%    A more flexible option is the European font encoding T1, which
+%    covers most of European languages written in the Latin script.
+%    Unfortunately, the default fonts in this encoding are bitmap
+%    based, which will result in sub-optimal rendering. So with T1 it
+%    is necessary to select a different font family as well.  A safe
+%    option is to use Latin Modern (Latin Modern is practically
+%    identical to Computer Modern, a new name was needed to keep
+%    backward compatibility of Computer Modern):
+% \begin{verbatim}
+% \usepackage{lmodern}
+% \usepackage[T1]{fontenc}
+% \usepackage[polish]{babel}
+% \end{verbatim}
+%    Many font switching packages work with T1.  Besides Latin Modern,
+%    you can expect well designed Polish characters to be present in
+%    all fonts from the \TeX\ Gyre collection (in particular the Times
+%    lookalike \file{tgtermes}, Bookmanish \file{tgbonum}, Century
+%    Schoolbook-like \file{tgschola}, etc.) and in other fonts
+%    originating from the Polish \TeX\ Users Group
+%    GUST\footnote{\url{http://www.gust.org.pl/projects/e-foundry}}.
+%    With Unicode engines you can also use any OpenType font present
+%    on your system (see the \texttt{fontspec} package).
+%
+%    It is also worth noting, that ogonek is not really an accent: it
+%    has to be separately designed for each base letter to get a
+%    typographically acceptable result.  This is not the case, e.g.,
+%    for the packages in the PSNFSS set, in particular
+%    \file{times.sty}.  Although these support the T1 encoding, the
+%    ogonek protrudes from the characters at some random angle (this
+%    is particularly visible in the case of the letter~ę):
+%    \begin{center}\fontencoding{T1}
+%      \begin{tabular}{l>\Huge l<{gąbkę}>{\Huge\itshape\strut} l<{gąbkę}}
+%          \TeX\ Gyre Termes & \fontfamily{qtm}\selectfont &
+%          \fontfamily{qtm}\selectfont \\
+%          PSNFF Times & \fontfamily{ptm}\selectfont &
+%          \fontfamily{ptm}\selectfont \\
+%      \end{tabular}
+%    \end{center}
+%    If quality is your goal, do not use \file{times.sty} for Polish,
+%    use \file{tgtermes.sty}.
+%
+%    Another element necessary for successful typesetting of Polish is
+%    a way to encode Polish accented characters in the source file.
+%    Fortunately, nowadays all \LaTeX\ engines assume input files to
+%    be in Unicode, in its UTF-8 form, so if you are on a modern
+%    system, this will work by default.  (If you are forced to use
+%    some old byte-based encoding like the standard ISO 8859-2 or its
+%    Windows counterpart CP1250, please consult the documentation of
+%    the \file{inputenc} package.)
+%
+%
+%\section{The Functions of this Module}
+%
+%    As of version 1.3 the code has been updated to the new syntax
+%    provided by Babel to declare language specific elements.  In its
+%    current form, the module is pretty typical \texttt{.ldf} file: it
+%    defines Polish translation of language specific strings used by
+%    \LaTeX, it ensures Polish hyphenation patterns are used, and
+%    activates the setting known as \cs{frenchspacing}.
+%
+%    Language modules of Babel typically check for the hyphenation
+%    patterns for the language in question.  In their absence, a
+%    warning is issued and English hyphenation patterns are activated.
+%    We find this behaviour inappropriate.  Polish hyphenation
+%    patterns are a part of standard \TeX\ distributions for over 20
+%    years.  Inability to load them signals some configuration problem
+%    in the system.  Moreover, the use of English patterns would lead
+%    to very badly chosen breaks in a Polish text.  Thus, we have
+%    decided to block automatic hyphenation in Polish text in this
+%    case.  In consequence, system configuration has to be corrected or
+%    hyphenation points selected manually.
+%
+%    American typography has a rule, that space after punctuation
+%    characters is larger than typical inter-word space.  This rule is
+%    by default followed by \TeX.  In Polish tradition all spaces
+%    should be of equal width, so we activate \cs{frenchspacing} for
+%    Polish text.
+%
+%    Babel provides a mechanism for language-specific short commands
+%    (shorthands) consisting of the character \texttt{"} followed by
+%    one more character.  Table~\ref{tab:polish-short} lists the
+%    commands available for Polish.  The shorthand \texttt{"-} is
+%    similar to the command \cs{-} but the former does not block
+%    automatic hyphenation in the rest of the word.  The shorthand
+%    \texttt{"=} should be used for explicit hyphens in the text.
+%    According to Polish rules, when a break occurs at an explicit
+%    hyphen, the hyphen gets repeated at the beginning of the new
+%    line.  So, e.g., Polish compound adjectives like
+%    \emph{biało-czerwony} `white-and-red' should be input as
+%    \texttt{biało"=czerwony}.
+%    \begin{table}[ht]
+%          \caption{Shorthands provided by the Polish module}
+%          \label{tab:polish-short}
+%      \begin{center}
+%        \begin{tabular}{lp{10cm}}
+%            |"-| & soft hyphen\\
+%            |"=| & explicit hyphen repeated after the break \\
+%            \verb="|= & disable ligature at this position.\\
+%            |"`| & Polish left double quote: „   \\
+%            |"'| & Polish right double quote: ”                  \\
+%            |"<| & French left double quote: « (used in Polish as
+%                     second level quotes)\\
+%            |">| & French right double quote: »\\
+%          \end{tabular}
+%        \end{center}
+%      \end{table}
+%
+%
+% \section{A Note on Compatibility}
+% \label{sec:compat}
+%
+%    Incompatible changes were introduced in version 1.3 of this module.
+%    In case of problems with processing legacy documents, please
+%    try replacing the module invocation with the following:
+% \begin{verbatim}
+% \usepackage[polish-compat]{babel}
+% \end{verbatim}
+%    This causes an exact copy of the module version v1.2l of
+%    2005/03/31 to be loaded.  However, please be aware that this old
+%    code has known problems (see Section~\ref{sec:compat-code}).  In
+%    compatibility mode a different list of shorthands is available,
+%    they are listed in Table~\ref{tab:polish-quote}.
+%    \begin{table}[htb]
+%     \caption{Shortcuts and commands provided in the compatibility
+%     mode. Be aware that these do not provide typographically
+%     acceptable shapes of Polish accented characters.}
+%     \label{tab:polish-quote}
+%     \begin{center}\fontencoding{OT1}\selectfont
+%     \begin{tabular}{lp{10cm}}
+%      |"a| & or |\aob|, for a-ogonek (rendered ą)\\
+%      |"A| & or |\Aob|, for A-ogonek (rendered \k{A})\\
+%      |"e| & or |\eob|, for e-ogonek (rendered \k{e})\\
+%      |"E| & or |\Eob|, for E-ogonek (rendered \k{E})\\
+%      |"c| & or |\'c|,  for accented c (\'c),
+%                      same with uppercase letters and n, o, s\\
+%      |"l| & or |\lpb{}|, for l with stroke (\l)\\
+%      |"L| & or |\Lpb{}|, for L with stroke (\L)\\
+%      |"r| & or |\zkb{}|, for z-dot-accent (\.z), cf.
+%      pronounciation\\
+%      |"R| & or |\Zkb{}|, for Z-dot-accent (\.Z)\\
+%      |"z| & or |\'z|,  for accented z (ź)\\
+%      |"Z| & or |\'Z|,  for accented Z (Ź)\\
+%      \verb="|= & disable ligature at this position.\\
+%      |"-| & an explicit hyphen sign, allowing hyphenation
+%                  in the rest of the word.\\
+%      |""| & like |"-|, but producing no hyphen sign
+%                  (for compund words with hyphen, e.g.\ |x-""y|). \\
+%      |"`| & for Polish left double quote (,,).   \\
+%      |"'| & for Polish right double quote ('').                  \\
+%      |"<| & for French left double quote (\guillemotleft). \\
+%      |">| & for French right double quote (\guillemotright).\\
+%     \end{tabular}
+%     \end{center}
+%    \end{table}
+%
+% \StopEventually{}\newpage
+%
+% \section{The code}
+%    \begin{macrocode}
+%<*code>
+\LdfInit{polish}\captionspolish
+%    \end{macrocode}
+%
+%    The new code requires at least the version 3.63 of Babel where
+%    the macro \cs{babel@texpdf} was first introduced.
+%    \begin{macrocode}
+\@ifpackagelater{babel}{2021/08/30}{%
+}{\PackageError{polish.ldf}{Babel too old, at least version 2021/08/30
+    required}{}%
+  \providecommand\babel@texpdf[4]{#1}%
+}
+%    \end{macrocode}
+%
+%    When this file is read as an option, i.e. by the |\usepackage|
+%    command, \texttt{polish} could be an `unknown' language in which
+%    case we have to make it known. So we check for the existence of
+%    |\l@polish| to see whether we have to do something here.
+%
+%    \begin{macrocode}
+\ifx\l@polish\@undefined
+  \@nopatterns{Polish}
+  \adddialect\l@polish\l@unhyphenated\fi
+%    \end{macrocode}
+%
+% \begin{macro}{\captionspolish}
+%    The macro |\captionspolish| defines all strings used in the four
+%    standard documentclasses provided with \LaTeX.
+%    \begin{macrocode}
+\StartBabelCommands*{polish}{captions}
+  [unicode, charset=utf8, fontenc=TU EU1 EU2]
+  \SetString{\prefacename}{Przedmowa}
+  \SetString{\refname}{Literatura}
+  \SetString{\abstractname}{Streszczenie}
+  \SetString{\bibname}{Bibliografia}
+  \SetString{\chaptername}{Rozdział}
+  \SetString{\appendixname}{Dodatek}
+  \SetString{\contentsname}{Spis treści}
+  \SetString{\listfigurename}{Spis rysunków}
+  \SetString{\listtablename}{Spis tabel}
+  \SetString{\indexname}{Skorowidz}
+  \SetString{\figurename}{Rysunek}
+  \SetString{\tablename}{Tabela}
+  \SetString{\partname}{Część}
+  \SetString{\enclname}{Załączniki}
+  \SetString{\ccname}{Do wiadomości}
+  \SetString{\headtoname}{Do}
+  \SetString{\pagename}{Strona}
+  \SetString{\seename}{zob.}
+  \SetString{\alsoname}{zob. także}
+  \SetString{\proofname}{Dowód}
+  \SetString{\glossaryname}{Słowniczek}
+
+\StartBabelCommands*{polish}{date}
+  [unicode, charset=utf8, fontenc=TU EU1 EU2]
+  \SetStringLoop{month#1name}{%
+    stycznia,lutego,marca,kwietnia,maja,czerwca,%
+    lipca,sierpnia,września,października,listopada,grudnia}
+%    \end{macrocode}
+%    And now, the generic branch, using the LICR and assuming T1.
+%    \begin{macrocode}
+\StartBabelCommands*{polish}{captions}
+  \SetString{\prefacename}{Przedmowa}
+  \SetString{\refname}{Literatura}
+  \SetString{\abstractname}{Streszczenie}
+  \SetString{\bibname}{Bibliografia}
+  \SetString{\chaptername}{Rozdzia\l}
+  \SetString{\appendixname}{Dodatek}
+  \SetString{\contentsname}{Spis tre\'sci}
+  \SetString{\listfigurename}{Spis rysunk\'ow}
+  \SetString{\listtablename}{Spis tabel}
+  \SetString{\indexname}{Skorowidz}
+  \SetString{\figurename}{Rysunek}
+  \SetString{\tablename}{Tabela}
+  \SetString{\partname}{Cz\k{e}\'s\'c}
+  \SetString{\enclname}{Za\l\k{a}czniki}
+  \SetString{\ccname}{Do wiadomo\'sci}
+  \SetString{\headtoname}{Do}
+  \SetString{\pagename}{Strona}
+  \SetString{\seename}{zob.}
+  \SetString{\alsoname}{zob. tak\.ze}
+  \SetString{\proofname}{Dow\'od}
+  \SetString{\glossaryname}{S\l owniczek}
+
+\StartBabelCommands*{polish}{date}
+  \SetStringLoop{month#1name}{%
+    stycznia,lutego,marca,kwietnia,maja,czerwca,%
+    lipca,sierpnia,wrze\'snia,pa\'zdziernika,listopada,grudnia}
+  \SetString\today{%
+    {\number\day}~\@nameuse{month\romannumeral\month name} {\number\year}}
+\EndBabelCommands
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\extraspolish}
+% \begin{macro}{\noextraspolish}
+%    The macro |\extraspolish| will perform all the extra definitions
+%    needed for the Polish language. The macro |\noextraspolish| is
+%    used to cancel the actions of |\extraspolish|.
+%
+%    \begin{macrocode}
+\initiate@active@char{"}
+\declare@shorthand{polish}{"-}{\bbl@hy@soft}
+\declare@shorthand{polish}{"=}{\babel@texpdf{\bbl@hy@repeat}{-}{-}{\textminus}}
+\declare@shorthand{polish}{"|}{\babel@texpdf{\discretionary{-}{}{\kern.03em}}{}{}{}}
+\declare@shorthand{polish}{"`}{\quotedblbase}
+\declare@shorthand{polish}{"'}{\textquotedblright}
+\declare@shorthand{polish}{"<}{\guillemotleft}
+\declare@shorthand{polish}{">}{\guillemotright}
+%    \end{macrocode}
+%    We specify that the polish group of shorthands should be used.
+%    These characters are `turned on' once, later their definition may
+%    vary. 
+%    \begin{macrocode}
+\addto\extraspolish{%
+  \bbl@frenchspacing
+  \languageshorthands{polish}%
+  \bbl@activate{"}}
+%    \end{macrocode}
+%
+%    For Polish texts |\frenchspacing| should be in effect. We
+%    make sure this is the case and reset it if necessary.
+%
+%    \begin{macrocode}
+\addto\noextraspolish{%
+  \bbl@nonfrenchspacing
+  \bbl@deactivate{"}}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+%    \begin{macrocode}
+\ldf@finish{polish}
+%</code>
+%    \end{macrocode}
+%
+% \subsection{Compatibility code}
+% \label{sec:compat-code}
+%
+%    This section contains the code and documentation of version v1.2l
+%    (2005/03/31) of \file{polish.ldf}, which is used for
+%    \file{polish-compat}. We keep 
+%    it as a compatibility fallback, since (more or less) this version was
+%    available for almost 20 years and some documents may depend on its
+%    idiosyncratic features.  There are known problems with this code:
+%    \begin{itemize}
+%    \item The \texttt{"}-shorthands for Polish characters do not use
+%      LICR, so even with modern fonts the precomposed characters from
+%      the font are not used (in the case of \textit{ą, ę, ł, ż}).
+%    \item The substitute for ogonek accent defined for OT1 is not
+%      accessible with standard \cs{k} (besides being hideous).
+%    \item Wrong shape of \textit{ę} is used in the word
+%      \textit{Część} generated by the command \cs{part}.
+%    \item The code is \textbf{evil}: it redefines \cs{selectfont},
+%      which leads to conflicts with some standard \LaTeX\ packages.
+%      Another known incompatibility is the macro \cs{lll}, which
+%      conflicts with AMS-\LaTeX.
+%    \end{itemize}
+%    
+%    The macro |\LdfInit| takes care of preventing that this file is
+%    loaded more than once, checking the category code of the
+%    \texttt{@} sign, etc.
+% \changes{polish-1.2d}{1996/11/03}{Now use \cs{LdfInit} to perform
+%    initial checks} 
+%    \begin{macrocode}
+%<*compat>
+\LdfInit{polish}\captionspolish
+%    \end{macrocode}
+% \iffalse
+%% File `polish.dtx'
+%% Babel package for LaTeX version 2e
+%% Copyright (C) 1989 -- 2005
+%%           by Johannes Braams, TeXniek
+%
+%% Polish Language Definition File
+%% Copyright (C) 1989 - 2005
+%%           by Elmar Schalueck, Michael Janich
+%              Universitaet-Gesamthochschule Paderborn
+%              Warburger Strasse 100
+%              4790 Paderborn
+%              Germany
+%              elmar at uni-paderborn.de
+%              massa at uni-paderborn.de
+%
+%% Please report errors to: J.L. Braams
+%%                          babel at braams.cistron.nl
+% \fi
+%
+%    This file is part of the babel system, it provides the source
+%    code for the Polish language definition file. It was developped
+%    out of Polish.tex, which was written by Elmar Schalueck and
+%    Michael Janich. Polish.tex was based on code by Leszek
+%    Holenderski, Jerzy Ryll and J. S. Bie\'n from Faculty of
+%    Mathematics,Informatics and Mechanics of Warsaw University, exept
+%    of Jerzy Ryll (Instytut Informatyki Uniwersytetu Warszawskiego).
+%
+%    When this file is read as an option, i.e. by the |\usepackage|
+%    command, \texttt{polish} could be an `unknown' language in which
+%    case we have to make it known. So we check for the existence of
+%    |\l@polish| to see whether we have to do something here.
+%
+% \changes{polish-1.1c}{1994/06/26}{Now use \cs{@nopatterns} to
+%    produce the warning}
+%    \begin{macrocode}
+\ifx\l@polish\@undefined
+  \@nopatterns{Polish}
+  \adddialect\l@polish0\fi
+%    \end{macrocode}
+%
+%    The next step consists of defining commands to switch to (and
+%    from) the Polish language.
+%
+% \begin{macro}{\captionspolish}
+%    The macro |\captionspolish| defines all strings used in the four
+%    standard documentclasses provided with \LaTeX.
+% \changes{polish-1.2b}{1995/07/04}{Added \cs{proofname} for
+%    AMS-\LaTeX}
+% \changes{polish-1.2f}{1997/09/11}{Added translation for Proof and
+%    changed translation of Contents}
+% \changes{polish-1.2i}{2000/09/19}{\cs{bibname} and \cs{refname} were
+%    swapped}
+% \changes{polish-1.2i}{2000/09/19}{Added \cs{glossaryname}}
+%    \begin{macrocode}
+\addto\captionspolish{%
+  \def\prefacename{Przedmowa}%
+  \def\refname{Literatura}%
+  \def\abstractname{Streszczenie}%
+  \def\bibname{Bibliografia}%
+  \def\chaptername{Rozdzia\l}%
+  \def\appendixname{Dodatek}%
+  \def\contentsname{Spis tre\'sci}%
+  \def\listfigurename{Spis rysunk\'ow}%
+  \def\listtablename{Spis tablic}%
+  \def\indexname{Indeks}%
+  \def\figurename{Rysunek}%
+  \def\tablename{Tablica}%
+  \def\partname{Cz\eob{}\'s\'c}%
+  \def\enclname{Za\l\aob{}cznik}%
+  \def\ccname{Kopie:}%
+  \def\headtoname{Do}%
+  \def\pagename{Strona}%
+  \def\seename{Por\'ownaj}%
+  \def\alsoname{Por\'ownaj tak\.ze}%
+  \def\proofname{Dow\'od}%
+  \def\glossaryname{Glossary}% <-- Needs translation
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\datepolish}
+%    The macro |\datepolish| redefines the command |\today| to produce
+%    Polish dates.
+% \changes{polish-1.2f}{1997/10/01}{Use \cs{edef} to define
+%    \cs{today} to save memory}
+% \changes{polish-1.2f}{1998/03/28}{use \cs{def} instead of \cs{edef}}
+% \changes{polish-1.2i}{2000/01/08}{A missing comment character caused
+%    an unwanted space character in the output}
+%    \begin{macrocode}
+\def\datepolish{%
+  \def\today{\number\day~\ifcase\month\or
+  stycznia\or lutego\or marca\or kwietnia\or maja\or czerwca\or lipca\or
+  sierpnia\or wrze\'snia\or pa\'zdziernika\or listopada\or grudnia\fi
+  \space\number\year}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\extraspolish}
+% \begin{macro}{\noextraspolish}
+%    The macro |\extraspolish| will perform all the extra definitions
+%    needed for the Polish language. The macro |\noextraspolish| is
+%    used to cancel the actions of |\extraspolish|.
+%
+%    For Polish the \texttt{"} character is made active. This is
+%    done once, later on its definition may vary. Other languages in
+%    the same document may also use the \texttt{"} character for
+%    shorthands; we specify that the polish group of shorthands
+%    should be used.
+%
+%    \begin{macrocode}
+\initiate@active@char{"}
+\addto\extraspolish{\languageshorthands{polish}}
+\addto\extraspolish{\bbl@activate{"}}
+%    \end{macrocode}
+%    Don't forget to turn the shorthands off again.
+% \changes{polish-1.2h}{1999/12/17}{Deactivate shorthands ouside of
+%    Polish}
+%    \begin{macrocode}
+\addto\noextraspolish{\bbl@deactivate{"}}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+%    The code above is necessary because we need an extra
+%    active character. This character is then used as indicated in
+%    table~\ref{tab:polish-quote}.
+%
+%    If you have problems at the end of a word with a linebreak, use
+%    the other version without hyphenation tricks. Some TeX wizard may
+%    produce a better solution with forcasting another token to decide
+%    whether the character after the double quote is the last in a
+%    word. Do it and let us know.
+%
+%    In Polish texts some letters get special diacritical marks.
+%    Leszek Holenderski designed the following code to position the
+%    diacritics correctly for every font in every size. These macros
+%    need a few extra dimension variables.
+%
+%    \begin{macrocode}
+\newdimen\pl@left
+\newdimen\pl@down
+\newdimen\pl@right
+\newdimen\pl@temp
+%    \end{macrocode}
+%
+%  \begin{macro}{\sob}
+%    The macro |\sob| is used to put the `ogonek' in the right
+%    place.
+%
+% \changes{polish-1.2d}{1996/08/18}{This macro is meant to be used in
+%    horizontal mode; so leave vertical mode if necessary} 
+%    \begin{macrocode}
+\def\sob#1#2#3#4#5{%parameters: letter and fractions hl,ho,vl,vo
+  \setbox0\hbox{#1}\setbox1\hbox{$_\mathchar'454$}\setbox2\hbox{p}%
+  \pl@right=#2\wd0 \advance\pl@right by-#3\wd1
+  \pl@down=#5\ht1 \advance\pl@down by-#4\ht0
+  \pl@left=\pl@right \advance\pl@left by\wd1
+  \pl@temp=-\pl@down \advance\pl@temp by\dp2 \dp1=\pl@temp
+  \leavevmode
+  \kern\pl@right\lower\pl@down\box1\kern-\pl@left #1}
+%    \end{macrocode}
+%  \end{macro}
+%
+%  \begin{macro}{\aob}
+%  \begin{macro}{\Aob}
+%  \begin{macro}{\eob}
+%  \begin{macro}{\Eob}
+%    The ogonek is placed with the letters `a', `A', `e', and `E'.
+% \changes{polish-1.2d}{1996/08/18}{Use the constructed version of the
+%    characters only in OT1; use proper characters in T1.} 
+%    \begin{macrocode}
+\DeclareTextCommand{\aob}{OT1}{\sob a{.66}{.20}{0}{.90}}
+\DeclareTextCommand{\Aob}{OT1}{\sob A{.80}{.50}{0}{.90}}
+\DeclareTextCommand{\eob}{OT1}{\sob e{.50}{.35}{0}{.93}}
+\DeclareTextCommand{\Eob}{OT1}{\sob E{.60}{.35}{0}{.90}}
+%    \end{macrocode}
+%    For the 'new' \texttt{T1} encoding we can provide simpler
+%    definitions. 
+%    \begin{macrocode}
+\DeclareTextCommand{\aob}{T1}{\k a}
+\DeclareTextCommand{\Aob}{T1}{\k A}
+\DeclareTextCommand{\eob}{T1}{\k e}
+\DeclareTextCommand{\Eob}{T1}{\k E}
+%    \end{macrocode}
+%    Construct the characters by default from the OT1 encoding.
+%    \begin{macrocode}
+\ProvideTextCommandDefault{\aob}{\UseTextSymbol{OT1}{\aob}}
+\ProvideTextCommandDefault{\Aob}{\UseTextSymbol{OT1}{\Aob}}
+\ProvideTextCommandDefault{\eob}{\UseTextSymbol{OT1}{\eob}}
+\ProvideTextCommandDefault{\Eob}{\UseTextSymbol{OT1}{\Eob}}
+%    \end{macrocode}
+%  \end{macro}
+%  \end{macro}
+%  \end{macro}
+%  \end{macro}
+%
+%  \begin{macro}{\spb}
+%    The macro |\spb| is used to put the `poprzeczka' in the
+%    right place.
+%
+% \changes{polish-1.2d}{1996/08/18}{\cs{spb} is meant to be used in
+%    horizontal mode; so leave vertical mode if necessary} 
+%    \begin{macrocode}
+\def\spb#1#2#3#4#5{%
+  \setbox0\hbox{#1}\setbox1\hbox{\char'023}%
+  \pl@right=#2\wd0 \advance\pl@right by-#3\wd1
+  \pl@down=#5\ht1 \advance\pl@down by-#4\ht0
+  \pl@left=\pl@right \advance\pl@left by\wd1
+  \ht1=\pl@down \dp1=-\pl@down
+  \leavevmode
+  \kern\pl@right\lower\pl@down\box1\kern-\pl@left #1}
+%    \end{macrocode}
+%  \end{macro}
+%
+%  \begin{macro}{\skb}
+%    The macro |\skb| is used to put the `kropka' in the
+%    right place.
+%
+% \changes{polish-1.2d}{1996/08/18}{\cs{skb} is meant to be used in
+%    horizontal mode; so leave vertical mode if necessary} 
+%    \begin{macrocode}
+\def\skb#1#2#3#4#5{%
+  \setbox0\hbox{#1}\setbox1\hbox{\char'056}%
+  \pl@right=#2\wd0 \advance\pl@right by-#3\wd1
+  \pl@down=#5\ht1 \advance\pl@down by-#4\ht0
+  \pl@left=\pl@right \advance\pl@left by\wd1
+  \leavevmode
+  \kern\pl@right\lower\pl@down\box1\kern-\pl@left #1}
+%    \end{macrocode}
+%  \end{macro}
+%
+%  \begin{macro}{\textpl}
+%    For the `poprzeczka' and the `kropka' in text fonts we don't need
+%    any special coding, but we can (almost) use what is already
+%    available.
+%
+%    \begin{macrocode}
+\def\textpl{%
+  \def\lpb{\plll}%
+  \def\Lpb{\pLLL}%
+  \def\zkb{\.z}%
+  \def\Zkb{\.Z}}
+%    \end{macrocode}
+%    Initially we assume that typesetting is done with text fonts.
+% \changes{polish-1.0a}{1993/11/05}{Initially execute `textpl}
+%    \begin{macrocode}
+\textpl
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\let\lll=\l \let\LLL=\L
+\def\plll{\lll}
+\def\pLLL{\LLL}
+%    \end{macrocode}
+%  \end{macro}
+%
+%  \begin{macro}{\telepl}
+%    But for the `teletype' font in `OT1' encoding we have to take some
+%    special actions, involving the macros defined above.
+%
+%    \begin{macrocode}
+\def\telepl{%
+  \def\lpb{\spb l{.45}{.5}{.4}{.8}}%
+  \def\Lpb{\spb L{.23}{.5}{.4}{.8}}%
+  \def\zkb{\skb z{.5}{.5}{1.2}{0}}%
+  \def\Zkb{\skb Z{.5}{.5}{1.1}{0}}}
+%    \end{macrocode}
+%  \end{macro}
+%
+%    To activate these codes the font changing commands as they are
+%    defined in \LaTeX\ are modified. The same is done for plain
+%    \TeX's font changing commands.
+%
+%    When |\selectfont| is undefined the current format is spposed to be
+%    either plain (based) or \LaTeX$\:$2.09.
+% \changes{polish-1.2a}{1995/06/06}{Don't modify \cs{rm} and friends for
+%    \LaTeXe, take \cs{selectfont } instead}
+%    \begin{macrocode}
+\ifx\selectfont\@undefined
+  \ifx\prm\@undefined \addto\rm{\textpl}\else \addto\prm{\textpl}\fi
+  \ifx\pit\@undefined \addto\it{\textpl}\else \addto\pit{\textpl}\fi
+  \ifx\pbf\@undefined \addto\bf{\textpl}\else \addto\pbf{\textpl}\fi
+  \ifx\psl\@undefined \addto\sl{\textpl}\else \addto\psl{\textpl}\fi
+  \ifx\psf\@undefined                   \else \addto\psf{\textpl}\fi
+  \ifx\psc\@undefined                   \else \addto\psc{\textpl}\fi
+  \ifx\ptt\@undefined \addto\tt{\telepl}\else \addto\ptt{\telepl}\fi
+\else
+%    \end{macrocode}
+%    When |\selectfont| exists we assume \LaTeXe.
+%    \begin{macrocode}
+  \expandafter\addto\csname selectfont \endcsname{%
+    \csname\f@encoding @pl\endcsname}
+\fi
+%    \end{macrocode}
+%    Currently we support the OT1 and T1 encodings. For T1 we don't
+%    have to make a difference between typewriter fonts and other
+%    fonts, they all have the same glyphs.
+%    \begin{macrocode}
+\expandafter\let\csname T1@pl\endcsname\textpl
+%    \end{macrocode}
+%    For OT1 we need to check the current font family, stored in
+%    |\f@family|. Unfortunately we need a hack as |\ttdefault| is
+%    defined as a |\long| macro, while |\f@family| is not.
+%    \begin{macrocode}
+\expandafter\def\csname OT1@pl\endcsname{%
+  \long\edef\curr@family{\f@family}%
+  \ifx\curr@family\ttdefault
+    \telepl
+  \else
+    \textpl
+  \fi}
+%    \end{macrocode}
+%
+%  \begin{macro}{\dq}
+%    We save the original double quote character in |\dq| to keep
+%    it available, the math accent |\"| can now be typed as |"|.
+%    \begin{macrocode}
+\begingroup \catcode`\"12
+\def\x{\endgroup
+  \def\dq{"}}
+\x
+%    \end{macrocode}
+%  \end{macro}
+%
+%    Now we can define the doublequote macros for diacritics,
+% \changes{polish-1.1d}{1995/01/31}{The dqmacro for C used \cs{'c}}
+%    \begin{macrocode}
+\declare@shorthand{polish}{"a}{\textormath{\aob}{\ddot a}}
+\declare@shorthand{polish}{"A}{\textormath{\Aob}{\ddot A}}
+\declare@shorthand{polish}{"c}{\textormath{\'c}{\acute c}}
+\declare@shorthand{polish}{"C}{\textormath{\'C}{\acute C}}
+\declare@shorthand{polish}{"e}{\textormath{\eob}{\ddot e}}
+\declare@shorthand{polish}{"E}{\textormath{\Eob}{\ddot E}}
+\declare@shorthand{polish}{"l}{\textormath{\lpb}{\ddot l}}
+\declare@shorthand{polish}{"L}{\textormath{\Lpb}{\ddot L}}
+\declare@shorthand{polish}{"n}{\textormath{\'n}{\acute n}}
+\declare@shorthand{polish}{"N}{\textormath{\'N}{\acute N}}
+\declare@shorthand{polish}{"o}{\textormath{\'o}{\acute o}}
+\declare@shorthand{polish}{"O}{\textormath{\'O}{\acute O}}
+\declare@shorthand{polish}{"s}{\textormath{\'s}{\acute s}}
+\declare@shorthand{polish}{"S}{\textormath{\'S}{\acute S}}
+%    \end{macrocode}
+%  \begin{macro}{\polishrz}
+%  \begin{macro}{\polishzx}
+% \changes{polish-1.2j}{2000/11/11}{Added support for two
+%    notationstyles for kropka and accented z}
+%    The command |\polishrz| defines the shorthands |"r|, |"z| and
+%    |"x| to produce pointed z, accented z and |"x|. This is the
+%    default as these shorthands were defined by this language
+%    definition file for quite some time.
+%    \begin{macrocode}
+\newcommand*{\polishrz}{%
+  \declare@shorthand{polish}{"r}{\textormath{\zkb}{\ddot r}}%
+  \declare@shorthand{polish}{"R}{\textormath{\Zkb}{\ddot R}}%
+  \declare@shorthand{polish}{"z}{\textormath{\'z}{\acute z}}%
+  \declare@shorthand{polish}{"Z}{\textormath{\'Z}{\acute Z}}%
+  \declare@shorthand{polish}{"x}{\dq x}%
+  \declare@shorthand{polish}{"X}{\dq X}%
+  }
+\polishrz
+%    \end{macrocode}
+%    The command |\polishzx| switches to a different set of
+%    shorthands, |"z|, |"x| and |"r| to produce pointed z, accented z
+%    and |"r|; a different shorthand notation also in use.
+% \changes{polish-1.2k}{2003/10/12}{Fixed a typo}
+%    \begin{macrocode}
+\newcommand*{\polishzx}{%
+  \declare@shorthand{polish}{"z}{\textormath{\zkb}{\ddot z}}%
+  \declare@shorthand{polish}{"Z}{\textormath{\Zkb}{\ddot Z}}%
+  \declare@shorthand{polish}{"x}{\textormath{\'z}{\acute x}}%
+  \declare@shorthand{polish}{"X}{\textormath{\'Z}{\acute X}}%
+  \declare@shorthand{polish}{"r}{\dq r}%
+  \declare@shorthand{polish}{"R}{\dq R}%
+  }
+%    \end{macrocode}
+%  \end{macro}
+%  \end{macro}
+%
+%    Then we define access to two forms of quotation marks, similar
+%    to the german and french quotation marks.
+% \changes{polish-1.2e}{1997/04/03}{Removed empty groups after
+%    double quote and guillemot characters}
+% \changes{polish-1.2l}{2004/02/18}{Changed closing quote}
+%    \begin{macrocode}
+\declare@shorthand{polish}{"`}{%
+  \textormath{\quotedblbase}{\mbox{\quotedblbase}}}
+\declare@shorthand{polish}{"'}{%
+  \textormath{\textquotedblright}{\mbox{\textquotedblright}}}
+\declare@shorthand{polish}{"<}{%
+  \textormath{\guillemotleft}{\mbox{\guillemotleft}}}
+\declare@shorthand{polish}{">}{%
+  \textormath{\guillemotright}{\mbox{\guillemotright}}}
+%    \end{macrocode}
+%    then we define two shorthands to be able to specify hyphenation
+%    breakpoints that behavew a little different from |\-|.
+%    \begin{macrocode}
+\declare@shorthand{polish}{"-}{\nobreak-\bbl@allowhyphens}
+\declare@shorthand{polish}{""}{\hskip\z@skip}
+%    \end{macrocode}
+%    And we want to have a shorthand for disabling a ligature.
+%    \begin{macrocode}
+\declare@shorthand{polish}{"|}{%
+  \textormath{\discretionary{-}{}{\kern.03em}}{}}
+%    \end{macrocode}
+%
+%
+%  \begin{macro}{\mdqon}
+%  \begin{macro}{\mdqoff}
+%    All that's left to do now is to  define a couple of commands
+%    for reasons of compatibility with \file{polish.tex}.
+% \changes{polish-1.2f}{1998/06/07}{Now use \cs{shorthandon} and
+%    \cs{shorthandoff}} 
+%    \begin{macrocode}
+\def\mdqon{\shorthandon{"}}
+\def\mdqoff{\shorthandoff{"}}
+%    \end{macrocode}
+%  \end{macro}
+%  \end{macro}
+%
+%    The macro |\ldf@finish| takes care of looking for a
+%    configuration file, setting the main language to be switched on
+%    at |\begin{document}| and resetting the category code of
+%    \texttt{@} to its original value.
+% \changes{polish-1.2d}{1996/11/03}{Now use \cs{ldf@finish} to wrap
+%    up} 
+%    \begin{macrocode}
+\ldf@finish{polish}
+%</compat>
+%    \end{macrocode}
+%
+% \Finale
+%
+%% \CharacterTable
+%%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%%   Digits        \0\1\2\3\4\5\6\7\8\9
+%%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%%   Dollar        \$     Percent       \%     Ampersand     \&
+%%   Acute accent  \'     Left paren    \(     Right paren   \)
+%%   Asterisk      \*     Plus          \+     Comma         \,
+%%   Minus         \-     Point         \.     Solidus       \/
+%%   Colon         \:     Semicolon     \;     Less than     \<
+%%   Equals        \=     Greater than  \>     Question mark \?
+%%   Commercial at \@     Left bracket  \[     Backslash     \\
+%%   Right bracket \]     Circumflex    \^     Underscore    \_
+%%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%%   Right brace   \}     Tilde         \~}
+%%
+\endinput
+
+% \endinput
+% Local Variables:
+% mode: doctex
+% TeX-master: t
+% End:

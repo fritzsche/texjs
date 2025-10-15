@@ -1,0 +1,658 @@
+% \iffalse meta-comment
+%
+%% File: annee-scolaire.dtx 
+%% Copyright (C) 2020 Yvon Henel aka Le TeXnicien de surface
+%%
+%% It may be distributed and/or modified under the conditions of the
+%% LaTeX Project Public License (LPPL), either version 1.3c of this
+%% license or (at your option) any later version.  The latest version
+%% of this license is in the file
+%%
+%%    http://www.latex-project.org/lppl.txt
+%%
+%
+%<*driver|package|doc>
+\RequirePackage{expl3}[2013/03/12]
+\GetIdInfo$Id: annee-scolaire.dtx 1.6 2020-07-29 TdS $
+  {}
+%</driver|package|doc>
+%<*driver>
+\documentclass[full]{l3doc}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage[french,main=english]{babel}
+\usepackage{annee-scolaire}
+\usepackage{xspace}
+\usepackage{csquotes}
+
+
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \title{^^A
+%   The \pkg{annee-scolaire} package^^A
+%   \thanks{This file describes v\ExplFileVersion, last revised \ExplFileDate.}^^A
+% }
+%
+% \author{^^A
+%  Yvon Henel\thanks^^A
+%    {^^A
+%      E-mail:
+%        \href{mailto:le.texnicien.de.surface@yvon-henel.fr}
+%          {le.texnicien.de.surface@yvon-henel.fr}^^A
+%    }^^A
+% }
+%
+% \date{Released \ExplFileDate}
+%
+% \maketitle
+% 
+% \changes{v1.5}{2020/04/05}{First public
+% version.\foreignlanguage{french}{\emph{Première version publique.}}}
+% \changes{v1.6}{2020/04/13}{Correction of typos in documentation.
+% \foreignlanguage{french}{\emph{Correction d'erreurs dans la documentation.}}}
+% \changes{v1.6}{2020/04/13}{Unification of lppl version in documentation.
+% \foreignlanguage{french}{\emph{Unification de la version de la LPPL dans la
+% documentation.}}}
+% \changes{v1.6}{2020/07/29}{Replacement of obsolete macro \cs{c_one}.
+% \foreignlanguage{french}{\emph{Remplacement de la macro obsolète \cs{c_one}.}}}
+%
+% \thispagestyle{empty}
+% 
+% \noindent\hrulefill
+%
+% \begin{otherlanguage}{french}
+% \begin{abstract}
+%   Cette extension fournit des commandes pour écrire l'année scolaire en
+%   cours. L'année est calculée à partir de la date de compilation du
+%   document. La date de début de l'année scolaire est, par défaut, le 1\ier 
+%   aout mais deux options de l'extension permettent de la changer.
+% 
+%   Cette documentation a été écrite pendant l'année
+%   universitaire~\anneescolaire{}.
+% 
+%   La documentation française pour l'utilisateur de l'extension
+%   \pkg{annee-scolaire} est disponible sous le nom de
+%   \texttt{annee-scolaire-fra}. 
+% \end{abstract}
+% \end{otherlanguage}
+% 
+% \noindent\hrulefill
+%
+% \begin{abstract}
+%   This package provides macros to write the academic year (French way). The
+%   year is calculated from the compilation date. The day of the beginning of
+%   the academic year is, by default, 1st August but two options of the package
+%   enable us to change it.
+%   
+%   This documentation was written during academic year~\anneescolaire{}.
+% 
+%   The English documentation for the final user of the package
+%   \pkg{annee-scolaire} is available in the file
+%   \texttt{annee-scolaire-eng}.
+% \end{abstract}
+% 
+% \noindent\hrulefill
+% 
+% \DisableDocumentation
+% 
+% \begin{documentation}
+% 
+% \end{documentation}
+%
+% \iffalse
+%<*doc> 
+\documentclass[full]{l3doc}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+%<FRA>\usepackage[english,main=french]{babel}
+%<ENG>\usepackage[french,main=english]{babel}
+\usepackage{xparse}
+\usepackage[decalage=0]{annee-scolaire}
+\newcommand\BOP{\discretionary{}{}{}}
+\usepackage{xspace}
+\usepackage{csquotes}
+\usepackage{fancyvrb,fancyvrb-ex}
+\begin{document}
+%<*FRA>
+\title{Guide de l'utilisateur de \pkg{annee-scolaire}\thanks{Ce fichier
+    décrit la version~\ExplFileVersion, dernière révision~\ExplFileDate. Édition
+  spéciale \emph{confinement}.}}
+%</FRA>
+%<*ENG>
+\title{\pkg{annee-scolaire} user guide\thanks{This file describes
+    version~\ExplFileVersion, last revised~\ExplFileDate. Special
+    \emph{quarantine} edition.}}
+%</ENG>
+\author{Yvon Henel\thanks{E-mail:
+    \href{mailto:le.texnicien.de.surface@yvon-henel.fr}
+    {le.texnicien.de.surface@yvon-henel.fr}}}
+\maketitle
+\noindent\hrulefill
+
+\begin{abstract}
+%<*FRA> 
+Une macro \cs{anneescolaire} pour écrire automatiquement l'année scolaire en
+fonction de la date du jour de compilation.
+%</FRA>
+%<*ENG>
+A macro \cs{anneescolaire} to automatically write academic year (French way)
+according to the date of compilation day.
+%</ENG>
+\end{abstract}
+
+\noindent\hrulefill
+
+%<FRA> \begin{otherlanguage}{english}
+%<ENG> \begin{otherlanguage}{french}
+\begin{abstract}
+%<*FRA> 
+A macro \cs{anneescolaire} to automatically write academic year (French way)
+according to the date of compilation day.
+
+The English documentation for the final user of the package
+\pkg{annee-scolaire} is available in the file \texttt{annee-scolaire-eng}. 
+%</FRA>
+%<*ENG>
+Une macro \cs{anneescolaire} pour écrire automatiquement l'année scolaire en
+fonction de la date du jour de compilation.
+
+La documentation française pour l'utilisateur de l'extension
+\pkg{annee-scolaire} est disponible sous le nom de \texttt{annee-scolaire-fra}. 
+%</ENG>
+\end{abstract}
+\end{otherlanguage}
+
+\noindent\hrulefill
+\vspace{\baselineskip}
+
+%<*ENG>
+\section{The Macros}
+\label{sec:macros}
+
+\pkg{annee-scolaire} offers three main document macros which produce
+text in the final document and one macro which is used to determine the
+presentation of the said text.
+
+\subsection{Main Macros}
+\label{sec:main}
+
+This package has three main document macros viz.
+\begin{function}{\anneescolaire}
+  \begin{syntax}
+    \cs{anneescolaire}\oarg{shift}
+  \end{syntax}
+  where \meta{shift} is an integer the default value of which is~\(0\). It is
+  the number of years the academic year is shifted. The same optional argument
+  with the same aim is available for the next two macros.
+\end{function}
+
+In French \foreignquote{french}{année scolaire} means \enquote{school year}.
+
+\begin{function}{\debutanneescolaire}
+  \begin{syntax}
+    \cs{debutanneescolaire}\oarg{shift}
+  \end{syntax}
+\end{function}
+
+In French \foreignquote{french}{début d'année scolaire} means \enquote{beginning
+  of school year}.
+
+\begin{function}{\finanneescolaire}
+  \begin{syntax}
+    \cs{finanneescolaire}\oarg{shift}
+  \end{syntax}
+\end{function}
+
+In French \foreignquote{french}{fin d'année scolaire} means \enquote{end of
+  school year}.
+
+See examples on page~\pageref{sec:writingyear}.
+
+\subsection{Presentation Macro}
+\label{sec:look}
+
+The presentation of the years as written by the three preceding commands may be
+changed redefining the following macro: 
+\begin{function}{\AnneeScolairePresentation}
+  \begin{syntax}
+    \cs{AnneeScolairePresentation}\oarg{number}\marg{year}
+  \end{syntax}
+  where \meta{year} is a integer (a \LaTeX3 \texttt{\textit{int}}) which is the
+  number of the year to be written in the document. The optional argument
+  \meta{number} can be used to tailor the presentation according to the
+  following scheme
+  \begin{description}
+  \item[\textbf{1}] presentation of the beginning year in the text created by the
+    macro \cs{anneescolaire}; 
+  \item[\textbf{2}] presentation of the ending year in the text created by the
+    macro \cs{anneescolaire};
+  \item[\textbf{3}] presentation of the year in the text created by the
+    macro \cs{debutanneescolaire};
+  \item[\textbf{4}]  presentation of the year in the text created by the
+    macro \cs{finanneescolaire}.
+  \end{description}
+
+  By default, the macro is an alias of \cs{int_to_arabic:n}.
+  %
+  If you want to change the presentation, you have to redefine the command with
+  \cs{RenewDocumentCommand}. 
+\end{function}
+
+See examples on page \pageref{sec:changelook}.
+%</ENG>
+
+%<*FRA>
+\section{Les macros}
+\label{sec:macros}
+
+L'extension \pkg{annee-scolaire} offre quatre macros de document: trois macros
+principales produisant du texte et une macro, qui ne devrait être utilisée que
+rarement et peut-être même jamais, qui permet de changer la présentation du
+texte écrit. 
+
+\subsection{Macros principales}
+\label{sec:principales}
+
+Les trois macros principales de document sont les suivantes: 
+
+\begin{function}{\anneescolaire}
+  \begin{syntax}
+    \cs{anneescolaire}\oarg{décalage}
+  \end{syntax}
+  où \meta{décalage} est un entier relatif qui vaut~\(0\) par défaut.  C'est le
+  nombre d'années dont l'année scolaire est décalée. Les deux autres macros ont
+  le même argument optionnel. 
+\end{function}
+
+\begin{function}{\debutanneescolaire}
+  \begin{syntax}
+    \cs{debutanneescolaire}\oarg{décalage}
+  \end{syntax}
+\end{function}
+
+Comme son nom l'indique, cette macro donne l'année de début de l'année scolaire.
+
+\begin{function}{\finanneescolaire}
+  \begin{syntax}
+    \cs{finanneescolaire}\oarg{décalage}
+  \end{syntax}
+\end{function}
+
+Celle-ci donne l'année de fin.
+
+Voir les exemples en page~\pageref{sec:ecrireannee}.
+
+\subsection{Changement de la présentation}
+\label{sec:presentation}
+
+La présentation des années obtenues à l'aide des trois macros précédentes peut
+être modifiée en redéfinissant la macro \cs{AnneeScolairePresentation}:
+\begin{function}{\AnneeScolairePresentation}
+  \begin{syntax}
+    \cs{AnneeScolairePresentation}\oarg{numéro}\marg{année}
+  \end{syntax}
+  où \meta{année} est un entier relatif (\texttt{\textit{int}} au sens de
+  \LaTeX3), c'est le numéro de l'année à écrire dans le document. L'argument
+  optionnel \meta{numéro} peut être utilisé pour traiter différemment la
+  présentation suivant ce schéma
+  \begin{description}
+  \item[\textbf{1}] présentation de l'année de début dans le texte créé par la
+    macro \cs{anneescolaire}; 
+  \item[\textbf{2}] présentation de l'année de fin dans le texte créé par la
+    macro \cs{anneescolaire};
+  \item[\textbf{3}] présentation de l'année dans le texte créé par la
+    macro \cs{debutanneescolaire};
+  \item[\textbf{4}]  présentation de l'année dans le texte créé par la
+    macro \cs{finanneescolaire}.
+  \end{description}
+
+  Par défaut, cette macro est définie comme un alias de \cs{int_to_arabic:n}.
+  %
+  Si l'on veut changer la présentation, il faut redéfinir cette commande à
+  l'aide de \cs{RenewDocumentCommand}. 
+\end{function}
+
+Voir les exemples en page~\pageref{sec:aspect}.
+%</FRA>
+
+%<*ENG>
+\section{The Package Options}
+\label{sec:keys}
+
+The package uses the key-value options. There are four keys:
+\texttt{premiermois} (\emph{first month}), \texttt{premierjour} (\emph{first
+  day}), \texttt{decalage} (\emph{shift}) and \texttt{separateur}
+(\emph{separator}).
+
+\begin{description}
+\item[\texttt{premiermois} (\textit{\texttt{int}})] is the number of the first
+  month of the school year. It defaults to~\(8\).
+  
+\item[\texttt{premierjour} (\textit{\texttt{int}})] is the number of the first
+  day of the first month of the school year. Its default value is~\(1\) so the
+  school year begins, by default, on the first of August.
+
+  \emph{Beware: no attempt is made in order to ensure the consistency of the
+    chosen date --- you can chose the 32nd February if you dare. You have to
+    take care of that by yourself.}
+
+\item[\texttt{decalage} (\textit{\texttt{int}})] is an integer which defaults
+  to~\(0\). It is used to shift the school year: passing the option
+  \verb|decalage=1| to the package forces \cs{anneescolaire} to give the next
+  school year.
+
+\item[\texttt{separateur} (\textit{\texttt{token list}})] is the text used
+  between the numbers of the two calendar years which the school year spans. Its
+  default value is~\enquote{\texttt{-}}.
+\end{description}
+%</ENG>
+
+%<*FRA>
+\section{Les options de l'extension}
+\label{sec:clefs}
+
+L'extension utilise le système de clefs-valeurs pour ses options. Elle possède
+quatre clés: \texttt{premiermois}, \texttt{premierjour}, \texttt{decalage} et
+\texttt{separateur}.
+
+\begin{description}
+\item[\texttt{premiermois} (\textit{\texttt{int}})] contient le numéro du 1\ier
+  mois de l'année scolaire. Par défaut sa valeur est~\(8\);
+  
+\item[\texttt{premierjour} (\textit{\texttt{int}})] contient le numéro du 1\ier
+  jour du 1\ier mois de l'année scolaire. Par défaut sa valeur est~\(1\). La
+  date de début de l'année scolaire est donc le 1\ier aout;
+
+  \emph{Attention: l'extension ne vérifie pas la validité de la date ainsi
+    choisie --- choisir le 32 février ne provoquera pas d'erreur. L'utilisateur
+    s'en assurera lui-même.}
+  
+\item[\texttt{decalage} (\textit{\texttt{int}})] est un entier relatif qui vaut
+  \(0\) par défaut. Il permet de décaler l'année scolaire. En donnant l'option
+  \verb|decalage=1| à l'extension on force \cs{anneescolaire} à donner l'année
+  scolaire prochaine;
+  
+\item[\texttt{separateur} (\textit{\texttt{token list}})] est le texte utilisé
+  entre les numéros des deux années civiles composant l'année scolaire. Par
+  défaut sa valeur est \enquote{\texttt{-}}.
+\end{description}
+%</FRA> 
+
+%<*ENG>
+\section{Examples}
+\label{sec:examples}
+
+\subsection{Writing the School Year}
+\label{sec:writingyear}
+
+The text\\[0.5\baselineskip]
+\enquote{Today is \today, academic year \anneescolaire, beginning
+  in~\debutanneescolaire{} and ending in~\finanneescolaire.}\\[0.5\baselineskip]
+is obtained with the code\\[0.5\baselineskip]
+\texttt{Today is \cs{today}, academic year \cs{anneescolaire}, beginning
+  in}\verb|~|\cs{debutannee}\BOP \texttt{sco}\BOP \texttt{laire}\verb|{}|
+\texttt{and ending in\verb|~|\cs{finanneescolaire}.}
+
+\medskip{}
+
+What follows illustrates the use of the optional argument of the three document
+commands. 
+%</ENG>
+
+%<*FRA>
+\section{Exemples}
+\label{sec:exemples}
+
+\subsection{Écrire l'année scolaire}
+\label{sec:ecrireannee}
+
+Le texte\\[0.5\baselineskip]
+\enquote{Aujourd'hui est le \today, année scolaire \anneescolaire, débutant
+  en~\debutanneescolaire{} et finissant en~\finanneescolaire.}\\[0.5\baselineskip]
+est obtenu avec le code\\[0.5\baselineskip]
+\texttt{Aujourd'hui} \texttt{est} \texttt{le} \cs{today}\texttt{,}
+\texttt{année} \texttt{scolaire} \cs{anneescolaire}\texttt{,} \texttt{débutant}
+\texttt{en}\verb|~|\cs{de}\BOP{}\texttt{but}\BOP \texttt{an}\BOP
+\texttt{nee}\BOP \texttt{sco}\BOP \texttt{laire}\verb|{}| \texttt{et}
+\texttt{finissant} \texttt{en}\verb|~|\cs{finanneescolaire}.
+
+\medskip{}
+
+La suite illustre l'utilisation de l'argument optionnel des trois commandes.
+%</FRA> 
+
+\vspace{\baselineskip}
+
+\framebox[0.85\textwidth]{\begin{minipage}{.65\linewidth}
+\vspace*{.5\baselineskip}
+
+%<FRA> Le
+%<ENG> On 
+\today{}: 
+
+\vspace{.5\baselineskip}
+
+\noindent{}
+{\cs{anneescolaire[-1]}}: \anneescolaire[-1] \par\noindent{}
+{\cs{debutanneescolaire[-1]}}: \debutanneescolaire[-1] \par\noindent{}
+{\cs{finanneescolaire[-1]}}: \finanneescolaire[-1]
+
+\vspace{.5\baselineskip}
+
+\noindent{}
+{\cs{anneescolaire}}: \anneescolaire \par\noindent{}
+{\cs{debutanneescolaire}}: \debutanneescolaire \par\noindent{}
+{\cs{finanneescolaire}}: \finanneescolaire
+
+\vspace{.5\baselineskip}
+
+\noindent{}
+{\cs{anneescolaire[1]}}: \anneescolaire[1] \par\noindent{}
+{\cs{debutanneescolaire[1]}}: \debutanneescolaire[1] \par\noindent{}
+{\cs{finanneescolaire[1]}}: \finanneescolaire[1]
+
+\vspace*{.5\baselineskip}
+\end{minipage}}
+
+%<*ENG>
+\subsection{Changing the Look}
+\label{sec:changelook}
+
+With the following code: 
+
+%</ENG>
+
+%<*FRA>
+\subsection{Changer l'aspect}
+\label{sec:aspect}
+
+Avec le code suivant:
+
+%</FRA>
+
+\begin{Verbatim}[gobble=0, frame=lines, label={code}, labelposition=topline]
+\ExplSyntaxOn
+\RenewDocumentCommand{\AnneeScolairePresentation}{ o m }
+{
+  \int_case:nn { #1 }
+  {
+    {1} { \textbf{ \int_to_arabic:n { #2 } } }
+    {2} { \int_to_roman:n { #2 } }
+    {3} { \textit{ \int_to_arabic:n { #2 } } }
+    {4} { \int_to_Roman:n { #2 } }
+  }
+}
+\ExplSyntaxOff
+
+\anneescolaire \quad \debutanneescolaire \quad \finanneescolaire
+\end{Verbatim}
+
+%<ENG> We obtain:
+%<FRA> Nous obtenons: 
+
+\bgroup{}
+\ExplSyntaxOn
+\RenewDocumentCommand{\AnneeScolairePresentation}{ o m }
+{
+  \int_case:nn { #1 }
+  {
+    {1} { \textbf{ \int_to_arabic:n { #2 } } }
+    {2} { \int_to_roman:n { #2 } }
+    {3} { \textit{ \int_to_arabic:n { #2 } } }
+    {4} { \int_to_Roman:n { #2 } }
+  }
+}
+\ExplSyntaxOff
+
+\anneescolaire \quad \debutanneescolaire \quad \finanneescolaire
+\egroup{}
+
+\medskip{}
+
+%<*ENG>
+It should be obvious to everyone that the preceding code is given as a mere
+example of what we can do and certainly not as an example of what we \emph{have to}! 
+%</ENG>
+%<*FRA>
+Je n'ai pas besoin, je pense, d'insister sur le caractère de pur exemple du code
+qui précède. Il ne viendra à l'esprit de personne d'y voir un encouragement à la
+\emph{créativité typographique}! 
+%</FRA>
+
+\vspace{\stretch{2}}
+
+\noindent\hspace*{0.2\textwidth}\hrulefill\hspace*{0.2\textwidth}
+\begin{center}
+  \textsl{Le TeXnicien de Surface scripsit.}
+\end{center}
+\noindent\hspace*{0.2\textwidth}\hrulefill\hspace*{0.2\textwidth}
+
+\vspace*{\stretch{2}}
+
+\end{document}
+%</doc> 
+% \fi
+% \begin{implementation}
+%
+% \section{\pkg{annee-scolaire} implementation}
+%
+% 
+% \iffalse
+%<*package>
+% \fi
+% 
+%    \begin{macrocode}
+%<@@=AnneeScolaire>
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
+\ProvidesExplPackage
+  {\ExplFileName}{\ExplFileDate}{\ExplFileVersion}{\ExplFileDescription}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\RequirePackage{xparse}
+\RequirePackage{l3keys2e}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\keys_define:nn {annee-scolaire}
+{
+  premiermois .int_set:N = \c_@@_Premier_Mois_int, 
+  premiermois .initial:n = {8}, 
+  premierjour .int_set:N = \c_@@_Premier_Jour_int, 
+  premierjour .initial:n = {1}, 
+  decalage .int_set:N = \c_@@_Decalage_int, 
+  decalage .initial:n = {0}, 
+  separateur  .tl_set:N  = \c_@@_Separe_Annees_tl,
+  separateur  .initial:n = {-}
+}
+%    \end{macrocode}
+%
+% 
+%    \begin{macrocode}
+\ProcessKeysOptions { annee-scolaire }
+%    \end{macrocode}
+% 
+% 
+% \begin{variable}{\c_@@_Annee_Deb_int}
+%    \begin{macrocode}
+\int_const:Nn \c_@@_Annee_Deb_int {
+  \int_compare:nNnTF { 100*\the\month + \the\day } <
+  { 100*\c_@@_Premier_Mois_int + \c_@@_Premier_Jour_int}
+  {\year - 1 + \c_@@_Decalage_int}
+  {\year + \c_@@_Decalage_int}
+}
+%    \end{macrocode}
+% \end{variable}
+% 
+% \begin{variable}{\c_@@_Annee_Fin_int}
+%    \begin{macrocode}
+\int_const:Nn \c_@@_Annee_Fin_int {  
+  \c_@@_Annee_Deb_int + 1
+}
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}{\AnneeScolairePresentation}
+%    \begin{macrocode}
+\NewDocumentCommand \AnneeScolairePresentation { o m }
+{
+  \int_to_arabic:n { #2 }
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% 
+% 
+% \begin{macro}{\anneescolaire}
+%    \begin{macrocode}
+\NewDocumentCommand \anneescolaire { O{0} }
+{
+  \AnneeScolairePresentation[1] {\c_@@_Annee_Deb_int + #1} 
+  \c_@@_Separe_Annees_tl 
+  \AnneeScolairePresentation[2] {\c_@@_Annee_Fin_int + #1} 
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\debutanneescolaire}
+%    \begin{macrocode}
+\NewDocumentCommand \debutanneescolaire { O{0} }
+  {
+    \AnneeScolairePresentation[3] {\c_@@_Annee_Deb_int + #1} 
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\finanneescolaire}
+%    \begin{macrocode}
+\NewDocumentCommand \finanneescolaire { O{0} }
+  {
+    \AnneeScolairePresentation[4] {\c_@@_Annee_Fin_int + #1} 
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \iffalse
+%</package>
+% \fi
+% 
+% \end{implementation}
+%
+% \Finale \PrintChanges\PrintIndex
+% 
+\endinput
+%%% Local Variables: 
+%%% mode: doctex
+%%% coding: utf-8
+%%% fill-column: 80
+%%% TeX-master: t
+%%% End: 

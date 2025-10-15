@@ -1,0 +1,114 @@
+%%%
+% Cryptarithmes
+%%%
+\def\filedateCrypta{2024/08/04}%
+\def\fileversionCrypta{0.1}%
+\message{-- \filedateCrypta\space v\fileversionCrypta}%
+%
+\setKVdefault[Crypta]{Solution=false,ListeLettres={A,B,C,D,E,F,G,H,I,J},Tableau=false,Indices={}}%
+\defKV[Crypta]{Indices=\ifempty{#1}{}{\setKV[Crypta]{Tableau}}}%
+
+\colorlet{PfCCouleurVirgule}{black}
+
+\NewDocumentCommand\PfCRemplaceLettre{m}{%
+  \IfStrEqCase{#1}{%
+    {0}{\PfCCryptaListe[1]}%
+    {1}{\PfCCryptaListe[2]}%
+    {2}{\PfCCryptaListe[3]}%
+    {3}{\PfCCryptaListe[4]}%
+    {4}{\PfCCryptaListe[5]}%
+    {5}{\PfCCryptaListe[6]}%
+    {6}{\PfCCryptaListe[7]}%
+    {7}{\PfCCryptaListe[8]}%
+    {8}{\PfCCryptaListe[9]}%
+    {9}{\PfCCryptaListe[10]}%
+  }%
+}%
+
+\NewDocumentCommand\PfCchiffrecrypta{m}{%
+  \ifboolKV[Crypta]{Solution}{#1}{\PfCRemplaceLettre{#1}}%
+}%
+
+\NewDocumentCommand\PfCCryptaTestIndice{m}{%
+  \xintFor* ##1 in{\xintSeq{1}{\PfCCryptaListeIndicelen}}\do{%
+    \xintifboolexpr{\PfCCryptaListeIndice[##1]==#1}{\PfCRemplaceLettre{#1}\xintBreakFor}{}%
+  }%
+}%
+
+\NewDocumentCommand\BuildCryptaTab{}{%
+  \xdef\PfCFooCryptaIndices{\useKV[Crypta]{Indices}}%
+  \setsepchar{,}%
+  \readlist*\PfCCryptaListeIndice{\PfCFooCryptaIndices}%
+  \begin{tabular}{|*{10}{c|}}
+    \hline
+    0&1&2&3&4&5&6&7&8&9\\
+    \hline
+    \PfCCryptaTestIndice{0}&\PfCCryptaTestIndice{1}&\PfCCryptaTestIndice{2}&\PfCCryptaTestIndice{3}&\PfCCryptaTestIndice{4}&\PfCCryptaTestIndice{5}&\PfCCryptaTestIndice{6}&\PfCCryptaTestIndice{7}&\PfCCryptaTestIndice{8}&\PfCCryptaTestIndice{9}\\%
+    \hline
+  \end{tabular}
+}%
+
+\NewDocumentCommand\CryptarithmeAdd{omm}{%
+  \useKVdefault[Crypta]%
+  \setKV[Crypta]{#1}%
+  \xdef\PfCFooCryptaListe{\useKV[Crypta]{ListeLettres}}%
+  \setsepchar{,}%
+  \readlist*\PfCCryptaListe{\PfCFooCryptaListe}%
+  \ifboolKV[Crypta]{Solution}{\opset{carryadd}}{\opset{carryadd=false}}%
+  \begingroup
+  \setlength{\baselineskip}{1.75em}
+  \opset{lineheight=\baselineskip} % nécessaire
+  \opadd[decimalsepsymbol={,},lineheight=1.75em,columnwidth=1.5em,voperator=bottom,operandstyle=\PfCchiffrecrypta,resultstyle=\PfCchiffrecrypta,operandstyle.1.d=\color{PfCCouleurVirgule},operandstyle.2.d=\color{PfCCouleurVirgule},resultstyle.d=\color{PfCCouleurVirgule}]{#2}{#3}%
+  \endgroup
+  \ifboolKV[Crypta]{Tableau}{\\\BuildCryptaTab}{}%
+}%
+
+\NewDocumentCommand\CryptarithmeMAdd{om}{%
+  \useKVdefault[Crypta]%
+  \setKV[Crypta]{#1}%
+  \xdef\PfCFooCryptaListe{\useKV[Crypta]{ListeLettres}}%
+  \setsepchar{,}%
+  \readlist*\PfCCryptaListe{\PfCFooCryptaListe}%
+  \ifboolKV[Crypta]{Solution}{\opset{carryadd}}{\opset{carryadd=false}}%
+  \opmanyadd[decimalsepsymbol={,},lineheight=1.75em,columnwidth=1.5em,vmanyoperator=bottom,operandstyle=\PfCchiffrecrypta,resultstyle=\PfCchiffrecrypta,resultstyle.d=\color{PfCCouleurVirgule}]#2%
+  \ifboolKV[Crypta]{Tableau}{\\\BuildCryptaTab}{}%
+}%
+
+\NewDocumentCommand\CryptarithmeSous{omm}{%
+  \useKVdefault[Crypta]%
+  \setKV[Crypta]{#1}%
+  \xdef\PfCFooCryptaListe{\useKV[Crypta]{ListeLettres}}%
+  \setsepchar{,}%
+  \readlist*\PfCCryptaListe{\PfCFooCryptaListe}%
+  \ifboolKV[Crypta]{Solution}{\opset{carrysub}}{\opset{carrysub=false}}%
+   \begingroup
+   \setlength{\baselineskip}{1.75em}
+   \opset{lineheight=\baselineskip} % nécessaire
+   \opsub[decimalsepsymbol={,},lineheight=1.75em,columnwidth=1.5em,voperator=bottom,operandstyle=\PfCchiffrecrypta,resultstyle=\PfCchiffrecrypta,operandstyle.1.d=\color{PfCCouleurVirgule},operandstyle.2.d=\color{PfCCouleurVirgule},resultstyle.d=\color{PfCCouleurVirgule}]{#2}{#3}%
+   \endgroup
+   \ifboolKV[Crypta]{Tableau}{\\\BuildCryptaTab}{}%
+}%
+
+\NewDocumentCommand\CryptarithmeMul{omm}{%
+  \useKVdefault[Crypta]%
+  \setKV[Crypta]{#1}%
+  \xdef\PfCFooCryptaListe{\useKV[Crypta]{ListeLettres}}%
+  \setsepchar{,}%
+  \readlist*\PfCCryptaListe{\PfCFooCryptaListe}%
+  \begingroup
+  \setlength{\baselineskip}{1.75em}
+  \opset{lineheight=\baselineskip} % nécessaire
+  \opmul[decimalsepsymbol={,},lineheight=1.75em,columnwidth=1.5em,voperator=bottom,operandstyle=\PfCchiffrecrypta,intermediarystyle=\PfCchiffrecrypta,resultstyle=\PfCchiffrecrypta,operandstyle.1.d=\color{PfCCouleurVirgule},operandstyle.2.d=\color{PfCCouleurVirgule},resultstyle.d=\color{PfCCouleurVirgule}]{#2}{#3}%
+  \endgroup
+  \ifboolKV[Crypta]{Tableau}{\\\BuildCryptaTab}{}%
+}%
+
+\NewDocumentCommand\CryptarithmeDiv{omm}{%
+  \useKVdefault[Crypta]%
+  \setKV[Crypta]{#1}%
+  \xdef\PfCFooCryptaListe{\useKV[Crypta]{ListeLettres}}%
+  \setsepchar{,}%
+  \readlist*\PfCCryptaListe{\PfCFooCryptaListe}%
+  \opidiv[decimalsepsymbol={,},lineheight=1.75em,columnwidth=1.5em,voperator=bottom,displayintermediary=all,operandstyle=\PfCchiffrecrypta,intermediarystyle=\PfCchiffrecrypta,remainderstyle=\PfCchiffrecrypta,resultstyle=\PfCchiffrecrypta,operandstyle.1.d=\color{PfCCouleurVirgule},operandstyle.2.d=\color{PfCCouleurVirgule},resultstyle.d=\color{PfCCouleurVirgule}]{#2}{#3}%
+  \ifboolKV[Crypta]{Tableau}{\\\BuildCryptaTab}{}%
+}%

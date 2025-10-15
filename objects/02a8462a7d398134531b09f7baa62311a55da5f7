@@ -1,0 +1,275 @@
+%%%
+% Puissances 4
+%%%
+\def\filedatePquatre{2025/05/26}%
+\def\fileversionPquatre{0.1a}%
+\message{-- \filedatePquatre\space v\fileversionPquatre}%
+%
+\setKVdefault[ClesPQuatre]{Couleur=Gray,Largeur=2cm,LargeurUn=2cm,Multiplication,Entier,Nombre,Exposant=false,Libre=false,Texte=false,Echelle=2,Correction=false,Addition={},Relatif={},Puissance={},Autre={},Consignes={},Solution={},Graine={}}%
+\defKV[ClesPQuatre]{%
+  Addition=\ifempty{#1}{}{\setKV[ClesPQuatre]{Multiplication=false}},%
+  Relatif=\ifempty{#1}{}{\setKV[ClesPQuatre]{Entier=false}},%
+  Puissance=\ifempty{#1}{}{\setKV[ClesPQuatre]{Exposant}},%
+  Autre=\ifempty{#1}{}{\setKV[ClesPQuatre]{Nombre=false}\setKV[ClesPQuatre]{Libre}},%
+  Consignes=\ifempty{#1}{}{\setKV[ClesPQuatre]{Texte}},%
+  Solution=\ifempty{#1}{}{\setKV[ClesPQuatre]{Correction}\setsepchar{,}\ignoreemptyitems\readlist*\PQuatreListeS{#1}\reademptyitems},%
+  Graine=\ifempty{#1}{}{\PfCGraineAlea{#1}}%
+}%
+
+\newtoks\toklistePQuatreh%
+\newtoks\toklistePQuatrev%
+\newtoks\toklistePQuatres%
+\def\UpdatetoksPQuatreh#1\nil{\addtotok\toklistePQuatreh{"#1",}}%
+\def\UpdatetoksPQuatrev#1\nil{\addtotok\toklistePQuatrev{"#1",}}%
+\def\UpdatetoksPQuatres#1\nil{\addtotok\toklistePQuatres{"#1",}}%
+
+\NewDocumentCommand\PQuatre{o +m}{%
+  \useKVdefault[ClesPQuatre]%
+  \toklistePQuatreh{}%
+  \toklistePQuatrev{}%
+  \toklistePQuatres{}%
+  \setKV[ClesPQuatre]{#1}%
+  \ifboolKV[ClesPQuatre]{Nombre}{%
+    \ifboolKV[ClesPQuatre]{Exposant}{%
+      \def\PQuatreListe{-10,-9,-8,-7,-6,-5,-4,-3,-2,2,3,4,5,6,7,8,9,10}%
+      \MelangeListe{\PQuatreListe}{7}%
+      \ignoreemptyitems\readlist*\PQuatreListeH{\faa}%
+      \MelangeListe{\PQuatreListe}{7}%
+      \ignoreemptyitems\readlist*\PQuatreListeV{\faa}%
+      \reademptyitems
+      \foreachitem\compteur\in\PQuatreListeH{\expandafter\UpdatetoksPQuatreh\compteur\nil}%
+      \foreachitem\compteur\in\PQuatreListeV{\expandafter\UpdatetoksPQuatrev\compteur\nil}%
+    }{%
+      \ifboolKV[ClesPQuatre]{Entier}{%
+        % On choisit aléatoirement les listes de nombres de 2 à 10 en faisant deux listes : horizontale et verticale
+        \def\PQuatreListe{2,3,4,5,6,7,8,9,10}%
+        \MelangeListe{\PQuatreListe}{7}%
+        \readlist*\PQuatreListeH{\faa}%
+        \MelangeListe{\PQuatreListe}{7}%
+        \readlist*\PQuatreListeV{\faa}%
+        \foreachitem\compteur\in\PQuatreListeH{\expandafter\UpdatetoksPQuatreh\compteur\nil}%
+        \foreachitem\compteur\in\PQuatreListeV{\expandafter\UpdatetoksPQuatrev\compteur\nil}%
+      }{%
+        % On choisit aléatoirement les listes de nombres de -10 à -2 union 2 à 10 en faisant deux listes : horizontale et verticale
+        \def\PQuatreListe{-10,-9,-8,-7,-6,-5,-4,-3,-2,2,3,4,5,6,7,8,9,10}%
+        \MelangeListe{\PQuatreListe}{7}%
+        \readlist*\PQuatreListeH{\faa}%
+        \MelangeListe{\PQuatreListe}{7}%
+        \readlist*\PQuatreListeV{\faa}%
+        \foreachitem\compteur\in\PQuatreListeH{\expandafter\UpdatetoksPQuatreh\compteur\nil}%
+        \foreachitem\compteur\in\PQuatreListeV{\expandafter\UpdatetoksPQuatrev\compteur\nil}%
+      }%
+    }%
+  }{%
+    % on lit la liste des données fournies par l'utilisateur
+    \setsepchar[*]{,*/}%
+    \readlist\PQuatreListes{#2}%
+    \setsepchar{,}%
+    \foreachitem\compteur\in\PQuatreListes[1]{\expandafter\UpdatetoksPQuatrev\compteur\nil}%
+    \foreachitem\compteur\in\PQuatreListes[2]{\expandafter\UpdatetoksPQuatreh\compteur\nil}%
+    % On crée éventuellement la liste des solutions
+    \ifboolKV[ClesPQuatre]{Correction}{%
+      \foreachitem\compteur\in\PQuatreListeS{\expandafter\UpdatetoksPQuatres\compteur\nil}%
+    }{}%
+  }%
+  % Une fois les listes construites, on dessine et on place les listes.
+  \PQuatreGrille{\the\toklistePQuatrev}{\the\toklistePQuatreh}%
+}%
+
+\NewDocumentCommand\PQuatreGrille{m m}{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    PQLargeur=\useKV[ClesPQuatre]{Largeur};
+    PQLargeurUn=\useKV[ClesPQuatre]{LargeurUn};
+    PQEchelle=\useKV[ClesPQuatre]{Echelle};
+    color PQfond;
+    PQfond=\useKV[ClesPQuatre]{Couleur};
+    boolean PQLibre,PQMultiplication,PQTexte,Correction,Exposant;
+    PQLibre:=\useKV[ClesPQuatre]{Libre};
+    PQMultiplication=\useKV[ClesPQuatre]{Multiplication};
+    PQTexte:=\useKV[ClesPQuatre]{Texte};
+    Correction=\useKV[ClesPQuatre]{Correction};
+    Exposant=\useKV[ClesPQuatre]{Exposant};
+
+    if PQTexte:
+    string PQConsignes;
+    PQConsignes=\useKV[ClesPQuatre]{Consignes};
+    fi;
+    
+    % On calcule le nombre de cases
+    nchauteur:=0;
+    for p_=#1:
+    nchauteur:=incr nchauteur;
+    endfor;
+    nclargeur:=0;
+    for p_=#2:
+    nclargeur:=incr nclargeur;
+    endfor;
+    if PQLibre=false:
+    nchauteur:=7;
+    nclargeur:=7;
+    fi;
+    %On affiche
+    pair A,B,C,D,H[],V[],M[][];
+    A=(0,0);
+    B-A=PQLargeur*(nclargeur,0);
+    C-B=PQLargeur*(0,nchauteur);
+    D-C=A-B;
+    fill polygone(A,B,C,D) withcolor PQfond;
+    trace polygone(A,B,C,D);
+    for k=0 upto (nclargeur-1):
+    for l=0 upto (nchauteur-1):
+    M[k][l]=A+0.5*(PQLargeur,PQLargeur)+k*(PQLargeur,0)+l*(0,PQLargeur);
+    fill cercles(M[k][l],0.4*PQLargeur) withcolor blanc;
+    trace cercles(M[k][l],0.4*PQLargeur);
+    endfor;
+    endfor;
+    labeloffset:=labeloffset*2;
+    if PQLibre:
+    if PQTexte:
+    label.llft(TEX("\begin{minipage}{"&decimal(PQLargeurUn)&"pt}"&PQConsignes&"\end{minipage}") scaled PQEchelle,A);
+    else:
+    if PQMultiplication:
+    label.llft(TEX("$\times$") scaled PQEchelle,A);
+    else:
+    label.llft(TEX("$+$") scaled PQEchelle,A);
+    fi;
+    fi;
+    else:
+    if PQMultiplication:
+    label.llft(TEX("$\times$") scaled PQEchelle,A);
+    else:
+    label.llft(TEX("$+$") scaled PQEchelle,A);
+    fi;
+    fi;
+    %
+    string Textev[];
+    string Texteh[];
+    labeloffset:=labeloffset/2;
+    vardef Vertical(text t)=
+    n:=0;
+    for p_=t:
+    if PQLibre:
+    label.lft(TEX(p_) scaled PQEchelle,A+(0,n*PQLargeur+PQLargeur/2));
+    else:
+    if Exposant:
+    label.lft(TEX("$10^{"&p_&"}$") scaled PQEchelle,A+(0,n*PQLargeur+PQLargeur/2));
+    else:
+    label.lft(TEX("\num{"&p_&"}") scaled PQEchelle,A+(0,n*PQLargeur+PQLargeur/2));
+    fi;
+    Textev[n]=p_;
+    fi;
+    n:=n+1;
+    endfor;
+    enddef;
+    vardef Horizontal(text t)=
+    n:=0;
+    for p_=t:
+    if PQLibre:
+    label.bot(TEX(p_) scaled PQEchelle,A+(n*PQLargeur+PQLargeur/2,0));
+    else:
+    if Exposant:
+    label.bot(TEX("$10^{"&p_&"}$") scaled PQEchelle,A+(n*PQLargeur+PQLargeur/2,0));
+    else:
+    label.bot(TEX("\num{"&p_&"}") scaled PQEchelle,A+(n*PQLargeur+PQLargeur/2,0));
+    fi;
+    Texteh[n]=p_;
+    fi;
+    n:=n+1;
+    endfor;
+    enddef;
+    labeloffset:=labeloffset*4;
+    Vertical(#1);
+    Horizontal(#2);
+    % on affiche la solution
+    vardef AfficheSolution(text t)=
+    n:=0;
+    for p_=t:
+    label(TEX(p_),M[n mod nclargeur][n div nchauteur]);
+    n:=n+1;
+    endfor;
+    enddef;
+    if Correction:
+    if PQLibre=false:
+    for k=0 upto (nclargeur-1):
+    for l=0 upto (nchauteur-1):
+    if Exposant:
+    label(TEX("\Large$10^{\fpeval{"&Texteh[k]&"+"&Textev[l]&"}}$"),M[k][l]);
+    else:
+    if PQMultiplication:
+    label(TEX("\Huge\num{\fpeval{"&Texteh[k]&"*"&Textev[l]&"}}"),M[k][l]);
+    else:
+    label(TEX("\Huge\num{\fpeval{"&Texteh[k]&"+"&Textev[l]&"}}"),M[k][l]);
+    fi;
+    fi;
+    endfor;
+    endfor;
+    else:
+    AfficheSolution(\the\toklistePQuatres);
+    fi;
+    fi;
+  \end{mplibcode}
+  \else%
+  \begin{mpost}[mpsettings={Largeur=\useKV[ClesPQuatre]{Largeur};Largeur=\useKV[ClesPQuatre]{Largeur};LargeurUn=\useKV[ClesPQuatre]{LargeurUn};Echelle=\useKV[ClesPQuatre]{Echelle};color fond;fond=\useKV[ClesPQuatre]{Couleur};boolean Libre,Multiplication,Texte;Libre:=\useKV[ClesPQuatre]{Libre};Multiplication=\useKV[ClesPQuatre]{Multiplication};Texte:=\useKV[ClesPQuatre]{Texte};if Texte:string Consignes;Consignes=\useKV[ClesPQuatre]{Consignes};fi;}]
+    % On calcule le nombre de cases
+    nchauteur:=0;
+    for p_=#1:
+    nchauteur:=incr nchauteur;
+    endfor;
+    nclargeur:=0;
+    for p_=#2:
+    nclargeur:=incr nclargeur;
+    endfor;
+    if Libre=false:
+    nchauteur:=7;
+    nclargeur:=7;
+    fi;
+    %On affiche
+    pair A,B,C,D,H[],V[],M[][];
+    A=(0,0);
+    B-A=Largeur*(nclargeur,0);
+    C-B=Largeur*(0,nchauteur);
+    D-C=A-B;
+    fill polygone(A,B,C,D) withcolor fond;
+    trace polygone(A,B,C,D);
+    for k=0 upto (nclargeur-1):
+    for l=0 upto (nchauteur-1):
+    M[k][l]=A+0.5*(Largeur,Largeur)+k*(Largeur,0)+l*(0,Largeur);
+    fill cercles(M[k][l],0.4*Largeur) withcolor blanc;
+    trace cercles(M[k][l],0.4*Largeur);
+    endfor;
+    endfor;
+    labeloffset:=labeloffset*2;
+    if Libre:
+    if Texte:
+    label.llft(LATEX("\begin{minipage}{"&decimal(LargeurUn)&"pt}"&Consignes&"\end{minipage}") scaled Echelle,A);
+    fi;
+    else:
+    if Multiplication:
+    label.llft(btex $\times$ etex scaled Echelle,A);
+    else:
+    label.llft(btex $+$ etex scaled Echelle,A);
+    fi;
+    fi;
+    labeloffset:=labeloffset/2;
+    vardef Vertical(text t)=
+    n:=0;
+    for p_=t:
+    label.lft(LATEX(p_) scaled Echelle,A+(0,n*Largeur+Largeur/2));
+    n:=n+1;
+    endfor;
+    enddef;
+    vardef Horizontal(text t)=
+    n:=0;
+    for p_=t:
+    label.bot(LATEX(p_) scaled Echelle,A+(n*Largeur+Largeur/2,0));
+    n:=n+1;
+    endfor;
+    enddef;
+    labeloffset:=labeloffset*4;
+    Vertical(#1);
+    Horizontal(#2);
+  \end{mpost}
+  \fi%
+}%

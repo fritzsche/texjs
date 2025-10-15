@@ -1,0 +1,38 @@
+%%%
+% Mots empilés
+%%%
+\def\filedateMotsEmpiles{2024/08/04}%
+\def\fileversionMotsEmpiles{0.1}%
+\message{-- \filedateMotsEmpiles\space v\fileversionMotsEmpiles}%
+%
+\setKVdefault[ClesMotEmpile]{Colonne=4,Solution=false,Couleur=black}
+
+\newcounter{CompteurMotEmpile}
+
+\NewDocumentCommand\MotsEmpiles{om}{%
+  \useKVdefault[ClesMotEmpile]%
+  \setKV[ClesMotEmpile]{#1}%
+  \setcounter{CompteurMotEmpile}{0}%
+  \setsepchar[*]{,*/}%
+  \readlist*\ListeMotsEmpiles{#2}%
+  \xdef\ListeMotsEmpilesMax{0}%
+  \colorlet{MotEmpileCouleur}{\useKV[ClesMotEmpile]{Couleur}}%
+  \foreachitem\compteur\in\ListeMotsEmpiles{%
+    \StrLen{\ListeMotsEmpiles[\compteurcnt,2]}[\LongueurMot]%
+    \xintifboolexpr{\ListeMotsEmpilesMax<\fpeval{\ListeMotsEmpiles[\compteurcnt,1]+\LongueurMot}}{\xdef\ListeMotsEmpilesMax{\fpeval{\ListeMotsEmpiles[\compteurcnt,1]+\LongueurMot}}}{}%
+  }%
+  \begin{NiceTabular}{c|*{\fpeval{\ListeMotsEmpilesMax}}{m{10pt}}}%
+    \Block{1-\fpeval{\useKV[ClesMotEmpile]{Colonne}+2}}{}\xintFor* ##1 in {\xintSeq {1}{\fpeval{\useKV[ClesMotEmpile]{Colonne}}}}\do{&}&\Block{}{$\downarrow$}\xintFor* ##1 in {\xintSeq {1}{\fpeval{\ListeMotsEmpilesMax-\useKV[ClesMotEmpile]{Colonne}-1}}}\do{&}\\
+    \xintFor* ##1 in {\xintSeq {1}{\fpeval{\ListeMotsEmpileslen}}}\do{%
+      \rule[-1.2ex]{0pt}{3.8ex}\stepcounter{CompteurMotEmpile}\Alph{CompteurMotEmpile}&\Block{1-\fpeval{\ListeMotsEmpiles[##1,1]}}{}\xintFor* ##2 in {\xintSeq {1}{\fpeval{\ListeMotsEmpiles[##1,1]}}}\do{%
+        &
+      }%
+      \StrLen{\ListeMotsEmpiles[##1,2]}[\LongueurMot]%
+      \xintFor* ##3 in {\xintSeq {1}{\fpeval{\LongueurMot}}}\do{%
+        \xintifForFirst{}{&}\Block[draw=black,b]{1-1}{\ifboolKV[ClesMotEmpile]{Solution}{\StrMid{\ListeMotsEmpiles[##1,2]}{##3}{##3}}{}}%
+      }%
+      \\
+    }%
+    \CodeAfter\tikz\draw[line width=1.5pt,MotEmpileCouleur](row-2-|col-\fpeval{\useKV[ClesMotEmpile]{Colonne}+2}) rectangle (row-\fpeval{\ListeMotsEmpileslen+2}-|col-\fpeval{\useKV[ClesMotEmpile]{Colonne}+3});%
+  \end{NiceTabular}%
+}%

@@ -1,0 +1,3493 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2025 Alan J. Cain
+%
+% This file may be distributed and/or modified under the conditions of the LaTeX Project Public License, either version
+% 1.3c of this license or (at your option) any later version. The latest version of this license is in:
+%
+% http://www.latex-project.org/lppl.txt
+%
+% and version 1.3c or later is part of all distributions of LaTeX version 2008-05-04 or later.
+%
+% \fi
+%
+% \iffalse
+%<*driver>
+\PassOptionsToPackage{inline}{enumitem}
+\documentclass{l3doc}
+
+
+\makeatletter
+\ExplSyntaxOn
+
+\cs_gset:Npn \l@subsection { \@dottedtocline{2}{2.5em}{2.8em} }  % #2 = 1.5em
+\cs_gset:Npn \l@subsubsection { \@dottedtocline{3}{5.3em}{3.5em} }  % #2 = 1.5em
+\cs_gset:Npn \l@paragraph { \@dottedtocline{4}{8.8em}{3.2em} }  % #2 = 1.5em
+
+\ExplSyntaxOff
+\makeatother
+
+
+\usepackage{xcolor}
+
+\definecolor{linkcolor}{rgb}{0.0,0.4,0.7}
+\colorlet{citecolor}{linkcolor}
+\colorlet{urlcolor}{linkcolor}
+
+\hypersetup{
+  linkcolor=linkcolor,%
+  citecolor=citecolor,%
+  urlcolor=urlcolor,%
+}
+
+
+\newcommand*\fullref[2]{%
+  \hyperref[#2]{#1\penalty 200\ \ref*{#2}}%
+}
+
+
+\setcounter{tocdepth}{7}
+\numberwithin{figure}{section}
+
+
+\renewcommand*\topfraction{.8}
+
+
+\usepackage{marginalia}
+
+
+\marginaliasetup{
+  ysep=0pt,
+  ysep page top=10mm,
+  ysep page bottom=5mm,
+}
+\renewcommand*\marginpar[1]{\marginalia[pos=left]{#1}}
+
+
+\usepackage{titleps}
+
+\newpagestyle{sideheadings}[\normalfont]{
+  \sethead{%
+            \smash{%
+              \marginalia[
+                pos=left,
+                valign=b,
+                yshift={-\topskip-2\baselineskip},
+                type=optfixed,
+                xsep=2em,
+                ysep={2\baselineskip},
+                column=one,
+                width=40mm,
+              ]{%
+                \raggedleft
+                \itshape
+                \large
+                \sectiontitle
+              }%
+            }%
+           }
+          {}
+          {}
+  \setfoot{}
+          {\thepage}
+          {}
+}
+
+
+
+
+
+\usepackage{booktabs}
+\usepackage{graphicx}
+
+
+\newlist{vallist}{description}{1}
+\setlist[vallist]{
+  leftmargin=3em,
+  style=unboxed,
+  labelsep=1em,
+  font=\descriptionitemcolon,
+  nosep,
+}
+
+\newcommand*{\descriptionitemcolon}[1]{\kern 1em #1:}
+
+
+\usepackage{siunitx}
+\sisetup{
+  mode=match,
+}
+\DeclareSIUnit\inch{in}
+\DeclareSIUnit\point{pt}
+
+
+\usepackage{tikz}
+\usetikzlibrary{decorations.pathmorphing}
+
+
+\newrobustcmd*\examplelabel[1]{%
+  \smash{%
+    \begin{tikzpicture}[baseline=(labelnode.base)]
+      \node[node font=\sffamily\footnotesize] (labelnode) at (0,0) {#1};
+      \draw[gray] (labelnode.center) circle (5pt);
+    \end{tikzpicture}%
+  }%
+}
+
+
+\usepackage{mathtools}
+
+\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}
+\DeclarePairedDelimiter{\set}{\lbrace}{\rbrace}
+
+
+\newcommand*\key[1]{\texttt{#1}}
+\newcommand*\val[1]{\texttt{#1}}
+\newcommand*\keyvalue[2]{\texttt{#1=#2}}
+
+\NewDocumentCommand{\default}{ m }{(\textit{Default:} #1)}
+
+
+\newcommand*\luafunc[1]{\texttt{#1}}
+\newcommand*\luavar[1]{\texttt{#1}}
+
+
+\usepackage{listings}
+
+\lstset{
+  language=[LaTeX]TeX,
+  basicstyle=\small\ttfamily,
+  basewidth=0.5em,
+}
+
+
+
+\newcounter{sidenote}
+\newcommand*\sidenote[1]{%
+  \stepcounter{sidenote}%
+  \textsuperscript{\thesidenote}%
+  \marginalia[
+    pos=left,
+    style={\raggedright\footnotesize},
+    width=33mm,
+    xsep=1em,
+  ]{%
+    \leavevmode\strut\llap{\thesidenote~}#1\strut%
+  }%
+}
+
+
+
+\begin{document}
+
+\DocInput{marginalia.dtx}
+
+\PrintIndex
+
+\end{document}
+%</driver>
+% \fi
+%
+%
+%
+% \GetFileInfo{marginalia.sty}
+%
+%
+%
+% \title{^^A
+% \pkg{marginalia} ^^A
+%   --- Non-floating marginal content with automatic placement for Lua\LaTeX^^A
+%   \thanks{This file describes \fileversion, last revised \filedate.}^^A
+% }
+%
+% \author{^^A
+%  Alan J. Cain^^A
+% }
+%
+% \date{Released \filedate}
+%
+% \maketitle
+%
+%
+%
+% \begin{abstract}
+%   This Lua\LaTeX\ package allows the placement of marginal content anywhere, without \cs{marginpar}'s limits, and
+%   automatically adjusts positions to prevent overlaps or content being pushed off the page. In short, it tries to
+%   combine the best features from the packages \pkg{marginnote}, \pkg{marginfix} and \pkg{marginfit} with key--value
+%   settings that allow fine-grained customization.
+% \end{abstract}
+%
+%
+%
+% \tableofcontents
+%
+%
+%
+% \begin{documentation}
+%
+%
+%
+% \section{Introduction}
+% \pagestyle{sideheadings}
+%
+% The \LaTeX\ \cs{marginpar} command is the basic method for placing content in the margin. For purposes such as drawing
+% attention to particular points in the text, it functions well. Its main limitation is that \cs{marginpar} works via
+% the \LaTeX\ float mechanism and so cannot be used to create marginal content next to a figure, table, or other float,
+% or next to a footnote, or to place running heads in the margin, such as are found in the left-hand margin of this
+% document except for the `implementation' section. (Bringhurst called this style `running shoulder\-heads'
+% \cite[p.~65]{bringhurst_elements}, but the term may be non-standard.)
+%
+% Trying to set many separate pieces of marginal content using \cs{marginpar} can lead to other problems. If two
+% \texttt{marginpar}s would clash, \LaTeX\ shifts the second item downward. But the cumulative effect can lead to
+% \texttt{marginpar}s being shifted downward off the bottom of the page. Further, the asynchronous nature of \TeX's
+% page-breaking can cause:
+% \begin{enumerate*}[label={(\arabic*)}]
+%   \item a \texttt{marginpar} to be placed in the wrong margin;
+%   \item the topmost \texttt{marginpar} on a page to be unnecessarily shifted downward because of a hypothetical clash
+%   that would have occured with the previous \texttt{marginpar}, had they been on the same page.
+% \end{enumerate*}
+%
+% Packages like \pkg{mparhack}\sidenote{\textsc{url:} \url{https://ctan.org/pkg/mparhack}} (Tom Sgouros \& Stefan
+% Ulrich), \pkg{marginnote}\sidenote{\textsc{url}: \url{https://ctan.org/pkg/marginnote}} (Markus Kohm),
+% \pkg{marginfix}\sidenote{\textsc{url:} \url{https://ctan.org/pkg/marginfix}} (Stephen Hicks) and
+% \pkg{marginfit}\sidenote{\textsc{url:} \url{https://ctan.org/pkg/marginfit}} (Maurice Leclaire) were created to avoid
+% these limitations and problems. \pkg{mparhack} only ensures that each \texttt{marginpar} appears on the correct side
+% of the page. \pkg{marginnote} allows marginal content to be placed anywhere, but does not adjust positions to avoid
+% clashes. \pkg{marginfix} adjusts positions, but the unadjusted vertical positioning can be slightly off, and the
+% package still uses floats. \pkg{marginfit} gets positions exactly right, but uses the insert mechanism and so marginal
+% content cannot appear next to floats or footnotes.
+%
+% This Lua\LaTeX\ package, \pkg{marginalia}, provides a \cs{marginalia} command that attempts to avoid these
+% limitations. Marginal content is placed, not via floats or inserts, but by a calculated per-item horizontal shift
+% inside an (invisible) \cs{rlap} or \cs{llap} from the position where the \cs{marginalia} command was issued (which is
+% similar to the technique used by \pkg{marginnote}), plus a calculated per-item vertical shift to avoid clashes with
+% other content. The vertical shift is usually downward, but may be upward when necessary to prevent content from being
+% shifted off the bottom of the page (which is similar to the vertical shifts performed by \pkg{marginfix} and
+% \pkg{marginfit}).
+%
+% The calculation of the horizontal and vertical shifts uses information written to the \file{.aux} file during the
+% previous Lua\LaTeX\ run. It thus takes at least two runs for all content to appear in the correct places. The package
+% reports any changes from the previous run and any problems encountered.
+%
+% \bigskip
+%
+% \noindent\emph{Note:} \pkg{marginalia} was written to typeset running heads in the margin, sidenote references,
+% side-captions for floats, and small marginal figures in the author's book \textit{Form \& Number: A History of
+% Mathematical Beauty} \cite{cain_formandnumber_ebook_large}.\sidenote{\textit{Form \& Number} is freely available on
+% the Internet Archive under a Creative Commons licence.
+% \textsc{url}:~\url{https://archive.org/details/cain_formandnumber_ebook_large}} Thus the basic functionality has been
+% tested extensively, and it has performed correctly.
+%
+%
+%
+% \paragraph*{Acknowledgements.} The author thanks Ulrike Fischer for explaining how to add tagging support, and Julien
+% Labbé for some valuable suggestions.
+%
+%
+%
+% \paragraph*{Licence.} \noindent\pkg{marginalia} is released under the \LaTeX\ Project Public Licence v1.3c or
+% later.\footnote{\textsc{url}: \url{https://www.latex-project.org/lppl.txt}}
+%
+%
+%
+% \section{Requirements}
+%
+% \pkg{marginalia} requires
+% \begin{enumerate}[label={(\arabic*)}]
+%   \item Lua\LaTeX,
+%   \item a recent \LaTeX\ kernel with \pkg{expl3} support (any kernel version since 2020-02-02 should suffice).
+% \end{enumerate}
+% It does not depend on any other packages.
+%
+%
+%
+% \section{Installation}
+%
+% To install \pkg{marginalia} manually, run \texttt{luatex marginalia.ins} and copy \texttt{marginalia.sty} and
+% \texttt{marginalia.lua} to somewhere Lua\LaTeX\ can find them.
+%
+%
+%
+% \section{Getting started}
+%
+% \pkg{marginalia} works `out of the box'. Load the package (there are no package options) and use the main
+% \cs{marginalia} command to place marginal content. \fullref{Figure}{fig:getting-started} shows the source code for a
+% small demonstration and the resulting document. \emph{The source code must be processed \textsl{twice} by Lua\LaTeX\
+% for the marginal content to be placed correctly.} (See \fullref{Section}{sec:usage} for discussion of the need for
+% multiple runs.)
+%
+% \begin{figure}[t]
+%   \lstinputlisting{marginalia-doc-example.tex}
+%   \begin{tikzpicture}
+%     \pgfmathsetmacro{\s}{(\textwidth+.4pt)/210mm}
+%     \pgfmathsetlengthmacro{\w}{\s*210mm}
+%     \pgfmathsetlengthmacro{\h}{\s*110mm}
+%     \path[save path=\outline] (0,0) -| ++(\w,-\h) -| cycle;
+%     \begin{scope}
+%       \clip[use path=\outline];
+%       \node[anchor=north west,inner sep=0] at (0,0) {\includegraphics[scale=\s]{marginalia-doc-example.pdf}};
+%     \end{scope}
+%     \draw[gray,use path=\outline];
+%   \end{tikzpicture}
+%
+%   \caption{A small demonstration of \pkg{marginalia}.}
+%   \label{fig:getting-started}
+% \end{figure}
+%
+% Turn to \fullref{Section}{sec:commands} for a detailed description of the available user commands, and
+% \fullref{Section}{sec:options} for the various options (such as \keyvalue{style}{\meta{code}}) than can be used to
+% change the placement and formatting of the marginal content.
+%
+%
+%
+% \section{User commands}
+% \label{sec:commands}
+%
+% \begin{function}{\marginalia}
+%   \begin{syntax}
+%     \cs{marginalia}\oarg{options}\marg{content}
+%   \end{syntax}
+%   This is the basic command for placing marginal content. The \meta{content} can, roughly speaking, be anything: text,
+%   mathematics, included graphics, Ti\textit{k}Z. The optional argument \meta{options} is a key--value list that
+%   specifies how the content is typeset. The keys are described in \fullref{Subsection}{sec:options}.
+% \end{function}
+%
+%
+%
+% \begin{function}{\marginaliasetup}
+%   \begin{syntax}
+%     \cs{marginaliasetup}\marg{options}
+%   \end{syntax}
+%   This command is used to set options for all subsequent calls to \cs{marginalia}. The argument \meta{options} is the
+%   same kind of key--value list as the \meta{options} argument for the \cs{marginalia} command, and the keys are
+%   described in \fullref{Subsection}{sec:options}.
+%
+%   Note that \cs{marginaliasetup} can be used in the preamble or in the body of the document.
+% \end{function}
+%
+% \begin{function}{\marginalianewgeometry}
+%   \begin{syntax}
+%     \cs{marginalianewgeometry}
+%   \end{syntax}
+%   This command signals to \pkg{marginalia} that the page layout has been changed, for instance by using the
+%   \cs{newgeometry} command from the \pkg{geometry} package,\sidenote{\textsc{url}:
+%   \url{https://ctan.org/pkg/geometry}} or by using the \LaTeX\ command \cs{twocolumn} to switch to two-column mode. It
+%   should be issued immediately after such a change, and certainly before the first page with the new layout has been
+%   shipped out. There is no harm in using it unnecessarily.
+% \end{function}
+%
+%
+%
+% \subsection{Access to page and column}
+%
+% Within the \meta{content} of \cs{marginalia}, two counters are available which specify the actual page and column in
+% which the call to \cs{marginalia} appears. These counters can be used to select different actions depending on the
+% page on which the content appears or (in two-column mode) whether it pertains to the left or right column. It is best
+% to use the variants of the \key{style} and \key{width} keys if marginal content should have different widths or styles
+% depending on whether they appear on a recto/verso page or pertain to a particular column. These counters are made
+% available for purposes not covered by the \key{style} and \key{width} variants. The value of each counter is based on
+% the position of the call to \cs{marginalia} on the previous Lua\LaTeX\ run.
+%
+% \begin{variable}{\marginaliapage}
+%   A counter register, available within the \meta{content} of \cs{marginalia}, that holds the actual page on which the
+%   marginal content appears. The value is based on the previous Lua\LaTeX\ run and will default to \(1\).
+% \end{variable}
+%
+% \begin{variable}{\marginaliacolumn}
+%   A counter register, available within the \meta{content} of \cs{marginalia}, that holds the actual column to which
+%   the marginal content pertains. The value is \(1\) for the left column, \(2\) for the right column. In one-column
+%   mode, the value is always \(0\). (If the key \key{column} is used to manually specify the column to which the
+%   content pertains, the value of \cs{marginaliacolumn} will change accordingly.) The value is based on the previous
+%   Lua\LaTeX\ run and will default to \(0\).
+% \end{variable}
+%
+% ^^A Hack: need to manually deactivate page heading here, since the "function" environment does not use marginalia.
+% \thispagestyle{plain}
+%
+%
+%
+% \section{Options}
+% \label{sec:options}
+%
+% The description of keys in this section, which are summarized in \fullref{Table}{tbl:keys-summary}, should be read in
+% conjunction with the discussion of how marginal content is placed in \fullref{Section}{sec:placement}. In particular,
+% the variants of the keys \key{width} and \key{style} follow the terminology shown in
+% \fullref{Figure}{fig:terminology}.
+%
+% Note that the default values of the various keys \key{width}, \key{xsep}, \key{ysep} are determined by the values of
+% \cs{marginparwith}, \cs{marginparsep}, \cs{marginparpush} and the page layout at
+% \cs{begin}\texttt{\{}\env{document}\texttt{\}}, even if these have been changed after \pkg{marginalia} was loaded. But
+% these default values only have an effect if the relevant key has not already been set before
+% \cs{begin}\texttt{\{}\env{document}\texttt{\}}. So, for example, if \cs{marginaliasetup}\texttt{\{\key{width}=30mm\}}
+% is used in the preamble, the value of \cs{marginparwidth} at \cs{begin}\texttt{\{}\env{document}\texttt{\}} is
+% irrelevant: marginal content items will have width \qty{30}{\milli\metre}.
+%
+% \begin{table}[p]
+%   \caption{Summary of keys that can be set using \cs{marginaliasetup} or passed in the optional argument to
+%   \cs{marginalia}.}
+%   \label{tbl:keys-summary}
+%   \leavevmode\strut\kern\hsize
+%   \llap{^^A
+%   \begin{tabular}{lll}
+%     \toprule
+%     Key name                          & Value                                                 & Default                   \\
+%     \midrule
+%     \key{type}                        & \(\set{\val{normal},\val{fixed},\val{optfixed}}\)     & \val{normal}              \\
+%     \midrule
+%     \key{pos}                         & \(\set{\val{auto},\val{reverse},\val{left},
+%                                           \val{right},\val{nearest}}\)                        & \val{auto}                \\
+%     \key{column}                      & \(\set{\val{auto},\val{one},\val{left},\val{right}}\) & \val{auto}                \\
+%     \key{xsep}                        & Dimension                                             & \val{\cs{marginparsep}}   \\
+%     \key{xsep outer}                  & Dimension                                             & \val{\cs{marginparsep}}   \\
+%     \key{xsep inner}                  & Dimension                                             & \val{\cs{marginparsep}}   \\
+%     \key{xsep between}                & Dimension                                             & \val{\cs{marginparsep}}   \\
+%     \key{xsep recto outer}            & Dimension                                             & \val{\cs{marginparsep}}   \\
+%     \key{xsep recto inner}            & Dimension                                             & \val{\cs{marginparsep}}   \\
+%     \key{xsep verso outer}            & Dimension                                             & \val{\cs{marginparsep}}   \\
+%     \key{xsep verso inner}            & Dimension                                             & \val{\cs{marginparsep}}   \\
+%     \key{xsep right between}          & Dimension                                             & \val{\cs{marginparsep}}   \\
+%     \key{xsep left between}           & Dimension                                             & \val{\cs{marginparsep}}   \\
+%     \midrule
+%     \key{valign}                      & \(\set{\val{t},\val{b}}\)                             & \val{t}                   \\
+%     \key{yshift}                      & Dimension                                             & \qty{0}{\point}           \\
+%     \key{ysep}                        & Dimension                                             & \val{\cs{marginparpush}}  \\
+%     \key{ysep above below}            & Dimension                                             & \val{\cs{marginparpush}}  \\
+%     \key{ysep above}                  & Dimension                                             & \val{\cs{marginparpush}}  \\
+%     \key{ysep below}                  & Dimension                                             & \val{\cs{marginparpush}}  \\
+%     \key{ysep page top}               & Dimension                                             & [Margin above textblock]  \\
+%     \key{ysep page bottom}            & Dimension                                             & [Margin below textblock]  \\
+%     \key{ysep page top margin}        & [None]                                                & ---                       \\
+%     \key{ysep page bottom margin}     & [None]                                                & ---                       \\
+%     \key{ysep page top bottom margin} & [None]                                                & ---                       \\
+%     \midrule
+%     \key{width}                       & Dimension                                             & \val{\cs{marginparwidth}} \\
+%     \key{width outer}                 & Dimension                                             & \val{\cs{marginparwidth}} \\
+%     \key{width inner}                 & Dimension                                             & \val{\cs{marginparwidth}} \\
+%     \key{width between}               & Dimension                                             & \val{\cs{marginparwidth}} \\
+%     \key{width recto outer}           & Dimension                                             & \val{\cs{marginparwidth}} \\
+%     \key{width recto inner}           & Dimension                                             & \val{\cs{marginparwidth}} \\
+%     \key{width verso outer}           & Dimension                                             & \val{\cs{marginparwidth}} \\
+%     \key{width verso inner}           & Dimension                                             & \val{\cs{marginparwidth}} \\
+%     \key{width right between}         & Dimension                                             & \val{\cs{marginparwidth}} \\
+%     \key{width left between}          & Dimension                                             & \val{\cs{marginparwidth}} \\
+%     \key{style}                       & \LaTeX\ code                                          & [Empty]                   \\
+%     \key{style recto outer}           & \LaTeX\ code                                          & [Empty]                   \\
+%     \key{style recto inner}           & \LaTeX\ code                                          & [Empty]                   \\
+%     \key{style verso outer}           & \LaTeX\ code                                          & [Empty]                   \\
+%     \key{style verso inner}           & \LaTeX\ code                                          & [Empty]                   \\
+%     \key{style right between}         & \LaTeX\ code                                          & [Empty]                   \\
+%     \key{style left between}          & \LaTeX\ code                                          & [Empty]                   \\
+%     \bottomrule
+%   \end{tabular}^^A
+%   }
+% \end{table}
+%
+%
+%
+% \subsection{Type}
+%
+% \DescribeOption{type} The \key{type} of an item of marginal content can be set to one of the following three values:
+% \begin{vallist}
+%   \item[\val{normal}] The vertical position of the item will be changed automatically if necessary to prevent a clash
+%   with another item of content.
+%   \item[\val{fixed}] The vertical position of the item will \emph{never} be changed automatically from the position
+%   specified by \key{yshift}, even if there is a clash with another item. (The type \val{fixed} was designed for
+%   setting float captions in the margin, since a caption should not move away from the float with which it is
+%   associated.)
+%   \item[\val{optfixed}] The vertical position of the item will \emph{never} be changed automatically from the position
+%   specified by \key{yshift}, even if there is a clash with another item. But an \val{optfixed} item will not appear in
+%   the document if it would clash with a \val{fixed} item. (The type \val{optfixed} was designed for setting running
+%   heads in the margin, which should not appear if they would clash with a figure caption set in the margin.)
+% \end{vallist}
+% \default{\val{normal}}
+%
+%
+%
+% \subsection{Horizontal placement}
+%
+% \DescribeOption{pos} The position in which an item of marginal content should be placed. It can be set to one of the
+% the following four values:
+% \begin{vallist}
+%   \item[\val{auto}] Place the item in the default position as described in \fullref{Section}{sec:placement}: the outer
+%   margin in single-column mode, and on the opposite side from the other column in two-column mode.
+%   \item[\val{reverse}] Place the item on the opposite side of the text block (in one-column mode) or column (in
+%   two-column mode) from \val{auto}.
+%   \item[\val{left}] The left side of the text block or column.
+%   \item[\val{right}] The right side of the text block of column.
+%   \item[\val{nearest}] The side of the text block or column nearest to which \cs{marginalia} was called.
+% \end{vallist}%
+% \default{\val{auto}}
+%
+%
+% \medskip\goodbreak
+%
+%
+% \DescribeOption{column} In two-column mode, \pkg{marginalia} tries to determine to which column an item of marginal
+% content pertains using the position of the call to \cs{marginalia}. If the call is to the left of the mid-point
+% between the columns, the item is assumed to pertain to the left column; otherwise, it is assumed to pertain to the
+% right column. In certain situations, this might lead to undesired placement of the item. In particular, any call to
+% \cs{marginalia} in a full-width float in two-column mode would be handled as if it were a call from one of the columns
+% and might thus be set in the wrong place. Similarly, an overfull hbox or a piece of \cs{rlap}-ped text might carry a
+% call to \cs{marginalia} from the left column text into the area of the page occupied by the right column.
+%
+% The key \key{column} can be used to specify which column \pkg{marginalia} should place the item in. It can be set to
+% one of four values:
+% \begin{vallist}
+%   \item[\val{auto}] Automatically determine which column an item of marginal content is placed in.
+%   \item[\val{one}] Treat the item as being called from one-column mode.
+%   \item[\val{left}] Treat the item as pertaining to the left column.
+%   \item[\val{right}] Treat the item as pertaining to the right column.
+% \end{vallist}
+% The value of \key{column} has no effect in one-column mode. \default{\val{auto}}
+%
+%
+% \medskip\goodbreak
+%
+%
+% \DescribeOption{xsep}
+% \DescribeOption{xsep outer}
+% \DescribeOption{xsep inner}
+% \DescribeOption{xsep between}
+% \DescribeOption{xsep recto outer}
+% \DescribeOption{xsep recto inner}
+% \DescribeOption{xsep verso outer}
+% \DescribeOption{xsep verso inner}
+% \DescribeOption{xsep right between}
+% \DescribeOption{xsep left between}
+% These keys specify the horizontal separation between an item of marginal content and the text block next
+% to which it is placed. Which separation is used will depend on where the item is typeset. The terminology is as
+% in \fullref{Figure}{fig:terminology}.
+% \begin{vallist}
+%   \item[\key{xsep recto outer}] used for an item in the outer margin of a recto page.
+%   \item[\key{xsep recto inner}] used for an item in the inner margin of a recto page.
+%   \item[\key{xsep verso outer}] used for an item in the outer margin of a verso page.
+%   \item[\key{xsep verso inner}] used for an item in the inner margin of a verso page.
+%   \item[\key{xsep right between}] used for an item set from the right column between the columns.
+%   \item[\key{xsep left between}] used for an item set from the left column between the columns.
+%   \item[\key{xsep outer}] a shorthand for setting the keys \key{xsep recto outer} and \key{xsep verso outer}
+%   simultaneously to the same value.
+%   \item[\key{xsep inner}] a shorthand for setting the keys \key{xsep recto inner} and \key{xsep verso inner}
+%   simultaneously to the same value.
+%   \item[\key{xsep between}] a shorthand for setting the keys \key{xsep right between} and \key{xsep left between}
+%   simultaneously to the same value.
+% \item[\key{xsep}] a shorthand for setting all of these keys simultaneously.
+% \end{vallist}
+% (The shorthands \key{xsep outer} and \key{xsep inner} exist because page geometry is usually symmetrical between recto
+% and verso pages as regards outer and inner margins. The shorthand \key{xsep between} exists because the space between
+% columns, if used at all for marginal content, will often be shared equally.) Each of these keys must be set to a valid
+% dimension. \default{value of \cs{marginparsep} at \cs{begin}\texttt{\{}\env{document}\texttt{\}}}
+%
+%
+%
+% \subsection{Vertical placement}
+%
+% \DescribeOption{valign} The option \key{valign} can be either \val{t} or \val{b}. In the former case, the baseline of
+% the marginal content item is the baseline of the topmost box in its contents; in the latter case, its baseline is the
+% baseline of the bottommost box in its contents. (Essentially, \cs{vtop} and \cs{vbox} are used to set the two options)
+% \default{\val{t}}
+%
+%
+% \medskip\goodbreak
+%
+%
+% \DescribeOption{yshift}
+% The key \key{yshift} is used to shift the default position of the marginal content item up (positive) or
+% down (negative) from its normal position, which is to have its baseline aligned with the baseline of the callout
+% position. It must be set to a valid dimension. Note that if \keyvalue{type}{normal}, then the vertical
+% position may be adjusted from that specified by \key{yshift}. If this is not desired, specify a different \key{type}.
+% \default{0pt}.
+%
+%
+% \medskip\goodbreak
+%
+%
+% \DescribeOption{ysep}
+% \DescribeOption{ysep above}
+% \DescribeOption{ysep below}
+% \DescribeOption{ysep page top}
+% \DescribeOption{ysep page bottom}
+% These keys specify the minimum vertical separation above and below an item of marginal content
+% (see \fullref{Figure}{fig:ysep-explanation}).
+% \begin{vallist}
+%   \item[\key{ysep above}] the minimum vertical separation between an item and the one above.
+%     \default{value of \cs{marginparpush} at \cs{begin}\texttt{\{}\env{document}\texttt{\}}}
+%   \item[\key{ysep below}] the minimum vertical separation between an item and the one below.
+%     \default{value of \cs{marginparpush} at \cs{begin}\texttt{\{}\env{document}\texttt{\}}}
+%   \item[\key{ysep page top}] the minimum vertical separation between an item and top of the page.
+%     \default{margin above main textblock at \cs{begin}\texttt{\{}\env{document}\texttt{\}}}
+%   \item[\key{ysep page bottom}] the minimum vertical separation between an item and bottom of the page.
+%     \default{margin below main textblock at \cs{begin}\texttt{\{}\env{document}\texttt{\}}}
+%   \item[\key{ysep above below}] is a shorthand for setting both \key{ysep above} and \key{ysep below} simultaneously
+%      to the same value.
+%   \item[\key{ysep}] is a shorthand for setting all of these keys simultaneously to the same value.
+% \end{vallist}
+% Each of these keys must be set to a valid dimension.
+%
+% \begin{figure}[t]
+%   \centering
+%   \includegraphics{marginalia-doc-ysep-explanation.pdf}
+%   \caption{(Illustration of \key{ysep}) The length \examplelabel{1} is at least the value of \key{ysep below}
+%   specified (locally or globally) for marginal content item \examplelabel{A} and at least the value of \key{ysep
+%   above} specified for item \examplelabel{B}. In this example diagram, \examplelabel{B} has been automatically moved
+%   down from its natural position to maintain the required distance. Similarly, the length \examplelabel{2} is at least
+%   the value of \key{ysep below} specified for \examplelabel{C} and at least the value of \key{ysep above} specified
+%   for \examplelabel{D}, and the length \examplelabel{3} is at least the value of \key{ysep page bottom} specified for
+%   \examplelabel{D}. In this example, to maintain the required distances, \examplelabel{C} and \examplelabel{D} have
+%   been automatically moved (respectively) up and down from their natural positions.}
+%   \label{fig:ysep-explanation}
+% \end{figure}
+%
+% \medskip\goodbreak
+%
+% \DescribeOption{ysep page top margin}
+% \DescribeOption{ysep page bottom margin}
+% \DescribeOption{ysep page top bottom~margin}
+% These keys automatically set vertical separation between an item of marginal content and the top and bottom of the
+% page to match the main textblock.
+% \begin{vallist}
+%   \item[\key{ysep page top margin}] Automatically set \key{ysep page top} to match the margins above the main
+%   textblock; to be precise, \key{ysep page top} is set to the value of
+%   \(\qty{1}{\inch} + \cs{voffset} + \cs{topmargin} + \cs{headheight} + \cs{headsep}\).
+%   \item[\key{ysep page bottom margin}] Automatically set \key{ysep page bottom} to match the margins above the main
+%   textblock; to be precise, \key{ysep page bottom} is set to the value of
+%   \(\cs{paperheight} - (\qty{1}{\inch} + \cs{voffset} + \cs{topmargin} + \cs{headheight} + \cs{headsep}) - \cs{textheight}\).
+%   \item[\key{ysep page top bottom margin}] Automatically set \key{ysep page top} and \key{ysep page bottom} to match
+%   the margins above and below the main textblock; has the same effect as specifying \key{ysep page top margin} and
+%   \key{ysep page bottom margin} separately.
+% \end{vallist}
+% None of these keys takes a value. Note that if the sizes of the top and bottom margins are changed, the values of
+% \key{ysep page top} and \key{ysep page bottom} do not change automatically, even if these options have been used. The
+% options can of course be used immediately after the new margins have be set.
+%
+%
+%
+% \subsection{Appearance}
+%
+% An item of marginal content that appears in the inner margin might be narrower than one that appears in the outer
+% margin, and an item appearing in the outer margin of a recto page might be set ragged right, while an item appearing
+% in the outer margin of a verso page might be set ragged left. And since it is not known where an item will appear
+% until the page is assembled, the keys in this subsection, dealing with the width and style of an item, have variants
+% that apply depending on where the item appears on the page.
+%
+%
+% \medskip\goodbreak
+%
+%
+% \DescribeOption{width}
+% \DescribeOption{width outer}
+% \DescribeOption{width inner}
+% \DescribeOption{width between}
+% \DescribeOption{width recto outer}
+% \DescribeOption{width recto inner}
+% \DescribeOption{width verso outer}
+% \DescribeOption{width verso inner}
+% \DescribeOption{width right between}
+% \DescribeOption{width left between}
+% These keys specify the width of the an item of marginal content (or, more precisely, the \cs{hsize} of the box into
+% which the item is typeset). Which width is chosen will depend on the where the item is typeset. The terminology is as
+% in \fullref{Figure}{fig:terminology}.
+% \begin{vallist}
+%   \item[\key{width recto outer}] used for an item in the outer margin of a recto page.
+%   \item[\key{width recto inner}] used for an item in the inner margin of a recto page.
+%   \item[\key{width verso outer}] used for an item in the outer margin of a verso page.
+%   \item[\key{width verso inner}] used for an item in the inner margin of a verso page.
+%   \item[\key{width right between}] used for an item set from the right column and placed between the columns.
+%   \item[\key{width left between}] used for an item set from the right column and placed between the columns.
+%   \item[\key{width outer}] a shorthand for setting the keys \key{width recto outer} and \key{width verso outer}
+%   simultaneously to the same value.
+%   \item[\key{width inner}] a shorthand for setting the keys \key{width recto inner} and \key{width verso inner}
+%   simultaneously to the same value.
+%   \item[\key{width between}] a shorthand for setting the keys \key{width right between} and \key{width left between}
+%   simultaneously to the same value.
+% \item[\key{width}] a shorthand for setting all of these keys simultaneously.
+% \end{vallist}
+% (The shorthands \key{width outer} and \key{width inner} exist because page geometry is usually symmetrical between
+% recto and verso pages as regards outer and inner margins. The shorthand \key{width between} exists because the space
+% between columns, if used at all for marginal content, will often be shared equally.) Each of these keys must be set to
+% a valid dimension. \default{value of \cs{marginparwidth} at \cs{begin}\texttt{\{}\env{document}\texttt{\}}}
+%
+%
+% \medskip\goodbreak
+%
+%
+% \DescribeOption{style}
+% \DescribeOption{style recto outer}
+% \DescribeOption{style recto inner}
+% \DescribeOption{style verso outer}
+% \DescribeOption{style verso inner}
+% \DescribeOption{style right between}
+% \DescribeOption{style left between}
+% These keys specify the style with which an item of marginal content is typeset. Which style is chosen will depend on
+% where the item is typeset. The terminology is as in \fullref{Figure}{fig:terminology}.
+% \begin{vallist}
+%   \item[\key{style recto outer}] used for an item in the outer margin of a recto page.
+%   \item[\key{style recto inner}] used for an item in the inner margin of a recto page.
+%   \item[\key{style verso outer}] used for an item in the outer margin of a verso page.
+%   \item[\key{style verso inner}] used for an item in the inner margin of a verso page.
+%   \item[\key{style right between}] used for an item set from the right column between the columns.
+%   \item[\key{style left between}] used for an item set from the right column between the columns.
+%   \item[\key{style}] a shorthand for setting all of these keys simultaneously.
+% \end{vallist}
+% Each of these keys should be set to \LaTeX\ code that specifies the style. \default{[Empty]}
+%
+%
+%
+% \section{Placement}
+% \label{sec:placement}
+%
+% The placement of an item of marginal content depends on where the call to \cs{marginalia} appears in the finished
+% document. Both horizontal and vertical placement can be complicated.
+%
+%
+%
+% \subsection{Horizontal placement}
+%
+% To understand the horizontal placement, first recall some terminology: a recto page is an odd-numbered page in
+% two-sided mode, or any page in one-sided mode; a verso page is an even-numbered page in two-sided mode. The
+% description in the paragraphs that follow is summarized in \fullref{Figure}{fig:terminology}.
+%
+% \begin{figure}[t]
+%   \centering
+%   \begin{tikzpicture}[
+%     x={.45*\textwidth},
+%     y={sqrt(2)*.45*\textwidth},
+%     ]
+%
+%     \begin{scope}[
+%       every node/.style ={
+%         node font=\footnotesize\scshape,
+%         align=center,
+%       }
+%       ]
+%       \begin{scope}
+%         \clip[decorate,decoration={snake,amplitude=1mm,segment length=5mm}] (-1,0) -- (1,0) -- (1,.5) -| cycle;
+%         \begin{scope}[fill=lightgray]
+%           \fill (-.7,-.35) rectangle (-.2,.35);
+%           \node at (-.45,.175) {one\\column};
+%           \fill (.7,-.35) rectangle (.2,.35);
+%           \node at (.45,.175) {one\\column};
+%         \end{scope}
+%       \end{scope}
+%
+%       \begin{scope}
+%         \clip[decorate,decoration={snake,amplitude=1mm,segment length=5mm}] (-1,0) -- (1,0) -- (1,-.5) -| cycle;
+%         \begin{scope}[fill=lightgray]
+%           \fill (-.85,-.35) rectangle (-.65,.35);
+%           \node at (-.75,-.175) {left\\column};
+%           \fill (-.35,-.35) rectangle (-.15,.35);
+%           \node at (-.25,-.175) {right\\column};
+%           \fill (.35,-.35) rectangle (.15,.35);
+%           \node at (.25,-.175) {left\\column};
+%           \fill (.85,-.35) rectangle (.65,.35);
+%           \node at (.75,-.175) {right\\column};
+%         \end{scope}
+%       \end{scope}
+%
+%     \end{scope}
+%
+%     \pgfresetboundingbox
+%
+%     \draw[white,line width=1pt,decorate,decoration={snake,amplitude=1mm,segment length=5mm}] (-1,0) -- (1,0);
+%
+%     \draw (0,-.5) -- (0,.5);
+%     \draw (-1,-.5) rectangle (1,.5);
+%
+%     \begin{scope}[
+%       every node/.style={
+%         node font=\footnotesize\ttfamily,
+%         inner xsep=3pt,
+%       }
+%         ]
+%       \node[anchor=north west,align=left] at (.7,.35) {auto\\right};
+%       \node[anchor=north east,align=right] at (.2,.35) {reverse\\left};
+%
+%       \node[anchor=south east,align=right] at (.15,-.35) {auto\\left};
+%       \node[anchor=north,shift={(.03,0)},align=left] at (.35,-.35) {reverse\\right};
+%       \node[anchor=north,shift={(-.03,0)},align=right] at (.65,-.35) {reverse\\left};
+%       \node[anchor=south west,align=left] at (.85,-.35) {auto\\\strut\smash{right}};
+%
+%       \node[anchor=north east,align=right] at (-.7,.35) {auto\\left};
+%       \node[anchor=north west,align=left] at (-.2,.35) {reverse\\right};
+%
+%       \node[anchor=south east,align=right] at (-.85,-.35) {auto\\left};
+%       \node[anchor=north,shift={(.03,0)},align=left] at (-.65,-.35) {reverse\\right};
+%       \node[anchor=north,shift={(-.03,0)},align=right] at (-.35,-.35) {reverse\\left};
+%       \node[anchor=south west,align=left] at (-.15,-.35) {auto\\right};
+%
+%     \end{scope}
+%
+%     \begin{scope}[
+%       every node/.style={
+%         node font=\small\ttfamily,
+%         inner xsep=6pt,
+%       }
+%       ]
+%       \node[rotate=90,anchor=north] at (-1,0) {verso outer};
+%       \node[rotate=90,anchor=north east,align=right] at (-.65,0) {left\\[-1pt]between};
+%       \node[rotate=-90,anchor=north west,align=left] at (-.35,0) {right\\[-1pt]between};
+%       \node[rotate=-90,anchor=north] at (0,0) {verso inner};
+%       \node[rotate=90,anchor=north] at (0,0) {recto inner};
+%       \node[rotate=90,anchor=north east,align=right] at (.35,0) {left\\[-1pt]between};
+%       \node[rotate=-90,anchor=north west,align=left] at (.65,0) {right\\[-1pt]between};
+%       \node[rotate=-90,anchor=north] at (1,0) {recto outer};
+%     \end{scope}
+%
+%   \end{tikzpicture}
+%   \caption{Summary of the positioning of marginal content using \key{pos}, and terminology used in \key{width} and
+%   \key{style} keys, on recto and verso pages, in both one-column and two-column mode.}
+%   \label{fig:terminology}
+% \end{figure}
+%
+%
+% In one-column mode, marginal content is placed by default in the outer margin: right on recto pages, left on verso
+% pages. If \keyvalue{pos}{reverse} is applied, it is placed in the inner margin: left on recto pages, right on verso
+% pages.
+%
+% In two-column mode, the default placement is next to the column in which the call to \cs{marginalia} appears, on the
+% side opposite to the other column. Thus, if the call to \cs{marginalia} was in the left column, the marginal content
+% item is placed by default on the left: on a recto page, the inner margin, on a verso page, the outer margin. If
+% \keyvalue{pos}{reverse} is applied, it is placed between the two columns, adjacent to the left column. If the call to
+% \cs{marginalia} was in the right column, the item is placed by default on the right: on a recto page, the
+% outer margin, on a verso page, the inner margin. If \keyvalue{pos}{reverse} is applied, it is placed between the two
+% columns, adjacent to the right column.
+%
+% \keyvalue{pos}{left} specifies that the item is to be placed on the left of the text block or column
+% containing the call to \cs{marginalia}.
+%
+% \keyvalue{pos}{right} similarly specifies that the item is to be placed on the right of the text block or column
+% containing the call to \cs{marginalia}.
+%
+% \pkg{marginalia} determines in which column the call to \cs{marginalia} was made using its horizontal position. As
+% discussed in the description of key \key{column}, there are situations where this can go wrong and which
+% necessitate a manual specification of a particular column.
+%
+%
+%
+% \subsection{Vertical placement}
+% \label{subsec:vertical-placement}
+%
+% \pkg{marginalia} tries by default to place the each item of marginal content with its baseline shifted by the value of
+% \key{yshift} (by default, \qty{0}{\point}) from the baseline where \cs{marginalia} was called. The actual vertical
+% placement is calculated by the procedure described below, carried out for the items appearing in a particular
+% horizontal location. (As shown in \fullref{Figure}{fig:terminology}, in one-column mode the possible locations are in
+% outer and inner margins; in two-column mode the possible locationd are the outer and inner margins and on the left and
+% right sides of the space between the columns.) A \emph{clash} exists when two items are closer than specified by
+% \key{ysep below} for the upper item or \key{ysep above} for the lower item, whichever is greater.
+%
+% For the items in each horizontal location, the procedure is as follows:
+% \begin{enumerate}
+%     \item Place the items appearing in a given horizontal location on the page into a list.
+%     \item Set the vertical shift of each item to the one specified by \key{yshift}.
+%     \item For each \keyvalue{type}{optfixed} item, if it clashes with any \keyvalue{type}{fixed} item, delete it from
+%           the list of items that appear on the page.
+%     \item Sort the list by the position of the call to \cs{marginalia}, top-to-bottom, left-to-right, breaking ties
+%           by the order of calls. (Because of floats, footnotes, etc., the sorted order of the list is not necessarily
+%           the same as the order of appearance of \cs{marginalia} commands in the source code.)
+%     \item Pass through the list of items in sorted order. For each \keyvalue{type}{normal} item, if necessary shift it
+%           in a negative (downward) direction so that it
+%           \begin{enumerate*}[label={(\arabic*)}]
+%             \item does not reach closer to the top of the page than specified by \texttt{ysep page top}, and
+%             \item does not clash with the previous (above) item.
+%           \end{enumerate*}
+%           (After this stage, it is possible for an assigned vertical shift to push a \keyvalue{type}{normal} item off
+%           the bottom of the page.)
+%     \item Pass through the list of items in the reverse of the sorted order. For each \keyvalue{type}{normal} item, if
+%           necessary shift it in a positive (upward) direction so that it
+%           \begin{enumerate*}[label={(\arabic*)}]
+%             \item does not reach closer to the bottom of the page than specified by \texttt{ysep page bottom}, and
+%             \item does not clash with the next (below) item.
+%           \end{enumerate*}
+% \end{enumerate}
+% During this process, it may be found that it is impossible to prevent clashes or items reaching beyond the limits
+% (e.g. fixed items clash with each other; a fixed item conflicts with \texttt{ysep page top} or \texttt{ysep page
+% bottom}, or there are simply too many items of marginal content to fit (in which case, the top of some of them will be
+% above the limit specified by \texttt{ysep page top} or will clash with fixed items)). In these cases, warnings are
+% issued at the end of the Lua\LaTeX\ run.
+%
+%
+%
+% \section{Usage notes}
+% \label{sec:usage}
+%
+% \pkg{marginalia} requires a minimum of two Lua\LaTeX\ runs, and often more, to place items of marginal content
+% correctly. On the first pass, information about items, including their vertical size, is written to the \file{.aux}
+% file, and this information is used to position them correctly on the next run. However, because \key{width} and
+% \key{style} have variants dependent on the margin in which the item is placed, an item may only be typeset at the
+% correct size on this second run. Thus the vertical size of the item may have changed and so the information written to
+% the \file{.aux} file on the previous run may be out of date. In this case a third run may be needed for correct
+% placement.
+%
+% More runs may be needed if the position of the call to \cs{marginalia} changes between runs. Provided the main text
+% stabilizes, the placement of items using \cs{marginalia} should be correct two runs later.
+%
+% At the end of the Lua\LaTeX\ run, \pkg{marginalia} reports any problems encountered in the vertical placement of items
+% (as decribed at the end of \fullref{Subsection}{subsec:vertical-placement}). These problems are based on calculations
+% made on the basis of information from the previous written to the \file{.aux} file on the previous run, and may not
+% arise if item positions or sizes (i.e. height or depth) have changed. \pkg{marginalia} also reports any changes in
+% positions or sizes compared to the previous run.
+%
+% In these reports, a page number refers to a visible page number if it is prefixed with `\texttt{p}'; it otherwise
+% refers to the absolute page number of the output.
+%
+%
+%
+% \section{Incompatibilities}
+%
+% Using \pkg{marginalia} alongside \cs{marginpar} or packages like \pkg{mparhak}, \pkg{marginnote}, \pkg{marginfix}, or
+% \pkg{marginfit} should not produce any errors, but \pkg{marginalia} will ignore marginal content not created using
+% \cs{marginalia}; for example, an item of marginal content created using \cs{marginalia} might overlap with one created
+% using \cs{marginpar}.
+%
+%
+%
+% \section{Limitations}
+% \label{sec:limitations}
+%
+% As noted in the introduction, \pkg{marginalia} was originally written to typeset a particular kind of book. It thus
+% has several limitations. Three of these are:
+% \begin{description}
+%     \item[Lua\LaTeX only] Most of the code for deciding the placement of items of marginal content is written in Lua.
+%           In principle, it could be replaced with a pure \LaTeX\ solution.
+%     \item[No support for `moving past' fixed items] The adjustment of vertical positions will never cause a
+%           \keyvalue{type}{normal} item to be shifted past a \keyvalue{type}{fixed} one, even when there is space on
+%           the other side. It may be desirable to have this available as an option.
+%     \item[No support for nested content items] Nesting might be desirable for typesetting editions of manuscripts
+%           which sometimes contain marginal glosses, and then glosses upon those glosses.
+% \end{description}
+%
+% The lack of any built-in facility for producing (for example) numbered sidenotes is a conscious design choice. This is
+% properly the concern of a command that merely uses \cs{marginalia} to place the notes correctly.
+%
+%
+%
+% ^^A\bibliography{\jobname}
+% ^^A\bibliographystyle{alphaabbrv}
+%
+% \begin{thebibliography}{Cai24}
+%
+% \bibitem[Bri04]{bringhurst_elements}
+% R.~Bringhurst.
+% \newblock {\em {T}he {E}lements of {T}ypographic {S}tyle}.
+% \newblock Hartley {\&} Marks, version 3.0, 2004.
+%
+% \bibitem[Cai24]{cain_formandnumber_ebook_large}
+% A.~J. Cain.
+% \newblock {\em {F}orm {\&} {N}umber: {A} {H}istory of {M}athematical {B}eauty}.
+% \newblock Lisbon, 2024.
+% \newblock {\sc url:}
+%   \href{https://archive.org/details/cain_formandnumber_ebook_large}{\nolinkurl{https://archive.org/details/cain_formandnumber_ebook_large}}.
+%
+% \end{thebibliography}
+%
+%
+%
+% \end{documentation}
+%
+%
+%
+% \iffalse
+%<*example>
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{marginalia}
+
+\begin{document}
+
+Here is some body text.\marginalia{Here is a marginal note.} Some more
+body text.\marginalia[style=\footnotesize\itshape\raggedright]{Here is another
+  marginal note, set in smaller text and italics, whose position has been been
+  adjusted automatically.}
+
+\vspace{20mm}
+
+Some final body text after a space.\marginalia[pos=left, valign=b,
+style=\sffamily\raggedleft, width=35mm]{This note is placed on the left side
+  of the page, wider, in sans serif, ragged left, and bottom-aligned.}
+
+\end{document}
+%</example>
+% \fi
+%
+%
+%
+% \clearpage
+% \begin{implementation}
+%
+%
+%
+% \section{Implementation (\LaTeX\ package)}
+%
+%    \begin{macrocode}
+%<*package>
+%<@@=marginalia>
+%    \end{macrocode}
+%
+%
+%
+% \subsection{Initial set-up}
+%
+% Package identification/version information.
+%    \begin{macrocode}
+\NeedsTeXFormat{LaTeX2e}[2020-02-02]
+\ProvidesExplPackage{marginalia}{2025-10-08}{0.82.12}
+  {Non-floating marginal content for LuaLaTeX}
+%    \end{macrocode}
+% Check that Lua\TeX\ is in use.
+%    \begin{macrocode}
+\sys_if_engine_luatex:F
+  {
+    \msg_new:nnn{marginalia}{lualatex_required}
+      {LuaLaTeX~required.~Package~loading~will~abort.}
+    \msg_critical:nn{marginalia}{lualatex_required}
+  }
+%    \end{macrocode}
+%
+%
+%
+% \subsection{Tagging set-up}
+%
+% If \LaTeX\ has tagging support, set up sockets if necessary and define \cs{@@_tagging_socket:n} to be
+% \cs{UseTaggingSocket}.
+%    \begin{macrocode}
+\@ifundefined{UseTaggingSocket}
+  {
+    \cs_new:Npn \@@_tagging_socket:n #1 {}
+  }
+  {
+    \str_if_exist:cF { l__socket_tagsupport/marginpar/begin_plug_str }
+       {
+         \socket_new:nn {tagsupport/marginpar/begin}{0}
+         \socket_new:nn {tagsupport/marginpar/end}{0}
+       }
+    \str_if_exist:cF { l__socket_tagsupport/para/restore_plug_str }
+       {
+         \socket_new:nn {tagsupport/para/restore}{0}
+       }
+    \cs_new:Npn \@@_tagging_socket:n #1
+       {
+         \UseTaggingSocket{#1}
+       }
+  }
+%    \end{macrocode}
+%
+%
+%
+% \subsection{Auxiliary macro for dimension setting}
+%
+% \begin{macro}{
+%   \@@_set_dim:Nn,
+% }
+%   Set the dimension variable passed as the first parameter to value specified in second parameter at
+%   \texttt{begindocument} if used in the preamble, or immediately (since \texttt{begindocument} is a one-time hook) in
+%   the document.
+%    \begin{macrocode}
+\cs_new:Nn \@@_set_dim:Nn
+  {
+    \hook_gput_code:nnn { begindocument } { ./dim }
+      {
+        \dim_set:Nn #1 { #2 }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsection{Options}
+%
+% Set up the key--value options and the variables in which the settings will be stored.
+%
+%
+%
+% \subsubsection{Type}
+%
+% \begin{macro}{
+%   \l_@@_type_int,
+% }
+%   A key to store the type of the marginal content item. The setting is held in an integer variable:
+%   \(1 = \key{normal}\), \(2 = \key{fixed}\), \(3 = \key{optfixed}\).
+%    \begin{macrocode}
+\int_new:N\l_@@_type_int
+\keys_define:nn { marginalia }
+{
+  type .choices:nn = {normal,fixed,optfixed}{
+    \int_set:Nn\l_@@_type_int{\l_keys_choice_int}
+  },
+  type .initial:n = normal,
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsubsection{Horizontal placement}
+%
+% \begin{macro}{
+%   \l_@@_pos_int,
+% }
+%   A key to store the specified position of the marginal content item. The setting is held in an integer variable:
+%   \(1 = \key{auto}\), (the outer margin in one-column mode; left margin in left column, right margin in right column
+%   in two-column mode) \(2 = \key{reverse}\) (inner margin in one-column mode; between the columns in two-column mode),
+%   \(3 = \key{left}\), \(4 = \key{right}\), \(5 = \key{nearest}\).
+%    \begin{macrocode}
+\int_new:N\l_@@_pos_int
+\keys_define:nn { marginalia }
+{
+  pos .choices:nn = {auto,reverse,left,right,nearest}{
+    \int_set:Nn\l_@@_pos_int{\l_keys_choice_int}
+  },
+  pos .initial:n = auto
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{
+%   \l_@@_column_int,
+% }
+%   A key to force the marginal content item to be treated in one-column mode or as being set from the left or right
+%   column. The setting is held in an integer variable: \(-1 = \key{auto}\) (automatic), \(0 = \key{one}\) (one-column
+%   mode), \(1 = \key{left}\) (left column) \(2 = \key{right}\) (right column).
+%    \begin{macrocode}
+\int_new:N\l_@@_column_int
+\keys_define:nn { marginalia }
+{
+  column .choices:nn = {auto,one,left,right}{
+    \int_set:Nn\l_@@_column_int{\l_keys_choice_int-2}
+  },
+  column .initial:n = auto,
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{
+%   \l_@@_xsep_recto_outer_dim,
+%   \l_@@_xsep_recto_inner_dim,
+%   \l_@@_xsep_verso_outer_dim,
+%   \l_@@_xsep_verso_inner_dim,
+%   \l_@@_xsep_right_between_dim,
+%   \l_@@_xsep_left_between_dim,
+% }
+%   Dimension keys to hold the separation between the marginal content item and the main text, which can be dependent on
+%   where it appears on the page.
+%    \begin{macrocode}
+\dim_new:N\l_@@_xsep_recto_outer_dim
+\dim_new:N\l_@@_xsep_recto_inner_dim
+\dim_new:N\l_@@_xsep_verso_outer_dim
+\dim_new:N\l_@@_xsep_verso_inner_dim
+\dim_new:N\l_@@_xsep_right_between_dim
+\dim_new:N\l_@@_xsep_left_between_dim
+\keys_define:nn { marginalia }
+{
+  xsep~recto~outer .code:n
+    = \@@_set_dim:Nn\l_@@_xsep_recto_outer_dim{#1},
+  xsep~recto~inner .code:n
+    = \@@_set_dim:Nn\l_@@_xsep_recto_inner_dim{#1},
+  xsep~verso~outer .code:n
+    = \@@_set_dim:Nn\l_@@_xsep_verso_outer_dim{#1},
+  xsep~verso~inner .code:n
+    = \@@_set_dim:Nn\l_@@_xsep_verso_inner_dim{#1},
+  xsep~right~between .code:n
+    = \@@_set_dim:Nn\l_@@_xsep_right_between_dim{#1},
+  xsep~left~between .code:n
+    = \@@_set_dim:Nn\l_@@_xsep_left_between_dim{#1},
+  xsep .code:n = {
+    \keys_set:nn{ marginalia }{
+      xsep~recto~outer=#1,
+      xsep~recto~inner=#1,
+      xsep~verso~outer=#1,
+      xsep~verso~inner=#1,
+      xsep~right~between=#1,
+      xsep~left~between=#1,
+    }
+  },
+  xsep~outer .code:n = {
+    \keys_set:nn{ marginalia }{
+      xsep~recto~outer=#1,
+      xsep~verso~outer=#1,
+    }
+  },
+  xsep~inner .code:n = {
+    \keys_set:nn{ marginalia }{
+      xsep~recto~inner=#1,
+      xsep~verso~inner=#1,
+    }
+  },
+  xsep~between .code:n = {
+    \keys_set:nn{ marginalia }{
+      xsep~right~between=#1,
+      xsep~left~between=#1,
+    }
+  },
+  xsep .initial:n = \marginparsep,
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsubsection{Vertical placement}
+%
+% \begin{macro}{
+%   \l_@@_valign_int,
+% }
+%   A key to store the vertical alignment of the marginal content item. The setting is held in a integer variable:
+%   \(1 = \key{t}\) (aligned at the baseline of the topmost line of the item), \(2 = \key{b}\) (aligned at the baseline
+%   of the bottommost line of the item).
+%    \begin{macrocode}
+\int_new:N\l_@@_valign_int
+\keys_define:nn { marginalia }
+{
+  valign .choices:nn = {t,b}{
+    \int_set_eq:NN\l_@@_valign_int\l_keys_choice_int
+  },
+  valign .initial:n = t,
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{
+%   \l_@@_default_yshift_dim,
+% }
+%   Dimension key to hold the default vertical shift of the marginal content item from its natural position.
+%    \begin{macrocode}
+\keys_define:nn { marginalia }
+{
+  yshift .dim_set:N = \l_@@_default_yshift_dim,
+  yshift .initial:n = 0pt,
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{
+%   \@@_margin_top:,
+%   \@@_margin_bottom:
+% }
+%   These macros are simply the calculations necessary for the space above and below the main textblock. They are simply
+%   a convenience to avoid specifying the calcuation twice in the definition of the \key{ysep} keys.
+%    \begin{macrocode}
+\cs_new:Npn \@@_margin_top:
+  {
+    1in + \voffset + \topmargin + \headheight + \headsep
+  }
+\cs_new:Npn \@@_margin_bottom:
+  {
+    \pageheight - 1in - \voffset - \topmargin - \headheight - \headsep
+      - \textheight
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{
+%   \l_@@_ysep_above_dim,
+%   \l_@@_ysep_below_dim,
+%   \l_@@_ysep_page_top_dim,
+%   \l_@@_ysep_page_bottom_dim,
+% }
+%   Dimension keys to hold the the minimum vertical spacing between a marginal content item and (respectively) the item
+%   above, the item below, the page top, and the page bottom.
+%    \begin{macrocode}
+\dim_new:N\l_@@_ysep_above_dim
+\dim_new:N\l_@@_ysep_below_dim
+\dim_new:N\l_@@_ysep_page_top_dim
+\dim_new:N\l_@@_ysep_page_bottom_dim
+\keys_define:nn { marginalia }
+{
+  ysep~above .code:n
+    = \@@_set_dim:Nn\l_@@_ysep_above_dim{#1},
+  ysep~below .code:n
+    = \@@_set_dim:Nn\l_@@_ysep_below_dim{#1},
+  ysep~page~top .code:n
+    = \@@_set_dim:Nn\l_@@_ysep_page_top_dim{#1},
+  ysep~page~bottom .code:n
+    = \@@_set_dim:Nn\l_@@_ysep_page_bottom_dim{#1},
+  ysep~above~below .code:n = {
+    \keys_set:nn{ marginalia }{
+      ysep~below=#1,
+      ysep~above=#1,
+    }
+  },
+  ysep .code:n = {
+    \keys_set:nn{ marginalia }{
+      ysep~below=#1,
+      ysep~above=#1,
+      ysep~page~top=#1,
+      ysep~page~bottom=#1,
+    }
+  },
+  ysep~page~top~margin .code:n = {
+    \keys_set:nn{ marginalia }{
+      ysep~page~top
+        = \@@_margin_top:
+    }
+  },
+  ysep~page~bottom~margin .code:n = {
+    \keys_set:nn{ marginalia }{
+      ysep~page~bottom
+        = \@@_margin_bottom:
+    }
+  },
+  ysep~page~top~bottom~margin .code:n = {
+    \keys_set:nn{ marginalia }{
+      ysep~page~top~margin,
+      ysep~page~bottom~margin,
+    }
+  },
+  ysep~above~below .initial:n = \marginparpush,
+  ysep~page~top .initial:n = \@@_margin_top:,
+  ysep~page~bottom .initial:n = \@@_margin_bottom:,
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsubsection{Appearance}
+%
+% \begin{macro}{
+%   \l_@@_width_recto_outer_dim,
+%   \l_@@_width_recto_inner_dim,
+%   \l_@@_width_verso_outer_dim,
+%   \l_@@_width_verso_inner_dim,
+%   \l_@@_width_right_between_dim,
+%   \l_@@_width_left_between_dim,
+% }
+%   Dimension keys to hold the width of the marginal content item, which can be dependent on where it appears on the
+%   page.
+%    \begin{macrocode}
+\dim_new:N\l_@@_width_recto_outer_dim
+\dim_new:N\l_@@_width_recto_inner_dim
+\dim_new:N\l_@@_width_verso_outer_dim
+\dim_new:N\l_@@_width_verso_inner_dim
+\dim_new:N\l_@@_width_right_between_dim
+\dim_new:N\l_@@_width_left_between_dim
+\keys_define:nn { marginalia }
+{
+  width~recto~outer   .code:n
+    = \@@_set_dim:Nn\l_@@_width_recto_outer_dim{#1},
+  width~recto~inner   .code:n
+    = \@@_set_dim:Nn\l_@@_width_recto_inner_dim{#1},
+  width~verso~outer   .code:n
+    = \@@_set_dim:Nn\l_@@_width_verso_outer_dim{#1},
+  width~verso~inner   .code:n
+    = \@@_set_dim:Nn\l_@@_width_verso_inner_dim{#1},
+  width~right~between .code:n
+    = \@@_set_dim:Nn\l_@@_width_right_between_dim{#1},
+  width~left~between  .code:n
+    = \@@_set_dim:Nn\l_@@_width_left_between_dim{#1},
+  width .code:n = {
+    \keys_set:nn{ marginalia }{
+      width~recto~outer=#1,
+      width~recto~inner=#1,
+      width~verso~outer=#1,
+      width~verso~inner=#1,
+      width~right~between=#1,
+      width~left~between=#1,
+    }
+  },
+  width~outer .code:n = {
+    \keys_set:nn{ marginalia }{
+      width~recto~outer=#1,
+      width~verso~outer=#1,
+    }
+  },
+  width~inner .code:n = {
+    \keys_set:nn{ marginalia }{
+      width~recto~inner=#1,
+      width~verso~inner=#1,
+    }
+  },
+  width~between .code:n = {
+    \keys_set:nn{ marginalia }{
+      width~right~between=#1,
+      width~left~between=#1,
+    }
+  },
+  width .initial:n = \marginparwidth,
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%% \begin{macro}{
+%   \l_@@_style_recto_outer_tl,
+%   \l_@@_style_recto_inner_tl,
+%   \l_@@_style_verso_outer_tl,
+%   \l_@@_style_verso_inner_tl,
+%   \l_@@_style_right_between_tl,
+%   \l_@@_style_left_between_tl,
+% }
+%   Token list keys to hold the style with which a marginal content item is typeset, which can be dependent on where it
+%   appears on the page.
+%    \begin{macrocode}
+\keys_define:nn { marginalia }
+{
+  style~recto~outer .tl_set:N = \l_@@_style_recto_outer_tl,
+  style~recto~inner .tl_set:N = \l_@@_style_recto_inner_tl,
+  style~verso~outer .tl_set:N = \l_@@_style_verso_outer_tl,
+  style~verso~inner .tl_set:N = \l_@@_style_verso_inner_tl,
+  style~right~between .tl_set:N = \l_@@_style_right_between_tl,
+  style~left~between .tl_set:N = \l_@@_style_left_between_tl,
+  style .code:n = {
+    \keys_set:nn{ marginalia }{
+      style~recto~outer=#1,
+      style~recto~inner=#1,
+      style~verso~outer=#1,
+      style~verso~inner=#1,
+      style~right~between=#1,
+      style~left~between=#1,
+    }
+  },
+  style .initial:n = {},
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsection{Lua backend and interface}
+%
+% Load the Lua backend.
+%    \begin{macrocode}
+  \lua_now:n{
+    marginalia = require('marginalia')
+  }
+%    \end{macrocode}
+%
+% The following 9 macros interface between \LaTeX\ and Lua code. Each control sequence \cs[no-index]{@@_lua_XYZ}
+% simply calls the corresponding Lua function \luafunc{marginalia.XYZ}.
+% \begin{macro}{
+% \@@_lua_store_default_page_data:,
+% \@@_lua_store_page_data:n,
+% \@@_lua_check_page_data:n,
+% \@@_lua_store_item_data:n,
+% \@@_lua_check_item_data:n,
+% \@@_lua_compute_items:,
+% \@@_lua_write_problem_report:,
+% \@@_lua_write_item_change_report:,
+% }
+%   The first 8 macros do not require expansion of parameters: they either have none, or process data not containing
+%   control sequences (read from the \file{.aux} file); hence \cs{lua_now:n} is used.
+%    \begin{macrocode}
+\cs_new:Npn\@@_lua_store_default_page_data:
+  {
+    \lua_now:n{ marginalia.store_default_page_data() }
+  }
+\cs_new:Npn\@@_lua_store_page_data:n #1
+  {
+    \lua_now:n{ marginalia.store_page_data('#1') }
+  }
+\cs_new:Npn\@@_lua_check_page_data:n #1
+  {
+    \lua_now:n{ marginalia.check_page_data('#1') }
+  }
+\cs_new:Npn\@@_lua_write_page_change_report:
+  {
+    \lua_now:n{ marginalia.write_page_change_report() }
+  }
+\cs_new:Npn\@@_lua_store_item_data:n #1
+  {
+    \lua_now:n{ marginalia.store_item_data('#1') }
+  }
+\cs_new:Npn\@@_lua_check_item_data:n #1
+  {
+    \lua_now:n{ marginalia.check_item_data('#1') }
+  }
+\cs_new:Npn\@@_lua_compute_items:
+  {
+    \lua_now:n{ marginalia.compute_items() }
+  }
+\cs_new:Npn\@@_lua_write_problem_report:
+  {
+    \lua_now:n{ marginalia.write_problem_report() }
+  }
+\cs_new:Npn\@@_lua_write_item_change_report:
+  {
+    \lua_now:n{ marginalia.write_item_change_report() }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{
+%   \@@_lua_load_item_data:n,
+% }
+%   The last macro will receive a control sequence parameter and so requires expansion; hence
+%   \cs{lua_now:e} is used.
+%    \begin{macrocode}
+\cs_new:Npn\@@_lua_load_item_data:n #1
+  {
+    \lua_now:e{ marginalia.load_item_data('#1') }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsection{Processing data from the \texorpdfstring{\file{.aux}}{.aux} file}
+%
+% \begin{macro}[int]{
+%   \marginalia@pagedata,
+% }
+%   This command is used to store version information in the \file{.aux} file. It currently does nothing, but may be
+%   used in future to avoid errors if changes are made in the format of the data written to the \file{.aux} file.
+%    \begin{macrocode}
+\cs_new:Npn \marginalia@version #1
+  {}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[int]{
+%   \marginalia@pagedata,
+% }
+%   This command is used to store page data in the \file{.aux} file.
+%    \begin{macrocode}
+\cs_new:Npn \marginalia@pagedata #1
+  {
+    \@@_process_page_data:n{#1}
+  }
+%    \end{macrocode}
+%   Initially \cs{@@_process_page_data:n} is set to \cs{@@_lua_store_page_data:n}. Thus, when the \file{.aux} file is
+%   read, \cs{marginalia@pagedata} will pass the page data to the Lua backend to be stored.
+%    \begin{macrocode}
+\cs_set_eq:NN
+  \@@_process_page_data:n
+  \@@_lua_store_page_data:n
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[int]{
+%   \marginalia@itemdata,
+% }
+%   This command is used to store data for each marginal content item in the \file{.aux} file.
+%    \begin{macrocode}
+\cs_new:Npn \marginalia@itemdata #1
+  {
+    \@@_process_item_data:n{#1}
+  }
+%    \end{macrocode}
+% \end{macro}
+% Initially \cs{@@_process_item_data:n} is set to \cs{@@_lua_store_item_data:n}. Thus, when the \file{.aux} file is
+% read, \cs{marginalia@itemdata} will pass the item data to the Lua backend to be stored.
+%    \begin{macrocode}
+\cs_set_eq:NN
+  \@@_process_item_data:n
+  \@@_lua_store_item_data:n
+%    \end{macrocode}
+% At the \texttt{begindocument} hook, the \file{.aux} file has been read and closed. The Lua backend now stores the
+% geometry and computes the vertical shift for each item. Then the handle for the main \file{.aux} file is stored for
+% use in this package.
+%    \begin{macrocode}
+\hook_gput_code:nnn{ begindocument }{ ./prepare }{
+  \@@_lua_store_default_page_data:
+  \@@_lua_compute_items:
+  \cs_set_eq:NN\l_@@_aux_iow\@mainaux
+}
+%    \end{macrocode}
+% The \texttt{enddocument/afterlastpage} hook is before the \file{.aux} file is read back, so this is where
+% \cs{@@_process_page_data:n} and \cs{@@_process_item_data:n} are set, respectively, to \cs{@@_lua_check_page_data:n}
+% and \cs{@@_lua_check_item_data:n}. Thus, when the \file{.aux} file is read back, \cs{marginalia@pagedata} and
+% \cs{marginalia@itemdata} will pass data to the Lua backend to be checked for changes.
+%    \begin{macrocode}
+\hook_gput_code:nnn{enddocument/afterlastpage}{ ./check }{
+  \cs_set_eq:NN
+    \@@_process_page_data:n
+    \@@_lua_check_page_data:n
+  \cs_set_eq:NN
+    \@@_process_item_data:n
+    \@@_lua_check_item_data:n
+  }
+%    \end{macrocode}
+% \begin{macro}{\@@_write_reports:}
+%   All the reports of changes and/or problems are assembled in the Lua backend. This macro will write the reports as
+%   package warnings, using the following three messages, to which the Lua-assembled reports are passed as parameters:
+%    \begin{macrocode}
+\msg_new:nnn{marginalia}{placement_problem}
+  { Problems~in~placement.~#1 }
+\msg_new:nnn{marginalia}{item_change}
+  { Changes~in~item~data.~Rerun~to~get~correct~placement.~#1 }
+\msg_new:nnn{marginalia}{page_change}
+  { Changes~in~page~data.~Rerun~to~get~correct~placement.~#1 }
+\cs_new:Npn\@@_write_reports:
+  {
+    \group_begin:
+    \tl_set:Ne\l_tmpa_tl{\@@_lua_write_problem_report:}
+    \tl_if_blank:VF\l_tmpa_tl
+      {
+        \msg_warning:nne{marginalia}{placement_problem}{\tl_use:N\l_tmpa_tl}
+      }
+    \tl_set:Ne\l_tmpa_tl{\@@_lua_write_item_change_report:}
+    \tl_if_blank:VF\l_tmpa_tl
+      {
+        \msg_warning:nne{marginalia}{item_change}{\tl_use:N\l_tmpa_tl}
+      }
+    \tl_set:Ne\l_tmpa_tl{\@@_lua_write_page_change_report:}
+    \tl_if_blank:VF\l_tmpa_tl
+      {
+        \msg_warning:nne{marginalia}{page_change}{\tl_use:N\l_tmpa_tl}
+      }
+    \group_end:
+  }
+%    \end{macrocode}
+% \end{macro}
+% Use the \texttt{enddocument/info} hook to write the reports of changes and/or problems.
+%    \begin{macrocode}
+\hook_gput_code:nnn{ enddocument/info }{ ./report } {
+  \@@_write_reports:
+}
+%    \end{macrocode}
+%
+%
+%
+% \subsection{Writing page data to the \texorpdfstring{\file{.aux}}{.aux} file}
+%
+% \begin{macro}{\@@_write_version:}
+%   This command will be used to write the package version to the \file{.aux} file.
+%    \begin{macrocode}
+\cs_new:Npn\@@_write_version:
+  {
+    \iow_now:Ne\l_@@_aux_iow{
+      \token_to_str:N\marginalia@version{
+        \use:c{ver@marginalia.sty}
+      }
+    }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% To compute the positions of marginal content items, certain page layout data is required. And since all the
+% computation takes place at the beginning of the document, it is necessary to write this information to the \file{.aux}
+% file.
+%
+% \begin{macro}{\g_@@_pagedatano_int}
+%   Global integer variable to index page data items written to the \file{.aux} file.
+%    \begin{macrocode}
+\int_new:N\g_@@_pagedatano_int
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_write_page_data:}
+%   This command will be used to write the current page data to the \file{.aux} file. It is initially defined to do
+%   nothing, so that the use of \cs{marginalianewgeometry} in the preamble does not cause errors (because the
+%   \file{.aux} file is not available for writing until \texttt{begindocument/end}).
+%    \begin{macrocode}
+\cs_set_eq:NN\@@_write_page_data:\prg_do_nothing:
+\cs_new:Npn\@@_write_page_data_real:
+  {
+    \int_gincr:N\g_@@_pagedatano_int
+    \iow_now:Ne\l_@@_aux_iow{
+      \token_to_str:N\marginalia@pagedata{
+        pagedatano=\int_value:w\g_@@_pagedatano_int,
+        abspageno=\int_eval:n{\g_shipout_readonly_int+1},
+        hoffset=\int_value:w\hoffset,
+        voffset=\int_value:w\voffset,
+        pageheight=\int_value:w\pageheight,
+        oddsidemargin=\int_value:w\oddsidemargin,
+        evensidemargin=\int_value:w\evensidemargin,
+        textwidth=\int_value:w\textwidth,
+        columncount=\int_value:w\col@number,
+        columnwidth=\int_value:w\columnwidth,
+        columnsep=\int_value:w\columnsep,
+        twoside=\bool_to_str:n{\legacy_if_p:n{@twoside}},
+      }
+    }
+  }
+%    \end{macrocode}
+%   At the \texttt{begindocument/end} hook, the \file{.aux} file has been opened for writing, and so the macro
+%   \cs{@@_write_page_data:} is enabled and the initial page data is written out.
+%    \begin{macrocode}
+\hook_gput_code:nnn{ begindocument/end }{ ./initial }
+  {
+    \@@_write_version:
+    \cs_set_eq:NN
+      \@@_write_page_data:
+      \@@_write_page_data_real:
+    \@@_write_page_data:
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsection{Marginal content item processing}
+%
+% \subsubsection{Variables}
+%
+% \paragraph{Variables set by \LaTeX.}
+%
+% \begin{macro}{\g_@@_itemno_int}
+%   Global integer variable to index marginal content items.
+%    \begin{macrocode}
+\int_new:N\g_@@_itemno_int
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\l_@@_item_box}
+%   Box variable to hold the typeset marginal content item.
+%    \begin{macrocode}
+\box_new:N\l_@@_item_box
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{
+% \l_@@_item_height_dim,
+% \l_@@_item_depth_dim,
+% }
+%   Dimension variables to hold the height and depth of the typeset margin content item.
+%    \begin{macrocode}
+\dim_new:N\l_@@_item_height_dim
+\dim_new:N\l_@@_item_depth_dim
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \paragraph{Variables set by Lua.}
+%
+% The following variables will be set by the Lua backend via \texttt{tex.count} and \texttt{tex.dimen} when
+% \cs{@@_lua_load_item_data:n} is called.
+%
+% \begin{macro}{\l_@@_page_int}
+%   Integer variable for the page on which the marginal content item appears. This variable will be
+%   made available via \cs{marginaliapage} within the \meta{content} of \cs{marginalia}.
+%    \begin{macrocode}
+\int_new:N\l_@@_page_int
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\l_@@_column_computed_int}
+%   Integer variable for the column next to which the marginal content item appears. This variable will be
+%   will be made available via \cs{marginaliacolumn} within the \meta{content} of \cs{marginalia}.
+%    \begin{macrocode}
+\int_new:N\l_@@_column_computed_int
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{
+% \l_@@_xshift_computed_dim,
+% \l_@@_yshift_computed_dim,
+% }
+%   Dimension variables to hold the differences in \(x\) and \(y\) coordinates between the call to \cs{marginalia} and
+%   the position where the marginal content item should appear.
+%    \begin{macrocode}
+\dim_new:N\l_@@_xshift_computed_dim
+\dim_new:N\l_@@_yshift_computed_dim
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \begin{macro}{\l_@@_side_computed_int}
+%   Integer variable to indicate the side of the text block or column on which the marginal content item should be
+%   placed: \(0 = \textrm{right}\) and \(1 = \textrm{left}\).
+%    \begin{macrocode}
+\int_new:N\l_@@_side_computed_int
+%    \end{macrocode}
+%   (This variable could be a boolean, but an integer is used because there is no canonical access to booleans from
+%   Lua.)
+% \end{macro}
+%
+% \begin{macro}{\l_@@_marginno_computed_int}
+%   Integer variable to indicate in which margin the content will be be placed, to enable quick selection of width and
+%   style: \(0 = \textrm{recto outer}\), \(1 = \textrm{recto inner}\), \(2 = \textrm{verso outer}\), \(3 = \textrm{verso
+%   inner}\), \(4 = \textrm{right between}\), \(5 = \textrm{left between}\).
+%    \begin{macrocode}
+\int_new:N\l_@@_marginno_computed_int
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\l_@@_enabled_computed_int}
+%   Integer variable to indicate whether the marginal content item is enabled: \(0 = \textrm{disabled}\),
+%   \(1 = \textrm{enabled}\).
+%    \begin{macrocode}
+\int_new:N\l_@@_enabled_computed_int
+%    \end{macrocode}
+%   (This variable could be a boolean, but an integer is used because there is no canonical access to booleans from
+%   Lua.)
+% \end{macro}
+%
+%
+%
+% \subsubsection{Core macro}
+%
+% \begin{macro}{\@@_process_item:nn}
+%   This macro does most of the work in setting the marginal content item. The first parameter is \meta{options}, the
+%   second is \meta{content}.
+%    \begin{macrocode}
+\cs_new:Npn\@@_process_item:nn #1#2
+  {
+%    \end{macrocode}
+%   First, increment the index, then enter a group where all the action will happen.
+%    \begin{macrocode}
+    \int_gincr:N\g_@@_itemno_int
+    \group_begin:
+%    \end{macrocode}
+%   Process \meta{options}. These settings apply locally inside the group.
+%    \begin{macrocode}
+      \keys_set:nn{marginalia}{ #1 }
+%    \end{macrocode}
+%   Get item data from the Lua backend: the integer variables \cs{l_@@_page_int}, \cs{l_@@_column_computed_int},
+%   \cs{l_@@_side_computed_int}, \cs{l_@@_enabled_computed_int}, and the dimension variables
+%   \cs{l_@@_xshift_computed_dim}, and \cs{l_@@_yshift_computed_dim} are set by Lua via \texttt{tex.count} and
+%   \texttt{tex.dimen}. If no data is available (if, for instance, no data has been stored from a previous run), default
+%   values will be set by Lua. On later runs, the Lua backend will supply the values computed from the data written to
+%   the \file{.aux} file on the previous run.
+%    \begin{macrocode}
+      \@@_lua_load_item_data:n
+        { \int_value:w\g_@@_itemno_int }
+%    \end{macrocode}
+%   Choose the correct auxiliary function for typesetting, depending on which mode \TeX\ is in.
+%    \begin{macrocode}
+      \mode_if_math:TF
+        {
+          \cs_set_eq:NN
+            \@@_typeset:n
+            \@@_typeset_mmode:n
+        }
+        {
+          \legacy_if:nT{@inlabel}
+            { \leavevmode }
+          \mode_if_horizontal:TF
+            {
+              \cs_set_eq:NN
+                \@@_typeset:n
+                \@@_typeset_hmode:n
+            }
+            {
+              \cs_set_eq:NN
+                \@@_typeset:n
+                \@@_typeset_vmode:n
+            }
+        }
+%    \end{macrocode}
+%   Choose the correct box in which to typeset the item. \cs{l_@@_valign_int} can only be \(1\) or \(2\), so take \(2\)
+%   to signify bottom-aligned, anything else signifies top-aligned.
+%    \begin{macrocode}
+      \int_compare:nNnTF{\l_@@_valign_int}={2}
+        {
+          \cs_set_eq:NN\@@_item_box_set:Nn\vbox_set:Nn
+        }
+        {
+          \cs_set_eq:NN\@@_item_box_set:Nn\vbox_set_top:Nn
+        }
+%    \end{macrocode}
+%   Choose the correct horizontal separation, width, and style for the item.
+%    \begin{macrocode}
+      \@@_set_xsep_width_style:
+%    \end{macrocode}
+%   Typeset the \meta{content} into \cs{l_@@_item_box}. Use \cs{@parboxrestore} for brevity, even though \cs{hsize} and
+%   \cs{linewidth} are subsequently set to \cs{l_@@_width_dim}. Make available \cs{marginaliapage} and
+%   \cs{marginaliacolumn}.
+%    \begin{macrocode}
+      \@@_tagging_socket:n {marginpar/begin}
+      \@@_item_box_set:Nn\l_@@_item_box{
+        \@parboxrestore
+        \@@_tagging_socket:n {para/restore}
+        \normalfont\normalsize
+
+        \tl_use:N\l_@@_style_tl
+        \dim_set_eq:NN\hsize\l_@@_width_dim
+        \dim_set_eq:NN\linewidth\hsize
+
+        \cs_set_eq:NN\marginaliapage\l_@@_page_int
+        \cs_set_eq:NN\marginaliacolumn\l_@@_column_computed_int
+
+        \group_begin:
+        \ignorespaces
+        #2
+        \par
+        \group_end:
+      }
+      \@@_tagging_socket:n{marginpar/end}
+%    \end{macrocode}
+%   Measure \cs{l_@@_item_box}.
+%    \begin{macrocode}
+      \dim_set:Nn\l_@@_item_height_dim
+        {\box_ht:N\l_@@_item_box}
+      \dim_set:Nn\l_@@_item_depth_dim
+        {\box_dp:N\l_@@_item_box}
+%    \end{macrocode}
+%   Everything is now ready to place the item on the page and write the necessary data to the \file{.aux} file. Use the
+%   chosen auxiliary function for typesetting, and immediately use \cs{savepos} to store the callout position.
+%    \begin{macrocode}
+      \@@_typeset:n{
+        \savepos
+%    \end{macrocode}
+%   Write the item data to the \file{.aux} file. All tokens that will change for future items, and which are currently
+%   meaningful, are expanded now; the remainder will be expanded at shipout time, when \emph{they} are meaningful.
+%    \begin{macrocode}
+        \iow_shipout_e:Ne\l_@@_aux_iow{
+          \token_to_str:N\marginalia@itemdata{
+            itemno=\int_value:w\g_@@_itemno_int,
+            abspageno=\exp_not:N\int_eval:n{\g_shipout_readonly_int},
+            pageno=\exp_not:N\int_value:w\c@page,
+            type=\str_use:N\int_value:w\l_@@_type_int,
+            xpos=\exp_not:N\int_value:w\lastxpos,
+            ypos=\exp_not:N\int_value:w\lastypos,
+            height=\int_value:w\l_@@_item_height_dim,
+            depth=\int_value:w\l_@@_item_depth_dim,
+            pos=\int_value:w\l_@@_pos_int,
+            column=\int_value:w\l_@@_column_int,
+            yshift=\int_value:w\l_@@_default_yshift_dim,
+            ysep~above=\int_value:w\l_@@_ysep_above_dim,
+            ysep~below=\int_value:w\l_@@_ysep_below_dim,
+            ysep~page~top=\int_value:w\l_@@_ysep_page_top_dim,
+            ysep~page~bottom=\int_value:w\l_@@_ysep_page_bottom_dim,
+          }
+        }
+%    \end{macrocode}
+%   Finally, if the item is enabled, typeset it onto the page: shift the item by
+%   \[
+%     \abs[\big]{\cs{l_@@_xshift_computed_dim}} + \abs[\big]{\cs{l_@@_xsep_dim}}
+%   \]
+%   to the right in an \cs{rlap} or to the left in an \cs{llap}, depending on \cs{l_@@_side_computed_int}, then use
+%   \cs{@@_place_item_box} for the vertical placement.
+%    \begin{macrocode}
+      \int_if_zero:nF{\l_@@_enabled_computed_int}
+        {
+          \int_if_zero:nTF{\l_@@_side_computed_int}
+            {
+              \rlap{
+                \kern\l_@@_xshift_computed_dim
+                \kern\l_@@_xsep_dim
+                \@@_place_item_box:
+              }
+            }
+            {
+              \llap{
+                \@@_place_item_box:
+                \kern\l_@@_xsep_dim
+                \kern-\l_@@_xshift_computed_dim
+              }
+            }
+        }
+      }
+%    \end{macrocode}
+%   Close the group started near the beginning of \cs{@@_process_item:nn}.
+%    \begin{macrocode}
+    \group_end:
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsubsection{Width and style selection}
+%
+% \begin{macro}{\@@_set_xsep_width_style}
+%   Set \cs{l_@@_xsep_dim}, \cs{l_@@_width_dim}, and \cs{l_@@_style_tl}, based on \cs{l_@@_marginno_computed_int}.
+%    \begin{macrocode}
+\cs_new:Npn\@@_set_xsep_width_style:
+  {
+    \int_case:nn{\l_@@_marginno_computed_int}
+      {
+        {0}
+        {
+          \cs_set_eq:NN\l_@@_xsep_dim
+            \l_@@_xsep_recto_outer_dim
+          \cs_set_eq:NN\l_@@_width_dim
+            \l_@@_width_recto_outer_dim
+          \cs_set_eq:NN\l_@@_style_tl
+            \l_@@_style_recto_outer_tl
+        }
+        {1}
+        {
+          \cs_set_eq:NN\l_@@_xsep_dim
+            \l_@@_xsep_recto_inner_dim
+          \cs_set_eq:NN\l_@@_width_dim
+            \l_@@_width_recto_inner_dim
+          \cs_set_eq:NN\l_@@_style_tl
+            \l_@@_style_recto_inner_tl
+        }
+        {2}
+        {
+          \cs_set_eq:NN\l_@@_xsep_dim
+            \l_@@_xsep_verso_outer_dim
+          \cs_set_eq:NN\l_@@_width_dim
+            \l_@@_width_verso_outer_dim
+          \cs_set_eq:NN\l_@@_style_tl
+            \l_@@_style_verso_outer_tl
+        }
+        {3}
+        {
+          \cs_set_eq:NN\l_@@_xsep_dim
+            \l_@@_xsep_verso_inner_dim
+          \cs_set_eq:NN\l_@@_width_dim
+            \l_@@_width_verso_inner_dim
+          \cs_set_eq:NN\l_@@_style_tl
+            \l_@@_style_verso_inner_tl
+        }
+        {4}
+        {
+          \cs_set_eq:NN\l_@@_xsep_dim
+            \l_@@_xsep_right_between_dim
+          \cs_set_eq:NN\l_@@_width_dim
+            \l_@@_width_right_between_dim
+          \cs_set_eq:NN\l_@@_style_tl
+            \l_@@_style_right_between_tl
+        }
+        {5}
+        {
+          \cs_set_eq:NN\l_@@_xsep_dim
+            \l_@@_xsep_left_between_dim
+          \cs_set_eq:NN\l_@@_width_dim
+            \l_@@_width_left_between_dim
+          \cs_set_eq:NN\l_@@_style_tl
+            \l_@@_style_left_between_tl
+        }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsubsection{Auxiliary placement macros}
+%
+% \begin{macro}{\@@_place_item_box:}
+%   Place the item that has been set in \cs{l_@@_item_box}, vertically shifted by \cs{l_@@_yshift_computed_dim} and
+%   \cs{smash}ed to avoid altering vertical spacing in the main text.
+%    \begin{macrocode}
+\cs_new:Npn\@@_place_item_box:
+  {
+    \smash
+      {
+        \box_move_up:nn{\l_@@_yshift_computed_dim}
+          {
+            \box_use:N\l_@@_item_box
+          }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \begin{macro}{
+%   \@@_typeset_mmode:n,
+%   \@@_typeset_hmmode:n,
+%   \@@_typeset_vmode:n,
+% }
+%   These three macros handle typsetting in math mode, horizontal mode, and vertical mode. Nothing special needs to be
+%   done in math mode. In horizontal mode, \cs{@bsphack}\ldots\cs{@bsphack} avoids double spacing. In vertical mode,
+%   \cs{if@nobreak} is saved, a new paragraph is started, the item is typeset, the paragraph is ended, a vertical skip
+%   of \(-\cs{baselineskip}\) is added, which should `hide' that invisible paragraph, and \cs{if@nobreak} is restored to
+%   the saved value.
+%    \begin{macrocode}
+\cs_new:Npn\@@_typeset_mmode:n #1
+  {
+    #1
+  }
+\cs_new:Npn\@@_typeset_hmode:n #1
+  {
+    \@bsphack
+    #1
+    \@esphack
+  }
+\bool_new:N\l_@@_nobreak_bool
+\cs_new:Npn\@@_typeset_vmode:n #1
+  {
+    \bool_set:Nn\l_@@_nobreak_bool{ \legacy_if_p:n{@nobreak} }
+    \nobreak\noindent #1\par
+    \skip_vertical:n{-\baselineskip}
+    \legacy_if_gset:nn{ @nobreak }{ \l_@@_nobreak_bool }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsection{User commands}
+%
+% Finally, set up the commands for the user.
+%
+% \begin{macro}{\marginalia}
+%   This is the main user command for creating a marginal content item. This macro does nothing but hand off to
+%   \cs{@@_process_item:nn}.
+%    \begin{macrocode}
+\NewDocumentCommand{\marginalia}{ O{} +m }
+  {
+    \@@_process_item:nn{#1}{#2}
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \begin{macro}{\marginaliasetup}
+%   The user command to set the configuration.
+%    \begin{macrocode}
+\NewDocumentCommand{\marginaliasetup}{ m }
+{
+  \keys_set:nn{marginalia}{ #1 }
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \begin{macro}{\marginalianewgeometry}
+%   The user command to signal that the page geometry has been changed.
+%    \begin{macrocode}
+\NewDocumentCommand{\marginalianewgeometry}{}
+{
+  \@@_write_page_data:
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
+%
+%
+%
+% \section{Implementation (Lua backend)}
+%
+%    \begin{macrocode}
+%<*lua>
+%    \end{macrocode}
+%
+%
+%
+% \subsection{Global variables}
+%
+% Global tables for page_data and item_data.
+%    \begin{macrocode}
+local PAGE_DATA_MAIN_TABLE = {}
+local ITEM_DATA_MAIN_TABLE = {}
+%    \end{macrocode}
+% Global tables for compiling reports.
+%    \begin{macrocode}
+local PROBLEM_REPORT_TABLE = {}
+local PAGE_CHANGE_REPORT_TABLE = {}
+local ITEM_CHANGE_REPORT_TABLE = {}
+%    \end{macrocode}
+% Global configuration for reports.
+% \begin{macrocode}
+local PROBLEM_REPORT_MAX_LENGTH = 40
+local PAGE_CHANGE_REPORT_MAX_LENGTH = 10
+local ITEM_CHANGE_REPORT_MAX_LENGTH = 10
+%    \end{macrocode}
+%
+%
+%
+% \subsection{Constants}
+%
+% Type constants. These match the possible values for the type key.
+%    \begin{macrocode}
+local TYPE_NORMAL = 1
+local TYPE_FIXED = 2
+local TYPE_OPTFIXED = 3
+%    \end{macrocode}
+% Position constants. These match the possible values for the pos key.
+%    \begin{macrocode}
+local POS_AUTO = 1
+local POS_REVERSE = 2
+local POS_LEFT = 3
+local POS_RIGHT = 4
+local POS_NEAREST = 5
+%    \end{macrocode}
+%
+%
+%
+% \subsection{Keys for tables}
+%
+% The strings listed in this subsection are constants used to index the tables. Also listed are the types of
+% values that are indexed by each key. Note that values listed below as "dimensions" are actually integers, giving the
+% dimension in \TeX\ scaled points (sp)
+%
+%
+%
+% \subsubsection{Keys for both page and item data tables}
+%
+% Integer: Absolute page number in output file (not on-page number), used in both page_data and item_data tables
+%    \begin{macrocode}
+local KEY_ABSPAGENO = 'abspageno'
+%    \end{macrocode}
+% Boolean: Used to mark page_data or item_data as checked when the .aux file is read back at the end of the document
+%    \begin{macrocode}
+local KEY_CHECKED = 'checked'
+%    \end{macrocode}
+%
+%
+%
+% \subsubsection{Keys for page data tables, layout etc.}
+%
+% Integer: Used only to distinguish instances of data written to .aux file
+%    \begin{macrocode}
+local KEY_PAGEDATANO = 'pagedatano'
+%    \end{macrocode}
+% Dimensions: Value of next two will always be equivalent of \qty{1}{\inch}, but it is simpler to keep all geometry
+% data together.
+%    \begin{macrocode}
+local KEY_HOFFSETORIGIN = 'hoffsetorigin'
+local KEY_VOFFSETORIGIN = 'voffsetorigin'
+%    \end{macrocode}
+% Dimensions: corresponding to obvious \LaTeX\ dimensions
+%    \begin{macrocode}
+local KEY_HOFFSET = 'hoffset'
+local KEY_VOFFSET = 'voffset'
+local KEY_PAGEHEIGHT = 'pageheight'
+local KEY_ODDSIDEMARGIN = 'oddsidemargin'
+local KEY_EVENSIDEMARGIN = 'evensidemargin'
+local KEY_TEXTWIDTH = 'textwidth'
+local KEY_COLUMNWIDTH = 'columnwidth'
+local KEY_COLUMNSEP = 'columnsep'
+%    \end{macrocode}
+% Integer: either \(1\) or \(2\), depending on whether \LaTeX\ was in one- or two-column mode
+%    \begin{macrocode}
+local KEY_COLUMNCOUNT = 'columncount'
+%    \end{macrocode}
+% Boolean: true iff \LaTeX\ is in twoside mode
+%    \begin{macrocode}
+local KEY_TWOSIDE = 'twoside'
+%    \end{macrocode}
+%
+%
+%
+% \subsubsection{Keys for item data tables}
+%
+% Integer: Used to identify data with item
+%    \begin{macrocode}
+local KEY_ITEMNO = 'itemno'
+%    \end{macrocode}
+% Integer: On-page number
+%    \begin{macrocode}
+local KEY_PAGENO = 'pageno'
+%    \end{macrocode}
+% Dimensions: \(x\) and \(y\) positions of call to \cs{marginalia}
+%    \begin{macrocode}
+local KEY_XPOS = 'xpos'
+local KEY_YPOS = 'ypos'
+%    \end{macrocode}
+% Dimensions: Height and depth of typeset item
+%    \begin{macrocode}
+local KEY_HEIGHT = 'height'
+local KEY_DEPTH = 'depth'
+%    \end{macrocode}
+% Integer: Specified type, following \luavar{TYPE_*}
+%    \begin{macrocode}
+local KEY_TYPE = 'type'
+%    \end{macrocode}
+% Integer: corresponds to value of \key{pos} key: \(0 = \texttt{auto}\), \(1 = \texttt{reverse}\), \(2 = \texttt{left}\),
+% \(3 = \texttt{right}\), \(4 = \texttt{nearest}\)
+%    \begin{macrocode}
+local KEY_POS = 'pos'
+%    \end{macrocode}
+% Integer: corresponds to value of \key{column} key: \(-1 = \texttt{auto}\), \(0 = \texttt{one}\), \(1 = \texttt{left}\),
+% \(2 = \texttt{right}\)
+%    \begin{macrocode}
+local KEY_COLUMN = 'column'
+%    \end{macrocode}
+% Dimension: specified vertical shift
+%    \begin{macrocode}
+local KEY_YSHIFT = 'yshift'
+%    \end{macrocode}
+% Dimensions: specified vertical separations
+%    \begin{macrocode}
+local KEY_YSEP_ABOVE = 'ysep above'
+local KEY_YSEP_BELOW = 'ysep below'
+local KEY_YSEP_PAGE_TOP = 'ysep page top'
+local KEY_YSEP_PAGE_BOTTOM = 'ysep page bottom'
+%    \end{macrocode}
+%
+% \medskip\noindent
+% The preceding keys refer to values that will be supplied from \LaTeX. The remaining values will be computed in Lua
+% and passed back to \LaTeX.
+%
+% \medskip\noindent
+% Integer: column in which the call to \cs{marginalia} was located: \(0 = \textrm{one-column}\),
+% \(1 = \textrm{left}\), \(2 = \textrm{right}\)
+%    \begin{macrocode}
+local KEY_COLNO_COMPUTED = 'colno computed'
+%    \end{macrocode}
+% Dimension: Horizontal shift between the call to \cs{marginalia} and the margin in which the item should be located
+%    \begin{macrocode}
+local KEY_XSHIFT_COMPUTED = 'xshift computed'
+%    \end{macrocode}
+% Dimension: Computed vertical shift
+%    \begin{macrocode}
+local KEY_YSHIFT_COMPUTED = 'yshift computed'
+%    \end{macrocode}
+% Integer: Side of text on which the item will appear: \(0 = \textrm{right}\), \(1 = \textrm{left}\)
+%    \begin{macrocode}
+local KEY_SIDE_COMPUTED = 'side computed'
+%    \end{macrocode}
+% Integer: Number of margin in which the item will appear, \(0 = \textrm{recto outer}\), \(1 = \textrm{recto inner}\),
+% \(2 = \textrm{verso outer}\), \(3 = \textrm{verso inner}\), \(4 = \textrm{ right between}\),
+% \(5 = \textrm{left between}\)
+%    \begin{macrocode}
+local KEY_MARGINNO_COMPUTED = 'marginno computed'
+%    \end{macrocode}
+% Boolean: Whether the item will actually appear on the page
+%    \begin{macrocode}
+local KEY_ENABLED_COMPUTED = 'enabled computed'
+%    \end{macrocode}
+%
+%
+%
+% \subsection{Utility functions}
+%
+% \begin{macro}[int]{list_filter}
+%   Take a list \luavar{t} and remove from it any elements for which the function
+%   \luavar{f} does not return true. (The index \luavar{j} is always the destination index to which a `keep' element
+%   is moved.)\sidenote{Code adapted from \url{https://stackoverflow.com/a/53038524/8990243}.}
+%    \begin{macrocode}
+local function list_filter(t, f)
+  local j = 1
+  local n = #t
+
+  for i=1,n do
+    if (f(t[i])) then
+      if (i ~= j) then
+        t[j] = t[i]
+        t[i] = nil
+      end
+      j = j + 1
+    else
+      t[i] = nil
+    end
+  end
+
+end
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[int]{list_filter}
+%   Return boolean true iff \luavar{s} is exactly the string `\luavar{true}'.
+%    \begin{macrocode}
+local function toboolean(s)
+  return s == "true"
+end
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[int]{get_data_page_number}
+%   Take a item or page data and return a human-readable string indicating the page to which the data pertains.
+%    \begin{macrocode}
+local function get_data_page_number(data)
+  local pageno = data[KEY_PAGENO]
+  if pageno ~= nil then
+    return 'p' .. pageno .. ' (' .. data[KEY_ABSPAGENO] .. ')'
+  else
+    return data[KEY_ABSPAGENO]
+  end
+end
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsection{Generic page/item data functions}
+%
+% \begin{macro}[int]{parse_data}
+% Parse \luavar{keyvalue_string} and return the corresponding data as a table. The \luavar{keyvalue_string} is
+% expected to be of precisely the kind written to the \file{.aux} file as the parameter of \cs{marginalia@pagedata} or
+% \cs{marginalia@notedata}.
+%
+% Ignore any keys in \luavar{keyvalue_string} that are not listed in \luavar{conversion_table}. Fill in any missing
+% value with values from \luavar{defaults_table}.
+%
+% \luavar{conversion_table} is indexed by possible keys, with values equal to functions to convert the corresponding
+% value string to the value that should appear in the returned table.
+%
+% \luavar{defaults_table} is indexed by keys that \emph{will} appear in the returned table, using the corresponding
+% value unless it was given in \luavar{keyvalue_string} and the key appeared in \luavar{conversion_table}.
+%    \begin{macrocode}
+local function parse_data(keyvalue_string,conversion_table,defaults_table)
+
+  local key
+  local value
+  local result = {}
+
+  for s in string.gmatch(keyvalue_string,'([^,]+)') do
+
+    key,value = string.match(s,'^(.+)=(.+)$')
+    local conv = conversion_table[key]
+    if conv ~= nil then
+      result[key] = conv(value)
+    end
+
+  end
+
+  for key,value in pairs(defaults_table) do
+    if not(result[key] ~= nil) then
+      result[key] = value
+    end
+  end
+
+  return result
+
+end
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[int]{check_data}
+%   Check \luavar{keyvalue_string} against stored data. If it is new or has changed, append a report to
+%   \luavar{report_table}. Set the \luavar{KEY_CHECKED} of the data item to true.
+%
+%   The \luavar{keyvalue_string} is processed using \luavar{conversion_table} and \luavar{defaults_table} as per the
+%   \luavar{parse_data} function. The resulting table is compared to the table in \luavar{data_table} with the same value
+%   whose key is \luavar{data_table_key}. The tables are compared using the fields indexed by keys in
+%   \luavar{conversion_table}.
+%    \begin{macrocode}
+local function check_data(keyvalue_string,conversion_table,defaults_table,
+                          data_table,data_table_key_field,report_table)
+
+  local new_data = parse_data(keyvalue_string,
+                              conversion_table,defaults_table)
+
+  local data_table_key = new_data[data_table_key_field]
+
+  local stored_data = data_table[data_table_key]
+  if stored_data == nil then
+    table.insert(
+      report_table,
+      get_data_page_number(new_data) .. ' New'
+    )
+  else
+    local change_report = ''
+    for k,_ in pairs(conversion_table) do
+      if stored_data[k] ~= new_data[k] then
+        change_report = change_report
+          .. ' ' .. k .. ':' ..
+          tostring(stored_data[k]) .. '->' .. tostring(new_data[k])
+      end
+    end
+    if change_report ~= '' then
+      table.insert(
+        report_table,
+        get_data_page_number(new_data) .. ' ' .. change_report
+      )
+    end
+    stored_data[KEY_CHECKED] = true
+  end
+
+end
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[int]{check_removed_data}
+%   Check whether data have been removed from \luavar{data_table}, which corresponds to some entry having the value
+%   of \luavar{KEY_CHECKED} being false. In this case, append a report to \luavar{report_table}.
+%    \begin{macrocode}
+local function check_removed_data(data_table,report_table)
+  for _,data in pairs(data_table) do
+    if not data[KEY_CHECKED] then
+      table.insert(
+        report_table,
+        ' Removed'
+      )
+      break
+    end
+  end
+end
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsection{Processing of page data from \texorpdfstring{\file{.aux}}{.aux} file}
+%
+% Conversion and default tables.
+%    \begin{macrocode}
+local PAGE_DATA_CONVERSION_TABLE = {
+  [KEY_PAGEDATANO] = tonumber,
+  [KEY_ABSPAGENO] = tonumber,
+  [KEY_HOFFSETORIGIN] = tonumber,
+  [KEY_VOFFSETORIGIN] = tonumber,
+  [KEY_HOFFSET] = tonumber,
+  [KEY_VOFFSET] = tonumber,
+  [KEY_PAGEHEIGHT] = tonumber,
+  [KEY_ODDSIDEMARGIN] = tonumber,
+  [KEY_EVENSIDEMARGIN] = tonumber,
+  [KEY_COLUMNCOUNT] = tonumber,
+  [KEY_COLUMNWIDTH] = tonumber,
+  [KEY_COLUMNSEP] = tonumber,
+  [KEY_TEXTWIDTH] = tonumber,
+  [KEY_TWOSIDE] = toboolean,
+}
+local PAGE_DATA_DEFAULT_TABLE = {
+  [KEY_PAGEDATANO] = 0,
+  [KEY_ABSPAGENO] = 0,
+  [KEY_HOFFSETORIGIN] = tex.sp('1in'),
+  [KEY_VOFFSETORIGIN] = tex.sp('1in'),
+  [KEY_HOFFSET] = tex.dimen['hoffset'],
+  [KEY_VOFFSET] = tex.dimen['voffset'],
+  [KEY_PAGEHEIGHT] = tex.dimen['pageheight'],
+  [KEY_ODDSIDEMARGIN] = tex.dimen['oddsidemargin'],
+  [KEY_EVENSIDEMARGIN] = tex.dimen['evensidemargin'],
+  [KEY_TEXTWIDTH] = tex.dimen['textwidth'],
+  [KEY_COLUMNWIDTH] = tex.dimen['columnwidth'],
+  [KEY_COLUMNSEP] = tex.dimen['columnsep'],
+  [KEY_COLUMNCOUNT] = 1,
+  [KEY_TWOSIDE] = false,
+  [KEY_CHECKED] = false,
+}
+%    \end{macrocode}
+%
+% \begin{macro}[int]{store_page_data}
+%   Store page data supplied by \luavar{keyvalue_string} in \luavar{PAGE_DATA_MAIN_TABLE}.
+%    \begin{macrocode}
+local function store_page_data(keyvalue_string)
+
+  local page_data = parse_data(keyvalue_string,
+                               PAGE_DATA_CONVERSION_TABLE,
+                               PAGE_DATA_DEFAULT_TABLE)
+
+  PAGE_DATA_MAIN_TABLE[page_data[KEY_PAGEDATANO]] = page_data
+
+end
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[int]{store_default_page_data}
+%   Store default page data in \luavar{PAGE_DATA_MAIN_TABLE}, so that there is some data to work with when
+%   computing item positions, even on a first run, when no page data has been written to the \file{.aux} file.
+%    \begin{macrocode}
+local function store_default_page_data()
+
+  default_page_data = parse_data('',
+                                 PAGE_DATA_CONVERSION_TABLE,
+                                 PAGE_DATA_DEFAULT_TABLE)
+
+  default_page_data[KEY_ABSPAGENO] = 1
+  default_page_data[KEY_CHECKED] = true
+
+  PAGE_DATA_MAIN_TABLE[0] = default_page_data
+
+end
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[int]{check_page_data}
+% Check whether page_data supplied by keyvalue_string differs from that in \luavar{PAGE_DATA_MAIN_TABLE}, appending
+% reports to \luavar{PAGE_CHANGE_REPORT_TABLE} if so.
+%    \begin{macrocode}
+local function check_page_data(keyvalue_string)
+
+  check_data(keyvalue_string,
+             PAGE_DATA_CONVERSION_TABLE,PAGE_DATA_DEFAULT_TABLE,
+             PAGE_DATA_MAIN_TABLE,KEY_PAGEDATANO,
+             PAGE_CHANGE_REPORT_TABLE)
+
+end
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsection{Processing of item data from \texorpdfstring{\file{.aux}}{.aux} file}
+%
+% Conversion and default tables.
+%    \begin{macrocode}
+local ITEM_DATA_CONVERSIONS = {
+  [KEY_ITEMNO] = tonumber,
+  [KEY_ABSPAGENO] = tonumber,
+  [KEY_PAGENO] = tonumber,
+  [KEY_XPOS] = tonumber,
+  [KEY_YPOS] = tonumber,
+  [KEY_HEIGHT] = tonumber,
+  [KEY_DEPTH] = tonumber,
+  [KEY_TYPE] = tonumber,
+  [KEY_POS] = tonumber,
+  [KEY_COLUMN] = tonumber,
+  [KEY_YSHIFT] = tonumber,
+  [KEY_YSEP_ABOVE] = tonumber,
+  [KEY_YSEP_BELOW] = tonumber,
+  [KEY_YSEP_PAGE_TOP] = tonumber,
+  [KEY_YSEP_PAGE_BOTTOM] = tonumber,
+  [KEY_CHECKED] = toboolean,
+}
+local ITEM_DATA_DEFAULTS = {
+  [KEY_ITEMNO] = 0,
+  [KEY_ABSPAGENO] = 1,
+  [KEY_PAGENO] = 1,
+  [KEY_XPOS] = 0,
+  [KEY_YPOS] = 0,
+  [KEY_HEIGHT] = 0,
+  [KEY_DEPTH] = 0,
+  [KEY_TYPE] = 0,
+  [KEY_POS] = 0,
+  [KEY_COLUMN] = -1,
+  [KEY_YSHIFT] = 0,
+  [KEY_YSEP_ABOVE] = tex.dimen['marginparpush'],
+  [KEY_YSEP_BELOW] = tex.dimen['marginparpush'],
+  [KEY_YSEP_PAGE_TOP] = tex.dimen['marginparpush'],
+  [KEY_YSEP_PAGE_BOTTOM] = tex.dimen['marginparpush'],
+  [KEY_COLNO_COMPUTED] = 0,
+  [KEY_XSHIFT_COMPUTED] = 0,
+  [KEY_YSHIFT_COMPUTED] = 0,
+  [KEY_SIDE_COMPUTED] = 0,
+  [KEY_MARGINNO_COMPUTED] = 0,
+  [KEY_ENABLED_COMPUTED] = true,
+  [KEY_CHECKED] = false,
+}
+%    \end{macrocode}
+% \luavar{ITEM_DATA_DEFAULTS} is also used by \luafunc{load_item_data} when no stored item data is found in
+% \luavar{ITEM_DATA_MAIN_TABLE}.
+
+% \begin{macro}[int]{store_item_data}
+%   Store item_data supplied by \luavar{keyvalue_string} in \luavar{ITEM_DATA_MAIN_TABLE}.
+%    \begin{macrocode}
+local function store_item_data(keyvalue_string)
+
+  local item = parse_data(keyvalue_string,
+                          ITEM_DATA_CONVERSIONS,
+                          ITEM_DATA_DEFAULTS)
+
+  ITEM_DATA_MAIN_TABLE[item[KEY_ITEMNO]] = item
+
+end
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[int]{check_item_data}
+%   Check whether item_data supplied by \luavar{keyvalue_string} differs from that in \luavar{ITEM_DATA_MAIN_TABLE},
+%   appending reports to \luavar{ITEM_CHANGE_REPORT_TABLE} if so.
+%    \begin{macrocode}
+local function check_item_data(keyvalue_string)
+
+  check_data(keyvalue_string,
+             ITEM_DATA_CONVERSIONS,ITEM_DATA_DEFAULTS,
+             ITEM_DATA_MAIN_TABLE,KEY_ITEMNO,
+             ITEM_CHANGE_REPORT_TABLE)
+
+end
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsection{Writing reports}
+%
+% \begin{macro}[int]{write_report}
+%   Write the data contained in \luavar{report_table} to \TeX\ in a format suitable for a package warning. The written
+%   text will contain at most \luavar{max_length} items.
+%    \begin{macrocode}
+local function write_report(report_table,max_length,noun)
+
+  if #report_table > 0 then
+    local report_text
+    local report_length
+
+    if #report_table <= max_length then
+      report_length = #report_table
+      report_text = ' Here are the ' .. noun .. ':\n'
+    else
+      report_length = max_length
+      report_text = ' Here are the first ' .. report_length .. ' ' .. noun .. ':\n'
+    end
+
+    for i=1,report_length do
+      report_text = report_text .. report_table[i]
+      if i < report_length then
+        report_text = report_text .. '\n'
+      end
+    end
+
+    tex.print(report_text)
+  end
+
+end
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[int]{write_problem_report}
+% Write a report about placement problems to \TeX\ in a format suitable for a package warning.
+%    \begin{macrocode}
+local function write_problem_report()
+
+  write_report(PROBLEM_REPORT_TABLE,PROBLEM_REPORT_MAX_LENGTH,'problems')
+
+end
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[int]{write_item_change_report}
+%   Write a report about changes in item data to \TeX\ in a format suitable for a package warning.
+%    \begin{macrocode}
+local function write_item_change_report()
+
+  check_removed_data(ITEM_DATA_MAIN_TABLE,ITEM_CHANGE_REPORT_TABLE)
+  write_report(ITEM_CHANGE_REPORT_TABLE,ITEM_CHANGE_REPORT_MAX_LENGTH,'changes')
+
+end
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[int]{write_page_change_report}
+%   Write a report about changes in page data to \TeX\ in a format suitable for a package warning.
+%    \begin{macrocode}
+local function write_page_change_report()
+
+  check_removed_data(PAGE_DATA_MAIN_TABLE,PAGE_CHANGE_REPORT_TABLE)
+  write_report(PAGE_CHANGE_REPORT_TABLE,PAGE_CHANGE_REPORT_MAX_LENGTH,'changes')
+
+end
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsection{Computing horizontal positions}
+%
+% It is necessary to determine whether an item should be placed on the right or left of the text block, and in which
+% column it lies. The following lookup tables are used.
+%
+% The value found in \luavar{RIGHTSIDE_LOOKUP_TABLE} is either \luavar{true} (right) or \luavar{false} (left). It is
+% indexed by whether the item is on a recto page (\luavar{true}/\luavar{false}), whether it pertains to single-column
+% text, the left column, or the right colum (\luavar{0}/\luavar{1}/\luavar{2}), and the value of \key{pos} being
+% either \val{auto} or \val{reverse}.
+%    \begin{macrocode}
+local RIGHTSIDE_LOOKUP_TABLE = {
+  [true] = {
+    [0] = {
+      [POS_AUTO] = true,
+      [POS_REVERSE] = false,
+    },
+    [1] = {
+      [POS_AUTO] = false,
+      [POS_REVERSE] = true,
+    },
+    [2] = {
+      [POS_AUTO] = true,
+      [POS_REVERSE] = false,
+    },
+  },
+  [false] = {
+    [0] = {
+      [POS_AUTO] = false,
+      [POS_REVERSE] = true,
+    },
+    [1] = {
+      [POS_AUTO] = true,
+      [POS_REVERSE] = false,
+    },
+    [2] = {
+      [POS_AUTO] = false,
+      [POS_REVERSE] = true,
+    },
+  },
+}
+%    \end{macrocode}
+% The value found in \luavar{MARGINNO_LOOKUP_TABLE} ranges from \luavar{0} to \luavar{5} (see
+% \luavar{KEY_MARGINNO_COMPUTED} for the meaning of these values). It is indexed by whether the item is on a recto
+% page (\luavar{true}/\luavar{false}), whether it pertains to single-column text, the left column, or the right colum
+% (\luavar{0}/\luavar{1}/\luavar{2}), and whether it is to be placed on the right of the text block
+% (\luavar{true}/\luavar{false}).
+%    \begin{macrocode}
+local MARGINNO_LOOKUP_TABLE = {
+  [true] = {
+    [0] = {
+      [false] = 1,
+      [true] = 0,
+    },
+    [1] = {
+      [false] = 1,
+      [true] = 5,
+    },
+    [2] = {
+      [false] = 4,
+      [true] = 0,
+    },
+  },
+  [false] = {
+    [0] = {
+      [false] = 2,
+      [true] = 3,
+    },
+    [1] = {
+      [false] = 2,
+      [true] = 5,
+    },
+    [2] = {
+      [false] = 4,
+      [true] = 3,
+    },
+  },
+}
+%    \end{macrocode}
+%
+% \begin{macro}[int]{compute_items_horizontal}
+%   For every \luavar{item_data} in \luavar{item_data_list}, compute the fields relevant to horizontal positioning,
+%   namely \luavar{KEY_COLNO_COMPUTED}, \luavar{KEY_XSHIFT_COMPUTED}, \luavar{KEY_SIDE_COMPUTED}, based on the layout
+%   information in page_data. Every item described in \luavar{item_data_list} is assumed to be on the same page.
+%    \begin{macrocode}
+local function compute_items_horizontal(item_data_list,page_data)
+%    \end{macrocode}
+%   Immediately return if \luavar{item_data_list} is empty, to avoid edge cases.
+%    \begin{macrocode}
+  if #item_data_list == 0 then
+    return
+  end
+%    \end{macrocode}
+%   Information used frequently and which is the same for every item.
+%    \begin{macrocode}
+  local pageno = item_data_list[1][KEY_PAGENO]
+  local twoside = page_data[KEY_TWOSIDE]
+  local recto = ((pageno % 2) == 1) or (not twoside)
+  local columncount = page_data[KEY_COLUMNCOUNT]
+%    \end{macrocode}
+%   Tables to contain the \(x\)-coordinates of left edge, right edge, and middle of the current text, whether a single
+%   column (index 0), the left column (index 1), or the right column (index 2).
+%    \begin{macrocode}
+  local x_textleft = {}
+  local x_textright = {}
+  local x_textmiddle = {}
+%    \end{macrocode}
+%   First, compute necessary dimensions for single-column text, since most of these calculations would be used anyway
+%   for two-column text. The terms used in calculating \luavar{x_textleft[0]} respectively take one to the origin of
+%   \cs{hoffset}, to the origin of \cs{oddsidemargin} and \cs{evensidemargin}, and to the left-hand side of the text
+%   block.
+%    \begin{macrocode}
+  if recto then
+    x_textleft[0] = (
+      page_data[KEY_HOFFSETORIGIN]
+      + page_data[KEY_HOFFSET]
+      + page_data[KEY_ODDSIDEMARGIN]
+    )
+    x_textright[0] = (
+      x_textleft[0]
+      + page_data[KEY_TEXTWIDTH]
+    )
+  else
+    x_textleft[0] = (
+      page_data[KEY_HOFFSETORIGIN]
+      + page_data[KEY_HOFFSET]
+      + page_data[KEY_EVENSIDEMARGIN]
+    )
+    x_textright[0] = (
+      x_textleft[0]
+      + page_data[KEY_TEXTWIDTH]
+    )
+  end
+  x_textmiddle[0] = (x_textleft[0] + x_textright[0])/2
+
+
+  if columncount == 1 then
+%    \end{macrocode}
+%    If the page is one-column, the field \luavar{KEY_COLNO_COMPUTED} can be set immediately for every item_data.
+%    \begin{macrocode}
+    for i=1,#item_data_list do
+      item_data_list[i][KEY_COLNO_COMPUTED] = 0
+    end
+  else
+%    \end{macrocode}
+%    If the page is two-column, calculate the \(x\)-coordinates of the left and right edges and the mid-point of each
+%    column.
+%    \begin{macrocode}
+    x_textleft[1] = x_textleft[0]
+    x_textright[1] = (
+      x_textleft[1]
+      + page_data[KEY_COLUMNWIDTH]
+    )
+    x_textmiddle[1] = (x_textleft[1] + x_textright[1])/2
+
+    x_textleft[2] = (
+      x_textright[1]
+      + page_data[KEY_COLUMNSEP]
+    )
+    x_textright[2] = (
+      x_textleft[2]
+      + page_data[KEY_COLUMNWIDTH]
+    )
+    x_textmiddle[2] = (x_textleft[2] + x_textright[2])/2
+
+%    \end{macrocode}
+%   Calculate the cut-off (mid-way between the columns) that distinguishes items from left and right columns.
+%    \begin{macrocode}
+    local left_column_x_limit = (
+      x_textright[1]
+      + .5*page_data[KEY_COLUMNSEP]
+    )
+%    \end{macrocode}
+%   Now set the field \luavar{KEY_COLNO_COMPUTED} for each item.
+%    \begin{macrocode}
+    for i=1,#item_data_list do
+      local item_data = item_data_list[i]
+
+      if item_data[KEY_COLUMN] >= 0 then
+        item_data[KEY_COLNO_COMPUTED] = item_data[KEY_COLUMN]
+      else
+        if item_data[KEY_XPOS] <= left_column_x_limit then
+          item_data[KEY_COLNO_COMPUTED] = 1
+        else
+          item_data[KEY_COLNO_COMPUTED] = 2
+        end
+      end
+    end
+
+  end
+%    \end{macrocode}
+%   For every item_data in item_data_list, compute and set the fields \luavar{KEY_SIDE_COMPUTED},
+%   \luavar{KEY_XSHIFT_COMPUTED}, and \luavar{KEY_MARGINNO_COMPUTED}.
+%    \begin{macrocode}
+  for i=1,#item_data_list do
+    local item = item_data_list[i]
+
+    local pos = item[KEY_POS]
+    local colnocomputed = item[KEY_COLNO_COMPUTED]
+
+    if pos == POS_LEFT then
+      rightside = false
+    elseif pos == POS_RIGHT then
+      rightside = true
+    elseif pos == POS_NEAREST then
+      rightside = (item[KEY_XPOS] >= x_textmiddle[colnocomputed])
+    else
+%    \end{macrocode}
+%   \luavar{pos} must be POS_AUTO or POS_REVERSE
+%    \begin{macrocode}
+      rightside = RIGHTSIDE_LOOKUP_TABLE[recto][colnocomputed][pos]
+    end
+
+    local marginno = MARGINNO_LOOKUP_TABLE[recto][colnocomputed][rightside]
+
+    if rightside then
+      item[KEY_SIDE_COMPUTED] = 0
+      item[KEY_XSHIFT_COMPUTED] = -item[KEY_XPOS]
+                                  + x_textright[colnocomputed]
+    else
+      item[KEY_SIDE_COMPUTED] = 1
+      item[KEY_XSHIFT_COMPUTED] = -item[KEY_XPOS]
+                                  + x_textleft[colnocomputed]
+    end
+    item[KEY_MARGINNO_COMPUTED] = marginno
+
+  end
+
+end
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[int]{get_y_item_top}
+%   Return the \(y\)-coordinate of the top of the item described by \luavar{item_data}.
+%    \begin{macrocode}
+local function get_y_item_top(item_data)
+  return item_data[KEY_YPOS]
+         + item_data[KEY_YSHIFT_COMPUTED]
+         + item_data[KEY_HEIGHT]
+end
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[int]{get_y_item_bottom}
+%   Return the \(y\)-coordinate of the bottom of the item described by \luavar{item_data}.
+%    \begin{macrocode}
+local function get_y_item_bottom(item_data)
+  return item_data[KEY_YPOS]
+         - item_data[KEY_DEPTH]
+         + item_data[KEY_YSHIFT_COMPUTED]
+end
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[int]{get_ysep_list}
+%   Calculate the separation to be used between adjacent marginal content items as described in
+%   \luavar{item_data_list}. The list is assumed to be sorted so that items are in the order they should appear on the
+%   page, top to bottom.
+%
+%   The idea is that we have the following arrangement for \(i = 1,\ldots,\luavar{\#item_data_list}\):
+%   {
+%     \null~~~~~~\(\vdots\)\\
+%     \null~~~~\luavar{item_data_list[i]}\\
+%     \null~~~~~~\luavar{ysep_list[i]}\\
+%     \null~~~~\luavar{item_data_list[i+1]}\\
+%     \null~~~~~~\(\vdots\)\\
+%   }
+%   Also set \luavar{ysep_list[0]} and \luavar{ysep_list[\#item_data_list]} to 0, to avoid checking when these values
+%   are accessed (although they are not used).
+%    \begin{macrocode}
+local function get_ysep_list(item_data_list)
+
+  local ysep_list = {}
+
+  ysep_list[0] = 0
+  for i=1,#item_data_list-1 do
+    ysep_list[i] = math.max(
+                     item_data_list[i][KEY_YSEP_BELOW],
+                     item_data_list[i+1][KEY_YSEP_ABOVE]
+                   )
+  end
+  ysep_list[#item_data_list] = 0
+
+  return ysep_list
+
+end
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsection{Computing vertical positions}
+%
+%
+%
+% \subsubsection{Computing \val{optfixed} enabled}
+%
+% \begin{macro}[int]{compute_items_vertical_optfixed_enabled}
+%   For every \luavar{item_data} in \luavar{item_data_list} describing an item of type \luavar{TYPE_OPTFIXED}, check
+%   for a clash with an item of type \luavar{TYPE_FIXED}. If so, set \luavar{item_data[KEY_ENABLED_COMPUTED]} to
+%   \luavar{false}. Every item described in \luavar{item_data_list} is assumed to be on the same page and to have
+%   \luavar{KEY_YSHIFT} set to the default.
+%    \begin{macrocode}
+local function compute_items_vertical_optfixed_enabled(item_data_list)
+
+  local optfixed_item_data_list = {}
+  local fixed_item_data_list = {}
+
+  for _,item_data in pairs(item_data_list) do
+    if item_data[KEY_TYPE] == TYPE_OPTFIXED then
+      optfixed_item_data_list[#optfixed_item_data_list+1] = item_data
+    elseif item_data[KEY_TYPE] == TYPE_FIXED then
+      fixed_item_data_list[#fixed_item_data_list+1] = item_data
+    end
+  end
+
+  for _,optfixed_item_data in pairs(optfixed_item_data_list) do
+    local optfixed_y_item_top = get_y_item_top(optfixed_item_data)
+    local optfixed_y_item_bottom = get_y_item_bottom(optfixed_item_data)
+
+    for _,fixed_item_data in pairs(fixed_item_data_list) do
+      local fixed_y_item_top = get_y_item_top(fixed_item_data)
+      local fixed_y_item_bottom = get_y_item_bottom(fixed_item_data)
+
+      if (
+        (
+          (fixed_y_item_bottom - optfixed_y_item_top)
+          <
+          math.max(
+            fixed_item_data[KEY_YSEP_BELOW],
+            optfixed_item_data[KEY_YSEP_ABOVE]
+          )
+        )
+        and
+        (
+          (optfixed_y_item_bottom - fixed_y_item_top)
+          <
+          math.max(
+            optfixed_item_data[KEY_YSEP_BELOW],
+            fixed_item_data[KEY_YSEP_ABOVE]
+          )
+        )
+      ) then
+        optfixed_item_data[KEY_ENABLED_COMPUTED] = false
+        break
+      end
+    end
+  end
+
+end
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsubsection{Computing vertical adjustment}
+%
+% \begin{macro}[int]{compute_items_vertical_adjustment}
+%   For every \luavar{item_data} in \luavar{item_data_list}, compute the field relevant to vertical positioning,
+%   namely \luavar{KEY_YSHIFT_COMPUTED}, based on the layout information in \luavar{page_data}. Every item described
+%   in \luavar{item_data_list} is assumed to be on the same page and to have \luavar{KEY_YSHIFT} set to the default,
+%   and the list is assumed to be sorted so that items are in the order they should appear on the page, top to bottom.
+%    \begin{macrocode}
+local function compute_items_vertical_adjustment(item_data_list,page_data)
+%    \end{macrocode}
+%   Immediately return if \luavar{item_data_list} is empty, to avoid edge cases
+%    \begin{macrocode}
+  if #item_data_list == 0 then
+    return
+  end
+
+  local ysep_list = get_ysep_list(item_data_list)
+%    \end{macrocode}
+%   \textit{First pass of computation (downward).} \luavar{y_limit_above} will always be the highest \(y\)-coordinate
+%   at which the top of next item below can appear.
+%    \begin{macrocode}
+  local y_limit_above = (
+    page_data[KEY_VOFFSET]
+    + page_data[KEY_PAGEHEIGHT]
+    - item_data_list[1][KEY_YSEP_PAGE_TOP]
+  )
+
+  for i=1,#item_data_list do
+    local item_data = item_data_list[i]
+
+    local y_item_top = get_y_item_top(item_data)
+
+    if y_item_top > y_limit_above then
+      if item_data[KEY_TYPE] == TYPE_NORMAL then
+        item_data[KEY_YSHIFT_COMPUTED] = item_data[KEY_YSHIFT_COMPUTED]
+                                         + (y_limit_above - y_item_top)
+      end
+    end
+
+    y_limit_above = get_y_item_bottom(item_data) - ysep_list[i]
+  end
+%    \end{macrocode}
+%   \textit{Second pass of computation (upward)}. \luavar{y_limit_below} will always be the lowest \(y\)-coordinate at
+%   which the bottom of next item above can appear.
+%    \begin{macrocode}
+  local y_limit_below = (
+    page_data[KEY_VOFFSET]
+    + item_data_list[#item_data_list][KEY_YSEP_PAGE_BOTTOM]
+  )
+
+  for i=#item_data_list,1,-1 do
+    local item_data = item_data_list[i]
+
+    local y_item_bottom = get_y_item_bottom(item_data)
+
+    if y_item_bottom < y_limit_below then
+      if item_data[KEY_TYPE] == TYPE_NORMAL then
+        item_data[KEY_YSHIFT_COMPUTED] = item_data[KEY_YSHIFT_COMPUTED]
+                                         + (y_limit_below - y_item_bottom)
+      end
+    end
+
+    y_limit_below = get_y_item_top(item_data) + ysep_list[i-1]
+  end
+
+end
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsubsection{Checking vertical adjustment}
+%
+% Messages to use when checking results of vertical adjustment.
+%    \begin{macrocode}
+local ITEM_PASSED_YSEP_PAGE_TOP_MESSAGES = {
+  [TYPE_NORMAL] = 'Moveable item > ysep page top',
+  [TYPE_FIXED] = 'Topmost fixed item > ysep page top',
+  [TYPE_OPTFIXED] = 'Topmost optfixed item > ysep page top',
+}
+local ITEM_CLASH_MESSAGES = {
+  [TYPE_NORMAL] = {
+    [TYPE_NORMAL] = 'moveable items'
+                    .. ' (this shouldn\'t happen)',
+    [TYPE_FIXED] = 'moveable item above fixed item',
+    [TYPE_OPTFIXED] = 'moveable item above optfixed item',
+  },
+  [TYPE_FIXED] = {
+    [TYPE_NORMAL] = 'moveable item below fixed item',
+    [TYPE_FIXED] = 'fixed items',
+    [TYPE_OPTFIXED] = 'fixed item above optfixed item '
+                      .. '(this shouldn\'t happen)',
+  },
+  [TYPE_OPTFIXED] = {
+    [TYPE_NORMAL] = 'moveable items below optfixed item',
+    [TYPE_FIXED] = 'fixed item below optfixed item '
+                   .. '(this shouldn\'t happen)',
+    [TYPE_OPTFIXED] = 'optfixed items '
+                      .. '(this shouldn\'t happen)',
+  },
+}
+local ITEM_PASSED_YSEP_PAGE_BOTTOM_MESSAGE = {
+  [TYPE_NORMAL] = 'Moveable item < ysep page bottom',
+  [TYPE_FIXED] = 'Bottommost fixed item < ysep page bottom',
+  [TYPE_OPTFIXED] = 'Bottommost optfixed item < ysep page bottom',
+}
+%    \end{macrocode}
+%
+% \begin{macro}[int]{check_items_vertical}
+%   For the items described by the item_data in \luavar{item_data_list}, check whether any clash or fail to obey
+%   \key{ysep page top} or \key{ysep page bottom}. If so, write messages to \luavar{PROBLEM_REPORT_TABLE}.
+%    \begin{macrocode}
+local function check_items_vertical(item_data_list,page_data)
+%    \end{macrocode}
+%   Immediately return if item_data_list is empty, to avoid edge cases
+%    \begin{macrocode}
+  if (#item_data_list) == 0 then
+    return
+  end
+
+  local ysep_list = get_ysep_list(item_data_list)
+
+  local item_data
+
+%    \end{macrocode}
+%   If any item fails to obey \key{ysep page top}, the first one in the list does.
+%    \begin{macrocode}
+  item_data = item_data_list[1]
+  if (
+       get_y_item_top(item_data) > page_data[KEY_VOFFSET]
+                                 + page_data[KEY_PAGEHEIGHT]
+                                 - item_data[KEY_YSEP_PAGE_TOP]
+  ) then
+    table.insert(
+      PROBLEM_REPORT_TABLE,
+      get_data_page_number(item_data)
+      .. ' ' .. ITEM_PASSED_YSEP_PAGE_TOP_MESSAGES[item_data[KEY_TYPE]]
+    )
+  end
+
+  for i=2,#item_data_list do
+    local item_data = item_data_list[i]
+    local prev_item_data = item_data_list[i-1]
+    if (
+      get_y_item_top(item_data) > get_y_item_bottom(prev_item_data)
+                                  - ysep_list[i-1]
+    ) then
+      table.insert(
+        PROBLEM_REPORT_TABLE,
+        get_data_page_number(item_data)
+        .. ' Clash: ' ..
+        ITEM_CLASH_MESSAGES[prev_item_data[KEY_TYPE]][item_data[KEY_TYPE]]
+      )
+    end
+  end
+%    \end{macrocode}
+%   If any item fails to obey \key{ysep page bottom}, the last one in the list does.
+%    \begin{macrocode}
+  item_data = item_data_list[#item_data_list]
+  if (
+    get_y_item_bottom(item_data) < page_data[KEY_VOFFSET]
+                                   + item_data[KEY_YSEP_PAGE_BOTTOM]
+  ) then
+    table.insert(
+      PROBLEM_REPORT_TABLE,
+      get_data_page_number(item_data)
+      .. ' ' .. ITEM_PASSED_YSEP_PAGE_BOTTOM_MESSAGE[item_data[KEY_TYPE]]
+    )
+  end
+
+end
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsubsection{Core vertical position computation}
+%
+% \begin{macro}[int]{compute_items_vertical}
+%   For every \luavar{item_data} in \luavar{item_data_list}, compute the field relevant to vertical positioning,
+%   namely \luavar{KEY_YSHIFT_COMPUTED}, based on the layout information in \luavar{page_data}. This may involve
+%   setting the field \luavar{KEY_ENABLED_COMPUTED} to false. In such a case, the relevant item_data is removed from
+%   \luavar{item_data_list}.
+%    \begin{macrocode}
+local function compute_items_vertical(item_data_list,page_data)
+%    \end{macrocode}
+%   Set \luavar{KEY_YSHIFT_COMPUTED} of each \luavar{item_data} to the user-supplied value.
+%    \begin{macrocode}
+  for i=1,#item_data_list do
+    local item_data = item_data_list[i]
+
+    item_data[KEY_YSHIFT_COMPUTED] = item_data[KEY_YSHIFT]
+  end
+%    \end{macrocode}
+%   Decide which items of type \luavar{ITEM_DATA_OPTFIXED} are to be disabled.
+%    \begin{macrocode}
+  compute_items_vertical_optfixed_enabled(item_data_list)
+%    \end{macrocode}
+%   Strip any \luavar{item_data} with \luavar{KEY_ENABLED_COMPUTED} set to false from \luavar{item_data_list}.
+%    \begin{macrocode}
+  list_filter(item_data_list,function(item_data)
+    return item_data[KEY_ENABLED_COMPUTED]
+  end)
+%    \end{macrocode}
+%   Sort \luavar{item_data_list} according to the stored position from top to bottom and left to right on the page,
+%   resolving ties using \luavar{KEY_ITEMNO}.
+%    \begin{macrocode}
+  table.sort(
+    item_data_list,
+    function(left,right)
+      local y_diff = left[KEY_YPOS] - right[KEY_YPOS]
+
+      if y_diff > 0 then
+        return true
+      elseif y_diff < 0 then
+        return false
+      end
+
+      local x_diff = left[KEY_XPOS] - right[KEY_XPOS]
+
+      if x_diff < 0 then
+        return true
+      elseif x_diff > 0 then
+        return false
+      end
+
+      return (left[KEY_ITEMNO] < right[KEY_ITEMNO])
+    end
+  )
+
+  compute_items_vertical_adjustment(item_data_list,page_data)
+
+  check_items_vertical(item_data_list,page_data)
+
+end
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[int]{compute_items}
+%   For every item represented in \luavar{ITEM_DATA_MAIN_TABLE}, use the \luavar{page_data} stored in
+%   \luavar{PAGE_DATA_MAIN_TABLE} to compute the item_data values necessary to place the item correctly on the page,
+%   namely those indexed by: \luavar{KEY_COLNO_COMPUTED}, \luavar{KEY_XSHIFT_COMPUTED}, \luavar{KEY_YSHIFT_COMPUTED},
+%   \luavar{KEY_SIDE_COMPUTED}, \luavar{KEY_ENABLED_COMPUTED}.
+%    \begin{macrocode}
+local function compute_items()
+%    \end{macrocode}
+%   Compute the maximum abspageno, which will be the last page of the document on which a item appears.
+%    \begin{macrocode}
+  local max_abspageno = 0
+
+  for k,v in pairs(ITEM_DATA_MAIN_TABLE) do
+    max_abspageno = math.max(v[KEY_ABSPAGENO],max_abspageno)
+  end
+%    \end{macrocode}
+%   \luavar{list per_abspage_item_data_list} will be a list indexed by absolute page numbers. Each entry will be a
+%   list (possibly empty) of \luavar{item_data} describing the items that appear on the corresponding page.
+%    \begin{macrocode}
+  local per_abspage_item_data_list = {}
+%    \end{macrocode}
+%   Prepare \luavar{per_abspage_item_data_list} by making each entry an empty list, then fill it from
+%   \luavar{ITEM_DATA_MAIN_TABLE}.
+%    \begin{macrocode}
+  for i=1,max_abspageno do
+    per_abspage_item_data_list[i] = {}
+  end
+  for _,item_data in pairs(ITEM_DATA_MAIN_TABLE) do
+    local temp_table = per_abspage_item_data_list[item_data[KEY_ABSPAGENO]]
+    temp_table[#temp_table+1] = item_data
+  end
+%    \end{macrocode}
+%   \luavar{per_abspage_item_data_list} will be a list indexed by abssolute page numbers. Each entry will be a
+%   \luavar{page_data} describing the corresponding page. Usually multiple entries will be the same
+%   \luavar{page_data}: in the loop, \luavar{pagedatano} will be the index of the last entry in
+%   \luavar{PAGE_DATA_MAIN_TABLE} with \luavar{KEY_ABSPAGENO} value less than or equal to \luavar{abspageno}. (There
+%   may be several such entries in \luavar{PAGE_DATA_MAIN_TABLE} because \cs{marginalianewgeometry} may have been
+%   called multiple times on the same page.) Note that \luavar{PAGE_DATA_MAIN_TABLE[0]} is available even if there was
+%   no data in the \file{.aux} file, because the defaults were stored by \luafunc{store_default_page_data}.
+%    \begin{macrocode}
+  local per_abspage_page_data_list = {}
+%    \end{macrocode}
+%    \begin{macrocode}
+  local pagedatano = 0
+  for abspageno = 1,max_abspageno do
+%    \end{macrocode}
+%    \begin{macrocode}
+    while (
+      PAGE_DATA_MAIN_TABLE[pagedatano+1] ~= nil
+      and
+      PAGE_DATA_MAIN_TABLE[pagedatano+1][KEY_ABSPAGENO] == abspageno
+    ) do
+      pagedatano = pagedatano+1
+    end
+    per_abspage_page_data_list[abspageno] = PAGE_DATA_MAIN_TABLE[pagedatano]
+  end
+%    \end{macrocode}
+%   Iterate through all pages and perform the necessary computations.
+%    \begin{macrocode}
+  for abspageno=1,#per_abspage_item_data_list do
+    local current_page_data = per_abspage_page_data_list[abspageno]
+    local current_page_item_data_list = per_abspage_item_data_list[abspageno]
+%    \end{macrocode}
+%     First, compute the horizontal positions, which includes sorting items into columns in two-column mode.
+%    \begin{macrocode}
+    compute_items_horizontal(current_page_item_data_list,current_page_data)
+%    \end{macrocode}
+%     Sort the items into sublists corresponding to the margins in which they are located.
+%    \begin{macrocode}
+    local current_page_item_data_sublists = {}
+
+    for i=0,5 do
+      current_page_item_data_sublists[i] = {}
+    end
+
+    for _,item_data in pairs(current_page_item_data_list) do
+      table.insert(
+        current_page_item_data_sublists[item_data[KEY_MARGINNO_COMPUTED]],
+        item_data
+      )
+    end
+%    \end{macrocode}
+%     Compute vertical positons for each sublist.
+%    \begin{macrocode}
+    for i=0,5 do
+      compute_items_vertical(
+        current_page_item_data_sublists[i],
+        current_page_data
+      )
+    end
+  end
+end
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsection{Passing item_data back to \LaTeX}
+%
+% \begin{macro}[int]{load_item_data}
+%   Set the relevant \LaTeX\ counter and dimension variables to the values computed for \luavar{itemno}.
+%    \begin{macrocode}
+local function load_item_data(itemno)
+
+  item = ITEM_DATA_MAIN_TABLE[tonumber(itemno)]
+  if item == nil then
+    item = ITEM_DATA_DEFAULTS
+  end
+
+  tex.count['l__marginalia_page_int'] = item[KEY_PAGENO]
+  tex.count['l__marginalia_column_computed_int'] = item[KEY_COLNO_COMPUTED]
+  tex.dimen['l__marginalia_xshift_computed_dim'] = item[KEY_XSHIFT_COMPUTED]
+  tex.dimen['l__marginalia_yshift_computed_dim'] = item[KEY_YSHIFT_COMPUTED]
+  tex.count['l__marginalia_side_computed_int'] = item[KEY_SIDE_COMPUTED]
+  tex.count['l__marginalia_marginno_computed_int']
+    = item[KEY_MARGINNO_COMPUTED]
+  if item[KEY_ENABLED_COMPUTED] then
+    tex.count['l__marginalia_enabled_computed_int'] = 1
+  else
+    tex.count['l__marginalia_enabled_computed_int'] = 0
+  end
+
+end
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsection{Export public functions}
+%
+% Finally, make available the functions that will be called from \LaTeX\ using \cs{lua_now:n} and \cs{lua_now:e}.
+%    \begin{macrocode}
+return {
+  store_default_page_data = store_default_page_data,
+  store_page_data = store_page_data,
+  check_page_data = check_page_data,
+
+  store_item_data = store_item_data,
+  check_item_data = check_item_data,
+
+  compute_items = compute_items,
+
+  load_item_data = load_item_data,
+
+  write_problem_report = write_problem_report,
+
+  write_page_change_report = write_page_change_report,
+  write_item_change_report = write_item_change_report,
+}
+%    \end{macrocode}
+%
+%
+%
+%    \begin{macrocode}
+%</lua>
+%    \end{macrocode}
+
+%
+%
+%
+% \clearpage
+% \end{implementation}
+%
+%
+%
+% \iffalse
+%<*metadriver>
+\input{marginalia.dtx}
+%</metadriver>
+% \fi

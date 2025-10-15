@@ -1,0 +1,107 @@
+%%%
+% Mentalo
+%%%
+\def\filedateMentalo{2024/08/04}%
+\def\fileversionMentalo{0.1}%
+\message{-- \filedateMentalo\space v\fileversionMentalo}%
+%
+\NewDocumentCommand\PfCNumold{m}{%
+  \xintifboolexpr{#1<0}{(\num{#1})}{\num{#1}}%
+}%
+
+\NewDocumentCommand\PfCNum{m}{%
+  \ifnum#1<0\relax%
+    (\num{#1})%
+  \else%
+    \num{#1}%
+  \fi%
+}%
+
+\setKVdefault[Mentalo]{Questions=10,ValeurMin=1,ValeurMax=15,Perso=false}
+
+\NewDocumentCommand\Mentalo{o m}{%
+  \useKVdefault[Mentalo]%
+  \setKV[Mentalo]{#1}%
+  \ifboolKV[Mentalo]{Perso}{%
+      \setsepchar{,}\ignoreemptyitems%
+      \readlist*\PfCMentaloListeOperations{#2}%
+      \reademptyitems%
+      \xdef\PfCMentaloEtages{\fpeval{\PfCMentaloListeOperationslen+1}}%
+      \setlength{\tabcolsep}{0.25\tabcolsep}%
+      \renewcommand{\arraystretch}{1.5}%
+      \begin{NiceTabular}{*{\fpeval{\PfCMentaloEtages}}{m{5pt}}m{20pt}cm{20pt}cl*{\fpeval{\PfCMentaloEtages}}{m{5pt}}*{5}{m{15pt}}*{1}{m{10pt}}}
+      \Block{1-\fpeval{\PfCMentaloEtages}}{~}\xintFor* ##2 in{\xintSeq{1}{\fpeval{\PfCMentaloEtages}}}\do{&}%
+      \Block[draw,fill=gray!15]{1-5}{Arrivée}&&&&&\Block{1-\fpeval{\PfCMentaloEtages}}{~}\xintFor* ##2 in{\xintSeq{1}{\fpeval{\PfCMentaloEtages}}}\do{&}\\
+      \xintFor* ##1 in{\xintSeq{1}{\fpeval{\PfCMentaloEtages-1}}}\do{%
+        \Block{1-\fpeval{\PfCMentaloEtages-##1}}{~}\xintFor* ##2 in{\xintSeq{1}{\fpeval{\PfCMentaloEtages-##1}}}\do{&}%
+        \Block[borders={top,left,bottom}]{1-\fpeval{##1}}{~}\xintFor* ##2 in{\xintSeq{1}{\fpeval{##1}}}\do{&}%
+        \Block[borders={top,bottom}]{1-1}{%
+          \IfSubStr{\PfCMentaloListeOperations[##1]}{+}{\StrBefore{\PfCMentaloListeOperations[##1]}{+}[\PfCMentaloPremierTerme]\num{\PfCMentaloPremierTerme}}{}%
+          \IfSubStr{\PfCMentaloListeOperations[##1]}{-}{\StrBefore{\PfCMentaloListeOperations[##1]}{-}[\PfCMentaloPremierTerme]\num{\PfCMentaloPremierTerme}}{}%
+          \IfSubStr{\PfCMentaloListeOperations[##1]}{*}{\StrBefore{\PfCMentaloListeOperations[##1]}{*}[\PfCMentaloPremierTerme]\num{\PfCMentaloPremierTerme}}{}%
+          \IfSubStr{\PfCMentaloListeOperations[##1]}{/}{\StrBefore{\PfCMentaloListeOperations[##1]}{/}[\PfCMentaloPremierTerme]\num{\PfCMentaloPremierTerme}}{}%
+        }&
+        \Block[borders={top,bottom}]{1-1}{%
+          \IfSubStr{\PfCMentaloListeOperations[##1]}{+}{$+$}{}%
+          \IfSubStr{\PfCMentaloListeOperations[##1]}{-}{$-$}{}%
+          \IfSubStr{\PfCMentaloListeOperations[##1]}{*}{$\times$}{}%
+          \IfSubStr{\PfCMentaloListeOperations[##1]}{/}{$\div$}{}%
+        }%
+        &
+        \Block[borders={top,bottom}]{1-1}{%
+          \IfSubStr{\PfCMentaloListeOperations[##1]}{+}{\StrBehind{\PfCMentaloListeOperations[##1]}{+}[\PfCMentaloDeuxiemeTerme]\num{\PfCMentaloDeuxiemeTerme}}{}%
+          \IfSubStr{\PfCMentaloListeOperations[##1]}{-}{\StrBehind{\PfCMentaloListeOperations[##1]}{-}[\PfCMentaloDeuxiemeTerme]\num{\PfCMentaloDeuxiemeTerme}}{}%
+          \IfSubStr{\PfCMentaloListeOperations[##1]}{*}{\StrBehind{\PfCMentaloListeOperations[##1]}{*}[\PfCMentaloDeuxiemeTerme]\num{\PfCMentaloDeuxiemeTerme}}{}%
+          \IfSubStr{\PfCMentaloListeOperations[##1]}{/}{\StrBehind{\PfCMentaloListeOperations[##1]}{/}[\PfCMentaloDeuxiemeTerme]\num{\PfCMentaloDeuxiemeTerme}}{}%
+        }%
+        &\Block[borders={top,bottom}]{1-1}{$=$}&\Block[borders={top,bottom}]{1-1}{\pointilles[20pt]}&%
+        \Block[borders={top,right,bottom}]{1-\fpeval{##1}}{~}\xintFor* ##2 in{\xintSeq{1}{\fpeval{##1}}}\do{&}%
+        \Block{1-\fpeval{\PfCMentaloEtages-##1}}{~}\xintFor* ##2 in{\xintSeq{1}{\fpeval{\PfCMentaloEtages-##1}}}\do{&}%
+        &&&&\Block{1-2}{%
+          \num{\fpeval{\PfCMentaloListeOperations[##1]}}%
+        }&\\
+      }%
+      \Block[draw,fill=gray!15]{1-\fpeval{2*\PfCMentaloEtages+5}}{Départ}\xintFor* ##2 in{\xintSeq{1}{\fpeval{2*\PfCMentaloEtages+5}}}\do{&}\\%
+      \CodeAfter
+      \tikz\draw[dashed] (1-|\fpeval{5+5+2+2*\PfCMentaloEtages-2})--(last-|\fpeval{5+5+2+2*\PfCMentaloEtages-2});
+    \end{NiceTabular}
+  }{%
+    \xdef\PfCMentaloEtages{\fpeval{\useKV[Mentalo]{Questions}+1}}
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\PfCMentaloListeOperations{#2}%
+    \reademptyitems%
+    \setlength{\tabcolsep}{0.25\tabcolsep}
+    \renewcommand{\arraystretch}{1.5}
+    \begin{NiceTabular}{*{\fpeval{\PfCMentaloEtages}}{m{5pt}}m{20pt}cm{20pt}cl*{\fpeval{\PfCMentaloEtages}}{m{5pt}}*{5}{m{15pt}}*{1}{m{10pt}}}
+      \Block{1-\fpeval{\PfCMentaloEtages}}{~}\xintFor* ##2 in{\xintSeq{1}{\fpeval{\PfCMentaloEtages}}}\do{&}%
+      \Block[draw,fill=gray!15]{1-5}{Arrivée}&&&&&\Block{1-\fpeval{\PfCMentaloEtages}}{~}\xintFor* ##2 in{\xintSeq{1}{\fpeval{\PfCMentaloEtages}}}\do{&}\\
+      \xintFor* ##1 in{\xintSeq{1}{\fpeval{\PfCMentaloEtages-1}}}\do{%
+        \Block{1-\fpeval{\PfCMentaloEtages-##1}}{~}\xintFor* ##2 in{\xintSeq{1}{\fpeval{\PfCMentaloEtages-##1}}}\do{&}%
+        \Block[borders={top,left,bottom}]{1-\fpeval{##1}}{~}\xintFor* ##2 in{\xintSeq{1}{\fpeval{##1}}}\do{&}%
+        \Block[borders={top,bottom}]{1-1}{%
+          \xdef\PfCMentaloPremierTerme{\fpeval{randint(\useKV[Mentalo]{ValeurMin},\useKV[Mentalo]{ValeurMax})}}%
+          \num{\PfCMentaloPremierTerme}}&\Block[borders={top,bottom}]{1-1}{%
+          \xintifboolexpr{\PfCMentaloListeOperationslen==1}{%
+            \StrSubstitute{\PfCMentaloListeOperations[1]}{*}{\times}[\PfCCBAffiche]$\PfCCBAffiche$%
+          }{%
+            \StrSubstitute{\PfCMentaloListeOperations[##1]}{*}{\times}[\PfCCBAffiche]$\PfCCBAffiche$%
+          }%
+        }&%
+        \Block[borders={top,bottom}]{1-1}{\xdef\PfCMentaloDeuxiemeTerme{\fpeval{randint(\useKV[Mentalo]{ValeurMin},\useKV[Mentalo]{ValeurMax})}}%
+          \PfCNum{\PfCMentaloDeuxiemeTerme}}&\Block[borders={top,bottom}]{1-1}{$=$}&\Block[borders={top,bottom}]{1-1}{\pointilles[20pt]}&%
+        \Block[borders={top,right,bottom}]{1-\fpeval{##1}}{~}\xintFor* ##2 in{\xintSeq{1}{\fpeval{##1}}}\do{&}%
+        \Block{1-\fpeval{\PfCMentaloEtages-##1}}{~}\xintFor* ##2 in{\xintSeq{1}{\fpeval{\PfCMentaloEtages-##1}}}\do{&}%
+        &&&&\Block{1-2}{%
+          \xintifboolexpr{\PfCMentaloListeOperationslen==1}{%
+            \num{\fpeval{\PfCMentaloPremierTerme\PfCMentaloListeOperations[1]\PfCMentaloDeuxiemeTerme}}
+          }{%
+            \num{\fpeval{\PfCMentaloPremierTerme\PfCMentaloListeOperations[##1]\PfCMentaloDeuxiemeTerme}}
+          }%
+        }&\\
+      }%
+      \Block[draw,fill=gray!15]{1-\fpeval{2*\PfCMentaloEtages+5}}{Départ}\xintFor* ##2 in{\xintSeq{1}{\fpeval{2*\PfCMentaloEtages+5}}}\do{&}\\%
+      \CodeAfter
+      \tikz\draw[dashed] (1-|\fpeval{5+5+2+2*\PfCMentaloEtages-2})--(last-|\fpeval{5+5+2+2*\PfCMentaloEtages-2});
+    \end{NiceTabular}
+  }%
+}%

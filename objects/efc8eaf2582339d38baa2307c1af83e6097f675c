@@ -1,0 +1,353 @@
+%%%
+% Ticket de caisse
+%%%
+\def\filedateTicketCaisse{2024/08/04}%
+\def\fileversionTicketCaisse{0.1}%
+\message{-- \filedateTicketCaisse\space v\fileversionTicketCaisse}%
+%
+\newcounter{PfCNbInsulte}%
+\newcounter{PfCChoixService}%
+\setcounter{PfCNbInsulte}{0}%
+\setcounter{PfCChoixService}{0}%
+%
+\newlength\PfCTicketLarg
+
+\NewDocumentCommand\PfCPrixInsulte{sm}{%
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\PfCListeInsulte{\%,!,§,\#,*,@,-}%
+  \reademptyitems%
+  \IfBooleanTF{#1}{%
+    \MelangeListe{1,2,3,4,5,6,7}{5}%
+  }{%
+    \stepcounter{PfCNbInsulte}%
+    \MelangeListe{1,2,3,4,5,6,7}{3}%
+  }%
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\ListeInsulteMelange{\faa}%
+  \reademptyitems%
+  \ifboolKV[TicketCaisse]{Solution}{\textcolor{PfCTicketCouleurSolution}{#2}}{%
+    \xintFor* ##1 in{\xintSeq{1}{\ListeInsulteMelangelen}}\do{%
+      \xdef\Titi{\ListeInsulteMelange[##1]}%
+      \PfCListeInsulte[\Titi]%
+    }%
+  }%
+}%
+
+\makeatletter
+\NewDocumentCommand\PrixTicket{om}{%
+  \ifboolKV[TicketCaisse]{CHF}{%
+    \DeclareSIUnit{\Tempo}{\PfCCHF}%
+  }{%
+    \ifboolKV[TicketCaisse]{CFA}{%
+      \DeclareSIUnit{\Tempo}{\PfCCFA}%
+    }{%
+      \ifboolKV[TicketCaisse]{CFP}{%
+        \DeclareSIUnit{\Tempo}{\PfCCFP}%
+      }{%
+        \ifboolKV[TicketCaisse]{US}{%
+          \DeclareSIUnit{\Tempo}{\Dollar}%
+        }{%
+          \ifboolKV[TicketCaisse]{UK}{%
+            \DeclareSIUnit{\Tempo}{\LivreSterling}%
+          }{%
+            \ifboolKV[TicketCaisse]{Euro}{%
+              \DeclareSIUnit{\Tempo}{\EuRo}%
+            }{%
+              \if@CHF%
+                \setKV[TicketCaisse]{CHF}%
+              \fi%
+              \DeclareSIUnit{\Tempo}{\DeviseDefaut}%
+            }%
+          }%
+        }%
+      }%
+    }%
+  }%
+  \IfInteger{#2}{%
+    \ifboolKV[TicketCaisse]{CHF}{%
+      \si{\PfCCHF}~\num{#2}.-%
+    }{%
+      \SI[round-mode=places,round-precision=2]{#2}{\Tempo}%
+    }%
+  }{%
+    \SI[round-mode=places,round-precision=2]{#2}{\Tempo}%
+  }%
+}%
+\makeatother
+
+\setKVdefault[TicketCaisse]{Largeur=222pt,Especes=50,Simple=false,Taxes=false,SansRendu=false,Enseigne=Au comptoir des maths,DateAchat=\today,HeureAchat=15:13:34,Taches=false,Rendu,Total,SousTotal=false,UK=false,US=false,CFA=false,CFP=false,CHF=false,Euro=false,Solution=false,Couleur={},Service={}}
+\defKV[TicketCaisse]{%
+  Couleur=\ifempty{#1}{}{\colorlet{PfCTicketCouleurSolution}{#1}\setKV[TicketCaisse]{Solution}},%
+  Service=\ifempty{#1}{}{\setKV[TicketCaisse]{Taxes}}%
+}%
+
+\NewDocumentCommand\TicketCaisse{som}{%
+  \setcounter{PfCNbInsulte}{0}%
+  \useKVdefault[TicketCaisse]%
+  \setKV[TicketCaisse]{#2}%
+  \setlength{\PfCTicketLarg}{\useKV[TicketCaisse]{Largeur}}%
+  \setsepchar[*]{,*/}%
+  \readlist*\ListeAchats{#3}%
+  % On fait trois listes pour les retenir
+  % Liste Quantités
+  \xdef\PfCFooQuantites{}%
+  \foreachitem\compteur\in\ListeAchats{%
+    \StrChar{\ListeAchats[\compteurcnt,1]}{1}[\MyLetter]%
+    \IfStrEq{\MyLetter}{!}{%
+      \StrBehind{\ListeAchats[\compteurcnt,1]}{!}[\Titi]%
+      \xdef\PfCFooQuantites{\PfCFooQuantites,\Titi}%
+    }{%
+      \xdef\PfCFooQuantites{\PfCFooQuantites,\ListeAchats[\compteurcnt,1]}%
+    }%
+  }%
+  % Liste Elements
+  \xdef\PfCFooElements{}%
+  \foreachitem\compteur\in\ListeAchats{%
+    \xdef\PfCFooElements{\PfCFooElements,\ListeAchats[\compteurcnt,2]}%
+  }%
+  % Liste Prix Unitaire
+  \xdef\PfCFooPUnitaires{}%
+  \foreachitem\compteur\in\ListeAchats{%
+    \StrChar{\ListeAchats[\compteurcnt,3]}{1}[\MyLetter]%
+    \IfStrEqCase{\MyLetter}{%
+      {!}{%
+        \StrBehind{\ListeAchats[\compteurcnt,3]}{!}[\Titi]%
+        \StrChar{\Titi}{1}[\Toto]%
+        \IfStrEq{\Toto}{*}{%
+          \StrBehind{\ListeAchats[\compteurcnt,3]}{!*}[\Tata]%
+          \xdef\PfCFooPUnitaires{\PfCFooPUnitaires,\Tata}%
+        }{%
+          \xdef\PfCFooPUnitaires{\PfCFooPUnitaires,\Titi}%
+        }%
+      }% 
+      {*}{\StrBehind{\ListeAchats[\compteurcnt,3]}{*}[\Titi]%
+        \xdef\PfCFooPUnitaires{\PfCFooPUnitaires,\Titi}}%
+    }[\xdef\PfCFooPUnitaires{\PfCFooPUnitaires,\ListeAchats[\compteurcnt,3]}]%
+  }%
+  % On les lit
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\ListeQuantites{\PfCFooQuantites}%
+  \readlist*\ListeElements{\PfCFooElements}%
+  \readlist*\ListePUnitaires{\PfCFooPUnitaires}%
+  % On calcul le coût total
+  \xdef\PfCTCTotal{0}%
+  \xintFor* ##1 in{\xintSeq{1}{\ListeAchatslen}}\do{%
+    \xdef\PfCTCTotal{\fpeval{\PfCTCTotal+\ListeQuantites[##1]*\ListePUnitaires[##1]}}%
+  }%
+  \ifboolKV[TicketCaisse]{Taxes}{%
+    % On décompose la clé
+    \StrChar{\useKV[TicketCaisse]{Service}}{1}[\MyLetter]%
+    % Si le premier caractère est !, il faut regarder si le deuxième caractère est une étoile
+    \IfStrEq{\MyLetter}{!}{%
+      \StrChar{\useKV[TicketCaisse]{Service}}{2}[\MyLettera]%
+      \IfStrEq{\MyLettera}{*}{%
+        \StrGobbleLeft{\useKV[TicketCaisse]{Service}}{2}[\PfCTCValeurService]
+        \setcounter{PfCChoixService}{3}%
+      }{%
+        \StrGobbleLeft{\useKV[TicketCaisse]{Service}}{1}[\PfCTCValeurService]
+        \setcounter{PfCChoixService}{1}%
+      }%
+    }{%il faut regarder si c'est une étoile
+      \StrChar{\useKV[TicketCaisse]{Service}}{1}[\MyLettera]%
+      \IfStrEq{\MyLettera}{*}{%
+        \StrGobbleLeft{\useKV[TicketCaisse]{Service}}{1}[\PfCTCValeurService]
+        \setcounter{PfCChoixService}{2}
+      }{%
+        \xdef\PfCTCValeurService{\useKV[TicketCaisse]{Service}}%
+        \setcounter{PfCChoixService}{0}
+      }%
+    }%
+    % On fait les calculs associés à la clé.
+    \xdef\PfCTCSousTotal{\PfCTCTotal}%
+    \xdef\PfCTCService{\fpeval{\PfCTCValeurService*\PfCTCSousTotal/100}}%
+    \xdef\PfCTCTotal{\fpeval{\PfCTCSousTotal+\PfCTCService}}%
+  }{}%
+  % Le coût total est \PfCTCTotal\\
+  \IfBooleanTF{#1}{%
+    \ttfamily
+    \begin{tabular}{|m{0.48\PfCTicketLarg}m{0.13\PfCTicketLarg}m{0.165\PfCTicketLarg}m{0.225\PfCTicketLarg}|}%
+      \hline
+      &&&\\%
+    \multicolumn{4}{|c|}{\Large\bfseries\useKV[TicketCaisse]{Enseigne}}\\%
+    &&&\\%
+    \hline%
+    &&&\\%
+    \footnotesize\sc Description&\centering \footnotesize\sc Qte.&\centering\footnotesize\sc P.u.&\hfill\footnotesize\sc Prix \ifboolKV[TicketCaisse]{Taxes}{H.T.}{Net}\\%
+    &&&\\%
+    \xintFor* ##1 in{\xintSeq{1}{\ListeAchatslen}}\do{%
+      \ListeElements[##1]&%
+      \centering
+        \footnotesize%
+        \StrChar{\ListeAchats[##1,1]}{1}[\MyLetter]%
+        \IfStrEq{\MyLetter}{!}{\PfCPrixInsulte*{\ListeQuantites[##1]}}{\xintifboolexpr{\fpeval{\ListeQuantites[##1]}==1}{}{\num{\ListeQuantites[##1]}}}%
+      &
+      \hfill
+        \footnotesize
+        %Savoir si le nombre d'articles est affiché
+        \StrChar{\ListeAchats[##1,1]}{1}[\MyLetter]%
+        % Si le nombre d'articles n'est pas affiché, il faut impérativement afficher le prix unitaire
+        \IfStrEq{\MyLetter}{!}{%
+          \PrixTicket{\ListePUnitaires[##1]}%
+        }{%
+          % On regarde si on affiche le prix unitaire
+          \StrChar{\ListeAchats[##1,3]}{1}[\MyLettera]%
+          % Si c'est un !, on affiche pas
+          % Sinon, on affiche
+          \IfStrEq{\MyLettera}{!}{%
+            \PfCPrixInsulte*{\PrixTicket{\ListePUnitaires[##1]}}%
+          }{%
+            \xintifboolexpr{\fpeval{\ListeQuantites[##1]}==1}{}{%
+              \PrixTicket{\ListePUnitaires[##1]}%
+            }%
+          }%
+        }%
+      &\hfill
+        \StrChar{\ListeAchats[##1,3]}{1}[\MyLetter]%
+        % Si le premier caractère est !, il faut regarder si le deuxième caractère est une étoile
+        \IfStrEq{\MyLetter}{!}{%
+          \StrChar{\ListeAchats[##1,3]}{2}[\MyLettera]%
+          \IfStrEq{\MyLettera}{*}{%
+            \PfCPrixInsulte*{\PrixTicket{\fpeval{\ListeQuantites[##1]*\ListePUnitaires[##1]}}}%
+          }{%
+            \PrixTicket{\fpeval{\ListeQuantites[##1]*\ListePUnitaires[##1]}}%
+          }%
+        }{%il faut regarder si c'est une étoile
+          \StrChar{\ListeAchats[##1,3]}{1}[\MyLettera]%
+          \IfStrEq{\MyLettera}{*}{%
+            \PfCPrixInsulte{\PrixTicket{\fpeval{\ListeQuantites[##1]*\ListePUnitaires[##1]}}}%
+          }{%
+            \PrixTicket{\fpeval{\ListeQuantites[##1]*\ListePUnitaires[##1]}}%
+          }%
+        }%
+      \\
+    }%
+    &&&\\%
+      \hline%
+      &&&\\
+    % Partie Service
+    \ifboolKV[TicketCaisse]{Taxes}{%
+      Total H.T.\uppercase{&}\uppercase{&}\uppercase{&}\hfill\ifboolKV[TicketCaisse]{SousTotal}{\ifnum\thePfCNbInsulte=0\relax\PrixTicket{\PfCTCSousTotal}\else\PfCPrixInsulte*{\PrixTicket{\PfCTCSousTotal}}\fi}{\PfCPrixInsulte*{\PrixTicket{\PfCTCSousTotal}}}
+      \\%
+      Service %
+      \ifodd\thePfCChoixService\relax \PfCPrixInsulte{\num{\PfCTCValeurService}}\else\num{\PfCTCValeurService}\fi~\si{\percent}%
+      &&&\hfill
+        \ifnum\thePfCChoixService>1\relax \PfCPrixInsulte{\PrixTicket{\PfCTCService}}\else\PrixTicket{\PfCTCService}\fi%
+      \\
+      &&&\\
+      \hline
+      &&&\\
+    }{}%
+    \ifboolKV[TicketCaisse]{Simple}{}{%
+      Total\ifboolKV[TicketCaisse]{Taxes}{ T.T.C.}{}&&&\hfill\ifboolKV[TicketCaisse]{Total}{\ifnum\thePfCNbInsulte=0\relax\PrixTicket{\PfCTCTotal}\else\PfCPrixInsulte*{\PrixTicket{\PfCTCTotal}}\fi}{\PfCPrixInsulte*{\PrixTicket{\PfCTCTotal}}}\\%
+      \ifboolKV[TicketCaisse]{SansRendu}{}{%
+        Espèces&&&\hfill\PrixTicket{\useKV[TicketCaisse]{Especes}}\\%
+        Rendu&&&\hfill\ifboolKV[TicketCaisse]{Rendu}{\PrixTicket{\fpeval{\useKV[TicketCaisse]{Especes}-\PfCTCTotal}}}{\PfCPrixInsulte*{\PrixTicket{\fpeval{\useKV[TicketCaisse]{Especes}-\PfCTCTotal}}}}\\%
+      }
+      &&&\\%
+    }%
+      \multicolumn{4}{|c|}{\footnotesize\useKV[TicketCaisse]{DateAchat}\qquad\useKV[TicketCaisse]{HeureAchat}}\\%
+      \hline
+    \end{tabular}
+  }{%
+  {\ttfamily%
+    \begin{NiceTabular}{m{0.48\PfCTicketLarg}m{0.13\PfCTicketLarg}m{0.165\PfCTicketLarg}m{0.225\PfCTicketLarg}}%
+      \CodeBefore
+      \tikz\node[opacity=0.2,yshift=-1.5cm] at ($(1-|1)!0.5!(1-|last)$) {\Large\bfseries\reflectbox{
+          \begin{tabular}{c}
+            Papier garanti\\
+            sans Phénol
+          \end{tabular}
+        }
+      };
+      \tikz\node[opacity=0.2,anchor=center,yshift=1cm] at ($(last-|1)!0.5!(last-|last)$) {\Large\bfseries\reflectbox{%
+          \faRecycle~Pensez à trier.%
+        }%
+      };%
+      \tikz\node[opacity=0.5,anchor=center,yshift=2cm] at ($(last-|1)!0.5!(last-|last)$) {\Large\bfseries\reflectbox{
+          \LogoRecyclage[Couleur=0.8white]%
+        }%
+      };%
+      \tikz\draw[fill=Ivory,opacity=0.5] (1-|1) rectangle (last-|last);%
+    \Body
+    &&&\\%
+    \Block{1-4}{\Large\bfseries\useKV[TicketCaisse]{Enseigne}}&&&\\%
+    \\%
+    \Cdots\\%
+    \\%
+    \Block[l]{}{\footnotesize\sc Description}&\Block{}{\footnotesize\sc Qte.}&\Block{}{\footnotesize\sc P.u.}&\Block[r]{}{\footnotesize\sc Prix \ifboolKV[TicketCaisse]{Taxes}{H.T.}{Net}}\\%
+    \\%
+    \xintFor* ##1 in{\xintSeq{1}{\ListeAchatslen}}\do{%
+      \ListeElements[##1]&%
+      \Block{}{%
+        \footnotesize%
+        \StrChar{\ListeAchats[##1,1]}{1}[\MyLetter]%
+        \IfStrEq{\MyLetter}{!}{\PfCPrixInsulte*{\ListeQuantites[##1]}}{\xintifboolexpr{\fpeval{\ListeQuantites[##1]}==1}{}{\num{\ListeQuantites[##1]}}}%
+      }&
+      \Block[r]{}{%
+        \footnotesize
+        %Savoir si le nombre d'articles est affiché
+        \StrChar{\ListeAchats[##1,1]}{1}[\MyLetter]%
+        % Si le nombre d'articles n'est pas affiché, il faut impérativement afficher le prix unitaire
+        \IfStrEq{\MyLetter}{!}{%
+          \PrixTicket{\ListePUnitaires[##1]}%
+        }{%
+          % On regarde si on affiche le prix unitaire
+          \StrChar{\ListeAchats[##1,3]}{1}[\MyLettera]%
+          % Si c'est un !, on affiche pas
+          % Sinon, on affiche
+          \IfStrEq{\MyLettera}{!}{%
+            \PfCPrixInsulte*{\PrixTicket{\ListePUnitaires[##1]}}%
+          }{%
+            \xintifboolexpr{\fpeval{\ListeQuantites[##1]}==1}{}{%
+              \PrixTicket{\ListePUnitaires[##1]}%
+            }%
+          }%
+        }%
+      }%
+      &\Block[r]{}{%
+        \StrChar{\ListeAchats[##1,3]}{1}[\MyLetter]%
+        % Si le premier caractère est !, il faut regarder si le deuxième caractère est une étoile
+        \IfStrEq{\MyLetter}{!}{%
+          \StrChar{\ListeAchats[##1,3]}{2}[\MyLettera]%
+          \IfStrEq{\MyLettera}{*}{%
+            \PfCPrixInsulte*{\PrixTicket{\fpeval{\ListeQuantites[##1]*\ListePUnitaires[##1]}}}%
+          }{%
+            \PrixTicket{\fpeval{\ListeQuantites[##1]*\ListePUnitaires[##1]}}%
+          }%
+        }{%il faut regarder si c'est une étoile
+          \StrChar{\ListeAchats[##1,3]}{1}[\MyLettera]%
+          \IfStrEq{\MyLettera}{*}{%
+            \PfCPrixInsulte{\PrixTicket{\fpeval{\ListeQuantites[##1]*\ListePUnitaires[##1]}}}%
+          }{%
+            \PrixTicket{\fpeval{\ListeQuantites[##1]*\ListePUnitaires[##1]}}%
+          }%
+        }%
+      }\\
+    }%
+    \\%
+    \Cdots\\%
+    % Partie Service
+    \ifboolKV[TicketCaisse]{Taxes}{%
+      Total H.T.&&&\Block[r]{}{\ifboolKV[TicketCaisse]{SousTotal}{\ifnum\thePfCNbInsulte=0\relax\PrixTicket{\PfCTCSousTotal}\else\PfCPrixInsulte*{\PrixTicket{\PfCTCSousTotal}}\fi}{\PfCPrixInsulte*{\PrixTicket{\PfCTCSousTotal}}}
+      }\\%
+      Service %
+      \ifodd\thePfCChoixService\relax \PfCPrixInsulte{\num{\PfCTCValeurService}}\else\num{\PfCTCValeurService}\fi~\si{\percent}%
+      &&&\Block[r]{}{%
+        \ifnum\thePfCChoixService>1\relax \PfCPrixInsulte{\PrixTicket{\PfCTCService}}\else\PrixTicket{\PfCTCService}\fi%
+      }\\
+      \Cdots\\
+      \\
+    }{}%
+    \ifboolKV[TicketCaisse]{Simple}{}{%
+      Total\ifboolKV[TicketCaisse]{Taxes}{ T.T.C.}{}&&&\Block[r]{}{\ifboolKV[TicketCaisse]{Total}{\ifnum\thePfCNbInsulte=0\relax\PrixTicket{\PfCTCTotal}\else\PfCPrixInsulte*{\PrixTicket{\PfCTCTotal}}\fi}{\PfCPrixInsulte*{\PrixTicket{\PfCTCTotal}}}}\\%
+      \ifboolKV[TicketCaisse]{SansRendu}{}{%
+        Espèces&&&\Block[r]{}{\PrixTicket{\useKV[TicketCaisse]{Especes}}}\\%
+        Rendu&&&\Block[r]{}{\ifboolKV[TicketCaisse]{Rendu}{\PrixTicket{\fpeval{\useKV[TicketCaisse]{Especes}-\PfCTCTotal}}}{\PfCPrixInsulte*{\PrixTicket{\fpeval{\useKV[TicketCaisse]{Especes}-\PfCTCTotal}}}}}\\%
+      }
+      \\%
+    }%
+    \Block{1-4}{\footnotesize\useKV[TicketCaisse]{DateAchat}\qquad\useKV[TicketCaisse]{HeureAchat}}&&&\\%
+    \end{NiceTabular}
+  }%
+  }
+}%

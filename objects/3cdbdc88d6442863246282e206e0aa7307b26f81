@@ -1,0 +1,445 @@
+%
+% This is file `chemobabel.sty',
+% for generating chemical structural formulas
+% using Open Babel and Inkscape.
+%
+% Copyright 2014-2022 Acetaminophen (Hironobu YAMASHITA)
+%   Email   :  h.y.acetaminophen[a t]gmail.com
+%   GitHub  :  https://github.com/aminophen
+%   Blog    :  http://acetaminophen.hatenablog.com/
+%   Twitter :  @aminophen
+%
+% This work is based on a lot of resources published online.
+%  - Noel O'Boyle http://baoilleach.blogspot.jp/
+%  - Jakob Lykke Andersen http://imada.sdu.dk/~jlandersen/
+%  - TeX Forum http://oku.edu.mie-u.ac.jp/tex/
+%
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{chemobabel}
+  [2022/10/22 v0.9l Chemical structures with Open Babel]
+
+\def\chemob@bel@error{\PackageError{chemobabel}}
+\def\chemob@bel@warn{\PackageWarningNoLine{chemobabel}}
+
+%% Start of package main code
+%% Thanks: http://imada.sdu.dk/~jlandersen/latex/graphvizObabel.sty
+
+\RequirePackage{verbatim}
+\RequirePackage{graphicx}
+
+%% ----- Check graphics/x driver -----
+% prefer .pdf but fallback to .eps if necessary
+% --- currently known drivers all support .eps
+\@ifundefined{Gin@rule@.pdf}{\@ifundefined{Gin@rule@.eps}{%
+  \chemob@bel@warn{Unsupported situation? cannot happen}}{}%
+  % EPS: dvips.def
+  \def\chemob@belimgExt@default{eps}%
+}{%
+  % PDF>EPS: dvipdfmx.def, dvisvgm.def, luatex.def, pdftex.def, xetex.def
+  \def\chemob@belimgExt@default{pdf}%
+}
+
+%% ----- Check status -----
+\chardef\chemob@bel@status\z@
+
+%% ----- External command execution -----
+\ifx\directlua\@undefined
+  \def\chemob@bel@exec#1{\immediate\write18{#1}}
+  \ifx\pdfshellescape\@undefined
+    \ifx\shellescape\@undefined
+      \chardef\chemob@bel@shellescape \@ne % fallback no warning
+    \else
+      % xelatex, hilatex
+      \chardef\chemob@bel@shellescape \shellescape
+    \fi
+  \else
+      % (pdf)latex, platex, uplatex
+      \chardef\chemob@bel@shellescape \pdfshellescape
+  \fi
+\else
+  \def\chemob@bel@exec#1{\directlua{os.execute[[#1]]}}
+  \chardef\chemob@bel@shellescape =\directlua{tex.sprint(status.shell_escape)}
+\fi
+
+%% ----- Ensure -shell-escape when processing ChemFigFile.tex
+\edef\chemob@bel@jobname{\jobname}
+{\escapechar=-1 \xdef\chemob@bel@outname{\string\ChemFigFile}}
+\ifx\chemob@bel@jobname\chemob@bel@outname
+  \ifnum\chemob@bel@shellescape=\@ne\else
+    \chemob@bel@error{%
+      Processing \chemob@bel@outname.tex needs -shell-escape.\MessageBreak
+      Run 'pdflatex -shell-escape \chemob@bel@outname.tex'}\@ehc
+  \fi
+\fi
+
+%% ----- Make a directory for images -----
+\newcommand\chemobabelimgdir{chemobabelimgdir}
+\chemob@bel@exec{mkdir \chemobabelimgdir}
+
+%% ----- Definition of external commands -----
+\def\smilesob@bel@obabelcmd#1#2{obabel -:"#1" -O \smilesob@belGetName.svg #2}
+\def\chemob@bel@obabelcmd#1#2{obabel "#1" -O \chemob@belGetName.svg #2}
+%
+% inkscape 0.92 or earlier
+\def\chemob@bel@inkscapeoldcmd#1#2{inkscape -f #1.svg --export-#2=#1.#2}
+% inkscape major version 1.0
+\def\chemob@bel@inkscapecmd#1#2{inkscape #1.svg --export-type=#2}
+%
+% librsvg
+\def\chemob@bel@librsvgcmd#1#2{rsvg-convert -f #2 -o #1.#2 #1.svg}
+%
+% crop PDF
+\def\chemob@bel@pdfcropcmd#1{pdfcrop #1.pdf}% -> #1-crop.pdf
+% crop EPS
+\def\chemob@bel@epscropcmd#1{ps2eps -f #1.eps}% -> #1.eps.eps
+
+%% ----- Common part of \smilesobabel and \chemobabel -----
+\def\chemob@bel@common@maybeimg#1#2#3{%
+  \def\chemob@belImgName{#2\chemob@bel@maybecrop.\chemob@belimgExt}%
+  \IfFileExists{\chemob@belImgName}{% the image exists: include it
+    #1{\chemob@belImgName}%
+  }{% the image was not created - show a warning and a hint
+    \chemob@bel@warn{Processing of #3\space failed}%
+    \fbox{\begin{minipage}{0.9\textwidth}
+      Warning in chemobabel: #3\space was not processed.
+    \ifnum\chemob@bel@shellescape=\@ne
+      Please make sure that \texttt{obabel},
+      \ifx\chemob@bel@svgtoimgcmd\chemob@bel@librsvgcmd
+        \texttt{rsvg-convert}
+      \else
+        \texttt{inkscape}
+      \fi
+      \ifx\chemob@bel@cropcmd\chemob@bel@pdfcropcmd
+        and \texttt{pdfcrop}
+      \else\ifx\chemob@bel@cropcmd\chemob@bel@epscropcmd
+        and \texttt{ps2eps}
+      \fi\fi
+      are installed.\\
+    \else
+      Remember to run \texttt{latex} (\texttt{pdflatex}, \texttt{platex}, etc.)
+      with the \texttt{-shell-escape} option.\\
+    \fi
+      \IfFileExists{#2.log}{%
+        obabel log (might be empty):
+        \verbatiminput{#2.log}%
+      }{%
+        No log file.%
+      }%
+    \end{minipage}}%
+    \global\chardef\chemob@bel@status\@ne
+  }%
+}
+%% ----- Common part of \smilesobabel and \chemobabel end -----
+
+%% ----- Definition of \smilesobabel -----
+\newcounter{smilesob@belCounter}
+\setcounter{smilesob@belCounter}{1}
+\newcommand\smilesob@belPrefix{\chemobabelimgdir/smilesobabelimg}
+\newcommand\smilesob@belGetName{\smilesob@belPrefix\arabic{smilesob@belCounter}}
+
+% 1: (optional) options for includegraphics
+% 2: SMILES notation
+% 3: options for obabel
+\newcommand\smilesobabel{\@ifstar{\smilesobabel@i}{\smilesobabel@ii}}
+\newcommand\smilesobabel@i[1][scale=1]{%
+  \def\smilesobabel@next{\includegraphics[clip,#1]}%
+  \begingroup
+    \let\do\@makeother \dospecials \catcode`\{=1 \catcode`\}=2
+    \@smilesobabel@i
+}
+\newcommand\smilesobabel@ii[1][scale=1]{%
+  \def\smilesobabel@next{\includegraphics[clip,#1]}%
+  \begingroup
+    \let\do\@makeother \dospecials \catcode`\{=1 \catcode`\}=2
+    \@smilesobabel@ii
+}
+\def\@smilesobabel@i#1{%
+  \endgroup
+  \@smilesobabel@main{#1}{}%
+}
+\def\@smilesobabel@ii#1#2{%
+  \endgroup
+  \@smilesobabel@main{#1}{#2}%
+}
+\def\@smilesobabel@main#1#2{%
+  \chemob@bel@exec{%
+    \smilesob@bel@obabelcmd{#1}{#2} 2>\smilesob@belGetName.log
+    && \chemob@bel@svgtoimgcmd{\smilesob@belGetName}{\chemob@belimgExt} 2>>\smilesob@belGetName.log
+    || rm -f \smilesob@belGetName.\chemob@belimgExt}%
+  \chemob@bel@exec{\chemob@bel@cropcmd{\smilesob@belGetName}}%
+  \chemob@bel@common@maybeimg{\smilesobabel@next}{\smilesob@belGetName}{SMILES string}%
+  \addtocounter{smilesob@belCounter}{1}% select next name
+}
+%% ----- Definition of \smilesobabel end -----
+
+%% ----- Definition of \chemobabel -----
+\newcounter{chemob@belCounter}
+\setcounter{chemob@belCounter}{1}
+\newcommand\chemob@belPrefix{\chemobabelimgdir/chemobabelimg}
+\newcommand\chemob@belGetName{\chemob@belPrefix\arabic{chemob@belCounter}}
+
+% 1: (optional) options for includegraphics
+% 2: original files (.mol, .cdx, etc.)
+% 3: options for obabel
+\newcommand\chemobabel{\@ifstar{\chemobabel@i}{\chemobabel@ii}}
+\newcommand\chemobabel@i[1][scale=1]{%
+  \def\chemobabel@next{\includegraphics[clip,#1]}%
+  \begingroup
+    \let\do\@makeother \dospecials \catcode`\{=1 \catcode`\}=2
+    \@chemobabel@i
+}
+\newcommand\chemobabel@ii[1][scale=1]{%
+  \def\chemobabel@next{\includegraphics[clip,#1]}%
+  \begingroup
+    \let\do\@makeother \dospecials \catcode`\{=1 \catcode`\}=2
+    \@chemobabel@ii
+}
+\def\@chemobabel@i#1{%
+  \endgroup
+  \@chemobabel@main{#1}{}%
+}
+\def\@chemobabel@ii#1#2{%
+  \endgroup
+  \@chemobabel@main{#1}{#2}%
+}
+\def\@chemobabel@main#1#2{%
+  \IfFileExists{"#1"}{%
+    % the file exists: start processing
+    % (``#1'' can contain spaces, so ``"'' required)
+    \chemob@bel@exec{%
+      \chemob@bel@obabelcmd{#1}{#2} 2>\chemob@belGetName.log
+      && \chemob@bel@svgtoimgcmd{\chemob@belGetName}{\chemob@belimgExt} 2>>\chemob@belGetName.log
+      || rm -f \chemob@belGetName.\chemob@belimgExt}%
+    \chemob@bel@exec{\chemob@bel@cropcmd{\chemob@belGetName}}%
+    \chemob@bel@common@maybeimg{\chemobabel@next}{\chemob@belGetName}{file ``#1''}%
+  }{%
+    % the file does not exist: show a std error
+    \chemob@bel@error{File ``#1'' not found}\@ehc
+    \fbox{\begin{minipage}{0.9\textwidth}
+      Error in chemobabel: the file ``#1'' does not exist.
+    \end{minipage}}%
+  }%
+  \addtocounter{chemob@belCounter}{1}% select next name
+}
+%% ----- Definition of \chemobabel end -----
+
+%% ----- Check if no chemical structures -----
+\def\chemob@bel@ifnochem{%
+  \let\chemob@bel@nochem\relax
+  \ifnum\value{smilesob@belCounter}=\@ne
+  \ifnum\value{chemob@belCounter}=\@ne
+    \let\chemob@bel@nochem\@empty
+  \fi\fi
+  \ifx\chemob@bel@nochem\@empty
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi
+}
+
+%% ----- Declaration of options -----
+% load macros for extracting \chemobabel and \smilesobabel commands
+\let\chemob@bel@extract\relax
+\DeclareOption{extract}{\let\chemob@bel@extract\@empty}
+% define the image extension
+\DeclareOption{pdf}{%
+  \def\chemob@belimgExt{pdf}%
+  \let\chemob@bel@cropcmd\chemob@bel@pdfcropcmd
+  \def\chemob@bel@maybecrop{-crop}}
+\DeclareOption{eps}{%
+  \def\chemob@belimgExt{eps}%
+  \let\chemob@bel@cropcmd\chemob@bel@epscropcmd
+  \def\chemob@bel@maybecrop{.eps}}
+% determine image conversion command
+\DeclareOption{inkscape-old}%
+  {\let\chemob@bel@svgtoimgcmd\chemob@bel@inkscapeoldcmd}
+\DeclareOption{inkscape}%
+  {\let\chemob@bel@svgtoimgcmd\chemob@bel@inkscapecmd}
+\DeclareOption{librsvg}%
+  {\let\chemob@bel@svgtoimgcmd\chemob@bel@librsvgcmd}
+% crop image or not
+\let\chemob@bel@nocrop\relax
+\DeclareOption{nocrop}{\let\chemob@bel@nocrop\@empty}
+% default settings
+\ExecuteOptions{\chemob@belimgExt@default,inkscape}
+% handle user settings - arbitrary order allowed
+\ProcessOptions*\relax
+\ifx\chemob@bel@nocrop\relax \else
+  \let\chemob@bel@cropcmd\@gobble
+  \let\chemob@bel@maybecrop\@empty
+\fi
+%% ----- Declaration of options end -----
+
+%% ----- Warn if something went wrong -----
+% e.g.) \chemob@bel@common@maybeimg is not an image
+%   --- when current processing failed
+%        AND previous shell-escape run not found
+% e.g.) \chemob@bel@common@maybeimg is definitely a wrong image
+%   --- when current processing failed
+%        BUT previous shell-escape run with different total number found
+% --- note that re-run after removing [extract] should avoid the warning
+% --- as it will include all the correct images from previous shell-escape run
+\def\chemob@bel@record@imgnum#1{%
+  \immediate\write#1{\gdef\string
+    \smilesob@bel@imgNum{\number\value{smilesob@belCounter}}}%
+  \immediate\write#1{\gdef\string
+    \chemob@bel@imgNum{\number\value{chemob@belCounter}}}%
+}
+\def\chemob@bel@preserve@imgnum#1{%
+  \immediate\write#1{\gdef\string
+    \smilesob@bel@imgNum{\smilesob@bel@imgNum}}%
+  \immediate\write#1{\gdef\string
+    \chemob@bel@imgNum{\chemob@bel@imgNum}}%
+}
+\def\chemob@bel@atenddocument{%
+  \ifnum\chemob@bel@status>\z@ % at least one is not an image
+      \chemob@bel@warn{%
+        Some processing failed.\MessageBreak
+        Please rerun}%
+  \else % all images
+    \ifnum\chemob@bel@shellescape=\@ne % current run is shell-escape
+      % record number of images of the current run
+      \if@filesw
+        \chemob@bel@record@imgnum{\@mainaux}%
+      \fi
+      % when processing ChemFigFile.tex, also write to the original .aux
+      \ifx\chemob@bel@jobname\chemob@bel@outname
+        \IfFileExists{\chemobabelfile.tex}{%
+          \if@filesw
+            \newwrite\chemob@bel@origaux
+            \immediate\openout\chemob@bel@origaux=\chemobabelfile.aux\relax
+            \chemob@bel@record@imgnum{\chemob@bel@origaux}%
+            \immediate\closeout\chemob@bel@origaux
+          \fi
+        }{}%
+      \fi
+    \else
+      % compare number of images with the previous shell-escape run
+      \ifx\smilesob@bel@imgNum\@undefined\def\smilesob@bel@imgNum{0}\fi
+      \ifnum\value{smilesob@belCounter}=\smilesob@bel@imgNum\relax\else
+        \chemob@bel@warn{%
+          Number of \noexpand\smilesobabel changed.\MessageBreak
+          Please rerun}%
+      \fi
+      \ifx\chemob@bel@imgNum\@undefined\def\chemob@bel@imgNum{0}\fi
+      \ifnum\value{chemob@belCounter}=\chemob@bel@imgNum\relax\else
+        \chemob@bel@warn{%
+          Number of \noexpand\chemobabel changed.\MessageBreak
+          Please rerun}%
+      \fi
+      % record number of images of the previous shell-escape run
+      \if@filesw
+        \chemob@bel@preserve@imgnum{\@mainaux}%
+      \fi
+    \fi
+  \fi
+}
+\AtEndDocument{\chemob@bel@atenddocument}
+%% ----- Warn if something went wrong end -----
+
+%% ----- Exit this package now, if [extract] is not specified -----
+\ifx\chemob@bel@extract\relax \endinput \fi
+
+%% Extracting all codes of Open Babel figures
+%% Thanks: http://oku.edu.mie-u.ac.jp/tex/mod/forum/discuss.php?d=1411
+
+%% ----- Safety check before opening output file -----
+\ifx\chemob@bel@jobname\chemob@bel@outname
+  \chemob@bel@warn{%
+    Wow! Your file name is `\chemob@bel@outname'!\MessageBreak
+    Option [extract] ignored to avoid overwriting}
+  \expandafter\endinput
+\fi
+
+\chemob@bel@warn{%
+  You are using [extract] option.\MessageBreak
+  No chemical structures will be printed}
+
+%% ----- Accumulate user-given options to be passed -----
+% the image extension (non-empty)
+\edef\chemob@bel@options{\chemob@belimgExt}
+% image conversion command (except default=inkscape)
+\ifx\chemob@bel@svgtoimgcmd\chemob@bel@inkscapeoldcmd
+  \edef\chemob@bel@options{\chemob@bel@options,inkscape-old}
+\else\ifx\chemob@bel@svgtoimgcmd\chemob@bel@librsvgcmd
+  \edef\chemob@bel@options{\chemob@bel@options,librsvg}
+\fi\fi
+% crop image or not
+\ifx\chemob@bel@nocrop\relax \else
+  \edef\chemob@bel@options{\chemob@bel@options,nocrop}
+\fi
+
+%% ----- Define intermediate output file and load packages -----
+\newwrite\chemob@bel@outfile
+\immediate\openout\chemob@bel@outfile=\chemob@bel@outname.tex\relax
+\immediate\write\chemob@bel@outfile{\string\def\string\chemobabelfile{\chemob@bel@jobname}}
+\immediate\write\chemob@bel@outfile{\string\documentclass{article}}
+\immediate\write\chemob@bel@outfile{\string\usepackage[\chemob@bel@options]{chemobabel}}
+
+%% ----- Read and write -----
+\immediate\write\chemob@bel@outfile{\string\begin{document}}
+\def\chemob@bel@atenddocument{%
+  \immediate\write\chemob@bel@outfile{\string\end{document}}%
+  \immediate\closeout\chemob@bel@outfile
+  \chemob@bel@ifnochem{}{%
+    \chemob@bel@warn{%
+      Some chemical structures are extracted.\MessageBreak
+      Run 'pdflatex -shell-escape ChemFigFile.tex'}}%
+}
+% \smilesobabel*[#1]{#2} => normalized to \smilesobabel[#1]{#2}{#3}
+\renewcommand\smilesobabel@i{%
+  \begingroup
+    \let\do\@makeother \dospecials \catcode`\{=1 \catcode`\}=2
+    \@smilesobabel@i
+}
+\renewcommand\smilesobabel@ii{%
+  \begingroup
+    \let\do\@makeother \dospecials \catcode`\{=1 \catcode`\}=2
+    \@smilesobabel@ii
+}
+\renewcommand\@smilesobabel@i[2][scale=1]{%
+  \endgroup
+  \@smilesobabel@main{#1}{#2}{}%
+}
+\renewcommand\@smilesobabel@ii[3][scale=1]{%
+  \endgroup
+  \@smilesobabel@main{#1}{#2}{#3}%
+}
+\def\@smilesobabel@main#1#2#3{%
+  \immediate\write\chemob@bel@outfile{%
+    \string\smilesobabel[#1]{#2}{#3}%
+    \string\newpage}%
+  [\smilesob@belGetName.\chemob@belimgExt]%
+  \addtocounter{smilesob@belCounter}{1}}
+% \chemobabel*[#1]{#2} => normalized to \chemobabel[#1]{#2}{#3}
+\renewcommand\chemobabel@i{%
+  \begingroup
+    \let\do\@makeother \dospecials \catcode`\{=1 \catcode`\}=2
+    \@chemobabel@i
+}
+\renewcommand\chemobabel@ii{%
+  \begingroup
+    \let\do\@makeother \dospecials \catcode`\{=1 \catcode`\}=2
+    \@chemobabel@ii
+}
+\renewcommand\@chemobabel@i[2][scale=1]{%
+  \endgroup
+  \@chemobabel@main{#1}{#2}{}%
+}
+\renewcommand\@chemobabel@ii[3][scale=1]{%
+  \endgroup
+  \@chemobabel@main{#1}{#2}{#3}%
+}
+\def\@chemobabel@main#1#2#3{%
+  \immediate\write\chemob@bel@outfile{%
+    \string\chemobabel[#1]{#2}{#3}%
+    \string\newpage}%
+  [\chemob@belGetName.\chemob@belimgExt]%
+  \addtocounter{chemob@belCounter}{1}}
+%% ----- Read and write end -----
+
+\endinput
+
+%%
+%% End of file `chemobabel.sty'.

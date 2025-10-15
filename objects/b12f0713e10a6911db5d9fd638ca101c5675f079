@@ -1,0 +1,152 @@
+% Kale Ewasiuk (kalekje@gmail.com)
+% 2025-02-11
+% Copyright (C) 2021-2025 Kale Ewasiuk
+%
+% Permission is hereby granted, free of charge, to any person obtaining a copy
+% of this software and associated documentation files (the "Software"), to deal
+% in the Software without restriction, including without limitation the rights
+% to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+% copies of the Software, and to permit persons to whom the Software is
+% furnished to do so, subject to the following conditions:
+%
+% The above copyright notice and this permission notice shall be included in
+% all copies or substantial portions of the Software.
+%
+% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+% ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+% TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+% PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT
+% SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+% ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+% ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+% OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{yamlvars}[2025-02-11]
+
+\RequirePackage{luacode}
+\RequirePackage{etoolbox}
+\RequirePackage{luakeys}
+\RequirePackage{penlightplus} % no option passed here, but extras must be used, error will be thrown if not
+
+%\IfFileExists{tinyyaml.lua}{}{\PackageError{yamlvars}{This package requires installation of the 'tinyyaml' package, please install it and try again}{}}
+
+
+\luadirect{YAMLvars = require('YAMLvars')}
+
+\luadirect{
+  if YAMLvars.yaml == nil then
+      tex.sprint('\\PackageError{yamlvars}{"tinyyaml.lua" not found. Install the "lua-tinyyaml" package from CTAN or include "tinyyaml.lua" in your project}{}')
+  end
+}
+
+
+
+
+\DeclareOption{useyv}{
+       \NewDocumentCommand{\yv}{m}{\csuse{yv#1}}
+        \luadirect{YAMLvars.setts.prc = 'yvdef'}
+        \luadirect{YAMLvars.settsdefault.prc = 'yvdef'}
+}
+\DeclareOption{parseCLI}{
+      \AtBeginDocument{\luadirect{YAMLvars.doYAMLfiles(YAMLvars.getYAMLcli())}}
+}
+\DeclareOption{debug}{
+        \luadirect{YAMLvars.debug = true}
+}
+
+
+
+
+
+
+
+
+
+
+\newcommand{\yamlvarsdebugon}{\luadirect{YAMLvars.debug = true}}
+\newcommand{\yamlvarsdebugoff}{\luadirect{YAMLvars.debug = false}}
+\newcommand{\lowercasevarYVon}{\luadirect{YAMLvars.lowvasevarall = true}}
+\newcommand{\lowercasevarYVoff}{\luadirect{YAMLvars.lowvasevarall = false}}
+\newcommand{\AllowUndeclaredYV}{\luadirect{YAMLvars.setts.undeclared = true}}
+\newcommand{\ForbidUndeclaredYV}{\luadirect{YAMLvars.setts.undeclared = false}}
+\newcommand{\TextualYV}{\luadirect{
+YAMLvars.allowUndeclared = true
+YAMLvars.xfmDefault = {'lb2nl','addxspace'}
+}}
+\DeclareOption{allowundeclared}{
+        \luadirect{YAMLvars.settsdefault.undeclared = true}
+}
+\DeclareOption{overwritedefs}{
+        \luadirect{YAMLvars.settsdefault.overwrite = true}
+}
+%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
+\DeclareOption*{\PackageWarning{YAMLvars}{Unknown option: '\CurrentOption'}{}}
+\ProcessOptions\relax
+
+\luadirect{YAMLvars.setts2default()}
+
+
+\NewDocumentCommand{\YAMLvarsSetKeyVals}{}{\luadirect{YAMLvars.callkeyvals()}}
+
+
+\newcommand{\declareYAMLvarsFile}[1]{\luadirect{YAMLvars.declareYAMLvarsFile(\luastring{#1})}}
+\NewDocumentCommand{\parseYAMLvarsFile}{m}{\luadirect{
+  YAMLvars.parseYAMLvarsFile(\luastring{#1})
+}}
+
+
+\newenvironment{declareYAMLvars}{\luadirect{penlight.tex.startrecording()}}{\luadirect{penlight.tex.stoprecording()}
+        \luadirect{YAMLvars.declareYAMLvarsStr(penlight.tex.recordedbuf)}
+}
+
+
+\NewDocumentEnvironment{parseYAMLvars}{}%
+{\luadirect{
+  penlight.tex.startrecording()
+}}%
+{\luadirect{
+  penlight.tex.stoprecording()
+}}
+\AfterEndEnvironment{parseYAMLvars}{\luadirect{YAMLvars.parseYAMLvarsStr(penlight.tex.recordedbuf)}\YAMLvarsSetKeyVals}
+% necessary hack to get rohead and lohead to work..
+% .. https://tex.stackexchange.com/questions/637018/setting-koma-heading-within-lua/637021?noredirect=1#comment1587387_637021
+
+
+
+\newcommand{\resetYAMLvarsspec}{\luadirect{YAMLvars.varspec = {}}}
+
+
+
+\newenvironment{parseYAMLpdfdata}{\luadirect{penlight.tex.startrecording()}}{
+  \luadirect{penlight.tex.stoprecording()
+  YAMLvars.yaml2PDFmetadata(penlight.tex.recordedbuf)
+  penlight.tex.writePDFmetadata()
+  }
+}
+
+
+
+
+\NewDocumentCommand{\setYAMLvars}{s m }{\luadirect{
+  YAMLvars.updatesettskv(\luastring{#2}, \luastring{#1})
+}}
+
+\NewDocumentCommand{\setdefYAMLvars}{ m }{\luadirect{
+  YAMLvars.updatesettskv(\luastring{#1}, pl.tex._xFalse, true)
+}} % set the default settings
+
+%  \IfBooleanTF{#1}{\luadirect{YAMLvars.setts = pl.tablex.deepcopy(YAMLvars.settsdefault)}}{} % if * return to default first
+%  \luadirect{pl.tablex.update(YAMLvars.setts, luakeys.parse(\luastring{#2}))}
+%  \luadirect{YAMLvars.setts.xfm = {'lb2nl', 'addxspace'}}
+

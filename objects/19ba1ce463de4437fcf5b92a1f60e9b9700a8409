@@ -1,0 +1,242 @@
+input PfCSolid;
+
+ecartcube=5pt;
+
+vardef fakecube=
+  save $;picture $;
+  $=image(
+      fill polygone((0,0),u*(1,0),u*(1,1),u*(0,1)) withcolor CouleurFond;
+    fill polygone(u*(1,0),u*(1,1),u*(1,1)+u*sqrt(2)*0.25*(1,1),u*(1,0)+u*sqrt(2)*0.25*(1,1)) withcolor CouleurFond;
+    fill polygone(u*(0,1),u*(1,1),u*(1,1)+u*sqrt(2)*0.25*(1,1),u*(0,1)+u*sqrt(2)*0.25*(1,1)) withcolor CouleurFond;
+    trace polygone((0,0),u*(1,0),u*(1,1),u*(0,1));
+    trace polygone(u*(1,0),u*(1,1),u*(1,1)+u*sqrt(2)*0.25*(1,1),u*(1,0)+u*sqrt(2)*0.25*(1,1));
+    trace polygone(u*(0,1),u*(1,1),u*(1,1)+u*sqrt(2)*0.25*(1,1),u*(0,1)+u*sqrt(2)*0.25*(1,1));
+    );
+  larg:=(abs(lrcorner $ - llcorner $)+ecartcube);
+  haut:=(abs(urcorner $ - lrcorner $)+ecartcube);
+  $:=$ shifted(llcorner $-center $);
+  $
+enddef;
+
+vardef bouchon=
+  save $;picture $;
+  $=image(
+      path ccbase,ccbaseh;
+    ccbase=cercles(u*(0.5,0),0.5u) yscaled 0.25;
+    ccbaseh=ccbase shifted(u*(0,0.25));
+    fill (point(0) of ccbase)--(point(0) of ccbaseh)--(subpath(0,length ccbaseh/2) of ccbaseh)--(subpath(length ccbase/2,length ccbase) of ccbase)--cycle withcolor CouleurFond;
+    trace (point(length ccbaseh/2) of ccbaseh)--(subpath(length ccbase/2,length ccbase) of ccbase)--(point(0) of ccbaseh);
+    trace ccbaseh;
+    );
+  larg:=(abs(lrcorner $ - llcorner $)+ecartcube);
+  haut:=(abs(urcorner $ - lrcorner $)+ecartcube);
+  $:=$ shifted(llcorner $-center $);
+  $
+enddef;
+
+vardef cubeespace=
+  typerepre:="proj";
+  save $;picture $;
+  picture PourLarg;
+  intensite:=1.5;
+  Ferme[0]:=false;
+  outcolor:=LightSteelBlue;
+  incolor:=white;
+  nb:=1;subh:=1;
+  creux:=true;
+  %
+  PourLarg=image(%
+    Initialisation(5,10,20,25);
+    Objetcube1("a=0.25");
+    AffichageObjet1;
+  );
+  larg:=(abs(lrcorner PourLarg - llcorner PourLarg)+2pt);
+  haut:=(abs(urcorner PourLarg - lrcorner PourLarg)+2pt);
+  $=PourLarg;
+  $
+enddef;
+
+vardef carre=
+  save $;picture $;
+  $=image(
+    fill ((unitsquare scaled u) shifted (-0.5u,-0.5u)) withcolor CouleurFond;
+    trace (unitsquare scaled u) shifted (-0.5u,-0.5u);
+  );
+  $
+enddef;
+
+vardef kappla=
+  save $;picture $;
+  $=image(
+    fill ((unitsquare xscaled u yscaled 0.25u) shifted(-0.5u,-0.125u)) withcolor CouleurFond;
+    trace (unitsquare xscaled u yscaled 0.25u) shifted(-0.5u,-0.125u);
+  );
+  $
+enddef;
+
+vardef rectangleh=
+  save $;picture $;
+  %haut:=0.5u;
+  $=image(
+    fill ((unitsquare xscaled u yscaled 0.5u) shifted(-0.5u,-0.25u)) withcolor CouleurFond;
+    trace (unitsquare xscaled u yscaled 0.5u) shifted(-0.5u,-0.25u);
+  );
+  $
+enddef;
+
+vardef rectanglev=
+  save $;picture $;
+  %larg:=0.5u;
+  $=image(
+    fill ((unitsquare xscaled 0.5u yscaled u) shifted(-0.25u,-0.5u)) withcolor CouleurFond;
+    trace (unitsquare xscaled 0.5u yscaled u) shifted(-0.25u,-0.5u);
+  );
+  $
+enddef;
+
+vardef carrecroix=
+  save $;picture $;
+  path CarreCroix;
+  CarreCroix=(unitsquare scaled u) shifted(-0.5u,-0.5u);
+  $=image(
+      fill CarreCroix withcolor CouleurFond;
+      trace CarreCroix;
+    trace 0.75[point(0) of CarreCroix,point(2) of CarreCroix]--0.75[point(2) of CarreCroix,point(0) of CarreCroix];
+    trace 0.75[point(1) of CarreCroix,point(3) of CarreCroix]--0.75[point(3) of CarreCroix,point(1) of CarreCroix];
+    );
+  $
+enddef;
+
+vardef carrearrondi=
+  save $;picture $;
+  path CarreArrondi,CarreArrondiA;
+  CarreArrondi=(unitsquare scaled u) shifted(-0.5u,-0.5u);
+  CarreArrondiA=0.1[point(0) of CarreArrondi,point(1) of CarreArrondi]--0.90[point(0) of CarreArrondi,point(1) of CarreArrondi]{dir0}..{dir90}(0.1[point(1) of CarreArrondi,point(2) of CarreArrondi])--0.90[point(1) of CarreArrondi,point(2) of CarreArrondi]{dir90}..{dir180}(0.1[point(2) of CarreArrondi,point(3) of CarreArrondi])--0.90[point(2) of CarreArrondi,point(3) of CarreArrondi]{dir180}..{dir990}(0.1[point(3) of CarreArrondi,point(0) of CarreArrondi])--0.90[point(3) of CarreArrondi,point(0) of CarreArrondi]{dir-90}..cycle;
+  $=image(%
+    fill CarreArrondiA withcolor CouleurFond;
+    trace CarreArrondiA;
+  );
+  $
+enddef;
+
+vardef disque=
+  save $;picture $;
+  $=image(
+    fill cercles((0,0),0.5u) withcolor CouleurFond;
+    trace cercles((0,0),0.5u);
+  );
+  $
+enddef;
+
+vardef diamant=
+  save $;picture $;
+  $=image(
+      %trace rotation(carre scaled(sqrt(2)/2),(0,0),45);
+      fill rotation((unitsquare scaled (u*sqrt(2)/2)) shifted ((0.5*sqrt(2))*(-0.5u,-0.5u)),(0,0),45) withcolor CouleurFond;
+    trace rotation((unitsquare scaled (u*sqrt(2)/2)) shifted ((0.5*sqrt(2))*(-0.5u,-0.5u)),(0,0),45);
+  );
+  $
+enddef;
+
+vardef pentagone=
+  save $; picture $;
+  path Pentagonecc,Pentagonecd;
+  Pentagonecc=cercles((0,0),0.5u);
+  Pentagonecd=pointarc(Pentagonecc,18) for t=1 upto 5:--pointarc(Pentagonecc,18+t*72) endfor--cycle;
+  $=image(
+    fill Pentagonecd withcolor CouleurFond;
+    trace Pentagonecd;
+  );
+  $
+enddef;
+
+vardef etoile=
+  save $; picture $;
+  path Etoilecc;
+  Etoilecc=cercles((0,0),0.5u);
+  pair Etoilept[];
+  for k=0 step 2 until 8:
+  Etoilept[k]=pointarc(Etoilecc,18+(k div 2)*72);
+  endfor;
+  Etoilept[1]=chemin(Etoilept[0],Etoilept[4]) intersectionpoint chemin(Etoilept[2],Etoilept[8]);
+  Etoilept[3]=chemin(Etoilept[0],Etoilept[4]) intersectionpoint chemin(Etoilept[2],Etoilept[6]);
+  Etoilept[5]=chemin(Etoilept[2],Etoilept[6]) intersectionpoint chemin(Etoilept[4],Etoilept[8]);
+  Etoilept[7]=chemin(Etoilept[0],Etoilept[6]) intersectionpoint chemin(Etoilept[4],Etoilept[8]);
+  Etoilept[9]=chemin(Etoilept[0],Etoilept[6]) intersectionpoint chemin(Etoilept[2],Etoilept[8]);
+  path EtoileFin;
+  EtoileFin=Etoilept[0] for k=1 upto 9:--Etoilept[k] endfor -- cycle;
+  $=image(
+      fill EtoileFin withcolor CouleurFond;
+    trace EtoileFin;
+    );
+  $
+enddef;
+
+vardef hexagone=
+  save $; picture $;
+  path Hexagonecc,Hexagonecd;
+  Hexagonecc=cercles((0,0),0.5u);
+  Hexagonecd=pointarc(Hexagonecc,30) for t=1 upto 6:--pointarc(Hexagonecc,30+t*60) endfor--cycle;
+  $=image(
+    fill Hexagonecd withcolor CouleurFond;
+    trace Hexagonecd;
+  );
+  $
+enddef;
+
+vardef hexagonea=
+  save $; picture $;
+  path Hexagonecc,Hexagonecd;
+  Hexagonecc=cercles((0,0),0.5u);
+  Hexagonecd=pointarc(Hexagonecc,-60) for t=1 upto 6:--pointarc(Hexagonecc,-60+t*60) endfor--cycle;
+  $=image(
+    fill Hexagonecd withcolor CouleurFond;
+    trace Hexagonecd;
+  );
+  $
+enddef;
+
+vardef demihexagonea=
+  save $; picture $;
+  path Hexagonecc,Hexagonecd;
+  Hexagonecc=cercles((0,0),0.5u);
+  Hexagonecd=pointarc(Hexagonecc,-60) for t=1 upto 3:--pointarc(Hexagonecc,-60-t*60) endfor--cycle;
+  $=image(
+    fill Hexagonecd withcolor CouleurFond;
+    trace Hexagonecd;
+  );
+  $
+enddef;
+
+vardef equilateral=
+  save $; picture $;
+  path Equilateralcc,Equilateralcd;
+  Equilateralcc=cercles((0,0),0.5u);
+  Equilateralcd=pointarc(Equilateralcc,-30) for t=1 upto 3:--pointarc(Equilateralcc,-30+t*120) endfor--cycle;
+  $=image(
+    fill Equilateralcd withcolor CouleurFond;
+    trace Equilateralcd;
+  );
+  $
+enddef;
+
+vardef boussole=
+  save $; picture $;
+  path Boussolecc,Boussolecd;
+  Boussolecc=cercles((0,0),0.5u);
+  Boussolecd=0.9[(0,0),pointarc(Boussolecc,0)] for t=1 upto 4:--0.33[(0,0),pointarc(Boussolecc,(t-1)*90+22.5)]--0.66[(0,0),pointarc(Boussolecc,(t-1)*90+45)]--0.33[(0,0),pointarc(Boussolecc,(t-1)*90+67.5)]--0.9[(0,0),pointarc(Boussolecc,t*90)] endfor--cycle;
+  $=image(
+    fill Boussolecd withcolor CouleurFond;
+    trace Boussolecd;
+  );
+  $
+enddef;
+
+vardef dot=
+  save $;
+  picture $;
+  $=image(fill fullcircle scaled 2mm withcolor CouleurFond; trace fullcircle scaled 2mm;);
+  $
+enddef;
+
+endinput;

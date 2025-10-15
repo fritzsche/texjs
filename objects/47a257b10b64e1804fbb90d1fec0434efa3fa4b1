@@ -1,0 +1,122 @@
+%%%
+% Jeu Rangement
+%%%
+\def\filedateJeuRangement{2025/05/26}%
+\def\fileversionJeuRangement{0.1a}%
+\message{-- \filedateJeuRangement\space v\fileversionJeuRangement}%
+%
+\setKVdefault[JeuRgt]{Creation=false,Deno=12,Graines=false,Graine={},Largeur=15pt,Hauteur=20pt,Negatif=false,Decimaux=false,Solution=false,ValeurMin=2,ValeurMax=50,Exposants=false,Exposant={}}
+\defKV[JeuRgt]{%
+  Graine=\ifempty{#1}{}{\setKV[JeuRgt]{Graines}},%
+  Exposant=\ifempty{#1}{}{\setKV[JeuRgt]{Exposants}\setKV[JeuRgt]{Deno=1}}%
+%\defKV[JeuRgt]{Exposant=\setKV[JeuRgt]{Exposants}\setKV[JeuRgt]{Deno=1}}%
+}
+  
+\newlength{\PfCJeuRgtH}
+
+\NewDocumentCommand\DefiRangement{omm}{%
+  \useKVdefault[JeuRgt]%
+  \setKV[JeuRgt]{#1}%
+  \setlength{\PfCJeuRgtH}{\useKV[JeuRgt]{Hauteur}+\tabcolsep}%
+  \ifboolKV[JeuRgt]{Graines}{\PfCGraineAlea{\useKV[JeuRgt]{Graine}}}{}%
+  % On décompose la phrase
+  \xdef\PfCFooDepart{}%
+  \StrLen{#2}[\LongueurMot]%
+  \xintFor* ##1 in{\xintSeq{1}{\LongueurMot}}\do{%
+    \StrChar{#2}{##1}[\LettreMot]%
+    \xdef\PfCFooDepart{\PfCFooDepart\LettreMot/}%
+  }%
+  \setsepchar[*]{/}\reademptyitems%
+  \readlist*\ListeDesLettres{\PfCFooDepart}%
+%  La liste des Lettres est \showitems\ListeDesLettres[]%
+  % Liste des nombres
+  \ifboolKV[JeuRgt]{Creation}{%
+    \xdef\ListeDesChoix{}%
+    \ifboolKV[JeuRgt]{Exposants}{%
+      \xintFor* ##1 in{\xintSeq{\useKV[JeuRgt]{ValeurMin}}{\useKV[JeuRgt]{ValeurMax}}}\do{%
+        \xdef\ListeDesChoix{\ListeDesChoix,\fpeval{##1*(10**\useKV[JeuRgt]{Exposant})+randint(0,(10**\useKV[JeuRgt]{Exposant})-1)}}%
+      }%
+    }{%
+      \ifboolKV[JeuRgt]{Negatif}{%
+        \xdef\ListeDesChoix{-1}%
+        \xintFor* ##1 in{\xintSeq{\useKV[JeuRgt]{ValeurMin}}{\useKV[JeuRgt]{ValeurMax}}}\do{%
+          \xdef\ListeDesChoix{\ListeDesChoix,-##1}%
+        }%
+        \xintFor* ##1 in{\xintSeq{\useKV[JeuRgt]{ValeurMin}}{\useKV[JeuRgt]{ValeurMax}}}\do{%
+          \xdef\ListeDesChoix{\ListeDesChoix,##1}%
+        }%
+      }{%
+        \xintFor* ##1 in{\xintSeq{\useKV[JeuRgt]{ValeurMin}}{\useKV[JeuRgt]{ValeurMax}}}\do{%
+          \xdef\ListeDesChoix{\ListeDesChoix,##1}%
+        }%
+      }%
+    }%
+    \MelangeListe{\ListeDesChoix}{\LongueurMot}%
+    % Liste des nombres \faa et maintenant rangée
+    \Rangement[Seul]{\faa}% \PfCListeRgtRecup
+    \setsepchar{,}%
+    % Liste des nombres
+    % \readlist*\ListeDesNombres{\PfCListeRgtRecup}
+    \readlist*\ListeDesNombres{\PfCRetiensRangement}
+  }{%
+    \setsepchar{,}%
+    % Liste des nombres
+    \readlist*\ListeDesNombres{#3}
+  }%
+  % \\La liste des nombres est \showitems\ListeDesNombres[]
+  % On crée la liste des compteurs mélangés
+  \xdef\PfCFooListe{}%
+  \xintFor* ##1 in{\xintSeq{1}{\LongueurMot}}\do{%
+    \xdef\PfCFooListe{\PfCFooListe ##1,}
+  }%
+  % On mélange la liste des compteurs
+  \MelangeListe{\PfCFooListe}{\LongueurMot}
+  % On obtient la liste demandée
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\ListeCompteursMelanges{\faa}
+  \reademptyitems
+  % \\La liste des compteurs mélangés est \showitems\ListeCompteursMelanges[]
+  % Les associations
+  % \foreachitem\Lettre\in\ListeCompteursMelanges{%
+  % \xdef\Compteur{\ListeCompteursMelanges[\Lettrecnt]}
+  % \ListeDesLettres[\Compteur] -- \ListeDesNombres[\Compteur]\\
+  % }%
+  \begin{center}
+    \begin{NiceTabular}{*{\LongueurMot}{m{\useKV[JeuRgt]{Largeur}}}}[vlines]%
+      \hline
+      \rule{0pt}{\PfCJeuRgtH}\xintFor* ##1 in{\xintSeq{1}{\LongueurMot}}\do{%
+      \xintifForFirst{}{&}\Block{}{\xdef\Compteur{\ListeCompteursMelanges[##1]}\ListeDesLettres[\Compteur]}%
+    }%
+    \\
+    \hline
+    \rule{0pt}{\PfCJeuRgtH}\xintFor* ##1 in{\xintSeq{1}{\LongueurMot}}\do{%
+      \xintifForFirst{}{&}\Block{}{%
+        \xdef\Compteur{\ListeCompteursMelanges[##1]}%
+        \ifboolKV[JeuRgt]{Creation}{%
+          \ifboolKV[JeuRgt]{Decimaux}{\num{\fpeval{\ListeDesNombres[\Compteur]/\useKV[JeuRgt]{Deno}}}}{\Simplification{\ListeDesNombres[\Compteur]}{\useKV[JeuRgt]{Deno}}}}{%
+          \ListeDesNombres[\Compteur]%
+        }%
+      }
+    }%
+    \\
+    \ifboolKV[JeuRgt]{Solution}{%
+      \hline
+      \rule{0pt}{\PfCJeuRgtH}\xintFor* ##1 in{\xintSeq{1}{\LongueurMot}}\do{%
+        \xintifForFirst{}{&}\Block{}{\ListeDesLettres[##1]}%
+      }%
+      \\
+      \hline
+      \rule{0pt}{\PfCJeuRgtH}\xintFor* ##1 in{\xintSeq{1}{\LongueurMot}}\do{%
+        \xintifForFirst{}{&}\Block{}{%
+          \ifboolKV[JeuRgt]{Creation}{%
+            \ifboolKV[JeuRgt]{Decimaux}{\num{\fpeval{\ListeDesNombres[##1]/\useKV[JeuRgt]{Deno}}}}{\Simplification{\ListeDesNombres[##1]}{\useKV[JeuRgt]{Deno}}}}{%
+            \ListeDesNombres[##1]%
+          }%
+        }%
+      }%
+      \\
+    }{}%
+    \hline
+  \end{NiceTabular}
+\end{center}
+}

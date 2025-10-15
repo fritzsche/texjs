@@ -1,0 +1,91 @@
+%%%
+% Monnaie
+%%%
+\def\filedateMonnaie{2025/08/13}%
+\def\fileversionMonnaie{0.1}%
+\message{-- \filedateMonnaie\space v\fileversionMonnaie}%
+
+\setKVdefault[PfCMonnaie]{Echelle=0.5,Ecart=10pt,EcartPiece=10pt,EcartVH=1.2875cm,Vertical,Impression}%
+
+\makeatletter
+\NewDocumentCommand\Monnaie{om}{%
+  \useKVdefault[PfCMonnaie]%
+  \setKV[PfCMonnaie]{#1}%
+  \edef\PfC@ListeMonnaieAv{#2}%
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\PfC@ListeMonnaie{\PfC@ListeMonnaieAv}%
+  \reademptyitems%
+  \edef\PfC@scale{\useKV[PfCMonnaie]{Echelle}}%
+  \ifboolKV[PfCMonnaie]{Impression}{%
+    \ifboolKV[PfCMonnaie]{Vertical}{%
+      \xintFor* ##1 in{\xintSeq{1}{\PfC@ListeMonnaielen}}\do{%
+        \StrCount{\PfC@ListeMonnaie[##1]}{*}[\PfC@RecupStar]%
+        \ifnum\PfC@RecupStar=0\relax%
+          \itemtomacro\PfC@ListeMonnaie[##1]\PfCsuffixemonnaie%
+          \includegraphics[scale=\PfC@scale]{PfCPiece\PfCsuffixemonnaie.pdf}%
+        \else%
+          \StrBefore{\PfC@ListeMonnaie[##1]}{*}[\PfC@Facteur]%
+          \StrBehind{\PfC@ListeMonnaie[##1]}{*}[\PfC@Image]%
+          \begin{tikzpicture}
+            \foreach \PfCi in {1,...,\PfC@Facteur}{%
+              \draw (0,{-1*(\PfCi-1)*\useKV[PfCMonnaie]{EcartPiece}}) node[inner sep=0pt]{\includegraphics[scale=\PfC@scale]{PfCPiece\PfC@Image.pdf}};%
+            }%
+          \end{tikzpicture}%
+        \fi%
+        \xintifForLast{}{\hspace*{\useKV[PfCMonnaie]{Ecart}}}%
+      }%
+    }{%
+      \begin{tikzpicture}
+        \xintFor* ##1 in{\xintSeq{1}{\PfC@ListeMonnaielen}}\do{%
+          \StrCount{\PfC@ListeMonnaie[##1]}{*}[\PfC@RecupStar]%
+          \ifnum\PfC@RecupStar=0\relax%
+            \itemtomacro\PfC@ListeMonnaie[##1]\PfC@Image%
+            \draw (0,{-1*(##1-1)*\useKV[PfCMonnaie]{EcartVH}}) node[inner sep=0pt]{\includegraphics[scale=\PfC@scale]{PfCPiece\PfC@Image.pdf}};%
+          \else%
+            \StrBefore{\PfC@ListeMonnaie[##1]}{*}[\PfC@Facteur]%
+            \StrBehind{\PfC@ListeMonnaie[##1]}{*}[\PfC@Image]%
+            \foreach \PfCi in {1,...,\PfC@Facteur}{%
+              \draw ({-1*(\PfCi-1)*\useKV[PfCMonnaie]{EcartPiece}},{-1*(##1-1)*\useKV[PfCMonnaie]{EcartVH}}) node[inner sep=0pt]{\includegraphics[scale=\PfC@scale]{PfCPiece\PfC@Image.pdf}};%
+            }%
+          \fi%
+        }%
+      \end{tikzpicture}%
+    }%
+  }{%Couleur
+    \ifboolKV[PfCMonnaie]{Vertical}{%
+      \xintFor* ##1 in{\xintSeq{1}{\PfC@ListeMonnaielen}}\do{%
+        \StrCount{\PfC@ListeMonnaie[##1]}{*}[\PfC@RecupStar]%
+        \ifnum\PfC@RecupStar=0\relax%
+          \itemtomacro\PfC@ListeMonnaie[##1]\PfCsuffixemonnaie%
+          \includegraphics[scale=\PfC@scale]{PfCPieceCoul\PfCsuffixemonnaie.pdf}%
+        \else%
+          \StrBefore{\PfC@ListeMonnaie[##1]}{*}[\PfC@Facteur]%
+          \StrBehind{\PfC@ListeMonnaie[##1]}{*}[\PfC@Image]%
+          \begin{tikzpicture}
+            \foreach \PfCi in {1,...,\PfC@Facteur}{%
+              \draw (0,{-1*(\PfCi-1)*\useKV[PfCMonnaie]{EcartPiece}}) node[inner sep=0pt]{\includegraphics[scale=\PfC@scale]{PfCPieceCoul\PfC@Image.pdf}};%
+            }%
+          \end{tikzpicture}%
+        \fi%
+        \xintifForLast{}{\hspace*{\useKV[PfCMonnaie]{Ecart}}}%
+      }%
+    }{%
+      \begin{tikzpicture}
+        \xintFor* ##1 in{\xintSeq{1}{\PfC@ListeMonnaielen}}\do{%
+          \StrCount{\PfC@ListeMonnaie[##1]}{*}[\PfC@RecupStar]%
+          \ifnum\PfC@RecupStar=0\relax%
+            \itemtomacro\PfC@ListeMonnaie[##1]\PfC@Image%
+            \draw (0,{-1*(##1-1)*\useKV[PfCMonnaie]{EcartVH}}) node[inner sep=0pt]{\includegraphics[scale=\PfC@scale]{PfCPieceCoul\PfC@Image.pdf}};%
+          \else%
+            \StrBefore{\PfC@ListeMonnaie[##1]}{*}[\PfC@Facteur]%
+            \StrBehind{\PfC@ListeMonnaie[##1]}{*}[\PfC@Image]%
+            \foreach \PfCi in {1,...,\PfC@Facteur}{%
+              \draw ({-1*(\PfCi-1)*\useKV[PfCMonnaie]{EcartPiece}},{-1*(##1-1)*\useKV[PfCMonnaie]{EcartVH}}) node[inner sep=0pt]{\includegraphics[scale=\PfC@scale]{PfCPieceCoul\PfC@Image.pdf}};%
+            }%
+          \fi%
+        }%
+      \end{tikzpicture}%
+    }%
+  }%
+}%
+\makeatother

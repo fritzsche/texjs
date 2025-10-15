@@ -1,0 +1,186 @@
+%% filename: polexprexpr.tex
+%% Part of the polexpr package (0.8.7a, 2022/05/19)
+%%
+%% Polynomial extensions to the \xintexpr syntax:
+%%
+%% 1. Authorize ' in variable and function names
+%%    This partially breaks infix operators 'and', 'or', 'xor', 'mod'
+%%    which must be replaced by &&, ||, /: and xor() syntax
+%%    if immediately following a variable name
+%%
+%% 2. Map infix operators to the polexprcore macros
+%%
+%%    Overloading of infix operators must be done even outside of \poldef's
+%%    scope else functions declared via \xintdeffunc would not be usable in
+%%    \poldef as they would be using the xintfrac macros unaware of polynomials
+%%
+%%    The overloading of // and /: is experimental.
+%%
+%% 3. Support for the polynomial functions to work in \xintdeffunc
+%%
+%% 4. Support macros for the new functions acting on polynomial variables
+%
+% 1.
+\def\XINT_expr_scanfunc_b #1%
+{%
+  \ifcat \relax#1\xint_dothis{\iffalse{\fi}(_#1}\fi
+  \if (#1\xint_dothis{\iffalse{\fi}(`}\fi
+  \if 1\ifcat a#10\fi
+       \ifnum\xint_c_ix<1\string#1 0\fi
+       \if @#10\fi
+       \if _#10\fi
+       \if '#10\fi
+      1%
+      \xint_dothis{\iffalse{\fi}(_#1}\fi
+  \xint_orthat {#1\XINT_expr_scanfunc_a}%
+}%
+% 2.
+% the minus sign as prefix
+\def\POL_tmp #1#2%
+{%
+  \expandafter\def\csname XINT_expr_exec_#1\endcsname##1##2##3% \XINT_expr_exec_<op><level>
+  {%
+    \expandafter ##1\expandafter ##2\expandafter
+      {\romannumeral`&&@\XINT:NEhook:f:one:from:one{\romannumeral`&&@#2##3}}%
+  }%
+}%
+\POL_tmp{-xii}  \xintPolOpp
+\POL_tmp{-xiv}  \xintPolOpp
+\POL_tmp{-xvi}  \xintPolOpp
+\POL_tmp{-xviii}\xintPolOpp
+% infix operators
+\def\POL_tmp #1#2%
+{%
+  \expandafter\def\csname XINT_expr_exec_#1\endcsname##1##2##3##4% \XINT_expr_exec_<op>
+  {%
+    \expandafter##2\expandafter##3\expandafter
+      {\romannumeral`&&@\XINT:NEhook:f:one:from:two{\romannumeral`&&@#2##1##4}}%
+  }%
+}%
+\POL_tmp +  \xintPolAdd
+\POL_tmp -  \xintPolSub
+\POL_tmp *  \xintPolMul
+\POL_tmp /  \xintPolQuo
+% there is no infix operator mapped to \xintPolRem
+% for lack of notation: perhaps /; ? advices welcome
+\POL_tmp{//}\xintPolDivModQ
+\POL_tmp{/:}\xintPolDivModR
+\POL_tmp ^  \xintPolPow
+\expandafter\let\csname XINT_expr_op_**\expandafter\endcsname
+                \csname XINT_expr_op_^\endcsname
+% 3.
+% Matches with "mysterious stuff" section of xintexpr source code
+\let\POL:NEhook:polfunc\expandafter
+\toks0\expandafter{\XINT_expr_redefinemacros}%
+\toks2 {\let\POL:NEhook:polfunc\POL:NE:polfunc}%
+\edef\XINT_expr_redefinemacros{\the\toks0 \the\toks2}%
+\catcode`~ 12 %
+\def\POL@defpolfunc #1#2%
+{%
+  \expandafter\POL@defpolfunc_a
+  \csname XINT_#2_func_#1\expandafter\endcsname
+  \csname XINT_#2_polfunc_#1\endcsname
+}%
+\def\POL@defpolfunc_a #1#2%
+{%
+  \XINT_global
+  \def#1##1##2##3%
+  {%
+     \expandafter##1\expandafter##2\expandafter{%
+     \romannumeral`&&@\POL:NEhook:polfunc{\romannumeral`&&@#2##3}}%
+  }%
+}%
+\def\POL:NE:polfunc #1{%
+\def\POL:NE:polfunc ##1%
+{%
+    \if0\XINT:NE:hastilde ##1~!\relax % this ! of catcode 11
+        \XINT:NE:hashash  ##1#1!\relax 0\else
+        \xint_dothis\POL:NE:polfunc_a\fi
+    \xint_orthat\POL:NE:polfunc_b
+    ##1&&A%
+}}\expandafter\POL:NE:polfunc\string#%
+\def\POL:NE:polfunc_a\romannumeral`&&@#1#2&&A%
+{%
+% If we are here #2 was not braced; \string is done with \escapechar126
+    \expandafter{\expanded{~romannumeral~POL:NE:usepolfunc%
+                 {\expandafter\xint_gobble_i\string#1}}#2}%
+}%
+\def\POL:NE:polfunc_b#1{%
+\def\POL:NE:polfunc_b\romannumeral`&&@##1##2&&A%
+{%
+    \expandafter{%
+    \romannumeral`&&@%
+        \if0\XINT:NE:hastilde ##2~!\relax
+            \XINT:NE:hashash  ##2#1!\relax 0\else
+        \POL:NE:polfunc_c\fi
+    ##1{##2}}%
+}}\expandafter\POL:NE:polfunc_b\string#%
+% In this case the \expandafter inserted by \POL:NE:usepolfunc
+% expansion will be superfluous
+\def\POL:NE:polfunc_c#1#2% #1=\fi
+{%
+    \expanded{#1~romannumeral~POL:NE:usepolfunc%
+              {\expandafter\xint_gobble_i\string#2}}%
+}%
+% This \expandafter is in case there is an \expanded after that due
+% to some slicing constructs
+% Call: \romannumeral\POL:NE:usepolfunc
+\def\POL:NE:usepolfunc#1{`&&@\csname#1\expandafter\endcsname}%
+\catcode`~ 3  % its normal catcode in xint bundle
+% 4.
+\def\POL_tmp #1#2#3%
+{%
+  \expandafter\def\csname XINT_expr_func_#1\endcsname##1##2##3%
+  {%
+    \expandafter ##1\expandafter ##2\expandafter
+    {%
+        \romannumeral`&&@#2{\romannumeral`&&@#3##3}%
+    }%
+  }%
+}%
+\POL_tmp {sqr}       \XINT:NEhook:f:one:from:one  \xintPolSqr
+% 0.8.1 renames 0.8.0 icontent() to cont() and lcoeff() to lc()
+% and adds topol() and lcoeffs()
+\POL_tmp {pol}       \XINT:NEhook:f:one:from:one  \xintPolPol
+\POL_tmp {lpol}      \XINT:NEhook:f:one:from:one  \xintPolLPol
+\POL_tmp {deg}       \XINT:NEhook:f:one:from:one  \xintPolDeg
+\POL_tmp {coeffs}    \XINT:NEhook:f:one:from:one  \xintPolCoeffs
+\POL_tmp {lcoeffs}   \XINT:NEhook:f:one:from:one  \xintPolLCoeffs
+\POL_tmp {coeff}     \XINT:NEhook:f:one:from:two  \xintPolCoeff
+\POL_tmp {lc}        \XINT:NEhook:f:one:from:one  \xintPolLC
+\POL_tmp {monicpart} \XINT:NEhook:f:one:from:one  \xintPolMonicPart
+\POL_tmp {cont}      \XINT:NEhook:f:one:from:one  \xintPolCont
+\POL_tmp {primpart}  \XINT:NEhook:f:one:from:one  \xintPolPrimPart
+\POL_tmp {rdcoeffs}  \XINT:NEhook:f:one:from:one  \xintPolRedCoeffs
+\POL_tmp {rdzcoeffs} \XINT:NEhook:f:one:from:one  \xintPolSRedCoeffs
+\POL_tmp {diff1}     \XINT:NEhook:f:one:from:one  \xintPolDiffOne
+\POL_tmp {diff2}     \XINT:NEhook:f:one:from:one  \xintPolDiffTwo
+\POL_tmp {diffn}     \XINT:NEhook:f:one:from:two  \xintPolDiffN
+\POL_tmp {antider}   \XINT:NEhook:f:one:from:one  \xintPolAntiOne
+\POL_tmp {integral}  \XINT:NEhook:f:one:from:two  \xintPolIntegral
+\POL_tmp {intfrom}   \XINT:NEhook:f:one:from:two  \xintPolIntFrom
+\POL_tmp {quorem}    \XINT:NEhook:f:one:from:two  \xintPolQuoRem
+\POL_tmp {quo}       \XINT:NEhook:f:one:from:two  \xintPolQuo
+\POL_tmp {rem}       \XINT:NEhook:f:one:from:two  \xintPolRem
+\POL_tmp {prem}      \XINT:NEhook:f:one:from:two  \xintPolPRem
+\POL_tmp {divmod}    \XINT:NEhook:f:one:from:two  \xintPolDivMod
+\POL_tmp {mod}       \XINT:NEhook:f:one:from:two  \xintPolDivModR
+\POL_tmp {evalp}     \XINT:NEhook:f:one:from:two  \xintPolEvalAt
+\def\XINT_expr_func_polgcd #1#2#3%
+{%
+    \expandafter #1\expandafter #2\expandafter{\expandafter
+    {\romannumeral`&&@\XINT:NEhook:f:from:delim:u\XINT_PolGCDof#3^}}%
+}%
+% this is provisory
+\xintdeffunc polpowmod_(P, m, Q) :=
+       isone(m)?
+           % m=1: return P modulo Q
+           {   mod(P,Q)  }
+           % m > 1: test if odd or even and do recursive call
+           {   odd(m)? {  mod(P*sqr(polpowmod_(P, m//2, Q)), Q) }
+                       {  mod(  sqr(polpowmod_(P, m//2, Q)), Q) }
+            }
+         ;%
+\xintdeffunc polpowmod(P, m, Q) := (m)?{polpowmod_(P, m, Q)}{1};%
+%
+\endinput

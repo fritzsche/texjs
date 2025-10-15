@@ -1,0 +1,237 @@
+%%^^A%%  fontspec-code-opening.dtx -- part of FONTSPEC <latex3.github.io/fontspec>
+%
+% \section{Opening code}
+%
+% \begin{function}{\FontspecSetCheckBoolTrue,\FontspecSetCheckBoolFalse}
+% Allows easy return of boolean results (\verb|\l_@@_check_bool|) without requiring specific catcode regimes.
+% Used within Lua functions.
+% \end{function}
+%
+% \begin{function}{\@@_keys_set_known:nnN,\@@_keys_set_known:nxN}
+% Wrapper around standard \verb|\keys_set_known:nnN| which permits debugging.
+% \end{function}
+%
+% \begin{function}{\@@_int_mult_truncate:Nn}
+% \begin{syntax}
+% |\@@_int_mult_truncate:nn| \meta{int} \Arg{scale}
+% \end{syntax}
+% Scales \meta{integer variable} by \meta{scale}, discarding any fractional components.
+% E.g., 
+% \begin{Verbatim}
+% \int_new:N \foo
+% \int_set:Nn \foo {3}
+% \__fontspec_int_mult_truncate:Nn \foo {3.3}
+% \int_show:N \foo % \foo = 9
+%
+% \int_set:Nn \foo {3}
+% \__fontspec_int_mult_truncate:Nn \foo {3.4}
+% \int_show:N \foo % \foo = 10
+% \end{Verbatim}
+% \end{function}
+%
+% \begin{function}{\@@_lua_function:ne,\@@_lua_function:nee,\@@_lua_function:neee,\@@_lua_function:neeee}
+% \begin{syntax}
+% |\@@_lua_function:ne| \Arg{method} \Arg{arg.~1}
+% \end{syntax}
+% Wrapper around \verb|\lua_now:e|, hard-coded to refer to a method of the \verb|fontspec| module.
+% \verb|\@@_lua_function:ne {foo} {bar}| executes \verb|fontspec.foo("bar")| in the Lua engine.
+% Variants for up to four arguments are provided.
+% \end{function}
+%
+% \section{Implementation}
+%
+% \iffalse
+%    \begin{macrocode}
+%<*options>
+%    \end{macrocode}
+% \fi
+%
+% \subsection{Package options}
+%
+%    \begin{macrocode}
+\DeclareKeys 
+  {
+%    \end{macrocode}
+%    \begin{macrocode}
+    ,math    .bool_gset:N = \g_@@_math_bool
+    ,math    .usage:n     =  preamble
+    ,math / unknown .code:n = { } % \msg_warning:nnn {fontspec} {math-opt-unknown} {#1}
+    ,no-math .bool_gset_inverse:N = \g_@@_math_bool
+    ,no-math .usage:n             =  preamble
+%    \end{macrocode}
+%    \begin{macrocode}
+    ,config  .bool_gset:N = \g_@@_cfg_bool
+    ,config  .usage:n     = load
+    ,no-config  .bool_gset_inverse:N = \g_@@_cfg_bool
+    ,no-config  .usage:n             = load
+%    \end{macrocode}
+%    \begin{macrocode}
+    ,cm-default  .code:n = { \msg_warning:nn  {fontspec} {cm-default-obsolete} }    
+    ,euenc       .code:n = { \msg_warning:nnn {fontspec} {enc-obsolete}{euenc} }    
+    ,tuenc       .code:n = { \msg_warning:nnn {fontspec} {enc-obsolete}{tuenc} }    
+%    \end{macrocode}
+%    \begin{macrocode}
+    ,quiet .code:n = 
+      {
+        \msg_redirect_module:nnn { fontspec } { warning } { info }
+        \msg_redirect_module:nnn { fontspec } { info } { none }
+      }
+    ,silent .code:n = 
+      {
+        \msg_redirect_module:nnn { fontspec } { warning } { none }
+        \msg_redirect_module:nnn { fontspec } { info } { none }
+      }
+    ,verbose .code:n = 
+      {
+        \msg_redirect_module:nnn { fontspec } { warning } { warning }
+        \msg_redirect_module:nnn { fontspec } { info } { info }      
+      }  
+  }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\SetKeys{config,math}
+\ProcessKeyOptions
+%    \end{macrocode}
+%
+% \iffalse
+%    \begin{macrocode}
+%</options>
+%<*fontspec>
+%    \end{macrocode}
+% \fi
+%
+%
+% \subsection{Encodings}
+%
+% Now the default, with a just-in-case check:
+%    \begin{macrocode}
+\cs_if_exist:cF {T@TU}
+  {
+    \@@_warning:n {tu-clash}
+    \DeclareFontEncoding{TU}{}{}
+    \DeclareFontSubstitution{TU}{lmr}{m}{n}
+  }
+\tl_gset:Nn \g_fontspec_encoding_tl { TU }  
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\tl_set:Nn \rmdefault {lmr}
+\tl_set:Nn \sfdefault {lmss}
+\tl_set:Nn \ttdefault {lmtt}
+\RequirePackage[\g_fontspec_encoding_tl]{fontenc}
+\tl_set_eq:NN \UTFencname \g_fontspec_encoding_tl % for xunicode if needed
+%    \end{macrocode}
+% To overcome the encoding changing the current font size, but only if a class has been loaded first:
+%    \begin{macrocode}
+\tl_if_in:NnT \@filelist {.cls} { \normalsize }
+%    \end{macrocode}
+% Dealing with a couple of the problems introduced by \pkg{babel}:
+%    \begin{macrocode}
+\tl_set_eq:NN \cyrillicencoding \g_fontspec_encoding_tl
+\tl_set_eq:NN \latinencoding    \g_fontspec_encoding_tl
+\AtBeginDocument
+  {
+    \tl_set_eq:NN \cyrillicencoding \g_fontspec_encoding_tl
+    \tl_set_eq:NN \latinencoding    \g_fontspec_encoding_tl
+  }
+%    \end{macrocode}
+% That latin encoding definition is repeated to suppress font warnings.
+% Something to do with \cmd\select@language\ ending up in the \texttt{.aux}
+% file which is read at the beginning of the document.
+%
+%
+% \subsection{Generic functions}
+%
+% \begin{macro}{\FontspecSetCheckBoolTrue}
+% \begin{macro}{\FontspecSetCheckBoolFalse}
+% These strange set functions are to simplify returning code from LuaTeX:
+%    \begin{macrocode}
+\cs_new:Npn \FontspecSetCheckBoolTrue  { \bool_set_true:N  \l_@@_check_bool }
+\cs_new:Npn \FontspecSetCheckBoolFalse { \bool_set_false:N \l_@@_check_bool }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\@@_keys_set_known:nnN}
+%    \begin{macrocode}
+\cs_new:Nn \@@_keys_set_known:nnN
+  {
+%<debug>  \typeout{:::: Keys~set:~{#1}~{#2} }
+    \keys_set_known:nnN {#1} {#2} #3
+%<debug>  \typeout{:::: Leftover:~{#3} }
+  }
+\cs_generate_variant:Nn \@@_keys_set_known:nnN {nx}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_int_mult_truncate:Nn}
+% Missing in expl3, IMO.
+%    \begin{macrocode}
+\cs_new:Nn \@@_int_mult_truncate:Nn
+  {
+    \int_set:Nn #1 { \__dim_eval:w #2 #1 \__dim_eval_end: }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_lua_function:ne}
+% \begin{macro}{\@@_lua_function:nee}
+% \begin{macro}{\@@_lua_function:neee}
+% \begin{macro}{\@@_lua_function:neeee}
+%    \begin{macrocode}
+%<*LU>
+\cs_set:Npn \@@_lua_function:ne    #1#2       { \lua_now:e { fontspec.#1 ("#2")                } }
+\cs_set:Npn \@@_lua_function:nee   #1#2#3     { \lua_now:e { fontspec.#1 ("#2","#3")           } }
+\cs_set:Npn \@@_lua_function:neee  #1#2#3#4   { \lua_now:e { fontspec.#1 ("#2","#3","#4")      } }
+\cs_set:Npn \@@_lua_function:neeee #1#2#3#4#5 { \lua_now:e { fontspec.#1 ("#2","#3","#4","#5") } }
+%</LU>
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+%
+%
+% \subsection{\pkg{expl3} variants}
+%
+%    \begin{macrocode}
+\cs_generate_variant:Nn \int_set:Nn {Nv}
+\cs_generate_variant:Nn \prop_gput_if_not_in:Nnn {NeV}
+\cs_generate_variant:Nn \prop_gput:Nnn  {Nxn} % needed by unicode-math
+\cs_generate_variant:Nn \tl_if_empty:nF {f}
+\cs_generate_variant:Nn \tl_if_eq:nnT {oe}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\cs_generate_variant:Nn \msg_new:nnn  {nnx}
+\cs_generate_variant:Nn \msg_new:nnnn {nnxx}
+%    \end{macrocode}
+%
+%
+%
+% \iffalse
+%    \begin{macrocode}
+%</fontspec>
+%    \end{macrocode}
+% \fi
+
+
+\endinput
+
+% /©
+% ------------------------------------------------
+% The FONTSPEC package  <latex3.github.io/fontspec>
+% ------------------------------------------------
+% Copyright  2022-2025  The LaTeX project,  LPPL "maintainer"
+% Copyright  2004-2022  Will Robertson
+% Copyright  2009-2015  Khaled Hosny
+% Copyright  2013       Philipp Gesang
+% Copyright  2013-2016  Joseph Wright
+% ------------------------------------------------
+% This package is free software and may be redistributed and/or modified under
+% the conditions of the LaTeX Project Public License, version 1.3c or higher
+% (your choice): <http://www.latex-project.org/lppl/>.
+% ------------------------------------------------
+% ©/

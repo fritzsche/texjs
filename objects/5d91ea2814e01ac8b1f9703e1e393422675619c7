@@ -1,0 +1,537 @@
+% \iffalse meta-comment
+% (The MIT License)
+%
+% Copyright (c) 2021-2025 Yegor Bugayenko
+%
+% Permission is hereby granted, free of charge, to any person obtaining a copy
+% of this software and associated documentation files (the 'Software'), to deal
+% in the Software without restriction, including without limitation the rights
+% to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+% copies of the Software, and to permit persons to whom the Software is
+% furnished to do so, subject to the following conditions:
+%
+% The above copyright notice and this permission notice shall be included in all
+% copies or substantial portions of the Software.
+%
+% THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+% IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+% FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+% AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+% LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+% SOFTWARE.
+% \fi
+
+% \CheckSum{0}
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+
+% \GetFileInfo{iexec.dtx}
+% \DoNotIndex{\endgroup,\begingroup,\let,\else,\fi,\newcommand,\newenvironment}
+
+% \iffalse
+%<*driver>
+\ProvidesFile{iexec.dtx}
+%</driver>
+%<package>\NeedsTeXFormat{LaTeX2e}
+%<package>\ProvidesPackage{iexec}
+%<*package>
+[2025/01/16 0.15.0 Inputable Shell Executions]
+%</package>
+%<*driver>
+\documentclass{ltxdoc}
+\usepackage[tt=false, type1=true]{libertine}
+\usepackage{microtype}
+\AddToHook{env/verbatim/begin}{\microtypesetup{protrusion=false}}
+\usepackage{xcolor}
+\usepackage[dtx]{docshots}
+\usepackage{iexec}
+\usepackage{href-ul}
+\PageIndex
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+\begin{document}
+	\DocInput{iexec.dtx}
+	\PrintChanges
+	\PrintIndex
+\end{document}
+%</driver>
+% \fi
+
+% \title{|iexec|: \LaTeX{} Package \\ for Inputable Shell Executions\thanks{The sources are in GitHub at \href{https://github.com/yegor256/iexec}{yegor256/iexec}}}
+% \author{Yegor Bugayenko \\ \texttt{yegor256@gmail.com}}
+% \date{\filedate, \fileversion}
+%
+% \maketitle
+%
+% \textbf{\color{red}NB!}
+% This package doesn't work on Windows!
+%
+% \section{Introduction}
+%
+% This package helps you execute shell commands right from the
+% document and then put their output to the document:
+%
+% \begin{docshot}
+% \documentclass{article}
+% \usepackage{iexec}
+% \usepackage[paperwidth=3in]{geometry}
+% \pagestyle{empty}
+% \begin{document}
+% Today is \textbf{%
+%   \iexec{date +\%e-\%b-\%Y}}\unskip!
+% \end{document}
+% \end{docshot}
+
+% \DescribeMacro{\iexec} The only command provided by this package is
+% |\iexec| \oarg{options} \marg{cmd}.
+% Its only mandatory argument \meta{cmd} is the command to be executed
+% through the terminal shell (|bash|, or whatever is set as the default one
+% in your console).
+
+% You have to run |pdflatex| (or just |latex|)
+% with the |--shell-escape| flag
+% in order to let \href{https://ctan.org/pkg/shellesc}{shellesc}
+% execute your shell command.
+
+% It is important to remember that \LaTeX{} always uses ``|/bin/sh|'' shell.
+% This can't be changed,
+% as \href{https://tex.stackexchange.com/questions/698312}{explained here}.
+
+% \section{Options}
+
+% \DescribeMacro{quiet}
+% If you don't want the output to be visible,
+% use |\phantom\{\iexec{...}}|.
+% Otherwise, you can use the ``|quiet|'' option:
+%\iffalse
+%<*verb>
+%\fi
+\begin{verbatim}
+I just want to delete some file:
+\iexec[quiet]{rm -f foo.txt}
+\end{verbatim}
+%\iffalse
+%</verb>
+%\fi
+% In this case, whatever the shell command produces will not be included
+% into the document.
+
+% \DescribeMacro{stdout}
+% The output of your code is saved into the file provided as an
+% optional argument of |\iexec| (the default value is ``|iexec.tmp|''):
+%\iffalse
+%<*verb>
+%\fi
+\begin{verbatim}
+Today is \iexec[stdout=date.txt]{date +\%e-\%b-\%Y | tr -d '\\n'}.
+\end{verbatim}
+%\iffalse
+%</verb>
+%\fi
+% The tailing part of the command here removes all ends-of-line.
+
+% \DescribeMacro{stderr}
+% The error output of the code is saved into the file provided as an
+% optional argument of |\iexec| (by default the error output
+% is streamed into ``|stdout|''):
+%\iffalse
+%<*verb>
+%\fi
+\begin{verbatim}
+Today is \iexec[stderr=my.txt]{broken-command}.
+\end{verbatim}
+%\iffalse
+%</verb>
+%\fi
+
+% \DescribeMacro{exit}
+% The exit code of the command is saved into a file. You can change the name of it
+% using the ``|exit|'' option:
+%\iffalse
+%<*verb>
+%\fi
+\begin{verbatim}
+Today is \iexec[exit=code.txt]{./broken-command.sh}.
+\end{verbatim}
+%\iffalse
+%</verb>
+%\fi
+
+% \DescribeMacro{trace}
+% The file specified will be deleted right after its usage. If you don't
+% want this to happen, use the ``|trace|'' package option: all files will remain
+% in the directory where they were created.
+% It's possible to turn on the tracing globbaly, for the entire document, using
+% the ``|trace|'' option of the package:
+%\iffalse
+%<*verb>
+%\fi
+\begin{verbatim}
+\documentclass{article}
+\usepackage[trace]{iexec}
+\begin{document}
+This file won't be deleted: \iexec[stdout=me.txt]{whoami}.
+\end{document}
+\end{verbatim}
+%\iffalse
+%</verb>
+%\fi
+
+% \DescribeMacro{append}
+% The ``stdout'' produced will be appended to the file specified:
+%\iffalse
+%<*verb>
+%\fi
+\begin{verbatim}
+\documentclass{article}
+\usepackage[trace]{iexec}
+\begin{document}
+\iexec[append,stdout=foo.txt,quiet]{echo 'Hello, '}
+\iexec[append,stdout=foo.txt,quiet]{echo 'Jeffrey!'}
+\input{foo.txt}
+\end{document}
+\end{verbatim}
+%\iffalse
+%</verb>
+%\fi
+
+% \DescribeMacro{unskip}
+% In order to remove the tailing spacing after the content, you may use |unskip| package option,
+% which will append |\unskip| commmand to every |\iexec|:
+%\iffalse
+%<*verb>
+%\fi
+\begin{verbatim}
+\documentclass{article}
+\usepackage[unskip]{iexec}
+\begin{document}
+Today is \iexec{date +\%Y}!
+\end{document}
+\end{verbatim}
+%\iffalse
+%</verb>
+%\fi
+
+% \DescribeMacro{log}
+% The ``stdout'' produced will be printed in the \TeX{} log:
+%\iffalse
+%<*verb>
+%\fi
+\begin{verbatim}
+\iexec[log]{echo 'Hello, \\LaTeX!'}
+\end{verbatim}
+%\iffalse
+%</verb>
+%\fi
+
+% \DescribeMacro{null}
+% The ``stdout'' of the command will be sent to ``|/dev/null|'':
+%\iffalse
+%<*verb>
+%\fi
+\begin{verbatim}
+\iexec[null]{rm some-file.txt}
+\end{verbatim}
+%\iffalse
+%</verb>
+%\fi
+
+% \DescribeMacro{ignore}
+% By default, we report an error if the exit code is not equal to zero. You can suppress
+% this with the ``|ignore|'' option:
+%\iffalse
+%<*verb>
+%\fi
+\begin{verbatim}
+\iexec[ignore]{broken-command}
+\end{verbatim}
+%\iffalse
+%</verb>
+%\fi
+
+% \DescribeMacro{maybe}
+% If |-shell-escape| is not set, the |\iexec| command will lead to compilation failure. This
+% failure may be avoided with the help of the |maybe| option, which means that the execution
+% of |\iexec| must be quietly skipped if |-shell-escape| is not set:
+%\iffalse
+%<*verb>
+%\fi
+\begin{verbatim}
+\iexec[maybe]{echo 'Hello, world!'}
+\end{verbatim}
+%\iffalse
+%</verb>
+%\fi
+
+% \StopEventually{}
+
+% \section{Implementation}
+
+% First, we include the \href{https://ctan.org/pkg/shellesc}{shellesc} package, which
+% we use in order to execute shell commands:
+%    \begin{macrocode}
+\RequirePackage{shellesc}
+%    \end{macrocode}
+
+% Then, we parse package options, with the help
+% of \href{https://ctan.org/pkg/pgfopts}{pgfopts}:
+% \changes{0.14.0}{2024/01/14}{The \texttt{xkeyval} package is not used anymore. Instead, we use \texttt{pfgopts} in order to parse package options.}
+%    \begin{macrocode}
+\RequirePackage{pgfopts}
+\pgfkeys{
+  /iexec/.cd,
+  trace/.store in=\iexec@trace,
+}
+\ProcessPgfPackageOptions{/iexec}
+%    \end{macrocode}
+
+% Then, we prepare to parse the options of the |\iexec| command, with the help
+% of \href{https://ctan.org/pkg/pgfkeys}{pgfkeys}:
+%    \begin{macrocode}
+\RequirePackage{pgfkeys}
+\makeatletter\pgfkeys{
+  /iexec/.is family,
+  /iexec,
+  exit/.store in = \iexec@exit,
+  exit/.default = iexec.ret,
+  stdout/.store in = \iexec@stdout,
+  stdout/.default = iexec.tmp,
+  stderr/.store in = \iexec@stderr,
+  trace/.store in = \iexec@traceit,
+  append/.store in = \iexec@append,
+  log/.store in = \iexec@log,
+  null/.store in = \iexec@null,
+  unskip/.store in = \iexec@unskip,
+  quiet/.store in = \iexec@quiet,
+  ignore/.store in = \iexec@ignore,
+  maybe/.store in = \iexec@maybe,
+  stdout,exit
+}\makeatother
+%    \end{macrocode}
+
+% \begin{macro}{\iexec@typeout}
+% Then, we define an internal command |\iexec@typeout| for printing the content of a file,
+% as suggested \href{https://tex.stackexchange.com/questions/660808}{here}:
+%    \begin{macrocode}
+\RequirePackage{expl3}
+\makeatletter\ExplSyntaxOn
+\NewDocumentCommand{\iexec@typeout}{m}{
+  \iexec_typeout_file:n { #1 }}
+\ior_new:N \g_iexec_typeout_ior
+\cs_new_protected:Nn \iexec_typeout_file:n
+{
+  \ior_open:Nn \g_iexec_typeout_ior { #1 }
+  \ior_str_map_inline:Nn \g_iexec_typeout_ior
+    {\iow_term:n { ##1 }}
+  \ior_close:N \g_iexec_typeout_ior
+}
+\ExplSyntaxOff\makeatother
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\iexec}
+% Then, we define |\iexec| command.
+% It is implemented with the help of |\ShellEscape| from |shellesc| package:
+% \changes{0.10.0}{2022/10/19}{The file "iexec.ret" is reused for all scripts.}
+% \changes{0.10.0}{2022/10/19}{The option ``\texttt{ignore}'' suppresses the checking of ``\texttt{iexec.ret}'' value.}
+% \changes{0.7.0}{2022/09/25}{The option "append" was introduced --- if it's turned on, stdout will be appended to the file, instead of rewriting it (this is how it was before).}
+% \changes{0.7.0}{2022/09/25}{The option ``\texttt{log}'' was introduced, to turn on log/debug messages in TeX log (they were all visible always, which was sometimes annoying. Also, this option enables printing of the entire content of stdout to the log too (this may be pretty convenient for debugging).}
+% \changes{0.11.0}{2022/10/22}{The option ``\texttt{exit}'' allows to change the name of the file with exit code.}
+% \changes{0.12.0}{2023/10/12}{The option ``\texttt{unskip}'' adds \texttt{\char`\\unskip} after each \texttt{\char`\\iexec}, in order to trip the tailing end of line space.}
+%    \begin{macrocode}
+\makeatletter
+\newread\iexec@exitfile
+\newcommand\iexec[2][]{%
+  \begingroup%
+    \pgfqkeys{/iexec}{#1}%
+%    \end{macrocode}
+% First, we verify that |latex| is running with |--shell-escape| option, since without
+% it nothing will work; so, it's better to throw an error earlier than later:
+%    \begin{macrocode}
+    \ifnum\ShellEscapeStatus=1%
+      \begingroup%
+%    \end{macrocode}
+% Then, we start the log from a clean line:
+%    \begin{macrocode}
+        \ifdefined\iexec@log%
+          \message{^^J}%
+        \fi%
+%    \end{macrocode}
+% Then, we define a few special chars in order to escape them in the shell
+% (the full
+% list of them is in \href{https://ctan.mirror.norbert-ruehl.de/info/macros2e/macros2e.pdf}{macros2e}):
+%    \begin{macrocode}
+        \let\%\@percentchar%
+        \let\\\@backslashchar%
+        \let\{\@charlb%
+        \let\}\@charrb%
+%    \end{macrocode}
+% Then, we execute it and save exit code into a file (where we also add \texttt{\%} in order to trim the content to exactly one number, as suggested \href{https://tex.stackexchange.com/questions/662756}{here}):
+% \changes{0.10.0}{2022/10/19}{The ability to track exit code was added. Now, the code is saved into ``\texttt{iexec.ret}'' file, which is then read and checked for zero value.}
+% \changes{0.8.0}{2022/10/05}{The option "null" was introduced, allowing redirection of stdout to ``\texttt{/dev/null}''. Doesn't work on Windows, though.}
+% \changes{0.9.0}{2022/10/15}{The option ``\texttt{stderr}'' was introduced, allowing redirection of stderr to a file. Without this option specified, stderr will go to stdout.}
+% \changes{0.11.0}{2022/10/22}{The file with exit code now contains just numbers, without end of line.}
+% \changes{0.11.1}{2022/10/23}{When exit code is printed to the file, we add percentchar at the end of line in order to avoid extra space when reading it back.}
+% \changes{0.11.3}{2022/10/29}{Bug fixed, because of which we had an extra leading space.}
+% \changes{0.11.4}{2022/11/01}{In this version we escape dollar sign with \texttt{\char`\\string} command.}
+%    \begin{macrocode}
+        \def\iexec@cmd{(#2)
+          \ifdefined\iexec@append>\fi>
+          \ifdefined\iexec@null/dev/null\else\iexec@stdout\fi
+          \space\ifdefined\iexec@stderr2>\iexec@stderr\else2>&1\fi;
+          /bin/echo -n \string$?\% >\iexec@exit}%
+        \ShellEscape{\iexec@cmd}%
+%    \end{macrocode}
+% Then, a message is printed to \TeX{} log:
+%    \begin{macrocode}
+        \ifdefined\iexec@log%
+          \message{iexec: [\iexec@cmd]^^J}%
+        \fi%
+      \endgroup%
+%    \end{macrocode}
+% Then, we read back the exit code, from the file:
+%    \begin{macrocode}
+      \immediate\openin\iexec@exitfile=\iexec@exit%
+      \read\iexec@exitfile to \iexec@code%
+      \immediate\closein\iexec@exitfile%
+%    \end{macrocode}
+% Then, if required, we print the content of the stdout file to \TeX{} log:
+% \changes{0.11.2}{2022/10/25}{If execution fails, we print the content of ``\texttt{stdout}'' anyway, even if the ``\texttt{log}'' is not turned on.}
+%    \begin{macrocode}
+      \ifdefined\iexec@null\else%
+        \IfFileExists
+          {\iexec@stdout}
+          {}
+          {\PackageError{iexec}{The "\iexec@stdout" file is absent
+            after processing, looks like some internal error}{}}%
+        \ifdefined\iexec@log%
+          \message{iexec: This is the content of '\iexec@stdout'\ifdefined\pdffilesize
+            \space(\pdffilesize{\iexec@stdout} bytes)\else\fi:^^J}%
+          \IfFileExists
+            {\iexec@stdout}
+            {\iexec@typeout{\iexec@stdout}}
+            {\PackageError{iexec}{The "\iexec@stdout" file is absent
+              after processing, looks like some internal error}{}}%
+          \message{<EOF>^^J}%
+        \else%
+          \ifnum\iexec@code=0\else%
+            \ifdefined\iexec@ignore\else%
+              \message{iexec: See the content of '\iexec@stdout'\ifdefined\pdffilesize
+                \space(\pdffilesize{\iexec@stdout} bytes)\fi
+                after failure:^^J}%
+              \iexec@typeout{\iexec@stdout}%
+              \message{<EOF>^^J}%
+            \fi%
+          \fi%
+        \fi%
+      \fi%
+%    \end{macrocode}
+% Then, we check whether it's zero or not (if not zero, we either print a message or fail the build, depending on the presence of |ignore| option):
+%    \begin{macrocode}
+      \ifnum\iexec@code=0\else%
+        \ifdefined\iexec@ignore%
+          \ifdefined\iexec@log%
+            \message{iexec: Execution failure ignored,
+              the exit code was \iexec@code^^J}%
+          \fi%
+        \else%
+          \PackageError{iexec}{Execution failure,
+            the exit code was \iexec@code}{}%
+        \fi%
+      \fi%
+%    \end{macrocode}
+% Then, we include the produced output into the current document:
+%    \begin{macrocode}
+      \ifdefined\iexec@null\else%
+      \ifdefined\iexec@quiet%
+        \ifdefined\iexec@log%
+          \message{iexec: Due to 'quiet' option we didn't read
+          the content of '\iexec@stdout'
+          \ifdefined\pdffilesize (\pdffilesize{\iexec@stdout}
+          bytes)\fi^^J}%
+        \fi%
+      \else%
+        \ifdefined\iexec@log%
+          \message{iexec: We are going to include the content of
+          '\iexec@stdout'\ifdefined\pdffilesize (\pdffilesize
+          {\iexec@stdout} bytes)\fi...^^J}%
+        \fi%
+        \input{\iexec@stdout}%
+        \ifdefined\iexec@unskip\unskip\fi%
+        \message{iexec: The content of '\iexec@stdout'
+        was included into the document^^J}%
+      \fi\fi%
+%    \end{macrocode}
+% Then, we delete the file or leave it untouched:
+%    \begin{macrocode}
+      \ifdefined\iexec@null\else%
+      \ifdefined\iexec@trace%
+        \ifdefined\iexec@log%
+          \message{iexec: Due to package option 'trace',
+          the files '\iexec@stdout' and `\iexec@exit` were
+          not deleted^^J}%
+        \fi%
+      \else%
+        \ifdefined\iexec@traceit%
+          \ifdefined\iexec@log%
+            \message{iexec: Due to 'trace' package option,
+            the files '\iexec@stdout' and '\iexec@exit'
+            were not deleted^^J}%
+          \fi%
+        \else%
+          \ShellEscape{rm \iexec@stdout}%
+          \ifdefined\iexec@log%
+            \message{iexec: The file '\iexec@stdout' was deleted^^J}%
+          \fi%
+          \ShellEscape{rm \iexec@exit}%
+          \ifdefined\iexec@log%
+            \message{iexec: The file '\iexec@exit' was deleted^^J}%
+          \fi%
+        \fi%
+      \fi\fi%
+%    \end{macrocode}
+% \changes{0.14.0}{2024/01/14}{The \texttt{maybe} option introduced, allowing the user to skip the entire execution of the \texttt{\char`\\iexec} command, when \texttt{-shell-escape} option is off.}
+% Finally, we ignore the whole story if the |maybe| option is provided
+% and the |-shell-escape| is not set:
+%    \begin{macrocode}
+    \else%
+      \ifdefined\iexec@maybe%
+        \message{iexec: The execution skipped because -shell-escape
+          is not set and 'maybe' option is provided^^J}%
+      \else%
+        \PackageError{iexec}{You must run TeX processor with
+        --shell-escape option}{}%
+      \fi%
+    \fi%
+  \endgroup%
+}\makeatother
+%    \end{macrocode}
+% \end{macro}
+
+%    \begin{macrocode}
+\endinput
+%    \end{macrocode}
+
+% \Finale
+
+%\clearpage
+%\PrintChanges
+
+%\clearpage
+%\PrintIndex

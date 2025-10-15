@@ -1,0 +1,87 @@
+%%%
+% Crible Eratostene
+%%%
+\def\filedateEratos{2024/08/04}%
+\def\fileversionEratos{0.1}%
+\message{-- \filedateEratos\space v\fileversionEratos}%
+%
+\setKVdefault[ClesEra]{Premier=false,Nombre=1,CouleurP=Cornsilk!50,CouleurNP=Crimson!15,Colonnes=10,Lignes=10,Hauteur=24pt}%
+
+\NewDocumentCommand\TestPremier{m}{%
+  % #1 le nombre premier \`a tester
+  \newcount\anp\newcount\bnp\newcount\cnp%
+  \anp=#1\relax%
+  \bnp=2\relax%
+  \premier=-1\relax%
+  % Pour d\'eterminer le nombre d'\'etapes
+  \whiledo{\anp > 1}{%
+    \modulo{\the\anp}{\the\bnp}%
+    \ifnum\remainder=0\relax%
+      \global\premier=\numexpr\premier+1\relax%
+      \cnp=\numexpr\anp/\bnp\relax%
+      \anp=\cnp\relax%
+    \else%
+      \bnp=\numexpr\bnp+1\relax%
+    \fi%
+  }%
+  \ifnum\premier=0%
+  \setKV[ClesEra]{Premier=true}%
+  \else%
+  \setKV[ClesEra]{Premier=false}%
+  \fi%
+}%
+
+\newlength{\PfCEraHauteur}
+
+\NewDocumentCommand\Eratosthene{o}{%
+  \useKVdefault[ClesEra]
+  \setKV[ClesEra]{#1}
+  \setlength{\PfCEraHauteur}{\useKV[ClesEra]{Hauteur}}%
+  \xdef\PfCEraMax{\fpeval{\useKV[ClesEra]{Lignes}*\useKV[ClesEra]{Colonnes}}}%
+  \colorlet{PfCCouleurPremier}{\useKV[ClesEra]{CouleurP}}
+  \colorlet{PfCCouleurPasPremier}{\useKV[ClesEra]{CouleurNP}}
+  \begin{NiceTabular}{*{\useKV[ClesEra]{Colonnes}}{m{\PfCEraHauteur-\tabcolsep}}}[hvlines]
+    \CodeBefore
+    \tikz\draw[fill,PfCCouleurPasPremier] (1-|1) rectangle (2-|2);
+    \xintifboolexpr{\useKV[ClesEra]{Nombre}>1}{%
+      \xintFor* ##3 in{\xintSeq{2}{\useKV[ClesEra]{Nombre}}}\do{%
+        \TestPremier{##3}
+        \ifboolKV[ClesEra]{Premier}{%
+          % on positionne le nombre premier
+          \xdef\PfCEraLigneA{\fpeval{floor(##3/\useKV[ClesEra]{Colonnes})+1}}%
+          \xdef\PfCEraLigneB{\fpeval{floor(##3/\useKV[ClesEra]{Colonnes})+2}}%
+          \xdef\PfCEraLigneC{\fpeval{floor(##3/\useKV[ClesEra]{Colonnes})}}%
+          \xdef\PfCEraColonneA{\fpeval{##3-\useKV[ClesEra]{Colonnes}*floor(##3/\useKV[ClesEra]{Colonnes})}}
+          \xdef\PfCEraColonneB{\fpeval{##3-\useKV[ClesEra]{Colonnes}*floor(##3/\useKV[ClesEra]{Colonnes})+1}}
+          \xintifboolexpr{\PfCEraColonneA==0}{%
+            \tikz\draw[fill,PfCCouleurPremier] (\PfCEraLigneC-|\useKV[ClesEra]{Colonnes}) rectangle (\PfCEraLigneA-|\fpeval{\useKV[ClesEra]{Colonnes}+1});
+          }{%
+            \tikz\draw[fill,PfCCouleurPremier] (\PfCEraLigneA-|\PfCEraColonneA) rectangle (\PfCEraLigneB-|\PfCEraColonneB);
+          }%
+          %On positionne ses multiples
+          \xintFor* ##4 in{\xintSeq{2}{\fpeval{floor(\PfCEraMax/##3)}}}\do{%
+            \xintifboolexpr{##3>\fpeval{floor(sqrt(\PfCEraMax))}}{\xintBreakFor}{%
+              \xdef\PfCEraLigneA{\fpeval{floor(##3*##4/\useKV[ClesEra]{Colonnes})+1}}%
+              \xdef\PfCEraLigneB{\fpeval{floor(##3*##4/\useKV[ClesEra]{Colonnes})+2}}%
+              \xdef\PfCEraLigneC{\fpeval{floor(##3*##4/\useKV[ClesEra]{Colonnes})}}%
+              \xdef\PfCEraColonneA{\fpeval{##3*##4-\useKV[ClesEra]{Colonnes}*floor(##3*##4/\useKV[ClesEra]{Colonnes})}}
+              \xdef\PfCEraColonneB{\fpeval{##3*##4-\useKV[ClesEra]{Colonnes}*floor(##3*##4/\useKV[ClesEra]{Colonnes})+1}}
+              \xintifboolexpr{\PfCEraColonneA==0}{%
+                \tikz\draw[fill,PfCCouleurPasPremier] (\PfCEraLigneC-|\useKV[ClesEra]{Colonnes}) rectangle (\PfCEraLigneA-|\fpeval{\useKV[ClesEra]{Colonnes}+1});
+              }{%
+                \tikz\draw[fill,PfCCouleurPasPremier] (\PfCEraLigneA-|\PfCEraColonneA) rectangle (\PfCEraLigneB-|\PfCEraColonneB);
+              }%
+            }%
+          }%
+        }{%Le nombre choisi n'est pas un nombre premier, ses multiples ont déjà étaient criblés.
+        }%
+      }%
+    }%  
+    \Body
+    \xintFor* ##1 in{\xintSeq{0}{\fpeval{\useKV[ClesEra]{Lignes}-1}}}\do{%
+      \xintFor* ##2 in{\xintSeq{1}{\useKV[ClesEra]{Colonnes}}}\do{%
+        \xintifForFirst{\rule{0pt}{\PfCEraHauteur}}{&}\Block{1-1}{\fpeval{##2+##1*\useKV[ClesEra]{Colonnes}}}
+      }\\
+    }%
+  \end{NiceTabular}
+}%

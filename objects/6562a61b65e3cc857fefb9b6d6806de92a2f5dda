@@ -1,0 +1,165 @@
+% Author: Pascal Bercher <pascal.bercher -~AT~- anu.edu.au>
+% Version: 3.0 (2025-03-05)
+% 
+% Change Log:
+% 2.0 -> 3.0 
+% - Added causalLink label macro
+% - Removed code duplication
+% - Renamed files and folders standardized naming
+% - Revised instructions
+
+% Load necessary packages and styles
+\RequirePackage{tikz}
+\RequirePackage{listofitems}
+
+% Load required TikZ libraries directly
+\usetikzlibrary{calc, positioning, decorations.pathreplacing, decorations.markings}
+
+% this allows the definition of causal links, which place dots on the start and end of the link
+\tikzset{
+  causalLink/.style={
+    ->,
+    shorten <= 0.15cm,
+    shorten >= 0.15cm,
+    postaction={
+      decorate,
+      decoration={
+        markings,
+        % Not using exaxtly 0 and 1 is a hack sugested by chatGPT 
+        % because otherwise for long links the goal dots are not placed
+        mark=at position 0.0001 with {\fill circle[radius=1pt];},
+        mark=at position 0.9999 with {\fill circle[radius=1pt];}
+      }
+    }
+  }
+}
+
+% Name of Action/.style n args={number of objects}{
+%    {action= 
+%    % number of precs/effs
+%    {num of precondition lines (on the left side of action)}
+%    {num of effect lines (on the right side of action)}
+%    % prec/eff labels
+%    {sequence of precondition labels}
+%    {sequence of effect labels}
+%    % length of precs/effs
+%    {length of preconditions}
+%    {length of effects}
+%    % action name
+%    {action name}
+%    % prec/eff label position
+%    {precondition/effect label position: side or top}
+%    {height of node}
+%  }
+
+\tikzset{
+    action/.style n args={9}{
+        draw,
+        rounded corners,
+        minimum width=3cm,
+        fill=cyan,
+        minimum height={#9},
+        label={center:#7},
+        append after command={
+            \pgfextra{
+                % Define the node name
+                \edef\nodename{\tikzlastnode}
+                \ifx#3\empty % Check if label list is empty
+                \else % Process only if not empty
+                    % Read the label content
+                    \setsepchar{,}
+                    \readlist\nameparts{\nodename}
+                    \setsepchar{,}
+                    
+                    \ifnum#8=0\relax
+                    % Define positions for preconditions and effects relative to the node with shifts
+                        \ifnum#1>0
+                        \readlist\labellist{#3}
+                        \foreach \i in {1,...,#1} {
+                            % Precondition coordinates and lines
+                            \coordinate (\nodename-pre-\i) at ([xshift=-#5cm, yshift=#9/2-#9/(#1+1)*(\i)] \nodename.west);
+                            \draw (\nodename.west |- \nodename-pre-\i) -- +(-#5,0) node [midway, above, sloped, font=\scriptsize] {\labellist[\i]};
+                        }
+                        \fi;
+                        \readlist\labellist{#4}
+                        \ifnum#2>0
+                        \foreach \j in {1,...,#2} {
+                            % Effect coordinates and lines
+                            \coordinate (\nodename-eff-\j) at ([xshift=#6cm, yshift=#9/2-#9/(#2+1)*(\j)] \nodename.east);
+                            \draw (\nodename.east |- \nodename-eff-\j) -- +(#6,0) node [midway, above, sloped, font=\scriptsize] {\labellist[\j]};
+                        }
+                        \fi;
+                    \else
+                        \ifnum#1>0
+                        \readlist\labellist{#3}
+                        \foreach \i in {1,...,#1} {
+                            % Precondition coordinates and lines
+                            \coordinate (\nodename-pre-\i) at ([xshift=-#5cm, yshift=#9/2-#9/(#1+1)*(\i)] \nodename.west);
+                            \draw (\nodename.west |- \nodename-pre-\i) -- +(-#5,0) node [xshift=-(#5+0.5cm), sloped, font=\scriptsize]{\labellist[\i]};
+                        }
+                        \fi;
+                        \readlist\labellist{#4}
+                        \ifnum#2>0
+                        \foreach \j in {1,...,#2} {
+                            % Effect coordinates and lines
+                            \coordinate (\nodename-eff-\j) at ([xshift=#6 cm, yshift=#9/2-#9/(#2+1)*(\j)] \nodename.east);
+                            \draw (\nodename.east |- \nodename-eff-\j) -- +(#6,0) node [xshift=(#5+0.5 cm), font=\scriptsize] {\labellist[\j]};
+                        }
+                        \fi;
+                    \fi;
+                \fi;
+            }
+        },
+        label content/.initial={#3}
+    }
+}
+
+% INIT/.style={
+%     init={
+%         {number of effects},
+%         {effects},
+%         {effects length},
+%         {height of init}}}
+
+% GOAL/.style={
+%   goal={
+%     {number of preconditions},
+%     {preconditions},
+%     {preconditions length},
+%     {height of goal}}}
+
+\tikzset{
+    base/.style n args={6}{
+        draw,
+        minimum width=0.05cm,
+        fill=black,
+        minimum height={#6},
+        append after command={
+            \pgfextra{
+                \edef\nodename{\tikzlastnode}
+                \setsepchar{,}
+                \readlist\labellist{#2}
+                \foreach \i in {1,...,#1} {
+                    \coordinate (\nodename-#5-\i) at ([xshift=#3 cm, yshift=#6/2-#6/(#1+1)*(\i)] \nodename.#4);
+                    \draw (\nodename.#4 |- \nodename-#5-\i) -- +(#3,0)
+                        node [midway, above, sloped, font=\scriptsize] {\labellist[\i]};
+                }
+            }
+        }
+    }
+}
+
+
+\tikzset{
+    % Init style
+    init/.style n args={4}{
+        base={#1}{#2}{#3}{east}{eff}{#4}
+    }
+}
+
+\tikzset{
+    % Goal style
+    goal/.style n args={4}{
+        base={#1}{#2}{-#3}{west}{pre}{#4}
+    }
+}

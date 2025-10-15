@@ -1,0 +1,101 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2018 - 2021 by ChairX
+%
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either
+% version 1.3 of this license or (at your option) any later
+% version.  The latest version of this license is in:
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of
+% LaTeX version 2005/12/01 or later.
+%
+% This file contains the documentation of new delimiters.
+%
+% Macros have to be described by (delete the first %)
+% \DescribeMacro{\macro}
+% Description and usage of the macro.
+%
+% The description will appear in the usage
+% part of the documentation. Use \subsubsection{} etc. for structuring.
+%
+% The implementation of the macros defined here has to be written in
+% chairxmathDelimitersDoc.dtx
+%\fi
+%
+%
+% We use |\DeclarePairedDelimiters| to generate all kind of bracket
+% expressions of variable size as used e.g. in differential
+% geometry. This has the big advantage that one has two options to set
+% the size of the brackets: either with an explicit optional argument
+% |\big|, \ldots, |\Bigg|, |\vast|, or |\Vast| like
+% \begin{quote}
+% 	|\Schouten[\vast]{X, Y}|: $\Schouten[\vast]{X, Y}$
+% \end{quote}
+% or you can use the *-version which produces automatic sizes via
+% |\left| and |\right|.
+% \begin{quote}
+%     |\abs*{\lim\limits_{n\to\infty} b_n}|
+%     yields
+%     $\abs*{\lim\limits_{n\to\infty} b_n}$
+% \end{quote}
+% Note, however, that this will typically result in sub-optimal
+% spacing. Also, the brackets turn out to be typically too large.
+%
+%
+% Note that using the bracket constructions with
+% |\DeclarePairedDelimiters| gives typically much better spacing than
+% doing things by hand:
+% \DeleteShortVerb{\|}
+% \begin{quote}
+%     good \verb|\abs{\det(A)}|:
+%     $\abs{\det(A)}$
+%     \qquad
+%     bad \verb+|\det(A)|+:
+%     $|\det(A)|$
+% \end{quote}
+% \MakeShortVerb{\|}
+%
+%
+% \DescribeMacro{\vast}
+% \DescribeMacro{\Vast}
+% \DescribeMacro{\vastl}
+% \DescribeMacro{\vastm}
+% \DescribeMacro{\vastr}
+% \DescribeMacro{\Vastl}
+% \DescribeMacro{\Vastm}
+% \DescribeMacro{\Vastr}
+% In many formulas one needs large delimiters typically ranging from
+% |\big| to |\Bigg|. However, in very large formula constructions even
+% that is not enough. To have a systematic enlargement the following
+% delimiters sizes are introduced: |\vast| and |\Vast| together with
+% the corresponding helper macros |\vastl|, |\vastr|, |\vastm|,
+% |\Vastl|, |\Vastr|, and |\Vastm| needed to define pairs of
+% delimiters.  They allow to produce large (pairs of) delimiters,
+% always provided that the corresponding font has the symbols in the
+% correct size.
+%
+%
+% The following commands allow for an option size argument:
+% \begin{itemize}
+% \item Absolute value |\abs|
+% \item Generic norm |\norm|
+% \item Supremum norm |\supnorm|
+% \item Essential supremum norm |\essupnorm|
+% \item Dirac ket |\ket|
+% \item Dirac bra |\bra|
+% \item Dirac ketbra |\ketbra|
+% \item Dirac braket |\braket|
+% \item Schouten bracket |\Schouten|
+% \item Nijenhuis-Richardson bracket |\NRbracket|
+% \item Frölicher-Nijenhuis bracket |\FNbracket|
+% \item Courant bracket |\Courant|
+% \item Dorfman bracket |\Dorfman|
+% \item Generic scalar product |\SP|
+% \item Generic inner product with decorations |\IP|
+% \item Restriction of a map |\at|
+% \item Étalé space of a presheaf |\etale|
+% \end{itemize}
+%

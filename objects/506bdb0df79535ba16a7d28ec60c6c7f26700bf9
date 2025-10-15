@@ -1,0 +1,168 @@
+%%% Copyright (C) 2015-2024 Vincent Goulet
+%%%
+%%% Ce fichier fait partie du projet
+%%% «Rédaction avec LaTeX»
+%%% https://gitlab.com/vigou3/formation-latex-ul
+%%%
+%%% Cette création est mise à disposition sous licence
+%%% Attribution-Partage dans les mêmes conditions 4.0
+%%% International de Creative Commons.
+%%% https://creativecommons.org/licenses/by-sa/4.0/
+
+\section{Apparence et disposition du texte}
+
+\begin{frame}
+  \frametitle{Police de caractères}
+
+  Par défaut, {\LaTeX} compose les documents dans la police
+  {\CM Computer Modern}.
+
+  \begin{itemize}
+  \item Dans un premier temps, n'essayez pas de changer la police de
+    caractère du document
+  \item Commandes pour modifier les \alert{attributs} de la police
+    (famille, forme, graisse)
+    \medskip
+
+    par ex.:
+    {
+      \small
+      \begin{tabular}[t]{l}
+        \cs{rmfamily} \\ \CM romain
+      \end{tabular} \quad
+      \begin{tabular}[t]{l}
+        \cs{ttfamily} \\ \CMtt largeur fixe
+      \end{tabular} \quad
+      \begin{tabular}[t]{l}
+        \cs{itshape} \\ \CM\itshape italique
+      \end{tabular} \quad
+      \begin{tabular}[t]{l}
+        \cs{bfseries} \\ \CM\bfseries gras
+      \end{tabular}
+    }
+  \item Commandes pour modifier la \alert{taille} du texte
+    \medskip
+
+    par ex.:
+    {
+      \small
+      \begin{tabular}[t]{l}
+        \cs{footnotesize} \\ \CM\footnotesize très petit
+      \end{tabular} \quad
+      \begin{tabular}[t]{l}
+        \cs{small} \\ \CM\small petit
+      \end{tabular} \quad
+      \begin{tabular}[t]{l}
+        \cs{large} \\ \CM\large grand
+      \end{tabular} \quad
+      \begin{tabular}[t]{l}
+        \cs{Large} \\ \CM\Large très grand
+      \end{tabular}
+    }
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]
+  \frametitle{Italique}
+  \begin{itemize}
+  \item Une des propriétés les plus utilisées dans le texte
+  \item Commande sémantique:
+\begin{lstlisting}
+\emph`\marg{texte}'
+\end{lstlisting}
+  \item Pas de commande pour souligner en {\LaTeX\dots} et ce n'est
+    pas une omission!
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Listes}
+  \begin{itemize}
+  \item Deux principales sortes de listes:
+    \begin{enumerate}
+    \item \alert{à puce} avec environnement \code{itemize}
+    \item \alert{numérotée} avec environnement \code{enumerate}
+    \end{enumerate}
+  \item Possible de les imbriquer les unes dans les autres
+  \item Marqueurs adaptés automatiquement jusqu'à 4 niveaux
+  \pause
+
+\begin{lstlisting}
+\begin{itemize}
+\item Deux principales sortes de listes:
+  \begin{enumerate}
+  \item à puce avec environnement \texttt{itemize}
+  \item numérotée avec environnement \texttt{enumerate}
+  \end{enumerate}
+\item Possible de les imbriquer les unes dans les autres
+\item Marqueurs adaptés automatiquement jusqu'à 4 niveaux
+\end{itemize}
+\end{lstlisting}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Notes de bas de page}
+  \begin{itemize}
+  \item Note de bas de page insérée avec la commande
+\begin{lstlisting}
+\footnote`\marg{texte de la note}'
+\end{lstlisting}
+  \item Commande doit suivre immédiatement le texte à annoter
+  \item Numérotation et disposition automatiques
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]
+  \frametitle{Code source}
+  \begin{itemize}
+  \item Environnement \code{verbatim}
+\begin{lstlisting}
+\begin{verbatim}
+Texte disposé exactement tel qu'il est saisi
+dans une police à largeur fixe
+\end{verbatim}
+\end{lstlisting}
+  \item Pour usage plus intensif, utiliser les paquetages
+    \pkg{fancyvrb} ou \pkg{listings}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]
+  \tipbox{Il est aujourd'hui beaucoup plus facile d'utiliser d'autres
+    polices de caractères pour vos documents, surtout avec {\XeLaTeX}.
+
+
+    Attention, toutefois: peu de polices sont adaptées pour les
+    mathématiques.
+
+    Excellents choix modernes: %
+    \link{https://ctan.org/pkg/stix2-otf/}{\stixtwo STIX~Two}, %
+    \link{https://ctan.org/pkg/fira}{Fira Sans}.}
+\end{frame}
+
+\begin{exercice}
+  Utiliser le fichier \fichier{exercice-complet.tex}.
+
+  \begin{enumerate}
+  \item Étudier le code source du fichier, puis le compiler.
+  \item Supprimer l'option \code{article} au chargement de la classe
+    et compiler de nouveau le document. Observer l'effet de cette
+    option.
+  \item Effectuer les modifications suivantes au document.
+    \begin{enumerate}[a)]
+    \item Dernier paragraphe de la première section, placer toute la
+      phrase débutant par \code{«De simple dérivé»} à l'intérieur
+      d'une commande \cs{emph}.
+    \item Changer la puce des listes pour le symbole \code{\$>\$} en
+      activant la commande \cs{frenchbsetup\{ItemLabeli=\$>\$\}} dans
+      le préambule.
+    \end{enumerate}
+  \end{enumerate}
+\end{exercice}
+
+%%% Local Variables:
+%%% TeX-master: "formation-latex-ul-diapos"
+%%% TeX-engine: xetex
+%%% coding: utf-8
+%%% End:

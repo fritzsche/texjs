@@ -1,0 +1,1725 @@
+%%%
+% Tableaux d'unit\'es
+%%%
+\def\filedateTableaux{2025/05/27}%
+\def\fileversionTableaux{0.1b}%
+\message{-- \filedateTableaux\space v\fileversionTableaux}%
+\message{`PfCTableauxUnites.tex' v\fileversionTableaux\space (\filedateTableaux)}
+\setKVdefault[ClesTableaux]{Virgule=true,Incline=false,Entiers=false,Decimaux=false,Milliards=false,Millions=false,Micro=false,Nano=false,Partie=false,CouleurG=gray!15,CouleurM=gray!15,Couleurm=gray!15,Couleuru=gray!15,Couleurd=gray!15,Classes=false,Nombres=false,Puissances=false,NbLignes=2,Metre=false,Are=false,Capacite=false,Carre=false,CarreA=false,Cube=false,Litre=false,Gramme=false,Fleches=false,FlechesB=false,FlechesH=false,Colonnes=false,Prefixes=false,Escalier=false,CubeA=false,Taille=5,Largeur=4.75em,Nom=PfCTableau,CodeAfter={},PuissancesSeules=false,Colonne=-1,Octet=false,CouleurGN=white,CadreGN=black,Tabcolsep=0.275\tabcolsep,LargeurCube=15pt,Exterieur=false,Condense=false,DoubleEntree=false,ColonnesSup={}}%
+\defKV[ClesTableaux]{%
+  ColonnesSup=\ifempty{#1}{}{\setKV[ClesTableaux]{Exterieur}}%
+}
+\newcommand\PfCTBstrut{\rule[-1.2ex]{0pt}{3.8ex}}% Top and Bottom strut
+\newcommand\PfCTstrut{\rule{0pt}{3.8ex}}% Top strut
+\newcommand\PfCBstrut{\rule[-1.2ex]{0pt}{0ex}}% Bottom strut
+
+\newlength\PfCTableauNumLarg
+\newlength\PfCTableauPuissances%
+\newlength\PfCCubeTabColSep%
+
+\def\PfCCG{centaines de milliards}%
+\def\PfCDG{dizaines de milliards}%
+\def\PfCUG{unit\'es de milliards}%
+\def\PfCCM{centaines de millions}%
+\def\PfCDM{dizaines de millions}%
+\def\PfCUM{unit\'es de millions}%
+\def\PfCCm{centaines de milliers}%
+\def\PfCDm{dizaines de milliers}%
+\def\PfCUm{unit\'es de milliers}%
+\def\PfCC{centaines}%
+\def\PfCD{dizaines}%
+\def\PfCU{unit\'es}%
+\def\PfCd{dixi\`emes}%
+\def\PfCc{centi\'emes}%
+\def\PfCm{milli\`emes}%
+
+\newcommand\Tableau[2][]{%
+  \useKVdefault[ClesTableaux]%
+  \setKV[ClesTableaux]{#1}%
+  \ifboolKV[ClesTableaux]{Escalier}{%
+    \ifboolKV[ClesTableaux]{Metre}{%
+      \xdef\PfCTableauUnite{\meter}%
+      \xdef\PfCCoefConversion{10}%
+    }{}%
+    \ifboolKV[ClesTableaux]{Carre}{%
+      \xdef\PfCTableauUnite{\square\meter}%
+      \xdef\PfCCoefConversion{100}%
+    }{}%
+    \ifboolKV[ClesTableaux]{Cube}{%
+      \xdef\PfCTableauUnite{\cubic\meter}%
+      \xdef\PfCCoefConversion{1000}%
+    }{}%
+    \ifboolKV[ClesTableaux]{CubeA}{%
+      \xdef\PfCTableauUnite{\cubic\meter}%
+      \xdef\PfCCoefConversion{1000}%
+    }{}%
+    \ifboolKV[ClesTableaux]{Gramme}{%
+      \xdef\PfCTableauUnite{\gram}%
+      \xdef\PfCCoefConversion{10}%
+    }{}%
+    \PfCTableauIncline%
+  }{%Fin Escalier
+    \ifboolKV[ClesTableaux]{DoubleEntree}{%
+      \TableauDoubleEntree[#1]{#2}%
+    }{}%
+    %
+    %%% Clé Octet
+    %
+    \ifboolKV[ClesTableaux]{Octet}{%
+    \[\renewcommand{\arraystretch}{1.15}%
+      \setlength{\tabcolsep}{0.275\tabcolsep}%
+      \xdef\DecalageLigne{0}
+      \begin{NiceTabular}{*{5}{wc{15pt}wc{15pt}wc{15pt}}}
+        \Block[]{1-3}{}%
+        &&&\Block[]{1-3}{}%
+        &&&\Block[]{1-3}{}%
+        &&&\Block[]{1-3}{}%
+        &&&\Block[]{1-3}{}\\
+        \hline
+        \ifboolKV[ClesTableaux]{Classes}{%
+          \xdef\DecalageLigne{\fpeval{\DecalageLigne+1}}\Block[borders={left,top,right}]{1-3}{téraoctet\PfCTBstrut}&&&\Block[borders={top,right}]{1-3}{gigaoctet\PfCTBstrut}&&&\Block[borders={top,right}]{1-3}{mégaoctet\PfCTBstrut}&&&\Block[borders={top,right}]{1-3}{kilooctet\PfCTBstrut}&&&\Block[borders={top,right}]{1-3}{octet\PfCTBstrut}&&\\
+          \hline
+        }{}%
+        \Block[borders={left,top,right}]{1-3}{To\PfCTBstrut}&&&\Block[borders={top,right}]{1-3}{Go\PfCTBstrut}&&&\Block[borders={top,right}]{1-3}{Mo\PfCTBstrut}&&&\Block[borders={top,right}]{1-3}{ko\PfCTBstrut}&&&\Block[borders={top,right}]{1-3}{o\PfCTBstrut}&&\\
+        \hline
+        \xintFor* ##1 in {\xintSeq{1}{\useKV[ClesTableaux]{NbLignes}}}\do{%
+        &&&&&&&&&&&&&&\\
+        }%
+        \Block[]{1-3}{}%
+        &&&\Block[]{1-3}{}%
+        &&&\Block[]{1-3}{}%
+        &&&\Block[]{1-3}{}%
+        &&&\Block[]{1-3}{}\\
+        \CodeAfter
+        % on trace les lignes verticales
+        \xintFor* ##1 in {\xintSeq{1}{6}}\do{%
+          \tikz\draw (3-|\fpeval{3*(##1-1)+1})--(\fpeval{3+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{3*(##1-1)+1});
+        }%
+        \xintifboolexpr{\useKV[ClesTableaux]{Colonnes}}{%
+          \xintFor* ##1 in {\xintSeq{1}{5}}\do{%
+            \tikz\draw[gray!50] (3-|\fpeval{3*(##1-1)+2})--(\fpeval{3+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{3*(##1-1)+2});
+            \tikz\draw[gray!50] (3-|\fpeval{3*##1})--(\fpeval{3+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{3*##1});
+          }%
+        }{}%
+        % On place le nombre éventuel
+        \ifx\bla#2\bla%
+        \else%
+        \setsepchar[*]{,*/}
+        \readlist*\ListeNombreAPlacer{#2}%
+        \xintFor* ##2 in{\xintSeq {1}{\ListeNombreAPlacerlen}}\do{%
+          \StrLen{\ListeNombreAPlacer[##2,1]}[\TabLongueurNombre]%
+          \xintFor* ##1 in{\xintSeq {1}{\TabLongueurNombre}}\do{%
+            \tikz\node at (\fpeval{\DecalageLigne+##2+2.5}-|\fpeval{\ListeNombreAPlacer[##2,2]-0.5+##1}) {\PfCTBstrut\StrMid{\ListeNombreAPlacer[##2,1]}{##1}{##1}};%
+          }%
+        }%
+        \fi%
+        % on trace les flèches
+        \ifboolKV[ClesTableaux]{Fleches}{\setKV[ClesTableaux]{FlechesH,FlechesB}}{}%
+        \ifboolKV[ClesTableaux]{FlechesH}{%
+          \xintFor* ##1 in {\xintSeq{1}{4}}\do{%
+            \tikz\draw[gray,->,>=latex,out=30,in=150] (1.5-|\fpeval{2.5+3*(##1-1)}) to node[above, midway]{\small$\times\num{1000}$}(1.5-|\fpeval{2.5+3*##1});%
+          }%
+        }{}%
+        \ifboolKV[ClesTableaux]{Classes}{\xdef\PfCTableauDepart{4}}{\xdef\PfCTableauDepart{3}}%
+        \ifboolKV[ClesTableaux]{FlechesB}{%
+          \xintFor* ##1 in {\xintSeq{1}{4}}\do{%
+            \tikz\draw[gray,->,>=latex,out=-150,in=-30] (\fpeval{\PfCTableauDepart+\useKV[ClesTableaux]{NbLignes}+0.5}-|\fpeval{2.5+3*##1}) to node[below,midway]{\small$\div\num{1000}$}(\fpeval{\PfCTableauDepart+\useKV[ClesTableaux]{NbLignes}+0.5}-|\fpeval{2.5+3*(##1-1)});%
+          }%
+        }{}%
+        \useKV[ClesTableaux]{CodeAfter}%
+      \end{NiceTabular}
+    \]%
+  }{}%
+  %
+  %%% Cl\'e Prefixes
+  %
+  \ifboolKV[ClesTableaux]{Prefixes}{%
+    \xdef\DecalageLigne{0}%
+    \setlength{\tabcolsep}{0.01\tabcolsep}%
+    \begin{center}%
+      %
+      %%% Definition du tableau
+      %
+      \ifboolKV[ClesTableaux]{Milliards}{\xdef\PfCDerniereColonne{16}}{\ifboolKV[ClesTableaux]{Millions}{\xdef\PfCDerniereColonne{13}}{\xdef\PfCDerniereColonne{10}}}%
+      \ifboolKV[ClesTableaux]{Nano}{\xdef\PfCDerniereColonne{\fpeval{\PfCDerniereColonne+6}}}{\ifboolKV[ClesTableaux]{Micro}{\xdef\PfCDerniereColonne{\fpeval{\PfCDerniereColonne+3}}}{}}
+      \begin{NiceTabular}{*{\ifboolKV[ClesTableaux]{Milliards}{12}{%
+              \ifboolKV[ClesTableaux]{Millions}{9}{6}%
+            }}{m{3.25em}}>{\columncolor{gray!15}}{c}*{%
+            \ifboolKV[ClesTableaux]{Micro}{6}{%
+              \ifboolKV[ClesTableaux]{Nano}{9}{3}%
+            }}%
+          {m{3.25em}}}%
+        %
+      	%%% Prise en compte de la cl\'e Partie
+      	%
+        \ifboolKV[ClesTableaux]{Partie}{%
+          \xdef\DecalageLigne{\fpeval{\DecalageLigne+1}}%
+          \Block[]{1-%
+            \ifboolKV[ClesTableaux]{Milliards}{12}{%
+              \ifboolKV[ClesTableaux]{Millions}{9}{6}%
+            }}{\bfseries Partie enti\`ere}\ifboolKV[ClesTableaux]{Milliards}{%
+            &&&&&&%
+          }{%
+            \ifboolKV[ClesTableaux]{Millions}{%
+              &&&%
+            }{%
+            }}%
+          &&&&&
+          &\Block[fill=gray!15]{}{\ifboolKV[ClesTableaux]{Virgule}{,}{}}%
+          &\Block[]{1-%
+            \ifboolKV[ClesTableaux]{Micro}{6}{%
+              \ifboolKV[ClesTableaux]{Nano}{9}{3}%
+            }}{\bfseries Partie d\'ecimale}
+          &&%
+          \ifboolKV[ClesTableaux]{Micro}{&&&}{%
+            \ifboolKV[ClesTableaux]{Nano}{&&&&&&}{}%
+          }%
+          \\
+        }{}%
+        %
+      	%%% Prise en compte de la cl\'e Classes
+      	%
+        \ifboolKV[ClesTableaux]{Classes}{%
+          %\hline
+          \xdef\DecalageLigne{\fpeval{\DecalageLigne+1}}\ifboolKV[ClesTableaux]{Milliards}{\Block[draw,fill={\useKV[ClesTableaux]{CouleurG}}]{1-3}{Classe des milliards}&&&\Block[draw,fill={\useKV[ClesTableaux]{CouleurM}}]{1-3}{Classe des millions}&&&}{}
+          \ifboolKV[ClesTableaux]{Millions}{\Block[draw,fill={\useKV[ClesTableaux]{CouleurM}}]{1-3}{Classe des millions}&&&}{}
+          \Block[draw,fill={\useKV[ClesTableaux]{Couleurm}}]{1-3}{Classe des milliers}&&%
+          &\Block[draw,fill={\useKV[ClesTableaux]{Couleuru}}]{1-3}{Classe des unités}&&
+          &\Block[draw,fill=gray!15]{}{\ifboolKV[ClesTableaux]{Virgule}{,}{}}%
+          &\Block[draw]{1-%
+            \ifboolKV[ClesTableaux]{Micro}{6}{%
+              \ifboolKV[ClesTableaux]{Nano}{9}{3}%
+            }}{}
+          &&%
+          \ifboolKV[ClesTableaux]{Micro}{&&&}{%
+            \ifboolKV[ClesTableaux]{Nano}{&&&&&&}{}%
+          }%
+          \\
+        }{}%
+      	%
+      	%%% Valeurs par d\'efaut
+      	%
+        \hline%
+        \ifboolKV[ClesTableaux]{Milliards}{%
+        \Block[borders={left,right}]{}{}&\Block[borders={right}]{}{}%
+        &\Block[borders={right}]{}{\fontsize{8}{8}\selectfont giga}%
+        &\Block[borders={right}]{}{}%
+        &\Block[borders={right}]{}{}%
+        &\Block[borders={right}]{}{\fontsize{8}{8}\selectfont m\'ega}%
+        &\Block[borders={right}]{}{}%
+        }{%
+        \ifboolKV[ClesTableaux]{Millions}{%
+        \Block[borders={left,right}]{}{}&\Block[borders={right}]{}{}%
+        &\Block[]{}{\fontsize{8}{8}\selectfont m\'ega}%
+        &%
+        }{%
+        }}%
+        \Block[borders={left,right}]{}{}&\Block[borders={right}]{}{}%
+        &\Block[borders={right}]{}{\fontsize{8}{8}\selectfont kilo}%
+        &\Block[borders={right}]{}{\fontsize{8}{8}\selectfont hecto}%
+        &\Block[borders={right}]{}{\fontsize{8}{8}\selectfont d\'eca}%
+        &\Block[borders={right}]{}{\fontsize{8}{8}\selectfont unit\'es}%
+        &\Block[borders={right}]{}{\ifboolKV[ClesTableaux]{Virgule}{,}{}}%
+        &\Block[borders={right}]{}{\fontsize{8}{8}\selectfont deci}%
+        &\Block[borders={right}]{}{\fontsize{8}{8}\selectfont centi}%
+        &\Block[borders={right}]{}{\fontsize{8}{8}\selectfont milli}%
+      	\ifboolKV[ClesTableaux]{Micro}{&\Block[borders={right}]{}{}%
+        &\Block[borders={right}]{}{}%
+        &\Block[borders={right}]{}{\fontsize{8}{8}\selectfont micro}\\}{%
+      	\ifboolKV[ClesTableaux]{Nano}{&\Block[borders={right}]{}{}%
+        &\Block[borders={right}]{}{}%
+        &\Block[borders={right}]{}{\fontsize{8}{8}\selectfont micro}%
+        &\Block[borders={right}]{}{}%
+        &\Block[borders={right}]{}{}%
+        &\Block[borders={right}]{}{\fontsize{8}{8}\selectfont nano}\\}{\\}%
+      	}%
+        %
+      	%%% Prise en compte de la cl\'e Nombres
+      	%
+        \ifboolKV[ClesTableaux]{Nombres}{%
+          \xdef\DecalageLigne{\fpeval{\DecalageLigne+1}}%
+          \ifboolKV[ClesTableaux]{Milliards}{%
+            \Block[borders={left,right}]{}{\fontsize{5}{5}\selectfont\num{100000000000}}%
+            &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont\num{10000000000}}%
+            &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont\num{1000000000}}%
+            &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{100000000}}%
+            &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{10000000}}%
+            &\Block[borders={}]{}{\fontsize{5}{5}\selectfont \num{1000000}}%
+            &%
+          }{}
+          \ifboolKV[ClesTableaux]{Millions}{%
+            \Block[borders={left,right}]{}{\fontsize{5}{5}\selectfont \num{100000000}}%
+            &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{10000000}}%
+            &\Block[borders={}]{}{\fontsize{5}{5}\selectfont \num{1000000}}%
+            &%
+          }{}
+          \Block[borders={left,right}]{}{\fontsize{5}{5}\selectfont \num{100000}}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{10000}}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{1000}}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{100}}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{10}}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{1}}%
+          &\Block[borders={right}]{}{\ifboolKV[ClesTableaux]{Virgule}{,}{}}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{0,1} ou $\dfrac{\strut1}{\strut10}$}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{0,01} ou $\dfrac{\strut1}{\strut100}$}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{0,001} ou $\dfrac{\strut1}{\strut\num{1000}}$}%
+          \ifboolKV[ClesTableaux]{Micro}{%
+            &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{0,0001} ou $\dfrac{\strut1}{\strut\num{10000}}$}%
+            &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{0,00001} ou $\dfrac{\strut1}{\strut\num{100000}}$}%
+            &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{0,000001} ou $\dfrac{\strut1}{\strut\num{1000000}}$}%
+          }{%
+            \ifboolKV[ClesTableaux]{Nano}{%
+              &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{0,0001} ou $\dfrac{\strut1}{\strut\num{10000}}$}%
+              &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{0,00001} ou $\dfrac{\strut1}{\strut\num{100000}}$}%
+              &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{0,000001} ou $\dfrac{\strut1}{\strut\num{1000000}}$}%
+              &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{0,0000001} ou $\dfrac{\strut1}{\strut\num{10000000}}$}%
+              &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{0,00000001} ou $\dfrac{\strut1}{\strut\num{100000000}}$}%
+              &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{0,000000001} ou $\dfrac{\strut1}{\strut\num{1000000000}}$}%
+            }{}%
+          }{}\\%
+        }{}%
+      	%%% Prise en compte de la cl\'e Puissances
+        \ifboolKV[ClesTableaux]{Puissances}{%
+          \xdef\DecalageLigne{\fpeval{\DecalageLigne+1}}%
+          \ifboolKV[ClesTableaux]{Milliards}{%
+          \Block[borders={left,right}]{}{}&%
+          \Block[borders={right}]{}{}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times10^{9}$}%
+          &\Block[borders={right}]{}{}%
+          &\Block[borders={right}]{}{}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times10^{6}$}%
+          &\Block[borders={right}]{}{}%
+        }{%
+        \ifboolKV[ClesTableaux]{Millions}{%
+          \Block[borders={left,right}]{}{}&%
+          \Block[borders={right}]{}{}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times10^{6}$}%
+        &%
+        }{%
+        }}%
+        \Block[borders={left,right}]{}{}&\Block[borders={right}]{}{}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times10^3$}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times\num{10}^2$}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times\num{10}^1$}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times\num{1}$}%
+        &\Block[borders={right}]{}{\ifboolKV[ClesTableaux]{Virgule}{,}{}}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times\num{10}^{-1}$}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times\num{10}^{-2}$}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times\num{10}^{-3}$}%
+        \ifboolKV[ClesTableaux]{Micro}{&%
+          \Block[borders={right}]{}{}&%
+          \Block[borders={right}]{}{}&
+          \Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times\num{10}^{-6}$}}{%
+      	\ifboolKV[ClesTableaux]{Nano}{&%
+          \Block[borders={right}]{}{}&%
+        \Block[borders={right}]{}{}&%
+        \Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times\num{10}^{-6}$}%
+        &\Block[borders={right}]{}{}%
+        &\Block[borders={right}]{}{}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times\num{10}^{-9}$}}{}%
+      	}%
+        \\%
+        }{}%
+        %
+      	%%% Lignes vierges
+      	%
+        \hline%
+        \xintFor* ##1 in {\xintSeq{1}{\useKV[ClesTableaux]{NbLignes}}}\do{%
+          \ifboolKV[ClesTableaux]{Milliards}{%
+            &&&&&&%
+          }{%
+            \ifboolKV[ClesTableaux]{Millions}{%
+              &&&%
+            }{%
+            }}%
+          &&&&&&,&&&%
+          \ifboolKV[ClesTableaux]{Micro}{&&&}{%
+            \ifboolKV[ClesTableaux]{Nano}{&&&&&&}{}%
+          }%
+          \\}%
+        \CodeAfter%
+        % on trace les lignes verticales
+        \xintFor* ##1 in {\xintSeq{1}{\fpeval{\PfCDerniereColonne+1}}}\do{%
+          \tikz\draw (\fpeval{\DecalageLigne+2}-|##1)--(\fpeval{\DecalageLigne+2+\useKV[ClesTableaux]{NbLignes}}-|##1);%
+        }%
+        %% On place le nombre éventuel
+        \ifx\bla#2\bla%
+        \else%
+        \ifboolKV[ClesTableaux]{Milliards}{\xdef\PfCDerniereColonneEntiere{13}}{\ifboolKV[ClesTableaux]{Millions}{\xdef\PfCDerniereColonneEntiere{10}}{\xdef\PfCDerniereColonneEntiere{7}}}%
+        \xdef\PfCPremiereColonneDecimale{\fpeval{\PfCDerniereColonneEntiere+2}}%
+        \setsepchar[*]{,*.}%
+        \readlist*\ListeNombreAPlacer{#2}%
+        \xintFor* ##2 in{\xintSeq {1}{\ListeNombreAPlacerlen}}\do{%
+          \StrLen{\ListeNombreAPlacer[##2,1]}[\TabLongueurNombre]%
+          \xintFor* ##1 in{\xintSeq {\TabLongueurNombre}{1}}\do{%
+            \tikz\node at (\fpeval{\DecalageLigne+##2+1.5}-|\fpeval{\PfCDerniereColonneEntiere-0.5-\TabLongueurNombre+##1}) {\PfCTBstrut\StrMid{\ListeNombreAPlacer[##2,1]}{##1}{##1}};%
+          }%
+          \StrLen{\ListeNombreAPlacer[##2,2]}[\TabLongueurNombre]%
+          \xintFor* ##1 in{\xintSeq {1}{\TabLongueurNombre}}\do{%
+            \tikz\node at (\fpeval{\DecalageLigne+##2+1.5}-|\fpeval{\PfCPremiereColonneDecimale-1.5+##1}) {\PfCTBstrut\StrMid{\ListeNombreAPlacer[##2,2]}{##1}{##1}};%
+          }%
+        }%
+        \fi%
+      \end{NiceTabular}%
+    \end{center}%
+    \setlength{\tabcolsep}{100\tabcolsep}%
+  }{}%
+  %
+  %%% Puissances seules
+  %
+  \ifboolKV[ClesTableaux]{PuissancesSeules}{%
+    \setlength{\PfCTableauPuissances}{3em}%
+    \xdef\DecalageLigne{0}%
+    \setlength{\tabcolsep}{0.01\tabcolsep}%
+    \begin{center}%
+      % 
+      %%% Definition du tableau
+      % 
+      \ifboolKV[ClesTableaux]{Milliards}{\xdef\PfCDerniereColonne{16}}{\ifboolKV[ClesTableaux]{Millions}{\xdef\PfCDerniereColonne{13}}{\xdef\PfCDerniereColonne{10}}}%
+      \begin{NiceTabular}{*{\ifboolKV[ClesTableaux]{Milliards}{12}{%
+              \ifboolKV[ClesTableaux]{Millions}{9}{6}%
+            }}{m{\PfCTableauPuissances}}>{\columncolor{gray!15}}{c}*{3}{m{\PfCTableauPuissances}}}%
+        \CodeBefore
+        \xintifboolexpr{\useKV[ClesTableaux]{Colonne}>0}{%
+          \tikz\fill[gray!15] (1-|\fpeval{\useKV[ClesTableaux]{Colonne}}) rectangle (last-|\fpeval{\useKV[ClesTableaux]{Colonne}+1});
+        }{}
+        \Body
+        \hline
+      	% 
+      	%%% Prise en compte de la cl\'e Partie
+%      	% 
+%        \ifboolKV[ClesTableaux]{Partie}{%
+%          \Block[]{1-%
+%            \ifboolKV[ClesTableaux]{Milliards}{12}{%
+%              \ifboolKV[ClesTableaux]{Millions}{9}{6}%
+%            }}{\bfseries Partie enti\`ere}\ifboolKV[ClesTableaux]{Milliards}{%
+%            &&&&&&%
+%          }{%
+%            \ifboolKV[ClesTableaux]{Millions}{%
+%              &&&%
+%            }{%
+%            }}%
+%          &&&&&%
+%          &\Block[fill=gray!15]{}{\ifboolKV[ClesTableaux]{Virgule}{,}{}}\xdef\DecalageLigne{\fpeval{\DecalageLigne+1}}%%
+%          &\Block[]{1-3}{\bfseries Partie d\'ecimale}%
+%          &&\\
+%        }{}%
+%        %
+%      	%%% Prise en compte de la cl\'e Classes
+%      	%
+%        \ifboolKV[ClesTableaux]{Classes}{%
+%          \xdef\DecalageLigne{\fpeval{\DecalageLigne+1}}\ifboolKV[ClesTableaux]{Milliards}{\Block[draw,fill={\useKV[ClesTableaux]{CouleurG}}]{1-3}{Classe des milliards}&&&\Block[draw,fill={\useKV[ClesTableaux]{CouleurM}}]{1-3}{Classe des millions}&&&}{}%
+%          \ifboolKV[ClesTableaux]{Millions}{\Block[draw,fill={\useKV[ClesTableaux]{CouleurM}}]{1-3}{Classe des millions}&&&}{}%
+%          \Block[draw,fill={\useKV[ClesTableaux]{Couleurm}}]{1-3}{Classe des milliers}&&%
+%          &\Block[draw,fill={\useKV[ClesTableaux]{Couleuru}}]{1-3}{Classe des unités}&&
+%          &\Block[draw,fill=gray!15]{}{\ifboolKV[ClesTableaux]{Virgule}{,}{}}%
+%          &\Block[draw]{1-3}{}&&%
+%          \\
+%        }{}%
+        % 
+        %%% Valeurs ci-dessous par d\'efaut
+        %
+        %Affichage ou pas des noms ?
+%        \hline
+%        \ifboolKV[ClesTableaux]{Milliards}{%
+%          \Block[borders={left,right}]{}{\fontsize{5}{5}\selectfont centaines de milliards}%
+%          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont dizaines de milliards}%
+%          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont unit\'es de milliards}%
+%          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont centaines de millions}%
+%          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont dizaines de millions}%
+%          &\Block[]{}{\fontsize{5}{5}\selectfont unit\'es de millions}%
+%          &
+%        }{}%
+%        \ifboolKV[ClesTableaux]{Millions}{%
+%          \Block[borders={left,right}]{}{\fontsize{5}{5}\selectfont centaines de millions}%
+%          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont dizaines de millions}%
+%          &\Block[]{}{\fontsize{5}{5}\selectfont unit\'es de millions}%
+%          &
+%        }{}%
+%        \Block[borders={left,right}]{}{\fontsize{5}{5}\selectfont centaines de milliers}%
+%        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont dizaines de milliers}%
+%        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont unit\'es de milliers}%
+%        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont centaines}%
+%        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont dizaines}%
+%        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont unit\'es}%
+%        &\Block[borders={right}]{}{\ifboolKV[ClesTableaux]{Virgule}{,}{}}%
+%        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont dixi\`emes}%
+%        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont centi\`emes}%
+%        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont milli\`emes}\\
+%        %
+      	%%% Prise en compte de la cl\'e Nombres
+      	%
+        \ifboolKV[ClesTableaux]{Nombres}{%
+          \xdef\DecalageLigne{\fpeval{\DecalageLigne+1}}%
+          \ifboolKV[ClesTableaux]{Milliards}{%
+            \Block[borders={left,right}]{}{\fontsize{5}{5}\selectfont\num{100000000000}}%
+            &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont\num{10000000000}}%
+            &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont\num{1000000000}}%
+            &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{100000000}}%
+            &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{10000000}}%
+            &\Block[borders={}]{}{\fontsize{5}{5}\selectfont \num{1000000}}%
+            &%
+          }{}%
+          \ifboolKV[ClesTableaux]{Millions}{%
+            \Block[borders={left,right}]{}{\fontsize{5}{5}\selectfont \num{100000000}}%
+            &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{10000000}}%
+            &\Block[borders={}]{}{\fontsize{5}{5}\selectfont \num{1000000}}%
+            &%
+          }{}%
+          \Block[borders={left,right}]{}{\fontsize{5}{5}\selectfont \num{100000}}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{10000}}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{1000}}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{100}}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{10}}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{1}}%
+          &\Block[borders={right}]{}{\ifboolKV[ClesTableaux]{Virgule}{,}{}}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{0,1} ou $\dfrac{\strut1}{\strut10}$}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{0,01} ou $\dfrac{\strut1}{\strut100}$}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{0,001} ou $\dfrac{\strut1}{\strut\num{1000}}$}%
+          \\
+        }{}%
+        %%% Prise en compte de la cl\'e Puissances
+        \ifboolKV[ClesTableaux]{Milliards}{%
+          \Block[borders={left,right}]{}{\fontsize{5}{5}\selectfont $10^{11}$}&%
+          \Block[borders={right}]{}{\fontsize{5}{5}\selectfont $10^{10}$}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $10^{9}$}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $10^{8}$}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $10^{7}$}%
+          &\Block[borders={}]{}{\fontsize{5}{5}\selectfont $10^{6}$}%
+          &%
+        }{%
+          \ifboolKV[ClesTableaux]{Millions}{%
+            \Block[borders={left,right}]{}{\fontsize{5}{5}\selectfont $10^{8}$}&%
+            \Block[borders={right}]{}{\fontsize{5}{5}\selectfont $10^{7}$}%
+            &\Block[borders={}]{}{\fontsize{5}{5}\selectfont $10^{6}$}%
+            &%
+          }{%
+          }}%
+        \Block[borders={left,right}]{}{\fontsize{5}{5}\selectfont $10^{5}$}
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $10^{4}$}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $10^3$}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\num{d2}$}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\num{d1}$}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\num{10}^0$}%
+        &\Block[borders={right}]{}{\ifboolKV[ClesTableaux]{Virgule}{,}{}}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\num{10}^{-1}$}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\num{10}^{-2}$}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\num{10}^{-3}$}%
+        \\%
+        %%% Lignes vierges
+        \hline%
+        \xintFor* ##1 in {\xintSeq{1}{\useKV[ClesTableaux]{NbLignes}}}\do{%
+          \ifboolKV[ClesTableaux]{Milliards}{%
+            &&&&&&}{}%
+          \ifboolKV[ClesTableaux]{Millions}{%
+            &&&}{}%
+          &&&&&&\ifboolKV[ClesTableaux]{Virgule}{,}{\phantom{,}}&&&\\}%
+        \CodeAfter%
+        % on trace les lignes verticales
+        \xintFor* ##1 in {\xintSeq{1}{\fpeval{\PfCDerniereColonne+1}}}\do{%
+          \tikz\draw (\fpeval{\DecalageLigne+2}-|##1)--(\fpeval{\DecalageLigne+2+\useKV[ClesTableaux]{NbLignes}}-|##1);%
+        }%
+        % On place le nombre éventuel
+        \ifx\bla#2\bla%
+        \else%
+        \setsepchar[*]{,*/}%
+        \readlist*\ListeNombreAPlacer{#2}%
+        \setsepchar{,}%
+        \xintFor* ##2 in{\xintSeq {1}{\ListeNombreAPlacerlen}}\do{
+          \StrLen{\ListeNombreAPlacer[##2,1]}[\TabLongueurNombre]%
+          \xintFor* ##1 in{\xintSeq {1}{\TabLongueurNombre}}\do{%
+            \tikz\node at (\fpeval{##2+1.5}-|\fpeval{\ListeNombreAPlacer[##2,2]-0.5+##1}) {\PfCTBstrut\StrMid{\ListeNombreAPlacer[##2,1]}{##1}{##1}};
+          }%
+        }
+        \fi%
+      \end{NiceTabular}%
+    \end{center}%
+    \setlength{\tabcolsep}{100\tabcolsep}%
+  }{}%
+  %
+  %%% Cl\'e Entiers
+  %
+  \ifboolKV[ClesTableaux]{Entiers}{%
+    \xdef\DecalageLigne{0}%
+    \xdef\TailleFonte{\useKV[ClesTableaux]{Taille}}%
+    \setlength{\PfCTableauNumLarg}{\useKV[ClesTableaux]{Largeur}}%
+    \setlength{\tabcolsep}{0.01\tabcolsep}%
+    \begin{center}%
+      % 
+      %%% Definition du tableau
+      % 
+      \ifboolKV[ClesTableaux]{Milliards}{\xdef\PfCDerniereColonne{13}}{\ifboolKV[ClesTableaux]{Millions}{\xdef\PfCDerniereColonne{10}}{\xdef\PfCDerniereColonne{7}}}%
+      \begin{NiceTabular}{*{%
+            \ifboolKV[ClesTableaux]{Milliards}{12}{%
+              \ifboolKV[ClesTableaux]{Millions}{9}{6}%
+            }%
+          }{m{\PfCTableauNumLarg}}}%m{\useKV[ClesTableaux]{Largeur}}
+        \ifboolKV[ClesTableaux]{Classes}{%
+          \hline
+          \xdef\DecalageLigne{\fpeval{\DecalageLigne+1}}\ifboolKV[ClesTableaux]{Milliards}{\Block[draw,fill={\useKV[ClesTableaux]{CouleurG}}]{1-3}{Classe des milliards}&&&\Block[draw,fill={\useKV[ClesTableaux]{CouleurM}}]{1-3}{Classe des millions}&&&%
+          }{}
+          \ifboolKV[ClesTableaux]{Millions}{\Block[draw,fill={\useKV[ClesTableaux]{CouleurM}}]{1-3}{Classe des millions}&&&}{}
+          \Block[draw,fill={\useKV[ClesTableaux]{Couleurm}}]{1-3}{Classe des milliers}&&%
+          &\Block[draw,fill={\useKV[ClesTableaux]{Couleuru}}]{1-3}{Classe des unités}&&\\}{%
+          \xdef\DecalageLigne{\fpeval{\DecalageLigne+1}}%
+          \ifboolKV[ClesTableaux]{Milliards}{%
+            \Block[]{}{}&\Block[]{}{}&\Block[]{}{}&\Block[]{}{}&\Block[]{}{}&\Block[]{}{}&}{}%
+          \ifboolKV[ClesTableaux]{Millions}{%
+            \Block[]{}{}&\Block[]{}{}&\Block[]{}{}&}{}%
+          \Block[]{}{}
+          &\Block[]{}{}
+          &\Block[]{}{}
+          &\Block[]{}{}
+          &\Block[]{}{}
+          &\Block[]{}{}\\
+        }%ok
+        \hline
+        \ifboolKV[ClesTableaux]{Milliards}{%
+          \Block[draw]{}{\fontsize{\TailleFonte}{\TailleFonte}\selectfont\PfCCG}%
+          &\Block[draw]{}{\fontsize{5}{5}\selectfont\PfCDG}%
+          &\Block[draw]{}{\fontsize{5}{5}\selectfont\PfCUG}%
+          &\Block[draw]{}{\fontsize{5}{5}\selectfont\PfCCM}%
+          &\Block[draw]{}{\fontsize{5}{5}\selectfont\PfCDM}%
+          &\Block[draw]{}{\fontsize{5}{5}\selectfont\PfCUM}%
+          &
+        }{}
+        \ifboolKV[ClesTableaux]{Millions}{%
+          \Block[draw]{}{\fontsize{5}{5}\selectfont\PfCCM}%
+          &\Block[draw]{}{\fontsize{5}{5}\selectfont\PfCDM}%
+          &\Block[draw]{}{\fontsize{5}{5}\selectfont\PfCUM}%
+          &
+        }{}
+        \Block[draw]{}{\fontsize{5}{5}\selectfont\PfCCm}%
+        &\Block[draw]{}{\fontsize{5}{5}\selectfont\PfCDm}%
+        &\Block[draw]{}{\fontsize{5}{5}\selectfont\PfCUm}%
+        &\Block[draw]{}{\fontsize{5}{5}\selectfont\PfCC}%
+        &\Block[draw]{}{\fontsize{5}{5}\selectfont\PfCD}%
+        &\Block[draw]{}{\fontsize{5}{5}\selectfont\PfCU}\\%
+        \ifboolKV[ClesTableaux]{Nombres}{%
+          \xdef\DecalageLigne{\fpeval{\DecalageLigne+1}}%
+          \ifboolKV[ClesTableaux]{Milliards}{%
+            \Block[draw]{}{\fontsize{5}{5}\selectfont\num{100000000000}}%
+            &\Block[draw]{}{\fontsize{5}{5}\selectfont\num{10000000000}}%
+            &\Block[draw]{}{\fontsize{5}{5}\selectfont\num{1000000000}}%
+            &\Block[draw]{}{\fontsize{5}{5}\selectfont\num{100000000}}%
+            &\Block[draw]{}{\fontsize{5}{5}\selectfont\num{10000000}}%
+            &\Block[draw]{}{\fontsize{5}{5}\selectfont\num{1000000}}%
+            &%
+          }{}%
+          \ifboolKV[ClesTableaux]{Millions}{%
+            \Block[draw]{}{\fontsize{5}{5}\selectfont\num{100000000}}%
+            &\Block[draw]{}{\fontsize{5}{5}\selectfont\num{10000000}}%
+            &\Block[draw]{}{\fontsize{5}{5}\selectfont\num{1000000}}%
+            &%
+          }{}%
+          \Block[draw]{}{\fontsize{5}{5}\selectfont\num{100000}}%
+          &\Block[draw]{}{\fontsize{5}{5}\selectfont\num{10000}}%
+          &\Block[draw]{}{\fontsize{5}{5}\selectfont\num{1000}}%
+          &\Block[draw]{}{\fontsize{5}{5}\selectfont\num{100}}%
+          &\Block[draw]{}{\fontsize{5}{5}\selectfont\num{10}}%
+          &\Block[draw]{}{\fontsize{5}{5}\selectfont\num{1}}%
+          \\
+        }{}%
+        % 
+        %%% Prise en compte de la cl\'e Puissances
+        % 
+        \ifboolKV[ClesTableaux]{Puissances}{%
+          \xdef\DecalageLigne{\fpeval{\DecalageLigne+1}}%
+          \ifboolKV[ClesTableaux]{Milliards}{%
+            &%
+            &\Block[draw]{}{\fontsize{5}{5}\selectfont $\times10^{9}$}%
+            &%
+            &%
+            &\Block[draw]{}{\fontsize{5}{5}\selectfont $\times10^{6}$}%
+            &%
+          }{%
+            \ifboolKV[ClesTableaux]{Millions}{%
+              &%
+              &\Block[draw]{}{\fontsize{5}{5}\selectfont $\times10^{6}$}%
+              &%
+            }{%
+            }}%
+          &%
+          &\Block[draw]{}{\fontsize{5}{5}\selectfont $\times10^3$}%
+          &\Block[draw]{}{\fontsize{5}{5}\selectfont $\times\num{10}^2$}%
+          &\Block[draw]{}{\fontsize{5}{5}\selectfont $\times\num{10}^1$}%
+          &\Block[draw]{}{\fontsize{5}{5}\selectfont $\times\num{1}$}%
+          \\%
+        }{}%
+        % 
+        %%% Lignes vierges
+        % 
+        \hline%
+        \xintFor* ##1 in {\xintSeq{1}{\useKV[ClesTableaux]{NbLignes}}}\do{%
+          \ifboolKV[ClesTableaux]{Milliards}{%
+            &&&&&&}{}%
+          \ifboolKV[ClesTableaux]{Millions}{%
+            &&&}{}%
+          &&&&&\\}%
+        \ifboolKV[ClesTableaux]{Milliards}{%
+          \Block[]{}{\tikz[remember picture,overlay]{\coordinate (L1);}}&\Block[]{}{\tikz[remember picture,overlay]{\coordinate (K1);}}&\Block[]{}{\tikz[remember picture,overlay]{\coordinate (J1);}}&\Block[]{}{\tikz[remember picture,overlay]{\coordinate (I1);}}&\Block[]{}{\tikz[remember picture,overlay]{\coordinate (H1);}}&\Block[]{}{\tikz[remember picture,overlay]{\coordinate (G1);}}&}{}%
+        \ifboolKV[ClesTableaux]{Millions}{%
+          \Block[]{}{\tikz[remember picture,overlay]{\coordinate (I1);}}&\Block[]{}{\tikz[remember picture,overlay]{\coordinate (H1);}}&\Block[]{}{\tikz[remember picture,overlay]{\coordinate (G1);}}&}{}%
+        \Block[]{}{\tikz[remember picture,overlay]{\coordinate (F1);}}
+        &\Block[]{}{\tikz[remember picture,overlay]{\coordinate (E1);}}
+        &\Block[]{}{\tikz[remember picture,overlay]{\coordinate (D1);}}
+        &\Block[]{}{\tikz[remember picture,overlay]{\coordinate (C1);}}
+        &\Block[]{}{\tikz[remember picture,overlay]{\coordinate (B1);}}
+        &\Block[]{}{\tikz[remember picture,overlay]{\coordinate (A1);}}\\
+        \CodeAfter%
+        % on trace les lignes verticales
+        \xintFor* ##1 in {\xintSeq{1}{\PfCDerniereColonne}}\do{%
+          \tikz\draw (\fpeval{\DecalageLigne+1}-|##1)--(\fpeval{\DecalageLigne+1+\useKV[ClesTableaux]{NbLignes}+1}-|##1);%
+        }%
+        %% On place le nombre éventuel
+        \ifx\bla#2\bla%
+        \else%
+        \setsepchar{,}%
+        \readlist*\ListeNombreAPlacer{#2}%
+        \xintFor* ##2 in{\xintSeq {1}{\ListeNombreAPlacerlen}}\do{%
+          \StrLen{\ListeNombreAPlacer[##2]}[\TabLongueurNombre]%
+          \xintFor* ##1 in{\xintSeq {\TabLongueurNombre}{1}}\do{%
+            \tikz\node at (\fpeval{\DecalageLigne+##2+1.5}-|\fpeval{\PfCDerniereColonne-0.5-\TabLongueurNombre+##1}) {\PfCTBstrut\StrMid{\ListeNombreAPlacer[##2]}{##1}{##1}};%
+          }%
+        }%
+        \fi%
+        % On trace les éventuelles fleches
+        \ifboolKV[ClesTableaux]{Fleches}{\setKV[ClesTableaux]{FlechesH,FlechesB}}{}%%
+        \ifboolKV[ClesTableaux]{Classes}{}{%
+          \ifboolKV[ClesTableaux]{FlechesB}{%
+            \ifboolKV[ClesTableaux]{Milliards}{%
+              \xintFor* ##1 in {\xintSeq{1}{11}}\do{%
+                \tikz\draw[gray,->,>=latex,out=-150,in=-30] (\fpeval{3+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{1.5+##1}) to node[below, midway]{\small$\div\num{10}$}(\fpeval{3+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{0.5+##1});%
+              }%
+            }{%
+              \ifboolKV[ClesTableaux]{Millions}{%
+                \xintFor* ##1 in {\xintSeq{1}{8}}\do{%
+                  \tikz\draw[gray,->,>=latex,out=-150,in=-30] (\fpeval{3+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{1.5+##1}) to node[below, midway]{\small$\div\num{10}$}(\fpeval{3+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{0.5+##1});%
+                }%
+              }{%
+                \xintFor* ##1 in {\xintSeq{1}{5}}\do{%
+                  \tikz\draw[gray,->,>=latex,out=-150,in=-30] (\fpeval{3+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{1.5+##1}) to node[below, midway]{\small$\div\num{10}$}(\fpeval{3+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{0.5+##1});%
+                }%
+              }%
+            }%
+          }{}%
+          \ifboolKV[ClesTableaux]{FlechesH}{%
+            \ifboolKV[ClesTableaux]{Milliards}{%
+              \xintFor* ##1 in {\xintSeq{1}{11}}\do{%
+                \tikz\draw[gray,->,>=latex,out=30,in=150] (1.5-|\fpeval{0.5+##1}) to node[above, midway]{\small$\times\num{10}$}(1.5-|\fpeval{1.5+##1});%
+              }%
+            }{%
+              \ifboolKV[ClesTableaux]{Millions}{%
+                \xintFor* ##1 in {\xintSeq{1}{8}}\do{%
+                  \tikz\draw[gray,->,>=latex,out=30,in=150] (1.5-|\fpeval{0.5+##1}) to node[above, midway]{\small$\times\num{10}$}(1.5-|\fpeval{1.5+##1});%
+                }%
+              }{%
+                \xintFor* ##1 in {\xintSeq{1}{5}}\do{%
+                  \tikz\draw[gray,->,>=latex,out=30,in=150] (1.5-|\fpeval{0.5+##1}) to node[above, midway]{\small$\times\num{10}$}(1.5-|\fpeval{1.5+##1});%
+                }%
+              }%
+            }%
+          }{}%
+        }%
+        \useKV[ClesTableaux]{CodeAfter}%
+      \end{NiceTabular}%
+    \end{center}%
+    \setlength{\tabcolsep}{100\tabcolsep}%
+  }{}%
+  % 
+  %%% Cl\'e Decimaux
+  % 
+  \ifboolKV[ClesTableaux]{Decimaux}{%
+    \xdef\DecalageLigne{0}%
+    \setlength{\tabcolsep}{0.01\tabcolsep}%
+    \begin{center}%
+      % 
+      %%% Definition du tableau
+      % 
+      \ifboolKV[ClesTableaux]{Milliards}{\xdef\PfCDerniereColonne{16}}{\ifboolKV[ClesTableaux]{Millions}{\xdef\PfCDerniereColonne{13}}{\xdef\PfCDerniereColonne{10}}}%
+      \begin{NiceTabular}{*{\ifboolKV[ClesTableaux]{Milliards}{12}{%
+              \ifboolKV[ClesTableaux]{Millions}{9}{6}%
+            }}{m{\useKV[ClesTableaux]{Largeur}}}>{\columncolor{gray!15}}{c}*{3}{m{\useKV[ClesTableaux]{Largeur}}}}%
+      	% 
+      	%%% Prise en compte de la cl\'e Partie
+      	% 
+        \ifboolKV[ClesTableaux]{Partie}{%
+          \Block[]{1-%
+            \ifboolKV[ClesTableaux]{Milliards}{12}{%
+              \ifboolKV[ClesTableaux]{Millions}{9}{6}%
+            }}{\bfseries Partie enti\`ere}\ifboolKV[ClesTableaux]{Milliards}{%
+            &&&&&&%
+          }{%
+            \ifboolKV[ClesTableaux]{Millions}{%
+              &&&%
+            }{%
+            }}%
+          &&&&&%
+          &\Block[fill=gray!15]{}{\ifboolKV[ClesTableaux]{Virgule}{,}{}}\xdef\DecalageLigne{\fpeval{\DecalageLigne+1}}%%
+          &\Block[]{1-3}{\bfseries Partie d\'ecimale}%
+          &&\\
+        }{}%
+        %
+      	%%% Prise en compte de la cl\'e Classes
+      	%
+        \ifboolKV[ClesTableaux]{Classes}{%
+          \xdef\DecalageLigne{\fpeval{\DecalageLigne+1}}\ifboolKV[ClesTableaux]{Milliards}{\Block[draw,fill={\useKV[ClesTableaux]{CouleurG}}]{1-3}{Classe des milliards}&&&\Block[draw,fill={\useKV[ClesTableaux]{CouleurM}}]{1-3}{Classe des millions}&&&}{}%
+          \ifboolKV[ClesTableaux]{Millions}{\Block[draw,fill={\useKV[ClesTableaux]{CouleurM}}]{1-3}{Classe des millions}&&&}{}%
+          \Block[draw,fill={\useKV[ClesTableaux]{Couleurm}}]{1-3}{Classe des milliers}&&%
+          &\Block[draw,fill={\useKV[ClesTableaux]{Couleuru}}]{1-3}{Classe des unités}&&
+          &\Block[draw,fill=gray!15]{}{\ifboolKV[ClesTableaux]{Virgule}{,}{}}%
+          &\Block[draw]{1-3}{}&&%
+          \\
+        }{}%
+        % 
+        %%% Valeurs ci-dessous par d\'efaut
+        %
+        \hline
+        \ifboolKV[ClesTableaux]{Milliards}{%
+          \Block[borders={left,right}]{}{\fontsize{5}{5}\selectfont\PfCCG}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont\PfCDG}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont\PfCUG}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont\PfCCM}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont\PfCDM}%
+          &\Block[]{}{\fontsize{5}{5}\selectfont\PfCUM}%
+          &
+        }{}%
+        \ifboolKV[ClesTableaux]{Millions}{%
+          \Block[borders={left,right}]{}{\fontsize{5}{5}\selectfont\PfCCM}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont\PfCDM}%
+          &\Block[]{}{\fontsize{5}{5}\selectfont\PfCUM}%
+          &
+        }{}%
+        \Block[borders={left,right}]{}{\fontsize{5}{5}\selectfont\PfCCm}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont\PfCDm}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont\PfCUm}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont\PfCC}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont\PfCD}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont\PfCU}%
+        &\Block[borders={right}]{}{\ifboolKV[ClesTableaux]{Virgule}{,}{}}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont\PfCd}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont\PfCc}%
+        &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont\PfCm}\\
+        %
+      	%%% Prise en compte de la cl\'e Nombres
+      	%
+        \ifboolKV[ClesTableaux]{Nombres}{%
+          \xdef\DecalageLigne{\fpeval{\DecalageLigne+1}}%
+          \ifboolKV[ClesTableaux]{Milliards}{%
+            \Block[borders={left,right}]{}{\fontsize{5}{5}\selectfont\num{100000000000}}%
+            &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont\num{10000000000}}%
+            &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont\num{1000000000}}%
+            &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{100000000}}%
+            &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{10000000}}%
+            &\Block[borders={}]{}{\fontsize{5}{5}\selectfont \num{1000000}}%
+            &%
+          }{}%
+          \ifboolKV[ClesTableaux]{Millions}{%
+            \Block[borders={left,right}]{}{\fontsize{5}{5}\selectfont \num{100000000}}%
+            &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{10000000}}%
+            &\Block[borders={}]{}{\fontsize{5}{5}\selectfont \num{1000000}}%
+            &%
+          }{}%
+          \Block[borders={left,right}]{}{\fontsize{5}{5}\selectfont \num{100000}}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{10000}}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{1000}}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{100}}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{10}}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{1}}%
+          &\Block[borders={right}]{}{\ifboolKV[ClesTableaux]{Virgule}{,}{}}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{0,1} ou $\dfrac{\strut1}{\strut10}$}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{0,01} ou $\dfrac{\strut1}{\strut100}$}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont \num{0,001} ou $\dfrac{\strut1}{\strut\num{1000}}$}%
+          \\
+        }{}%
+        %
+        %%% Prise en compte de la cl\'e Puissances
+        %
+        \ifboolKV[ClesTableaux]{Puissances}{%
+          \xdef\DecalageLigne{\fpeval{\DecalageLigne+1}}%
+          \ifboolKV[ClesTableaux]{Milliards}{%
+            \Block[borders={left,right}]{}{}&%
+            \Block[borders={right}]{}{}%
+            &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times10^{9}$}%
+            &\Block[borders={right}]{}{}%
+            &\Block[borders={right}]{}{}%
+            &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times10^{6}$}%
+            &\Block[borders={right}]{}{}%
+          }{%
+            \ifboolKV[ClesTableaux]{Millions}{%
+              \Block[borders={left,right}]{}{}&%
+              \Block[borders={right}]{}{}%
+              &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times10^{6}$}%
+              &%
+            }{%
+            }}%
+          \Block[borders={left,right}]{}{}&\Block[borders={right}]{}{}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times10^3$}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times\num{10}^2$}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times\num{10}^1$}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times\num{1}$}%
+          &\Block[borders={right}]{}{\ifboolKV[ClesTableaux]{Virgule}{,}{}}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times\num{10}^{-1}$}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times\num{10}^{-2}$}%
+          &\Block[borders={right}]{}{\fontsize{5}{5}\selectfont $\times\num{10}^{-3}$}%
+          \\%
+        }{}%
+        %
+        %%% Lignes vierges
+        %
+        \hline%
+        \xintFor* ##1 in {\xintSeq{1}{\useKV[ClesTableaux]{NbLignes}}}\do{%
+          \ifboolKV[ClesTableaux]{Milliards}{%
+            &&&&&&}{}%
+          \ifboolKV[ClesTableaux]{Millions}{%
+            &&&}{}%
+          &&&&&&,&&&\\}%
+        \CodeAfter%
+        % on trace les lignes verticales
+        \xintFor* ##1 in {\xintSeq{1}{\fpeval{\PfCDerniereColonne+1}}}\do{%
+          \tikz\draw (\fpeval{\DecalageLigne+2}-|##1)--(\fpeval{\DecalageLigne+2+\useKV[ClesTableaux]{NbLignes}}-|##1);%
+        }%
+        % On place le nombre éventuel
+        \ifx\bla#2\bla%
+        \else%
+        \ifboolKV[ClesTableaux]{Milliards}{\xdef\PfCDerniereColonneEntiere{13}}{\ifboolKV[ClesTableaux]{Millions}{\xdef\PfCDerniereColonneEntiere{10}}{\xdef\PfCDerniereColonneEntiere{7}}}%
+        \xdef\PfCPremiereColonneDecimale{\fpeval{\PfCDerniereColonneEntiere+2}}%
+        \setsepchar[*]{,*.}%
+        \ignoreemptyitems%
+        \readlist*\ListeNombreAPlacer{#2}%
+        \xintFor* ##2 in{\xintSeq {1}{\ListeNombreAPlacerlen}}\do{%
+          \StrLen{\ListeNombreAPlacer[##2,1]}[\TabLongueurNombre]%
+          \xintFor* ##1 in{\xintSeq {\TabLongueurNombre}{1}}\do{%
+            \tikz\node at (\fpeval{\DecalageLigne+##2+1.5}-|\fpeval{\PfCDerniereColonneEntiere-0.5-\TabLongueurNombre+##1}) {\PfCTBstrut\StrMid{\ListeNombreAPlacer[##2,1]}{##1}{##1}};%
+          }%
+          \StrLen{\ListeNombreAPlacer[##2,2]}[\TabLongueurNombre]%
+          \xintifboolexpr{\ListeNombreAPlacer[##2,2]==0}{}{%
+            \xintFor* ##1 in{\xintSeq {1}{\TabLongueurNombre}}\do{%
+              \tikz\node at (\fpeval{\DecalageLigne+##2+1.5}-|\fpeval{\PfCPremiereColonneDecimale-1.5+##1}) {\PfCTBstrut\StrMid{\ListeNombreAPlacer[##2,2]}{##1}{##1}};%
+            }%
+          }%
+        }%
+        \fi%
+      \end{NiceTabular}%
+    \end{center}%
+    \setlength{\tabcolsep}{100\tabcolsep}%
+  }{}%
+  % Décimal version inclinée
+  \ifboolKV[ClesTableaux]{Incline}{%
+    \colorlet{PfCCouleurd}{\useKV[ClesTableaux]{Couleurd}}%
+    \xdef\DecalageLigne{0}%
+    \setlength{\tabcolsep}{0.01\tabcolsep}%
+    \begin{center}%
+      %
+      %%% Definition du tableau
+      %
+      \ifboolKV[ClesTableaux]{Milliards}{\xdef\PfCDerniereColonne{17}}{\ifboolKV[ClesTableaux]{Millions}{\xdef\PfCDerniereColonne{14}}{\xdef\PfCDerniereColonne{11}}}%
+      \begin{NiceTabular}{*{\ifboolKV[ClesTableaux]{Milliards}{12}{%
+              \ifboolKV[ClesTableaux]{Millions}{9}{6}%
+            }}{wc{1cm}}*{5}{wc{1cm}}}%
+        %
+        \CodeBefore%
+        \ifboolKV[ClesTableaux]{Milliards}{%
+          \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{CouleurG}}] (1|-5)--(2|-1)--(3|-1)--(2|-5)--cycle;
+          \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{CouleurG}}] (2|-5)--(3|-1)--(4|-1)--(3|-5)--cycle;
+          \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{CouleurG}}] (3|-5)--(4|-1)--(5|-1)--(4|-5)--cycle;
+          \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{CouleurM}}] (4|-5)--(5|-1)--(6|-1)--(5|-5)--cycle;
+          \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{CouleurM}}] (5|-5)--(6|-1)--(7|-1)--(6|-5)--cycle;
+          \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{CouleurM}}] (6|-5)--(7|-1)--(8|-1)--(7|-5)--cycle;
+          \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{Couleurm}}] (7|-5)--(8|-1)--(9|-1)--(8|-5)--cycle;
+          \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{Couleurm}}] (8|-5)--(9|-1)--(10|-1)--(9|-5)--cycle;
+          \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{Couleurm}}] (9|-5)--(10|-1)--(11|-1)--(10|-5)--cycle;
+          \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{Couleuru}}] (10|-5)--(11|-1)--(12|-1)--(11|-5)--cycle;
+          \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{Couleuru}}] (11|-5)--(12|-1)--(13|-1)--(12|-5)--cycle;
+          \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{Couleuru}}] (12|-5)--(13|-1)--(14|-1)--(13|-5)--cycle;
+          \tikz\draw[draw=black,fill=PfCCouleurd!50] (13|-5)--(14|-1)--(15|-1)--(14|-5)--cycle;
+          \tikz\draw[draw=black,fill=PfCCouleurd!40] (14|-5)--(15|-1)--(16|-1)--(15|-5)--cycle;
+          \tikz\draw[draw=black,fill=PfCCouleurd!30] (15|-5)--(16|-1)--(17|-1)--(16|-5)--cycle;
+          \tikz\draw[draw=black,fill=PfCCouleurd!20] (16|-5)--(17|-1)--(18|-1)--(17|-5)--cycle;
+        }{\ifboolKV[ClesTableaux]{Millions}{%
+            \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{CouleurM}}] (1|-5)--(2|-1)--(3|-1)--(2|-5)--cycle;
+            \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{CouleurM}}] (2|-5)--(3|-1)--(4|-1)--(3|-5)--cycle;
+            \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{CouleurM}}] (3|-5)--(4|-1)--(5|-1)--(4|-5)--cycle;
+            \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{Couleurm}}] (4|-5)--(5|-1)--(6|-1)--(5|-5)--cycle;
+            \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{Couleurm}}] (5|-5)--(6|-1)--(7|-1)--(6|-5)--cycle;
+            \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{Couleurm}}] (6|-5)--(7|-1)--(8|-1)--(7|-5)--cycle;
+            \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{Couleuru}}] (7|-5)--(8|-1)--(9|-1)--(8|-5)--cycle;
+            \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{Couleuru}}] (8|-5)--(9|-1)--(10|-1)--(9|-5)--cycle;
+            \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{Couleuru}}] (9|-5)--(10|-1)--(11|-1)--(10|-5)--cycle;
+            \tikz\draw[draw=black,fill=PfCCouleurd!50] (10|-5)--(11|-1)--(12|-1)--(11|-5)--cycle;
+            \tikz\draw[draw=black,fill=PfCCouleurd!40] (11|-5)--(12|-1)--(13|-1)--(12|-5)--cycle;
+            \tikz\draw[draw=black,fill=PfCCouleurd!30] (12|-5)--(13|-1)--(14|-1)--(13|-5)--cycle;
+            \tikz\draw[draw=black,fill=PfCCouleurd!20] (13|-5)--(14|-1)--(15|-1)--(14|-5)--cycle;
+          }{%
+            \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{Couleurm}}] (1|-5)--(2|-1)--(3|-1)--(2|-5)--cycle;
+            \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{Couleurm}}] (2|-5)--(3|-1)--(4|-1)--(3|-5)--cycle;
+            \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{Couleurm}}] (3|-5)--(4|-1)--(5|-1)--(4|-5)--cycle;
+            \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{Couleuru}}] (4|-5)--(5|-1)--(6|-1)--(5|-5)--cycle;
+            \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{Couleuru}}] (5|-5)--(6|-1)--(7|-1)--(6|-5)--cycle;
+            \tikz\draw[draw=black,fill={\useKV[ClesTableaux]{Couleuru}}] (6|-5)--(7|-1)--(8|-1)--(7|-5)--cycle;
+            \tikz\draw[draw=black,fill=PfCCouleurd!50] (7|-5)--(8|-1)--(9|-1)--(8|-5)--cycle;
+            \tikz\draw[draw=black,fill=PfCCouleurd!40] (8|-5)--(9|-1)--(10|-1)--(9|-5)--cycle;
+            \tikz\draw[draw=black,fill=PfCCouleurd!30] (9|-5)--(10|-1)--(11|-1)--(10|-5)--cycle;
+            \tikz\draw[draw=black,fill=PfCCouleurd!20] (10|-5)--(11|-1)--(12|-1)--(11|-5)--cycle;
+          }%
+        }%
+        \Body
+        %% Pour décaler et laisser la place nécessaire
+        \xintFor* ##1 in {\xintSeq{1}{4}}\do{%
+          \ifboolKV[ClesTableaux]{Milliards}{%
+            &&&&&&}{}%
+          \ifboolKV[ClesTableaux]{Millions}{%
+            &&&}{}%
+          &&&&&&&&&&\\}%
+        %%% Lignes vierges       
+        %
+        \xintFor* ##1 in {\xintSeq{1}{\useKV[ClesTableaux]{NbLignes}}}\do{%
+          \ifboolKV[ClesTableaux]{Milliards}{%
+            &&&&&&}{}%                       
+          \ifboolKV[ClesTableaux]{Millions}{%
+            &&&}{}%
+          &&&&&&&&&&\\}%
+        \CodeAfter%%
+        % on trace les lignes verticales
+        \xintFor* ##1 in {\xintSeq{2}{\fpeval{\PfCDerniereColonne-1}}}\do{%
+          \tikz\draw[dashed] (\fpeval{\DecalageLigne+5}-|##1)--(\fpeval{\DecalageLigne+5+\useKV[ClesTableaux]{NbLignes}}-|##1);%
+        }%
+        \tikz\draw (\fpeval{\DecalageLigne+5}-|1)--(\fpeval{\DecalageLigne+5+\useKV[ClesTableaux]{NbLignes}}-|1);%
+        \tikz\draw (\fpeval{\DecalageLigne+5}-|\fpeval{\PfCDerniereColonne})--(\fpeval{\DecalageLigne+5+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{\PfCDerniereColonne});%
+        %% On place le nombre éventuel
+        \ifx\bla#2\bla%
+        \else%
+        \ifboolKV[ClesTableaux]{Milliards}{\xdef\PfCDerniereColonneEntiere{13}}{\ifboolKV[ClesTableaux]{Millions}{\xdef\PfCDerniereColonneEntiere{10}}{\xdef\PfCDerniereColonneEntiere{7}}}%
+        \xdef\PfCPremiereColonneDecimale{\fpeval{\PfCDerniereColonneEntiere+1}}%
+        \setsepchar[*]{,*.}%
+        \ignoreemptyitems%
+        \readlist*\ListeNombreAPlacer{#2}%
+        \xintFor* ##2 in{\xintSeq {1}{\ListeNombreAPlacerlen}}\do{%
+          \StrLen{\ListeNombreAPlacer[##2,1]}[\TabLongueurNombre]%
+          \xintFor* ##1 in{\xintSeq {\TabLongueurNombre}{1}}\do{%
+            \tikz\node at (\fpeval{\DecalageLigne+##2+4.5}-|\fpeval{\PfCDerniereColonneEntiere-0.5-\TabLongueurNombre+##1}) {\PfCTBstrut\StrMid{\ListeNombreAPlacer[##2,1]}{##1}{##1}};%
+          }%
+          \StrLen{\ListeNombreAPlacer[##2,2]}[\TabLongueurNombre]%
+          \xintifboolexpr{\ListeNombreAPlacer[##2,2]==0}{}{%
+            % On place la virgule
+            \tikz\node[xshift=1em] at (\fpeval{\DecalageLigne+##2+4.5}-|\fpeval{\PfCPremiereColonneDecimale-1-0.5}) {\PfCTBstrut,};%
+            % on écrit la partie décimale
+            \xintFor* ##1 in{\xintSeq {1}{\TabLongueurNombre}}\do{%
+              \tikz\node at (\fpeval{\DecalageLigne+##2+4.5}-|\fpeval{\PfCPremiereColonneDecimale-1.5+##1}) {\PfCTBstrut\StrMid{\ListeNombreAPlacer[##2,2]}{##1}{##1}};%
+            }%
+          }%
+        }%
+        \fi%
+        \ifboolKV[ClesTableaux]{Milliards}{%
+          \tikz\node[rotate=58] at (2|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Centaines\\de milliards\end{center}\end{minipage}};
+          \tikz\node[rotate=58] at (3|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Dizaines\\de milliards\end{center}\end{minipage}};
+          \tikz\node[rotate=58] at (4|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Milliards\end{center}\end{minipage}};
+          \tikz\node[rotate=58] at (5|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Centaines\\de millions\end{center}\end{minipage}};
+          \tikz\node[rotate=58] at (6|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Dizaines\\de millions\end{center}\end{minipage}};
+          \tikz\node[rotate=58] at (7|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Millions\end{center}\end{minipage}};
+          \tikz\node[rotate=58] at (8|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Centaines\\de milliers\end{center}\end{minipage}};
+          \tikz\node[rotate=58] at (9|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Dizaines\\de milliers\end{center}\end{minipage}};
+          \tikz\node[rotate=58] at (10|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Milliers\end{center}\end{minipage}};
+          \tikz\node[rotate=58] at (11|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Centaines\end{center}\end{minipage}};
+          \tikz\node[rotate=58] at (12|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Dizaines\end{center}\end{minipage}};
+          \tikz\node[rotate=58] at (13|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Unités\end{center}\end{minipage}};
+          \tikz\node[rotate=58] at (14|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Dixièmes\end{center}\end{minipage}};
+          \tikz\node[rotate=58] at (15|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Centièmes\end{center}\end{minipage}};
+          \tikz\node[rotate=58] at (16|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Millièmes\end{center}\end{minipage}};
+          \tikz\node[rotate=58] at (17|-3) {\begin{minipage}{2cm}\begin{center}\scriptsize Dix-millièmes\end{center}\end{minipage}};
+        }{\ifboolKV[ClesTableaux]{Millions}{%
+            \tikz\node[rotate=58] at (2|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Centaines\\de millions\end{center}\end{minipage}};
+            \tikz\node[rotate=58] at (3|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Dizaines\\de millions\end{center}\end{minipage}};
+            \tikz\node[rotate=58] at (4|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Millions\end{center}\end{minipage}};
+            \tikz\node[rotate=58] at (5|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Centaines\\de milliers\end{center}\end{minipage}};
+            \tikz\node[rotate=58] at (6|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Dizaines\\de milliers\end{center}\end{minipage}};
+            \tikz\node[rotate=58] at (7|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Milliers\end{center}\end{minipage}};
+            \tikz\node[rotate=58] at (8|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Centaines\end{center}\end{minipage}};
+            \tikz\node[rotate=58] at (9|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Dizaines\end{center}\end{minipage}};
+            \tikz\node[rotate=58] at (10|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Unités\end{center}\end{minipage}};
+            \tikz\node[rotate=58] at (11|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Dixièmes\end{center}\end{minipage}};
+            \tikz\node[rotate=58] at (12|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Centièmes\end{center}\end{minipage}};
+            \tikz\node[rotate=58] at (13|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Millièmes\end{center}\end{minipage}};
+            \tikz\node[rotate=58] at (14|-3) {\begin{minipage}{2cm}\begin{center}\scriptsize Dix-millièmes\end{center}\end{minipage}};
+          }{%
+            \tikz\node[rotate=58] at (2|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Centaines\\de milliers\end{center}\end{minipage}};
+            \tikz\node[rotate=58] at (3|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Dizaines\\de milliers\end{center}\end{minipage}};
+            \tikz\node[rotate=58] at (4|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Milliers\end{center}\end{minipage}};
+            \tikz\node[rotate=58] at (5|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Centaines\end{center}\end{minipage}};
+            \tikz\node[rotate=58] at (6|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Dizaines\end{center}\end{minipage}};
+            \tikz\node[rotate=58] at (7|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Unités\end{center}\end{minipage}};
+            \tikz\node[rotate=58] at (8|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Dixièmes\end{center}\end{minipage}};
+            \tikz\node[rotate=58] at (9|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Centièmes\end{center}\end{minipage}};
+            \tikz\node[rotate=58] at (10|-3) {\begin{minipage}{1.5cm}\begin{center}\scriptsize Millièmes\end{center}\end{minipage}};
+            \tikz\node[rotate=58] at (11|-3) {\begin{minipage}{2cm}\begin{center}\scriptsize Dix-millièmes\end{center}\end{minipage}};
+          }%
+        }%
+      \end{NiceTabular}%
+    \end{center}%
+    \setlength{\tabcolsep}{100\tabcolsep}%
+  }{}%
+  %
+  %%% Prise en compte de la cl\'e Metre
+  %
+  \ifboolKV[ClesTableaux]{Metre}{%
+    \xdef\PfCNbColonnesUnites{7}%
+    \xdef\PfCNbColonnesUnitesSup{0}%
+    \ifboolKV[ClesTableaux]{Exterieur}{%
+      \xdef\PfCNbColonnesUnites{\fpeval{\PfCNbColonnesUnites+2*\useKV[ClesTableaux]{ColonnesSup}}}%
+      \xdef\PfCNbColonnesUnitesSup{\useKV[ClesTableaux]{ColonnesSup}}%
+    }{}%
+    \[\renewcommand{\arraystretch}{1.15}%
+      \begin{NiceTabular}{*{\PfCNbColonnesUnites}{wc{7.5mm}}}%
+        \ifboolKV[ClesTableaux]{Exterieur}{%
+          \xintFor* ##1 in{\xintSeq{1}{\useKV[ClesTableaux]{ColonnesSup}}}\do{%
+          \Block[]{}{}&
+        }}%
+      {}%
+      \Block[]{}{}%
+      &\Block[]{}{}%
+      &\Block[]{}{}%
+      &\Block[]{}{}%
+      &\Block[]{}{}%
+      &\Block[]{}{}%
+      &\Block[]{}{}%
+      \ifboolKV[ClesTableaux]{Exterieur}{%
+        \xintFor* ##1 in{\xintSeq{1}{\useKV[ClesTableaux]{ColonnesSup}}}\do{%
+          &\Block[]{}{}%
+        }%
+      }{}\\
+      \ifboolKV[ClesTableaux]{Exterieur}{%
+        \xintFor* ##1 in{\xintSeq{1}{\useKV[ClesTableaux]{ColonnesSup}}}\do{%
+          \Block[]{}{}&
+        }%
+      }{}\Block[draw]{}{km\PfCTBstrut}&\Block[draw]{1-1}{hm\PfCTBstrut}&\Block[draw]{1-1}{dam\PfCTBstrut}&\Block[draw]{1-1}{m\PfCTBstrut}&\Block[draw]{1-1}{dm\PfCTBstrut}&\Block[draw]{1-1}{cm\PfCTBstrut}&\Block[draw]{1-1}{mm\PfCTBstrut}\ifboolKV[ClesTableaux]{Exterieur}{%
+          \xintFor* ##1 in{\xintSeq{1}{\useKV[ClesTableaux]{ColonnesSup}}}\do{%
+          &\Block[]{}{}%
+        }}{}\\
+      \xintFor* ##1 in {\xintSeq {1}{\useKV[ClesTableaux]{NbLignes}}}\do{%
+          \ifboolKV[ClesTableaux]{Exterieur}{%
+              \xintFor* ##2 in{\xintSeq{1}{\useKV[ClesTableaux]{ColonnesSup}}}\do{%
+          \Block[]{}{}&%
+        }}{}&&&&&&\ifboolKV[ClesTableaux]{Exterieur}{%
+          \xintFor* ##2 in{\xintSeq{1}{\useKV[ClesTableaux]{ColonnesSup}}}\do{%
+          &\Block[]{}{}
+        }}{}%
+       \\%
+     }%
+     \ifboolKV[ClesTableaux]{Exterieur}{%
+       \xintFor* ##1 in{\xintSeq{1}{\useKV[ClesTableaux]{ColonnesSup}}}\do{%
+          \Block[]{}{}&
+        }%
+      }{}%
+      \Block[]{}{}%
+      &\Block[]{}{}%
+      &\Block[]{}{}%
+      &\Block[]{}{}%
+      &\Block[]{}{}%
+      &\Block[]{}{}%
+      &\Block[]{}{}%
+      \ifboolKV[ClesTableaux]{Exterieur}{%
+        \xintFor* ##1 in{\xintSeq{1}{\useKV[ClesTableaux]{ColonnesSup}}}\do{%
+          &\Block[]{}{}%
+        }%
+      }{}%
+      \\
+        \CodeAfter
+        % on trace les lignes verticales
+        \xintFor* ##1 in {\xintSeq{\fpeval{1+\PfCNbColonnesUnitesSup}}{\fpeval{8+\PfCNbColonnesUnitesSup}}}\do{%
+          \tikz\draw (3-|##1)--(\fpeval{3+\useKV[ClesTableaux]{NbLignes}}-|##1);
+        }%
+        % On place le nombre éventuel
+        \ifx\bla#2\bla%
+        \else%
+        \setsepchar[*]{,*/}
+        \readlist*\ListeNombreAPlacer{#2}%
+        \xintFor* ##2 in{\xintSeq{1}{\ListeNombreAPlacerlen}}\do{
+          \StrLen{\ListeNombreAPlacer[##2,1]}[\TabLongueurNombre]%
+          \xintFor* ##1 in{\xintSeq {1}{\TabLongueurNombre}}\do{%
+            \tikz\node at (\fpeval{##2+2.5}-|\fpeval{\ListeNombreAPlacer[##2,2]-0.5+##1}) {\PfCTBstrut\StrMid{\ListeNombreAPlacer[##2,1]}{##1}{##1}};
+          }%
+        }
+        \fi%
+        % on trace les flèches
+        \ifboolKV[ClesTableaux]{Fleches}{\setKV[ClesTableaux]{FlechesH,FlechesB}}{}%
+        \ifboolKV[ClesTableaux]{FlechesH}{%
+            \xintFor* ##1 in {\xintSeq{\fpeval{1+\PfCNbColonnesUnitesSup}}{\fpeval{6+\PfCNbColonnesUnitesSup}}}\do{%
+            \tikz\draw[gray,->,>=latex,out=30,in=150] (1.5-|\fpeval{0.5+##1}) to node[above, midway]{\small$\times\num{10}$}(1.5-|\fpeval{1.5+##1});%
+          }%
+        }{}%
+        \ifboolKV[ClesTableaux]{FlechesB}{%
+          \xintFor* ##1 in {\xintSeq{\fpeval{1+\PfCNbColonnesUnitesSup}}{\fpeval{6+\PfCNbColonnesUnitesSup}}}\do{%
+            \tikz\draw[gray,->,>=latex,out=-150,in=-30] (\fpeval{3+\useKV[ClesTableaux]{NbLignes}+0.5}-|\fpeval{1.5+##1}) to node[below,midway]{\small$\div\num{10}$}(\fpeval{3+\useKV[ClesTableaux]{NbLignes}+0.5}-|\fpeval{0.5+##1});%
+          }%
+        }{}%
+        \useKV[ClesTableaux]{CodeAfter}%
+      \end{NiceTabular}%
+    \]%
+  }%
+  {}%
+  %
+  %%% Prise en compte de la cl\'e Carre
+  %
+  \ifboolKV[ClesTableaux]{Carre}{%
+    \[\renewcommand{\arraystretch}{1.15}%
+      \begin{NiceTabular}{*{7}{wc{3.5mm}wc{3.5mm}}}%
+        \ifboolKV[ClesTableaux]{Condense}{}{%
+            \Block[]{1-2}{}%
+            &&\Block[]{1-2}{}%
+            &&\Block[]{1-2}{}%
+            &&\Block[]{1-2}{}%
+            &&\Block[]{1-2}{}%
+            &&\Block[]{1-2}{}%
+            &&\Block[]{1-2}{}\\
+          }%
+        \Block[borders={left,top,right}]{1-2}{km$^2$\PfCTBstrut}&&\Block[borders={top,right}]{1-2}{hm$^2$\PfCTBstrut}&&\Block[borders={top,right}]{1-2}{dam$^2$\PfCTBstrut}&&\Block[borders={top,right}]{1-2}{m$^2$\PfCTBstrut}&&\Block[borders={top,right}]{1-2}{dm$^2$\PfCTBstrut}&&\Block[borders={top,right}]{1-2}{cm$^2$\PfCTBstrut}&&\Block[borders={top,right}]{1-2}{mm$^2$\PfCTBstrut}&\\
+        \ifboolKV[ClesTableaux]{Are}{%
+          \Block[borders={left,right,bottom}]{1-2}{}&&\Block[draw=gray!50,borders={left,top,bottom}]{}{~}&\Block[borders={top,right,bottom}]{}{\scriptsize ha}&\Block[draw=gray!50,borders={left,top,bottom}]{}{~}&\Block[borders={top,right,bottom}]{}{\scriptsize a}&\Block[borders={left,right,bottom}]{1-2}{}&&\Block[borders={left,right,bottom}]{1-2}{}&&\Block[borders={left,right,bottom}]{1-2}{}&&\Block[borders={left,right,bottom}]{1-2}{}&\\
+        }{\hline}%
+        \xintFor* ##1 in {\xintSeq {1}{\useKV[ClesTableaux]{NbLignes}}}\do{%
+          &&&&&&&&&&&&&\\
+        }%
+        \ifboolKV[ClesTableaux]{Condense}{}{%
+            \Block[]{1-2}{}%
+            &&\Block[]{1-2}{}%
+            &&\Block[]{1-2}{}%
+            &&\Block[]{1-2}{}%
+            &&\Block[]{1-2}{}%
+            &&\Block[]{1-2}{}%
+            &&\Block[]{1-2}{}\\
+          }
+        \CodeAfter
+        % on trace les lignes verticales
+        \xdef\PfCRetiensDepart{3}%
+        \ifboolKV[ClesTableaux]{Condense}{\xdef\PfCRetiensDepart{2}}{}%
+        \xintifboolexpr{\useKV[ClesTableaux]{Are}}{%
+          \xintFor* ##1 in {\xintSeq{1}{8}}\do{%
+            \tikz\draw (\fpeval{\PfCRetiensDepart+1}-|\fpeval{2*(##1-1)+1})--(\fpeval{\fpeval{\PfCRetiensDepart+1}+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{2*(##1-1)+1});
+          }%
+          \xintFor* ##1 in {\xintSeq{1}{7}}\do{%
+            \tikz\draw[gray!50] (\fpeval{\PfCRetiensDepart+1}-|\fpeval{2*(##1-1)+2})--(\fpeval{\fpeval{\PfCRetiensDepart+1}+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{2*(##1-1)+2});
+          }%
+        }{%
+          \xintFor* ##1 in {\xintSeq{1}{8}}\do{%
+            \tikz\draw (\PfCRetiensDepart-|\fpeval{2*(##1-1)+1})--(\fpeval{\PfCRetiensDepart+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{2*(##1-1)+1});
+          }%
+          \xintifboolexpr{\useKV[ClesTableaux]{Colonnes}}{%
+            \xintFor* ##1 in {\xintSeq{1}{7}}\do{%
+              \tikz\draw[gray!50] (\PfCRetiensDepart-|\fpeval{2*(##1-1)+2})--(\fpeval{\PfCRetiensDepart+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{2*(##1-1)+2});
+            }%
+          }{}%
+        }%
+        % On place le nombre éventuel
+        \ifx\bla#2\bla%
+        \else%
+        \setsepchar[*]{,*/}
+        \readlist*\ListeNombreAPlacer{#2}%
+        \xintFor* ##2 in{\xintSeq {1}{\ListeNombreAPlacerlen}}\do{
+          \StrLen{\ListeNombreAPlacer[##2,1]}[\TabLongueurNombre]%
+          \xintFor* ##1 in{\xintSeq {1}{\TabLongueurNombre}}\do{%
+            \tikz\node at (\fpeval{##2+\ifboolKV[ClesTableaux]{Are}{\fpeval{\PfCRetiensDepart+0.5}}{\fpeval{\PfCRetiensDepart-0.5}}}-|\fpeval{\ListeNombreAPlacer[##2,2]-0.5+##1}) {\PfCTBstrut\StrMid{\ListeNombreAPlacer[##2,1]}{##1}{##1}};
+          }%
+        }
+        \fi%
+        % on trace les flèches
+        \ifboolKV[ClesTableaux]{Condense}{}{%
+        \ifboolKV[ClesTableaux]{Fleches}{\setKV[ClesTableaux]{FlechesH,FlechesB}}{}%
+        \ifboolKV[ClesTableaux]{Are}{\xdef\PfCTableauDepart{4}}{\xdef\PfCTableauDepart{3}}%
+        \ifboolKV[ClesTableaux]{FlechesH}{%
+          \xintFor* ##1 in {\xintSeq{1}{6}}\do{%
+            \tikz\draw[gray,->,>=latex,out=30,in=150] (1.5-|\fpeval{2*##1}) to node[above, midway]{\small$\times\num{100}$}(1.5-|\fpeval{2*(##1+1)});%
+          }%
+        }{}%
+        \ifboolKV[ClesTableaux]{FlechesB}{%
+          \xintFor* ##1 in {\xintSeq{1}{6}}\do{%
+            \tikz\draw[gray,->,>=latex,out=-150,in=-30] (\fpeval{\PfCTableauDepart+\useKV[ClesTableaux]{NbLignes}+0.5}-|\fpeval{2*(##1+1)}) to node[below,midway]{\small$\div\num{100}$}(\fpeval{\PfCTableauDepart+\useKV[ClesTableaux]{NbLignes}+0.5}-|\fpeval{2*##1});%
+          }%
+        }{}%
+        }%
+        \useKV[ClesTableaux]{CodeAfter}%
+      \end{NiceTabular}
+    \]%
+  }{}%
+  %
+  % Carré Eve
+  %
+  \ifboolKV[ClesTableaux]{CarreA}{%
+    \[\renewcommand{\arraystretch}{1.15}%
+      \begin{NiceTabular}{*{7}{wc{20pt}wc{20pt}}}%
+        \Block[]{1-2}{}%
+        &&\Block[]{1-2}{}%
+        &&\Block[]{1-2}{}%
+        &&\Block[]{1-2}{}%
+        &&\Block[]{1-2}{}%
+        &&\Block[]{1-2}{}%
+        &&\Block[]{1-2}{}\\
+        \Block[borders={left,top}]{1-1}{}&\Block[borders=top]{1-1}{km$^2$\PfCTBstrut}&
+        \Block[borders={left,top}]{1-1}{}&\Block[borders=top]{1-1}{hm$^2$\PfCTBstrut}&
+        \Block[borders={left,top}]{1-1}{}&\Block[borders=top]{1-1}{dam$^2$\PfCTBstrut}&
+        \Block[borders={left,top}]{1-1}{}&\Block[borders=top]{1-1}{m$^2$\PfCTBstrut}&
+        \Block[borders={left,top}]{1-1}{}&\Block[borders=top]{1-1}{dm$^2$\PfCTBstrut}&
+        \Block[borders={left,top}]{1-1}{}&\Block[borders=top]{1-1}{cm$^2$\PfCTBstrut}&
+        \Block[borders={left,top}]{1-1}{}&\Block[borders={top,right}]{1-1}{mm$^2$\PfCTBstrut}\\
+        \ifboolKV[ClesTableaux]{Are}{%
+          \Block[borders={left,right,bottom}]{1-2}{}&&\Block[draw=gray!50,borders={left,top,bottom}]{}{~}&\Block[borders={top,right,bottom}]{}{\scriptsize ha}&\Block[draw=gray!50,borders={left,top,bottom}]{}{~}&\Block[borders={top,right,bottom}]{}{\scriptsize a}&\Block[borders={left,right,bottom}]{1-2}{}&&\Block[borders={left,right,bottom}]{1-2}{}&&\Block[borders={left,right,bottom}]{1-2}{}&&\Block[borders={left,right,bottom}]{1-2}{}&\\
+        }{\hline}%
+        \xintFor* ##1 in {\xintSeq {1}{\useKV[ClesTableaux]{NbLignes}}}\do{%
+          &&&&&&&&&&&&&\\
+        }%
+        \Block[]{1-2}{}%
+        &&\Block[]{1-2}{}%
+        &&\Block[]{1-2}{}%
+        &&\Block[]{1-2}{}%
+        &&\Block[]{1-2}{}%
+        &&\Block[]{1-2}{}%
+        &&\Block[]{1-2}{}\\
+        \CodeAfter
+        % on trace les lignes verticales
+        \xintifboolexpr{\useKV[ClesTableaux]{Are}}{%
+          \xintFor* ##1 in {\xintSeq{1}{8}}\do{%
+            \tikz\draw (4-|\fpeval{2*(##1-1)+1})--(\fpeval{4+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{2*(##1-1)+1});
+          }%
+          \xintFor* ##1 in {\xintSeq{1}{7}}\do{%
+            \tikz\draw[gray!50] (4-|\fpeval{2*(##1-1)+2})--(\fpeval{4+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{2*(##1-1)+2});
+          }%
+        }{%
+          \xintFor* ##1 in {\xintSeq{1}{8}}\do{%
+            \tikz\draw (3-|\fpeval{2*(##1-1)+1})--(\fpeval{3+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{2*(##1-1)+1});
+          }%
+          \xintifboolexpr{\useKV[ClesTableaux]{Colonnes}}{%
+            \xintFor* ##1 in {\xintSeq{1}{7}}\do{%
+              \tikz\draw[gray!50] (3-|\fpeval{2*(##1-1)+2})--(\fpeval{3+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{2*(##1-1)+2});
+            }%
+          }{}%
+        }%
+        % On place le nombre éventuel
+        \ifx\bla#2\bla%
+        \else%
+        \setsepchar[*]{,*/}
+        \readlist*\ListeNombreAPlacer{#2}%
+        \xintFor* ##2 in{\xintSeq {1}{\ListeNombreAPlacerlen}}\do{
+          \StrLen{\ListeNombreAPlacer[##2,1]}[\TabLongueurNombre]%
+          \xintFor* ##1 in{\xintSeq {1}{\TabLongueurNombre}}\do{%
+            \tikz\node at (\fpeval{##2+\ifboolKV[ClesTableaux]{Are}{3.5}{2.5}}-|\fpeval{\ListeNombreAPlacer[##2,2]-0.5+##1}) {\PfCTBstrut\StrMid{\ListeNombreAPlacer[##2,1]}{##1}{##1}};
+          }%
+        }
+        \fi%
+        % on trace les flèches
+        \ifboolKV[ClesTableaux]{Fleches}{\setKV[ClesTableaux]{FlechesH,FlechesB}}{}%
+        \ifboolKV[ClesTableaux]{Are}{\xdef\PfCTableauDepart{4}}{\xdef\PfCTableauDepart{3}}%
+        \ifboolKV[ClesTableaux]{FlechesH}{%
+          \xintFor* ##1 in {\xintSeq{1}{6}}\do{%
+            \tikz\draw[gray,->,>=latex,out=30,in=150] (1.5-|\fpeval{2*##1+0.5}) to node[above, midway]{\small$\times\num{100}$}(1.5-|\fpeval{2*(##1+1)+0.5});%
+          }%
+        }{}%
+        \ifboolKV[ClesTableaux]{FlechesB}{%
+          \xintFor* ##1 in {\xintSeq{1}{6}}\do{%
+            \tikz\draw[gray,->,>=latex,out=-150,in=-30] (\fpeval{\PfCTableauDepart+\useKV[ClesTableaux]{NbLignes}+0.5}-|\fpeval{2*(##1+1)+0.5}) to node[below,midway]{\small$\div\num{100}$}(\fpeval{\PfCTableauDepart+\useKV[ClesTableaux]{NbLignes}+0.5}-|\fpeval{2*##1+0.5});%
+          }%
+        }{}%
+        \useKV[ClesTableaux]{CodeAfter}%
+      \end{NiceTabular}
+    \]%
+  }{}%
+  %
+  %%% Prise en compte de la cl\'e Cube
+  %
+  \ifboolKV[ClesTableaux]{Cube}{%
+      \setlength{\PfCCubeTabColSep}{\useKV[ClesTableaux]{Tabcolsep}}%
+      \setlength{\PfCTableauNumLarg}{\useKV[ClesTableaux]{LargeurCube}}%
+    \[\renewcommand{\arraystretch}{1.15}%
+%      \setlength{\tabcolsep}{0.625\tabcolsep}%
+%      \begin{NiceTabular}{*{7}{wc{3.5mm}wc{3.5mm}wc{3.5mm}}}
+      \setlength{\tabcolsep}{\PfCCubeTabColSep}%
+      \begin{NiceTabular}{*{7}{wc{\PfCTableauNumLarg}wc{\PfCTableauNumLarg}wc{\PfCTableauNumLarg}}}
+        \Block[]{1-3}{}%
+        &&&\Block[]{1-3}{}%
+        &&&\Block[]{1-3}{}%
+        &&&\Block[]{1-3}{}%
+        &&&\Block[]{1-3}{}%
+        &&&\Block[]{1-3}{}%
+        &&&\Block[]{1-3}{}\\
+        \Block[borders={left,top,right}]{1-3}{km$^3$\PfCTBstrut}&&&\Block[borders={top,right}]{1-3}{hm$^3$\PfCTBstrut}&&&\Block[borders={top,right}]{1-3}{dam$^3$\PfCTBstrut}&&&\Block[borders={top,right}]{1-3}{m$^3$\PfCTBstrut}&&&\Block[borders={top,right}]{1-3}{dm$^3$\PfCTBstrut}&&&\Block[borders={top,right}]{1-3}{cm$^3$\PfCTBstrut}&&&\Block[borders={top,right}]{1-3}{mm$^3$\PfCTBstrut}&&\\
+        \ifboolKV[ClesTableaux]{Capacite}{%
+          \Block[borders={left,right,bottom}]{1-3}{}&&&\Block[borders={right,bottom}]{1-3}{}&&&\Block[borders={right,bottom}]{1-3}{}&&&\Block[borders={right,bottom}]{1-3}{}&&&\Block[draw=gray!50,borders={top,left,bottom}]{}{\scriptsize hL}&\Block[draw=gray!50,borders={top,bottom}]{}{\scriptsize daL}&\Block[draw=gray!50,borders={top,right,bottom}]{}{\scriptsize L}&\Block[draw=gray!50,borders={top,left,bottom}]{}{\scriptsize dL}&\Block[draw=gray!50,borders={top,bottom}]{}{\scriptsize cL}&\Block[draw=gray!50,borders={top,right,bottom}]{}{\scriptsize mL}&\Block[borders={right,bottom}]{1-3}{}&&\\
+        }{\hline}%
+        \xintFor* ##1 in {\xintSeq{1}{\useKV[ClesTableaux]{NbLignes}}}\do{%
+        &&&&&&&&&&&&&&&&&&&&\\
+        }%
+        \Block[]{1-3}{}%
+        &&&\Block[]{1-3}{}%
+        &&&\Block[]{1-3}{}%
+        &&&\Block[]{1-3}{}%
+        &&&\Block[]{1-3}{}%
+        &&&\Block[]{1-3}{}%
+        &&&\Block[]{1-3}{}\\
+        \CodeAfter
+        % on trace les lignes verticales
+        \xintifboolexpr{\useKV[ClesTableaux]{Capacite}}{%
+          \xintFor* ##1 in {\xintSeq{1}{8}}\do{%
+            \tikz\draw (4-|\fpeval{3*(##1-1)+1})--(\fpeval{4+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{3*(##1-1)+1});
+          }%
+          \xintFor* ##1 in {\xintSeq{1}{7}}\do{%
+            \tikz\draw[gray!50] (4-|\fpeval{3*(##1-1)+2})--(\fpeval{4+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{3*(##1-1)+2});
+            \tikz\draw[gray!50] (4-|\fpeval{3*##1})--(\fpeval{4+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{3*##1});
+          }%
+        }{%
+          \xintFor* ##1 in {\xintSeq{1}{8}}\do{%
+            \tikz\draw (3-|\fpeval{3*(##1-1)+1})--(\fpeval{3+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{3*(##1-1)+1});
+          }%
+          \xintifboolexpr{\useKV[ClesTableaux]{Colonnes}}{%
+            \xintFor* ##1 in {\xintSeq{1}{7}}\do{%
+              \tikz\draw[gray!50] (3-|\fpeval{3*(##1-1)+2})--(\fpeval{3+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{3*(##1-1)+2});
+              \tikz\draw[gray!50] (3-|\fpeval{3*##1})--(\fpeval{3+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{3*##1});
+            }%
+          }{}%
+        }%
+        % On place le nombre éventuel
+        \ifx\bla#2\bla%
+        \else%
+        \setsepchar[*]{,*/}
+        \readlist*\ListeNombreAPlacer{#2}%
+        \xintFor* ##2 in{\xintSeq {1}{\ListeNombreAPlacerlen}}\do{
+          \StrLen{\ListeNombreAPlacer[##2,1]}[\TabLongueurNombre]%
+          \xintFor* ##1 in{\xintSeq {1}{\TabLongueurNombre}}\do{%
+            \tikz\node at (\fpeval{##2+\ifboolKV[ClesTableaux]{Capacite}{3.5}{2.5}}-|\fpeval{\ListeNombreAPlacer[##2,2]-0.5+##1}) {\PfCTBstrut\StrMid{\ListeNombreAPlacer[##2,1]}{##1}{##1}};
+          }%
+        }%
+        \fi%
+        % on trace les flèches
+        \ifboolKV[ClesTableaux]{Fleches}{\setKV[ClesTableaux]{FlechesH,FlechesB}}{}%
+        \ifboolKV[ClesTableaux]{Capacite}{\xdef\PfCTableauDepart{4}}{\xdef\PfCTableauDepart{3}}%
+        \ifboolKV[ClesTableaux]{FlechesH}{%
+          \xintFor* ##1 in {\xintSeq{1}{6}}\do{%
+            \tikz\draw[gray,->,>=latex,out=30,in=150] (1.5-|\fpeval{2.5+3*(##1-1)}) to node[above, midway]{\small$\times\num{1000}$}(1.5-|\fpeval{2.5+3*##1});%
+          }%
+        }{}%
+        \ifboolKV[ClesTableaux]{FlechesB}{%
+          \xintFor* ##1 in {\xintSeq{1}{6}}\do{%
+            \tikz\draw[gray,->,>=latex,out=-150,in=-30] (\fpeval{\PfCTableauDepart+\useKV[ClesTableaux]{NbLignes}+0.5}-|\fpeval{2.5+3*##1}) to node[below,midway]{\small$\div\num{1000}$}(\fpeval{\PfCTableauDepart+\useKV[ClesTableaux]{NbLignes}+0.5}-|\fpeval{2.5+3*(##1-1)});%
+          }%
+        }{}%
+        \useKV[ClesTableaux]{CodeAfter}%
+      \end{NiceTabular}
+    \]%
+  }{}%
+  % 
+  %%% Prise en compte de la cl\'e CubeA (Idée d'Eve Chambon)
+  %
+  \ifboolKV[ClesTableaux]{CubeA}{%
+    \setlength{\PfCCubeTabColSep}{\useKV[ClesTableaux]{Tabcolsep}}
+  \[\renewcommand{\arraystretch}{1.15}%
+    \setlength{\tabcolsep}{\PfCCubeTabColSep}%
+    \begin{NiceTabular}{*{7}{wc{25pt}wc{25pt}wc{25pt}}}
+      \Block[]{1-3}{}%
+      &&&\Block[]{1-3}{}%
+      &&&\Block[]{1-3}{}%
+      &&&\Block[]{1-3}{}%
+      &&&\Block[]{1-3}{}%
+      &&&\Block[]{1-3}{}%
+      &&&\Block[]{1-3}{}\\
+      \Block[borders={left,top}]{1-1}{}&\Block[borders={top}]{1-1}{}&\Block[borders={top,right}]{1-1}{km$^3$\PfCTBstrut}&\Block[borders={left,top}]{1-1}{}&\Block[borders={top}]{1-1}{}&\Block[borders={top,right}]{1-1}{hm$^3$\PfCTBstrut}&\Block[borders={left,top}]{1-1}{}&\Block[borders={top}]{1-1}{}&\Block[borders={top,right}]{1-1}{dam$^3$\PfCTBstrut}&\Block[borders={left,top}]{1-1}{}&\Block[borders={top}]{1-1}{}&\Block[borders={top,right}]{1-1}{m$^3$\PfCTBstrut}&\Block[borders={left,top}]{1-1}{}&\Block[borders={top}]{1-1}{}&\Block[borders={top,right}]{1-1}{dm$^3$\PfCTBstrut}&\Block[borders={left,top}]{1-1}{}&\Block[borders={top}]{1-1}{}&\Block[borders={top,right}]{1-1}{cm$^3$\PfCTBstrut}&\Block[borders={left,top}]{1-1}{}&\Block[borders={top}]{1-1}{}&\Block[borders={top,right}]{1-1}{mm$^3$\PfCTBstrut}\\
+      \ifboolKV[ClesTableaux]{Capacite}{%
+        \Block[borders={left,right,bottom}]{1-3}{}&&&\Block[borders={right,bottom}]{1-3}{}&&&\Block[borders={right,bottom}]{1-3}{}&&&\Block[borders={right,bottom}]{1-3}{}&&&\Block[draw=gray!50,borders={top,left,bottom}]{}{\scriptsize hL}&\Block[draw=gray!50,borders={top,bottom}]{}{\scriptsize daL}&\Block[draw=gray!50,borders={top,right,bottom}]{}{\scriptsize L}&\Block[draw=gray!50,borders={top,left,bottom}]{}{\scriptsize dL}&\Block[draw=gray!50,borders={top,bottom}]{}{\scriptsize cL}&\Block[draw=gray!50,borders={top,right,bottom}]{}{\scriptsize mL}&\Block[borders={right,bottom}]{1-3}{}&&\\
+      }{\hline}%
+      \xintFor* ##1 in {\xintSeq{1}{\useKV[ClesTableaux]{NbLignes}}}\do{%
+        &&&&&&&&&&&&&&&&&&&&\\
+      }%
+      \Block[]{1-3}{}%
+      &&&\Block[]{1-3}{}%
+      &&&\Block[]{1-3}{}%
+      &&&\Block[]{1-3}{}%
+      &&&\Block[]{1-3}{}%
+      &&&\Block[]{1-3}{}%
+      &&&\Block[]{1-3}{}\\
+      \CodeAfter
+      % on trace les lignes verticales
+      \xintifboolexpr{\useKV[ClesTableaux]{Capacite}}{%
+        \xintFor* ##1 in {\xintSeq{1}{8}}\do{%
+          \tikz\draw (4-|\fpeval{3*(##1-1)+1})--(\fpeval{4+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{3*(##1-1)+1});
+        }%
+        \xintFor* ##1 in {\xintSeq{1}{7}}\do{%
+          \tikz\draw[gray!50] (4-|\fpeval{3*(##1-1)+2})--(\fpeval{4+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{3*(##1-1)+2});
+          \tikz\draw[gray!50] (4-|\fpeval{3*##1})--(\fpeval{4+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{3*##1});
+        }%
+      }{%
+        \xintFor* ##1 in {\xintSeq{1}{8}}\do{%
+          \tikz\draw (3-|\fpeval{3*(##1-1)+1})--(\fpeval{3+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{3*(##1-1)+1});
+        }%
+        \xintifboolexpr{\useKV[ClesTableaux]{Colonnes}}{%
+          \xintFor* ##1 in {\xintSeq{1}{7}}\do{%
+            \tikz\draw[gray!50] (3-|\fpeval{3*(##1-1)+2})--(\fpeval{3+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{3*(##1-1)+2});
+            \tikz\draw[gray!50] (3-|\fpeval{3*##1})--(\fpeval{3+\useKV[ClesTableaux]{NbLignes}}-|\fpeval{3*##1});
+          }%
+        }{}%
+      }%
+      % On place le nombre éventuel
+      \ifx\bla#2\bla%
+      \else%
+        \setsepchar[*]{,*/}
+        \readlist*\ListeNombreAPlacer{#2}%
+        \xintFor* ##2 in{\xintSeq {1}{\ListeNombreAPlacerlen}}\do{
+          \StrLen{\ListeNombreAPlacer[##2,1]}[\TabLongueurNombre]%
+          \xintFor* ##1 in{\xintSeq {1}{\TabLongueurNombre}}\do{%
+            \tikz\node at (\fpeval{##2+\ifboolKV[ClesTableaux]{Capacite}{3.5}{2.5}}-|\fpeval{\ListeNombreAPlacer[##2,2]-0.5+##1}) {\PfCTBstrut\StrMid{\ListeNombreAPlacer[##2,1]}{##1}{##1}};
+            }%
+          }%
+        \fi%
+        % on trace les flèches
+        \ifboolKV[ClesTableaux]{Fleches}{\setKV[ClesTableaux]{FlechesH,FlechesB}}{}%
+          \ifboolKV[ClesTableaux]{Capacite}{\xdef\PfCTableauDepart{4}}{\xdef\PfCTableauDepart{3}}%
+            \ifboolKV[ClesTableaux]{FlechesH}{%
+                \xintFor* ##1 in {\xintSeq{1}{6}}\do{%
+                  \tikz\draw[gray,->,>=latex,out=30,in=150] (1.5-|\fpeval{3.5+3*(##1-1)}) to node[above, midway]{\small$\times\num{1000}$}(1.5-|\fpeval{3.5+3*##1});%
+                }%
+              }{}%
+              \ifboolKV[ClesTableaux]{FlechesB}{%
+                  \xintFor* ##1 in {\xintSeq{1}{6}}\do{%
+                    \tikz\draw[gray,->,>=latex,out=-150,in=-30] (\fpeval{\PfCTableauDepart+\useKV[ClesTableaux]{NbLignes}+0.5}-|\fpeval{3.5+3*##1}) to node[below,midway]{\small$\div\num{1000}$}(\fpeval{\PfCTableauDepart+\useKV[ClesTableaux]{NbLignes}+0.5}-|\fpeval{3.5+3*(##1-1)});%
+                  }%
+                }{}%
+                \useKV[ClesTableaux]{CodeAfter}%
+              \end{NiceTabular}
+  \]%
+  }{}%
+  %
+  %%% Prise en compte de la cl\'e Litre
+  %
+  \ifboolKV[ClesTableaux]{Litre}{%
+    \[\renewcommand{\arraystretch}{1.15}%
+      \begin{NiceTabular}{*{6}{wc{7.5mm}}}%
+        \Block[]{1-1}{}
+        &\Block[]{1-1}{}
+        &\Block[]{1-1}{}
+        &\Block[]{1-1}{}
+        &\Block[]{1-1}{}
+        &\Block[]{1-1}{}\\
+        \Block[draw]{}{hL\PfCTBstrut}&\Block[draw]{}{daL\PfCTBstrut}&\Block[draw]{}{L\PfCTBstrut}&\Block[draw]{}{dL\PfCTBstrut}&\Block[draw]{}{cL\PfCTBstrut}&\Block[draw]{}{mL\PfCTBstrut}\\
+        \xintFor* ##1 in {\xintSeq {1}{\useKV[ClesTableaux]{NbLignes}}}\do{%
+          &&&&&\\
+        }
+        \Block[]{1-1}{}
+        &\Block[]{1-1}{}
+        &\Block[]{1-1}{}
+        &\Block[]{1-1}{}
+        &\Block[]{1-1}{}
+        &\Block[]{1-1}{}\\
+        \CodeAfter
+        % on trace les lignes verticales
+        \xintFor* ##1 in {\xintSeq{1}{7}}\do{%
+          \tikz\draw (3-|##1)--(\fpeval{3+\useKV[ClesTableaux]{NbLignes}}-|##1);
+        }%
+        % On place le nombre éventuel
+        \ifx\bla#2\bla%
+        \else%
+        \setsepchar[*]{,*/}
+        \readlist*\ListeNombreAPlacer{#2}%
+        \xintFor* ##2 in{\xintSeq {1}{\ListeNombreAPlacerlen}}\do{
+          \StrLen{\ListeNombreAPlacer[##2,1]}[\TabLongueurNombre]%
+          \xintFor* ##1 in{\xintSeq {1}{\TabLongueurNombre}}\do{%
+            \tikz\node at (\fpeval{##2+2.5}-|\fpeval{\ListeNombreAPlacer[##2,2]-0.5+##1}) {\PfCTBstrut\StrMid{\ListeNombreAPlacer[##2,1]}{##1}{##1}};
+          }%
+        }%
+        \fi%
+        % on trace les flèches
+        \ifboolKV[ClesTableaux]{Fleches}{\setKV[ClesTableaux]{FlechesH,FlechesB}}{}%
+        \ifboolKV[ClesTableaux]{FlechesH}{%
+          \xintFor* ##1 in {\xintSeq{1}{5}}\do{%
+            \tikz\draw[gray,->,>=latex,out=30,in=150] (1.5-|\fpeval{0.5+##1}) to node[above, midway]{\small$\times\num{10}$}(1.5-|\fpeval{1.5+##1});%
+          }%
+        }{}%
+        \ifboolKV[ClesTableaux]{FlechesB}{%
+          \xintFor* ##1 in {\xintSeq{1}{5}}\do{%
+            \tikz\draw[gray,->,>=latex,out=-150,in=-30] (\fpeval{3+\useKV[ClesTableaux]{NbLignes}+0.5}-|\fpeval{1.5+##1}) to node[below,midway]{\small$\div\num{10}$}(\fpeval{3+\useKV[ClesTableaux]{NbLignes}+0.5}-|\fpeval{0.5+##1});%
+          }%
+        }{}%
+        \useKV[ClesTableaux]{CodeAfter}%
+      \end{NiceTabular}%
+    \]%
+  }{}%
+  % 
+  %%% Prise en compte de la cl\'e Gramme
+  % 
+  \ifboolKV[ClesTableaux]{Gramme}{%
+    \[\renewcommand{\arraystretch}{1.15}%
+      \begin{NiceTabular}{*{7}{wc{7.5mm}}}%
+        \Block[]{}{}
+        &\Block[]{}{}
+        &\Block[]{}{}
+        &\Block[]{}{}
+        &\Block[]{}{}
+        &\Block[]{}{}
+        &\Block[]{}{}\\
+        \Block[draw]{}{kg\PfCTBstrut}&\Block[draw]{1-1}{hg\PfCTBstrut}&\Block[draw]{1-1}{dag\PfCTBstrut}&\Block[draw]{1-1}{g\PfCTBstrut}&\Block[draw]{1-1}{dg\PfCTBstrut}&\Block[draw]{1-1}{cg\PfCTBstrut}&\Block[draw]{1-1}{mg\PfCTBstrut}\\
+        \xintFor* ##1 in {\xintSeq {1}{\useKV[ClesTableaux]{NbLignes}}}\do{%
+          &&&&&&\\
+        }%
+        \Block[]{}{}
+        &\Block[]{}{}
+        &\Block[]{}{}
+        &\Block[]{}{}
+        &\Block[]{}{}
+        &\Block[]{}{}
+        &\Block[]{}{}\\
+        \CodeAfter
+        % on trace les lignes verticales
+        \xintFor* ##1 in {\xintSeq{1}{8}}\do{%
+          \tikz\draw (3-|##1)--(\fpeval{3+\useKV[ClesTableaux]{NbLignes}}-|##1);
+        }%
+        % On place le nombre éventuel
+        \ifx\bla#2\bla%
+        \else%
+        \setsepchar[*]{,*/}
+        \readlist*\ListeNombreAPlacer{#2}%
+        \xintFor* ##2 in{\xintSeq {1}{\ListeNombreAPlacerlen}}\do{
+          \StrLen{\ListeNombreAPlacer[##2,1]}[\TabLongueurNombre]%
+          \xintFor* ##1 in{\xintSeq {1}{\TabLongueurNombre}}\do{%
+            \tikz\node at (\fpeval{##2+2.5}-|\fpeval{\ListeNombreAPlacer[##2,2]-0.5+##1}) {\PfCTBstrut\StrMid{\ListeNombreAPlacer[##2,1]}{##1}{##1}};
+          }%
+        }
+        \fi%
+        % on trace les flèches
+        \ifboolKV[ClesTableaux]{Fleches}{\setKV[ClesTableaux]{FlechesH,FlechesB}}{}%
+        \ifboolKV[ClesTableaux]{FlechesH}{%
+          \xintFor* ##1 in {\xintSeq{1}{6}}\do{%
+            \tikz\draw[gray,->,>=latex,out=30,in=150] (1.5-|\fpeval{0.5+##1}) to node[above, midway]{\small$\times\num{10}$}(1.5-|\fpeval{1.5+##1});%
+          }%
+        }{}%
+        \ifboolKV[ClesTableaux]{FlechesB}{%
+          \xintFor* ##1 in {\xintSeq{1}{6}}\do{%
+            \tikz\draw[gray,->,>=latex,out=-150,in=-30] (\fpeval{3+\useKV[ClesTableaux]{NbLignes}+0.5}-|\fpeval{1.5+##1}) to node[below,midway]{\small$\div\num{10}$}(\fpeval{3+\useKV[ClesTableaux]{NbLignes}+0.5}-|\fpeval{0.5+##1});%
+          }%
+        }{}%
+        \useKV[ClesTableaux]{CodeAfter}%
+      \end{NiceTabular}%
+    \]%
+  }{}%
+}%
+}%
+
+\newcommand\PfCTableauIncline{%
+\begin{NiceTabular}{wc{30pt}wc{30pt}wc{30pt}wc{30pt}wc{30pt}wc{30pt}wc{30pt}}
+  &&&&&&\\
+  \Block[borders={bottom}]{}{\si{\kilo\PfCTableauUnite}}&\\
+  &\Block[borders={left}]{}{}&\\
+  &\Block[borders={left,bottom}]{}{\si{\hecto\PfCTableauUnite}}&\\
+  &&\Block[borders={left}]{}{}&\\
+  &&\Block[borders={left,bottom}]{}{\si{\deca\PfCTableauUnite}}&\\
+  &&&\Block[borders={left}]{}{}&\\
+  &&&\Block[borders={left,bottom}]{}{\si{\PfCTableauUnite}}&\\
+  &&&&\Block[borders={left}]{}{}&\\
+  &&&&\Block[borders={left,bottom}]{}{\si{\deci\PfCTableauUnite}}&\\
+  &&&&&\Block[borders={left}]{}{}&\\
+  &&&&&\Block[borders={left,bottom}]{}{\si{\centi\PfCTableauUnite}}&\\
+  &&&&&&\Block[borders={left}]{}{}\\
+  &&&&&&\Block[borders={left,bottom}]{}{\si{\milli\PfCTableauUnite}}\\
+  &&&&&&
+  \CodeAfter
+  \tikz\draw[out=35,in=90,-stealth,gray] (2-|1.5) to node[midway,right]{\footnotesize$\times\num{\PfCCoefConversion}$}(4-|2.5);
+  \tikz\draw[out=35,in=90,-stealth,gray] (4-|2.5) to node[midway,right]{\footnotesize$\times\num{\PfCCoefConversion}$}(6-|3.5);
+  \tikz\draw[out=35,in=90,-stealth,gray] (6-|3.5) to node[midway,right]{\footnotesize$\times\num{\PfCCoefConversion}$}(8-|4.5);
+  \tikz\draw[out=35,in=90,-stealth,gray] (8-|4.5) to node[midway,right]{\footnotesize$\times\num{\PfCCoefConversion}$}(10-|5.5);
+  \tikz\draw[out=35,in=90,-stealth,gray] (10-|5.5) to node[midway,right]{\footnotesize$\times\num{\PfCCoefConversion}$}(12-|6.5);
+  \tikz\draw[out=35,in=90,-stealth,gray] (12-|6.5) to node[midway,right]{\footnotesize$\times\num{\PfCCoefConversion}$}(14-|7.5);
+  % bas
+  \tikz\draw[out=215,in=-90,-stealth,gray,transform canvas={yshift=-2mm}] (15-|7.5) to node[midway,left]{\footnotesize$\div\num{\PfCCoefConversion}$}(13-|6.5);
+  \tikz\draw[out=215,in=-90,-stealth,gray,transform canvas={yshift=-2mm}] (13-|6.5) to node[midway,left]{\footnotesize$\div\num{\PfCCoefConversion}$}(11-|5.5);
+  \tikz\draw[out=215,in=-90,-stealth,gray,transform canvas={yshift=-2mm}] (11-|5.5) to node[midway,left]{\footnotesize$\div\num{\PfCCoefConversion}$}(9-|4.5);
+  \tikz\draw[out=215,in=-90,-stealth,gray,transform canvas={yshift=-2mm}] (9-|4.5) to node[midway,left]{\footnotesize$\div\num{\PfCCoefConversion}$}(7-|3.5);
+  \tikz\draw[out=215,in=-90,-stealth,gray,transform canvas={yshift=-2mm}] (7-|3.5) to node[midway,left]{\footnotesize$\div\num{\PfCCoefConversion}$}(5-|2.5);
+  \tikz\draw[out=215,in=-90,-stealth,gray,transform canvas={yshift=-2mm}] (5-|2.5) to node[midway,left]{\footnotesize$\div\num{\PfCCoefConversion}$}(3-|1.5);
+\end{NiceTabular}%
+}%
+
+%%%
+% Glisse Nombre
+%%%
+\NewDocumentCommand\GlisseNombre{o m}{%
+  \useKVdefault[ClesTableaux]%
+  \setKV[ClesTableaux]{#1}%
+  \colorlet{PfCCouleurFondGN}{\useKV[ClesTableaux]{CouleurGN}}%
+  \colorlet{PfCCouleurCadreGN}{\useKV[ClesTableaux]{CadreGN}}%
+  \xintifboolexpr{\useKV[ClesTableaux]{NbLignes}<10}{\setKV[ClesTableaux]{NbLignes=10}}{}%
+  \ifboolKV[ClesTableaux]{Entiers}{%
+    \colorlet{PfCCouleurA}{\useKV[ClesTableaux]{CouleurG}}%
+    \colorlet{PfCCouleurB}{\useKV[ClesTableaux]{CouleurM}}%
+    \colorlet{PfCCouleurC}{\useKV[ClesTableaux]{CouleurM}}%
+    \colorlet{PfCCouleurD}{\useKV[ClesTableaux]{Couleurm}}%
+    \colorlet{PfCCouleurE}{\useKV[ClesTableaux]{Couleurm}}%
+    \colorlet{PfCCouleurF}{\useKV[ClesTableaux]{Couleuru}}%
+    \setsepchar{,}%
+    \readlist*\PfCNomUnites{Milliards,Centaines\\de millions,Dizaines\\de millions,Millions,Centaines\\de milliers,Dizaines\\de milliers,Milliers,Centaines,Dizaines,Unités}%
+  }{%
+    \colorlet{PfCCouleurA}{\useKV[ClesTableaux]{Couleurm}}%
+    \colorlet{PfCCouleurB}{\useKV[ClesTableaux]{Couleurm}}%
+    \colorlet{PfCCouleurC}{\useKV[ClesTableaux]{Couleuru}}%
+    \colorlet{PfCCouleurD}{\useKV[ClesTableaux]{Couleuru}}%
+    \colorlet{PfCCouleurE}{\useKV[ClesTableaux]{Couleurd}}%
+    \colorlet{PfCCouleurF}{\useKV[ClesTableaux]{Couleurd}}%
+    \setsepchar{,}%
+    \readlist*\PfCNomUnites{Centaines\\de milliers,Dizaines\\de milliers,Milliers,Centaines,Dizaines,Unités,Dixièmes,Centièmes,Millièmes,Dix-millièmes}%
+  }%
+  \begin{center}
+    \fcolorbox{PfCCouleurCadreGN}{PfCCouleurFondGN}{%
+      \begin{minipage}{0.8\linewidth}%
+        \setlength{\tabcolsep}{0.01\tabcolsep}%
+        \begin{center}%
+          \xdef\PfCDerniereColonne{11}%
+          \begin{NiceTabular}{*{6}{wc{30pt}wc{10pt}}*{4}{wc{30pt}wc{10pt}}wc{30pt}}%
+            \CodeBefore%
+            \tikz\draw[draw=black,fill=PfCCouleurA] (1|-5)--(2|-1)--(3|-1)--++(20pt,0)--(2|-5)--cycle;%m->A
+            \tikz\draw[draw=black,fill=PfCCouleurB] (3|-5)--(4|-1)--(5|-1)--++(20pt,0)--(4|-5)--cycle;%m->B
+            \tikz\draw[draw=black,fill=PfCCouleurB] (5|-5)--(6|-1)--(7|-1)--++(20pt,0)--(6|-5)--cycle;%m->B
+            \tikz\draw[draw=black,fill=PfCCouleurC] (7|-5)--(8|-1)--(9|-1)--++(20pt,0)--(8|-5)--cycle;%u->C
+            \tikz\draw[draw=black,fill=PfCCouleurD] (9|-5)--(10|-1)--(11|-1)--++(20pt,0)--(10|-5)--cycle;%u->D
+            \tikz\draw[draw=black,fill=PfCCouleurD] (11|-5)--(12|-1)--(13|-1)--++(20pt,0)--(12|-5)--cycle;%u->D
+            \tikz\draw[draw=black,fill=PfCCouleurE] (13|-5)--(14|-1)--(15|-1)--++(20pt,0)--(14|-5)--cycle;%d->E
+            \tikz\draw[draw=black,fill=PfCCouleurF] (15|-5)--(16|-1)--(17|-1)--++(20pt,0)--(16|-5)--cycle;%d->F
+            \tikz\draw[draw=black,fill=PfCCouleurF] (17|-5)--(18|-1)--(19|-1)--++(20pt,0)--(18|-5)--cycle;%d->F
+            \tikz\draw[draw=black,fill=PfCCouleurF] (19|-5)--(20|-1)--(21|-1)--++(20pt,0)--(20|-5)--cycle;%d->F
+            % 
+            \Body
+            %% Pour décaler et laisser la place nécessaire
+            \xintFor* ##1 in {\xintSeq{1}{4}}\do{%
+              &&&&&&&&&&&&&&&&&&&&\\
+            }%
+            %% Lignes vierges 
+            \xintFor* ##1 in {\xintSeq{1}{\fpeval{\useKV[ClesTableaux]{NbLignes}-2}}}\do{%
+              &&&&&&&&&&&&&&&&&&&&\\
+            }%
+            &&&&&&&&&&&\ifboolKV[ClesTableaux]{Entiers}{}{\Huge\bfseries ,}&&&&&&&&&\\
+            &&&&&&&&&&&&&&&&&&&&\\
+            \CodeAfter
+            \tikz\draw (last-|1)--(last-|\fpeval{2*\PfCDerniereColonne-2});
+            \xintFor* ##1 in {\xintSeq{1}{\fpeval{2*\PfCDerniereColonne-2}}}\do{%
+              \tikz\draw[dashed] (5-|##1)--(\fpeval{5+\useKV[ClesTableaux]{NbLignes}}-|##1);%
+              \tikz\draw (5-|##1)--(\fpeval{7}-|##1);%
+              \tikz\draw (\fpeval{5+\useKV[ClesTableaux]{NbLignes}}-|##1)--(\fpeval{3+\useKV[ClesTableaux]{NbLignes}}-|##1);%
+            }%
+            % 
+            \tikz\node[rotate=60] at (2|-3) {\begin{minipage}{60pt}\begin{center}\scriptsize \PfCNomUnites[1]\end{center}\end{minipage}};%
+            \tikz\node[rotate=60] at (4|-3) {\begin{minipage}{60pt}\begin{center}\scriptsize \PfCNomUnites[2]\end{center}\end{minipage}};%
+            \tikz\node[rotate=60] at (6|-3) {\begin{minipage}{60pt}\begin{center}\scriptsize \PfCNomUnites[3]\end{center}\end{minipage}};%
+            \tikz\node[rotate=60] at (8|-3) {\begin{minipage}{60pt}\begin{center}\scriptsize \PfCNomUnites[4]\end{center}\end{minipage}};%
+            \tikz\node[rotate=60] at (10|-3) {\begin{minipage}{60pt}\begin{center}\scriptsize \PfCNomUnites[5]\end{center}\end{minipage}};%
+            \tikz\node[rotate=60] at (12|-3) {\begin{minipage}{60pt}\begin{center}\scriptsize \PfCNomUnites[6]\end{center}\end{minipage}};%
+            \tikz\node[rotate=60] at (14|-3) {\begin{minipage}{60pt}\begin{center}\scriptsize \PfCNomUnites[7]\end{center}\end{minipage}};%
+            \tikz\node[rotate=60] at (16|-3) {\begin{minipage}{60pt}\begin{center}\scriptsize \PfCNomUnites[8]\end{center}\end{minipage}};%
+            \tikz\node[rotate=60] at (18|-3) {\begin{minipage}{60pt}\begin{center}\scriptsize \PfCNomUnites[9]\end{center}\end{minipage}};%
+            \tikz\node[rotate=60] at (20|-3) {\begin{minipage}{60pt}\begin{center}\scriptsize \PfCNomUnites[10]\end{center}\end{minipage}};%
+          \end{NiceTabular}%
+        \end{center}%
+        \setlength{\tabcolsep}{100\tabcolsep}%
+      \end{minipage}%
+    }%
+  \end{center}
+  \begin{center}
+    \begin{NiceTabular}{m{0.97\linewidth}}%
+      \xintFor* ##1 in{\xintSeq{1}{\fpeval{\useKV[ClesTableaux]{NbLignes}-4}}}\do{%
+        \Block[fill=PfCCouleurFondGN]{}{\phantom{A}}\\
+      }%
+      \CodeAfter%
+      \tikz\draw (1-|1) rectangle (last-|last);%
+    \end{NiceTabular}
+  \end{center}
+}%

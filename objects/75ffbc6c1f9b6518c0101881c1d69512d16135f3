@@ -1,0 +1,175 @@
+%%% Copyright (C) 2015-2024 Vincent Goulet
+%%%
+%%% Ce fichier fait partie du projet
+%%% «Rédaction avec LaTeX»
+%%% https://gitlab.com/vigou3/formation-latex-ul
+%%%
+%%% Cette création est mise à disposition sous licence
+%%% Attribution-Partage dans les mêmes conditions 4.0
+%%% International de Creative Commons.
+%%% https://creativecommons.org/licenses/by-sa/4.0/
+
+\section{B.a.-ba des mathématiques}
+
+\begin{frame}[fragile=singleslide]
+  \frametitle{Principes de base}
+  \begin{itemize}
+  \item Décrire des équations mathématiques requiert un «langage» spécial
+    \begin{itemize}
+    \item il faut informer {\LaTeX} que l'on passe à ce langage
+    \item par le biais de modes mathématiques
+    \end{itemize}
+  \item Important d'utiliser un mode mathématique
+    \begin{itemize}
+    \item règles de typographie spéciales
+    \item espaces gérées automatiquement
+    \end{itemize}
+  \item Vous voulez utiliser le paquetage \pkg{amsmath}
+\begin{lstlisting}
+\usepackage{amsmath}
+\end{lstlisting}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Modes mathématiques}
+  \begin{enumerate}[<+->]
+  \item «En ligne» directement dans le texte comme $(a + b)^2 = a^2 +
+    2ab + b^2$ en plaçant l'équation entre \verb=$ $=
+\begin{lstlisting}
+«En ligne» directement dans le texte
+comme $(a + b)^2 = a^2 + 2ab + b^2$
+\end{lstlisting}
+  \item «Hors paragraphe» séparé du texte principal comme
+    \begin{equation*}
+      \int_0^\infty f(x)\, dx = \sum_{i = 1}^n \alpha_i e^{x_i} f(x_i)
+    \end{equation*}
+    en utilisant divers types d'environnements
+\begin{lstlisting}
+«Hors paragraphe» séparé du texte principal comme
+\begin{equation*}
+  \int_0^\infty f(x)\, dx =
+  \sum_{i = 1}^n \alpha_i e^{x_i} f(x_i)
+\end{equation*}
+\end{lstlisting}
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[plain]
+  \tipbox{En ligne ou hors paragraphe, les équations font partie intégrante de
+    la phrase.
+
+    Les règles de ponctuation usuelles s'appliquent donc aux
+    équations. \newline
+
+    \fbox{\includegraphics[width=0.95\linewidth]{images/ponctuation}}}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Quelques règles de base}
+  \begin{itemize}
+  \item En mode mathématique, {\TeX} écrit automatiquement les
+    constantes en romain et les variables en italique
+    \begin{demo}
+      \begin{texample}
+\begin{lstlisting}
+$z = 2a + 3y$
+\end{lstlisting}
+        \producing
+        $z = 2a + 3y$
+      \end{texample}
+    \end{demo}
+  \item Espacement entre les éléments géré automatiquement, peu importe
+    le code source
+    \begin{demo}
+      \begin{texample}
+\begin{lstlisting}
+$z=2 a+3 y$
+\end{lstlisting}
+        \producing
+        $z=2 a+3 y$
+      \end{texample}
+    \end{demo}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Quelques règles de base (suite)}
+  \begin{itemize}
+  \item \alert{Ne pas} utiliser le mode mathématique pour obtenir du
+    texte en italique!
+    \begin{demo}
+      \begin{minipage}{0.45\linewidth}
+\begin{lstlisting}
+\emph{xyz}
+\end{lstlisting}
+      \end{minipage}
+      \hfill
+      \begin{minipage}{0.45\linewidth}
+        \includegraphics[height=0.8\baselineskip,keepaspectratio]{images/xyz-emph}
+      \end{minipage}\par
+      \begin{minipage}{0.45\linewidth}
+\begin{lstlisting}
+$xyz$
+\end{lstlisting}
+      \end{minipage}
+      \hfill
+      \begin{minipage}{0.45\linewidth}
+        \includegraphics[height=0.8\baselineskip,keepaspectratio]{images/xyz-math}
+      \end{minipage}
+    \end{demo}
+  \item Commande \cs{text} de \pkg{amsmath} pour texte à
+    l'intérieur du mode mathématique
+    \begin{demo}
+      \begin{texample}
+\begin{lstlisting}
+$x = 0 \text{ si } y < 2$
+\end{lstlisting}
+        \producing
+        $x = 0 \text{ si } y < 2$
+      \end{texample}
+    \end{demo}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Avant-gout}
+
+  Pouvez-vous interpréter ce code?
+\begin{lstlisting}
+\begin{equation*}
+  \Gamma(\alpha) =
+  \sum_{j = 0}^\infty \int_j^{j + 1}
+    x^{\alpha - 1} e^{-x}\, dx
+\end{equation*}
+\end{lstlisting}
+  \vspace{18pt}
+  \pause
+
+  Fort probablement!
+  \begin{equation*}
+    \Gamma(\alpha) =
+    \sum_{j = 0}^\infty \int_j^{j + 1} x^{\alpha - 1} e^{-x}\, dx
+  \end{equation*}
+\end{frame}
+
+\begin{exercice}
+  Utiliser le fichier \fichier{exercice-mathematiques.tex}.
+
+  \begin{enumerate}
+  \item Étudier le code source du fichier, puis le compiler.
+  \item Charger le paquetage \pkg{amsfonts} dans le préambule, puis
+    remplacer \verb=$R^+$= par \verb=$\mathbb{R}^+$= à la ligne
+    débutant par «Le domaine».
+  \item À l'aide de la fonction Rechercher et remplacer de l'éditeur
+    de texte, remplacer toutes les occurrences du symbole $\theta$ par
+    $\lambda$.
+  \end{enumerate}
+\end{exercice}
+
+
+%%% Local Variables:
+%%% TeX-master: "formation-latex-ul-diapos"
+%%% TeX-engine: xetex
+%%% coding: utf-8
+%%% End:

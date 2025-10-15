@@ -1,0 +1,323 @@
+boolean Couleurs;
+Couleurs=false;
+
+%Style cartoon
+pickup pencircle xscaled 2bp yscaled 0.25bp rotated 60;
+
+% Définitions des points d'accroche
+pair Or[],P[],Ja[],Br[],Bo,Ne,Ye,Ch,Pap,Cr,Mo,Ce;
+P1=(0,0);
+P2-P1=u*(5,0);
+P3-P2=u*(0,6.75);
+P4-P3=P1-P2;
+Ja1=1/4[P1,P2];
+Ja2=3/4[P1,P2];
+Br1=2/5[P1,P4];
+Br2=2/5[P2,P3];
+Or1=3.5/5[P1,P4];
+Or2=3.5/5[P2,P3];
+Ch=1/2[P4,P3];
+Ye=4/5[1/2[P1,P2],1/2[P3,P4]];
+Ne=1/2[1/2[P1,P2],1/2[P3,P4]];
+Mo=2/5[1/2[P1,P2],1/2[P3,P4]];
+Bo=1/5[1/2[P1,P2],1/2[P3,P4]];
+Pap=1/2[P1,P2];
+Cr=Pap;
+
+vardef Corps(expr nb)=
+  save $;
+  path $;
+  path RetiensCorps[];
+  RetiensCorps1=(0,0.125){dir-50}..{dir50}(0.5,0.125){dir-50}..{dir50}(1,0.125){dir-50}..{dir50}(1.5,0.125){dir-50}..{dir50}(2,0.125){dir-50}..{dir50}(2.5,0.125){dir160}..{dir90}(2.5,1.5)..{dir180}(1.25,2.25){dir180}..{dir-90}(0,1.5){dir-90}..{dir-160}cycle;
+  RetiensCorps1:=RetiensCorps1 xscaled 2u yscaled 3u;
+%
+  RetiensCorps2=(0,0)--(2.5,0){dir70}..{dir120}(2.5,1.5)--(2.25,1.25)--(2,1.75)--(1.75,1.5)--(1.25,2.25)--(0.75,1.5)--(0.5,1.75)--(0.25,1.25)--(0,1.5){dir-120}..{dir-70}cycle;
+  RetiensCorps2:=RetiensCorps2 xscaled 2u yscaled 3u;
+%
+  RetiensCorps3=(fullcircle scaled 2.5) shifted(1.25,1.25);
+%
+  RetiensCorps6=(0,0)--(2.5,0){dir70}..{dir120}(1.25,2.25){dir-120}..{dir-70}cycle;
+  RetiensCorps7=RetiensCorps6 scaled 0.9;
+  RetiensCorps8=RetiensCorps7 shifted(center RetiensCorps6-center RetiensCorps7);
+  pair MC[],NC[];
+  nbche:=20;
+  for k=0 upto nbche:
+    MC[k]=point(k*length RetiensCorps6/nbche) of RetiensCorps6;
+    NC[k]=point(k*length RetiensCorps8/nbche) of RetiensCorps8;
+  endfor;
+  RetiensCorps4=MC[0]{dir(angle(NC0-MC0)-5+uniformdeviate(10))} for k=0 upto nbche-1:..NC[k]{dir(angle(MC[k+1]-NC[k])-10+uniformdeviate(20))}..MC[k+1]{dir(angle(NC[k+1]-MC[k+1])-5+uniformdeviate(10))} endfor..cycle;
+  RetiensCorps4:=RetiensCorps4 xscaled 2u yscaled 3u;
+  RetiensCorps9=(fullcircle scaled (0.9*2.5)) shifted(1.25,1.25);
+  for k=0 upto 360:
+    MC[k]:=pointarc(RetiensCorps3,k);
+    NC[k]:=pointarc(RetiensCorps9,k);
+  endfor;
+  RetiensCorps51=NC[0]{dir90}..NC[5]{dir(angle(MC[10]-NC[5]))}--MC[5]{dir90}%
+    ..{dir180}NC[20]{dir(angle(MC[25]-NC[20]))}..MC[25]{dir115}%
+    ..{dir180}NC[45]{dir(angle(MC[50]-NC[45]))}..MC[50]{dir140}%
+    ..{dir180}NC[75]{dir(angle(MC[80]-NC[75]))}..MC[70]{dir160}%
+    ..MC[85]..NC[90];
+  RetiensCorps5=RetiensCorps51..(symetrie(reverse RetiensCorps51,center RetiensCorps3,center RetiensCorps3+(0,1)))..symetrie(RetiensCorps51,center RetiensCorps3)..symetrie(reverse RetiensCorps51,center RetiensCorps3,center RetiensCorps3+(1,0))..cycle;
+  RetiensCorps5:=RetiensCorps5 xscaled 2u yscaled ((6.75/2.5)*u);
+  $=RetiensCorps[nb];
+  $
+enddef;
+%%%%%%%%%%%%%
+% Yeux
+%%%%%%%%%%%%%
+vardef Yeux(expr nb)=
+  save $;
+  picture $;
+  picture RetiensYeux[];
+  RetiensYeux1=image(%
+      path cyeux,pupille;
+    cyeux=(fullcircle xscaled 0.9 yscaled 1.25) rotated -10;
+    pupille=0.1*(cosd(0),sind(0)) for k=1 upto 14:..(0.02+0.03*(k+1)-0.01*k)*(cosd(90*k),sind(90*k)) endfor;
+    fill (cyeux scaled u) withcolor white;
+    fill symetrie(cyeux scaled u,pointarc(cyeux scaled u,10)+(0,-u),pointarc(cyeux scaled u,10)+(0,u)) withcolor white;
+    trace cyeux scaled u;
+    trace pupille scaled u;
+    trace symetrie(cyeux scaled u,pointarc(cyeux scaled u,10)+(0,-u),pointarc(cyeux scaled u,10)+(0,u));
+    trace symetrie(pupille scaled u,pointarc(cyeux scaled u,10)+(0,-u),pointarc(cyeux scaled u,10)+(0,u));
+    );
+  RetiensYeux2=image(%
+      path cyeux,pupille;
+    cyeux=(fullcircle xscaled 0.9 yscaled 1.25);
+    pupille=fullcircle scaled 0.2;
+    fill rotation(cyeux scaled u,(0,0),-90) shifted(0.8u,-0.1u) withcolor white;
+    trace rotation(cyeux scaled u,(0,0),-90) shifted(0.8u,-0.1u);
+    fill rotation((pupille scaled u) shifted(pointarc(cyeux scaled u,-30)+(-0.1u,0)),(0,0),-90) shifted(0.8u,-0.1u);
+    fill (cyeux scaled u) withcolor white;
+    trace cyeux scaled u;
+    fill (pupille scaled u) shifted(pointarc(cyeux scaled u,0)+(-0.1u,0));
+    pair M[];
+    M1=pointarc(cyeux scaled u,75)+(0,0.05u);
+    M2=pointarc(cyeux scaled u,110)+0.5*sqrt(2)*(-0.05u,0.05u);
+    fill M1{dir150}..{dir-120}M2{dir90}..{dir-90}M1--cycle;
+    fill symetrie((M1{dir150}..{dir-120}M2{dir90}..{dir-90}M1--cycle),pointarc(cyeux scaled u,0),pointarc(cyeux scaled u,0)+(0,1)) shifted(0,-0.2u);
+    ); 
+  RetiensYeux3=image(%
+      path cyeux,pupille;
+    cyeux=(fullcircle xscaled 0.9 yscaled 1.25) rotated 30;
+    pupille=fullcircle scaled 0.25 shifted(0.2,0.2);
+    fill (cyeux scaled u) withcolor white;
+    fill symetrie(cyeux scaled u,pointarc(cyeux scaled u,-30)+(0,-u),pointarc(cyeux scaled u,-30)+(0,u)) withcolor white;
+    fill (cercles((0.5,0.5),0.25) scaled u) withcolor white;
+    trace cyeux scaled u;
+    fill pupille scaled u;
+    trace symetrie(cyeux scaled u,pointarc(cyeux scaled u,-30)+(0,-u),pointarc(cyeux scaled u,-30)+(0,u));
+    fill symetrie(pupille scaled u,pointarc(cyeux scaled u,-30)+(0,-u),pointarc(cyeux scaled u,-30)+(0,u));
+    trace cercles((0.5,0.5),0.25) scaled u;
+    fill (cercles((0.5,0.5),0.1) shifted(-0.1,0))  scaled u ;
+    );
+  RetiensYeux4=image(%
+      path cyeux,pupille;
+    trace (fullcircle xscaled 0.9 yscaled 1.25) scaled u withcolor CoulCorps;
+    cyeux=(fullcircle xscaled 1.1 yscaled 1.5) rotated 90;
+    pupille=fullcircle scaled 0.75;
+    fill (cyeux scaled u) withcolor white;
+    trace cyeux scaled u;
+    fill pupille scaled u;
+    );
+  RetiensYeux5=image(%
+      path cyeux,pupille;
+    cyeux=(fullcircle xscaled 0.9 yscaled 1.25);
+    pupille=fullcircle scaled 0.25;
+    fill (cyeux scaled u) withcolor white;
+    fill symetrie(cyeux scaled u,pointarc(cyeux scaled u,0)+(0,-u),pointarc(cyeux scaled u,0)+(0,u)) withcolor white;
+    fill ((subpath(0.05*length (cyeux scaled u),0.45*length (cyeux scaled u)) of (cyeux scaled u)){dir 30}..(point(0.05*length (cyeux scaled u)) of (cyeux scaled u))--cycle);
+    fill symetrie(((subpath(0.05*length (cyeux scaled u),0.45*length (cyeux scaled u)) of (cyeux scaled u)){dir 30}..(point(0.05*length (cyeux scaled u)) of (cyeux scaled u))--cycle),pointarc(cyeux scaled u,0)+(0,-u),pointarc(cyeux scaled u,0)+(0,u));
+    trace cyeux scaled u;
+    fill (pupille shifted (0,0.25)) scaled u;
+    trace symetrie(cyeux scaled u,pointarc(cyeux scaled u,0)+(0,-u),pointarc(cyeux scaled u,0)+(0,u));
+    fill symetrie(pupille scaled u,pointarc(cyeux scaled u,0)+(0,-u),pointarc(cyeux scaled u,0)+(0,u));
+    );
+  $=RetiensYeux[nb];
+  $
+enddef;
+%%%%%%
+%Bouche
+%%%%%%
+vardef Bouche(expr nb)=
+  save $;
+  picture $;
+  picture RetiensBouche[];
+  RetiensBouche1=image(
+      path contourbouche;
+    contourbouche=(0,0){dir-30}..{dir30}(0.5u,0){dir30}..{dir0}(1.5u,0.5u)..{dir-90}(2u,0){dir-90}..{dir120}(1.5u,-0.3u)..{dir180}(0.5u,0);
+    if Couleurs:
+      fill (0.5u,0){dir30}..{dir0}(1.5u,0.5u)..{dir-90}(2u,0){dir-90}..{dir120}(1.5u,-0.3u)..{dir180}(0.5u,0)--cycle withcolor white;
+    fi;
+    trace contourbouche;
+    trace (0.5u,0){dir10}..{dir-10}(2u,0);
+    trace (point(0.35*length contourbouche) of contourbouche){dir-80}..(point(0.875*length contourbouche) of contourbouche);
+    trace (point(0.45*length contourbouche) of contourbouche){dir-80}..(point(0.775*length contourbouche) of contourbouche);
+    );
+  RetiensBouche2=image(
+      path contourbouche,jointure,levreh,levreb;
+    contourbouche=(0,0){dir90}..(0.1u,0.35u){dir0}..(u,0.25u)..(1.5u,0.4u)..(1.9u,0.35u){dir-80}..(2u,0){dir-90}..(1.9u,-0.35u)..(1.5u,-0.4u)..(u,-0.25u)..(0.1u,-0.35u)..cycle;
+    jointure=(0,0){dir90}..(0.1u,0u){dir0}..(u,-0.1u)..(1.5u,0.05u)..(1.9u,0){dir-80}..(2u,0);
+    if Couleurs:
+      fill contourbouche withcolor white;
+    fi;
+    trace contourbouche;
+    trace jointure;
+    levreh=subpath(0,length contourbouche/2) of contourbouche;
+    levreb=subpath(length contourbouche/2,length contourbouche) of contourbouche;
+    pair tt[],ss[];
+    for k=1 upto 5:
+      tt[k]=point((k/6)*length jointure) of jointure;
+      ss[k]=point((1/8+k/7)*length jointure) of jointure;
+      trace tt[k]..(perpendiculaire((0,0),(2u,0),tt[k]) intersectionpoint levreh);
+      trace ss[k]..(perpendiculaire((0,0),(2u,0),ss[k]) intersectionpoint levreb);
+    endfor;
+    path carrieh[],carrieb[];
+    carrieh[4]=buildcycle(perpendiculaire((0,0),(2u,0),tt[4]),levreh,reverse(perpendiculaire((0,0),(2u,0),tt[5])),reverse(jointure));
+    fill carrieh4;
+    carrieh[2]=buildcycle(perpendiculaire((0,0),(2u,0),tt[1]),levreh,reverse(perpendiculaire((0,0),(2u,0),tt[2])),reverse(jointure));
+    fill carrieh2;
+    carrieb[2]=buildcycle(jointure,perpendiculaire((0,0),(2u,0),ss[3]),levreb,reverse(perpendiculaire((0,0),(2u,0),ss[2])));
+    fill carrieb2;
+    );
+  RetiensBouche3=image(
+      path contourbouche,jointure,levreh,levreb;
+    contourbouche=(0,0.75u){dir-60}..{dir0}(u,0.75u){dir0}..{dir60}(2u,0.75u){dir-110}..{dir180}(u,-0.15u){dir180}..{dir110}(0,0.75u)--cycle;
+    fill contourbouche;
+    levreh=subpath(0,2) of contourbouche;
+    levreb=subpath(2,length contourbouche) of contourbouche;
+    pair M[];
+    M1=point(0.1*length levreh) of levreh;
+    M2=point(0.15*length levreh) of levreh;
+    fill ((subpath(0.1*length levreh,0.15*length levreh) of levreh)--(iso(M1,M2)+(0,-0.1u))--cycle) withcolor white;
+    M3=point(0.25*length levreh) of levreh;
+    M4=point(0.325*length levreh) of levreh;
+    fill ((subpath(0.25*length levreh,0.325*length levreh) of levreh)--(iso(M3,M4)+(0,-0.2u))--cycle) withcolor white;
+    M5=point(0.45*length levreh) of levreh;
+    M6=point(0.55*length levreh) of levreh;
+    fill ((subpath(0.45*length levreh,0.55*length levreh) of levreh)--(iso(M5,M6)+(0,-0.35u))--cycle) withcolor white;
+    M7=point(0.675*length levreh) of levreh;
+    M8=point(0.75*length levreh) of levreh;
+    fill ((subpath(0.675*length levreh,0.75*length levreh) of levreh)--(iso(M7,M8)+(0,-0.2u))--cycle) withcolor white;
+    M10=point(0.875*length levreh) of levreh;
+    M11=point(0.925*length levreh) of levreh;
+    fill ((subpath(0.875*length levreh,0.925*length levreh) of levreh)--(iso(M10,M11)+(0,-0.1u))--cycle) withcolor white;
+%%%%%%%%%%%%%
+    M1:=point(0.1*length levreb) of levreb;
+    M2:=point(0.15*length levreb) of levreb;
+    fill ((subpath(0.1*length levreb,0.15*length levreb) of levreb)--(iso(M1,M2)+(0,0.15u))--cycle) withcolor white;
+    M3:=point(0.2*length levreb) of levreb;
+    M4:=point(0.3*length levreb) of levreb;
+    fill ((subpath(0.2*length levreb,0.3*length levreb) of levreb)--(iso(M3,M4)+(0,0.2u))--cycle) withcolor white;
+    M5:=point(0.35*length levreb) of levreb;
+    M6:=point(0.45*length levreb) of levreb;
+    fill ((subpath(0.35*length levreb,0.45*length levreb) of levreb)--(iso(M5,M6)+(0,0.2u))--cycle) withcolor white;
+    M7:=point(0.5*length levreb) of levreb;
+    M8:=point(0.55*length levreb) of levreb;
+    fill ((subpath(0.5*length levreb,0.55*length levreb) of levreb)--(iso(M7,M8)+(0,0.1u))--cycle) withcolor white;
+    trace contourbouche;
+    );
+  RetiensBouche4=image(
+      path contourbouche,jointure,levreh,levreb;
+    pair M[];
+    M0=(0,0);
+    M1=(2u,0.5u);
+    contourbouche=(0,0)--(2u,0.5u)--(1.25u,-0.2u)--cycle;
+    fill contourbouche;
+    trace (0,-0.2u)--(0,0.2u);
+    trace (2u,0.3u)--(2u,0.7u);
+    M2=6.5/10[M0,M1];
+    M3=8.5/10[M0,M1];
+    M4=(0.5*(6.5+8.5)/10)[M0,M1];
+    M5=2.9[M4,rotation(M3,M4,-90)];
+    trace contourbouche;
+    fill M2{dir-80}..{dir0}M5{dir60}..M3--cycle withcolor white;
+    trace M2{dir-80}..{dir0}M5{dir60}..M3--cycle;
+    trace M4--(7/10)[M4,M5];
+    );
+  RetiensBouche5=image(
+      path contourbouche,jointure,levreh,levreb;
+    contourbouche=(0,0.5u){dir60}..{dir0}(0.25u,0)..(0.6u,0.2u)..(1.2u,-0.2u)..{dir-10}(2u,0);
+    trace (-0.05u,0.55u)--(0.05u,0.45u);
+    trace (1.95u,-0.05u)--(2.05u,0.05u);
+    trace contourbouche;
+    );
+  $=RetiensBouche[nb];
+  $
+enddef;
+%%%%
+% Nez
+%%%%
+vardef Nez(expr nb)=
+  save $;
+  picture $;
+  picture RetiensNez[];
+  RetiensNez1=image(
+      trace (0,0.2u){dir-120}..{dir0}(0.25u,0);
+    trace (0.25u,0.1u){dir-90}..{dir60}(1.7u,0.2u);
+    trace (1.7u,0.2u){dir-110}..{dir100}(2u,0.2u);
+    );
+  RetiensNez2=image(
+      trace (0.1u,0.5u){dir-100}..{dir-10}(0,0){dir-10}..(u,0.2u)..(2u,0){dir0}..{dir100}(1.9u,0.5u);
+    );
+  RetiensNez3=image(
+      if Couleurs:
+      fill (0,0){dir90}..{dir-10}(u,0.25u){dir10}..{dir-90}(2u,0){dir-90}..{dir170}(u,-0.25u){dir-170}..{dir90}cycle withcolor white;
+      fi;
+      trace (0,0){dir90}..{dir-10}(u,0.25u){dir10}..{dir-90}(2u,0){dir-90}..{dir170}(u,-0.25u){dir-170}..{dir90}cycle;
+    fill (fullcircle xscaled 0.1u yscaled 0.2u) shifted(0.5u,0);
+    fill (fullcircle xscaled 0.1u yscaled 0.2u) shifted(1.5u,0);
+    );
+  RetiensNez4=image(
+      pair M[];
+    M0=(0,0);
+    M1=(0.5u,0);
+    M2=2[iso(M0,M1),rotation(M1,M0,60)];
+    fill M0{dir-10}..{dir10}M1..{dir120}M2{dir-120}..{dir-10}cycle;
+    );
+  RetiensNez5=image(
+      pair M[];
+    M0=(0,0);
+    M1=(0.5u,0);
+    M2=(1.5u,0);
+    M3=(2u,0);
+    path contournez;
+    contournez=M1{dir100}..{dir-100}M2{dir-160}..{dir160}cycle;
+    fill contournez withcolor white;
+    fill buildcycle(subpath(0,0.5*length contournez) of contournez,(point(0.15*length contournez) of contournez){dir0}..{dir-90}(u,-0.5u),contournez);
+    fill symetrie(buildcycle(subpath(0,0.5*length contournez) of contournez,(point(0.15*length contournez) of contournez){dir0}..{dir-90}(u,-0.5u),contournez),(u,0),(u,0.5));
+    trace contournez;
+    );
+  $=RetiensNez[nb];
+  $
+enddef;
+%%%%%
+%Oreilles
+%%%%%
+vardef Oreille(expr nb)=
+  save $;
+  picture $;
+  picture RetiensOreille[];
+  RetiensOreille1=image(
+      draw (0,0){dir150}..{dir60}(-0.2u,1.5u){dir-100}..(u,0.5u);
+    );
+  RetiensOreille2=image(
+      draw (0,0){dir180}..{dir-120}(-u,-0.25u){dir180}..{dir0}(-u,0.5u){dir-60}..{dir0}(u,0.25u);
+    draw (-u,-0.25u){dir120}..{dir60}(-u,0.5u);
+    );
+  RetiensOreille3=image(
+      draw (0,0)--(-u,0)--(-u,u){dir-90}..{dir90}(-0.5u,u)--(-0.5u,0.5u)--(u,0.5u);
+    );
+  RetiensOreille4=image(
+      path coinor;
+    coinor=(0,0){dir60}..{dir90}(-0.5u,1.5u){dir-60}..{dir0}(u,u);
+    fill (subpath(0.3*length coinor,0.7*length coinor) of coinor)--cycle;
+    trace coinor;
+    );
+  RetiensOreille5=image(
+      path coinor;
+    coinor=(0,0)--(-0.5u,1u)--(0,1.5u)--(-0.25u,u)--(u,0.5u);
+    trace coinor;
+    );
+  $=RetiensOreille[nb];
+  $
+enddef;

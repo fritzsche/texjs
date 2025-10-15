@@ -1,0 +1,148 @@
+%%%
+% Multiplication Japonaise
+%%%
+\def\filedateMulEthiopie{2025/08/01}%
+\def\fileversionMulEthiopie{0.1}%
+\message{-- \filedateMulEthiopie\space v\fileversionMulEthiopie}%
+%
+\setKVdefault[MulEthiopie]{Etape=0,CouleurInter=Crimson,Details=false,Aide=false}
+
+\makeatletter
+\NewDocumentCommand\MulEthiopie{om}{%
+  \useKVdefault[MulEthiopie]%
+  \setKV[MulEthiopie]{#1}%
+  \setsepchar{x}\ignoreemptyitems%
+  \readlist*\PfC@MulEthiopie{#2}%
+  \reademptyitems%
+  \ifboolKV[MulEthiopie]{Details}{%
+    \PfM@BuildTabMulEthiopieDetaille%
+  }{%
+    \PfM@BuildTabMulEthiopie%
+  }%
+}%
+
+\NewDocumentCommand\PfM@BuildTabMulEthiopie{}{%
+  % Combien de lignes
+  \edef\PfC@FacteurA{\PfC@MulEthiopie[1]}%
+  \edef\PfC@FacteurB{\PfC@MulEthiopie[2]}%
+  \edef\PfC@ProduitFinal{\fpeval{\PfC@FacteurA*\PfC@FacteurB}}%
+  \StrLen{\PfC@ProduitFinal}[\PfC@LongueurTab]%
+  \edef\PfC@MulEthiopieTotalEtape{0}%
+  \whiledo{\PfC@FacteurA>1}{%
+    \quotient{\PfC@FacteurA}{2}%
+    \edef\PfC@FacteurA{\the\intquotient}%
+    \edef\PfC@MulEthiopieTotalEtape{\fpeval{\PfC@MulEthiopieTotalEtape+1}}%
+  }%
+  \colorlet{PfCCouleurMulEthiopie}{\useKV[MulEthiopie]{CouleurInter}}%
+  \ifnum\useKV[MulEthiopie]{Etape}<3\relax%
+    \begin{NiceTabular}{m{\fpeval{0.5*\PfC@LongueurTab}em}m{\fpeval{0.5*\PfC@LongueurTab}em}}%
+      \CodeBefore
+      \ifnum\useKV[MulEthiopie]{Etape}=2\relax%
+        \xdef\PfC@FacteurA{\PfC@MulEthiopie[1]}%
+        \xintFor* ##1 in{\xintSeq{1}{\fpeval{\PfC@MulEthiopieTotalEtape+1}}}\do{%
+          \ifodd\PfC@FacteurA\relax%
+            \ifboolKV[MulEthiopie]{Aide}{\tikz \draw[fill=LightGreen] (\fpeval{##1+1+1}-|1) rectangle (\fpeval{##1+1}-|2);}{}%
+          \else%
+          \fi%
+          \quotient{\PfC@FacteurA}{2}%
+          \xdef\PfC@FacteurA{\the\intquotient}%
+        }%
+      \fi%
+      \Body%
+      \Block[draw,fill=Cornsilk]{1-2}{$\num{\PfC@MulEthiopie[1]}\times\num{\PfC@MulEthiopie[2]}$}&\\
+      \ifnum\useKV[MulEthiopie]{Etape}=0\relax%
+        \num{\PfC@MulEthiopie[1]}&\num{\PfC@MulEthiopie[2]}\\%
+        \xintFor* ##1 in{\xintSeq{1}{\PfC@MulEthiopieTotalEtape}}\do{%
+          &\\%
+        }%
+      \fi%
+      \ifnum\useKV[MulEthiopie]{Etape}>0\relax%
+        \xdef\PfC@FacteurA{\PfC@MulEthiopie[1]}%
+        \xdef\PfC@FacteurB{\PfC@MulEthiopie[2]}%
+        \xintFor* ##1 in{\xintSeq{1}{\fpeval{\PfC@MulEthiopieTotalEtape+1}}}\do{%
+          \num{\PfC@FacteurA}&%
+          \ifodd\PfC@FacteurA\relax%
+            \ifnum\useKV[MulEthiopie]{Etape}=2\relax%
+              \textcolor{PfCCouleurMulEthiopie}{\num{\PfC@FacteurB}}%
+            \else%
+              \num{\PfC@FacteurB}%
+            \fi%
+          \else%
+            \num{\PfC@FacteurB}%
+          \fi%
+          \quotient{\PfC@FacteurA}{2}%
+          \xdef\PfC@FacteurA{\the\intquotient}%
+          \xdef\PfC@FacteurB{\fpeval{\PfC@FacteurB*2}}%
+          \\
+        }%
+      \fi%
+      \CodeAfter%
+      \tikz \draw[line width=1pt] (2-|2) to (last-|2);%
+      \ifnum\useKV[MulEthiopie]{Etape}=2\relax%
+        \xdef\PfC@FacteurA{\PfC@MulEthiopie[1]}%
+        \xintFor* ##1 in{\xintSeq{1}{\fpeval{\PfC@MulEthiopieTotalEtape+1}}}\do{%
+          \ifodd\PfC@FacteurA\relax%
+          \else%
+            \tikz \draw[line width=1pt] (\fpeval{##1+1+0.5}-|1) to (\fpeval{##1+1+0.5}-|3);%
+          \fi%
+          \quotient{\PfC@FacteurA}{2}%
+          \xdef\PfC@FacteurA{\the\intquotient}%
+        }%
+      \fi%
+    \end{NiceTabular}%
+  \else%
+    \begin{align*}
+      \num{\PfC@MulEthiopie[1]}\times\num{\PfC@MulEthiopie[2]}&=
+                                                      \xdef\PfC@FacteurA{\PfC@MulEthiopie[1]}%
+                                                      \xdef\PfC@FacteurB{\PfC@MulEthiopie[2]}%
+                                                      \xintFor* ## 1in{\xintSeq{1}{\fpeval{\PfC@MulEthiopieTotalEtape+1}}}\do{%
+                                                      \ifodd\PfC@FacteurA\relax%
+                                                      \num{\PfC@FacteurB}\xintifForLast{}{+}%
+                                                      \fi%
+                                                      \quotient{\PfC@FacteurA}{2}%
+                                                      \xdef\PfC@FacteurA{\the\intquotient}%
+                                                      \xdef\PfC@FacteurB{\fpeval{\PfC@FacteurB*2}}%
+                                                      }\\
+      \num{\PfC@MulEthiopie[1]}\times\num{\PfC@MulEthiopie[2]}&=\mathcolor{Evidence}{\num{\fpeval{\PfC@MulEthiopie[1]*\PfC@MulEthiopie[2]}}}
+    \end{align*}
+  \fi%
+}%
+
+\NewDocumentCommand\PfM@BuildTabMulEthiopieDetaille{}{%
+  % Combien de lignes
+  \edef\PfC@FacteurA{\PfC@MulEthiopie[1]}%
+  \edef\PfC@FacteurB{\PfC@MulEthiopie[1]}%
+  \edef\PfC@ProduitFinal{\fpeval{\PfC@FacteurA*\PfC@FacteurB}}%
+  \StrLen{\PfC@ProduitFinal}[\PfC@LongueurTab]%
+  \edef\PfC@MulEthiopieTotalEtape{0}%
+  \whiledo{\PfC@FacteurA>1}{%
+    \quotient{\PfC@FacteurA}{2}%
+    \edef\PfC@FacteurA{\the\intquotient}%
+    \edef\PfC@MulEthiopieTotalEtape{\fpeval{\PfC@MulEthiopieTotalEtape+1}}%
+  }%
+  \ifnum\useKV[MulEthiopie]{Etape}>\fpeval{\PfC@MulEthiopieTotalEtape+1}\relax%
+    \message{Le nombre d'étapes demandé est supérieur aux \fpeval{\PfC@MulEthiopieTotalEtape+1} nécessaires à la multiplication \PfC@FacteurA x \PfC@FacteurB}%
+  \else%
+    \colorlet{PfCCouleurMulEthiopie}{\useKV[MulEthiopie]{CouleurInter}}%
+    \begin{NiceTabular}{m{\fpeval{0.5*\PfC@LongueurTab}em}m{\fpeval{0.5*\PfC@LongueurTab}em}}%
+      \Block[draw,fill=Cornsilk]{1-2}{$\num{\PfC@MulEthiopie[1]}\times\num{\PfC@MulEthiopie[2]}$}&\\
+      \xdef\PfC@FacteurA{\PfC@MulEthiopie[1]}%
+      \xdef\PfC@FacteurB{\PfC@MulEthiopie[2]}%
+      \xintFor* ##1 in{\xintSeq{1}{\useKV[MulEthiopie]{Etape}}}\do{%
+        \num{\PfC@FacteurA}&\num{\PfC@FacteurB}%
+        \quotient{\PfC@FacteurA}{2}%
+        \xdef\PfC@FacteurA{\the\intquotient}%
+        \xdef\PfC@FacteurB{\fpeval{\PfC@FacteurB*2}}%
+        \\
+      }%
+      \ifnum\useKV[MulEthiopie]{Etape}<\fpeval{\PfC@MulEthiopieTotalEtape+1}\relax%
+        \xintFor* ##1 in{\xintSeq{\fpeval{\useKV[MulEthiopie]{Etape}+1}}{\fpeval{\PfC@MulEthiopieTotalEtape+1}}}\do{%
+          &\\
+        }%
+      \fi%
+      \CodeAfter
+      \tikz \draw[line width=1pt] (2-|2) to (last-|2);
+    \end{NiceTabular}%
+  \fi%
+}%
+\makeatother

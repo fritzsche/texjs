@@ -1,0 +1,805 @@
+%%
+%% This is file `math-operator.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% math-operator-code.dtx  (with options: `code')
+%% 
+%% This file is from version 1.3a of the free and open-source
+%% LaTeX package "math-operator," released September 2025.
+%% 
+%% Copyright 2025 Conrad Kosowsky
+%% 
+%% This file may be used, distributed, and modified under the
+%% terms of the LaTeX Public Project License, version 1.3c or
+%% any later version. The most recent version of this license
+%% is available online at
+%% 
+%%           https://www.latex-project.org/lppl/
+%% 
+%% This work has the LPPL status "maintained," and the current
+%% maintainer is the package author, Conrad Kosowsky. He can
+%% be reached at kosowsky.latex@gmail.com.
+%% 
+%% PLEASE KNOW THAT THIS FREE SOFTWARE IS PROVIDED WITHOUT
+%% ANY WARRANTY. SPECIFICALLY, THE "NO WARRANTY" SECTION OF
+%% THE LATEX PROJECT PUBLIC LICENSE STATES THE FOLLOWING:
+%% 
+%% THERE IS NO WARRANTY FOR THE WORK. EXCEPT WHEN OTHERWISE
+%% STATED IN WRITING, THE COPYRIGHT HOLDER PROVIDES THE WORK
+%% `AS IS’, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
+%% OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+%% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+%% PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE
+%% OF THE WORK IS WITH YOU. SHOULD THE WORK PROVE DEFECTIVE,
+%% YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR, OR
+%% CORRECTION.
+%% 
+%% IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED
+%% TO IN WRITING WILL THE COPYRIGHT HOLDER, OR ANY AUTHOR
+%% NAMED IN THE COMPONENTS OF THE WORK, OR ANY OTHER PARTY
+%% WHO MAY DISTRIBUTE AND/OR MODIFY THE WORK AS PERMITTED
+%% ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL,
+%% SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT
+%% OF ANY USE OF THE WORK OR OUT OF INABILITY TO USE THE WORK
+%% (INCLUDING, BUT NOT LIMITED TO, LOSS OF DATA, DATA BEING
+%% RENDERED INACCURATE, OR LOSSES SUSTAINED BY ANYONE AS A
+%% RESULT OF ANY FAILURE OF THE WORK TO OPERATE WITH ANY
+%% OTHER PROGRAMS), EVEN IF THE COPYRIGHT HOLDER OR SAID
+%% AUTHOR OR SAID OTHER PARTY HAS BEEN ADVISED OF THE
+%% POSSIBILITY OF SUCH DAMAGES.
+%% 
+%% For more information, see the LaTeX Project Public License.
+%% Derivative works based on this software may come with their
+%% own license or terms of use, and the package author is not
+%% responsible for any third-party software.
+%% 
+%% Happy TeXing!
+%% 
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{math-operator}[2025/09/10 v. 1.3a]
+\newif\if@operator@bb  % blackboard bold
+\newif\if@operator@c   % category theory
+\newif\if@operator@j   % Jacobi elliptic functions
+\newif\if@operator@l   % linear algebra
+\newif\if@operator@o   % overlining
+\newif\if@operator@p   % probability distributions
+\newif\if@operator@sf  % special functions
+\newif\if@operator@s   % standard operators
+\newif\if@operator@t   % trigonometry
+\@operator@bbtrue
+\@operator@ctrue
+\@operator@jtrue
+\@operator@ltrue
+\@operator@otrue
+\@operator@ptrue
+\@operator@sftrue
+\@operator@strue
+\@operator@ttrue
+\DeclareOption{blackboard}{\@operator@bbtrue}
+\DeclareOption{category}{\@operator@ctrue}
+\DeclareOption{jacobi}{\@operator@jtrue}
+\DeclareOption{linear}{\@operator@ltrue}
+\DeclareOption{overbar}{\@operator@otrue}
+\DeclareOption{probability}{\@operator@ptrue}
+\DeclareOption{special}{\@operator@sftrue}
+\DeclareOption{standard}{\@operator@strue}
+\DeclareOption{trigonometry}{\@operator@ttrue}
+\DeclareOption{no-blackboard}{\@operator@bbfalse}
+\DeclareOption{no-category}{\@operator@cfalse}
+\DeclareOption{no-jacobi}{\@operator@jfalse}
+\DeclareOption{no-linear}{\@operator@lfalse}
+\DeclareOption{no-overbar}{\@operator@ofalse}
+\DeclareOption{no-probability}{\@operator@pfalse}
+\DeclareOption{no-special}{\@operator@sffalse}
+\DeclareOption{no-standard}{\@operator@sfalse}
+\DeclareOption{no-trigonometry}{\@operator@tfalse}
+\ProcessOptions*
+\def\@operatorinfo#1{\wlog{Package operator Info: #1}}
+\newcount\operatordefmode
+\operatordefmode\@ne
+\newif\if@bfop@
+\@bfop@false
+\ifx\protected\@undefined
+  \let\@operator@robust@def\DeclareRobustCommand
+  \def\@operator@robust@gdef#1{%
+    \bgroup
+      \escapechar\m@ne
+      \xdef#1{\noexpand\protect
+        \expandafter\noexpand\csname\string#1 \endcsname}%
+      \expandafter
+    \egroup
+    \expandafter\gdef\csname\string#1 \endcsname}
+\else
+  \def\@operator@robust@def{\protected\def}
+  \def\@operator@robust@gdef{\protected\gdef}
+\fi
+\def\defaultinverse{-1}
+\ifx\Umathchar\@undefined
+  \begingroup
+    \@tempcntb=\number`\-\relax
+    \count@\@tempcntb
+    \divide\count@ by 16\relax
+    \@tempcnta\count@
+    \multiply\count@ by 16\relax
+    \advance\@tempcntb by -\count@
+    \global\mathchardef\@operatorhyphen
+      "70\hexnumber@\@tempcnta\hexnumber@\@tempcntb\relax
+    \@tempcntb=\number`2\relax
+    \count@\@tempcntb
+    \divide\count@ by 16\relax
+    \@tempcnta\count@
+    \multiply\count@ by 16\relax
+    \advance\@tempcntb by -\count@
+    \global\mathchardef\@operatortw@
+      "70\hexnumber@\@tempcnta\hexnumber@\@tempcntb\relax
+  \endgroup
+  \def\@operatorm@ne{\begingroup\fam\m@ne\defaultinverse\endgroup}
+\else
+  \Umathchardef\@operatorhyphen=+7+0+`\-\relax
+  \Umathchardef\@operatortw@=+7+0+`2\relax
+  \def\@operatorm@ne{%
+    \ifnum\fam>\m@ne
+      \mathchoice{%
+        \iffontchar\textfont\fam"2212\relax
+          \Umathchar+0+\fam"2212\relax  % minus sign
+          \Umathchar+0+\fam  "31\relax  % 1
+        \else
+          \begingroup\fam\m@ne\defaultinverse\endgroup
+        \fi}%
+        {\iffontchar\textfont\fam"2212\relax
+          \Umathchar+0+\fam"2212\relax  % minus sign
+          \Umathchar+0+\fam  "31\relax  % 1
+        \else
+          \begingroup\fam\m@ne\defaultinverse\endgroup
+        \fi}%
+        {\iffontchar\scriptfont\fam"2212\relax
+          \Umathchar+0+\fam"2212\relax  % minus sign
+          \Umathchar+0+\fam  "31\relax  % 1
+        \else
+          \begingroup\fam\m@ne\defaultinverse\endgroup
+        \fi}%
+        {\iffontchar\scriptscriptfont\fam"2212\relax
+          \Umathchar+0+\fam"2212\relax  % minus sign
+          \Umathchar+0+\fam  "31\relax  % 1
+        \else
+          \begingroup\fam\m@ne\defaultinverse\endgroup
+        \fi}%
+    \else
+      \defaultinverse
+    \fi}
+\fi
+\@operator@robust@def\operatorhyphen{\@ifstar
+  \@operatorhyphen@bf\@operatorhyphen@@}
+\def\@operatorhyphen@bf{%
+  \if@bfop@
+    -%
+  \else
+    \mathchoice{}{}{}{}
+    {\@init@bfopfont\@bfop@choices{-}}
+  \fi}
+\def\@operatorhyphen@@{%
+  \if@bfop@
+    -%
+  \else
+    {\operator@font\@operatorhyphen}
+  \fi}
+\@operator@robust@def\operatorsquared{\@ifstar
+  \@operatorsquared@bf\@operatorsquared@@}
+\def\@operatorsquared@bf{%
+  \if@bfop@
+    \textsuperscript{2}%
+  \else
+    ^{\@init@bfopfont\@bfop@choices{2}}
+  \fi}
+\def\@operatorsquared@@{%
+  \if@bfop@
+    \textsuperscript{2}%
+  \else
+    ^{\operator@font\@operatortw@}
+  \fi}
+\@operator@robust@def\operatorinverse{\@ifstar
+  \@operatorinverse@bf\@operatorinverse@@}
+\def\@operatorinverse@bf{%
+  \if@bfop@
+    \textsuperscript{%
+      \ifx\Uchar\@undefined
+        $\defaultinverse$%
+      \else
+        \iffontchar\font"2212\relax
+          \Uchar"2212\relax 1%
+        \else
+          $\defaultinverse$%
+        \fi
+      \fi}%
+  \else
+    ^{\@init@bfopfont\@bfop@choices{%
+      \ifx\Uchar\@undefined
+        $\defaultinverse$%
+      \else
+        \iffontchar\font"2212\relax
+          \Uchar"2212\relax 1%
+        \else
+          $\defaultinverse$%
+        \fi
+      \fi}}
+  \fi}
+\def\@operatorinverse@@{%
+  \if@bfop@
+    \textsuperscript{%
+      \ifx\Uchar\@undefined
+        $\defaultinverse$%
+      \else
+        \iffontchar\font"2212\relax
+          \Uchar"2212\relax 1%
+        \else
+          $\defaultinverse$%
+        \fi
+      \fi}%
+  \else
+    ^{\operator@font\@operatorm@ne}
+  \fi}
+\@operator@robust@def\pilcrow{\ifmmode
+  \textparagraph\else\mathparagraph\fi}
+\ifx\protected\@undefined
+  \def\@tempa{\DeclareRobustCommand\DeclareMathText[2]}
+\else
+  \def\@tempa{\protected\def\DeclareMathText##1##2}
+\fi
+\@tempa{\make@newop@cmd{#1}
+    {\@operator@robust@def#1{{\operator@font #2}}}}
+\ifx\protected\@undefined
+  \def\@tempa{\DeclareRobustCommand\DeclareBoldMathText[2]}
+\else
+  \def\@tempa{\protected\def\DeclareBoldMathText##1##2}
+\fi
+\@tempa{\make@newop@cmd{#1}
+    {\@operator@robust@def#1{\mathchoice{}{}{}{}\@init@bfopfont
+      {\@bfop@choices{#2}}}}}
+\@operator@robust@def\DeclareMathOperator{\relax\@ifstar
+  \@operatorlim\@operatornolim}
+\@operator@robust@def\DeclareBoldMathOperator{\relax\@ifstar
+  \@bfoperatorlim\@bfoperatornolim}
+\def\@operatorlim#1#2{%
+  \make@newop@cmd{#1}
+    {\@operator@robust@def#1{\mathop{\operator@font\kern\z@#2}\limits}}}
+\def\@operatornolim#1#2{%
+  \make@newop@cmd{#1}
+    {\@operator@robust@def#1{\mathop{\operator@font\kern\z@#2}\nolimits}}}
+\def\@bfoperatorlim#1#2{%
+  \make@newop@cmd{#1}
+    {\@operator@robust@def#1{\mathchoice{}{}{}{}\@init@bfopfont
+      \mathop{\@bfop@choices{#2}}\limits}}}
+\def\@bfoperatornolim#1#2{%
+  \make@newop@cmd{#1}
+    {\@operator@robust@def#1{\mathchoice{}{}{}{}\@init@bfopfont
+      \mathop{\@bfop@choices{#2}}\nolimits}}}
+\def\operator@list{\log\lg\ln
+  \lim\limsup\liminf
+  \sin\arcsin\sinh
+  \cos\arccos\cosh
+  \tan\arctan\tanh
+  \cot\coth
+  \sec\csc
+  \max\min\sup\inf
+  \arg\ker\dim\hom\det
+  \exp
+  \Pr
+  \gcd\deg}
+\def\addto@operator@list#1{\expandafter
+  \def\expandafter\operator@list\expandafter{\operator@list#1}}
+\def\@ifoperator#1{%
+  \expandafter\in@\expandafter#1\expandafter{\operator@list}%
+  \ifin@
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi}
+\def\OperatorBadNameError#1{%
+  \def\@tempa{#1}%
+  \@onelevel@sanitize\@tempa
+  \PackageError{math-operator}{Invalid name\MessageBreak
+    "\@tempa" for new operator}
+    {I was expecting the name of the new operator\MessageBreak
+    to be a single control sequence, but instead\MessageBreak
+    you typed "\@tempa."\MessageBreak
+    This doesn't work. To resolve this error,\MessageBreak
+    make sure the first argument of the operator\MessageBreak
+    declaration is a single control sequence.\MessageBreak}}
+\def\OperatorCSDefWarning#1{%
+  \PackageWarning{math-operator}{Control sequence\MessageBreak
+    \string#1\space is already defined. Your\MessageBreak
+    operator declaration was\MessageBreak ignored}}
+\def\OperatorCSDefError#1{%
+  \PackageError{math-operator}{Control sequence\MessageBreak
+    \string#1\space already defined. Your\MessageBreak
+    operator declaration was ignored}
+    {You tried to define the control sequence\MessageBreak
+    \string#1\space to be a new\MessageBreak
+    operator even though it already has a\MessageBreak
+    definition. I'm currently set to raise an\MessageBreak
+    error when that happens. To resolve the\MessageBreak
+    error, either pick a different control\MessageBreak
+    sequence or set \string\operatordefmode\space to a \MessageBreak
+    negative number to overwrite the definition.\MessageBreak}}
+\def\make@newop@cmd#1#2{%
+  \expandafter\ifx\expandafter\@nnil\@gobble#1\@nnil % is #1 one token?
+    \ifcat\relax\noexpand#1 % does #1 start with cs?
+      \@ifoperator{#1}
+        {\@operatorinfo{Redefining \string#1\space operator.}
+          #2}  % <-- new definition happens here
+        {\ifx#1\@undefined
+          \@operatorinfo{Defining new operator \string#1.}
+          \addto@operator@list{#1}
+          #2   % <-- new definition happens here
+        \else                           % if #1 is already defined...
+          \ifnum\operatordefmode<\z@    % case < 0: redefine
+            \@operatorinfo{Overwriting definition of \string#1.}
+            \addto@operator@list{#1}
+            #2 % <-- new definition happens here
+          \else
+            \@operatorinfo{Leaving \string#1\space as is.}
+            \ifcase\operatordefmode     % case 0: do nothing
+            \or                         % case 1: warning
+              \OperatorCSDefWarning{#1}
+            \else                       % case >= 2: error
+              \OperatorCSDefError{#1}
+            \fi
+          \fi
+        \fi}
+    \else
+      \OperatorBadNameError{#1}
+    \fi
+  \else
+    \OperatorBadNameError{#1}
+  \fi}
+\let\operator@tf\relax
+\let\operator@sf\relax
+\let\operator@ssf\relax
+\def\@init@bfopfont{%
+  \@tempswatrue        % reset sizes by default
+  \ifx\operator@tf\tf@size
+    \ifx\operator@sf\sf@size
+      \ifx\operator@ssf\ssf@size
+        \@tempswafalse % don't reset sizes if unnecessary
+      \fi
+    \fi
+  \fi
+  \if@tempswa
+    \begingroup
+      \operator@font
+      \escapechar\m@ne
+      \def\set@bf@@##1##2##3{%
+        \edef\@tempa{\expandafter\string\the##2\fam}
+        \expandafter\split@name\@tempa\@nil
+        \DeclareFixedFont##1\f@encoding\f@family\bfdefault\f@shape##3}
+      \set@bf@@\@bfoptf\textfont\tf@size
+      \set@bf@@\@bfopsf\scriptfont\sf@size
+      \set@bf@@\@bfopssf\scriptscriptfont\ssf@size
+      \global\let\operator@tf\tf@size
+      \global\let\operator@sf\sf@size
+      \global\let\operator@ssf\ssf@size
+    \endgroup
+  \fi}
+\def\operator@update@font{\begingroup
+    \escapechar\m@ne
+    \expandafter\expandafter\expandafter
+  \endgroup
+  \expandafter\expandafter\expandafter
+  \split@name\expandafter\string\the\font\@nil}
+\def\@bfop@choices#1{\@bfop@true
+  \mathchoice{\hbox{\@bfoptf\operator@update@font#1}}
+    {\hbox{\@bfoptf\operator@update@font#1}}
+    {\hbox{\@bfopsf\operator@update@font#1}}
+    {\hbox{\@bfopssf\operator@update@font#1}}}
+\@onlypreamble\DeclareMathText
+\@onlypreamble\DeclareBoldMathText
+\@onlypreamble\DeclareMathOperator
+\@onlypreamble\DeclareBoldMathOperator
+\@onlypreamble\@operatorlim
+\@onlypreamble\@operatornolim
+\@onlypreamble\@bfoperatorlim
+\@onlypreamble\@bfoperatornolim
+\@onlypreamble\make@newop@cmd
+\wlog{}
+\if@operator@bb
+  \@operatorinfo{Defining blackboard-bold letters.}
+  \def\NoBBError#1{\PackageError{math-operator}
+    {Missing \string\mathbb\space command}
+    {It looks like you're trying to make\MessageBreak
+    a blackbold-board "#1." However, I\MessageBreak
+    can't define blackboard-bold letters\MessageBreak
+    because I don't see a definition for\MessageBreak
+    \string\mathbb, which is what I would use to\MessageBreak
+    do it. To resolve this error message,\MessageBreak
+    try loading a package that provides\MessageBreak
+    blackboard-bold font support such as\MessageBreak
+    amssymb or mathfont.\MessageBreak}}
+  \def\@makebbchar#1{%
+    \@operatorinfo{Predefining
+      \expandafter\string\csname #1\endcsname\space
+      for use later.}
+    \expandafter\@operator@robust@def\csname #1\endcsname{%
+      \ifx\mathbb\@undefined
+        \NoBBError{#1}%
+      \else
+        \@operatorinfo{Setting up \expandafter
+          \string\csname#1\endcsname\space for use.}%
+        \expandafter\@operator@robust@gdef\csname #1\endcsname{\mathbb{#1}}%
+        \@nameuse{#1}%
+      \fi}}
+  \@makebbchar{N}
+  \@makebbchar{Z}
+  \@makebbchar{Q}
+  \@makebbchar{R}
+  \@makebbchar{C}
+  \@makebbchar{F}
+  \@operatorinfo{Predefining \string\H\space for use later.}
+  \@operatorinfo{Predefining \string\O\space for use later.}
+  \let\textH\H
+  \let\textO\O
+  \def\mathH{%
+    \ifx\mathbb\@undefined
+      \NoBBError{H}%
+    \else
+      \@operatorinfo{Setting up \string\H\space for use.}%
+      \gdef\mathH{\mathbb{H}}%
+      \mathH
+    \fi}
+  \def\mathO{%
+    \ifx\mathbb\@undefined
+      \NoBBError{O}%
+    \else
+      \@operatorinfo{Setting up \string\O\space for use.}%
+      \gdef\mathO{\mathbb{O}}%
+      \mathO
+    \fi}
+  \@operator@robust@def\O{\ifmmode\mathO\else\expandafter\textO\fi}
+  \@operator@robust@def\H{\ifmmode\mathH\else\expandafter\textH\fi}
+  \def\@makebbop#1{%
+    \@operatorinfo{Predefining
+      \expandafter\string\csname #1\endcsname\space
+      for use later.}
+    \expandafter\@operator@robust@def\csname#1\endcsname{%
+      \ifx\mathbb\@undefined
+        \NoBBError{#1}%
+      \else
+        \@operatorinfo{Setting up \expandafter
+          \string\csname#1\endcsname\space for use.}%
+        \expandafter\@operator@robust@gdef\csname#1\endcsname{%
+          \mathop{\kern\z@\mathbb{#1}}}%
+        \@nameuse{#1}%
+      \fi}}
+  \@makebbop{E}
+  \@makebbop{P}
+  \addto@operator@list{\N\Z\Q\R\C\F\mathO\mathH\E\P}
+\else
+  \@operatorinfo{Skipping blackboard-bold letters.}
+\fi
+\if@operator@c
+  \wlog{}
+  \@operatorinfo{Defining category theory notation.}
+  \DeclareBoldMathText{\Ab}{Ab}
+  \DeclareBoldMathText{\Alg}{Alg}
+  \DeclareBoldMathText{\Bialg}{Bialg}
+  \DeclareBoldMathText{\Cat}{Cat}
+  \DeclareBoldMathText{\CGH}{CGH}
+  \DeclareBoldMathText{\CGWH}{CGWH}
+  \DeclareBoldMathText{\Coalg}{Coalg}
+  \DeclareBoldMathText{\Comod}{Comod}
+  \DeclareBoldMathText{\CRing}{CRing}
+  \DeclareBoldMathText{\Field}{Field}
+  \DeclareBoldMathText{\FinGrp}{FinGrp}
+  \DeclareBoldMathText{\FinHilb}{FinHilb}
+  \DeclareBoldMathText{\FinVect}{FinVect}
+  \DeclareBoldMathText{\FinSet}{FinSet}
+  \DeclareBoldMathText{\Frm}{Frm}
+  \DeclareBoldMathText{\Grp}{Grp}
+  \DeclareBoldMathText{\Haus}{Haus}
+  \DeclareBoldMathText{\HeytAlg}{HeytAlg}
+  \DeclareBoldMathText{\Hilb}{Hilb}
+  \DeclareBoldMathText{\HopfAlg}{HopfAlg}
+  \DeclareBoldMathText{\Lat}{Lat}
+  \DeclareBoldMathText{\LieAlg}{LieAlg}
+  \DeclareBoldMathText{\LieGrp}{LieGrp}
+  \DeclareBoldMathText{\Loc}{Loc}
+  \DeclareBoldMathText{\Man}{Man}
+  \DeclareBoldMathText{\Mat}{Mat}
+  \DeclareBoldMathText{\Met}{Met}
+  \DeclareBoldMathText{\Mod}{Mod}
+  \DeclareBoldMathText{\Mon}{Mon}
+  \DeclareBoldMathText{\Ord}{Ord}
+  \DeclareBoldMathText{\Pos}{Pos}
+  \DeclareBoldMathText{\Rel}{Rel}
+  \DeclareBoldMathText{\Ring}{Ring}
+  \DeclareBoldMathText{\Set}{Set}
+  \DeclareBoldMathText{\Top}{Top}
+  \DeclareBoldMathText{\Topos}{Topos}
+  \DeclareBoldMathText{\Vect}{Vect}
+  \DeclareMathOperator{\cocone}{cocone}
+  \DeclareMathOperator*{\colim}{colim}
+  \DeclareMathOperator{\cone}{cone}
+  \DeclareMathOperator{\Ho}{Ho}
+  \DeclareMathOperator{\Hom}{Hom}
+  \DeclareMathOperator{\Ob}{Ob}
+  \DeclareMathOperator{\PSh}{PSh}
+  \DeclareMathOperator{\Sh}{Sh}
+  \@operatorinfo{Defining new operator \string\op.}
+  \addto@operator@list{\op}
+  \@operator@robust@def\op{^{\operator@font op}}
+\else
+  \@operatorinfo{Skipping category theory notation.}
+\fi
+\if@operator@j
+  \wlog{}
+  \@operatorinfo{Defining Jacobi elliptic functions.}
+  \DeclareMathOperator{\cd}{cd}
+  \DeclareMathOperator{\cn}{cn}
+  \DeclareMathOperator{\cs}{cs}
+  \DeclareMathOperator{\dc}{dc}
+  \DeclareMathOperator{\dn}{dn}
+  \DeclareMathOperator{\ds}{ds}
+  \DeclareMathOperator{\nc}{nc}
+  \DeclareMathOperator{\nd}{nd}
+  \DeclareMathOperator{\ns}{ns}
+  \let\sc\@undefined
+  \DeclareMathOperator{\sc}{sc}
+  \DeclareMathOperator{\sd}{sd}
+  \DeclareMathOperator{\sn}{sn}
+\else
+  \@operatorinfo{Skipping Jacobi elliptic functions.}
+\fi
+\if@operator@l
+  \wlog{}
+  \@operatorinfo{Defining operators from linear algebra.}
+  \DeclareMathOperator{\adj}{adj}
+  \DeclareMathOperator{\Cl}{Cl}
+  \DeclareMathOperator{\codim}{codim}
+  \DeclareMathOperator{\coker}{coker}
+  \DeclareMathText{\GL}{GL}
+  \DeclareMathOperator{\nullity}{nullity}
+  \DeclareMathText{\Orthogonal}{O}
+  \DeclareMathOperator{\Pin}{Pin}
+  \DeclareMathOperator{\proj}{proj}
+  \DeclareMathOperator{\rank}{rank}
+  \DeclareMathText{\SL}{SL}
+  \DeclareMathText{\SO}{SO}
+  \DeclareMathText{\SU}{SU}
+  \DeclareMathOperator{\Sp}{Sp}
+  \DeclareMathOperator*{\spanop}{span}
+  \DeclareMathOperator{\Spin}{Spin}
+  \DeclareMathOperator{\tr}{tr}
+  \@operatorinfo{Defining new operator \string\T.}
+  \addto@operator@list{\T}
+  \@operator@robust@def\T{^{\operator@font T}}
+  \DeclareMathText{\Unitary}{U}
+\else
+  \@operatorinfo{Skipping operators from linear algebra.}
+\fi
+\if@operator@o
+  \wlog{}
+  \@operatorinfo{Defining \string\overbar.}
+  \newcount\overbaroffset
+  \overbaroffset=800\relax
+  \let\operatorbaroffset\overbaroffset
+  \@operator@robust@def\overbar{\mathchoice{}{}{}{}%
+    \@ifstar
+      {\@ifnextchar[%
+        {\@overb@r{500}}
+        {\@overb@r{500}[0.8]}}
+      {\@ifnextchar[%
+        {\@overb@r{\overbaroffset}}
+        {\@overb@r{\overbaroffset}[0.8]}}}
+  \def\@overb@r#1[#2]#3{\begingroup
+    \mathchoice
+      {\setbox\@tempboxa\hbox{$\displaystyle#3\m@th$}
+        \@tempdima\wd\@tempboxa
+        \@tempdimb\ht\@tempboxa
+        \@tempdimc\dp\@tempboxa
+        \dimen@\@tempdima
+        \advance\dimen@ by -#2\@tempdima
+        \divide\dimen@ by 1000
+        \multiply\dimen@ by #1
+        \advance\dimen@ by -\@tempdima
+        \hbox to \@tempdima{\unhbox\@tempboxa\hskip\dimen@
+          $\overline{%
+            \vrule width \z@ height \@tempdimb depth \@tempdimc
+            \hskip#2\@tempdima}\m@th$%
+          \hfil}}
+      {\setbox\@tempboxa\hbox{$\textstyle#3\m@th$}
+        \@tempdima\wd\@tempboxa
+        \@tempdimb\ht\@tempboxa
+        \@tempdimc\dp\@tempboxa
+        \dimen@\@tempdima
+        \advance\dimen@ by -#2\@tempdima
+        \divide\dimen@ by 1000
+        \multiply\dimen@ by #1
+        \advance\dimen@ by -\@tempdima
+        \hbox to \@tempdima{\unhbox\@tempboxa\hskip\dimen@
+          $\overline{%
+            \vrule width \z@ height \@tempdimb depth \@tempdimc
+            \hskip#2\@tempdima}\m@th$%
+          \hfil}}
+      {\setbox\@tempboxa\hbox{$\scriptstyle#3\m@th$}
+        \@tempdima\wd\@tempboxa
+        \@tempdimb\ht\@tempboxa
+        \@tempdimc\dp\@tempboxa
+        \advance\dimen@ by -#2\@tempdima
+        \divide\dimen@ by 1000
+        \multiply\dimen@ by #1
+        \advance\dimen@ by -\@tempdima
+        \hbox to \@tempdima{\unhbox\@tempboxa\hskip\dimen@
+          $\overline{%
+            \vrule width \z@ height \@tempdimb depth \@tempdimc
+            \hskip#2\@tempdima}\m@th$%
+          \hfil}}
+      {\setbox\@tempboxa\hbox{$\scriptscriptstyle#3\m@th$}
+        \@tempdima\wd\@tempboxa
+        \@tempdimb\ht\@tempboxa
+        \@tempdimc\dp\@tempboxa
+        \advance\dimen@ by -#2\@tempdima
+        \divide\dimen@ by 1000
+        \multiply\dimen@ by #1
+        \advance\dimen@ by -\@tempdima
+        \hbox to \@tempdima{\unhbox\@tempboxa\hskip\dimen@
+          $\overline{%
+            \vrule width \z@ height \@tempdimb depth \@tempdimc
+            \hskip#2\@tempdima}\m@th$%
+          \hfil}}
+    \endgroup}
+\else
+  \@operatorinfo{Skipping \string\overbar.}
+\fi
+\if@operator@p
+  \wlog{}
+  \@operatorinfo{Defining probability distributions.}
+  \DeclareMathOperator{\Bernoulli}{Bernoulli}
+  \DeclareMathOperator{\Betaop}{Beta}
+  \DeclareMathOperator{\Binomial}{Binomial}
+  \DeclareMathOperator{\Boltzmann}{Boltzmann}
+  \DeclareMathOperator{\Burr}{Burr}
+  \DeclareMathOperator{\Categorical}{Categorical}
+  \DeclareMathOperator{\Cauchy}{Cauchy}
+  \DeclareMathOperator{\chiop}{\chi}
+  \@operator@robust@def\ChiSq{\chiop^{\operator@font\@operatortw@}}
+  \DeclareMathOperator{\Dagum}{Dagum}
+  \DeclareMathOperator{\Exponential}{Exponential}
+  \DeclareMathOperator{\Erlang}{Erlang}
+  \DeclareMathOperator{\Gammaop}{Gamma}
+  \DeclareMathOperator{\Gompertz}{Gompertz}
+  \@operator@robust@def\InvChiSq{%
+    \mathop{\operator@font
+      Inv\@operatorhyphen\chiop}%
+      \nolimits^{\operator@font\@operatortw@}}
+  \DeclareMathOperator{\InvGamma}
+    {Inv\@operatorhyphen Gamma}
+  \DeclareMathOperator{\Kolmogorov}{Kolmogorov}
+  \DeclareMathOperator{\LogLogistic}{Log\@operatorhyphen Logistic}
+  \DeclareMathOperator{\LogNormal}{Log\@operatorhyphen Normal}
+  \DeclareMathOperator{\Logistic}{Logistic}
+  \DeclareMathOperator{\Lomax}{Lomax}
+  \DeclareMathOperator{\MaxwellBoltzmann}
+    {Maxwell\@operatorhyphen Boltzmann}
+  \DeclareMathOperator{\Multinomial}{Multinomial}
+  \DeclareMathOperator{\NegBinomial}{Neg\@operatorhyphen Binomial}
+  \@operatorinfo{Defining new operator \string\Normal.}
+  \addto@operator@list{\Normal}
+  \def\operator@N{\mathop{\kern\z@\mathcal{N}}\nolimits}
+  \def\operator@normal{\mathop{\operator@font Normal}\nolimits}
+  \@operator@robust@def\Normal{%
+    \mathchoice{}{}{}{}
+    \@ifstar\operator@normal\operator@N}
+  \DeclareMathOperator{\Pareto}{Pareto}
+  \DeclareMathOperator{\Poisson}{Poisson}
+  \DeclareMathOperator{\Weibull}{Weibull}
+  \DeclareMathOperator{\Zipf}{Zipf}
+\else
+  \@operatorinfo{Skipping probability distributions.}
+\fi
+\if@operator@sf
+  \wlog{}
+  \@operatorinfo{Defining special functions.}
+  \DeclareMathOperator{\Ai}{Ai}
+  \DeclareMathOperator{\Bi}{Bi}
+  \DeclareMathOperator{\Ci}{Ci}
+  \DeclareMathOperator{\ci}{ci}
+  \DeclareMathOperator{\Chiop}{Chi}
+  \DeclareMathOperator{\Ei}{Ei}
+  \DeclareMathOperator{\erf}{erf}
+  \@operator@robust@def\erfinv{\erf^{\operator@font\@operatorm@ne}}
+  \DeclareMathOperator{\erfc}{erfc}
+  \@operator@robust@def\erfcinv{\erfc^{\operator@font\@operatorm@ne}}
+  \DeclareMathOperator{\Li}{Li}
+  \DeclareMathOperator{\li}{li}
+  \DeclareMathOperator{\Log}{Log}
+  \DeclareMathOperator{\sgn}{sgn}
+  \DeclareMathOperator{\Si}{Si}
+  \DeclareMathOperator{\si}{si}
+  \DeclareMathOperator{\Shi}{Shi}
+\else
+  \@operatorinfo{Skipping special functions.}
+\fi
+\if@operator@s
+  \wlog{}
+  \@operatorinfo{Defining standard operators.}
+  \DeclareMathOperator*{\argmax}{arg\,max}
+  \DeclareMathOperator*{\argmin}{arg\,min}
+  \DeclareMathOperator{\Aut}{Aut}
+  \@operatorinfo{Defining new operator \string\c.}
+  \addto@operator@list{\mathc}
+  \let\textc\c
+  \def\mathc{^{\operator@font c}}
+  \@operator@robust@def\c{\ifmmode\mathc\else\expandafter\textc\fi}
+  \DeclareMathOperator{\cf}{cf}
+  \DeclareMathOperator{\cl}{cl}
+  \DeclareMathOperator{\conv}{conv}
+  \DeclareMathOperator{\corr}{corr}
+  \DeclareMathOperator{\cov}{cov}
+  \DeclareMathOperator{\curl}{curl}
+  \DeclareMathOperator{\divop}{div}
+  \DeclareMathOperator{\Ext}{Ext}
+  \DeclareMathOperator{\Gal}{Gal}
+  \DeclareMathOperator{\grad}{grad}
+  \DeclareMathOperator{\Hess}{\mathcal{H}}
+  \DeclareMathOperator{\id}{id}
+  \DeclareMathOperator{\img}{img}
+  \DeclareMathOperator{\Info}{\mathcal{I}}
+  \DeclareMathOperator{\interior}{int}
+  \DeclareMathOperator*{\lcm}{lcm}
+  \DeclareMathOperator{\Proj}{Proj}
+  \DeclareMathOperator{\Res}{Res}
+  \DeclareMathOperator{\Spec}{Spec}
+  \DeclareMathOperator{\st}{st}
+  \DeclareMathOperator{\supp}{supp}
+  \DeclareMathOperator{\Tor}{Tor}
+  \DeclareMathOperator{\Var}{Var}
+  \addto@operator@list{\varIm\varRe\Im\Re}
+  \@operatorinfo{Defining \string\varIm\space operator from \string\Im.}
+  \@operatorinfo{Defining \string\varRe\space operator from \string\Re.}
+  \let\varIm\Im
+  \let\varRe\Re
+  \DeclareMathOperator{\Im}{Im}
+  \DeclareMathOperator{\Re}{Re}
+\else
+  \@operatorinfo{Skipping standard operators.}
+\fi
+\if@operator@t
+  \wlog{}
+  \@operatorinfo{Defining trigonometric functions.}
+  \DeclareMathOperator{\csch}{csch}
+  \DeclareMathOperator{\sech}{sech}
+  \DeclareMathOperator{\arccsc}{arccsc}
+  \DeclareMathOperator{\arcsec}{arcsec}
+  \DeclareMathOperator{\arccot}{arccot}
+  \DeclareMathOperator{\arcsinh}{arcsinh}
+  \DeclareMathOperator{\arccosh}{arccosh}
+  \DeclareMathOperator{\arctanh}{arctanh}
+  \DeclareMathOperator{\arccsch}{arccsch}
+  \DeclareMathOperator{\arcsech}{arcsech}
+  \DeclareMathOperator{\arccoth}{arccoth}
+  \DeclareMathOperator{\arsinh}{arsinh}
+  \DeclareMathOperator{\arcosh}{arcosh}
+  \DeclareMathOperator{\artanh}{artanh}
+  \DeclareMathOperator{\arcsch}{arcsch}
+  \DeclareMathOperator{\arsech}{arsech}
+  \DeclareMathOperator{\arcoth}{arcoth}
+  \@operator@robust@def\sininv{\sin^{\operator@font\@operatorm@ne}}
+  \@operator@robust@def\cosinv{\cos^{\operator@font\@operatorm@ne}}
+  \@operator@robust@def\taninv{\tan^{\operator@font\@operatorm@ne}}
+  \@operator@robust@def\cscinv{\csc^{\operator@font\@operatorm@ne}}
+  \@operator@robust@def\secinv{\sec^{\operator@font\@operatorm@ne}}
+  \@operator@robust@def\cotinv{\cot^{\operator@font\@operatorm@ne}}
+  \@operator@robust@def\sinhinv{\sinh^{\operator@font\@operatorm@ne}}
+  \@operator@robust@def\coshinv{\cosh^{\operator@font\@operatorm@ne}}
+  \@operator@robust@def\tanhinv{\tanh^{\operator@font\@operatorm@ne}}
+  \@operator@robust@def\cschinv{\csch^{\operator@font\@operatorm@ne}}
+  \@operator@robust@def\sechinv{\sech^{\operator@font\@operatorm@ne}}
+  \@operator@robust@def\cothinv{\coth^{\operator@font\@operatorm@ne}}
+\else
+  \@operatorinfo{Skipping trigonometric functions.}
+\fi
+\wlog{}
+\endinput
+%%
+%% End of file `math-operator.sty'.

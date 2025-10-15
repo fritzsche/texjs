@@ -1,0 +1,288 @@
+% \iffalse meta-comment
+%
+% Copyright (cc) 2020 by Thomas Nicholson
+%
+% This work is licensed under the Creative Commons Attribution 4.0 International License. 
+% To view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/ or 
+% send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+%
+%
+% \fi
+
+% \iffalse
+%<package>\NeedsTeXFormat{LaTeX2e}[2005-12-01]
+%<package>\ProvidesPackage{helmholtz-ellis-ji-notation}[2020-05-19 v1.1]
+
+%<*driver>
+\documentclass[a4paper, 10pt]{ltxdoc}
+\usepackage{helmholtz-ellis-ji-notation}
+\usepackage{hologo}
+\usepackage{makecell}
+\usepackage{microtype}
+\usepackage[all]{nowidow}
+\usepackage{longtable}
+\usepackage{fontspec}
+\DisableCrossrefs
+\CodelineIndex
+\RecordChanges
+\begin{document}
+	\DocInput{helmholtz-ellis-ji-notation.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \CheckSum{200}
+%
+% \changes{v1.0}{2019-12-09}{Initial version}
+%
+% \GetFileInfo{helmholtz-ellis-ji-notation.sty}
+%
+% \title{The \textsf{helmholtz-ellis-ji-notation} package\thanks{This document corresponds to \textsf{helmholtz-ellis-ji-notation} v1.1, dated 2020-05-19.}}
+% \author{Thomas Nicholson \\ \texttt{thomas@thomasnicholson.ca}}
+% 
+%
+% \maketitle
+%
+% \section{Introduction}
+% The Helmholtz-Ellis JI Pitch~Notation~(HEJI), devised in the early 2000s by Marc~Sabat and Wolfgang~von~Schweinitz, explicitly notates the raising and lowering of the \textit{untempered} diatonic Pythagorean notes by specific microtonal ratios defined for each prime. It provides visually distinctive ``logos'' distinguishing families of justly tuned intervals that relate to the harmonic series. These take the form of strings of additional accidental symbols based on historical precedents, extending the traditional sharps and flats. Since its 2020 update, HEJI~ver.~2 (``HEJI2'') provides unique microtonal symbols through the 47-limit. 
+%
+% The \textsf{helmholtz-ellis-ji-notation} package is a simple \hologo{LaTeX} implementation of HEJI2 that allows for in-line typesetting of microtonal accidentals for use within theoretical texts, program notes, symbol legends, etc. 
+%
+% \section{Compatibility}
+% Documents must be compiled using the \hologo{XeLaTeX} engine.
+% 
+% \section{Installation}
+% Insall the package either through your \hologo{TeX} distribution (TeXLive, MiKTeX) or by manually insalling the |helmholtz-ellis-ji-notation.ins| file (e.g. run |latex helmholtz-ellis-ji-notation.ins| in Command Prompt) and compiling |helmholtz-ellis-ji-notation.dtx| using \hologo{XeLaTeX} to create the latest version of this documentation. Include the package 
+%
+% \vspace{3mm}
+% |\usepackage|\oarg{option}|{helmholtz-ellis-ji-notation}|  
+% \vspace{3mm}
+% 
+% \noindent
+% in your document preamble. You must also install the |HEJI2Text.otf| font file and verify that it appears in your system's system font directory.
+%
+% \newpage
+% \section{Usage}
+% The \textsf{helmholtz-ellis-ji-notation} package provides the general \DescribeMacro{heji}|\heji| macro for typesetting microtones. It takes two arguments.
+%
+% \vspace{3mm}
+% |\heji|\marg{note}\marg{string}
+% \vspace{3mm}
+%
+% \noindent
+% The first argument, \DescribeMacro{note}\marg{note}, corresponds to the desired diatonic pitch name (\textit{e.g.}~A--G, do--ti) and is typeset in the document's default body font. The second argument, \DescribeMacro{string}\marg{string}, corresponds to the appropriate character mapping of the desired accidental (combination) within the |HEJI2Text.otf| file \textbf{or} the appropriate string of \textit{accidental macros} (see table in section~5). For example, the pitch 7/4 above \heji{C}{\nat} may be typeset by writing either |\heji{B}{<e}| or |\heji{B}{\otonalseven\flat}| to produce \heji{B}{\otonalseven\flat}. By default, tones are displayed in note--accidental format. Including the \DescribeMacro{accfirst option}option |accfirst| when loading the package reverses the order of elements to accidental--note format. To print an accidental on its own, use the macro \DescribeMacro{acc}|\acc|\marg{string}.
+%
+% The stand-alone macros \DescribeMacro{otonal, utonal}|\otonal| and |\utonal| may be used when describing partials of harmonic and subharmonic series, e.g. |15\otonal\| for 15\otonal\ and |\utonal 7| for \utonal 7. Note the extra backslash when the |\otonal| macro is used. This is required because \hologo{LaTeX} ignores spaces immediately following these macros (which is why a space \textit{is}, confusingly, inserted after |\utonal| in order to \textit{adjoin} it to the following digit). Including a backslash on the tail of |\otonal| \textit{forces} a space after the symbol is printed. If no space is desired (e.g. if the symbol is followed by a period or a comma) then the trailing backslash may, of course, be omitted.
+%
+% \section{Accidental macros \& font mappings}
+%
+% \setlength{\extrarowheight}{3pt}
+% \begin{longtable}{ccc}
+%	\textbf{Notation} & \textbf{Accidental macro} & \textbf{Font mapping} \\
+%	\hline
+%	\endfirsthead
+%	\multicolumn{3}{l}{\textbf{Accidental macros \& font mappings} -- \textit{cont'd from previous page}} \\
+%	\textbf{Notation} & \textbf{Accidental macro} & \textbf{Font mapping} \\
+%	\hline
+%	\endhead
+%   \multicolumn{3}{r}{\textit{cont'd on next page}} \\
+%	\endfoot
+%	\endlastfoot
+%	\heji{}{\tempflatflat} & |\tempflatflat| & |A| \\
+%	\heji{}{\tempflat} & |\tempflat| & |a| \\
+%	\heji{}{\tempnat} & |\tempnat| & |j| \\
+%	\heji{}{\tempsharp} & |\tempsharp| & |z| \\
+%	\heji{}{\tempsharpsharp} & |\tempsharpsharp| & |Z| \\
+%	\hline
+%   \heji{}{\flatflat} & |\flatflat| & |E| \\
+%   \heji{}{\flat} & |\flat| & |e| \\
+%   \heji{}{\nat} & |\nat| & |n| \\
+%   \heji{}{\sharp} & |\sharp| & |v| \\
+%   \heji{}{\sharpsharp} & |\sharpsharp| & |V| \\
+%   \hline
+%	\heji{}{\otonalsixtwentyfiveflatflat} & |\otonalsixtwentyfiveflatflat| & |I| \\
+%	\heji{}{\otonalsixtwentyfiveflat} & |\otonalsixtwentyfiveflat| & |K| \\
+%	\heji{}{\otonalsixtwentyfivenat} & |\otonalsixtwentyfivenat| & |M| \\
+%	\heji{}{\otonalsixtwentyfivesharp} & |\otonalsixtwentyfivesharp| & |O| \\
+%	\heji{}{\otonalsixtwentyfivesharpsharp} & |\otonalsixtwentyfivesharpsharp| & |R| \\
+%   \heji{}{\otonalonetwentyfiveflatflat} & |\otonalonetwentyfiveflatflat| & |B| \\
+%   \heji{}{\otonalonetwentyfiveflat} & |\otonalonetwentyfiveflat| & |b| \\
+%   \heji{}{\otonalonetwentyfivenat} & |\otonalonetwentyfivenat| & |k| \\
+%   \heji{}{\otonalonetwentyfivesharp} & |\otonalonetwentyfivesharp| & |s| \\
+%   \heji{}{\otonalonetwentyfivesharpsharp} & |\otonalonetwentyfivesharpsharp| & |S| \\
+%   \heji{}{\otonaltwentyfiveflatflat} & |\otonaltwentyfiveflatflat| & |C| \\
+%   \heji{}{\otonaltwentyfiveflat} & |\otonaltwentyfiveflat| & |c| \\
+%   \heji{}{\otonaltwentyfivenat} & |\otonaltwentyfivenat| & |l| \\
+%   \heji{}{\otonaltwentyfivesharp} & |\otonaltwentyfivesharp| & |t| \\
+%   \heji{}{\otonaltwentyfivesharpsharp} & |\otonaltwentyfivesharpsharp| & |T| \\
+%   \heji{}{\otonalfiveflatflat} & |\otonalfiveflatflat| & |D| \\
+%   \heji{}{\otonalfiveflat} & |\otonalfiveflat| & |d| \\
+%   \heji{}{\otonalfivenat} & |\otonalfivenat| & |m| \\
+%   \heji{}{\otonalfivesharp} & |\otonalfivesharp| & |u| \\
+%   \heji{}{\otonalfivesharpsharp} & |\otonalfivesharpsharp| & |U| \\
+%   \heji{}{\utonalfiveflatflat} & |\utonalfiveflatflat| & |F| \\
+%   \heji{}{\utonalfiveflat} & |\utonalfiveflat| & |f| \\
+%   \heji{}{\utonalfivenat} & |\utonalfivenat| & |o| \\
+%   \heji{}{\utonalfivesharp} & |\utonalfivesharp| & |w| \\
+%   \heji{}{\utonalfivesharpsharp} & |\utonalfivesharpsharp| & |W| \\
+%   \heji{}{\utonaltwentyfiveflatflat} & |\utonaltwentyfiveflatflat| & |G| \\
+%   \heji{}{\utonaltwentyfiveflat} & |\utonaltwentyfiveflat| & |g| \\
+%   \heji{}{\utonaltwentyfivenat} & |\utonaltwentyfivenat| & |p| \\
+%   \heji{}{\utonaltwentyfivesharp} & |\utonaltwentyfivesharp| & |x| \\
+%   \heji{}{\utonaltwentyfivesharpsharp} & |\utonaltwentyfivesharpsharp| & |X| \\
+%   \heji{}{\utonalonetwentyfiveflatflat} & |\utonalonetwentyfiveflatflat| & |H| \\
+%   \heji{}{\utonalonetwentyfiveflat} & |\utonalonetwentyfiveflat| & |h| \\
+%   \heji{}{\utonalonetwentyfivenat} & |\utonalonetwentyfivenat| & |q| \\
+%   \heji{}{\utonalonetwentyfivesharp} & |\utonalonetwentyfivesharp| & |y| \\
+%   \heji{}{\utonalonetwentyfivesharpsharp} & |\utonalonetwentyfivesharpsharp| & |Y| \\
+%   \heji{}{\utonalsixtwentyfiveflatflat} & |\utonalsixtwentyfiveflatflat| & |J| \\
+%   \heji{}{\utonalsixtwentyfiveflat} & |\utonalsixtwentyfiveflat| & |L| \\
+%   \heji{}{\utonalsixtwentyfivenat} & |\utonalsixtwentyfivenat| & |N| \\
+%   \heji{}{\utonalsixtwentyfivesharp} & |\utonalsixtwentyfivesharp| & |P| \\
+%   \heji{}{\utonalsixtwentyfivesharpsharp} & |\utonalsixtwentyfivesharpsharp| & |Q| \\
+%	\hline
+%   \heji{}{\otonalfortynine} & |\otonalfortynine| & |,| \\
+%   \heji{}{\otonalseven} & |\otonalseven| & |<| \\
+%   \heji{}{\utonalseven} & |\utonalseven| & |>| \\
+%   \heji{}{\utonalfortynine} & |\utonalfortynine| & |.| \\
+%	\hline
+%   \heji{}{\otonaleleven} & |\otonaleleven| & |4| \\
+%   \heji{}{\utonaleleven} & |\utonaleleven| & |5| \\
+%	\hline
+%   \heji{}{\otonalthirteen} & |\otonalthirteen| & |0| \\
+%   \heji{}{\utonalthirteen} & |\utonalthirteen| & |9| \\
+%	\hline
+%   \heji{}{\otonalseventeen} & |\otonalseventeen| & |:| \\
+%   \heji{}{\utonalseventeen} & |\utonalseventeen| & |;| \\
+%	\hline
+%   \heji{}{\otonalnineteen} & |\otonalnineteen| & |/| \\
+%   \heji{}{\utonalnineteen} & |\utonalnineteen| & |*| \\
+%	\hline
+%   \heji{}{\otonaltwentythree} & |\otonaltwentythree| & |3| \\
+%   \heji{}{\utonaltwentythree} & |\utonaltwentythree| & |6| \\
+%	\hline
+%   \heji{}{\otonaltwentynine} & |\otonaltwentynine| & |2| \\
+%   \heji{}{\utonaltwentynine} & |\utonaltwentynine| & |7| \\
+%	\hline
+%   \heji{}{\otonalthirtyone} & |\otonalthirtyone| & |1| \\
+%   \heji{}{\utonalthirtyone} & |\utonalthirtyone| & |8| \\
+%	\hline
+%   \heji{}{\otonalthirtyseven} & |\otonalthirtyseven| & |á| \\
+%   \heji{}{\utonalthirtyseven} & |\utonalthirtyseven| & |à| \\
+%	\hline
+%   \heji{}{\otonalfortyone} & |\otonalfortyone| & |+| \\
+%   \heji{}{\utonalfortyone} & |\utonalfortyone| & |-| \\
+%	\hline
+%   \heji{}{\otonalfortythree} & |\otonalfortythree| & |é| \\
+%   \heji{}{\utonalfortythree} & |\utonalfortythree| & |è| \\
+%	\hline
+%   \heji{}{\otonalfortyseven} & |\otonalfortyseven| & |í| \\
+%   \heji{}{\utonalfortyseven} & |\utonalfortyseven| & |ì| \\
+%   \hline
+%   \multicolumn{3}{c}{\textit{stand-alone macros for o- and utonal symbols}} \\
+%   \heji{}{\otonal} & |\otonal| & |ö| \\
+%   \heji{}{\utonal} & |\utonal| & |ü| \\
+%   \heji{}{\Otonal} & |\Otonal| & |Ö| \\
+%   \heji{}{\Utonal} & |\Utonal| & |Ü| \\
+% \end{longtable}
+%
+% \StopEventually{}
+% \newpage
+% \section{Implementation}
+% \begin{macro}{\heji}
+% The package requires \textsf{fontspec} to access the required font files.
+%    \begin{macrocode}
+\RequirePackage{fontspec}[2018-07-30 vv2.6h]
+\newfontfamily{\HEJIfont}{HEJI2Text}
+\makeatletter
+\newcommand*{\fsize}{\dimexpr\f@size pt\relax}
+\makeatother
+\newcommand*{\tempflatflat}{A}
+\newcommand*{\tempflat}{a}
+\newcommand*{\tempnat}{j}
+\newcommand*{\tempsharp}{z}
+\newcommand*{\tempsharpsharp}{Z}
+\newcommand*{\otonalsixtwentyfiveflatflat}{I}
+\newcommand*{\otonalsixtwentyfiveflat}{K}
+\newcommand*{\otonalsixtwentyfivenat}{M}
+\newcommand*{\otonalsixtwentyfivesharp}{O}
+\newcommand*{\otonalsixtwentyfivesharpsharp}{R}
+\newcommand*{\otonalonetwentyfiveflatflat}{B}
+\newcommand*{\otonalonetwentyfiveflat}{b}
+\newcommand*{\otonalonetwentyfivenat}{k}
+\newcommand*{\otonalonetwentyfivesharp}{s}
+\newcommand*{\otonalonetwentyfivesharpsharp}{S}
+\newcommand*{\otonaltwentyfiveflatflat}{C}
+\newcommand*{\otonaltwentyfiveflat}{c}
+\newcommand*{\otonaltwentyfivenat}{l}
+\newcommand*{\otonaltwentyfivesharp}{t}
+\newcommand*{\otonaltwentyfivesharpsharp}{T}
+\newcommand*{\otonalfiveflatflat}{D}
+\newcommand*{\otonalfiveflat}{d}
+\newcommand*{\otonalfivenat}{m}
+\newcommand*{\otonalfivesharp}{u}
+\newcommand*{\otonalfivesharpsharp}{U}
+\newcommand*{\flatflat}{E}
+\renewcommand*{\flat}{e}
+\newcommand*{\nat}{n}
+\renewcommand*{\sharp}{v}
+\newcommand*{\sharpsharp}{V}
+\newcommand*{\utonalfiveflatflat}{F}
+\newcommand*{\utonalfiveflat}{f}
+\newcommand*{\utonalfivenat}{o}
+\newcommand*{\utonalfivesharp}{w}
+\newcommand*{\utonalfivesharpsharp}{W}
+\newcommand*{\utonaltwentyfiveflatflat}{G}
+\newcommand*{\utonaltwentyfiveflat}{g}
+\newcommand*{\utonaltwentyfivenat}{p}
+\newcommand*{\utonaltwentyfivesharp}{x}
+\newcommand*{\utonaltwentyfivesharpsharp}{X}
+\newcommand*{\utonalonetwentyfiveflatflat}{H}
+\newcommand*{\utonalonetwentyfiveflat}{h}
+\newcommand*{\utonalonetwentyfivenat}{q}
+\newcommand*{\utonalonetwentyfivesharp}{y}
+\newcommand*{\utonalonetwentyfivesharpsharp}{Y}
+\newcommand*{\utonalsixtwentyfiveflatflat}{J}
+\newcommand*{\utonalsixtwentyfiveflat}{L}
+\newcommand*{\utonalsixtwentyfivenat}{N}
+\newcommand*{\utonalsixtwentyfivesharp}{P}
+\newcommand*{\utonalsixtwentyfivesharpsharp}{Q}
+\newcommand*{\otonalfortynine}{,}
+\newcommand*{\otonalseven}{<}
+\newcommand*{\utonalseven}{>}
+\newcommand*{\utonalfortynine}{.}
+\newcommand*{\otonaleleven}{4}
+\newcommand*{\utonaleleven}{5}
+\newcommand*{\otonalthirteen}{0}
+\newcommand*{\utonalthirteen}{9}
+\newcommand*{\otonalseventeen}{:}
+\newcommand*{\utonalseventeen}{;}
+\newcommand*{\otonalnineteen}{/}
+\newcommand*{\utonalnineteen}{*}
+\newcommand*{\otonaltwentythree}{3}
+\newcommand*{\utonaltwentythree}{6}
+\newcommand*{\otonaltwentynine}{2}
+\newcommand*{\utonaltwentynine}{7}
+\newcommand*{\otonalthirtyone}{1}
+\newcommand*{\utonalthirtyone}{8}
+\newcommand*{\otonalthirtyseven}{á}
+\newcommand*{\utonalthirtyseven}{à}
+\newcommand*{\otonalfortyone}{+}
+\newcommand*{\utonalfortyone}{-}
+\newcommand*{\otonalfortythree}{é}
+\newcommand*{\utonalfortythree}{è}
+\newcommand*{\otonalfortyseven}{í}
+\newcommand*{\utonalfortyseven}{ì}
+\newcommand{\heji}[2]{\mbox{#1\HEJIfont\large #2}}
+\DeclareOption{accfirst}{
+\renewcommand{\heji}[2]{\mbox{{\HEJIfont\large #2}#1}}
+}
+\newcommand{\acc}[1]{\mbox{\HEJIfont\large #1}}
+\newcommand*{\otonal}{\mbox{\HEJIfont\large ö}}
+\newcommand*{\utonal}{\mbox{\HEJIfont\large ü}}
+\newcommand*{\Otonal}{\mbox{\HEJIfont\large Ö}}
+\newcommand*{\Utonal}{\mbox{\HEJIfont\large Ü}}
+\ProcessOptions\relax
+%    \end{macrocode}
+% \end{macro}
+% \Finale

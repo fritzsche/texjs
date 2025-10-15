@@ -1,0 +1,451 @@
+%%%
+% Fraction Nombre
+%%%
+\def\filedateFractionNombre{2025/05/28}%
+\def\fileversionFractionNombre{0.1a}%
+\message{-- \filedateFractionNombre\space v\fileversionFractionNombre}%
+%
+\newtoks\tokFractionNombrePerso%
+\def\UpdatetoksFN#1\nil{\addtotok\tokFractionNombrePerso{"#1",}}%
+
+\setKVdefault[ClesFN]{Unite=5cm,Aire=false,Solution=false,Quadrillage=false,PasQuad=5mm,HautQuad=3,LargQuad=8,Vide=false,Creation=false,Couleur=blue,UniteAire=1x1,Pointilles=false,Tentatives=10,SansLegende=false,CouleurAire=LightSteelBlue,CouleurUniteAire=0.7white,Perso={}}%
+\defKV[ClesFN]{Perso=\ifempty{#1}{}{\setKV[ClesFN]{Creation}\xdef\PfCFooCheminFN{#1}}}%
+
+\NewDocumentCommand\FractionNombre{om}{%
+  \useKVdefault[ClesFN]%
+  \setKV[ClesFN]{#1}%
+  \tokFractionNombrePerso{}%
+  \ifboolKV[ClesFN]{Creation}{%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\PfCListeDeplacements{\PfCFooCheminFN}%
+    \reademptyitems%
+    \foreachitem\compteur\in\PfCListeDeplacements{\expandafter\UpdatetoksFN\compteur\nil}%
+  }{}%
+  \StrCut{#2}{/}\PfCNumA\PfCNumB%
+  \ifboolKV[ClesFN]{Aire}{%
+    \StrCut{\useKV[ClesFN]{UniteAire}}{x}\PfCAirex\PfCAirey%
+    \ifboolKV[ClesFN]{Creation}{%
+        \BuildFractionNombreAirePerso{\PfCNumA}{\PfCNumB}{\PfCAirex}{\PfCAirey}{\the\tokFractionNombrePerso}%
+      }{%
+      \BuildFractionNombreAire{\PfCNumA}{\PfCNumB}{\PfCAirex}{\PfCAirey}%
+    }%
+  }{%
+    \ifboolKV[ClesFN]{Quadrillage}{%
+      \BuildFractionNombreQuadrillage{\PfCNumA}{\PfCNumB}{\the\tokFractionNombrePerso}%
+    }{%
+      \BuildFractionNombreSegment{\PfCNumA}{\PfCNumB}%
+    }%
+  }%
+}%
+
+\NewDocumentCommand\BuildFractionNombreAirePerso{mmmmm}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      vardef LireMotif(text t)=
+      lmotif=0;
+      hmotif=0;
+      for p_=t:
+      hmotif:=hmotif+1;
+      if lmotif<(length p_):
+      lmotif:=length p_;
+      fi;
+      endfor;
+      enddef;
+      %
+      vardef PlacerMotif(text t)=
+      ChoixLigneD=hmotif+ceiling(uniformdeviate(HautQuad-1-hmotif));
+      ChoixColonneD=ceiling(uniformdeviate(LargQuad-#3-1-lmotif));
+      Colonne:=ChoixColonneD;
+      Ligne=ChoixLigneD;
+      for p_=t:
+      Colonne:=ChoixColonneD;
+      for k=0 upto ((length p_)-1):
+      if (substring(k,k+1) of p_)="x":
+      fill ((unitsquare scaled 5mm) shifted (5mm*(Colonne-1,Ligne-1))) withcolor CouleurAire;
+      fi;
+      Colonne:=Colonne+1;
+      endfor;
+      Ligne:=Ligne-1;
+      endfor;
+      enddef;
+      %
+      color CouleurAire,CouleurUniteAire;
+      CouleurAire=\useKV[ClesFN]{CouleurAire};
+      CouleurUniteAire=\useKV[ClesFN]{CouleurUniteAire};
+      PasQuad=\useKV[ClesFN]{PasQuad};
+      HautQuad=\useKV[ClesFN]{HautQuad};
+      LargQuad=\useKV[ClesFN]{LargQuad};
+      pair A,B,C,D,U[];
+      A=(0,0);
+      B-A=PasQuad*(LargQuad,0);
+      C-B=PasQuad*(0,HautQuad);
+      D-C=A-B;
+      % l'unité
+      U0=C;
+      U1-U0=#3*PasQuad*(-1,0);
+      U3-U0=#4*PasQuad*(0,-1);
+      U2-U3=U1-U0;
+      %
+      LireMotif(#5);
+      PlacerMotif(#5);
+      % Tracage
+      fill polygone(U0,U1,U2,U3) withcolor CouleurUniteAire;
+      label.top(TEX("\textbf{1 ua}"),iso(U1,U0));
+      %Le quadrillage
+      trace polygone(A,B,C,D);
+      for k=1 upto LargQuad-1:
+      trace (k/LargQuad)[A,B]--(k/LargQuad)[D,C];
+      endfor;
+      for k=1 upto HautQuad-1:
+      trace (k/HautQuad)[A,D]--(k/HautQuad)[B,C];
+      endfor;
+    \end{mplibcode}%
+  \fi%
+}%
+
+\NewDocumentCommand\BuildFractionNombreAire{mmmm}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      boolean Impossible[][];
+      %
+      vardef InitialisationZone=
+      for k=-1 upto HautQuad+1:
+      for l=-1 upto LargQuad+1:
+      Impossible[k][l]=true;
+      endfor;
+      endfor;
+      for k=1 upto HautQuad-1:
+      for l=1 upto LargQuad-#3-1:
+      Impossible[k][l]:=false;
+      endfor;
+      endfor;
+      enddef;
+      %
+      vardef RAZZone=
+      pair PileChemin[];
+      indiceChemin:=0;
+      enddef;
+      % 
+      def PushChemin(expr tt)=
+      if indiceChemin<1:
+      PileChemin[1]:=tt;
+      indiceChemin:=1;
+      else:
+      PileChemin[indiceChemin+1]:=tt;
+      indiceChemin:=indiceChemin+1;
+      fi;
+      enddef;
+      %
+      def PopChemin=
+      tentative:=tentative+1;
+      currentpicture:=nullpicture;
+      RAZZone;
+      for k=-1 upto HautQuad:
+      for l=-1 upto LargQuad:
+      Impossible[k][l]:=true;
+      endfor;
+      endfor;
+      for k=1 upto HautQuad-1:
+      for l=1 upto LargQuad-#3-1:
+      Impossible[k][l]:=false;
+      endfor;
+      endfor;
+      %Redemarrage
+      nbcaseschoisies:=1;
+      PushChemin((ChoixLigneD,ChoixColonneD));
+      fill ((unitsquare scaled 5mm) shifted (5mm*(ChoixColonneD-1,ChoixLigneD-1))) withcolor CouleurAire;
+      Impossible[ChoixLigneD][ChoixColonneD]:=true;
+      VoisinDispo(ChoixLigneD,ChoixColonneD);
+      enddef;
+      %
+      %Pile des cases voisines de la case parcourue
+      pair PileVoisin[];
+      numeric indiceVoisin;
+      indiceVoisin=0;
+      % 
+      vardef RAZPileVoisin=
+      indiceVoisin:=0;
+      enddef;
+      %
+      def PushVoisin(expr tt)=
+      if indiceVoisin<1:
+      PileVoisin[1]:=tt;
+      indiceVoisin:=1;
+      else:
+      PileVoisin[indiceVoisin+1]:=tt;
+      indiceVoisin:=indiceVoisin+1;
+      fi;
+      enddef;
+      % 
+      vardef VoisinDispo(expr la,lo)=
+      RAZPileVoisin;
+      numeric nbvoisin;
+      nbvoisin=0;
+      if Impossible[la+1][lo]=false:
+      nbvoisin:=nbvoisin+1;
+      PushVoisin((la+1,lo));
+      fi;
+      if Impossible[la-1][lo]=false:
+      nbvoisin:=nbvoisin+1;
+      PushVoisin((la-1,lo));
+      fi;
+      if Impossible[la][lo+1]=false:
+      nbvoisin:=nbvoisin+1;
+      PushVoisin((la,lo+1));
+      fi;
+      if Impossible[la][lo-1]=false:
+      nbvoisin:=nbvoisin+1;
+      PushVoisin((la,lo-1));
+      fi;
+      enddef;
+      %
+      color CouleurAire,CouleurUniteAire;
+      CouleurAire=\useKV[ClesFN]{CouleurAire};
+      CouleurUniteAire=\useKV[ClesFN]{CouleurUniteAire};
+      %
+      boolean Vide,SansLegende;
+      Vide=\useKV[ClesFN]{Vide};
+      SansLegende=\useKV[ClesFN]{SansLegende};
+      PasQuad=\useKV[ClesFN]{PasQuad};
+      HautQuad=\useKV[ClesFN]{HautQuad};
+      LargQuad=\useKV[ClesFN]{LargQuad};
+      Tentatives=\useKV[ClesFN]{Tentatives};
+      pair A,B,C,D,U[];
+      A=(0,0);
+      B-A=PasQuad*(LargQuad,0);
+      C-B=PasQuad*(0,HautQuad);
+      D-C=A-B;
+      % l'unité
+      U0=C;
+      U1-U0=#3*PasQuad*(-1,0);
+      U3-U0=#4*PasQuad*(0,-1);
+      U2-U3=U1-U0;
+      % Le nombres total de cases à colorier
+      NbTotalCasesAColorier=((#1*#3*#4)/#2);
+      NbTotalCasesRestantes=HautQuad*(LargQuad-#3-1);
+      %
+      InitialisationZone;
+      RAZZone;
+      %
+      ChoixLigneD=ceiling(uniformdeviate(HautQuad-1));
+      ChoixColonneD=ceiling(uniformdeviate(LargQuad-#3-1));
+      %
+      tentative:=1;
+      if Vide=false:
+      PushChemin((ChoixLigneD,ChoixColonneD));
+      nbcaseschoisies=1;
+      fill ((unitsquare scaled 5mm) shifted (5mm*(ChoixColonneD-1,ChoixLigneD-1))) withcolor CouleurAire;
+      Impossible[ChoixLigneD][ChoixColonneD]:=true;
+      VoisinDispo(ChoixLigneD,ChoixColonneD);
+      % Le "parcours"
+      forever: exitif (nbcaseschoisies>NbTotalCasesAColorier-1) or (tentative>Tentatives);
+      nb:=ceiling(uniformdeviate(nbvoisin));
+      if nb>0:
+      for k=1 upto nbvoisin:
+      Impossible[xpart(PileVoisin[nb])][ypart(PileVoisin[nb])]:=true;
+      endfor;
+      PushChemin((xpart(PileVoisin[nb]),ypart(PileVoisin[nb])));
+      nbcaseschoisies:=nbcaseschoisies+1;
+      fill ((unitsquare scaled 5mm) shifted (5mm*(ypart(PileVoisin[nb])-1,xpart(PileVoisin[nb])-1))) withcolor CouleurAire;
+      VoisinDispo(xpart(PileChemin[indiceChemin]),ypart(PileChemin[indiceChemin]));
+      else:
+      PopChemin;
+      fi;
+      endfor;
+      fi;
+      % Tracage
+      if tentative>Tentatives:
+      currentpicture:=nullpicture;
+      picture MiseEnGarde;
+      MiseEnGarde=image(
+      label(TEX("\begin{minipage}{0.5\linewidth}
+        La construction automatique a échouée. Relancez en augmentant le nombre de tentatives ou en augmentant les dimensions du quadrillage (Hauteur,Largeur)
+      \end{minipage}"),(0,0));
+      );
+      draw (((llcorner MiseEnGarde)--(lrcorner MiseEnGarde)--(urcorner MiseEnGarde)--(ulcorner MiseEnGarde)--cycle) scaled 1.1) withpen pensquare scaled 2;
+      draw MiseEnGarde;
+      else:
+      if SansLegende=false:
+      fill polygone(U0,U1,U2,U3) withcolor CouleurUniteAire;
+      label.top(TEX("\textbf{1 ua}"),iso(U1,U0));
+      fi;
+      %Le quadrillage
+      trace polygone(A,B,C,D);
+      for k=1 upto LargQuad-1:
+      trace (k/LargQuad)[A,B]--(k/LargQuad)[D,C];
+      endfor;
+      for k=1 upto HautQuad-1:
+      trace (k/HautQuad)[A,D]--(k/HautQuad)[B,C];
+      endfor;
+      fi;
+    \end{mplibcode}%
+  \fi%
+}%
+
+\NewDocumentCommand\BuildFractionNombreSegment{mm}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      Unite:=\useKV[ClesFN]{Unite};
+      boolean Solution,Vide;
+      Solution=\useKV[ClesFN]{Solution};
+      Vide=\useKV[ClesFN]{Vide};
+      color CoulFN;
+      CoulFN=\useKV[ClesFN]{Couleur};
+      Num:=#1;
+      Pas:=#2;
+      pair A,B,C,D;
+      A=(0,0);
+      B=Unite*(1,0);
+      if Num>Pas:
+      C=((Num+1)/Pas)[A,B];
+      Total=Num+1;
+      else:
+      C=B;
+      Total=Pas;
+      fi;
+      D=(Num/Pas)[A,B];      
+      trace segment(A,C);
+      for k=0 upto Total:
+      trace ((0,-1mm)--(0,1mm)) shifted ((k/Pas)[A,B]);
+      endfor;
+      trace cotationmil(A,B,5mm,15,TEX("1 ul"));
+      if Solution:
+      draw (A--D) withpen pencircle scaled 2 withcolor CoulFN;
+      trace cotationmil(A,D,-5mm,25,TEX("$?=\dfrac{"&decimal(#1)&"}{"&decimal(#2)&"}$~ul"));
+      else:
+      if Vide:
+      else:
+      trace cotationmil(A,D,-5mm,25,TEX("$?=\dots$~ul"));
+      fi;
+      fi;
+    \end{mplibcode}%
+  \fi%
+}%
+
+\NewDocumentCommand\BuildFractionNombreQuadrillage{mmm}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      Unite:=#2;%\useKV[ClesFN]{Unite};%en carreaux
+      HautQuad:=\useKV[ClesFN]{HautQuad};
+      Largeur:=Unite;%en carreaux
+      boolean Solution,Vide,Creation,Pointilles;
+      Solution=\useKV[ClesFN]{Solution};
+      Vide=\useKV[ClesFN]{Vide};
+      Creation=\useKV[ClesFN]{Creation};
+      Pointilles=\useKV[ClesFN]{Pointilles};
+      color CoulFN;
+      CoulFN=\useKV[ClesFN]{Couleur};
+      Num:=#1;
+      Pas:=#2;
+      PasQuad:=\useKV[ClesFN]{PasQuad};
+      pair A,B,C,D;
+      A=(0,0);
+      B=(((#1 div #2)+1)*Unite+1)*PasQuad*(1,0);
+      C-B=(0,HautQuad*PasQuad);
+      D-C=A-B;
+      trace polygone(A,B,C,D);
+      TotalLargeur=(((#1 div #2)+1)*Unite+1);
+      for k=1 upto TotalLargeur-1:
+      trace (k/TotalLargeur)[A,B]--(k/TotalLargeur)[D,C];
+      endfor;
+      for k=1 upto HautQuad-1:
+      trace (k/HautQuad)[A,D]--(k/HautQuad)[B,C];
+      endfor;
+      % Macro pour le chemin perso
+      vardef RemplirChemin(text t)=
+      nbpoints:=0;
+      % On compte le dénivelé
+      denivele=0;
+      denivmax:=0;
+      denivmin:=0;
+      for p_=t:
+      if p_="+":
+      denivmax:=denivmax+1;
+      elseif p_="-":
+      denivmin:=denivmin-1;
+      fi;
+      endfor;
+      depart:=-(denivmin)+floor(uniformdeviate(HautQuad-2-abs(denivmax-abs(denivmin))));
+      ch[0]=PasQuad*(0,depart);
+      for p_=t:
+      nbpoints:=nbpoints+1;
+      if p_=">":
+      ch[nbpoints]=ch[nbpoints-1]+PasQuad*(1,0);
+      elseif p_="<":
+      ch[nbpoints]=ch[nbpoints-1]+PasQuad*(-1,0);
+      elseif p_="+":
+      ch[nbpoints]=ch[nbpoints-1]+PasQuad*(0,1);
+      elseif p_="-":
+      ch[nbpoints]=ch[nbpoints-1]+PasQuad*(0,-1);
+      fi;
+      endfor;
+      enddef;
+      % On choisit le départ.
+      pair ch[];
+      numeric xe[],ye[];
+      if Creation:
+      RemplirChemin(#3);
+      else:
+      depart:=floor(uniformdeviate(HautQuad-1));
+      ch[0]=PasQuad*(0,depart);
+      xe0=0;
+      ye0=depart;
+      for k=1 upto #1:
+      if (k mod 2)=1:
+      ch[k]-ch[k-1]=PasQuad*(1,0);
+      xe[k]=xe[k-1]+1;
+      ye[k]=ye[k-1];
+      else:
+      if ye[k-1]=0:
+      alea:=uniformdeviate(2);
+      if alea<1:
+      ch[k]-ch[k-1]=PasQuad*(0,1);
+      xe[k]=xe[k-1];
+      ye[k]=ye[k-1]+1;
+      else:
+      ch[k]-ch[k-1]=PasQuad*(1,0);
+      xe[k]=xe[k-1]+1;
+      ye[k]=ye[k-1];
+      fi;
+      elseif ye[k-1]=2:
+      alea:=uniformdeviate(2);
+      if alea<1:
+      ch[k]-ch[k-1]=PasQuad*(0,-1);
+      xe[k]=xe[k-1];
+      ye[k]=ye[k-1]-1;
+      else:
+      ch[k]-ch[k-1]=PasQuad*(1,0);
+      xe[k]=xe[k-1]+1;
+      ye[k]=ye[k-1];
+      fi;
+      else:
+      alea:=uniformdeviate(3);
+      if alea<1:
+      ch[k]-ch[k-1]=PasQuad*(0,1);
+      xe[k]=xe[k-1];
+      ye[k]=ye[k-1]+1;
+      elseif alea<2:
+      ch[k]-ch[k-1]=PasQuad*(1,0);
+      xe[k]=xe[k-1]+1;
+      ye[k]=ye[k-1];
+      else:
+      ch[k]-ch[k-1]=PasQuad*(0,-1);
+      xe[k]=xe[k-1];
+      ye[k]=ye[k-1]-1;
+      fi;
+      fi;      
+      fi;
+      endfor;
+      fi;
+      if Vide=false:
+      trace ch[0] for k=1 upto #1:--ch[k] endfor withpen pencircle scaled 2 if Pointilles: dashed evenly else: withcolor CoulFN fi;
+      fi;
+      trace cotationmil(D,(D+#2*(PasQuad,0)),5mm,15,TEX("1 ul"));
+      trace segment(D,D+#2*(PasQuad,0)) withpen pencircle scaled 1.5;
+    \end{mplibcode}%
+  \fi%
+}%

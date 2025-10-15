@@ -1,0 +1,2607 @@
+\documentclass{ltxdoc}
+\usepackage[show]{cloze}
+\usepackage{graphicx}
+\usepackage{fontspec}
+\usepackage{paralist}
+\usepackage{forest}
+\usepackage{multicol}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+
+%%
+% Make underscore an "other" character
+%%
+\catcode`\_=12
+
+%%
+% titlesec
+%%
+
+\usepackage{titlesec}
+\titleformat{\paragraph}[hang]{%
+  \normalfont\normalsize\bfseries%
+  }{\theparagraph}{1em}{}
+\titleformat{\subparagraph}[hang]{%
+  \normalfont\small\bfseries%
+  }{\thesubparagraph}{1em}{}
+  \titlespacing*{\subparagraph}{0pt}{*1}{0pt}
+
+%%
+% hyperref
+%%
+
+\usepackage[
+  colorlinks=true,
+  linkcolor=red,
+  filecolor=red,
+  urlcolor=red,
+]{hyperref}
+
+%%
+% mdframed
+%%
+
+\usepackage{mdframed}
+\definecolor{TmpGray}{gray}{0.95}
+% f2d6aa 242 214 170
+\definecolor{TmpYellow}{rgb}{0.949019608, 0.839215686, 0.666666667}
+\newmdenv[
+  backgroundcolor=TmpYellow!3,
+  linecolor=TmpYellow!70
+]{TmpExample}
+\surroundwithmdframed[backgroundcolor=TmpGray]{verbatim}
+
+%%
+% minted
+%%
+
+\usepackage{minted}
+\usemintedstyle{colorful}
+\BeforeBeginEnvironment{minted}{\begin{mdframed}[
+  backgroundcolor=TmpGray!60,
+  linecolor=gray!40,
+]}
+\AfterEndEnvironment{minted}{\end{mdframed}}
+\setminted{
+  breaklines=true,
+  fontsize=\footnotesize,
+}
+
+\MakeShortVerb{\|}
+
+%%
+% Temporary local macros
+%%
+
+\def\TmpExpDesc#1{(|#1|)}
+
+\def\TmpDesc#1{%
+  \hfill%
+  \TmpExpDesc{#1}%
+  \par%
+}
+
+\def\tt#1{%
+  \texttt{#1}%
+}
+
+\def\TmpSecRef#1{%
+  (\rightarrow\ \ref{#1})%
+}
+
+\def\TmpOption#1#2{%
+  \tt{[#1=}\meta{#2}\tt{]}%
+}
+
+\def\TmpHide{%
+  \noindent%
+  \texttt{\string\clozehide}:%
+  \clozehide%
+}
+
+\def\TmpShow{%
+  \noindent%
+  \texttt{\string\clozeshow}:%
+  \clozeshow%
+}
+
+\def\TmpReduceVspace{%
+  \vspace{-0.2cm}%
+}
+
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\providecommand*{\url}{\texttt}
+\GetFileInfo{cloze.dtx}
+\title{The \cloze{cloze} package%
+  \thanks{Many thanks to Robert-Michael Huber for his advice
+and to Paul Isambert for his article \emph{"Three things you can do with
+Lua\TeX{} that would be extremely painful otherwise"} in TUGboat, Volume
+31 (2010), No. 3. This article helped a lot to write this package.}%
+}
+\author{%
+  Josef Friedrich\\%
+  \url{josef@friedrich.rocks}\\%
+  \href{https://github.com/Josef-Friedrich/cloze}
+  {github.com/Josef-Friedrich/cloze}%
+}
+\date{v2.0.0~from 2025/07/04}
+
+\maketitle\vfill
+
+\pagebreak
+
+\setcounter{secnumdepth}{5}
+\setcounter{tocdepth}{5}
+\tableofcontents
+
+%-----------------------------------------------------------------------
+% Introduction
+%-----------------------------------------------------------------------
+
+\pagebreak
+\section{Introduction}
+
+\emph{cloze} is a plain \TeX{} or a \LaTeX{} package to generate cloze
+texts. It uses the capabilities of the modern \TeX{} engine
+\emph{Lua\TeX}. Therefore, you must use Lua\TeX{} or Lua\LaTeX{} to
+create documents containing gaps.
+
+\begin{center}
+\begin{minipage}{0.4\linewidth}
+\begin{verbatim}
+lualatex cloze-text.tex
+\end{verbatim}
+\end{minipage}
+or
+\begin{minipage}{0.4\linewidth}
+\begin{verbatim}
+luatex cloze-text.tex
+\end{verbatim}
+\end{minipage}
+\end{center}
+
+\noindent
+The main feature of the package is that the formatting doesn't change
+when using the |hide| and |show| \TmpSecRef{sec:option-hide} options.
+
+\def\clozelorem{%
+Lorem ipsum \cloze{dolor sit} amet, consectetur \cloze{adipisicing}
+elit, sed do eiusmod tempor incididunt ut labore et \cloze{dolore magna}
+aliqua. Ut enim ad minim veniam, quis nostrud \cloze{exercitation}
+ullamco laboris nisi ut \cloze{aliquip} ex ea commodo consequat.%
+}
+
+\begin{TmpExample}
+\clozelorem
+\end{TmpExample}
+
+\clozeset{hide}
+
+\noindent
+The command |\clozeset{hide}| only shows gaps. When you put both texts
+on top of each other you will see that they perfectly match.
+
+\begin{TmpExample}
+\clozelorem
+\end{TmpExample}
+
+\clozeset{show}
+
+%-----------------------------------------------------------------------
+% Usage
+%-----------------------------------------------------------------------
+
+\section{Usage}
+
+%-----------------------------------------------------------------------
+%
+%-----------------------------------------------------------------------
+
+\subsection{Interfaces}
+
+%%
+%
+%%
+
+\subsubsection{The plain (Lua)\TeX{} interface}
+
+% Dank \href{https://ctan.org/pkg/lparse}{lparse} sollten die meisten
+% Kommandos in plain Lua\TeX{} genauso funktionieren wie in Lua\LaTeX{}.
+Thanks to \href{https://ctan.org/pkg/lparse}{lparse}, most
+commands should work in plain Lua\TeX{} just like in Lua\LaTeX{}.
+% In Lua\TeX{} gibt es jedoch keine Umgebungen.
+However, there are no environments in Lua\TeX{}.
+
+\begin{minted}{tex}
+\input cloze.tex
+\clozeset{margin=1cm}
+\clozeshow
+Lorem \cloze{ipsum} dolor.
+\bye
+\end{minted}
+
+%%
+%
+%%
+
+\subsubsection{The (Lua)\LaTeX{} interface}
+
+\begin{minted}{latex}
+\documentclass{article}
+\usepackage[show,margin=1cm]{cloze}
+\begin{document}
+Lorem \cloze{ipsum} dolor.
+\end{document}
+\end{minted}
+
+\subsection{The commands and environments}
+
+There are the commands
+\cmd{\cloze},
+\cmd{\clozefix},
+\cmd{\clozefil},
+\cmd{\clozenol},
+\cmd{\clozeparcapture},
+\cmd{\clozestrike} and the environments
+|clozepar| and
+|clozebox|
+to generate cloze texts.
+
+%%
+% \cloze
+%%
+
+\subsubsection{\cmd{\cloze}}
+\label{sec:command-cloze}
+
+\DescribeMacro{\cloze} \cmd{\cloze}\oarg{options}\marg{some text}: The
+command \cmd{\cloze} is similar to a command that offers the possibility
+to underline the texts. \cmd{\cloze} does not prevent line breaks. The
+width of a gap depends on the number of letters and the font used.
+The only option which affects the widths of a gap is the option
+|margin| \TmpSecRef{sec:option-margin}.
+
+\begin{TmpExample}
+Lorem ipsum \cloze{dolor} sit amet, \cloze{consectetur} adipisicing
+elit, sed do eiusmod tempor incididunt ut labore et dolore
+\cloze{magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+ullamco laboris nisi} ut aliquip ex ea commodo consequat.
+\end{TmpExample}
+
+\noindent It is possible to convert a complete paragraph into a `gap'.
+But don't forget: There is a special environment for this: \tt{clozepar}
+\TmpSecRef{sec:command-clozepar}.
+
+\begin{TmpExample}
+\cloze{Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
+eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
+ex ea commodo consequat.}
+\end{TmpExample}
+
+\noindent The command \cmd{\cloze} doesn’t (better shouldn’t)  change
+the behavior of the hyphenation. Let’s try some long German words (Known
+issue: Sometimes you have to insert manual hyphenation points (|\-|). I
+don’t know why. Solutions and suggestions are very welcome.):
+
+\begin{TmpExample}
+es
+\cloze{Te\-le\-kom\-mu\-ni\-ka\-tions\-ü\-ber\-wach\-ung}
+geht
+\cloze{Un\-ter\-neh\-mens\-steu\-er\-fort\-ent\-wick\-lungs\-ge\-setz}
+\cloze{Ab\-teil\-ungs\-lei\-ter\-in}
+\cloze{Ober\-kom\-mi\-sar\-in}
+auch
+\cloze{Fil\-lial\-lei\-ter\-in}
+kurz.
+\end{TmpExample}
+
+%%
+% \clozesetfont
+%%
+
+\subsubsection{\cmd{\clozesetfont}}
+\label{sec:command-clozesetfont}
+\label{sec:command-clozefont}
+
+\DescribeMacro{\clozesetfont}
+The gap font can be changed by using the command
+\cmd{\clozesetfont}. \tt{\string\cloze\-set\-font} redefines the command
+\cmd{\clozefont} which contains the font definition.
+Thus, the command \tt{\string\clozesetfont\string{\string\Large\string}}
+has the same effect as
+|\def\clozefont{\Large}|.
+
+\clozesetfont{\Large}
+
+\begin{TmpExample}
+Excepteur \cloze{sint} occaecat \cloze{cupidatat} non proident.
+\end{TmpExample}
+
+\noindent Please do not put any color definitions in
+\cmd{\clozesetfont}, as it won't work. Use the option
+|text_color| instead \TmpSecRef{sec:option-text-color}.
+
+|\clozesetfont{\ttfamily\normalsize}| changes the gap text for example
+into a normal sized typewriter font.
+
+\clozesetfont{\ttfamily\normalsize}
+
+\begin{TmpExample}
+Excepteur \cloze{sint} occaecat \cloze{cupidatat} non proident.
+\end{TmpExample}
+
+\clozesetfont{\itshape}
+
+\noindent
+If you use clozes in math mode you have to overwrite the default cloze
+font (|\clozesetfont{\itshape}|) of the package, because \cmd{\itshape}
+is not available in math mode. |\clozesetfont{}| will do the
+trick.
+
+%%
+% \clozefix
+%%
+
+\subsubsection{\cmd{\clozefix}}
+\label{sec:command-clozefix}
+
+\DescribeMacro{\clozefix} \cmd{\clozefix}\oarg{options}\marg{some text}:
+The command \cmd{\clozefix} creates gaps with a fixed width. The
+clozes are default concering the width \tt{\ClozeGetOption{width}}.
+
+\begin{TmpExample}
+\noindent Lorem ipsum dolor sit amet:
+\begin{compactenum}
+\item \clozefix[width=5cm]{consectetur}
+\item \clozefix[width=5cm]{adipisicing}
+\item \clozefix[width=5cm]{elit}
+\end{compactenum}
+sed do eiusmod.
+\end{TmpExample}
+
+\noindent
+Gaps with a fixed width are much harder to solve.
+
+\begin{TmpExample}
+Lorem ipsum dolor \clozefix[align=center,width=3cm]{sit} amet,
+\clozefix[align=center,width=3cm]{consectetur} adipisicing elit, sed do
+eiusmod tempor incididunt \clozefix[align=center,width=3cm]{ut} labore
+et dolore magna aliqua.
+\end{TmpExample}
+
+\noindent
+Using the option |align| you can make nice tabulars like this:
+
+\begin{TmpExample}
+\begin{tabular}{p{5cm}p{4cm}}
+\raggedleft Composer & Life span \\
+
+\clozefix[width=5cm,align=right]{Joseph Haydn} &
+\clozefix{1723-1809} \\
+
+\clozefix[width=5cm,align=right]{Wolfgang Amadeus Mozart} &
+\clozefix{1756-1791} \\
+
+\clozefix[width=5cm,align=right]{Ludwig van Beethoven} &
+\clozefix{1770-1827} \\
+\end{tabular}
+\end{TmpExample}
+
+%%
+% \clozenol
+%%
+
+\subsubsection{\cmd{\clozenol}}
+\label{sec:command-clozenol}
+\DescribeMacro{\clozenol} \cmd{\clozenol}\oarg{options}\marg{some text}:
+The macro name |clozenol| stands for \emph{“cloze no line”}. As the
+the name suggests this macro typesets cloze texts without a line.
+\cmd{\clozenol} is a convenient abbreviation for
+|\cloze[thickness=0pt]{text}|.
+
+\begin{minted}{latex}
+Lorem \clozenol{ipsum dolor} sit amet.
+\end{minted}
+
+\begin{TmpExample}
+Lorem \clozenol{ipsum dolor} sit amet.
+\end{TmpExample}
+
+\begin{minted}{latex}
+Lorem \clozenol[text_color=green]{ipsum dolor} sit amet.
+\end{minted}
+
+\begin{TmpExample}
+Lorem \clozenol[text_color=green]{ipsum dolor} sit amet.
+\end{TmpExample}
+
+\noindent
+The next examples are showing that \cmd{\clozenol} behaves exactly as
+\cmd{\clozenol} with the option |thickness=0pt|
+(|\cloze[thickness=0pt]|) set: The text layout doesn’t change if we are
+hiding the gaps and the hidden text is not really hidden. It is removed.
+It can not be copied.
+
+\begin{mdframed}[backgroundcolor=gray!40]
+Lorem ipsum \clozenol{dolor sit amet, consetetur sadipscing elitr, sed
+diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam
+erat, sed diam voluptua} sit amet.
+\end{mdframed}
+
+\noindent
+Now hide the text
+
+\clozehide
+
+\begin{mdframed}[backgroundcolor=gray!40]
+Lorem ipsum \clozenol{dolor sit amet, consetetur sadipscing elitr, sed
+diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam
+erat, sed diam voluptua} sit amet.
+\end{mdframed}
+
+\clozeshow
+
+%%
+% \clozefil
+%%
+
+\subsubsection{\cmd{\clozefil}}
+\label{sec:command-clozefil}
+
+\DescribeMacro{\clozefil} \cmd{\clozefil}\oarg{options}\marg{some text}:
+The name of the command is inspired by \cmd{\hfil}, \cmd{\hfill}, and
+\cmd{\hfilll}. \cmd{\clozefil} fills out all available horizontal
+space with a line. The macros \cmd{\clozefill} and \cmd{\clozefilll}
+doesn’t exist, only \cmd{\clozefil} (with one |l|) does.
+
+\def\TmpExampleClozefil{
+Complete the sentences below to share more about yourself:
+\bigskip
+
+\noindent
+I am someone who love \clozefil{to write cloze worksheets in \TeX}.
+
+\noindent
+I am someone who hate \clozefil{to write cloze worksheets in MS Word}.
+
+\noindent
+I am someone who can \clozefil{write cloze worksheets in \TeX}.
+
+\noindent
+I am someone who can’t \clozefil{write cloze worksheets in MS Word}.
+}
+
+\bigskip
+
+\TmpHide
+\begin{TmpExample}
+\TmpExampleClozefil
+\end{TmpExample}
+
+\TmpShow
+\begin{TmpExample}
+\TmpExampleClozefil
+\end{TmpExample}
+
+%%
+% \clozeextend
+%%
+
+\subsubsection{\cmd{\clozeextend}}
+\label{sec:command-clozeextend}
+
+\DescribeMacro{\clozeextend} \cmd{\clozeextend}\oarg{spaces}: The
+command |\clozeextend| adds some invisible placeholders to extend some
+cloze texts with blank space. Keep in mind that there is the option
+\tt{min_lines} \TmpSecRef{sec:option-min-lines}, if you want to extend
+some cloze paragraphs.
+% Die zugehörigen Optionen sind:
+The associated options are:
+
+\begin{description}
+\item[|extension_count|]: The number of extension units
+\TmpSecRef{sec:option-extend-count}.
+
+\item[|extension_height|]:
+The height of one extension unit (default: 2ex)
+\TmpSecRef{sec:option-extend-height}.
+
+\item[|extension_width|]:
+The width of one extension unit (default: 1em)
+\TmpSecRef{sec:option-extend-width}.
+\end{description}
+
+\begin{minted}{latex}
+\begin{itemize}
+\item \clozefil{Lorem ipsum dolor sit amet, consectetur adipisicing
+elit, sed do eiusmod tempor incididunt ut labore et dolore magna
+aliqua.}
+\item \clozefil{Ut enim ad minim veniam \clozeextend[30]}
+\item \clozefil{quis nostrud \clozeextend[40]}
+\end{itemize}
+\end{minted}
+
+\begin{TmpExample}
+\begin{itemize}
+\item \clozefil{Lorem ipsum dolor sit amet, consectetur adipisicing
+elit, sed do eiusmod tempor incididunt ut labore et dolore magna
+aliqua.}
+\item \clozefil{Ut enim ad minim veniam \clozeextend[30]}
+\item \clozefil{quis nostrud \clozeextend[40]}
+\end{itemize}
+\end{TmpExample}
+
+%%
+% clozepar
+%%
+
+\subsubsection{\tt{clozepar}}
+\label{sec:command-clozepar}
+
+\DescribeEnv{clozepar} |\begin{clozepar}|\oarg{options} \dots
+\textit{some text} \dots |\end{clozepar}|: The environment \tt{clozepar}
+transforms a complete paragraph into a cloze text. The options |align|,
+|margin| and |width| have no effect on this environment.
+
+\begin{TmpExample}
+Lorem ipsum dolor sit amet, consectetur adipisicing elit ullamco laboris
+nisi.
+
+\begin{clozepar}
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
+ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+reprehenderit in voluptate velit esse cillum.
+\end{clozepar}
+
+Excepteur sint occaecat cupidatat non proident.
+\end{TmpExample}
+
+%%
+% \clozeparplain
+%%
+
+\subsubsection{\cmd{\clozeparplain}}
+\label{sec:command-clozeparplain}
+\DescribeMacro{\clozeparplain} \cmd{\clozeparplain}: The command
+\cmd{\clozeparplain} is the macro version of the environment |clozepar|
+\TmpSecRef{sec:command-clozepar}. It is intended to provide cloze
+support on full paragraphs in plain Lua\TeX.
+
+%%
+% \clozeparcapture
+%%
+
+\subsubsection{\cmd{\clozeparcapture}}
+\label{sec:command-clozeparcapture}
+\DescribeMacro{\clozeparcapture} \cmd{\clozeparcapture}: The command is
+defined to capture all text until the next paragraph (|\par|):
+\mintinline{latex}{\def\clozeparcapture#1\par{...}}. In some cases (see
+example below) you have to set the paragraph end manually by inserting a
+|\par|.
+
+\begin{minted}{latex}
+\begin{enumerate}
+\item Solid state drives (SSD) ...
+
+\clozeparcapture
+They do not need to get up to speed to work properly / No latency;
+...
+\par
+
+\end{enumerate}
+\end{minted}
+
+\TmpReduceVspace
+
+% https://www.bitsofbytes.co/exam-questions---memory--storage.html
+\begin{TmpExample}
+\begin{enumerate}
+\item Solid state drives (SSD) are replacing hard disc drives (HDD) in
+some computers. Give some reasons why this is happening.
+
+\clozeparcapture
+They do not need to get up to speed to work properly / No latency;
+Less power consumption / More energy efficient;
+Run cooler;
+Run quieter;
+Data access is faster;
+Occupies less physical space - more compact;
+Lighter, so suitable for portable computer / laptop;
+No moving parts so more reliable / durable in a portable computer / laptop.
+\par
+\end{enumerate}
+\end{TmpExample}
+
+\noindent
+It is often sufficient to insert an empty line.
+
+\begin{minted}{latex}
+Explain three ways that RAM is different to ROM.
+
+1:
+
+\clozeparcapture RAM is Volatile, ROM is non-volatile
+
+2:
+\end{minted}
+
+\TmpReduceVspace
+% https://www.bitsofbytes.co/exam-questions---memory--storage.html
+\begin{TmpExample}
+\noindent
+Explain three ways that RAM is different to ROM.
+
+\def\TmpWay#1{\medskip\noindent\textbf{#1:}\medskip}
+
+\TmpWay{1}
+
+\clozeparcapture RAM is Volatile, ROM is non-volatile
+
+\TmpWay{2}
+
+\clozeparcapture RAM is temporary, ROM is (semi) permanent
+
+\TmpWay{3}
+
+\clozeparcapture RAM normally has a larger capacity than ROM \par
+\end{TmpExample}
+
+%%
+% clozebox
+%%
+
+\subsubsection{\tt{clozebox}}
+\label{sec:environment-clozebox}
+
+\DescribeEnv{clozebox} |\begin{clozebox}|*\oarg{options} \dots
+\textit{some text} \dots |\end{clozebox}|: The environment \tt{clozebox}
+surrounds a text with a box. The starred version omits the line around
+the box. Use the options |box_height| \TmpSecRef{sec:option-box-height}
+and |box_width| \TmpSecRef{sec:option-box-width} to specify the dimensions
+of the box. By default the width of the box is |\linewidth|. The height
+of the box is determined by the amount of text. This environment is
+realized by a combination of the |minipage| environment surrounded by a
+\cmd{\fbox}. For the cloze text the macro \cmd{\clozenol} is reused. New
+paragraphs are not allowed inside a cloze box. Use two backslashes
+multiple times |\\| instead.
+
+\begin{minted}{latex}
+\begin{clozebox}
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+tempor incididunt ut labore et dolore magna aliqua.
+\end{clozebox}
+\end{minted}
+
+\begin{multicols}{2}
+\TmpHide
+
+\begin{TmpExample}
+\begin{clozebox}
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+tempor incididunt ut labore et dolore magna aliqua.
+\end{clozebox}
+\end{TmpExample}
+
+\columnbreak
+
+\TmpShow
+
+\begin{TmpExample}
+\begin{clozebox}
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+tempor incididunt ut labore et dolore magna aliqua.
+\end{clozebox}
+\end{TmpExample}
+
+\end{multicols}
+
+\noindent
+Like with all cloze macros and environments the hidden text vanishes
+from the rendered file. The starred version omits the line around the
+box:
+
+% starred
+
+\begin{multicols}{2}
+\begin{minted}{latex}
+\begin{clozebox}*
+Lorem ...
+\end{clozebox}
+\end{minted}
+
+\columnbreak
+
+\begin{TmpExample}
+\begin{center}
+\begin{clozebox}*
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+tempor incididunt ut labore et dolore magna aliqua.
+\end{clozebox}
+\end{center}
+\end{TmpExample}
+\end{multicols}
+
+%%
+% clozespace
+%%
+
+\subsubsection{\tt{clozespace}}
+\label{sec:command-clozespace}
+
+\DescribeEnv{clozespace} |\begin{clozespace}|\oarg{options} \dots
+\textit{some text} \dots |\end{clozespace}|: If you are using a
+bigger font for the cloze text as for the normal text, you are getting
+irregular distances between the lines:
+
+\def\TmpOrbit{
+\clozesetfont{\Huge\fontspec{Kalam}}
+Today in the Discovery Lab we learned about three types of spacecraft
+that are helping us explore \cloze{Mars}. The \cloze{spacecraft} are on
+Mrs. Bratt’s Principal’s Reading Challenge board. One type of spacecraft
+is the \cloze{orbiter}.
+}
+
+\begin{minted}{latex}
+\clozesetfont{\Huge\fontspec{Kalam}}
+Today in the Discovery ...
+\end{minted}
+\TmpReduceVspace
+% https://en.wikipedia.org/wiki/Cloze_test#/media/File:Student_matching_cloze_terms_on_smartboard.jpg
+\begin{TmpExample}
+\TmpOrbit
+\end{TmpExample}
+
+\noindent
+With the environment |clozespace| you are able to restore the regular
+balanced line spacing. The default value for the option |spacing| is
+\tt{\ClozeGetOption{spacing}}. Also take a look in the section about the
+option |spacing| \TmpSecRef{sec:option-spacing}.
+
+\begin{minted}{latex}
+\begin{clozespace}[spacing=2]
+...
+\end{clozespace}
+\end{minted}
+\TmpReduceVspace
+\begin{TmpExample}
+\begin{clozespace}[spacing=2]
+\TmpOrbit
+\end{clozespace}
+\TmpReduceVspace
+\end{TmpExample}
+
+\noindent
+The environment |clozespace| uses the package
+\href{https://www.ctan.org/pkg/setspace}{setspace} in the background for
+setting the spacing between the lines.
+
+%%
+% \clozeline
+%%
+
+\subsubsection{\cmd{\clozeline}}
+\label{sec:command-clozeline}
+
+\DescribeMacro{\clozeline}
+%
+\cmd{\clozeline}\oarg{options}: To create a cloze line of a certain
+width, use the command \cmd{\clozeline}. The default width of the line
+is \tt{\ClozeGetOption{width}}. In combination with the other cloze
+commands you can create for example an irregular alignment of the cloze
+text.
+
+\begin{minted}{latex}
+Ut enim ad
+\clozeline[width=1cm]\cloze{minim}\clozeline[width=3cm]
+minim veniam
+\end{minted}
+
+\begin{TmpExample}
+Ut enim ad \clozeline[width=1cm]\cloze{minim}\clozeline[width=3cm] minim
+veniam,
+\end{TmpExample}
+
+%%
+% \clozelinefil
+%%
+
+\subsubsection{\cmd{\clozelinefil}}
+\label{sec:command-clozelinefil}
+
+\DescribeMacro{\clozelinefil}
+\cmd{\clozelinefil}\oarg{options}:
+This command \cmd{\clozelinefil} fills the
+complete available horizontal space with a line. Moreover,
+\cmd{\clozelinefil} was used to create \cmd{\clozefil}.
+
+\begin{TmpExample}
+Lorem\clozelinefil
+\end{TmpExample}
+
+%%
+% \clozestrike
+%%
+
+\subsubsection{\cmd{\clozestrike}}
+\label{sec:command-clozestrike}
+
+\DescribeMacro{\clozestrike}
+\cmd{\clozestrike}\oarg{options}\marg{wrong text}\marg{correct text}:
+This macro can be useful for worksheets that contain intentionally
+errors. The pupils have to find and cross out the mistakes and
+write the right solution on top of the errors.
+
+\begin{minted}{latex}
+Wolfgang Amadeus Mozart was born in \clozestrike{Vienna}{Salzburg}.
+\end{minted}
+
+\begin{TmpExample}
+Wolfgang Amadeus Mozart was born in \clozestrike{Vienna}{Salzburg}.
+\end{TmpExample}
+
+\noindent
+The option |line_color| has no effect on the lines produced by the
+macro \cmd{\clozestrike}. The line color and and the text color
+are both the same, because the pupils have to draw the lines.
+
+\begin{minted}{latex}
+Mozart’s father was called
+\clozestrike[text_color=red]{Ludwig}{Leopold} Mozart.
+\end{minted}
+
+\begin{TmpExample}
+Mozart’s father was called
+\clozestrike[text_color=red]{Ludwig}{Leopold} Mozart.
+\end{TmpExample}
+
+%-----------------------------------------------------------------------
+% Options
+%-----------------------------------------------------------------------
+
+\subsection{The options}
+
+\subsubsection{Overview over all options}
+
+\def\TmpDescriptionLine#1{
+  {\footnotesize#1}
+}
+
+\begin{tabular}{lll}
+\textbf{Option} &
+\textbf{Description} &
+\textbf{Reference} \\\hline
+
+\tt{align} &
+\TmpDescriptionLine{The alignment of a fixed-size cloze text (\cmd{\clozefix})}. &
+\TmpSecRef{sec:option-align} \\
+
+\tt{box_height} &
+\TmpDescriptionLine{The height of a cloze box (\tt{clozebox}).} &
+\TmpSecRef{sec:option-box-height} \\
+
+\tt{box_rule} &
+\TmpDescriptionLine{The thickness of the line around a \tt{clozebox}.} &
+\TmpSecRef{sec:option-box-rule} \\
+
+\tt{box_width} &
+\TmpDescriptionLine{The width of a cloze box (\tt{clozebox}).} &
+\TmpSecRef{sec:option-box-width} \\
+
+\tt{debug} &
+\TmpDescriptionLine{The debug or log level.} &
+\TmpSecRef{sec:option-debug} \\
+
+\tt{distance} &
+\TmpDescriptionLine{The distance between the cloze text and the cloze line.} &
+\TmpSecRef{sec:option-distance} \\
+
+\tt{extend_count} &
+\TmpDescriptionLine{The number of extension units (\cmd{\clozeextend}).} &
+\TmpSecRef{sec:option-extend-count} \\
+
+\tt{extend_height} &
+\TmpDescriptionLine{The height of one extension unit (\cmd{\clozeextend}).} &
+\TmpSecRef{sec:option-extend-height} \\
+
+\tt{extend_width} &
+\TmpDescriptionLine{The width of one extension unit (\cmd{\clozeextend}).} &
+\TmpSecRef{sec:option-extend-width} \\
+
+\tt{hide} &
+\TmpDescriptionLine{Hide the cloze text.} &
+\TmpSecRef{sec:option-hide} \\
+
+\tt{font} &
+\TmpDescriptionLine{The font of the cloze text.} &
+\TmpSecRef{sec:option-font} \\
+
+\tt{line_color} &
+\TmpDescriptionLine{The color name to colorize the cloze line.} &
+\TmpSecRef{sec:option-line-color} \\
+
+\tt{margin} &
+\TmpDescriptionLine{The additional margin between the normal and the cloze text.} &
+\TmpSecRef{sec:option-margin} \\
+
+\tt{min_lines} &
+\TmpDescriptionLine{The minimum number of lines a \tt{clozepar} environment must have.} &
+\TmpSecRef{sec:option-min-lines} \\
+
+\tt{show} &
+\TmpDescriptionLine{Show the cloze text.} &
+\TmpSecRef{sec:option-show} \\
+
+\tt{spacing} &
+\TmpDescriptionLine{The spacing of the lines in the environment \tt{clozespace}.} &
+\TmpSecRef{sec:option-spacing} \\
+
+\tt{spread} &
+\TmpDescriptionLine{The magnification or spreading factor of a gap.} &
+\TmpSecRef{sec:option-spread} \\
+
+\tt{text_color} &
+\TmpDescriptionLine{The color name to colorize the cloze text.} &
+\TmpSecRef{sec:option-text-color} \\
+
+\tt{thickness} &
+\TmpDescriptionLine{The thickness of a line.} &
+\TmpSecRef{sec:option-thickness} \\
+
+\tt{width} &
+\TmpDescriptionLine{The width of a fixed size cloze (\cmd{\clozefix}).} &
+\TmpSecRef{sec:option-show} \\
+
+\tt{visibility} &
+\TmpDescriptionLine{The visibility of the cloze text.} &
+\TmpSecRef{sec:option-visibility} \\
+\end{tabular}
+
+%%
+%
+%%
+
+\noindent
+\begin{tikzpicture}[x=1cm,y=1cm,scale=0.8,transform shape]
+% \draw (0,0) grid[step=1] (13,8);
+% \draw[help lines] (0,0) grid[step=0.2] (13,8);
+\node (cloze) at (-1,0) [node font=\fontsize{180}{1.2},anchor=south west]{
+  \cloze[distance=15pt,thickness=3pt,margin=40pt]{cl…}
+};
+
+\node (distance) at (3,1.9) {distance};
+\draw [|<->|] (4,1.7) --  (4,2.05);
+
+\node (thickness) at (0,1.65) {thickness};
+\draw [->] (1.3,2.2) --  (1.3,1.8);
+\draw [->] (1.3,1) --  (1.3,1.4);
+
+\node (margin) at (2.2,4) {margin};
+\draw [|<->|] (1.5,3.5) --  (3,3.5);
+
+\node (margin) at (11.75,4) {margin};
+\draw [|<->|] (11,3.5) --  (12.5,3.5);
+
+\node (text_color) at (4.5,6) {text_color};
+\draw [->] (text_color) --  (6.4,5);
+
+\node (line_color) at (7,0.5) {line_color};
+\draw [->] (line_color) --  (7,1.5);
+\end{tikzpicture}
+
+%%
+% clozefix
+%%
+
+\noindent
+\begin{tikzpicture}[
+  x=1cm,
+  y=1cm,
+  clozefix/.style={
+    node font=\fontsize{40}{1.2}
+  },
+  scale=0.95,
+  transform shape
+]
+% \draw (0,0) grid[step=1] (13,7);
+% \draw[help lines] (0,0) grid[step=0.2] (13,7);
+
+\node (right) at (7,6) [clozefix]{
+  \clozefix[distance=10pt,thickness=2pt,width=8cm,align=right]{clozefix}
+};
+
+\node (center) at (5,4) [clozefix]{
+  \clozefix[distance=10pt,thickness=2pt,width=8cm,align=center]{clozefix}
+};
+
+\node (left) at (3,2) [clozefix]{
+  \clozefix[distance=10pt,thickness=2pt,width=8cm]{clozefix}
+};
+
+\node (width) at (5,0.7) {width};
+\draw [|<->|] (0.8,1) --  (8.7,1);
+\node (alignleft) at (6.5,2) {align=left};
+
+\node (aligncenter) at (3.3,4) {align=center};
+
+\node (alignright) at (7,6) {align=right};
+\end{tikzpicture}
+\clozereset
+
+\begin{tikzpicture}
+% \draw (0,0) grid[step=1] (12,7);
+% \draw[help lines] (0,0) grid[step=0.2] (12,7);
+\node (onlytikz) at (6,3.5) [draw,text width=3cm,scale=3,transform shape,thick] {
+  \clozeparplain[min_lines=3,]{clozebox}
+};
+
+\node (box_height) at (0.5,3.5) [rotate=90] {box_height};
+\draw [|<->|] (1,1.05) --  (1,5.95);
+
+\node (box_width) at (6,0.5){box_width};
+\draw [|<->|] (1.15,0.9) --  (10.85,0.9);
+\end{tikzpicture}
+
+%%
+% Local and global options
+%%
+
+\subsubsection{Local and global options}
+
+The \emph{cloze} package distinguishs between \emph{local} and
+\emph{global} options. Besides the possiblity to set \emph{global}
+options in the \cmd{\usepackage}\oarg{global options}\marg{cloze}
+declaration, the cloze package offers a special command to set
+\emph{global} options:
+\cmd{\clozeset}\marg{global options}
+
+%%
+% \clozeset
+%%
+
+\subsubsection{\cmd{\clozeset}}
+\label{sec:command-clozeset}
+
+\DescribeMacro{\clozeset}
+\cmd{\clozeset}\marg{global options}: The command can set \emph{global}
+options for each paragraph.
+
+\begin{minted}{latex}
+\clozeset{text_color=red} Lorem \cloze{ipsum} dolor \par
+\clozeset{text_color=green} Lorem \cloze{ipsum} dolor
+\end{minted}
+
+\begin{TmpExample}
+\clozeset{text_color=red} Lorem \cloze{ipsum} dolor \par
+\clozeset{text_color=green} Lorem \cloze{ipsum} dolor
+\end{TmpExample}
+
+\noindent \cmd{\clozeset} does not change the options within a
+paragraph. As you can see in the example below the last \cmd{\clozeset}
+applies the color green for both gaps.
+
+\begin{minted}{latex}
+\clozeset{text_color=red} Lorem \cloze{ipsum} dolor
+\clozeset{text_color=green} Lorem \cloze{ipsum} dolor
+\end{minted}
+
+\begin{TmpExample}
+\clozeset{text_color=red} Lorem \cloze{ipsum} dolor
+\clozeset{text_color=green} Lorem \cloze{ipsum} dolor
+\end{TmpExample}
+
+\clozereset
+
+%%
+% \clozereset
+%%
+
+\subsubsection{\cmd{\clozereset}}
+\label{sec:command-clozereset}
+
+\DescribeMacro{\clozereset}
+\cmd{\clozereset}: The command resets all \emph{global} options to the
+default values. It has no effect on the \emph{local} options.
+
+\begin{minted}{latex}
+\clozeset{
+  thickness=3mm,
+  line_color=yellow,
+  text_color=magenta,
+  margin=-2pt
+}
+\end{minted}
+
+\clozeset{thickness=3mm,line_color=yellow,text_color=magenta,margin=-2pt}
+
+\begin{TmpExample}
+Very \cloze{silly} global \cloze{options}.
+\end{TmpExample}
+
+\begin{minted}{latex}
+\clozereset
+\end{minted}
+\clozereset
+
+\begin{TmpExample}
+\cloze{Relax!} We can reset \cloze{those} options.
+\end{TmpExample}
+
+%%
+% \clozereset
+%%
+
+\subsubsection{\cmd{\clozeshow} and \cmd{\clozehide}}
+\label{sec:command-clozeshow}
+\label{sec:command-clozehide}
+
+\DescribeMacro{\clozeshow} \DescribeMacro{\clozehide}
+\cmd{\clozeshow} and \cmd{\clozehide}: This commands are shortcuts for
+\cmd{\clozeset}\marg{show} and \cmd{\clozeset}\marg{hide}.
+
+\begin{minted}{latex}
+\clozehide
+\end{minted}
+\clozehide
+
+\begin{TmpExample}
+Lorem \cloze{ipsum dolor sit} amet, consectetur \cloze{adipisicing}
+elit.
+\end{TmpExample}
+
+\begin{minted}{latex}
+\clozeshow
+\end{minted}
+\clozeshow
+
+\begin{TmpExample}
+Lorem \cloze{ipsum dolor sit} amet, consectetur \cloze{adipisicing}
+elit.
+\end{TmpExample}
+
+%%
+% align
+%%
+
+\subsubsection{\tt{align}}
+\label{sec:option-align}
+
+\TmpOption{align}{left/center/right}:
+%
+Only the macro \cmd{\clozefix} \TmpSecRef{sec:command-clozefix} takes
+the option \tt{align} into account. Possible values are \tt{left},
+\tt{center} and \tt{right}. This option only makes sense, if the width
+of the line is larger than the width of the text.
+
+\def\TmpOptionAlign#1{%
+  \noindent%
+  \clozefix[align=#1,width=8cm]{Lorem ipsum}%
+  \TmpDesc{#1}%
+}
+
+\begin{TmpExample}
+\TmpOptionAlign{left}
+\TmpOptionAlign{center}
+\TmpOptionAlign{right}
+\end{TmpExample}
+
+%%
+% box_height
+%%
+
+\subsubsection{\tt{box_height}}
+\label{sec:option-box-height}
+
+\TmpOption{box_height}{dimen}:
+specifies the height of a cloze box. This
+option has only an effect on the environment |clozebox|
+\TmpSecRef{sec:environment-clozebox}.
+
+\begin{minted}{latex}
+\begin{clozebox}[box_height=5cm]
+\end{minted}
+
+\TmpReduceVspace
+
+\begin{TmpExample}
+\bigskip
+\begin{center}
+\begin{clozebox}[box_height=3cm,box_width=3cm]
+box_height: 3cm; Lorem ipsum dolor sit amet ...
+\end{clozebox}
+\begin{clozebox}[box_height=2cm,box_width=3cm]
+box_height: 2cm; Lorem ipsum dolor sit amet ...
+\end{clozebox}
+\begin{clozebox}[box_height=1cm,box_width=3cm]
+box_height: 1cm; Lorem ipsum dolor sit amet ...
+\end{clozebox}
+\end{center}
+\bigskip
+\end{TmpExample}
+
+%%
+% box_rule
+%%
+
+\subsubsection{\tt{box_rule}}
+\label{sec:option-box-rule}
+
+\TmpOption{box_rule}{dimen}: specifies the thickness of the rule around a
+cloze box. This option has only an effect on the environment |clozebox|
+\TmpSecRef{sec:environment-clozebox}.
+
+\begin{minted}{latex}
+\begin{clozebox}[box_rule=2pt]
+\end{minted}
+
+\TmpReduceVspace
+
+\begin{TmpExample}
+\bigskip
+\begin{center}
+\begin{clozebox}[box_rule=1pt,box_width=3cm]
+box_rule: 1pt
+\end{clozebox}
+\begin{clozebox}[box_rule=2pt,box_width=3cm]
+box_rule: 2pt
+\end{clozebox}
+\begin{clozebox}[box_rule=3pt,box_width=3cm]
+box_rule: 3pt
+\end{clozebox}
+\end{center}
+\bigskip
+\end{TmpExample}
+
+%%
+% box_width
+%%
+
+\subsubsection{\tt{box_width}}
+\label{sec:option-box-width}
+
+\TmpOption{box_width}{dimen}:
+specifies the width of a cloze box. This option has only an
+effect on the environment |clozebox| \TmpSecRef{sec:environment-clozebox}.
+
+\begin{minted}{latex}
+\begin{clozebox}[box_width=3cm]
+\end{minted}
+
+\TmpReduceVspace
+
+\begin{TmpExample}
+\bigskip
+\begin{center}
+\begin{clozebox}[box_width=2.5cm]
+box_width: 2.5cm; Lorem ipsum dolor sit amet ...
+\end{clozebox}
+\begin{clozebox}[box_width=3cm]
+box_width: 3cm; Lorem ipsum dolor sit amet ...
+\end{clozebox}
+\begin{clozebox}[box_width=5cm]
+box_width: 4cm; Lorem ipsum dolor sit amet ...
+\end{clozebox}
+\end{center}
+\bigskip
+\end{TmpExample}
+
+%%
+% debug
+%%
+
+\subsubsection{\tt{debug}}
+\label{sec:option-debug}
+
+% Die Option |debug| definiert den Debug- oder Log-Level für den
+% Lua-Code. Die folgenden Debug-Level können eingestellt werden.
+The |debug| option sets the log level. The following debug levels can be
+set.
+% Es gibt einige Stellen im Lua-Code, an denen Print-Anweisungen
+% eingebaut sind, die bei Bedarf Debug-Meldungen auf der Konsole
+% ausgeben.
+There are a few places in the Lua code where print statements are built
+in, which output debug messages to the console if required. The default
+value is \tt{\ClozeGetOption{debug}}.
+
+\begin{itemize}
+\item 1 (error)
+\item 2 (warn)
+\item 3 (info)
+\item 4 (verbose)
+\item 5 (debug)
+\end{itemize}
+
+%%
+% distance
+%%
+
+\subsubsection{\tt{distance}}
+\label{sec:option-distance}
+
+\TmpOption{distance}{dimen}:
+The option |distance| specifies the spacing between the baseline of the
+text and the gap line. The larger the dimension of the option
+|distance|, the more moves the line down. Negative values cause the line
+to appear above the baseline. The default value is
+\tt{\ClozeGetOption{distance}}.
+
+\def\TmpOptionDistance#1{%
+  \noindent%
+  \clozefil[distance=#1]{Lorem ipsum dolor sit amet.}
+  \TmpExpDesc{#1}
+  \par%
+}
+
+\begin{TmpExample}
+\TmpOptionDistance{1.5pt}
+\TmpOptionDistance{3pt}
+\TmpOptionDistance{-3pt}
+\end{TmpExample}
+
+\subsubsection{\tt{font}}
+\label{sec:option-font}
+
+\TmpOption{font}{cmd}: The option |font| is an alternative to the
+commands \cmd{\clozefont} or \cmd{\clozesetfont}. If this option is used
+\cmd{\clozefont} or \cmd{\clozesetfont} have no effect. The option can
+used as a local or global option, but not as a package option.
+
+\begin{minted}{latex}
+Lorem \cloze[font=\Huge]{ipsum} dolor.
+\end{minted}
+
+\begin{TmpExample}
+Lorem \cloze[font=\Huge]{ipsum} dolor.
+\end{TmpExample}
+
+%%
+% extend_count
+%%
+
+\subsubsection{\tt{extend_count}}
+\label{sec:option-extend-count}
+
+\TmpOption{extend_count}{integer}:
+% Als lokale Option innerhalb des Kommandos \cmd{\clozeextend} angegeben,
+% kann die Option abgekürzt und das prefix |extend_| weggelassen
+% werden.
+If specified as a local option within the \cmd{\clozeextend} command,
+the option can be abbreviated and the prefix |extend_| omitted.
+
+\begin{minted}{latex}
+\cloze{Lorem ipsum dolor sit amet. \clozeextend[count=5]}
+\end{minted}
+
+\def\TmpExtendCount#1{%
+  \noindent%
+  \cloze{Lorem ipsum dolor sit amet. \clozeextend[count=#1]}
+  \hfill
+  \TmpExpDesc{#1}
+  \par%
+}
+
+\begin{TmpExample}
+\TmpExtendCount{5}
+\TmpExtendCount{10}
+\TmpExtendCount{15}
+\end{TmpExample}
+
+% Die Option kann sogar noch weiter gekürzt werden, nämlich als eine
+% einzige Zahl.
+The option can be shortened even further, namely as a single number.
+% In allen drei Beispielen wird die Option |extend_count| auf 5 gesetzt.
+All three examples set the |extend_count| option to 5.
+
+\begin{minted}{latex}
+\clozeextend[5]
+\clozeextend[count=5]
+\clozeextend[extend_count=5]
+\end{minted}
+
+% Diese Option hat nur Auswirkungen auf den Befehl \cmd{\clozeextend}
+% \TmpSecRef{sec:command-clozeextend}.
+\noindent
+This option only has an effect on the command \cmd{\clozeextend}
+\TmpSecRef{sec:command-clozeextend}.
+
+%%
+% extend_height
+%%
+
+\subsubsection{\tt{extend_height}}
+\label{sec:option-extend-height}
+
+\TmpOption{extend_height}{dim}:
+% Als lokale Option innerhalb des Kommandos \cmd{\clozeextend} angegeben,
+% kann die Option abgekürzt und das prefix |extend_| weggelassen
+% werden.
+If specified as a local option within the \cmd{\clozeextend} command,
+the option can be abbreviated and the prefix |extend_| omitted.
+
+\begin{minted}{latex}
+\cloze{Lorem ipsum dolor sit amet. \clozeextend[height=2ex]}
+\end{minted}
+
+\def\TmpExtendHeight#1{%
+  \noindent%
+  \cloze{Lorem ipsum dolor sit amet. \clozeextend[height=#1]}
+  \hfill
+  \TmpExpDesc{#1}
+  \par%
+}
+
+\begin{TmpExample}
+\TmpExtendHeight{2ex}
+\TmpExtendHeight{3ex}
+\TmpExtendHeight{4ex}
+\end{TmpExample}
+
+% Diese Option hat nur Auswirkungen auf den Befehl \cmd{\clozeextend}
+% \TmpSecRef{sec:command-clozeextend}.
+\noindent
+This option only has an effect on the command \cmd{\clozeextend}
+\TmpSecRef{sec:command-clozeextend}.
+
+%%
+% extend_width
+%%
+
+\subsubsection{\tt{extend_width}}
+\label{sec:option-extend-width}
+
+\TmpOption{extend_width}{dim}:
+% Als lokale Option innerhalb des Kommandos \cmd{\clozeextend} angegeben,
+% kann die Option abgekürzt und das prefix |extend_| weggelassen
+% werden.
+If specified as a local option within the \cmd{\clozeextend} command,
+the option can be abbreviated and the prefix |extend_| omitted.
+
+\begin{minted}{latex}
+\cloze{Lorem ipsum dolor sit amet. \clozeextend[width=1em]}
+\end{minted}
+
+\def\TmpExtendWidth#1{%
+  \noindent%
+  \cloze{Lorem ipsum dolor sit amet. \clozeextend[width=#1]}
+  \hfill
+  \TmpExpDesc{#1}
+  \par%
+}
+
+\begin{TmpExample}
+\TmpExtendWidth{1em}
+\TmpExtendWidth{2em}
+\TmpExtendWidth{3em}
+\end{TmpExample}
+
+% Diese Option hat nur Auswirkungen auf den Befehl \cmd{\clozeextend}
+% \TmpSecRef{sec:command-clozeextend}.
+This option only has an effect on the command \cmd{\clozeextend}
+\TmpSecRef{sec:command-clozeextend}.
+
+%%
+% hide and show
+%%
+
+\subsubsection{\tt{hide} and \tt{show}}
+\label{sec:option-hide}
+\label{sec:option-show}
+
+\tt{[hide]} and \tt{[show]}:
+By default the cloze text is displayed. Use the option |hide| to remove
+the cloze text from the output.
+
+\def\TmpOptionShow#1{%
+  \noindent%
+  Lorem ipsum \cloze[#1]{dolor sit amet}, consectetur
+  \cloze[#1]{adipisicing} elit.%
+  \TmpDesc{#1}%
+}
+
+\begin{TmpExample}
+\TmpOptionShow{hide}
+\TmpOptionShow{show}
+\end{TmpExample}
+
+%%
+% line_color and text_color
+%%
+
+\subsubsection{\tt{line_color} and \tt{text_color}}
+\label{sec:option-line-color}
+\label{sec:option-text-color}
+
+\TmpOption{line_color}{color name} and
+\TmpOption{text_color}{color name}:
+Values for both color options are color names.
+To define your own color use the following command:
+
+\begin{minted}{latex}
+\definecolor{myclozecolor}{rgb}{0.1,0.4,0.6}
+\cloze[text_color=myclozecolor]{Lorem ipsum}
+\end{minted}
+\definecolor{myclozecolor}{rgb}{0.1,0.4,0.6}
+
+\def\TmpOptionColor#1#2{%
+  \noindent%
+  \clozefil[#1=#2]{Lorem ipsum dolor sit amet, consectetur} %
+  \TmpExpDesc{#2}%
+  \par%
+}
+
+\begin{TmpExample}
+\TmpOptionColor{text_color}{myclozecolor}
+\TmpOptionColor{text_color}{red}
+\TmpOptionColor{text_color}{green}
+\end{TmpExample}
+
+\noindent You can use the same color names to colorize the cloze lines.
+
+\begin{TmpExample}
+\TmpOptionColor{line_color}{myclozecolor}
+\TmpOptionColor{line_color}{red}
+\TmpOptionColor{line_color}{green}
+\end{TmpExample}
+
+\noindent
+And now hide the clozes:
+
+\clozehide
+\begin{TmpExample}
+\TmpOptionColor{line_color}{myclozecolor}
+\TmpOptionColor{line_color}{red}
+\TmpOptionColor{line_color}{green}
+\end{TmpExample}
+\clozeshow
+
+
+%%
+% margin
+%%
+
+\subsubsection{\tt{margin}}
+\label{sec:option-margin}
+
+\TmpOption{margin}{dimen}:
+The option |margin| indicates how far the line sticks up from the text.
+The option can be used with the commands \cmd{\cloze}, \cmd{\clozefix}
+and \cmd{\clozefil}. The default value of the option is
+\tt{\ClozeGetOption{margin}}.
+
+\def\TmpOptionMargin#1{%
+  \noindent%
+  Lorem ipsum \cloze[margin=#1]{dolor} sit amet.%
+  \TmpDesc{#1}%
+}
+
+\begin{TmpExample}
+\TmpOptionMargin{0pt}
+\TmpOptionMargin{5mm}
+\TmpOptionMargin{1cm}
+\TmpOptionMargin{6em}
+\TmpOptionMargin{-4pt}
+\end{TmpExample}
+
+% Folgt ein Satzzeichen direkt auf eine Lücke, so findet der
+% Zeilenumbruch erst nach dem Satzzeichen statt. Auch ein noch so großer
+% Wert für |margin| beeinflusst dieses Verhalten nicht.
+\noindent Is a punctation mark placed directly after a gap, then the
+line breaks after this punctation mark. Even the most large value of
+|margin| does not affect this behavior.
+
+\begin{TmpExample}
+\clozeset{margin=3mm}
+\cloze{Lorem}, \cloze{ipsum}. \cloze{dolor}; \cloze{sit}: \cloze{amet},
+\cloze{consectetur}. \cloze{adipisicing}; \cloze{elit}: \cloze{sed},
+\cloze{do}. \cloze{eiusmod}; \cloze{tempor}.
+\end{TmpExample}
+
+\clozereset
+
+%%
+% min_lines
+%%
+
+\newpage
+\subsubsection{\tt{min_lines}}
+\label{sec:option-min-lines}
+
+\TmpOption{min_lines}{integer}: \tt{min_lines} stands for
+“\textbf{min}imum \textbf{lines}”. With the option \tt{min_lines} you can
+set how many lines a \tt{clozepar} at least must have. If the text to be
+typeset results in fewer lines, empty lines are appended to the end. If
+the text of a \tt{clozepar} produces more lines as specified in
+\tt{min_lines}, the option has no effect at all. The option \tt{min_lines}
+only affects the behavior of the environment \tt{clozepar}
+\TmpSecRef{sec:command-clozepar} and the macro versions
+\cmd{\clozeparplain} \TmpSecRef{sec:command-clozeparplain} and
+\cmd{\clozeparcapture} \TmpSecRef{sec:command-clozeparcapture}.
+
+% https://www.pinterest.de/pin/856176579144764867/
+
+\begin{minted}{latex}
+\clozeset{min_lines=4}
+\begin{enumerate}
+\item Battlements
+
+\begin{clozepar}
+Higher ...
+\end{minted}
+
+\clozeset{min_lines=4}
+
+\def\TmpExampleMinlines{
+\textbf{\Large{}Defending a Castle}
+
+\noindent
+Here is a list of features on castle in the Middle Ages that would help
+to defend it.
+
+\begin{enumerate}
+\item Battlements
+
+\begin{clozepar}
+Higher than the walls and jutting out from them to allow
+defenders to fire at people who had reached the walls
+\end{clozepar}
+
+\item Embrasures
+
+\begin{clozepar}
+Heavily protected entrance
+\end{clozepar}
+
+\item Portcullis
+
+\begin{clozepar}
+Arrow slits with a round hole for firing musket guns
+\end{clozepar}
+\end{enumerate}
+}
+
+\begin{multicols}{2}
+\TmpHide
+\begin{TmpExample}
+\TmpExampleMinlines
+\end{TmpExample}
+
+\columnbreak
+
+\TmpShow
+\begin{TmpExample}
+\TmpExampleMinlines
+\end{TmpExample}
+\end{multicols}
+
+\clozereset
+
+%%
+% spacing
+%%
+
+\subsubsection{\tt{spacing}}
+\label{sec:option-spacing}
+
+\TmpOption{spacing}{number}:
+%
+This option provides support for setting the spacing between lines. A
+larger font used for the cloze texts needs more line space to avoid
+unsteady line distances. This option only affects the environment
+|clozespace| \TmpSecRef{sec:command-clozespace}.
+
+%%
+% spread
+%%
+
+\subsubsection{\tt{spread}}
+\label{sec:option-spread}
+
+\TmpOption{spread}{number}:
+%
+% Vergrößere bzw. spreize eine Lücke um einen gewissen Faktor.
+The option |spread| enlarges or spreads a gap by a certain factor.
+% 0.5 beispielsweise vergrößert die Lücke um die Hälfte ihrer ursprünglichen bereite
+$0.5$, for example, enlarges the gap by half of its original size.
+% Ein spread-Faktor von 0 fügt keinen Abstand ein.
+A spread factor of $0$ does not insert a space.
+% Ein negativer spread-Faktor kann auch angewendet werden.
+A negative spread factor can also be applied.
+% Dadurch überlappen sich unter Umständen die Textzeichen.
+This may cause the text characters to overlap.
+% Diese Option kann nur in Verbindung mit den Kommandos cloze and clozenol eingesetzt werden.
+This option can only be used in combination with the commands
+\cmd{\cloze} \TmpSecRef{sec:command-cloze} and \cmd{\clozenol}
+\TmpSecRef{sec:command-clozenol}.
+
+\def\TmpOptionSpread#1{%
+  \noindent%
+  Lorem \cloze[spread=#1]{ipsum dolor sit} amet.%
+  \TmpDesc{#1}%
+}
+
+\begin{TmpExample}
+\TmpOptionSpread{-0.5}
+\TmpOptionSpread{0}
+\TmpOptionSpread{0.5}
+\TmpOptionSpread{1}
+\TmpOptionSpread{2}
+\end{TmpExample}
+
+\noindent
+% Die Option spread fügt am Anfang und am Ende einer Lücke einen Abstand
+% ein, der abhängig von der Breite des Texts in der Lücke ist.
+The |spread| option inserts a space at the beginning and end of a gap
+that depends on the width of the text in the gap.
+
+\begin{TmpExample}
+Lorem ipsum dolor \cloze[spread=0.5]{sit} amet. \TmpDesc{0.5}%
+\noindent
+Lorem ipsum \cloze[spread=0.5]{dolor sit} amet. \TmpDesc{0.5}%
+\noindent
+Lorem \cloze[spread=0.5]{ipsum dolor sit} amet. \TmpDesc{0.5}%
+\noindent
+\cloze[spread=0.5]{Lorem ipsum dolor sit} amet. \TmpDesc{0.5}%
+\noindent
+\cloze[spread=0.5]{Lorem ipsum dolor sit amet}. \TmpDesc{0.5}%
+\end{TmpExample}
+
+\noindent
+% Zusätzlich zu der der Option spread kann auch noch die Option margin
+% verwendet werden, die einen Abstand eingefügt werden, der unabhängig
+% von der Breite der Lücke ist.
+In addition to the |spread| option, the |margin| option can also be used,
+which inserts a distance that is independent of the width of the gap.
+
+%%
+% thickness
+%%
+
+\subsubsection{\tt{thickness}}
+\label{sec:option-thickness}
+
+\TmpOption{thickness}{dimen}:
+%
+The option |thickness| indicates how thick the line is. The option
+|distance| \TmpSecRef{sec:option-distance} is not affected by this
+option, because the bottom of the line moves down. The default value of
+this option is \tt{\ClozeGetOption{thickness}}.
+
+\def\TmpOptionThickness#1{%
+  \noindent%
+  Lorem \cloze[thickness=#1]{ipsum dolor sit} amet.%
+  \TmpDesc{#1}%
+}
+
+\begin{TmpExample}
+\TmpOptionThickness{0.01pt}
+\TmpOptionThickness{1pt}
+\TmpOptionThickness{2pt}
+\end{TmpExample}
+
+%%
+% width
+%%
+
+\subsubsection{\tt{width}}\label{sec:option-width}
+
+\TmpOption{width}{dimen}:
+%
+The only command which can be changed by the option |width| is
+\cmd{\clozefix} \TmpSecRef{sec:command-clozefix}. The default value of
+the option is \tt{\ClozeGetOption{width}}.
+
+\def\TmpOptionWidth#1{%
+  \noindent%
+  Lorem \clozefix[width=#1]{dolor} amet.%
+  \TmpDesc{#1}%
+}
+
+\begin{TmpExample}
+\TmpOptionWidth{3cm}
+\TmpOptionWidth{5cm}
+\TmpOptionWidth{7cm}
+\end{TmpExample}
+
+%%
+% visibility
+%%
+
+\subsubsection{\tt{visibility}}\label{sec:option-visibility}
+
+\TmpOption{visibility}{boolean}:
+%
+% Anstelle der entgegengesetzten Optionen |show| und |hide| können Sie
+% die Option |visibility| verwenden und diese auf einen booleschen Wert
+% setzen.
+Instead of the opposite naked |show| and |hide| keys, you can use the
+|visibility| option and set it to a boolean value.
+
+\begin{minted}{latex}
+Lorem \cloze[visibility=false]{ipsum} dolor.
+
+Lorem \cloze[visibility=true]{ipsum} dolor.
+
+Lorem \cloze[visibility=false]{ipsum} dolor.
+\end{minted}
+
+\def\TmpOptionVisibility#1{%
+  \noindent%
+  Lorem \cloze[visibility=#1]{ipsum} dolor.%
+  \TmpDesc{#1}%
+}
+
+\begin{TmpExample}
+\TmpOptionVisibility{false}
+\TmpOptionVisibility{true}
+\TmpOptionVisibility{false}
+\end{TmpExample}
+%
+
+%-----------------------------------------------------------------------
+% Handwriting fonts from CTAN and \TeX{} Live
+%-----------------------------------------------------------------------
+
+\subsection{Handwriting fonts from CTAN and \TeX{} Live}
+
+If you want to imitate a hand-filled worksheet, then some handwriting
+fonts are suitable for this purpose. This section is intended to provide
+an overview of handwriting fonts available on CTAN and \TeX{} Live. The
+fonts are listed in alphabetical order:
+
+\def\TmpHandwritingExample{
+  \begin{TmpExample}
+  Lorem \cloze{ipsum} dolor sit amet, consetetur \cloze{sadipscing
+  elitr, sed diam nonumy eirmod tempor} invidunt ut \cloze{labore et
+  dolore magna aliquyam erat}, sed \cloze{diam} voluptua.
+  \end{TmpExample}
+}
+
+\def\TmpHandwritingCtan#1#2{
+  \subsubsection*{#1}
+
+  \begin{tabbing}
+    \hspace{2.8cm} \= \hspace{8cm} \kill
+
+    CTAN: \>
+    {\footnotesize\href{https://www.ctan.org/pkg/#2}{#2}}\\
+
+    \TeX{} Live: \>
+    \texttt{\footnotesize tlmgr install #2}\\
+
+    Font selection: \>
+    \texttt{\footnotesize\string\clozesetfont\{\string\fontspec\{#1\}\}}\\
+  \end{tabbing}
+  \vspace{-0.7cm}
+  %
+
+  \clozeset{margin=7pt}
+  \clozesetfont{\Large\fontspec{#1}}
+  \TmpHandwritingExample
+}
+
+% \TmpHandwritingCtan{LobsterTwo}{lobster2}
+% \TmpHandwritingCtan{Miama Nueva}{miama}
+\TmpHandwritingCtan{QT Brush Stroke}{qualitype}
+\TmpHandwritingCtan{QT Florencia}{qualitype}
+% \TmpHandwritingCtan{QT Handwriting}{qualitype}
+\TmpHandwritingCtan{QT Linostroke}{qualitype}
+\TmpHandwritingCtan{QT Merry Script}{qualitype}
+\TmpHandwritingCtan{QT Slogantype}{qualitype}
+
+%-----------------------------------------------------------------------
+% Handwriting fonts from Google Fonts
+%-----------------------------------------------------------------------
+
+\subsection{Handwriting fonts from Google Fonts}
+
+You can get many more free handwriting fonts from Google Fonts. This
+section shows only a selection. I personally use the font named
+\emph{Kalam} for my worksheets. All Google Fonts are available
+in a \href{https://github.com/google/fonts}{Git respository}.
+
+\begin{minted}{shell}
+git clone https://github.com/google/fonts.git
+\end{minted}
+
+\noindent
+The fonts are listed in alphabetical order:
+
+\def\TmpHandwritingGoogle#1{
+  \subsubsection*{#1}
+
+  \begin{tabbing}
+    \hspace{2.8cm} \= \hspace{8cm} \kill
+    URL: \> {\footnotesize\url{https://fonts.google.com/specimen/\directlua{
+      local font_name = '#1'
+      font_name = font_name:gsub(' ', '+')
+      tex.print(font_name)
+    }}}
+    \\
+
+    Font selection: \>
+    \texttt{\footnotesize\string\clozesetfont\{\string\fontspec\{#1\}\}}
+    \\
+  \end{tabbing}
+  \vspace{-0.7cm}
+  %
+  \clozeset{margin=7pt}
+  \clozesetfont{\Large\fontspec{#1}}
+  \TmpHandwritingExample
+}
+
+%\TmpHandwritingGoogle{Amatic SC}
+% \TmpHandwritingGoogle{Annie Use Your Telescope}
+% \TmpHandwritingGoogle{Architects Daughter}
+% \TmpHandwritingGoogle{Bad Script}
+% \TmpHandwritingGoogle{Bubblegum Sans}
+% \TmpHandwritingGoogle{Caveat Brush}
+% \TmpHandwritingGoogle{Caveat}
+% \TmpHandwritingGoogle{Cedarville Cursive}
+\TmpHandwritingGoogle{Coming Soon}
+% \TmpHandwritingGoogle{Covered By Your Grace}
+% \TmpHandwritingGoogle{Crafty Girls}
+% \TmpHandwritingGoogle{East Sea Dokdo}
+% \TmpHandwritingGoogle{Fondamento}
+% \TmpHandwritingGoogle{Ga Maamli}
+% \TmpHandwritingGoogle{Gamja Flower}
+% \TmpHandwritingGoogle{Give You Glory}
+% \TmpHandwritingGoogle{Gloria Hallelujah}
+\TmpHandwritingGoogle{Gluten}
+% \TmpHandwritingGoogle{Gochi Hand}
+% \TmpHandwritingGoogle{Grape Nuts}
+% \TmpHandwritingGoogle{Hachi Maru Pop}
+% \TmpHandwritingGoogle{Handlee}
+% \TmpHandwritingGoogle{Homemade Apple}
+% \TmpHandwritingGoogle{Indie Flower}
+% \TmpHandwritingGoogle{Italianno}
+% \TmpHandwritingGoogle{Julee}
+% \TmpHandwritingGoogle{Just Another Hand}
+% \TmpHandwritingGoogle{Just Me Again Down Here}
+\TmpHandwritingGoogle{Kalam}
+% \TmpHandwritingGoogle{Knewave}
+% \TmpHandwritingGoogle{Kristi}
+% \TmpHandwritingGoogle{La Belle Aurore}
+% \TmpHandwritingGoogle{Lacquer}
+% \TmpHandwritingGoogle{Leckerli One}
+% \TmpHandwritingGoogle{Loved by the King}
+% \TmpHandwritingGoogle{Ma Shan Zheng}
+\TmpHandwritingGoogle{Mali}
+% \TmpHandwritingGoogle{Mansalva}
+% \TmpHandwritingGoogle{Marck Script}
+% \TmpHandwritingGoogle{Meddon}
+% \TmpHandwritingGoogle{Merienda}
+% \TmpHandwritingGoogle{Montez}
+% \TmpHandwritingGoogle{Moon Dance}
+% \TmpHandwritingGoogle{Mr Dafoe}
+% \TmpHandwritingGoogle{Mr De Haviland}
+% \TmpHandwritingGoogle{Mrs Saint Delafield}
+% \TmpHandwritingGoogle{Ms Madi}
+% \TmpHandwritingGoogle{Nanum Brush Script}
+% \TmpHandwritingGoogle{Neucha}
+% \TmpHandwritingGoogle{Nothing You Could Do}
+% \TmpHandwritingGoogle{Oooh Baby}
+\TmpHandwritingGoogle{Oregano}
+% \TmpHandwritingGoogle{Over the Rainbow}
+% \TmpHandwritingGoogle{Pangolin}
+% \TmpHandwritingGoogle{Patrick Hand SC}
+% \TmpHandwritingGoogle{Patrick Hand}
+% \TmpHandwritingGoogle{Permanent Marker}
+% \TmpHandwritingGoogle{Playpen Sans}
+% \TmpHandwritingGoogle{Playwrite Deutschland Grundschrift}
+% \TmpHandwritingGoogle{Qwitcher Grypen}
+% \TmpHandwritingGoogle{Rancho}
+% \TmpHandwritingGoogle{Reenie Beanie}
+% \TmpHandwritingGoogle{Rock Salt}
+% \TmpHandwritingGoogle{Schoolbell}
+% \TmpHandwritingGoogle{Seaweed Script}
+% \TmpHandwritingGoogle{Sedgwick Ave}
+% \TmpHandwritingGoogle{Shadows Into Light Two}
+% \TmpHandwritingGoogle{Shadows Into Light}
+% \TmpHandwritingGoogle{Shantell Sans}
+% \TmpHandwritingGoogle{Short Stack}
+% \TmpHandwritingGoogle{Sriracha}
+% \TmpHandwritingGoogle{Sue Ellen Francisco}
+% \TmpHandwritingGoogle{Sunshiney}
+% \TmpHandwritingGoogle{Swanky and Moo Moo}
+% \TmpHandwritingGoogle{The Girl Next Door}
+% \TmpHandwritingGoogle{Vibur}
+%\TmpHandwritingGoogle{Nanum Pen Script}
+\clozereset
+
+%-----------------------------------------------------------------------
+% Special application areas
+%-----------------------------------------------------------------------
+
+\subsection{Special application areas}
+
+This section lists examples that didn’t work in older versions of
+the cloze package and required special treatment to work as expected.
+
+\subsubsection{The math mode}
+
+By default the package uses |\itshape| to format the cloze text. In
+math mode you have to reset the cloze text format by calling
+|\clozesetfont{}|. A known bug is: You can’t show and hide
+a single display math formula. Only the last |\clozeshow| or
+|\clozehide| takes effect on the whole document. Side note: The usage
+of the \TeX{} primitive syntax |$$ $$| is not recommended.
+
+\clozesetfont{}
+
+%%
+%
+%%
+
+\bigskip
+
+\begin{multicols}{2}
+\begin{minted}{latex}
+\clozesetfont{}
+$$1 + 1 = \cloze{2}$$
+\clozesetfont{\itshape}
+\end{minted}
+
+\columnbreak
+
+\begin{TmpExample}
+$$1 + 1 = \cloze{2}$$
+\end{TmpExample}
+\end{multicols}
+
+\bigskip
+
+%%
+%
+%%
+
+\noindent
+|\[\]| should be used instead.
+
+\begin{multicols}{2}
+\begin{minted}{latex}
+\[123 + 456 = \cloze{579}\]
+\end{minted}
+
+\columnbreak
+
+\begin{TmpExample}
+\[123 + 456 = \cloze{579}\]
+\end{TmpExample}
+\end{multicols}
+
+%%
+%
+%%
+
+\bigskip
+\noindent
+A cloze inside a display math environment should work fine:
+
+\begin{multicols}{2}
+\begin{minted}{latex}
+\begin{displaymath}
+2^{\cloze{2}} = 4
+\end{displaymath}
+\end{minted}
+
+\columnbreak
+
+\begin{TmpExample}
+\begin{displaymath}
+2^{\cloze{2}} = 4
+\end{displaymath}
+\end{TmpExample}
+\end{multicols}
+
+\bigskip
+
+\noindent
+The inline math mode works too:
+
+\begin{minted}{latex}
+${\sqrt[3]{\cloze{8}}} = 2$ and ${\sqrt[\cloze{3}]{\cloze{8}}} = 2$
+\end{minted}
+
+\begin{TmpExample}
+\begin{center}
+${\sqrt[3]{\cloze{8}}} = 2$ and ${\sqrt[\cloze{3}]{\cloze{8}}} = 2$
+\end{center}
+\end{TmpExample}
+
+%%
+% equation
+%%
+
+\begin{multicols}{2}
+\begin{minted}{latex}
+\begin{equation}
+e^{\pi i} + 1 = \cloze{0}
+\end{equation}
+\end{minted}
+
+\columnbreak
+
+\begin{TmpExample}
+\begin{equation}
+e^{\pi i} + 1 = \cloze{0}
+\end{equation}
+\end{TmpExample}
+\end{multicols}
+
+%%
+% amsmath: multline
+%%
+
+\noindent
+The amsmath \texttt{multline} environment:
+
+\begin{multicols}{2}
+\begin{minted}{latex}
+\begin{multline*}
+p(x) = \cloze{590}x^4y^2 + \cloze{19}x^3y^3\\
+- 12x^2y^4 - \cloze{12}xy^5
+\end{multline*}
+\end{minted}
+
+\columnbreak
+
+\begin{TmpExample}
+\begin{multline*}
+p(x) = \cloze{590}x^4y^2 + \cloze{19}x^3y^3\\
+- 12x^2y^4 - \cloze{12}xy^5
+\end{multline*}
+\end{TmpExample}
+\end{multicols}
+
+%%
+%
+%%
+
+\def\TmpSubtraction{
+  Missing Subtraction Facts to 12
+
+  \def\TmpMath##1{
+    \hspace{0.3cm}\scalebox{1.5}{$##1$}
+  }
+
+  \clozeset{margin=8pt}
+  \renewcommand{\labelenumi}{\alph{enumi})}
+  \begin{enumerate}
+  \item \TmpMath{8 - 6 = \cloze{2}}
+  \item \TmpMath{10 - 4 = \cloze{6}}
+  \item \TmpMath{7 - \cloze{2} = 5}
+  \item \TmpMath{6 - \cloze{1} = 5}
+  \item \TmpMath{\cloze{6} - 3 = 3}
+  \item \TmpMath{\cloze{10} - 2 = 8}
+  \end{enumerate}
+}
+
+\begin{multicols}{2}
+\TmpHide
+\begin{TmpExample}
+\TmpSubtraction
+\end{TmpExample}
+
+\columnbreak
+
+\TmpShow
+\begin{TmpExample}
+\TmpSubtraction
+\end{TmpExample}
+
+\end{multicols}
+
+\clozesetfont{\itshape}
+\clozereset
+
+%%
+% tabbing
+%%
+
+\subsubsection{The \tt{tabbing} environment}
+
+\begin{minted}{latex}
+\begin{tabbing}
+col1 \hspace{1cm} \= col2 \hspace{1cm} \= col3 \hspace{1cm} \= col4 \\
+\cloze{col1} \> \> \clozefix{col3} \\
+\end{tabbing}
+\end{minted}
+
+\begin{TmpExample}
+\begin{tabbing}
+col1 \hspace{1cm} \= col2 \hspace{1cm} \= col3 \hspace{1cm} \= col4 \\
+\cloze{col1} \> \> \clozefix{col3} \\
+\end{tabbing}
+\end{TmpExample}
+
+%%
+% picture
+%%
+
+\newpage
+\subsubsection{The \tt{picture} environment}
+
+\begin{minted}{latex}
+\setlength{\unitlength}{0.8cm}
+\begin{picture}(4.8,3.8)
+\thicklines
+\put(1,0.5){\line(2,1){3}} \put(4,2){\line(-2,1){2}} \put(2,3){\line(-2,-5){1}}
+
+\put(0.4,0.2){\cloze{A}} \put(4.05,1.9){$B$} \put(1.8,3.1){$C$}
+
+\put(3.1,2.5){$a$} \put(0.8,1.8){\cloze{b}} \put(2.5,0.9){\cloze{c}}
+\end{picture}
+\end{minted}
+
+\def\TmpPicture{
+  \setlength{\unitlength}{0.8cm}
+  \begin{picture}(4.8,3.8)
+  \thicklines
+  \put(1,0.5){\line(2,1){3}}
+  \put(4,2){\line(-2,1){2}}
+  \put(2,3){\line(-2,-5){1}}
+  \put(0.4,0.2){\cloze{A}}
+  \put(4.05,1.9){$B$}
+  \put(1.8,3.1){$C$}
+  \put(3.1,2.5){$a$}
+  \put(0.8,1.8){\cloze{b}}
+  \put(2.5,0.9){\cloze{c}}
+  \end{picture}
+}
+%
+
+\begin{multicols}{2}
+\TmpHide
+
+\begin{TmpExample}
+\center{\TmpPicture}
+\end{TmpExample}
+
+\columnbreak
+
+\TmpShow
+
+\begin{TmpExample}
+\center{\TmpPicture}
+\end{TmpExample}
+\end{multicols}
+
+\clozereset
+
+%%
+% tabular
+%%
+
+\subsubsection{The \tt{tabular} environment}
+
+\begin{minted}{latex}
+\begin{tabular}{l|l}
+  \textbf{englisch} & \textbf{deutsch} \\\hline
+  book & \clozefil{Buch} \\
+  \clozefil{scissors} & Schere\\
+  pen & \clozefil{Füller} \\
+  \clozefil{pencil} & Bleistift\\
+\end{tabular}
+\end{minted}
+
+\def\TmpTabluarEnglishGerman{
+  \clozeset{distance=4pt}
+  \renewcommand{\arraystretch}{1.5}
+  \begin{tabular}{ll}
+  \textbf{englisch} & \textbf{deutsch} \\
+  \hline
+  book & \clozefil{Buch} \\
+  \clozefil{scissors} & Schere\\
+  pen & \clozefil{Füller} \\
+  \clozefil{pencil} & Bleistift\\
+  \end{tabular}
+  \vspace{0.2cm}
+}
+
+\begin{multicols}{2}
+\TmpHide
+\begin{TmpExample}
+\center{\TmpTabluarEnglishGerman}
+\end{TmpExample}
+
+\columnbreak
+
+\TmpShow
+\begin{TmpExample}
+\center{\TmpTabluarEnglishGerman}
+\end{TmpExample}
+\end{multicols}
+
+%%
+% forest
+%%
+
+\newpage
+\subsubsection{The package \tt{forest}}
+
+\begin{minted}{latex}
+\begin{forest}
+[Johann Sebastian \cloze{Bach}
+  [Carl \cloze{Phillip} Emanuel
+    [Johann Sebastian (der \cloze{Jüngere})]
+  ]
+  [Johann Christoph \cloze{Friedrich}
+    [\cloze{Wilhelm} Friedrich Ernst]
+  ]
+  [\cloze{Johann Christian}]
+]
+\end{forest}
+\end{minted}
+
+\def\TmpForestBach{
+  {
+  \noindent
+  \scriptsize
+  \begin{forest}
+  [Johann Sebastian \cloze{Bach}
+    [Carl \cloze{Phillip} Emanuel
+      [Johann Sebastian (der \cloze{Jüngere})]
+    ]
+    [Johann Christoph \cloze{Friedrich}
+      [\cloze{Wilhelm} Friedrich Ernst]
+    ]
+    [\cloze{Johann Christian}]
+  ]
+  \end{forest}
+  }
+}
+
+\TmpHide
+
+\begin{TmpExample}
+\begin{center}
+\TmpForestBach
+\end{center}
+\end{TmpExample}
+
+\TmpShow
+
+\begin{TmpExample}
+\begin{center}
+\TmpForestBach
+\end{center}
+\end{TmpExample}
+
+\clozereset
+
+%%
+% tikz
+%%
+
+\newpage
+\subsubsection{The package \tt{tikz}}
+
+%%
+%
+%%
+
+\paragraph{Example Multiline alignment in TikZ}
+\def\TmpTikzExampleAlignment{
+  \begin{tikzpicture}[
+    cloze box/.style={draw,text width=3cm},
+    scale=0.6,
+    transform shape
+  ]
+  \def\TmpLorem{
+    \clozenol[margin=0pt]{Damit Ihr indess erkennt, woher
+      dieser ganze Irrthum gekommen ist.}
+  }
+
+  \def\TmpTextBox##1##2##3{
+    \node (##1) at (##2) [cloze box,align=##1] {\TmpLorem};
+    \node [##3=0cm of ##1] {\texttt{\footnotesize{}align=##1}};
+    \draw (##1) -- (tikz);
+  }
+
+  \node (tikz) at (4,4) [circle, text width=3cm, align=center] {
+    \textbf{TikZ}\\Alignment of Multi-Line\\ Text
+  };
+
+  \TmpTextBox{left}         {0,8}{above}
+  \TmpTextBox{center}       {4,8}{above}
+  \TmpTextBox{right}        {8,8}{above}
+  \TmpTextBox{flush right}  {8,4}{above}
+  \TmpTextBox{none}         {8,0}{below}
+  \TmpTextBox{flush center} {4,0}{below}
+  \TmpTextBox{justify}      {0,0}{below}
+  \TmpTextBox{flush left}   {0,4}{above}
+  \end{tikzpicture}
+}
+
+\TmpHide
+\begin{TmpExample}
+\center{\TmpTikzExampleAlignment}
+\end{TmpExample}
+
+\TmpShow
+\begin{TmpExample}
+\center{\TmpTikzExampleAlignment}
+\end{TmpExample}
+
+%%
+%
+%%
+
+\newpage
+\paragraph{Example Timeline}
+
+\def\TmpTimeline{\begin{tikzpicture}[
+  scale=0.6,
+  transform shape,
+  text box/.style={black, text width=3cm, align=flush left, draw},
+  arrow/.style={<-,thick,black,align=center},
+  >=latex
+]
+
+  % limits
+  \newcount\yearOne; \yearOne=1860
+  \def\widthOfAxes{15}
+  \def\numberOfDecades{11}
+  \def\tenTickLength{0.40}
+  \def\fiveTickLength{0.36}
+  \def\oneTickLength{0.30}
+
+  % help functions
+  % ##1: year
+  % ##2: distance arrow timeline: - below + above
+  % ##3: arrow length
+  % ##4: Text
+  % ##5: left or right or empty (-> center)
+  \def\yearArrowLabel(##1,##2,##3,##4,##5){
+    \def\xy{{(##1-\yearOne)*\widthOfAxes/\numberOfDecades/10}};
+    \pgfmathparse{int(##2*100)};
+    \ifnum \pgfmathresult<0
+      % below
+      \def\yyp{{(\tenTickLength*(0.90+##2))}}; \def\yyw{{(\yyp-\tenTickLength*##3)}}
+      \draw[arrow] (\xy,\yyp) -- (\xy,\yyw) node[below ##5,text box] at (\xy,\yyw) {\footnotesize\textbf{##1}: ##4};
+    \else
+      % above
+      \def\yyp{{(\tenTickLength*(0.10+##2)}}; \def\yyw{{(\yyp+\tenTickLength*##3)}}
+      \draw[arrow] (\xy,\yyp) -- (\xy,\yyw) node[above ##5,text box] at (\xy,\yyw) {\footnotesize\textbf{##1:} ##4};
+    \fi
+  }
+
+  % axis
+  \draw[->,thick] (-\widthOfAxes*0.03,0) -- (\widthOfAxes*1.03,0);
+
+  % ticks
+  \foreach \tick in {0,1,...,\numberOfDecades}{
+    \def\x{{\tick*\widthOfAxes/\numberOfDecades}}
+    \def\year{\the\numexpr \yearOne+\tick*10 \relax}
+     % ten tick
+    \draw[thick] (\x,\tenTickLength) -- (\x,-\tenTickLength) node[below] {\year};
+
+    \ifnum \tick<\numberOfDecades
+      % five tick
+      \draw ({(\x+\widthOfAxes/\numberOfDecades/2)},0) --
+            ({(\x+\widthOfAxes/\numberOfDecades/2)},\fiveTickLength);
+      \foreach \ticko in {1,2,3,4,6,7,8,9}{
+        \def\xo{{(\x+\ticko*\widthOfAxes/\numberOfDecades/10)}}
+        % one tick
+        \draw (\xo,0) -- (\xo,\oneTickLength);
+      }
+    \fi
+  }
+
+  % label
+  \yearArrowLabel(1865,-1,3,
+    Thirteenth \cloze{Amendment} to constitution abolishes \cloze{Slavery},)
+
+  \yearArrowLabel(1875,1,2,
+    \cloze{Civil Rights Act} is passed giving black citizens \cloze{equal} treatment.,)
+
+  \yearArrowLabel(1896,-1,3,
+    Plessy v. \cloze{Ferguson} say that segregation is \cloze{constitutional},)
+
+  \yearArrowLabel(1909,1,2,
+    \cloze{NAACP} is founded in New York and led by W.E.B. Du \cloze{Bois},)
+
+  \yearArrowLabel(1946,1,2,
+    U.S. Supreme court bans segregation on \cloze{Public Transit} (i.e. subways).,left)
+
+  \yearArrowLabel(1955,-1,3,
+    Rosa \cloze{Parks} refuses to give up her seat on a \cloze{bus} in \cloze{Alabama},left)
+
+  \yearArrowLabel(1963,1,2,
+    Martin Luther \cloze{King} Jr. delivers his ‘I Have a \cloze{Dream}’ speech in \cloze{Washington} D.C.,)
+
+  \yearArrowLabel(1968,-3,2,
+    Martin Luther King Jr. is \cloze{assassinated},right)
+\end{tikzpicture}
+}
+
+\TmpHide
+
+\begin{TmpExample}
+\begin{center}
+\TmpTimeline
+\end{center}
+\end{TmpExample}
+
+\TmpShow
+
+\begin{TmpExample}
+\begin{center}
+\TmpTimeline
+\end{center}
+\end{TmpExample}
+
+\paragraph{Number pyramid}
+
+\clozesetfont{\ttfamily}
+\def\TmpNumberPyramid(#1,#2,#3,#4,#5,#6){
+  \begin{tikzpicture}[
+    node distance = 0pt,
+    every node/.style = {
+      draw,
+      minimum width=10mm,
+      minimum height=6mm,
+      inner sep=0pt,
+      outer sep=0pt,
+      font=\ttfamily,
+    }
+  ]
+  \node (n1)  {#1};
+  %
+  \node (n11) [below left=of n1.south]    {#2};
+  \node (n12) [right=of n11]              {#3};
+  %
+  \node (n21) [below left=of n11.south]   {#4};
+  \node (n22) [right=of n21]              {#5};
+  \node (n23) [right=of n22]              {#6};
+  \end{tikzpicture}
+}
+
+\def\TmpNumberPyramids{
+  \TmpNumberPyramid(\clozenol{17},\clozenol{12},\clozenol{5},10,2,3)
+  \TmpNumberPyramid(\clozenol{19},10,\clozenol{9},3,\clozenol{7},2)
+  \TmpNumberPyramid(10,\clozenol{7},3,\clozenol{5},2,\clozenol{1})
+}
+
+\TmpHide
+
+\begin{TmpExample}
+\begin{center}
+\TmpNumberPyramids
+\end{center}
+\end{TmpExample}
+
+\TmpShow
+
+\begin{TmpExample}
+\begin{center}
+\TmpNumberPyramids
+\end{center}
+\end{TmpExample}
+
+\section{Implementation}
+
+The source code is hosted on
+\href{https://github.com/Josef-Friedrich/cloze}{Github}. The
+following links will take you to the individual files:
+
+\begin{itemize}
+\item \href{https://github.com/Josef-Friedrich/cloze/blob/main/cloze.lua}{cloze.lua}
+
+\item \href{https://github.com/Josef-Friedrich/cloze/blob/main/cloze.tex}{cloze.tex}
+
+\item \href{https://github.com/Josef-Friedrich/cloze/blob/main/cloze.sty}{cloze.sty}
+\end{itemize}
+
+\pagebreak
+\PrintIndex
+\end{document}

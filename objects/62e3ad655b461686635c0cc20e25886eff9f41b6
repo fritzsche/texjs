@@ -1,0 +1,98 @@
+%%%
+% Dés à jouer
+%%%
+\def\filedateDesAJouer{2024/11/21}%
+\def\fileversionDesAJouer{0.1}%
+\message{-- \filedateDesAJouer\space v\fileversionDesAJouer}%
+%
+\setKVdefault[ClesDe]{ListeCouleurs={Cornsilk},Arete=1cm}
+\newtoks\toknombrede
+\def\UpdateNombreDe#1\nil{\addtotok\toknombrede{"#1"}}%
+
+\NewDocumentCommand\PfCDe{om}{%
+  \toknombrede{}
+  \useKVdefault[ClesDe]%
+  \setKV[ClesDe]{#1}%
+  \xdef\PfCCouleursDeAv{\useKV[ClesDe]{ListeCouleurs}}%
+  \expandafter\UpdateNombreDe#2\nil
+  \BuildDe{\PfCCouleursDeAv}{\the\toknombrede}%
+}%
+
+\NewDocumentCommand\BuildDe{mm}{%
+  \ifluatex
+    \mplibforcehmode%
+    \begin{mplibcode}
+      Arete=\useKV[ClesDe]{Arete};
+      color Couleurs[],CouleurDefaut;
+      CouleurDefaut=white;
+      nbcol:=0;
+      for p_=#1:
+      nbcol:=nbcol+1;
+      if color p_:
+      Couleurs[nbcol]=p_;
+      else:
+      Couleurs[nbcol]=CouleurDefaut;
+      fi;
+      endfor;
+      nombre=scantokens(#2);
+      %
+      vardef De(expr nb)=
+      save titi;
+      picture titi;
+      path base;
+      pair A[],B[],O;
+      A1=(0,0);
+      A2-A1=Arete*(1,0);
+      A3=rotation(A1,A2,-90);
+      A4-A3=A1-A2;
+      O=iso(A1,A3);
+      B1=1/4[A4,A2];
+      B2=1/4[1/2[A1,A4],1/2[A2,A3]];
+      B3=symetrie(B1,B2);
+      B4=symetrie(B3,O);
+      B5=symetrie(B2,O);
+      B6=symetrie(B1,O);
+      B7=O;
+      base=unitsquare scaled Arete;
+      titi=image(
+      fill base if unknown Couleurs[nbcolcoulant] : withcolor CouleurDefaut else: withcolor Couleurs[nbcolcoulant] fi;
+      trace base;
+      if (nb=1) or (nb=3) or (nb=5):
+      fill cercles(B7,0.1*Arete) if (known Couleurs[nbcolcoulant]): if Couleurs[nbcolcoulant]<>white:withcolor white fi;fi;
+      trace cercles(B7,0.1*Arete);
+      fi;
+      if nb>1:
+      fill cercles(B3,0.1*Arete) if (known Couleurs[nbcolcoulant]): if Couleurs[nbcolcoulant]<>white:withcolor white fi;fi;
+      fill cercles(B4,0.1*Arete) if (known Couleurs[nbcolcoulant]): if Couleurs[nbcolcoulant]<>white:withcolor white fi;fi;
+      trace cercles(B3,0.1*Arete);
+      trace cercles(B4,0.1*Arete);
+      fi;
+      if nb>3:
+      fill cercles(B1,0.1*Arete) if (known Couleurs[nbcolcoulant]): if Couleurs[nbcolcoulant]<>white:withcolor white fi;fi;
+      fill cercles(B6,0.1*Arete) if (known Couleurs[nbcolcoulant]): if Couleurs[nbcolcoulant]<>white:withcolor white fi;fi;
+      trace cercles(B1,0.1*Arete);
+      trace cercles(B6,0.1*Arete);
+      fi;
+      if nb=6:
+      fill cercles(B2,0.1*Arete) if (known Couleurs[nbcolcoulant]): if Couleurs[nbcolcoulant]<>white:withcolor white fi;fi;
+      fill cercles(B5,0.1*Arete) if (known Couleurs[nbcolcoulant]): if Couleurs[nbcolcoulant]<>white:withcolor white fi;fi;
+      trace cercles(B2,0.1*Arete);
+      trace cercles(B5,0.1*Arete);
+      fi;
+      );
+      titi
+      enddef;
+      %
+      string toto;
+      toto=#2;
+      longueurnombre=length toto;
+      basenombre=nombre;
+      nbcolcoulant=0;
+      for k=(longueurnombre-1) downto 0:
+      nbcolcoulant:=nbcolcoulant+1;
+      trace De(basenombre div (10**k)) shifted(((longueurnombre-k-1)*Arete+(longueurnombre-k)*1mm)*(1,0));
+      basenombre:=basenombre mod (10**k);
+      endfor;      
+    \end{mplibcode}%
+  \fi%
+}%%

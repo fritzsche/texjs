@@ -1,0 +1,143 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2018 - 2021 by ChairX
+%
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either
+% version 1.3 of this license or (at your option) any later
+% version.  The latest version of this license is in:
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of
+% LaTeX version 2005/12/01 or later.
+%
+% This file contains the documentation of the environment handling.
+%
+% Macros have to be described by (delete the first %)
+% \DescribeMacro{\macro}
+% Description and usage of the macro.
+%
+% The description will appear in the usage
+% part of the documentation. Use \subsubsection{} etc. for structuring.
+%
+% The implementation of the macros defined here has to be written in
+% chairxEnv.dtx
+%\fi
+%
+% \subsubsection{The Predefined Environments}
+%\label{sec:doc_PredefinedEnvironments}
+%
+% The following theorem-like environments will be defined as standards
+% as they will be needed anyway. We use the |ntheorem| package
+% to do this and load it automatically with several options. Hence you
+% should not load it by hand with other options.
+%
+%
+\DescribeEnv{claim}
+\DescribeEnv{corollary}
+\DescribeEnv{definition}
+\DescribeEnv{lemma}
+\DescribeEnv{proposition}
+\DescribeEnv{theorem}
+% As usually needed we define the standard mathematical environments
+% |claim|, |corollary|, |definition|, |lemma|, |proposition|, and
+% |theorem| with a common appearance: titles in bold, body in
+% italic. The numbering will use a common counter including the
+% section counter.
+%
+%
+\DescribeEnv{conjecture}
+\DescribeEnv{convention}
+\DescribeEnv{example}
+\DescribeEnv{notation}
+\DescribeEnv{question}
+\DescribeEnv{remark}
+% The environments |conjecture|, |example|, |notation|, |question|,
+% and |remark| use the same counter as the above ones but have a body
+% in roman.
+%
+%
+\DescribeEnv{exercise}
+% The environment |exercise| has its own counter including the section
+% and is set in roman.
+%
+%
+\DescribeEnv{maintheorem}
+% We have a |maintheorem| environment which has no numbering at all:
+% this is useful for papers where there is one and only one main
+% theorem you want to place at a particular place, say in the
+% introduction.
+%
+%
+\DescribeEnv{nn<environment>}
+% For all these environments there is a non-numbered version |nn<environment>|.
+% So one can use e.g. |\begin{nntheorem} ... \end{nntheorem}| to get the theorem
+% environment as above, but without numbering.
+%
+% These environments are compatible with |autoref|.  Hence using
+% \begin{quote}
+%     |\autoref{label_to_<env-name>}|
+% \end{quote}
+% will give a linked reference to the
+% environment labelled with
+% \begin{quote}
+%     |\label{label_to_<env-name>}|
+% \end{quote}
+% with a prefix depending on the type of environment.  This also works
+% for chapters, sections, etc.
+% For non-numbered environments one should still use |\ref|.
+%
+%
+\DescribeEnv{proof}
+\DescribeEnv{subproof}
+% We have a |proof| and a |subproof| environment with an automatic
+% tombstone sign at their ends. The location of the tombstone signs is
+% maintained by the |ntheorem| package in a really good way. The
+% |proof| environment finishes with a box sign, the subproof with
+% $\triangledown$.  The only catch is that one should not use the
+% commands |\[| and |\]| for equations without numbers in the proof
+% environment anymore: this causes errors as soon as one wants to
+% place a |\tag{$*$}| for these equations. Instead, one can achieve
+% this as follows:
+% \begin{center}
+%     \begin{tabular}[l]{p{0.8\textwidth}}
+%         |\begin{equation*}| \\
+%             |    E = mc^2|\\
+%             |    \tag{$*$}|\\
+%             |\end{equation*}|
+%     \end{tabular}
+% \end{center}
+% It seems that also some float environments (like |figure| or
+% |table|) at the end of the proof confuse the |ntheorem| package: you
+% should avoid this by placing the float outside of the |proof|
+% environment.
+%
+%
+\DescribeEnv{hint}
+% We have a |hint| environment to be used inside exercises: set in a
+% very small font and without numbering.
+%
+%
+\DescribeEnv{<environment>list}
+% We have special list environments |claimlist|, |conjecturelist|, |conventionlist|,
+% |corollarylist|, |definitionlist|, |examplelist|, |exerciselist|,
+% |lemmalist|, |maintheoremlist|, |notationlist|, |propositionlist|,
+% |questionlist|, |remarklist|,  |theoremlist| and |prooflist| corresponding to the
+% above mathematical environments. They allow to control the
+% appearance of the item lists individually. The items will be
+% numbered in italic and can be referred to using the command
+% |\ref{item:MyLabel}|.  Currently, all the lists are styled the same
+% way, but this can individually be changed easily. The lists are
+% build using the |enumitem| package.
+% You can use all options that are available by the |enumitem| package
+% also for these lists.
+%
+%
+% \DescribeEnv{cptenum}
+% \DescribeEnv{cptitem}
+% \DescribeEnv{cptdesc}
+% Beside these mathematical environments we also provide generic
+% compact lists: |cptenum|, |cptitem|, and |cptdesc| similar to the
+% lists from the |paralist| package.
+%

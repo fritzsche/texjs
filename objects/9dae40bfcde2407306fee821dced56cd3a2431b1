@@ -1,0 +1,4869 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2016-2025 by Paul Gaborit
+% -----------------------------------
+%
+% This work may be distributed and/or modified under the conditions of
+% the LaTeX Project Public License, either version 1.3 of this license
+% or (at your option) any later version.  The latest version of this
+% license is in
+%
+% <http://www.latex-project.org/lppl.txt>
+%
+% and version 1.3 or later is part of all distributions of LaTeX version
+% 2005/12/01 or later.
+% 
+% This work has the LPPL maintenance status “maintained”.
+% 
+% The Current Maintainer of this work is Paul Gaborit.
+% 
+% This work consists of the files sankey.dtx, sankey.ins and the derived
+% files sankey.sty, tikzlibrarydubins.code.tex, sankey-doc-preamble.sty,
+% sankey-example1.tex, sankey-example2.tex, sankey-example3.tex,
+% sankey-example3-variation.tex, sankey-example4.tex,
+% sankey-example-energy.tex
+%
+%
+% \fi
+%
+% \iffalse
+%
+%<*driver>
+\documentclass[a4paper,10pt,draft]{ltxdoc}
+\SetupDoc{reportchangedates}
+\usepackage{sankey-doc-preamble}
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+\begin{document}
+\DocInput{sankey.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \GetFileInfo{\jobname.dtx}
+%
+% \DoNotIndex{\newcommand,\newenvironment}
+% \DoNotIndex{\#,\$,\%,\&,\@,\\,\{,\},\^,\_,\~,\ }
+% \DoNotIndex{\begingroup,\endgroup,\begin,\end}
+% \DoNotIndex{\def,\edef,\gdef,\xdef,\ifx,\else,\string,\relax}
+% \DoNotIndex{\csname,\endcsname,\ifcsdef,\expandafter,\ifnumgreater}
+% \DoNotIndex{\NewDocumentCommand,\NewDocumentEnvironment,\IfBooleanTF}
+% \DoNotIndex{\NewCommandCopy,\NewExpandableDocumentCommand}
+% \DoNotIndex{\NeedsTeXFormat,\ProvidesPackage,\RequirePackage,\PackageError,\PackageWarning}
+% \DoNotIndex{\newtoggle,\toggletrue,\togglefalse,\iftoggle,\ifdefempty,\ifundef,\ifdefstrequal}
+% \DoNotIndex{\ifbool,\ifdef,\ifnumequal,\colorlet,\fpeval,\inteval,\newbool}
+% \DoNotIndex{\pgfmathsetmacro,\pgfdeclarelayer,\pgfdeclareshape,\pgfkeys,\pgfset,\usetikzlibrary}
+% \DoNotIndex{\the,\pgf@x,\pgf@y,\tikz@scan@one@point,\pgfutil@firstofone}
+% \DoNotIndex{\pgfsetlayers,\inheritsavedanchors,\inheritanchor,\inheritanchorborder,\anchor,\pgf@process,\northeast,\southwest}
+% \DoNotIndex{\pgfmathresult,\pgfinterruptpath,\endpgfinterruptpath,\pgfkeysvalueof,\pgfmathtruncatemacro,\pgfmathparse}
+% \DoNotIndex{\tikzset,\pgfextra,\pgflinewidth,\foreach,\coordinate}
+% \DoNotIndex{\path,\node,\pgfmathprintnumber,\n,\p,\x,\y}
+% \DoNotIndex{\tiny,\ttfamily,\space}
+%
+% \title{The \textsf{sankey} package\\
+% Draw Sankey diagrams via TikZ}
+%
+% \author{Paul Gaborit
+% (\href{mailto:paul.gaborit@gmail.com}{\texttt{paul.gaborit@gmail.com}})}
+% \date{\fileversion{} -- \filedate{}}
+%
+% \GetFileInfo{sankey.sty}
+%
+% \def\manualparts{
+% \begin{quote}
+%   This manual contains three parts:
+%   \nameref{usermanual} (p.\pageref{usermanual}),
+%   \nameref{examples} (p.\pageref{examples})
+%   and \nameref{implementation} (p.\pageref{implementation}).
+% \end{quote}
+% }
+%
+% \maketitle
+%
+% \hypersetup{
+%  pdftitle=How to use the sankey package to build Sankey diagrams (\fileversion),
+%  pdfauthor=Paul Gaborit,
+% }
+%
+% \def\ttintitle#1{\textmd{\textcolor{red!50!black}{\texttt{#1}}}}
+%
+%
+% \begin{abstract}
+%   The \code{sankey} package provides macros and environments to
+%   build \emph{Sankey
+%   diagrams}\footnote{\url{https://en.wikipedia.org/wiki/Sankey_diagram}},
+%   i.e.  \emph{flow diagrams} in which the width of the arrows is
+%   proportional to the flow rate.  The initial idea for the first
+%   implementation came out from
+%   \href{https://tex.stackexchange.com/q/40159/14500}{this question} on
+%   \href{https://tex.stackexchange.com/}{TeX.StackExchange}.
+%   
+%
+% \end{abstract}
+%
+%
+% \manualparts
+%
+% \clearpage
+%
+% \manualparts
+%
+% \begin{quote}
+%   {\footnotesize Note: the \code{sankey.dtx} and \code{sankey.ins}
+%   files are attachments of the current PDF document.\par}
+% \end{quote}
+% 
+%^^A % ------------------------------------------------------------
+% \part{User manual}
+% \label{usermanual}
+%^^A % ------------------------------------------------------------
+%
+% \changes{v3.0.2}{2025/10/10}{Update for new version of \protect\code{ltxdoc} class}
+% 
+% \changes{v3.0.2}{2025/10/10}{Fixed extra parentheses in some code examples}
+%
+% {
+%   \setlength{\parskip}{0pt}
+%   \localtableofcontents
+% }
+%
+% \clearpage
+% 
+%^^A % ------------------------------------------------------------
+% \section{Preamble}
+%^^A % ------------------------------------------------------------
+%
+% To use the \code{sankey} package, insert the following line in your preamble:
+%
+% \begin{lstlisting}[style=LaTeXsmall]
+% \usepackage{sankey}
+% \end{lstlisting}
+%
+% {\small Note: the
+% \code{sankey} package requires automatically the
+% \code{xparse}, \code{etoolbox}, \code{xfp} and
+% \code{tikz} packages, as well as the \code{calc},
+% \code{decorations.markings} and
+% \code{dubins} (cf. \vref{sec:dubins}) TikZ libraries.\par}
+%
+%
+%^^A % ------------------------------------------------------------
+% \section{The \ttintitle{sankeydiagram} environment}
+%^^A % ------------------------------------------------------------
+%
+% \DescribeEnv{sankeydiagram} %
+% A \code{sankeydiagram} environment nested in a \code{tikzpicture}
+% environment activates the sankey macros:
+%
+% \begin{lstlisting}[style=LaTeXsmall]
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[... options ...]
+%     ... sankey macros ...
+%   \end{sankeydiagram}  
+% \end{tikzpicture}
+% \end{lstlisting}
+%
+%^^A % ------------------------------------------------------------
+% \section{Sankey diagram options}
+%^^A % ------------------------------------------------------------
+%
+% The \code{sankey} package uses \code{pgfkeys} to set options via
+% \emph{key=value} pairs with default path \code{/sankey} (and
+% \code{/sankey/node parameters} for Sankey node parameters).
+%
+%
+% Options can be defined in three ways:
+%
+% \begin{itemize}
+% \item via the optional argument of the
+%   \code{sankeydiagram} environment:
+%   
+% \begin{lstlisting}[style=LaTeXsmall]
+% \begin{sankeydiagram}[debug=true]
+%   \sankeynode{name=a,quantity=1,angle=0,at={0,0}}
+% \end{sankeydiagram}
+% \end{lstlisting}
+% 
+% \item \DescribeMacro{\sankeyset} %
+% via the \code{\sankeyset} macro:
+%   
+% \begin{lstlisting}[style=LaTeXsmall]
+% \begin{sankeydiagram}
+%   \sankeyset{debug=true}
+%   \sankeynode{name=a,quantity=1,angle=0,at={0,0}}
+% \end{sankeydiagram}
+% \end{lstlisting}
+%   
+% \item  temporarily modified for a single macro:
+% \begin{lstlisting}[style=LaTeXsmall]
+% \begin{sankeydiagram}
+%   \sankeynode[debug=true]{name=a,quantity=1,angle=0,at={0,0}}
+% \end{sankeydiagram}
+% \end{lstlisting}
+%   
+% \end{itemize}
+% 
+% At the begining of each Sankey diagram, all options are initialized
+% with initial values then the \code{every diagram} style is applied.
+%
+% \begin{sankeyoption}{every diagram}{}{}{empty}
+%   This style is installed at beginning of each Sankey diagram.
+% \end{sankeyoption}
+%
+% For instance, to use a ratio of 5mm/10 by default (instead of 1cm/10)
+% for all Sankey diagrams, add the following line:
+%
+% \begin{lstlisting}[style=LaTeXsmall]
+% \sankeyset{every diagram/.style={ratio=5mm/10}}
+% \end{lstlisting}
+%
+%^^A % ------------------------------------------------------------
+% \subsection{Keys to choose the scale}
+%^^A % ------------------------------------------------------------
+%
+% The scale or ratio of the Sankey diagram is the ratio between the %
+% \code{ratio length} and the \code{ratio quantity}.
+%
+% \begin{sankeyoption}{ratio quantity}{\VAR{number}}{}{10}
+%   Quantity (in units of flow) to define ratio. The \VAR{number} can be
+%   any math expression.
+% \end{sankeyoption}
+%
+% \begin{sankeyoption}{ratio length}{\VAR{distance}}{}{1cm}
+%   Distance (a graphical distance) to define scale.
+% \end{sankeyoption}
+%
+% \begin{sankeyoption}{ratio}{\VAR{distance}/\VAR{number}}{}{1cm/10}
+%   Fix the ratio to \VAR{distance}\texttt{/}\VAR{number}.
+% \end{sankeyoption}
+%
+% The initial ratio is 1\,cm/10 units.
+%
+%
+% \textbf{Note:} the \code{sankey} package uses the \code{xfp} package to
+% evaluate all math expressions that use quantities (in units of
+% flow). You can therefore use quantities of a very large or very small
+% order of magnitude. In contrast, for graphic distances, the sankey
+% package uses the \code{pgfmath} package (all calculations must not
+% exceed $\pm 16383.99999$).
+%
+%^^A % ------------------------------------------------------------
+% \subsection{Keys to define rotate offset}
+%^^A % ------------------------------------------------------------
+%
+% \begin{sankeyoption}{rotate}{\VAR{angle}}{}{0}
+%
+%   The \code{rotate} key stores an offset angle applied to all Sankey
+%   nodes.  This is useful when using the \code{rotate} option within a
+%   \code{tikzpicture} or a \code{scope}. This TikZ option is only
+%   applied to coordinates and not to TikZ nodes (remember that Sankey
+%   nodes are TikZ nodes). It's up to the author to keep the
+%   \code{rotate} option of the \code{tikzpicture} and that of the
+%   \code{sankeydiagram} synchronous.
+%   
+% \end{sankeyoption}
+%
+%^^A % ------------------------------------------------------------
+% \subsection{Keys to define drawing parameters}
+%^^A % ------------------------------------------------------------
+%
+% \begin{sankeyoption}{minimum radius}{\VAR{distance}}{}{5mm}
+%   The minimum radius used by \code{\sankeyturn} and
+%   \code{\sankeydubins}.
+% \end{sankeyoption}
+%
+% \begin{sankeyoption}{outin steps}{\VAR{integer}}{}{10}
+%   Number of steps used by the \code{\sankeyoutin} macro to simulate flow
+%   lanes with constant width.
+% \end{sankeyoption}
+%
+%^^A % ------------------------------------------------------------
+% \subsection{Keys to choose drawing styles}
+%^^A % ------------------------------------------------------------
+%
+% \begin{sankeyoption}{fill/.style}{\VAR{style}}{}{{line width=0pt,fill=white}}
+%   This TikZ style is used to \emph{fill} all sankey paths.
+% \end{sankeyoption}
+%
+% \begin{sankeyoption}{draw/.style}{\VAR{style}}{}{draw=black,line width=.4pt}
+%   This TikZ style is used to \emph{draw} all sankey paths.
+% \end{sankeyoption}
+%
+% \begin{sankeyoption}{start style}{\VAR{style name}}{}{none}
+%   There are three predefined \emph{start} styles: \constant{none},
+%   \constant{simple}, \constant{arrow}.
+% \end{sankeyoption}
+%
+% \begin{sankeyoption}{end style}{\VAR{style name}}{}{none}
+%   There are three predefined \emph{end} styles: \constant{none},
+%   \constant{simple}, \constant{arrow}.
+% \end{sankeyoption}
+%
+%^^A % ------------------------------------------------------------
+% \subsection{Keys to define new \emph{start} and \emph{end} styles}
+%^^A % ------------------------------------------------------------
+%
+% \begin{sankeyoption}{new start style}{\{\VAR{name}\}\{\VAR{fill
+%       path}\}\{\VAR{draw path}\}}{}{}
+%   Define the new start style named \VAR{name} with its \VAR{fill
+%     path} and its \VAR{draw path}.
+% \end{sankeyoption}
+%
+% \begin{sankeyoption}{new end style}{\{\VAR{name}\}\{\VAR{fill
+%       path}\}\{\VAR{draw path}\}}{}{}
+%   Define the new end style named \VAR{name} with its \VAR{fill
+%     path} and its \VAR{draw path}.
+% \end{sankeyoption}
+%
+% The \VAR{fill path} and the \VAR{draw path} are build in a TikZ scope
+% where the origin is the center of the current Sankey node (its name is
+% accessible via \code{\name}) and the coordinate system is rotated by
+% its orientation.
+%
+%^^A % ------------------------------------------------------------
+% \subsection{The \emph{debug} key}
+%^^A % ------------------------------------------------------------
+%
+% \begin{sankeyoption}{debug}{\VAR{boolean}}{true}{false}
+%   To debug a sankey diagram.
+% \end{sankeyoption}
+%
+%^^A % ------------------------------------------------------------
+% \section{Sankey nodes and flows}
+%^^A % ------------------------------------------------------------
+%
+%^^A % ------------------------------------------------------------
+% \subsection{Create Sankey nodes}
+%^^A % ------------------------------------------------------------
+%
+%^^A % ------------------------------------------------------------
+%
+% \begin{miniblock}
+% \DescribeMacro{\sankeynode} %
+% \MACRO\code{\sankeynode}\OPTARG{\VAR{options}}\ARG{\VAR{node parameters}}
+%
+% The \code{\sankeynode} macro defines a Sankey node. The \VAR{options}
+% can be any Sankey diagram keys. To define a Sankey node, you must
+% provide a \emph{name}, a \emph{quantity} and an \emph{angle} as
+% \VAR{node parameters}.
+%
+% \begin{sankeyoption}[/sankey/node parameters]{name}{\VAR{name}}{}{}
+%   The \VAR{name} of the new Sankey node (and the associated TikZ node).
+% \end{sankeyoption}
+%
+% \begin{sankeyoption}[/sankey/node parameters]{quantity}{\VAR{quantity}}{}{}
+%   The quantity (in flow unit) of the new Sankey node. The \VAR{quantity}
+%   can be any math expression.
+% \end{sankeyoption}
+%
+% \begin{sankeyoption}[/sankey/node parameters]{angle}{\VAR{angle}}{}{}
+%   The orientation of the flow (0 points to the right) of the new Sankey
+%   node.
+% \end{sankeyoption}
+%
+% \begin{sankeyoption}[/sankey/node parameters]{at}{\VAR{at}}{}{0,0}
+%   The position of the new Sankey node (a TikZ coordinate
+%   \textbf{without} round brackets or parentheses).
+% \end{sankeyoption}
+%
+% \begin{sankeyoption}[/sankey/node parameters]{anchor}{\VAR{anchor}}{}{center}
+%   Specify the anchor of the Sankey node. Possible values are
+%   \constant{center}, \constant{left} or \constant{right}.
+% \end{sankeyoption}
+%
+% \begin{sankeyoption}[/sankey/node parameters]{as}{\VAR{name}}{}{}
+%   Copy the \emph{name}, the \emph{quantity}, the \emph{angle} and the
+%   \emph{position} of the Sankey node named \VAR{name}.
+% \end{sankeyoption}
+%
+% A Sankey node is also a Tikz node but with only three anchors:
+% \code{left}, \code{center} and \code{right}\footnote{In fact, to be
+% able to use the TikZ \code{fit} library, the %
+% \code{north}, \code{north east} and \code{north west} anchors exist
+% and are equal to \code{left}, %
+% the \code{east} and \code{west} anchors exist and are equal to
+% \code{center} and %
+% the \code{south}, \code{south east} and \code{south west} anchors
+% exist and are equal to \code{right}.}:
+%
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[debug]
+%     \sankeynode{name=a,quantity=10}
+%     \sankeynode{name=b,quantity=5,angle=45,at={2,1},anchor=left}
+%     \sankeynode{name=c,quantity=20,angle=-90,at={5,0},anchor=right}
+%     \foreach \nodename/\pos in {a/left,b/below left,c/above}{
+%       \foreach \ancname in {left,center,right}{
+%         \node[node font=\ttfamily\footnotesize,\pos=1mm of \nodename.\ancname,
+%         inner sep=0pt,rotate=\sankeygetnodeorient{\nodename},anchor=east]
+%         {\ancname\vphantom{g}};
+%         \fill[black] (\nodename.\ancname) circle(1pt);
+%       }
+%     }
+%   \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+% %
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+%^^A % \clearpage
+%
+%^^A % ------------------------------------------------------------
+% \subsubsection{Choose default parameters}
+%^^A % ------------------------------------------------------------
+%
+% \begin{sankeyoption}{every node/.style}{\{\VAR{node parameters}\}}{}{empty}
+%   The \VAR{node parameters} defined by the
+%   \code{every node} style is installed at the creation of every Sankey node.
+% \end{sankeyoption}
+%
+%^^A % ------------------------------------------------------------
+% \subsubsection{Create starting and ending nodes via macros}
+%^^A % ------------------------------------------------------------
+%
+% \begin{miniblock}
+% \DescribeMacro{\sankeynodestart} %
+% \MACRO\code{\sankeynodestart}\OPTARG{\VAR{options}}\ARG{\VAR{node parameters}}
+%
+% The \code{\sankeynodestart} creates and fills/draws a starting Sankey
+% node:
+%
+%
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[start style=arrow,fill/.style={fill=orange!20}]
+%     \sankeynodestart{name=a,quantity=10}
+%     \sankeynodestart{name=b,quantity=5,angle=45,at={2,1},anchor=left}
+%     \sankeynodestart{name=c,quantity=20,angle=-90,at={5,1},anchor=right}
+%   \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+% %
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%^^A % ------------------------------------------------------------
+%
+%
+% \begin{miniblock}
+%   \DescribeMacro{\sankeynodeend} %
+%   \MACRO\code{\sankeynodeend}\OPTARG{\VAR{options}}\ARG{\VAR{node
+%   parameters}}
+%   
+%   The \code{\sankeynodeend} creates and fills/draws an ending Sankey
+%   node:
+%   
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[end style=simple,fill/.style={fill=orange!20}]
+%     \sankeynodeend{name=a,quantity=10}
+%     \sankeynodeend{name=b,quantity=5,angle=45,at={2,1},anchor=left}
+%     \sankeynodeend{name=c,quantity=20,angle=-90,at={5,1},anchor=right}
+%   \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+% %
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+%^^A % ------------------------------------------------------------
+% \subsubsection{Create starting and ending nodes via options}
+%^^A % ------------------------------------------------------------
+%
+% \begin{miniblock}
+%   \begin{sankeyoption}[/sankey/node parameters]{start}{\VAR{boolean}}{true}{false}
+%     The \code{\sankeynode} macro acts as the
+%     \code{\sankeynodestart} macro if you add the
+%     \code{start} option to its options.
+%   \end{sankeyoption}
+%
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[start style=arrow,fill/.style={fill=orange!20}]
+%     \sankeynode{name=a,quantity=10,start}
+%     \sankeynode{name=b,quantity=5,angle=45,at={2,1},anchor=left,start}
+%     \sankeynode{name=c,quantity=20,angle=-90,at={5,1},anchor=right,start}
+%   \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+% %
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+% \begin{miniblock}
+%   \begin{sankeyoption}[/sankey/node parameters]{end}{\VAR{boolean}}{true}{false}
+%     The \code{\sankeynode} macro acts as the \code{\sankeynodeend}
+%     macro if you add the \code{end} option to its options.
+%   \end{sankeyoption}
+%
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[end style=simple,fill/.style={fill=orange!20}]
+%     \sankeynode{name=a,quantity=10,end}
+%     \sankeynode{name=b,quantity=5,angle=45,at={2,1},anchor=left,end}
+%     \sankeynode{name=c,quantity=20,angle=-90,at={5,1},anchor=right,end}
+%   \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+% %
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+%
+% \begin{miniblock}
+%   Although rarely necessary, you can mix these two parameters:
+%
+%   \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}
+%     \sankeyset{
+%       end style=arrow,
+%       start style=arrow,
+%       fill/.style={fill=orange!20}
+%     }
+%     \sankeynode{name=a,quantity=10,start,end}
+%     \sankeynode{name=b,quantity=5,angle=45,at={2,1},anchor=left,start,end}
+%     \sankeynode{name=c,quantity=20,angle=-90,at={5,1},anchor=right,start,end}
+%   \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+% % 
+% {\centering\input{\samplecodename}\par}
+% % 
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+%
+% \end{miniblock}
+%
+%^^A % ------------------------------------------------------------
+% \subsection{Retrieve information from Sankey nodes}
+%^^A % ------------------------------------------------------------
+%
+% \DescribeMacro{\sankeygetnodeqty} %
+% \MACRO\code{\sankeygetnodeqty}\ARG{\VAR{node name}}
+%
+% The expandable command \code{\sankeygetnodeqty} returns the quantity
+% assigned to the Sankey node named \VAR{node name}.
+%
+% \DescribeMacro{\sankeyqtytolen} %
+% \MACRO\code{\sankeyqtytolen}\ARG{\VAR{quantity}}
+%
+% The expandable \code{\sankeyqtytolen} macro converts \VAR{quantity} to
+% graphical length using the current ratio.
+%
+% \DescribeMacro{\sankeygetnodeorient} %
+% \MACRO\code{\sankeygetnodeorient}\ARG{\VAR{node name}}
+%
+% The expandable command \code{\sankeygetnodeorient} returns the angle
+% (orientation) assigned to the Sankey node named \VAR{node name}.
+%
+%^^A % ------------------------------------------------------------
+% \subsection{Move nodes}
+%^^A % ------------------------------------------------------------
+%
+% All the macros of this section move a Sankey node and fill/draw a
+% portion of the Sankey flow. Then the previous position of the Sankey
+% node is accessible via the \code{-old} suffix (i.e. if you move the
+% \code{a} node, its previous position is the \code{a-old} node).
+%
+% The starred version of each of these macros moves in the opposite
+% direction to their non-starred version.
+%
+% Except for the \code{\sankeyturn} macro, a negative value (distance or
+% angle) moves in the opposite direction (the \code{\sankeyturn} macro
+% is an exception: a negative angle turns right while a positive value
+% turns left).
+%
+% {\centering
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}
+%     \tikzset{com/.style={node font=\ttfamily\scriptsize,
+%     fill=bgcode,fill opacity=1,text opacity=1}}
+%     \sankeyset{end style=simple,start style=simple}
+%     \sankeynode{name=ac,quantity=5}
+%     \sankeynode{name=al,quantity=5,at={[yshift=2mm]ac.left},anchor=right}
+%     \sankeynode{name=ar,quantity=5,at={[yshift=-2mm]ac.right},anchor=left}
+%     \sankeyturnleft{al}{60}
+%     \sankeyadvance{ac}{1cm}
+%     \sankeyturnright{ar}{60}
+%     \sankeyturnleft*{al-old}{60}
+%     \sankeyadvance*{ac-old}{1cm}
+%     \sankeyturnright*{ar-old}{60}
+%     \sankeystart{al-old}
+%     \sankeystart{ac-old}
+%     \sankeystart{ar-old}
+%     \sankeyend{al}
+%     \sankeyend{ac}
+%     \sankeyend{ar}
+%     \draw[red,very thick]
+%     (al-old-old.left) -- node[com]{n} (al-old-old.right) 
+%     (ac-old-old.left) -- node[com]{n} (ac-old-old.right)
+%     (ar-old-old.left) -- node[com]{n} (ar-old-old.right);
+%     \path
+%     (al) ++(2mm,2mm) node[com,anchor=south west,align=left] {
+%       \string\sankeyturnleft\{n\}\{angle>0\}\\
+%       \string\sankeyturnleftbackward\{n\}\{angle<0\}\\
+%       \string\sankeyturnleft*\{n\}\{angle<0\}\\
+%       \string\sankeyturnleftbackward*\{n\}\{angle>0\}\\
+%       \string\sankeyturn\{n\}\{angle>0\}
+%     };
+%     \path
+%     (al-old) ++(-2mm,2mm) node[com,anchor=south east,align=right] {
+%       \string\sankeyturnleftbackward\{n\}\{angle>0\}\\
+%       \string\sankeyturnleft\{n\}\{angle<0\}\\
+%       \string\sankeyturnleft*\{n\}\{angle>0\}\\
+%       \string\sankeyturnleftbackward*\{n\}\{angle<0\}\\
+%       \string\sankeyturn*\{n\}\{angle>0\}
+%     };
+%     \path
+%     (ac) ++(2mm,0) node[com,anchor=west,align=left] {
+%       \string\sankeyadvance\{n\}\{distance>0\}\\
+%       \string\sankeyadvance*\{n\}\{distance<0\}
+%     };
+%     \path
+%     (ac-old) ++(-2mm,0) node[com,anchor=east,align=right] {
+%       \string\sankeyadvance\{n\}\{distance<0\}\\
+%       \string\sankeyadvance*\{n\}\{distance>0\}
+%     };
+%     \path
+%     (ar) ++(2mm,-2mm) node[com,anchor=north west,align=left] {
+%       \string\sankeyturnright\{n\}\{angle>0\}\\
+%       \string\sankeyturnrightbackward\{n\}\{angle<0\}\\
+%       \string\sankeyturnright*\{n\}\{angle<0\}\\
+%       \string\sankeyturnrightbackward*\{n\}\{angle>0\}\\
+%       \string\sankeyturn\{n\}\{angle<0\}
+%     };
+%     \path
+%     (ar-old) ++(-2mm,-2mm) node[com,anchor=north east,align=right] {
+%       \string\sankeyturnrightbackward\{n\}\{angle>0\}\\
+%       \string\sankeyturnright\{n\}\{angle<0\}\\
+%       \string\sankeyturnright*\{n\}\{angle>0\}\\
+%       \string\sankeyturnrightbackward*\{n\}\{angle<0\}\\
+%       \string\sankeyturn*\{n\}\{angle<0\}
+%     };
+%     \end{sankeydiagram}
+%   \end{tikzpicture}
+% \par}
+%^^A % ------------------------------------------------------------
+% \subsubsection{Macro to move straight (forward or backward)}
+%^^A % ------------------------------------------------------------
+%
+%
+% \begin{miniblock}
+%   \DescribeMacro{\sankeyadvance} %
+%   \MACRO\code{\sankeyadvance}\OPTARG{\VAR{options}}\ARG{\VAR{node
+%   name}}\ARG{\VAR{distance}}
+%   
+%   The \code{\sankeyadvance} moves the sankey node straight ahead and
+%   fills/draws this portion of the sankey path. A positive
+%   \VAR{distance} moves forward while a negative \VAR{distance} moves
+%   backward.
+%   
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[start style=arrow,fill/.style={fill=orange!20}]
+%     \sankeynodestart{name=a,quantity=10}
+%     \sankeyadvance{a}{1cm}
+%     \sankeynode[debug]{as=a}
+%     \sankeynode[debug]{as=a-old}
+%     \sankeynodestart{name=b,quantity=5,angle=45,at={2,1},anchor=left}
+%     \sankeyadvance{b}{1cm}
+%     \sankeynodestart{name=c,quantity=10,angle=-90,at={5,1},anchor=right}
+%     \sankeyadvance{c}{5mm}
+%     \fill[cyan] (0,0) circle(2pt) (2,1) circle(2pt) (5,1) circle(2pt);
+%   \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+% %
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+% \begin{miniblock}
+%   \MACRO\code{\sankeyadvance*}\OPTARG{\VAR{options}}\ARG{\VAR{node
+%   name}}\ARG{\VAR{distance}}
+%
+%   The
+%   \code{\sankeyadvance*} moves the sankey node straight back and fills/draws this portion of the sankey path. A positive \VAR{distance} moves backward while a negative \VAR{distance} moves forward.
+%   
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[end style=arrow,fill/.style={fill=orange!20}]
+%     \sankeynodeend{name=a,quantity=10}
+%     \sankeyadvance*{a}{1cm}
+%     \sankeynode[debug]{as=a}
+%     \sankeynode[debug]{as=a-old}
+%     \sankeynodeend{name=b,quantity=5,angle=45,at={2,1},anchor=left}
+%     \sankeyadvance*{b}{1cm}
+%     \sankeynodeend{name=c,quantity=10,angle=-90,at={5,1},anchor=right}
+%     \sankeyadvance*{c}{5mm}
+%     \fill[cyan] (0,0) circle(2pt) (2,1) circle(2pt) (5,1) circle(2pt);
+%   \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+% %
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+%^^A % ------------------------------------------------------------
+% \subsubsection{Macro to turn forward or backward}
+%^^A % ------------------------------------------------------------
+%
+%\begin{miniblock}
+%   \DescribeMacro{\sankeyturn} %
+%   \MACRO\code{\sankeyturn}\OPTARG{\VAR{options}}\ARG{\VAR{node
+%   name}}\ARG{\VAR{angle}}
+%   
+%   The \code{\sankeyturn} macro moves the
+%   sankey node by turning to one side or the other and fills/draws
+%   this portion of the sankey path. A \emph{positive} \VAR{angle}
+%   turns left while a \emph{negative} \VAR{angle} turns right.
+%   
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[start style=arrow,fill/.style={fill=orange!20}]
+%     \sankeynodestart{name=a,quantity=10}
+%     \sankeyturn{a}{90}
+%     \sankeynode[debug]{as=a}
+%     \sankeynode[debug]{as=a-old}
+%     \sankeynodestart{name=b,quantity=5,angle=45,at={2,1},anchor=left}
+%     \sankeyturn[minimum radius=1cm]{b}{-45}
+%     \sankeynodestart{name=c,quantity=10,angle=-90,at={5,1},anchor=right}
+%     \sankeyturn{c}{180}
+%     \fill[cyan] (0,0) circle(2pt) (2,1) circle(2pt) (5,1) circle(2pt);
+%   \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+%
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+% \begin{miniblock}
+%   \MACRO\code{\sankeyturn*}\OPTARG{\VAR{options}}\ARG{\VAR{node
+%   name}}\ARG{\VAR{angle}}
+%   
+%   The \code{\sankeyturn*} macro moves the
+%   sankey node backward by turning right or left and fills/draws this
+%   portion of the sankey path. A \emph{positive} \VAR{angle} turns left
+%   while a \emph{negative} \VAR{angle} turns right.
+%
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[end style=simple,fill/.style={fill=orange!20}]
+%     \sankeynodeend{name=a,quantity=10}
+%     \sankeyturn*{a}{90}
+%     \sankeynode[debug]{as=a}
+%     \sankeynode[debug]{as=a-old}
+%     \sankeynodeend{name=b,quantity=5,angle=45,at={2,1},anchor=left}
+%     \sankeyturn*[minimum radius=1cm]{b}{-45}
+%     \sankeynodeend{name=c,quantity=10,angle=-90,at={3,1},anchor=right}
+%     \sankeyturn*{c}{180}
+%     \fill[cyan] (0,0) circle(2pt) (2,1) circle(2pt) (3,1) circle(2pt);
+%   \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+% %
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+%^^A % ------------------------------------------------------------
+% \subsubsection{Macros to turn left (forward or backward)}
+%^^A % ------------------------------------------------------------
+%
+% \begin{miniblock}
+%   \DescribeMacro{\sankeyturnleft} %
+%   \MACRO\code{\sankeyturnleft}\OPTARG{\VAR{options}}\ARG{\VAR{node
+%   name}}\ARG{\VAR{angle}}
+%   
+%   The \code{\sankeyturnleft} macro moves the sankey node by turning
+%   left and fills/draws this portion of the sankey path. A
+%   \emph{positive} \VAR{angle} turns forward while a \emph{negative}
+%   \VAR{angle} turns backward.
+%
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[start style=arrow,end style=arrow]
+%     \sankeyset{fill/.style={fill=orange!20}}
+%     \sankeynodestart{name=a,quantity=10}
+%     \sankeyturnleft{a}{90}
+%     \sankeynode[debug]{as=a}
+%     \sankeynode[debug]{as=a-old}
+%     \sankeyset{fill/.style={fill=lime!20}}
+%     \sankeynodeend{name=b,quantity=5,angle=-135,at={1,2},anchor=left}
+%     \sankeyturnleft[minimum radius=1cm]{b}{-225}
+%     \fill[cyan] (0,0) circle(2pt) (1,2) circle(2pt);
+% \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+%
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+% \begin{miniblock}
+%   \MACRO\code{\sankeyturnleft*}\OPTARG{\VAR{options}}\ARG{\VAR{node
+%   name}}\ARG{\VAR{angle}}
+%   
+%   The
+%   \code{\sankeyturnleft*} macro moves the sankey node backward
+%   by turning left and fills/draws this portion of the sankey path.
+%   A \emph{positive} \VAR{angle} turns backward while a
+%   \emph{negative} \VAR{angle} turns forward.
+%
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[start style=arrow,end style=arrow]
+%     \sankeyset{fill/.style={fill=orange!20}}
+%     \sankeynodeend{name=a,quantity=10}
+%     \sankeyturnleft*{a}{90}
+%     \sankeynode[debug]{as=a}
+%     \sankeynode[debug]{as=a-old}
+%     \sankeyset{fill/.style={fill=lime!20}}
+%     \sankeynodestart{name=b,quantity=5,angle=-135,at={1,2},anchor=left}
+%     \sankeyturnleft*[minimum radius=.75cm]{b}{-225}
+%     \fill[cyan] (0,0) circle(2pt) (1,2) circle(2pt);
+% \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+%
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+% \begin{miniblock}
+%   \DescribeMacro{\sankeyturnleftbackward} %
+%   \MACRO\code{\sankeyturnleftbackward}\OPTARG{\VAR{options}}\ARG{\VAR{node
+%   name}}\ARG{\VAR{angle}}
+%   
+%   The \code{\sankeyturnleftbackward} macro moves the sankey node
+%   backward by turning left and fills/draws this portion of the sankey
+%   path.  A \emph{positive} \VAR{angle} turns backward while a
+%   \emph{negative} \VAR{angle} turns forward.
+%
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[start style=arrow,end style=arrow]
+%     \sankeyset{fill/.style={fill=orange!20}}
+%     \sankeynodeend{name=a,quantity=10}
+%     \sankeyturnleftbackward{a}{90}
+%     \sankeynode[debug]{as=a}
+%     \sankeynode[debug]{as=a-old}
+%     \sankeyset{fill/.style={fill=lime!20}}
+%     \sankeynodestart{name=b,quantity=5,angle=-135,at={1,2},anchor=left}
+%     \sankeyturnleftbackward[minimum radius=.75cm]{b}{-225}
+%     \fill[cyan] (0,0) circle(2pt) (1,2) circle(2pt);
+% \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+%
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+% \begin{miniblock}
+%   \MACRO\code{\sankeyturnleftbackward*}\OPTARG{\VAR{options}}\ARG{\VAR{node
+%   name}}\ARG{\VAR{angle}}
+%   
+%   The
+%   \code{\sankeyturnleftbackward*} macro moves the sankey node by turning left
+%   and fills/draws this portion of the sankey path. A \emph{positive}
+%   \VAR{angle} turns forward while a \emph{negative} \VAR{angle} turns backward.
+%
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[start style=arrow,end style=arrow]
+%     \sankeyset{fill/.style={fill=orange!20}}
+%     \sankeynodestart{name=a,quantity=10}
+%     \sankeyturnleftbackward*{a}{90}
+%     \sankeynode[debug]{as=a}
+%     \sankeynode[debug]{as=a-old}
+%     \sankeyset{fill/.style={fill=lime!20}}
+%     \sankeynodeend{name=b,quantity=5,angle=-135,at={1,2},anchor=left}
+%     \sankeyturnleftbackward*[minimum radius=1cm]{b}{-225}
+%     \fill[cyan] (0,0) circle(2pt) (1,2) circle(2pt);
+% \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+%
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+% 
+%^^A % ------------------------------------------------------------
+% \subsubsection{Macros to turn right (forward or backward)}
+%^^A % ------------------------------------------------------------
+%
+% \begin{miniblock}
+%   \DescribeMacro{\sankeyturnright} %
+%   \MACRO\code{\sankeyturnright}\OPTARG{\VAR{options}}\ARG{\VAR{node
+%   name}}\ARG{\VAR{angle}}
+%   
+%   The \code{\sankeyturnright} macro moves the sankey node by turning
+%   right and fills/draws this portion of the sankey path. A
+%   \emph{positive} \VAR{angle} turns forward while a \emph{negative}
+%   \VAR{angle} turns backward.
+%   
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[start style=arrow,end style=arrow]
+%     \sankeyset{fill/.style={fill=orange!20}}
+%     \sankeynodestart{name=a,quantity=10}
+%     \sankeyturnright[fill/.style={fill=orange!20}]{a}{90}
+%     \sankeynode[debug]{as=a}
+%     \sankeynode[debug]{as=a-old}
+%     \sankeyset{fill/.style={fill=lime!20}}
+%     \sankeynodeend{name=b,quantity=5,angle=45,at={2,1},anchor=left}
+%     \sankeyturnright[minimum radius=.75cm]{b}{-225}
+%     \fill[cyan] (0,0) circle(2pt) (2,1) circle(2pt);
+% \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+%
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+% \begin{miniblock}
+%   \MACRO\code{\sankeyturnright*}\OPTARG{\VAR{options}}\ARG{\VAR{node
+%   name}}\ARG{\VAR{angle}}
+%   
+%   The \code{\sankeyturnright*} macro
+%   moves the sankey node backward by turning right and fills/draws
+%   this portion of the sankey path. A \emph{positive} \VAR{angle} turns
+%   backward while a \emph{negative} \VAR{angle} turns forward.
+%   
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[start style=arrow,end style=arrow]
+%     \sankeyset{fill/.style={fill=orange!20}}
+%     \sankeynodeend{name=a,quantity=10}
+%     \sankeyturnright*[fill/.style={fill=orange!20}]{a}{90}
+%     \sankeynode[debug]{as=a}
+%     \sankeynode[debug]{as=a-old}
+%     \sankeyset{fill/.style={fill=lime!20}}
+%     \sankeynodestart{name=b,quantity=5,angle=45,at={1,1},anchor=left}
+%     \sankeyturnright*[minimum radius=.75cm]{b}{-225}
+%     \fill[cyan] (0,0) circle(2pt) (1,1) circle(2pt);
+% \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+%
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+% \begin{miniblock}
+%   \DescribeMacro{\sankeyturnrightbackward} %
+%   \MACRO\code{\sankeyturnrightbackward}\OPTARG{\VAR{options}}\ARG{\VAR{node
+%   name}}\ARG{\VAR{angle}}
+%   
+%   The \code{\sankeyturnrightbackward} macro
+%   moves the sankey node backward by turning right and fills/draws
+%   this portion of the sankey path. A \emph{positive} \VAR{angle} turns
+%   backward while a \emph{negative} \VAR{angle} turns forward.
+%   
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[start style=arrow,end style=arrow]
+%     \sankeyset{fill/.style={fill=orange!20}}
+%     \sankeynodeend{name=a,quantity=10}
+%     \sankeyturnrightbackward[fill/.style={fill=orange!20}]{a}{90}
+%     \sankeynode[debug]{as=a}
+%     \sankeynode[debug]{as=a-old}
+%     \sankeyset{fill/.style={fill=lime!20}}
+%     \sankeynodestart{name=b,quantity=5,angle=45,at={1,1},anchor=left}
+%     \sankeyturnrightbackward[minimum radius=.75cm]{b}{-225}
+%     \fill[cyan] (0,0) circle(2pt) (1,1) circle(2pt);
+% \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+%
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+% \begin{miniblock}
+%   \MACRO\code{\sankeyturnrightbackward*}\OPTARG{\VAR{options}}\ARG{\VAR{node
+%   name}}\ARG{\VAR{angle}}
+%   
+%   The
+%   \code{\sankeyturnrightbackward*} macro  moves the sankey
+%   node forward by turning right and fills/draws this portion
+%   of the sankey path. A \emph{positive} \VAR{angle} turns forward
+%   while a \emph{negative} \VAR{angle} turns backward.
+%   
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[start style=arrow,end style=arrow]
+%     \sankeyset{fill/.style={fill=orange!20}}
+%     \sankeynodestart{name=a,quantity=10}
+%     \sankeyturnrightbackward*[fill/.style={fill=orange!20}]{a}{90}
+%     \sankeynode[debug]{as=a}
+%     \sankeynode[debug]{as=a-old}
+%     \sankeyset{fill/.style={fill=lime!20}}
+%     \sankeynodeend{name=b,quantity=5,angle=45,at={2,1},anchor=left}
+%     \sankeyturnrightbackward*[minimum radius=.75cm]{b}{-225}
+%     \fill[cyan] (0,0) circle(2pt) (2,1) circle(2pt);
+% \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+%
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+%
+%^^A % ------------------------------------------------------------
+% \subsection{Links between nodes}
+%^^A % ------------------------------------------------------------
+%
+% The macros described in this section fill/draw a lane between two
+% Sankey nodes.
+%
+% Note: since Sankey nodes are oriented, linking \code{A} node to
+% \code{B} node does not produce the same result as linking \code{B}
+% node to \code{A} node!
+%
+% \begin{miniblock}
+%   \DescribeMacro{\sankeyoutin} %
+%   \MACRO\code{\sankeyoutin}\OPTARG{\VAR{options}}\ARG{\VAR{node
+%   A}}\ARG{\VAR{node B}}
+%   
+%   The \code{\sankeyoutin} macro
+%   fills/draws a lane from \VAR{node A} to \VAR{node B} using a
+%   Bézier curve with regular steps (10 steps by default) to
+%   simulate constant width lane.
+%   
+%   \textbf{Note:} The constant width and the minimum curvature are
+%   \emph{not} guaranteed!
+% \end{miniblock}
+%
+% \begin{miniblock}
+%   \DescribeMacro{\sankeydubins} %
+%   \MACRO\code{\sankeydubins}\OPTARG{\VAR{options}}\ARG{\VAR{node
+%   A}}\ARG{\VAR{node B}}
+%   
+%   The \code{\sankeydubins} macro fills/draws a lane between
+%   \VAR{node A} and \VAR{node B} using a Dubins
+%   path\footnote{\url{https://en.wikipedia.org/wiki/Dubins_path}}.
+%   
+%   \textbf{Note:} The constant width and the minimum curvature are
+%   guaranteed.
+% \end{miniblock}
+%
+% \clearpage
+%
+%^^A % ------------------------------------------------------------
+% \subsubsection{Comparison between \ttintitle{outin} and \ttintitle{dubins}
+%   paths}
+%^^A % ------------------------------------------------------------
+%
+% The following diagrams compare \texttt{outin} path with
+% 10 steps (orange), \texttt{outin} path with 2 steps (red)
+% and \texttt{dubins} path (lime) in various positions.
+%
+% \begin{miniblock}
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[start style=simple,end style=arrow]
+%     \sankeyset{fill/.style={fill=orange!20}}
+%     \sankeynodestart{name=a,quantity=5}
+%     \sankeynodeend{name=b,at={4,3},quantity=5}
+%     \sankeyoutin{a}{b}
+%
+%     \sankeyset{fill/.style={fill=red!20}}
+%     \sankeynodestart{name=a,at={2,0},quantity=5}
+%     \sankeynodeend{name=b,at={6,3},quantity=5}
+%     \sankeyoutin[outin steps=2]{a}{b}
+%
+%     \sankeyset{fill/.style={fill=lime!40}}
+%     \sankeynodestart{name=a,at={4,0},quantity=5}
+%     \sankeynodeend{name=b,at={8,3},quantity=5}
+%     \sankeydubins[minimum radius=5mm]{a}{b}
+%   \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+% %
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+% \begin{miniblock}
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[start style=simple,end style=arrow]
+%     \sankeyset{fill/.style={fill=orange!20}}
+%     \sankeynodestart{name=a,quantity=5}
+%     \sankeynodeend{name=b,at={2,3},quantity=5}
+%     \sankeyoutin{a}{b}
+%
+%     \sankeyset{fill/.style={fill=red!20}}
+%     \sankeynodestart{name=a,at={2,0},quantity=5}
+%     \sankeynodeend{name=b,at={4,3},quantity=5}
+%     \sankeyoutin[outin steps=2]{a}{b}
+%
+%     \sankeyset{fill/.style={fill=lime!40}}
+%     \sankeynodestart{name=a,at={4,0},quantity=5}
+%     \sankeynodeend{name=b,at={6,3},quantity=5}
+%     \sankeydubins[minimum radius=5mm]{a}{b}
+%   \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+% %
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+% \begin{miniblock}
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[start style=simple,end style=arrow]
+%     \sankeyset{fill/.style={fill=orange!20}}
+%     \sankeynodestart{name=a,quantity=5}
+%     \sankeynodeend{name=b,at={0,3},quantity=5}
+%     \sankeyoutin{a}{b}
+%
+%     \sankeyset{fill/.style={fill=red!20}}
+%     \sankeynodestart{name=a,at={2,0},quantity=5}
+%     \sankeynodeend{name=b,at={2,3},quantity=5}
+%     \sankeyoutin[outin steps=2]{a}{b}
+%
+%     \sankeyset{fill/.style={fill=lime!40}}
+%     \sankeynodestart{name=a,at={4,0},quantity=5}
+%     \sankeynodeend{name=b,at={4,3},quantity=5}
+%     \sankeydubins[minimum radius=5mm]{a}{b}
+%   \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+% %
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+%^^A % ------------------------------------------------------------
+% \subsubsection{Examples of \ttintitle{dubins} paths}
+%^^A % ------------------------------------------------------------
+%
+% \begin{miniblock}
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}[start style=simple,end style=arrow]
+%     \sankeyset{
+%       fill/.style={fill=lime!40},
+%       draw/.style={draw=green!50!black,line width=2pt},
+%     }
+%
+%     \sankeynodestart{name=a,quantity=5}
+%     \sankeynodeend{name=b,at={0,2},quantity=5}
+%     \sankeydubins[minimum radius=2mm]{a}{b}
+%
+%     \fill[green!50!black] (2,0) coordinate (c) circle(2pt);
+%     \sankeynodestart{name=a,at={[shift={(c)}]90:5mm},quantity=5}
+%     \sankeynodeend{name=b,at={[shift={(c)}]150:5mm},angle=60,quantity=5}
+%     \sankeydubins[minimum radius=2.5mm]{a}{b}
+%
+%     \sankeynodestart{name=a,at={3.5,0},quantity=5}
+%     \sankeynodeend{name=b,at={3.5,.75},angle=-180,quantity=5}
+%     \sankeydubins[minimum radius=5mm]{a}{b}
+%
+%     \sankeynodestart{name=a,at={7,1},quantity=5}
+%     \sankeynodeend{name=b,at={7,1.75},quantity=5}
+%     \sankeydubins[minimum radius=2.5mm]{a}{b}
+%
+%     \sankeynodestart{name=a,at={9,0},quantity=5}
+%     \sankeynodeend{name=b,at={9,2},angle=180,quantity=5}
+%     \sankeydubins[minimum radius=2.5mm]{a}{b}
+%   \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+% %
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+%^^A % ------------------------------------------------------------
+% \subsection{Pure filling/drawing macros}
+%^^A % ------------------------------------------------------------
+%
+% \begin{miniblock}
+%   \DescribeMacro{\sankeystart} %
+%   \MACRO\code{\sankeystart}\OPTARG{\VAR{options}}\ARG{\VAR{name}}
+%   
+%   The \code{\sankeystart} fills/draws a starting extremity attached to
+%   the preexisting Sankey node \VAR{name}:
+%   
+%   
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}
+%     [start style=arrow,fill/.style={fill=cyan!20},draw/.style={draw=blue}]
+%     \sankeynode{name=a,quantity=10}
+%     \sankeystart{a}
+%     \sankeynode{name=b,quantity=5,angle=45,at={2,1},anchor=left}
+%     \sankeystart{b}
+%     \sankeynode{name=c,quantity=20,angle=-90,at={5,1},anchor=right}
+%     \sankeystart{c}
+%   \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+% %
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%^^A % ------------------------------------------------------------
+%
+%
+% \begin{miniblock}
+%   \DescribeMacro{\sankeyend} %
+%   \MACRO\code{\sankeyend}\OPTARG{\VAR{options}}\ARG{\VAR{name}}
+%
+%   The \code{\sankeyend} fills/draws an ending extremity attached to
+%   the preexisting Sankey node \VAR{name}:
+%
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}
+%     [end style=simple,fill/.style={fill=cyan!20},draw/.style={draw=blue}]
+%     \sankeynode{name=a,quantity=10}
+%     \sankeyend{a}
+%     \sankeynode{name=b,quantity=5,angle=45,at={2,1},anchor=left}
+%     \sankeyend{b}
+%     \sankeynode{name=c,quantity=20,angle=-90,at={5,1},anchor=right}
+%     \sankeyend{c}
+%   \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+% % 
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% % 
+% {\centering\input{\samplecodename}\par}
+% \end{miniblock}
+%
+%^^A % ------------------------------------------------------------
+% \subsection{Forked node}
+%^^A % ------------------------------------------------------------
+%
+%^^A % ------------------------------------------------------------
+% \subsubsection{Create and fork a Sankey node}
+%^^A % ------------------------------------------------------------
+%
+% \changes{v3.0}{2021/03/14}{Add keys to fork a Sankey node during its
+% creation}
+%
+% \begin{miniblock}
+%   When creating a new Sankey node, the \code{forked} and %
+%   \code{fork anchor} keys allow to fork the node directly \emph{and} to
+%   anchor it on an anchor of a forked subnode.
+%
+% \begin{sankeyoption}[/sankey/node parameters]{forked}{\{\VAR{quantity/name pairs}\}}{}{}
+%   The \VAR{quantity/name pairs} is a comma separated list of
+%   \emph{quantity/name} pairs (one for each subnode, from left to
+%   right). The sum of all quantities \emph{must} be equal to the quantity
+%   of the new node to fork.
+% \end{sankeyoption}
+%
+% \begin{sankeyoption}[/sankey/node parameters]{fork anchor}{\VAR{node.anchor}}{}{}
+%   An anchor belonging to the new node \emph{or} belonging to a subnode
+%   (the anchor name must be prefixed by the name of the
+%   node). \emph{Note:} when a \code{fork anchor} key is supplied, the
+%   \code{anchor} key is ignored (with a \emph{warning} message).
+% \end{sankeyoption}
+%
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}
+%     \sankeyset{
+%       start style=arrow,end style=arrow,
+%       fill/.style={fill=yellow!10,line width=0pt,draw=yellow!10}
+%     }
+%
+%     \sankeynode[debug]{
+%       name=a,quantity=40,angle=-80,
+%       forked={25/b,10/c,5/d},
+%       fork anchor=c.right,
+%     }
+%
+%     \sankeyadvance*{b}{1cm}
+%     \sankeyturn*[minimum radius=2cm]{c}{-30}
+%     \sankeyturn*[minimum radius=2cm]{c}{30}
+%     \sankeyturn*[minimum radius=5mm]{d}{-90}
+%     \sankeyadvance{a}{1.5cm}
+%     \foreach \nodename in {b,c,d}{ \sankeystart{\nodename} }
+%     \sankeyend{a}
+%   \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+% % 
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+%
+%^^A % ------------------------------------------------------------
+% \subsubsection{Fork a Sankey node}
+%^^A % ------------------------------------------------------------
+% \begin{miniblock}
+%   \DescribeMacro{\sankeyfork} %
+%   \MACRO\code{\sankeyfork}\OPTARG{\VAR{options}}\ARG{\VAR{name}}\ARG{\VAR{quantity/name pairs}}
+%
+%   The \code{\sankeyfork} macro splits the preexisting Sankey node
+%   named \VAR{name} in a list of new Sankey subnodes. The
+%   \VAR{quantity/name pairs} is a comma separated list of
+%   \emph{quantity/name} pairs, one for each subnode from left to
+%   right. The sum of all quantities \emph{must} be equal to the
+%   quantity of the node to fork.
+%
+% \begin{VerbatimOut}[gobble=2]{\samplecodename}
+% \begin{tikzpicture}
+%   \begin{sankeydiagram}
+%     \sankeynode{name=a,quantity=40,angle=-45}
+%     \sankeyfork[debug]{a}{25/b,10/c,5/d}
+%     \path (a.left) rectangle (a.right); %^^A create a bounding box
+%   \end{sankeydiagram}
+% \end{tikzpicture}
+% \end{VerbatimOut}
+% % 
+% {\centering\input{\samplecodename}\par}
+% %
+% \lstinputlisting[style=LaTeXsmall]{\samplecodename}
+% \end{miniblock}
+%
+%^^A % ------------------------------------------------------------
+% \section{Miscellaneous}
+%^^A % ------------------------------------------------------------
+%
+%^^A % ------------------------------------------------------------
+% \subsection{The \ttintitle{debug} layer}
+%^^A % ------------------------------------------------------------
+%
+% The options \code{debug} key uses the \code{sankeydebug} layer to draw
+% above the \code{main} TikZ layer (via \code{\pgfsetlayers}, the
+% \code{sankey} package installs four layers: \code{background},
+% \code{main}, \code{foreground}, \code{sankeydebug}).
+%
+% The four following styles define how to display debug information:
+%
+% \begin{lstlisting}[style=LaTeXsmall]
+% \sankeyset{
+%   debug color/.style={/utils/exec={\colorlet{debug color}{#1}}},
+%   % debug color used by all debug macros
+%   debug color=red!75!black,
+%   % debug line between left and right anchors
+%   debug line/.style={overlay,draw=debug color,|-|},
+%   % debug line between center and label
+%   debug normal/.style={overlay,draw=debug color},
+%   % debug node label
+%   debug label/.style={
+%     overlay,
+%     draw,
+%     font=\ttfamily\tiny,
+%     text=debug color,text opacity=1,
+%     inner sep=.1em,
+%     fill=white,fill opacity=1,
+%     rounded corners=.1em,
+%     node contents={\name},
+%   },
+% }
+% \end{lstlisting}
+%
+%^^A % ------------------------------------------------------------
+% \subsection{The \ttintitle{dubins} TikZ library}
+% \label{sec:dubins}
+%^^A % ------------------------------------------------------------
+%
+% The \code{sankey} package uses the \code{dubins} TikZ library (the
+% \code{tikzlibrarydubins.code.tex} file) to compute Dubins paths. The
+% documentation for this library does not yet exist.
+%
+%^^A % ------------------------------------------------------------
+% \subsection{How to duplicate a Sankey node}
+%^^A % ------------------------------------------------------------
+%
+% \DescribeMacro{\sankeynodealias} %
+% \MACRO\code{\sankeynodealias}\ARG{\VAR{origname}}\ARG{\VAR{clonename}}
+%
+% The \code{\sankeynodealias} macro clones the Sankey node named
+% \VAR{origname} into the Sankey node named \VAR{clonename}.
+%
+% So, you can clone a Sankey node via two methods:
+%
+% \begin{lstlisting}[style=LaTeXsmall]
+% \sankeynode{name=a,quantity=10}
+% \sankeynode{as=a,name=b}
+% \end{lstlisting}
+%
+% \begin{lstlisting}[style=LaTeXsmall]
+% \sankeynode{name=a,quantity=10}
+% \sankeynodealias{a}{b}
+% \end{lstlisting}
+%
+%^^A % ------------------------------------------------------------
+% \subsection{How to define new start and end styles}
+%^^A % ------------------------------------------------------------
+%
+% Here are the definitions of the \code{arrow} styles:
+%
+% \begin{lstlisting}[style=LaTeXsmall]
+% \sankeyset{
+%   %% arrow style
+%   new start style={arrow}{
+%     (\name.left) -- ++(-10pt,0)
+%     -- ([xshift=-10pt/6]\name.center)
+%     -- ([xshift=-10pt]\name.right)
+%     -- (\name.right) -- cycle
+%   }{
+%     (\name.left) -- ++(-10pt,0)
+%     -- ([xshift=-10pt/6]\name.center)
+%     -- ([xshift=-10pt]\name.right)
+%     -- (\name.right)
+%   },
+%   new end style={arrow}{
+%     (\name.left) -- ([yshift=1mm]\name.left)
+%     -- ([xshift=10pt]\name.center)
+%     -- ([yshift=-1mm]\name.right) -- (\name.right) -- cycle
+%   }{
+%     (\name.left) -- ([yshift=1mm]\name.left)
+%     -- ([xshift=10pt]\name.center)
+%     -- ([yshift=-1mm]\name.right) -- (\name.right)
+%   },
+% }
+% \end{lstlisting}
+%
+%^^A % ------------------------------------------------------------
+% \section{Todo}
+%^^A % ------------------------------------------------------------
+%
+% \begin{itemize}
+% \item Document the \code{dubins} TikZ library.
+% \item Add a tutorial.
+% \item Add examples with cycle(s).
+% \end{itemize}
+%
+% ^^A % ------------------------------------------------------------
+% \clearpage
+%
+% \manualparts
+%
+% \part{Examples}
+% \label{examples}
+%^^A % ------------------------------------------------------------
+% {
+%   \setlength{\parskip}{0pt}
+%   \localtableofcontents
+%   \listoffigures
+% }
+%
+% \tikzset{every picture/.style={}}
+%^^A % ------------------------------------------------------------
+%
+%^^A % ------------------------------------------------------------
+% \clearpage
+% \section{Simple example}
+%^^A % ------------------------------------------------------------
+%
+% \embedfile[mimetype=text/plain]{sankey-example1.tex}
+%
+% \begin{figure}
+%   \centering
+%   {\MakePercentComment\input{sankey-example1.tex}}
+%   \caption{Simple example}
+%   \label{fig:simple-example}
+% \end{figure}
+%
+% See figure~\vref{fig:simple-example}. The \code{sankey-example1.tex}
+% file contains the following code and is an attachement of the current
+% PDF document.
+%
+% \lstinputlisting[style=LaTeXsmall]{sankey-example1.tex}
+%
+% \iffalse
+%<*example1>
+\begin{tikzpicture}
+  \begin{sankeydiagram}%[debug]
+    \colorlet{cold}[rgb]{cyan!75!blue!50!white}
+    \colorlet{hot}[rgb]{red!50!orange!75!white}
+    \sankeyset{
+      ratio=90pt/6,minimum radius=15pt,
+      start style=simple,end style=simple,
+      draw/.style={
+        draw=blue!50!cyan,
+        line width=1pt,line cap=round,line join=round,
+      },
+      cold/.style={
+        fill/.style={
+          draw=cold,line width=0pt,fill=cold,
+        },
+      },
+      cold to hot/.style={
+        fill/.style={
+          fill=none,top color=cold,
+          bottom color=hot,middle color=yellow,
+        },
+      },
+      hot/.style={
+        fill/.style={
+          draw=hot,line width=0pt,fill=hot,
+        },
+      },
+    }
+
+    \sankeyset{cold}
+    \sankeynodestart{name=p0,at={100,0},angle=-90,quantity=6}
+    \sankeyadvance{p0}{50pt}
+    \sankeyfork{p0}{3/p1,3/p2}
+    \sankeyturnleft{p1}{90}
+    \sankeyadvance{p1}{20pt}
+    \sankeyadvance{p2}{60pt}
+    \sankeyfork{p2}{2/p3,1/p4}
+    \sankeyturnleft{p3}{90}
+    \sankeyadvance{p3}{50pt}
+    \sankeyfork{p3}{1/p5,1/p6}
+    \sankeyadvance{p5}{70pt}
+    \sankeyfork{p1}{1/p7,1/p8,1/p9}
+    \sankeyadvance{p7}{50pt}
+    \sankeyadvance{p9}{50pt}
+    \sankeyadvance{p4}{40pt}
+    \sankeyturnleft{p4}{90}
+    \sankeyadvance{p4}{65pt}
+    \sankeyadvance{p7}{40pt}
+    \sankeynode{
+      name=p11,at={[shift={(50pt,-15pt)}]p7},quantity=3,
+      forked={1/p7a,1/p9a,1/p5a},
+    }
+    \sankeyoutin{p7}{p7a}
+    \sankeyoutin{p9}{p9a}
+    \sankeyoutin{p5}{p5a}
+    \sankeyadvance{p11}{30pt}
+    \sankeyend{p11}
+    \sankeyturnright{p8}{90}
+    \sankeyturnright{p6}{90}
+    \sankeyturnright{p4}{90}
+    \sankeyset{hot}
+    \sankeyadvance[cold to hot]{p8}{40pt}
+    \sankeynode{
+      name=p10,at={[shift={(-15pt,-60pt)}]p8},angle=-90,quantity=3,
+      forked={1/p8a,1/p6a,1/p4a},
+    }
+    \sankeyoutin[cold to hot]{p4}{p4a}
+    \sankeyoutin[cold to hot]{p6}{p6a}
+    \sankeyoutin{p8}{p8a}
+    \sankeyadvance{p10}{30pt}
+    \sankeyend{p10}
+  \end{sankeydiagram}
+\end{tikzpicture}
+%</example1>
+% \fi
+% 
+%^^A % ------------------------------------------------------------
+% \clearpage
+% \section{Energy diagram}
+%^^A % ------------------------------------------------------------
+%
+% \embedfile[mimetype=text/plain]{sankey-example-energy.tex}
+%
+% \begin{figure}
+%   \centering
+%   {\MakePercentComment\input{sankey-example-energy.tex}}
+%   \caption{Energy diagram}
+%   \label{fig:very-simple-example}
+% \end{figure}
+%
+% This example comes from
+% \href{https://ibphysicsblog.wordpress.com/2015/10/23/sankey-diagrams/}{IB
+% Pysics Blog} by Kyu Won Shim.
+%
+% See figure~\vref{fig:very-simple-example}. The \code{sankey-example-energy.tex}
+% file contains the following code and is an attachement of the current
+% PDF document.
+%
+% \lstinputlisting[style=LaTeXsmall]{sankey-example-energy.tex}
+%
+% \iffalse
+%<*example-energy>
+\begin{tikzpicture}
+  % font choice
+  \renewcommand\rmdefault{txr}\rmfamily\footnotesize
+  \sisetup{
+    round-mode=places,
+    round-precision=1,
+    add-decimal-zero,
+    round-pad=true,
+  }
+  \begin{sankeydiagram}
+    \colorlet{energy}{blue!30!cyan!80!black}
+    \colorlet{lost energy}{red!50!orange!90!black}
+    \sankeyset{
+      ratio=13em/100,
+      minimum radius=1em,
+      start style=simple,end style=simple,
+      draw/.style={draw=none,line width=0},
+      energy/.style={
+        fill/.style={
+          draw=energy,
+          line width=0,
+          fill=energy,
+        }
+      },
+      lost energy/.style={
+        fill/.style={
+          draw=lost energy,
+          line width=0,
+          fill=lost energy,
+        }
+      }
+    }
+
+    \newcommand\abovelabel[2]{ % valname, label
+      \node[anchor=south east,align=center,inner xsep=0] at (#1.left) {#2};
+    }
+    
+    \newcommand\energylabel[1]{ % valname
+      \node[anchor=north east,text=energy,inner xsep=0] at (#1.right)
+      {\num{\sankeygetnodeqty{#1}}};
+    }
+
+    \newcommand\lostenergylabel[2]{ % valname, label
+      \node[anchor=north,text=lost energy] at ([yshift=-2.5mm]#1.center)
+      (value)
+      {\num{\sankeygetnodeqty{#1}}};
+      \node[anchor=north,inner sep=0,align=center] at (value.south) {#2};
+    }
+    
+    \newcommand\lostenergylabelbottom[2]{ % valname, label
+      \draw[draw=lost energy,dashed,thick]
+      ([yshift=-3mm]#1.center) coordinate (#1) -- ([yshift=-3mm]#1.center);
+      \lostenergylabel{#1}{#2}
+    }
+    
+    \sankeynode{name=Co,quantity=100.0}
+    \path (Co.right) ++(0,-7mm) coordinate (c);
+    
+    \newcommand\turnandstop[2]{ % valname, label
+      \begingroup
+      \sankeyset{lost energy}
+      \sankeyturnright{#1}{90}
+      \sankeynode{as=#1,name=#1-stop,at={#1 |- c}}
+      \sankeyoutin{#1}{#1-stop}
+      \sankeynode{as=#1-stop,name=#1}
+      \sankeyend{#1}
+      \lostenergylabel{#1}{#2}
+      \endgroup
+    }    
+
+    \newcommand\turnandstopbottom[2]{ % valname, label
+      \begingroup
+      \sankeyset{lost energy}
+      \sankeyturnright{#1}{90}
+      \sankeynode{as=#1,name=#1-stop,at={#1 |- c}}
+      \sankeyoutin{#1}{#1-stop}
+      \sankeynode{as=#1-stop,name=#1}
+      \sankeyend{#1}
+      \lostenergylabelbottom{#1}{#2}
+      \endgroup
+    }    
+
+    \def\hshift{6.25em}
+    
+    \sankeyadvance[energy]{Co}{1.2*\hshift}
+    \abovelabel{Co}{\textbf{Coal}\\(Primary energy)}
+    \energylabel{Co}
+    \sankeyfork{Co}{35/El1,65/Pg}
+    \turnandstop{Pg}{Power generation}
+
+    \sankeyadvance[energy]{El1}{1.8*\hshift}
+    \abovelabel{El1}{\textbf{Electricity}\\(Secondary energy)}
+    \energylabel{El1}
+    \sankeyfork{El1}{33.5/El2,1.5/Tr}
+    \turnandstopbottom{Tr}{Transmission}
+    
+    \sankeyadvance[energy]{El2}{.65*\hshift}
+    \energylabel{El2}
+    \sankeyfork{El2}{31.5/El3,2.0/Di}
+    \turnandstop{Di}{Distribution}
+    
+    \sankeyadvance[energy]{El3}{.65*\hshift}
+    \energylabel{El3}
+    \sankeyfork{El3}{31.0/El4,0.5/Wi}
+    \turnandstopbottom{Wi}{Wiring}
+    
+    \sankeyadvance[energy]{El4}{.65*\hshift}
+    \abovelabel{El4}{\textbf{Electricity}\\(Final energy)}
+    \energylabel{El4}
+    \sankeyfork{El4}{3.0/Lr1,28.0/Lb}
+    \turnandstop{Lb}{Lightbulb}
+    
+    \sankeyadvance[energy]{Lr1}{1.1*\hshift}
+    \abovelabel{Lr1}{\textbf{Light radiation}\\(Useful energy)}
+    \energylabel{Lr1}
+    \sankeyfork{Lr1}{2.0/Lr2,1.0/Ls}
+    \turnandstopbottom{Ls}{Lampshade}
+    
+    \sankeyadvance[energy]{Lr2}{.6*\hshift}
+    \energylabel{Lr2}
+    \sankeyfork{Lr2}{1.0/Il,1.0/Id}
+    \turnandstop{Id}{Idle}
+
+    \sankeyadvance[energy]{Il}{.6*\hshift}
+    \abovelabel{Il}{\textbf{Illumination}\\(Energy services)}
+    \energylabel{Il}
+    \sankeyend[energy]{Il}
+  \end{sankeydiagram}
+\end{tikzpicture}
+%</example-energy>
+% \fi
+%^^A % ------------------------------------------------------------
+% \clearpage
+% \section{Example from question on TeX.se}
+%^^A % ------------------------------------------------------------
+%
+% \changes{v3.0}{2021/03/14}{Fix bad names in second example}
+%
+% \embedfile[mimetype=text/plain]{sankey-example2.tex}
+%
+% \begin{figure}
+%   \centering
+%   {\MakePercentComment\input{sankey-example2}}
+%   \caption{Example from TeX.se question}
+%   \label{fig:texse-example}
+% \end{figure}
+%
+% This example came from
+% \href{https://tex.stackexchange.com/q/40159/14500}{this question} on
+% \href{https://tex.stackexchange.com/}{TeX.StackExchange}.
+%
+% See figure~\vref{fig:texse-example}. The \code{sankey-example2.tex}
+% file contains the following code and is an attachement of the current
+% PDF document.
+% 
+% \lstinputlisting[style=LaTeXsmall]{sankey-example2}
+%
+% \iffalse
+%<*example2>
+\begin{tikzpicture}
+  \renewcommand*\sfdefault{txss}
+
+  \begin{sankeydiagram}%[debug]
+    \sankeyset{
+      ratio=4cm/524.3,
+      minimum radius=3mm,
+      start style=arrow,
+      end style=arrow,
+      fill/.style={
+        line width=0pt,
+        fill=cyan!50!blue!50!black,
+        draw=cyan!50!blue!50!black,
+      },
+      draw/.style={draw=none},
+      every node/.style={angle=-90},
+    }
+
+    \sankeynodestart{name=B,at={-.5,0},quantity=7.2}
+    \coordinate[below=1mm of B.center] (B label);
+    \sankeyadvance{B}{5mm}
+    \sankeynodestart{name=GI,at={1,0},quantity=137.3}
+    \coordinate[below=1mm of GI.center] (GI label);
+    \sankeyadvance{GI}{5mm}
+    \sankeynodestart{name=I,at={4,0},quantity=397.8}
+    \coordinate[below=1mm of I.center] (I label);
+    \sankeynode{
+      name=EI,at={2.86,-3},quantity=542.3,
+      forked={397.8/Ia,137.3/GIa,7.2/Ba}
+    }
+    \sankeydubins[minimum radius=1.2cm]{I}{Ia}
+    \sankeyoutin{GI}{GIa}
+    \sankeyoutin{B}{Ba}
+    \sankeyadvance{EI}{5mm}
+    \coordinate (EI label) at (EI);
+    \sankeyadvance{EI}{5mm}
+    \sankeyfork{EI}{63.1/EB,479.2/P}
+
+    \sankeyturnleft{EB}{90}
+    \sankeyadvance{EB}{4cm}
+    \coordinate (EB label) at ($(EB)!.5!(EB-old)$);
+    \sankeyend{EB}
+
+    \sankeyadvance{P}{10mm}
+    \coordinate (P label) at (P);
+    \sankeyadvance{P}{5mm}
+
+    \sankeyfork{P}{33.5/NV,445.7/P-NV}
+
+    {
+      \colorlet{NV color}{cyan!80!lime!50!gray}
+      \sankeyset{fill/.append style={fill=NV color,draw=NV color}}
+      \sankeyturnleft{NV}{90}
+      \sankeynode{as=NV,name=NV2,at=NV -| EB}
+      \sankeyoutin{NV}{NV2}
+      \coordinate (NV label) at (NV -| EB label);
+      \sankeyend{NV2}
+    }
+
+    \sankeyadvance{P-NV}{10mm}
+    \sankeyfork{P-NV}{118.1/U,327.6/P-NV-U}
+
+    {
+      \sankeyset{
+        fill/.style={fill=orange!70!gray!50,draw=orange!70!gray!50}
+      }
+      \sankeyturnleft{U}{90}
+      \sankeynode{as=U,name=U2,at=U -| EB}
+      \sankeyoutin{U}{U2}
+      \coordinate (U label) at (U -| EB label);
+      \sankeyend{U2}
+    }
+
+    \sankeyadvance{P-NV-U}{10mm}
+    \sankeyfork{P-NV-U}{327.2/P-NV-U-SD,0.4/SD}
+
+    {
+      \sankeyturnright{SD}{90}
+      \sankeyadvance{SD}{15mm}
+      \coordinate (SD label) at (SD);
+      \sankeyadvance{SD}{15mm}
+      \sankeyend{SD}
+    }
+
+    \sankeyadvance{P-NV-U-SD}{8mm}
+    \sankeyfork{P-NV-U-SD}{18.8/VE,308.4/E}
+
+    {
+      \sankeyset{fill/.append style={orange!70!gray!30}}
+      \sankeyturnleft{VE}{90}
+      \sankeynode{as=VE,name=VE2,at=VE -| EB}
+      \sankeyoutin{VE}{VE2}
+      \coordinate (VE label) at (VE -| EB label);
+      \sankeyend{VE2}
+    }
+
+    \sankeyadvance{E}{8mm}
+    \coordinate (E label) at (E);
+    \sankeyadvance{E}{20mm}
+    \sankeyfork{E}{135.1/H+GHD,87.2/V,86.1/In}
+
+    \sankeyturnright{In}{90}
+    \sankeyadvance{In}{10mm}
+    \sankeyturnleft{In}{90}
+    \sankeyadvance{In}{5mm}
+    \coordinate (In label)  at (In);
+    \sankeyadvance{In}{10mm}
+    \sankeyend{In}
+
+    \sankeynode{as=V,name=V2,at=V|-In label}
+    \sankeyoutin{V}{V2}
+    \coordinate (V label) at (V2);
+    \sankeyadvance{V2}{10mm}
+    \sankeyend{V2}
+
+    \sankeyturnleft{H+GHD}{90}
+    \sankeyadvance{H+GHD}{5mm}
+    \sankeyfork{H+GHD}{47.0/GHD,88.1/H}
+
+    \sankeyturnright{H}{90}
+    \sankeynode{as=H,name=H2,at=H|-In label}
+    \sankeyoutin{H}{H2}
+    \coordinate (H label) at (H2);
+    \sankeyadvance{H2}{10mm}
+    \sankeyend{H2}
+
+    \sankeyadvance{GHD}{30mm}
+    \sankeyturnright{GHD}{90}
+    \sankeynode{as=GHD,name=GHD2,at=GHD|-In label}
+    \sankeyoutin{GHD}{GHD2}
+    \coordinate (GHD label) at (GHD2);
+    \sankeyadvance{GHD2}{10mm}
+    \sankeyend{GHD2}
+  \end{sankeydiagram}
+
+  % labels
+  \tikzset{
+    label/.style={
+      fill=white,fill opacity=.8,text opacity=1,
+      inner sep=1mm,
+      text=cyan!50!blue!50!black,
+      inner xsep=2mm,
+      font=\sffamily\bfseries\footnotesize,
+      align=center,
+    },
+  }
+  \node[label,anchor=north] (B label) at (B label) {7.2};
+  \node[label,left=1mm of B label] {Bestands-\\entnahme};
+  \node[label,anchor=north] at (GI label) {137.3};
+  \node[label,above=5mm of GI label] {Gewinnung\\im Inland};
+  \node[label,anchor=north] at (I label) {397.8};
+  \node[label,above=5mm of I label] {Import};
+
+  \node[label] at (EI label) {542.3\\Energieaufkommen im Inland};
+
+  \node[label,anchor=center] (EB label) at (EB label) {63.1};
+  \node[label,above=1mm of EB label] {Export und\\Bunkerung};
+
+  \node[label] at (P label) {479.2\\Primärenergieverbrauch};
+
+  \node[label,anchor=center] (NV label) at (NV label) {33.5};
+  \node[label,above=0mm of NV label] {Nichtenergetischer Verbrauch};
+
+  \node[label,anchor=center] (U label) at (U label) {118.1};
+  \node[label,below=3mm of U label] {Umwandlungsverluste};
+
+  \node[label,anchor=center] (SD label) at (SD label) {0.4};
+  \node[label,above=0mm of SD label] {Statistische\\Differenzen};
+
+  \node[label,anchor=center] (VE label) at (VE label) {18.8};
+  \node[label,below=0mm of VE label] {Verbrauch in den\\Energiesktoren};
+
+  \node[label,anchor=north] (E label) at (E label)
+  {308.4\\Endenergieverbrauch};
+
+  \node[label,anchor=north] (In label) at (In label) {86.1};
+  \node[label,anchor=north,below=1cm of In label] {Industrie};
+
+  \node[label,anchor=north] (V label) at (V label) {87.2};
+  \node[label,anchor=north,below=1cm of V label] {Verkehr};
+
+  \node[label,anchor=north] (H label) at (H label) {88.1};
+  \node[label,anchor=north,below=1cm of H label] {Haushalte};
+
+  \node[label,anchor=north] (GHD label) at (GHD label) {47.0};
+  \node[label,anchor=north,below=1cm of GHD label]
+  {Gewerbe, Handel\\Diensleistungen};
+\end{tikzpicture}
+%</example2>
+% \fi
+%
+%^^A % ------------------------------------------------------------
+% \clearpage
+% \section{Reproduction of an example from Google Charts documentation}
+%^^A % ------------------------------------------------------------
+%
+% \changes{v3.0}{2021/03/14}{Add the reproduction of an example from
+% Google Charts documentation}
+%
+% \embedfile[mimetype=text/plain]{sankey-example3.tex}
+%
+% This example is a reproduction of an example of Google
+% Charts Documentation\footnote{\url{https://developers.google.com/chart/interactive/docs/gallery/sankey}}.
+%
+% See figure \vref{fig:google-example}. The \code{sankey-example3.tex}
+% file contains the following code and is an attachement of the current
+% PDF document.
+%
+% \begin{figure}
+%   \centering
+%   {\MakePercentComment\input{sankey-example3}}
+%   \caption{Reproduction of an example from Google Charts
+%   documentation}
+%   \label{fig:google-example}
+% \end{figure}
+%
+% \lstinputlisting[style=LaTeXsmall]{sankey-example3}
+%
+% \iffalse
+%<*example3>
+\begin{tikzpicture}
+  \begin{sankeydiagram}%[debug]
+    \sffamily
+    \sankeyset{
+      ratio=1cm/10,
+      outin steps=2,
+      draw/.style={draw=none,line width=0pt},
+      color/.style={fill/.style={fill=#1,fill opacity=.75}},
+      shade/.style 2 args={fill/.style={left color=#1,
+          right color=#2,fill opacity=.5}},
+      % colors
+      @define HTML color/.code args={#1/#2}{\definecolor{#1}{HTML}{#2}},
+      @define HTML color/.list={
+        cyan/a6cee3,lime/b2df8a,red/fb9a99,orange/fdbf6f,
+        violet/cab2d6,yellow/ffff99,blue/1f78b4,green/33a02c
+      },
+      % colors of countries
+      @let country color/.code args={#1/#2}{\colorlet{#1}[rgb]{#2}},
+      @let country color/.list={
+        CA/red,US/orange,MX/orange,BR/cyan,FR/lime,GB/red,
+        SP/lime,PT/cyan,ML/blue,SN/violet,MA/yellow,
+        AO/violet,ZA/yellow,IN/green,JP/green,CN/blue
+      },
+    }
+    \def\vdist{5mm}
+    \def\hwidth{.5em}
+    \def\hdist{4.1cm}
+    
+    \sankeynode{name=CA,quantity=7}
+    \sankeynode{name=US,quantity=8,at={[yshift=\vdist]CA.left},anchor=right}
+    \sankeynode{name=MX,quantity=8,at={[yshift=\vdist]US.left},anchor=right}
+    \sankeynode{name=BR,quantity=8,at={[yshift=\vdist]MX.left},anchor=right}
+
+    \foreach \country in {CA,US,MX,BR}{
+      \sankeyadvance[color=\country]{\country}{\hwidth}
+    }
+
+    \sankeyfork{CA}{1/CA-to-PT,1/CA-to-GB,5/CA-to-FR}
+    \sankeyfork{US}{1/US-to-PT,1/US-to-SP,5/US-to-GB,1/US-to-FR}
+    \sankeyfork{MX}{1/MX-to-PT,5/MX-to-SP,1/MX-to-GB,1/MX-to-FR}
+    \sankeyfork{BR}{5/BR-to-PT,1/BR-to-SP,1/BR-to-GB,1/BR-to-FR}
+
+    \sankeynode{name=FR,quantity=11,
+      at={[xshift=\hdist]CA.right},anchor=right}
+    \sankeynode{name=GB,quantity=11,
+      at={[yshift=\vdist]FR.left},anchor=right}
+    \sankeynode{name=SP,quantity=7,
+      at={[yshift=\vdist]GB.left},anchor=right}
+    \sankeynode{name=PT,quantity=8,
+      at={[yshift=\vdist]SP.left},anchor=right}
+
+    \sankeyfork{FR}
+    {1/FR-from-BR,1/FR-from-MX,1/FR-from-US,5/FR-from-CA,3/FR-from-00}
+    \sankeyfork{GB}
+    {1/GB-from-BR,1/GB-from-MX,5/GB-from-US,1/GB-from-CA,3/GB-from-00}
+    \sankeyfork{SP}{1/SP-from-BR,5/SP-from-MX,1/SP-from-US}
+    \sankeyfork{PT}{5/PT-from-BR,1/PT-from-MX,1/PT-from-US,1/PT-from-CA}
+
+    \foreach \country in {FR,GB,SP,PT}{
+      \sankeyadvance[color=\country]{\country}{\hwidth}
+    }
+
+    \sankeyfork{FR}{1/FR-to-ZA,1/FR-to-AO,3/FR-to-MA,3/FR-to-SN,3/FR-to-ML}
+    \sankeyfork{GB}{7/GB-to-ZA,1/GB-to-AO,2/GB-to-MA,1/GB-to-SN}
+    \sankeyfork{SP}{1/SP-to-ZA,3/SP-to-MA,1/SP-to-SN,2/SP-to-00}
+    \sankeyfork{PT}{3/PT-to-ZA,2/PT-to-AO,1/PT-to-MA,1/PT-to-SN,1/PT-to-00}
+
+    \sankeynode{name=ML,quantity=9,
+      at={[xshift=\hdist]FR.right},anchor=right}
+    \sankeynode{name=SN,quantity=9,
+      at={[yshift=\vdist]ML.left},anchor=right}
+    \sankeynode{name=MA,quantity=9,
+      at={[yshift=\vdist]SN.left},anchor=right}
+    \sankeynode{name=AO,quantity=9,
+      at={[yshift=\vdist]MA.left},anchor=right}
+    \sankeynode{name=ZA,quantity=12,
+      at={[yshift=\vdist]AO.left},anchor=right}
+
+    \sankeyfork{ML}{3/ML-from-FR,6/Mail-from-00}
+    \sankeyfork{SN}
+    {1/SN-from-PT,1/SN-from-SP,1/SN-from-GB,3/SN-from-FR,3/SN-from-00}
+    \sankeyfork{MA}{1/MA-from-PT,3/MA-from-SP,2/MA-from-GB,3/MA-from-FR}
+    \sankeyfork{AO}{2/AO-from-PT,1/AO-from-GB,1/AO-from-FR,5/AO-from-00}
+    \sankeyfork{ZA}{3/ZA-from-PT,1/ZA-from-SP,7/ZA-from-GB,1/ZA-from-FR}
+    
+    \foreach \country in {ML,SN,MA,AO,ZA}{
+      \sankeyadvance[color=\country]{\country}{\hwidth}
+    }
+
+    \sankeyfork{ML}{5/ML-to-CN,3/ML-to-JP,1/ML-to-IN}
+    \sankeyfork{SN}{5/SN-to-CN,3/SN-to-JP,1/SN-to-IN}
+    \sankeyfork{MA}{5/MA-to-CN,3/MA-to-JP,1/MA-to-IN}
+    \sankeyfork{AO}{5/AO-to-CN,3/AO-to-JP,1/AO-to-IN}
+    \sankeyfork{ZA}{5/ZA-to-CN,3/ZA-to-JP,1/ZA-to-IN,3/ZA-to-00}
+
+    \sankeynode{name=IN,quantity=5,
+      at={[xshift=\hdist]ML.right},anchor=right}
+    \sankeynode{name=JP,quantity=15,
+      at={[yshift=\vdist]IN.left},anchor=right}
+    \sankeynode{name=CN,quantity=25,
+      at={[yshift=\vdist]JP.left},anchor=right}
+    
+    \sankeyfork{IN}
+    {1/IN-from-ZA,1/IN-from-AO,1/IN-from-MA,1/IN-from-SN,1/IN-from-ML}
+    \sankeyfork{JP}
+    {3/JP-from-ZA,3/JP-from-AO,3/JP-from-MA,3/JP-from-SN,3/JP-from-ML}
+    \sankeyfork{CN}
+    {5/CN-from-ZA,5/CN-from-AO,5/CN-from-MA,5/CN-from-SN,5/CN-from-ML}
+
+    \foreach \country in {IN,JP,CN}{
+      \sankeyadvance[color=\country]{\country}{\hwidth}
+    }
+    
+    \foreach \startcountry/\countries in {
+      CA/{PT,GB,FR},    US/{PT,SP,GB,FR},    MX/{PT,SP,GB,FR},
+      BR/{PT,SP,GB,FR}, FR/{ML,SN,MA,AO,ZA}, GB/{SN,MA,AO,ZA},
+      SP/{SN,MA,ZA},    PT/{SN,MA,AO,ZA},    ML/{IN,JP,CN},
+      SN/{IN,JP,CN},    MA/{IN,JP,CN},       AO/{IN,JP,CN},
+      ZA/{IN,JP,CN}}
+    {
+      \foreach \endcountry in \countries {
+        \sankeyoutin[shade={\startcountry}{\endcountry}]
+        {\startcountry-to-\endcountry}{\endcountry-from-\startcountry}
+      }
+    }
+
+    \foreach \country/\countryname in {CA/Canada, US/USA, MX/Mexico,
+      BR/Brazil, FR/France, GB/England, SP/Spain, PT/Portugal}
+    {
+      \node[anchor=west,inner sep=.1em,font=\small]
+      at (\country) {\countryname\vphantom{Ag}};
+    }
+
+    \foreach \country/\countryname in {
+      ML/Mali, SN/Senegal, MA/Morocco, AO/Angola,
+      ZA/South Africa, IN/India, JP/Japan, CN/China}
+    {
+      \node[anchor=east,inner sep=.1em,font=\small]
+      at (\country-old) {\countryname\vphantom{Ag}};
+    }
+  \end{sankeydiagram}
+\end{tikzpicture}
+%</example3>
+% \fi
+%
+%^^A % ------------------------------------------------------------
+% \subsection{Variation}
+%^^A % ------------------------------------------------------------
+%
+% Here is a variation of the previous example using the \code{rotate}
+% key.
+%
+% See figure \vref{fig:google-example-variation}. The
+% \code{sankey-example3-variation.tex} file contains the following code
+% and is an attachement of the current PDF document.
+%
+% \begin{figure}
+%   \centering
+%   {\MakePercentComment\input{sankey-example3-variation}}
+%   \caption{Reproduction of an example from Google Charts documentation
+%   -- variation using the \protect\texttt{rotate} key.}
+%   \label{fig:google-example-variation}
+% \end{figure}
+%
+% \lstinputlisting[style=LaTeXsmall]{sankey-example3-variation}
+%
+% \iffalse
+%<*example3-variation>
+\begin{tikzpicture}[rotate=-90]
+  \begin{sankeydiagram}[rotate=-90]
+    \sffamily
+    \sankeyset{
+      ratio=1.7cm/10,
+      outin steps=2,
+      start style=arrow,
+      end style=simple,
+      draw/.style={draw=white,line width=.4pt},
+      color/.style={fill/.style={fill=#1,fill opacity=.75}},
+      shade/.style 2 args={fill/.style={
+          fill=none,line width=0,
+          top color=#1,bottom color=#2,
+          middle color=#1!50!#2!50!white,
+          fill opacity=.75}},
+      % colors
+      @define HTML color/.code args={#1/#2}{\definecolor{#1}{HTML}{#2}},
+      @define HTML color/.list={
+        cyan/a6cee3,lime/b2df8a,red/fb9a99,orange/fdbf6f,
+        violet/cab2d6,yellow/ffff99,blue/1f78b4,green/33a02c
+      },
+      % colors of countries
+      @let country color/.code args={#1/#2}{\colorlet{#1}[rgb]{#2}},
+      @let country color/.list={
+        CA/red,US/orange,MX/lime,BR/violet,FR/yellow,GB/blue,
+        SP/green,PT/cyan,ML/cyan,SN/red,MA/orange,
+        AO/violet,ZA/lime,IN/blue,JP/yellow,CN/green
+      },
+    }
+    \def\vdist{5mm}
+    \def\hwidth{1em}
+    \def\hdist{6cm}
+
+    \sankeynode{name=CA,quantity=7}
+    \sankeynode{name=US,quantity=8,at={[yshift=\vdist]CA.left},anchor=right}
+    \sankeynode{name=MX,quantity=8,at={[yshift=\vdist]US.left},anchor=right}
+    \sankeynode{name=BR,quantity=8,at={[yshift=\vdist]MX.left},anchor=right}
+
+    \foreach \country in {CA,US,MX,BR}{
+      \sankeystart[color=\country]{\country}
+      \sankeyadvance[color=\country]{\country}{\hwidth}
+    }
+
+    \sankeyfork{CA}{1/CA-to-PT,1/CA-to-GB,5/CA-to-FR}
+    \sankeyfork{US}{1/US-to-PT,1/US-to-SP,5/US-to-GB,1/US-to-FR}
+    \sankeyfork{MX}{1/MX-to-PT,5/MX-to-SP,1/MX-to-GB,1/MX-to-FR}
+    \sankeyfork{BR}{5/BR-to-PT,1/BR-to-SP,1/BR-to-GB,1/BR-to-FR}
+
+    \sankeynode{name=FR,quantity=11,
+      at={[xshift=\hdist]CA.right},anchor=right}
+    \sankeynode{name=GB,quantity=11,
+      at={[yshift=\vdist]FR.left},anchor=right}
+    \sankeynode{name=SP,quantity=7,
+      at={[yshift=\vdist]GB.left},anchor=right}
+    \sankeynode{name=PT,quantity=8,
+      at={[yshift=\vdist]SP.left},anchor=right}
+
+    \sankeyfork{FR}
+    {1/FR-from-BR,1/FR-from-MX,1/FR-from-US,5/FR-from-CA,3/FR-from-00}
+    \sankeyfork{GB}
+    {1/GB-from-BR,1/GB-from-MX,5/GB-from-US,1/GB-from-CA,3/GB-from-00}
+    \sankeyfork{SP}{1/SP-from-BR,5/SP-from-MX,1/SP-from-US}
+    \sankeyfork{PT}{5/PT-from-BR,1/PT-from-MX,1/PT-from-US,1/PT-from-CA}
+
+    \foreach \country in {FR,GB,SP,PT}{
+      \sankeyadvance[color=\country]{\country}{\hwidth}
+    }
+
+    \sankeyfork{FR}{1/FR-to-ZA,1/FR-to-AO,3/FR-to-MA,3/FR-to-SN,3/FR-to-ML}
+    \sankeyfork{GB}{7/GB-to-ZA,1/GB-to-AO,2/GB-to-MA,1/GB-to-SN}
+    \sankeyfork{SP}{1/SP-to-ZA,3/SP-to-MA,1/SP-to-SN,2/SP-to-00}
+    \sankeyfork{PT}{3/PT-to-ZA,2/PT-to-AO,1/PT-to-MA,1/PT-to-SN,1/PT-to-00}
+
+    \sankeynode{name=ML,quantity=9,
+      at={[xshift=\hdist]FR.right},anchor=right}
+    \sankeynode{name=SN,quantity=9,
+      at={[yshift=\vdist]ML.left},anchor=right}
+    \sankeynode{name=MA,quantity=9,
+      at={[yshift=\vdist]SN.left},anchor=right}
+    \sankeynode{name=AO,quantity=9,
+      at={[yshift=\vdist]MA.left},anchor=right}
+    \sankeynode{name=ZA,quantity=12,
+      at={[yshift=\vdist]AO.left},anchor=right}
+
+    \sankeyfork{ML}{3/ML-from-FR,6/Mail-from-00}
+    \sankeyfork{SN}
+    {1/SN-from-PT,1/SN-from-SP,1/SN-from-GB,3/SN-from-FR,3/SN-from-00}
+    \sankeyfork{MA}{1/MA-from-PT,3/MA-from-SP,2/MA-from-GB,3/MA-from-FR}
+    \sankeyfork{AO}{2/AO-from-PT,1/AO-from-GB,1/AO-from-FR,5/AO-from-00}
+    \sankeyfork{ZA}{3/ZA-from-PT,1/ZA-from-SP,7/ZA-from-GB,1/ZA-from-FR}
+
+    \foreach \country in {ML,SN,MA,AO,ZA}{
+      \sankeyadvance[color=\country]{\country}{\hwidth}
+    }
+
+    \sankeyfork{ML}{5/ML-to-CN,3/ML-to-JP,1/ML-to-IN}
+    \sankeyfork{SN}{5/SN-to-CN,3/SN-to-JP,1/SN-to-IN}
+    \sankeyfork{MA}{5/MA-to-CN,3/MA-to-JP,1/MA-to-IN}
+    \sankeyfork{AO}{5/AO-to-CN,3/AO-to-JP,1/AO-to-IN}
+    \sankeyfork{ZA}{5/ZA-to-CN,3/ZA-to-JP,1/ZA-to-IN,3/ZA-to-00}
+
+    \sankeynode{name=IN,quantity=5,
+      at={[xshift=\hdist]ML.right},anchor=right}
+    \sankeynode{name=JP,quantity=15,
+      at={[yshift=\vdist]IN.left},anchor=right}
+    \sankeynode{name=CN,quantity=25,
+      at={[yshift=\vdist]JP.left},anchor=right}
+
+    \sankeyfork{IN}
+    {1/IN-from-ZA,1/IN-from-AO,1/IN-from-MA,1/IN-from-SN,1/IN-from-ML}
+    \sankeyfork{JP}
+    {3/JP-from-ZA,3/JP-from-AO,3/JP-from-MA,3/JP-from-SN,3/JP-from-ML}
+    \sankeyfork{CN}
+    {5/CN-from-ZA,5/CN-from-AO,5/CN-from-MA,5/CN-from-SN,5/CN-from-ML}
+
+    \foreach \country in {IN,JP,CN}{
+      \sankeyadvance[color=\country]{\country}{\hwidth}
+      \sankeyend[color=\country]{\country}
+    }
+
+    \foreach \startcountry/\countries in {
+      CA/{PT,GB,FR},    US/{PT,SP,GB,FR},    MX/{PT,SP,GB,FR},
+      BR/{PT,SP,GB,FR}, FR/{ML,SN,MA,AO,ZA}, GB/{SN,MA,AO,ZA},
+      SP/{SN,MA,ZA},    PT/{SN,MA,AO,ZA},    ML/{IN,JP,CN},
+      SN/{IN,JP,CN},    MA/{IN,JP,CN},       AO/{IN,JP,CN},
+      ZA/{IN,JP,CN}}
+    {
+      \foreach \endcountry in \countries {
+        \sankeyoutin[shade={\startcountry}{\endcountry}]
+        {\startcountry-to-\endcountry}{\endcountry-from-\startcountry}
+      }
+    }
+
+    
+    \foreach \country/\countryname in {CA/Canada, US/USA, MX/Mexico,
+      BR/Brazil, FR/France, GB/England, SP/Spain, PT/Portugal}
+    {
+      \node[anchor=south,inner sep=.1em,font=\small]
+      at (\country) {\countryname\vphantom{Ag}};
+    }
+
+    \foreach \country/\countryname in {
+      ML/Mali, SN/Senegal, MA/Morocco, AO/Angola,
+      ZA/South Africa, IN/India, JP/Japan, CN/China}
+    {
+      \node[anchor=south,inner sep=.1em,font=\small]
+      at (\country) {\countryname\vphantom{Ag}};
+    }
+  \end{sankeydiagram}
+\end{tikzpicture}
+%</example3-variation>
+% \fi
+%
+%^^A % ------------------------------------------------------------
+% \clearpage
+% \section{Very nice example -- Nadieh Bremer creation}
+%^^A % ------------------------------------------------------------
+%
+% \embedfile[mimetype=text/plain]{sankey-example4.tex}
+%
+% \begin{figure}
+%   \centering
+%   {\MakePercentComment\input{sankey-example4}}
+%   \caption{Very nice example -- Nadieh Bremer's creation}
+%   (from
+%   \href{https://www.visualcinnamon.com/portfolio/adyen-report-2019/}{Adyen's
+%     Shareholder Report})
+%   \label{fig:nice-example}
+% \end{figure}
+%
+% Graphic designer Nadieh Bremer created this very nice Sankey
+% diagram\footnote{\url{https://www.visualcinnamon.com/portfolio/adyen-report-2019/}}
+% for Adyen's second half 2018 report to shareholders. It is coded here
+% with her kind permission.
+%
+% You can change the data values between lines 27 and 52.
+%
+% See figure~\vref{fig:nice-example}. The \code{sankey-example4.tex}
+% file contains the following code and is an attachement of the current
+% PDF document.
+%
+% \lstinputlisting[numbers=left,style=LaTeXsmall]{sankey-example4}
+%
+% \iffalse
+%<*example4>
+\begin{tikzpicture}
+  \renewcommand*\sfdefault{txss}
+  \sffamily
+  \sisetup{
+    detect-all=true,
+    group-separator={,},
+    group-minimum-digits=4,
+  }
+  % storage of labels
+  \newcommand\LabSet[2]{% node name, label
+    \expandafter\edef\csname#1@Lab\endcsname{#2}}
+  \newcommand\Lab[1]{% node name
+    \csname#1@Lab\endcsname}
+  % storage of quantities
+  \newcommand\QtySet[2]{% node name, quantity
+    \expandafter\edef\csname#1@Qty\endcsname{\fpeval{#2}}}
+  \newcommand\Qty[1]{% node name
+    \csname#1@Qty\endcsname}
+  % all nodes with their name, label and quantity
+  \sankeyset{
+    def data/.code args={#1/#2/#3}{% node name/label/values
+      \LabSet{#1}{#2}
+      \QtySet{#1}{#3}
+      \typeout{#1: \Qty{#1}€ (\Lab{#1})}
+    },
+    def data/.list={
+      {Pf/Processing\\fees/71713},
+      {Sog/Sales of\\good/4547},
+      {Sf/Settlement\\fees/842075},
+      {Os/Other\\services/37532},
+      {R/Revenues/\Qty{Pf}+\Qty{Sog}+\Qty{Sf}+\Qty{Os}},
+      {Coi/Cost of Inventory/5151},
+      {Ciffi/Cost insecure from financial institutions/758234},
+      {Nr/Net revenue/\Qty{R}-\Qty{Coi}-\Qty{Ciffi}},
+      {Aadotaifa/Amortization and\\depreciation of tangible and\\
+        intangible fixed assets/4688},
+      {Ssapc/Social securities and\\pension costs/7860},
+      {Was/Wages and salaries/35627},
+      {Ooe/Other operating expenses/37346},
+      {Nr2/-/\Qty{Nr}-\Qty{Aadotaifa}-\Qty{Ssapc}-\Qty{Was}-\Qty{Ooe}},
+      {Oi/Other income/47},
+      {Ibiiieait/Income before interest income,\\interest expense and
+        income taxes/\Qty{Nr2}+\Qty{Oi}},
+      {Fe/Finance expense/561},
+      {Ofr/Other financial results/2533},
+      {Ibiiieait2/-/\Qty{Ibiiieait}-\Qty{Fe}-\Qty{Ofr}},
+      {Fi/Finance income/204},
+      {Ibit/Income before income taxes/\Qty{Ibiiieait2}+\Qty{Fi}},
+      {It/Income taxes/21134},
+      {Niftp/Net income for the period/\Qty{Ibit}-\Qty{It}},
+      {Octa/Other currency\\translation adjustments/785},
+      {Tci/Total comprehensive income/\Qty{Niftp}+\Qty{Octa}}
+    },
+  }
+
+  \definecolor{mygreen}{RGB}{9,192,82}
+  \tikzset{
+    cost node/.style={
+      overlay,
+      align=flush center,
+      node font=\footnotesize\sffamily\bfseries,
+      inner sep=0,
+      node contents={%
+        {\mdseries€\,\num{\Qty{#1}}}\\
+        \Lab{#1}\vphantom{g}%
+      },
+    },
+    white hash/.style={
+      draw=none,fill=none,
+      pattern={Lines[angle=60,line width=2pt,distance=4pt]},
+      pattern color=white,
+    },
+    line sep/.style={draw=white,line width=1pt},
+    left label/.style={left=#1,align=flush right,anchor=north east},
+    right label/.style={right=#1,align=flush left},
+    right label hashed/.style={
+      right=1mm of $(#1.left)!.5!(#1-old.left)$,align=flush left,
+    },
+    left label hashed/.style={
+      left=1mm of $(#1.right)!.5!(#1-old.right)$,align=flush right,
+    },
+  }
+
+  \newcommand\turnandstop[1]{
+    \sankeyturn[green to greenwhite]{#1}{-90}
+    \sankeynode{as=#1,name=#1-e,at={#1 -| Coi}}
+    \sankeyoutin[greenwhite to white]{#1}{#1-e}
+    \node[cost node=#1,left label={1mm of #1-e.right}];
+  }
+
+  \begin{sankeydiagram}%[debug]
+    \sankeyset{
+      ratio=28em/1000000,
+      minimum radius=2cm,
+      start style=none,
+      every node/.style={angle=-90},
+      % default fill and draw styles
+      fill/.style={
+        line width=0pt,
+        fill=mygreen,
+      },
+      draw/.style={draw=none},
+      % specific fill and draw styles
+      green to greenwhite/.style={
+        fill/.style={
+          line width=0pt,
+          right color=mygreen,
+          left color=mygreen!20!white,
+        }
+      },
+      greenwhite to white/.style={
+        fill/.style={
+          line width=0pt,
+          right color=mygreen!20!white,
+          left color=mygreen!5!white,
+        }
+      },
+      dashed/.style={draw/.style={draw=mygreen,dashed}},
+    }
+
+    \coordinate (top) at (0,2em);
+
+    \sankeynodestart{name=Pf,quantity=\Qty{Pf}}
+    \node[cost node=Pf,above=.5em of Pf.center];
+
+    \sankeynodestart{name=Sog,quantity=\Qty{Sog},
+      at={[xshift=4em]Pf.left},anchor=right}
+    \node[cost node=Sog,above=.5em of Sog.center];
+
+    \sankeynodestart{name=Sf,quantity=\Qty{Sf},
+      at={[xshift=2em]Sog.left},anchor=right}
+    \node[cost node=Sf,above=.5em of Sf.center];
+
+    \sankeynodestart{name=Os,quantity=\Qty{Os},
+      at={[xshift=2em]Sf.left},anchor=right}
+    \node[cost node=Os,above=.5em of Os.center];
+
+    \sankeynode{
+      name=R,quantity=\Qty{R},at={[yshift=-10em]Sf.center},
+      forked={\Qty{Os}/Os-a,\Qty{Sf}/Sf-a,\Qty{Sog}/Sog-a,\Qty{Pf}/Pf-a},
+    }
+
+    \foreach \nodename in {Pf,Sog,Sf,Os}{
+      \sankeyoutin[fill/.style={top color=white,bottom color=mygreen}]
+      {\nodename}{\nodename-a}
+    }
+
+    \sankeyadvance{R}{1em}
+    \node[cost node=R,right label hashed=R];
+
+    \sankeyfork{R}{\Qty{Ciffi}/Ciffi,\Qty{Nr}/Nr,\Qty{Coi}/Coi}
+
+    \sankeyturnleft[minimum radius=1.cm]{Ciffi}{90}
+    \node[cost node=Ciffi,at={([shift={(1mm,0)}]Ciffi.center)},rotate=-90,
+    anchor=south,align=flush left,node font=\scriptsize\sffamily\bfseries];
+
+    \sankeyturnright[green to greenwhite]{Coi}{90}
+    \sankeyadvance[greenwhite to white]{Coi}{1em}
+    \node[cost node=Coi,left={1mm of [yshift=.75ex]Coi.left},
+    align=flush right,anchor=north east,overlay];
+
+    \sankeyadvance{Nr}{9em}
+    \sankeyadvance{Nr}{1em}
+    \node[cost node=Nr,left label hashed=Nr,
+    node font=\large\sffamily\bfseries];
+
+    \sankeyfork{Nr}{\Qty{Nr2}/Nr2,\Qty{Ooe}/Ooe,
+      \Qty{Was}/Was,\Qty{Ssapc}/Ssapc,\Qty{Aadotaifa}/Aadotaifa}
+
+    \turnandstop{Aadotaifa}
+
+    \sankeyadvance{Ssapc}{5em}
+    \turnandstop{Ssapc}
+
+    \sankeyadvance{Was}{9em}
+    \turnandstop{Was}
+
+    \sankeyadvance{Ooe}{12em}
+    \turnandstop{Ooe}
+
+    \sankeyadvance{Nr2}{15em}
+    \sankeynode{name=Ibiiieait,quantity=\Qty{Ibiiieait},
+      anchor=right,at={Nr2.right},
+      forked={\Qty{Oi}/Oi,\Qty{Nr2}/Nr2-e}}
+
+    \sankeyturnleftbackward[minimum radius=1cm,dashed]{Oi}{90}
+    \node[cost node=Oi,right label=1mm of Oi.left];
+
+    \sankeyadvance{Ibiiieait}{1em}
+    \node[cost node=Ibiiieait,right label hashed=Ibiiieait];
+
+    \sankeyfork{Ibiiieait}
+    {\Qty{Ibiiieait2}/Ibiiieait2,\Qty{Ofr}/Ofr,\Qty{Fe}/Fe}
+
+    \turnandstop{Fe}
+
+    \sankeyadvance{Ofr}{3em}
+    \turnandstop{Ofr}
+
+    \sankeyadvance{Ibiiieait2}{6em}
+    \sankeynode{name=Ibit,quantity={\Qty{Ibiiieait2}+\Qty{Fi}},
+      anchor=right,at={Ibiiieait2.right},
+      forked={\Qty{Fi}/Fi,\Qty{Ibiiieait2}/Ibiiieait2-e}}
+
+    \sankeyturnleftbackward[minimum radius=1cm,dashed]{Fi}{90}
+    \node[cost node=Fi,right label=1mm of Fi.left];
+
+    \sankeyadvance{Ibit}{1em}
+    \node[cost node=Ibit,right label hashed=Ibit];
+
+    \sankeyfork{Ibit}{\Qty{Niftp}/Niftp,\Qty{It}/It}
+
+    \turnandstop{It}
+
+    \sankeyadvance{Niftp}{6em}
+
+    \sankeyadvance{Niftp}{1em}
+    \node[cost node=Niftp,right label hashed=Niftp];
+
+    \sankeynode{name=Tci,quantity=\Qty{Niftp}+\Qty{Octa},
+      anchor=right,at={[yshift=-6em]Niftp.right},
+      forked={\Qty{Octa}/Octa,\Qty{Niftp}/Niftp-e}}
+    \sankeyoutin{Niftp}{Niftp-e}
+
+    \sankeyturnleftbackward[minimum radius=1cm]{Octa}{90}
+    \node[cost node=Octa,right label=1mm of Octa.left];
+
+    \sankeyadvance{Tci}{1em}
+    \node[cost node=Tci,right label hashed=Tci];
+
+    \newcommand\hashband[1]{
+      \draw[line sep] (#1-old.right) -- (#1-old.left);
+      \draw[line sep] (#1.right) -- (#1.left);
+      \path[white hash] (#1-old.right) rectangle (#1.left);
+    }
+
+    \foreach \nodename in {R,Nr,Nr,Ibiiieait,Ibit,Niftp,Tci}{
+      \hashband{\nodename}
+    }
+
+  \end{sankeydiagram}
+\end{tikzpicture}
+%</example4>
+% \fi
+%
+% \clearpage
+%
+% \StopEventually{}
+%^^A % ------------------------------------------------------------
+%
+% \manualparts
+%
+% \part{Installation \& Implementation}
+% \label{implementation}
+%^^A % ------------------------------------------------------------
+%
+% {
+%   \setlength{\parskip}{0pt}
+%   \localtableofcontents
+% }
+%
+%
+% \changes{v3.0.1}{2022/02/04}{Fix options used by the new version of \protect\code{siunitx} package}
+%
+%^^A % ------------------------------------------------------------
+% \section{Compiling \ttintitle{sankey}}
+%^^A % ------------------------------------------------------------
+%
+% \changes{v3.0.1}{2022/02/04}{Add instructions for compiling and installing the
+% package}
+%
+% To produce the \code{sankey} package:
+%
+% \begin{lstlisting}[style=bashsmall]
+% pdflatex sankey.ins # or 'latex sankey.ins'
+% \end{lstlisting}
+%
+% To finish the installation you have to move the
+% \code{tikzlibrarydubins.code.tex} and
+% \code{sankey.sty} files into a directory searched by \LaTeX.
+% 
+% To compile the \code{sankey} documentation (the
+% \code{sankey.pdf} file):
+%
+% \begin{lstlisting}[style=bashsmall]
+% pdflatex sankey.dtx
+% makeindex -s gind.ist -o sankey.ind sankey.idx
+% pdflatex sankey.dtx
+% makeindex -s gind.ist -o sankey.ind sankey.idx
+% pdflatex sankey.dtx
+% pdflatex sankey.dtx
+% \end{lstlisting}
+%
+%
+%^^A % ------------------------------------------------------------
+% \section{The \ttintitle{sankey.sty} file}
+%^^A % ------------------------------------------------------------
+%
+% Poorly commented source code...
+%
+% \changes{v1.0}{2016/03/06}{First version}
+% \changes{v2.0}{2021/01/27}{First public version (on \CTAN)}
+% \changes{v3.0}{2021/03/14}{Better naming rule}
+% \changes{v3.0}{2021/03/14}{Use \protect\code{.ins} and \protect\code{.dtx} files}
+%
+% \iffalse
+%<*sankey>
+% \fi
+%
+% Version information:
+%
+%    \begin{macrocode}
+\NeedsTeXFormat{LaTeX2e}[2015/10/01]
+\ProvidesPackage{sankey}[2025/01/10 v3.0.2 to draw Sankey diagrams]
+%    \end{macrocode}
+%
+% All required packages and TikZ libraries:
+%    \begin{macrocode}
+\RequirePackage{xparse}
+\RequirePackage{etoolbox}
+\RequirePackage{xfp}
+\RequirePackage{tikz}
+\usetikzlibrary{
+  calc,
+  decorations.markings,
+  dubins
+}
+%    \end{macrocode}
+% 
+% Declarations of PGF layers (to debug Sankey diagrams):
+%
+%    \begin{macrocode}
+%% add a new layer to debug sankey diagrams
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{foreground}
+\pgfdeclarelayer{sankeydebug}
+\pgfsetlayers{background,main,foreground,sankeydebug}
+%    \end{macrocode}
+%
+%
+%^^A % ------------------------------------------------------------
+% \subsection{Fields}
+%^^A % ------------------------------------------------------------
+%
+% \begin{macro}{\snk@newfield}
+%
+% The \code{sankeynewfield} macro defines
+% setter and getter macros for \emph{key}/\emph{value} pairs.
+% It requires five parameters: the \emph{def} macro used to
+% store a new value, the \emph{setter} macro name, the \emph{getter} macro name,
+% the \emph{cs name} used by the new field (including a \texttt{\#1}
+% parameter -- the \emph{key}) and the \emph{error message} (used by the getter
+% macro if the key is not defined).
+%
+% The \emph{setter} macro requires
+% two parameters: the key and the value.
+% The \emph{getter} macro requires
+% one parameter: the key.
+%
+%    \begin{macrocode}
+\def\snk@newfield#1#2#3#4#5{
+  % setter
+  \def#2##1##2{\expandafter#1\csname #4\endcsname{##2}}
+  % getter
+  \def#3##1{%
+    \ifcsdef{#4}{%
+      \csname#4\endcsname%
+    }{%
+      \PackageError{sankey}{#5}{unknown key with \string#3}%
+    }%
+  }
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%^^A % ------------------------------------------------------------
+% \subsubsection{Definition of \emph{global} and \emph{expanded} fields (using
+% \ttintitle{\protect\string\xdef})}
+%^^A % ------------------------------------------------------------
+%
+% \begin{macro}{\snk@setnodeqty}
+% \begin{macro}{\sankeygetnodeqty}
+% The setter and getter macros to store and retrieve
+% the \emph{quantity} field associated with
+% each Sankey node (the key is the name of the Sankey node).
+%    \begin{macrocode}
+\snk@newfield\xdef\snk@setnodeqty\sankeygetnodeqty%
+{@snk@node@qty@#1}{Unknown sankey node '#1'}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% 
+% \begin{macro}{\snk@setnodeorient}
+% \begin{macro}{\sankeygetnodeorient}
+% The setter and getter macros to store and retrieve
+% the \emph{angle} (or orientation) field
+% associated with each Sankey node (the key is the name of the Sankey node).
+%    \begin{macrocode}
+\snk@newfield\xdef\snk@setnodeorient\sankeygetnodeorient%
+{@snk@node@orient@#1}{Unknown sankey node '#1'}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+%^^A % ------------------------------------------------------------
+% \subsubsection{Definitions of \emph{local} fields (using \ttintitle{\protect\string\def})}
+%^^A % ------------------------------------------------------------
+%
+% \begin{macro}{\snk@setstartfill}
+% \begin{macro}{\snk@getstartfill}
+% \begin{macro}{\snk@setstartdraw}
+% \begin{macro}{\snk@getstartdraw}
+% The setter and getter macros to store and retrieve the starting fill/draw
+% paths (the key is the style name).
+%    \begin{macrocode}
+\snk@newfield\def\snk@setstartfill\snk@getstartfill%
+{@snk@start@fill@#1}{Unknown sankey start fill path #1}
+
+\snk@newfield\def\snk@setstartdraw\snk@getstartdraw%
+{@snk@start@draw@#1}{Unknown sankey start draw path #1}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% 
+% \begin{macro}{\snk@setendfill}
+% \begin{macro}{\snk@getendfill}
+% \begin{macro}{\snk@setenddraw}
+% \begin{macro}{\snk@getenddraw}
+% The setter and getter macros to store and retrieve the ending fill/draw
+% paths (the key is the style name).
+%    \begin{macrocode}
+\snk@newfield\def\snk@setendfill\snk@getendfill%
+{@snk@end@fill@#1}{Unknown sankey end fill path #1}
+
+\snk@newfield\def\snk@setenddraw\snk@getenddraw%
+{@snk@end@draw@#1}{Unknown sankey end draw path #1}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+%^^A % ------------------------------------------------------------
+% \subsubsection{Check if a sankey node is defined}
+%^^A % ------------------------------------------------------------
+%
+% \begin{macro}{\snk@ifnodedefined}
+
+% The \code{\snk@ifnodedefined} macro checks if a Sankey
+% node is defined by checking if its name is associated to
+% a \emph{quantity}.
+%    \begin{macrocode}
+\newcommand\snk@ifnodedefined[3]{%
+  \ifcsdef{@snk@node@qty@#1}{#2}{#3}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\snk@errorifnotdefined}
+% The \code{\snk@errorifnotdefined} macro generares
+% an error message if the Sankye node is not defined.
+%    \begin{macrocode}
+\newcommand\snk@errorifnotdefined[1]{%
+  \snk@ifnodedefined{#1}{}%
+  {\PackageError{sankey}{Unknown sankey node '#1'}{}}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%^^A % ------------------------------------------------------------
+% \subsection{The \ttintitle{sankey node} shape}
+%^^A % ------------------------------------------------------------
+%
+%
+% A \code{sankey node} is defined as a TikZ node
+% with a particular \emph{shape}: its width is null and its
+% height matches the associated \emph{quantity}.
+% This shape requires only three anchors: \code{center}, \code{left}
+% and \code{right}.
+% These threee anchors are sufficient to use the
+% \code{sankey} package. But the \code{fit} library needs
+% anchors defined by rectangular node.
+%
+%    \begin{macrocode}
+\pgfdeclareshape{sankey node}{
+  \inheritsavedanchors[from=rectangle]
+  \inheritanchor[from=rectangle]{center}
+  \inheritanchorborder[from=rectangle]
+  \anchor{left}{\pgf@process{\northeast}}
+  \anchor{right}{\pgf@process{\southwest}}
+  % compatibility with 'fit' library
+  \inheritanchor[from=rectangle]{west}
+  \inheritanchor[from=rectangle]{east}
+  \inheritanchor[from=rectangle]{north}
+  \inheritanchor[from=rectangle]{south}
+  \inheritanchor[from=rectangle]{north west}
+  \inheritanchor[from=rectangle]{south east}
+  \inheritanchor[from=rectangle]{north east}
+  \inheritanchor[from=rectangle]{south west}
+}
+%    \end{macrocode}
+%
+%^^A % ------------------------------------------------------------
+% \subsection{Keys}
+%^^A % ------------------------------------------------------------
+%
+% \begin{macro}{\sankeyset}
+% The \code{sankey} package uses \code{pgfkeys} to set options via
+% \emph{key=value} pairs using the \texttt{/sankey} path
+% (for Sankey diagram options) and using the
+% \texttt{/sankey/node parameters} path (for Sankey node parameters).
+%
+% The \code{\sankeyset} macro processes
+% its parameter as a list of comma separated pairs of the form
+% \emph{key=value} with \texttt{/sankey} as default path.
+%
+%    \begin{macrocode}
+\pgfkeys{/sankey/.is family}
+\NewDocumentCommand\sankeyset{m}{\pgfkeys{sankey,#1}}
+%    \end{macrocode}
+% \end{macro}
+%
+%^^A % ------------------------------------------------------------
+% \subsubsection{Keys to define the scale}
+%^^A % ------------------------------------------------------------
+% \begin{macro}{\snk@totalqty}
+% \begin{macro}{\snk@totallen}
+% 
+% The \code{ratio quantity}, \code{ratio length} and
+% \code{ratio} keys define the ratio between
+% \emph{flow quantity} and \emph{graphic length} (the scale).
+% The \code{\snk@totalqty} and \code{\snk@totallen} macros store the values.
+% All \emph{quantities} are processed by \code{\fpeval} and
+% all \emph{lengths} are processed by \code{pgfmath}.
+%    \begin{macrocode}
+\sankeyset{
+  ratio quantity/.code={\edef\snk@totalqty{\fpeval{#1}}},
+  ratio quantity/.value required,
+  ratio length/.code={
+    \pgfmathsetmacro\snk@totallen{#1}
+    \edef\snk@totallen{\snk@totallen pt}
+  },
+  ratio length/.value required,
+  ratio/.style args={#1/#2}{
+    ratio length=#1,
+    ratio quantity=#2,
+  },
+  ratio/.value required,
+}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+%^^A % ------------------------------------------------------------
+% \subsubsection{Rotate offset}
+%^^A % ------------------------------------------------------------
+%
+% \begin{macro}{\snk@rotate}
+%
+% The \code{rotate} key stores an offset angle applied to all Sankey
+% nodes.  This is useful when using the \code{rotate} option within a
+% \code{tikzpicture} or a \code{scope}. This TikZ option is only
+% applied to coordinates and not to TikZ nodes (remember that Sankey
+% nodes are TikZ nodes). It's up to the author to keep the
+% \code{rotate} option of the \code{tikzpicture} and that of the
+% \code{sankeydiagram} synchronous.
+% 
+%    \begin{macrocode}
+\sankeyset{
+  rotate/.code={\edef\snk@rotate{\fpeval{#1}}},
+  rotate/.value required,
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%^^A % ------------------------------------------------------------
+% \subsubsection{Minimum radius}
+%^^A % ------------------------------------------------------------
+%
+% \begin{macro}{\snk@minradius}
+%
+% The \code{minimum radius} key processes the minimum radius
+% of curvature by \code{pgfmath} then stores it in
+% the \code{\snk@minradius} macro.
+%    \begin{macrocode}
+\sankeyset{
+  minimum radius/.code={
+    \pgfmathsetmacro\snk@minradius{#1}
+    \edef\snk@minradius{\snk@minradius pt}
+  },
+  minimum radius/.value required,
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%^^A % ------------------------------------------------------------
+% \subsubsection{Outin step}
+%^^A % ------------------------------------------------------------
+%
+% \begin{macro}{\snk@stepoutin}
+% The \code{outin} key stores its value in
+% the \code{\snk@stepoutin} macro.
+%
+%    \begin{macrocode}
+\sankeyset{
+  outin steps/.estore in=\snk@stepoutin,
+  outon steps/.value required,
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%^^A % ------------------------------------------------------------
+% \subsubsection{Sankey debug}
+%^^A % ------------------------------------------------------------
+%
+%
+% The \code{debug} key drives the \code{sankey debug} toggle.
+%
+%    \begin{macrocode}
+\newtoggle{sankey debug}
+\sankeyset{
+  debug/.is choice,
+  debug/true/.code={\toggletrue{sankey debug}},
+  debug/false/.code={\togglefalse{sankey debug}},
+  debug/.default=true,
+}
+%    \end{macrocode}
+%
+%^^A % ------------------------------------------------------------
+% \subsubsection{Start and end styles}
+%^^A % ------------------------------------------------------------
+%
+% \begin{macro}{\snk@startstyle}
+% \begin{macro}{\snk@endstyle}
+% The \code{start style} and \code{end style} keys are choices.
+%
+% The \code{new start style} and \code{new end style} keys
+% add new option to these choices.
+% They use the \code{startfill}, \code{startdraw} fields
+% or the \code{endfill} and \code{enddraw}
+% fields (using the style \emph{name} as key) to store the fill and draw
+% paths then create a new option to install the new
+% start (\code{\snk@startstyle}) or end (\code{\snk@endstyle}) style.
+%
+%    \begin{macrocode}
+\sankeyset{
+  start style/.is choice,
+  end style/.is choice,
+  % to define new start and end styles
+  new start style/.code n args={3}{% name, fill path, draw path
+    \snk@setstartfill{#1}{#2}
+    \snk@setstartdraw{#1}{#3}
+    \sankeyset{start style/#1/.code={\def\snk@startstyle{#1}}}
+  },
+  new end style/.code n args={3}{% name, fill path, draw path
+    \snk@setendfill{#1}{#2}
+    \snk@setenddraw{#1}{#3}
+    \sankeyset{end style/#1/.code={\def\snk@endstyle{#1}}}
+  },
+}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+%^^A % ------------------------------------------------------------
+% \subsubsection{Initial parameters}
+%^^A % ------------------------------------------------------------
+%
+% The \code{@initial options} style defines default values for
+% options of Sankey diagram.  The \code{every diagram} style (initially
+% empty) allows the user to choose its own default values.
+%
+% The \code{@initial options} and the \code{every diagram} styles are
+% applied (in this order) at the beginning of each Sankey diagram.
+%
+%    \begin{macrocode}
+\sankeyset{
+  debug color/.style={/utils/exec={\colorlet{debug color}{#1}}},
+  @initial options/.style={
+    ratio=1cm/10,
+    minimum radius=5mm,%
+    outin steps=10,
+    debug=false,
+    start style=none,
+    end style=none,
+    rotate=0,
+    % default fill/draw styles,
+    fill/.style={line width=0pt,fill=white},
+    draw/.style={draw=black,line width=.4pt},
+    % debug color used by all debug macros
+    debug color=red!75!black,
+    % debug line between left and right anchors
+    debug line/.style={overlay,draw=debug color,|-|},
+    % debug line between center and label
+    debug normal/.style={overlay,draw=debug color},
+    % debug node label
+    debug label/.style={
+      overlay,
+      draw,
+      font=\ttfamily\tiny,
+      text=debug color,text opacity=1,
+      inner sep=.1em,
+      fill=white,fill opacity=1,
+      rounded corners=.1em,
+      node contents={\name},
+    },
+    every node/.style={},
+  },
+  every diagram/.style={},
+}
+
+%    \end{macrocode}
+%
+%^^A % ------------------------------------------------------------
+% \subsubsection{Sankey node parameters}
+%^^A % ------------------------------------------------------------
+%
+% The \code{/sankey/node parameters} family defines all parameters during
+% creation of Sankey node.
+%
+%    \begin{macrocode}
+\sankeyset{node parameters/.is family}
+%    \end{macrocode}
+% \begin{macro}{\name}
+% \begin{macro}{\qty}
+% \begin{macro}{\orient}
+% \begin{macro}{\pos}
+%
+% The \code{name}, \code{quantity}, \code{angle} and \code{at} keys use the
+% \code{\name}, \code{\qty}, \code{\orient} and \code{\pos} macros
+% to store the \emph{name}, the \emph{quantity}, the \emph{orientation} (or
+% \emph{angle}) and the \emph{position} of a Sankey node during its
+% creation.
+%
+% The \emph{quantity} is processed via \code{\fpeval}. The
+% \emph{orientation} is normalized.
+%
+%    \begin{macrocode}
+\sankeyset{node parameters,
+  name/.estore in=\name,
+  name/.value required,
+  quantity/.code={\edef\qty{\fpeval{#1}}},
+  quantity/.value required,
+  angle/.code={\edef\orient{\snk@normalize@angle{#1}}},
+  angle/.value required,
+  at/.code={\snk@getpos\pos{#1}},
+  at/.value required,
+}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% The \code{as} key is just a shortcut to define the four current node
+% parameters by copying them from an existing Sankey node.
+%
+%    \begin{macrocode}
+\sankeyset{node parameters,
+  as/.style={
+    name=#1,
+    quantity=\sankeygetnodeqty{#1},
+    angle=\sankeygetnodeorient{#1},
+    at={#1.center},
+  },
+  as/.value required,
+}
+%    \end{macrocode}
+%
+% \begin{macro}{\snk@anchor}
+%
+% The \code{anchor} key stores in the \code{\snk@anchor} macro
+% the anchor name to use to create the new current Sankey node
+%
+%    \begin{macrocode}
+\sankeyset{node parameters,
+  anchor/.is choice,
+  anchor/left/.code={\def\snk@anchor{left}},
+  anchor/right/.code={\def\snk@anchor{right}},
+  anchor/center/.code={\def\snk@anchor{center}},
+  anchor/.value required,
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% The \code{start} and \code{end} keys drive the
+% \code{sankey node start} and \code{sankey node end}
+% toggles.
+%
+%    \begin{macrocode}
+\newtoggle{sankey node start}
+\newtoggle{sankey node end}
+\sankeyset{node parameters,
+  start/.is choice,
+  start/true/.code={\toggletrue{sankey node start}},
+  start/false/.code={\togglefalse{sankey node start}},
+  start/.default=true,
+  % 
+  end/.is choice,
+  end/true/.code={\toggletrue{sankey node end}},
+  end/false/.code={\togglefalse{sankey node end}},
+  end/.default=true,
+}
+%    \end{macrocode}
+% \begin{macro}{\snk@listofforks}
+% \begin{macro}{\snk@forkanchor}
+%
+% The \code{forked} and \code{fork anchor} keys store their value in the
+% \code{\snk@listofforks} and \code{\snk@forkanchor} macros.
+%
+%    \begin{macrocode}
+\sankeyset{node parameters,
+  forked/.estore in=\snk@listofforks,
+  forked/.value required,
+  fork anchor/.estore in=\snk@forkanchor,
+  fork anchor/.value required,
+}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% The \code{@initial parameters} style initialises all Sankey node
+% parameters at the start of the creation of a new Sankey node.
+%
+%    \begin{macrocode}
+\sankeyset{node parameters,
+  @initial parameters/.style={
+    start=false,
+    end=false,
+    forked=,
+    fork anchor=,
+    anchor=center,
+    at={0,0},
+    angle=0,
+  },
+}
+%    \end{macrocode}
+% 
+%
+%^^A % ------------------------------------------------------------
+% \subsubsection{Internal Tikz style}
+%^^A % ------------------------------------------------------------
+%
+% To apply this style with Tikz, use absolute key name
+% (\texttt{/sankey/@sankey node}). This style is used to create the Tikz
+% node assoicated to a Sankey node.
+%
+%    \begin{macrocode}
+\sankeyset{
+  % sankey node TikZ style
+  @sankey node/.style n args={3}{% name, pos, anchor
+    shape=sankey node,
+    inner sep=0,
+    minimum height={\sankeyqtytolen{\sankeygetnodeqty{#1}}},
+    minimum width=0,
+    draw=none,
+    line width=0pt,
+    fill=none,
+    node contents={},
+    rotate=\sankeygetnodeorient{#1}+\snk@rotate,
+    at={(#2)},
+    name=#1,
+    anchor=#3,
+  },
+}
+%    \end{macrocode}
+% 
+%^^A % ------------------------------------------------------------
+% \subsection{Internal macros}
+%^^A % ------------------------------------------------------------
+%
+% \begin{macro}{\snk@getpos}
+%
+% The \code{\snk@getpos} macro extracts the position of a TikZ
+% node\footnote{Thanks to Andrew Stacey \url{https://tex.stackexchange.com/a/33765/14500}}.
+%
+%    \begin{macrocode}
+\def\snk@getpos#1#2{%
+  \tikz@scan@one@point\pgfutil@firstofone(#2)\relax%
+  \edef#1{\the\pgf@x,\the\pgf@y}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\snk@modulo}
+% 
+% The \code{\snk@modulo} macro evaluates \#1 modulo \#2 using \code{\fpeval}.
+% 
+%    \begin{macrocode}
+\def\snk@modulo#1#2{\fpeval{#1-(floor((#1)/(#2),0)*#2)}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\snk@normalize@angle}
+%
+% The \code{\snk@normalize@angle} macro normalizes \#1 (an angle) between
+% $-180$ and $180$ (using \code{\fpeval}).
+%
+%    \begin{macrocode}
+\def\snk@normalize@angle#1{%
+  \fpeval{\snk@modulo{(#1)+180}{360}-180}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\snk@show@debug}
+%
+% The \code{snk@show@debug} macro draws debug information
+% of the Sankey node named \#1 but only if the \code{sankey debug}
+% toogle is true. Everything is drawn on the \code{sankeydebug}
+% layer. It uses the \code{/sankey/debug line},
+% \code{/sankey/debug normal} and \code{/sankey/debug label} Tikz styles.
+%
+%    \begin{macrocode}
+\def\snk@show@debug#1{% node name
+  \iftoggle{sankey debug}{
+    \begingroup
+    \edef\name{#1}
+    \edef\qty{\sankeygetnodeqty{\name}}
+    \edef\orient{\sankeygetnodeorient{\name}}
+    \begin{pgfonlayer}{sankeydebug}
+      \path[/sankey/debug line] (\name.left) -- (\name.right);
+      \pgfmathsetmacro{\snk@len}{\sankeyqtytolen{\qty}/3}
+      \path[/sankey/debug normal] (\name.center)
+      -- ($(\name.center)!\snk@len pt!90:(\name.right)$)
+      node[/sankey/debug label,rotate=\orient+90+\snk@rotate,anchor=north];
+    \end{pgfonlayer}
+    \endgroup
+  }{}
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\snk@makeforkednode}
+% \begin{macro}{\snk@tot}
+% \begin{macro}{\snk@subnodeqty}
+% \begin{macro}{\snk@subnodename}
+% \begin{macro}{\snk@added@values}
+%
+% The \code{\snk@makeforkednode} forks a Sankey node.
+%
+%    \begin{macrocode}
+\def\snk@makeforkednode{
+  \begingroup
+  \ifdefempty{\snk@listofforks}{
+    \ifdefempty{\snk@forkanchor}{}{
+      \PackageWarning{sankey}%
+      {Can't use 'fork anchor' key without 'forked' key}
+    }
+  }{
+    \def\snk@tot{0}
+    \def\snk@added@values{}
+    \sankeyset{
+      @add forked node/.code args={##1/##2}{
+        \coordinate (##2) at ($(\name.left)%
+        !\fpeval{(\snk@tot+.5*(##1))/\qty}%
+        !(\name.right)$);
+        \edef\snk@orient{\orient}
+        \sankeynode[debug=false]
+        {name=##2,quantity=##1,at=##2,angle=\snk@orient}
+        \edef\snk@tot{\fpeval{\snk@tot+##1}}
+        \edef\snk@added@values{\snk@added@values+##1}
+      },
+      @add forked node/.list/.expand once=\snk@listofforks,
+    }
+    \edef\snk@diff{\fpeval{abs(\qty-\snk@tot)}}
+    \ifnumequal{\snk@diff}{0}{}{
+      \PackageWarning{sankey}%
+      {^^J*** Warning: bad sankey fork: %
+        \qty\space!=\space\snk@added@values(=\snk@tot)%
+        ^^J\snk@listofforks}
+    }
+    \ifdefempty{\snk@forkanchor}{
+      \edef\snk@forkanchor{\name.\snk@anchor}
+    }{}
+    \snk@getpos\snk@c{$(\snk@forkanchor) - (\pos)$}
+    \sankeynode{as=\name,at={$(\name) - (\snk@c)$}}
+    \foreach \snk@subnodeqty/\snk@subnodename in \snk@listofforks {
+      \sankeynode{as=\snk@subnodename,at={$(\snk@subnodename) - (\snk@c)$}}
+    }
+  }
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \begin{macro}{\snk@makenode}
+%
+% The \code{\snk@makenode} macro creates a new Sankey node named
+% \code{\name} with \code{\qty} quantity, oriented at
+% \code{\orient} degrees (but modified by the \code{\snk@rotate}
+% angle offset), anchored by its \code{\anchor} (or its \emph{center}
+% by default) at \code{\pos} position.
+%
+%    \begin{macrocode}
+\def\snk@makenode{
+  \begingroup
+  \snk@setnodeqty{\name}{\qty}
+  \edef\orient{\snk@normalize@angle{\orient}}
+  \snk@setnodeorient{\name}{\orient}
+  \ifundef{\snk@anchor}{\def\snk@anchor{center}}{}
+  \node[/sankey/@sankey node={\name}{\pos}{\snk@anchor}];
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\snk@filldrawstart}
+%
+% The \code{\snk@filldrawstart} macro fills
+% (with the \code{/sankey/fill} TikZ style) then draws
+% (with the \code{/sankey/draw} TikZ style)
+% a start of flow using paths from style \code{\snk@startstyle} on
+% the Sankey node named \code{\name}.
+%
+%    \begin{macrocode}
+\def\snk@filldrawstart{
+  \begin{scope}[shift={(\name)},rotate=\orient]
+    \path[/sankey/fill] \snk@getstartfill{\snk@startstyle};
+    \path[/sankey/draw] \snk@getstartdraw{\snk@startstyle};
+  \end{scope}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\snk@filldrawend}
+%
+% The \code{\snk@filldrawend} macro fills
+% (with the \code{/sankey/fill} TikZ style) then draws
+% (with the \code{/sankey/draw} TikZ style)
+% a end of flow using paths from style \code{\snk@endstyle} on
+% the Sankey node named \code{\name}.
+%
+%    \begin{macrocode}
+\def\snk@filldrawend{
+  \begin{scope}[shift={(\name)},rotate=\sankeygetnodeorient{\name}]
+    \path[/sankey/fill] \snk@getendfill{\snk@endstyle};
+    \path[/sankey/draw] \snk@getenddraw{\snk@endstyle};
+  \end{scope}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\snk@checkquantities}
+% \begin{macro}{\snk@qtyi}
+% \begin{macro}{\snk@qtyii}
+% The \code{\snk@checkquantities} compares quantities
+% from Sankey nodes \code{#1} and \code{#2} and emits
+% an error message if they differ (\code{#3}  is the name
+% of the macro which requested the verification).
+%
+%    \begin{macrocode}
+\def\snk@checkquantities#1#2#3{
+  \begingroup
+  \edef\snk@qtyi{\sankeygetnodeqty{#1}}
+  \edef\snk@qtyii{\sankeygetnodeqty{#2}}
+  \ifdefstrequal{\snk@qtyi}{\snk@qtyii}{}{
+    \PackageError{sankey}%
+    {^^J*** \string#3: quantities differ between %
+      #1 (\snk@qtyi) and #2 (\snk@qtyii)%
+      ^^J}%
+    {The quantities of the two Sankey nodes must be equal.}
+  }
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+%^^A % ------------------------------------------------------------
+% \subsection{User macros}
+%^^A % ------------------------------------------------------------
+%
+% The user macros are globally defined as internal (with \code{snk@}
+% prefix) and locally defined in the \code{sankeydiagram} environment as
+% user macros (without the \code{snk@} prefix).
+% 
+% \begin{macro}{\snk@sankeydubins}
+%   
+%   The \code{\snk@sankeydubins} macro links two Sankey nodes via a
+%   Dubins path. First, it computes the Dubins path between centers
+%   (left and right radii are the same) and stores the result in
+%   \code{sankey}. Then it uses the stored result to fill and draw the
+%   lane (left border and right borders use Dubins paths with asymmetric
+%   radii).
+%   
+%    \begin{macrocode}
+\NewDocumentCommand\snk@sankeydubins{O{}mm}{% options, sn, en
+  \snk@errorifnotdefined{#2}
+  \snk@errorifnotdefined{#3}
+  \snk@checkquantities{#2}{#3}{\sankeydubins}
+  \begingroup
+  \sankeyset{#1}
+  \pgfmathsetmacro\qty{\sankeygetnodeqty{#2}}
+  \dubinspathset{
+    sankey/.style={
+      start point=#2.center,start angle=\sankeygetnodeorient{#2},
+      end point=#3.center,end angle=\sankeygetnodeorient{#3},
+      minimum radius=\snk@minradius + .5 * \sankeyqtytolen{\qty} pt,
+    },
+  }
+  \dubinspathcalc{sankey,store=sankey}
+  \dubinspathset{
+    left border/.style={
+      sankey, use store=sankey,
+      left and right minimum radii={\snk@minradius}
+      and {\snk@minradius + \sankeyqtytolen{\qty} pt},
+    },
+    right border/.style={
+      sankey, use store=sankey,
+      left and right minimum radii=
+      {\snk@minradius + \sankeyqtytolen{\qty} pt}
+      and {\snk@minradius},
+    },
+  }
+  % fill the region
+  \path[/sankey/fill] (#2.left)  \dubinspath{left border}
+  -- (#3.left) -- (#3.right) \dubinspath{right border,reverse}
+  -- (#2.right) -- cycle;
+  % draw left and right borders
+  \path[/sankey/draw] (#2.left) \dubinspath{left border}
+  (#2.right) \dubinspath{right border};
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\snk@sankeyoutin}
+%
+%   The \code{\snk@sankeyoutin} macro links two Sankey nodes via a
+%   Bézier curve.  First, to simulate constant width, it creates
+%   \code{\snk@stepoutin} intermediate Sankey nodes along the Bézier
+%   curve. Then, the lane is filled and drawn linking all the
+%   intermediate Sankey node via smaller Bézier curves.
+%   
+%    \begin{macrocode}
+\NewDocumentCommand\snk@sankeyoutin{O{}mm}{% options, sn, en
+  \snk@errorifnotdefined{#2}
+  \snk@errorifnotdefined{#3}
+  \snk@checkquantities{#2}{#3}{\sankeyoutin}
+  \begingroup
+  \sankeyset{#1}
+  \edef\qty{\sankeygetnodeqty{#2}}
+  \pgfmathsetmacro\snk@len{\sankeyqtytolen{\qty}/2}
+  \edef\snk@step{\fpeval{1/\snk@stepoutin}}
+  \edef\snk@laststep{\inteval{\snk@stepoutin-1}}
+  \path[overlay,decorate,decoration={
+      markings,
+      mark=between positions \snk@step and {\fpeval{1-.5*\snk@step}}
+      step \snk@step with {
+        \edef\snk@outinmidptname{%
+          snk@outinmidpt-%
+          \pgfkeysvalueof{/pgf/decoration/mark info/sequence number}%
+        }
+        \path
+        (0,0) coordinate(\snk@outinmidptname)
+        (0,-\snk@len pt) coordinate (\snk@outinmidptname-r)
+        (0,\snk@len pt) coordinate (\snk@outinmidptname-l)
+        ;
+      }
+    }]
+  (#2.center)
+  to[out=\sankeygetnodeorient{#2},in=\sankeygetnodeorient{#3}+180]
+  (#3.center);
+  \foreach \snk@ptnum in {1,...,\snk@laststep}{
+    \edef\snk@outinmidptname{snk@outinmidpt-\snk@ptnum}
+    \dbp@anglebetween\snk@outinmidptangle%
+    {\snk@outinmidptname-r}{\snk@outinmidptname-l}
+    \sankeynode[debug=false]{%
+      name=\snk@outinmidptname,
+      quantity=\qty,
+      angle=\snk@outinmidptangle-90,%
+      at=\snk@outinmidptname%
+    }
+  }
+  \sankeynode[debug=false]{%
+    name={snk@outinmidpt-0},
+    quantity=\sankeygetnodeqty{#2},
+    angle=\sankeygetnodeorient{#2},%
+    at={#2}%
+  }
+  \sankeynode[debug=false]{%
+    name={snk@outinmidpt-\snk@stepoutin},
+    quantity={\sankeygetnodeqty{#3}},
+    angle={\sankeygetnodeorient{#3}},%
+    at={#3}%
+  }
+  \path[/sankey/fill,looseness=1]
+  (snk@outinmidpt-0.left)
+  \foreach \snk@curpt
+  [remember=\snk@curpt as \snk@prevpt (initially 0)]
+  in {1,...,\snk@stepoutin}{
+    to[out=\sankeygetnodeorient{snk@outinmidpt-\snk@prevpt},
+      in=\sankeygetnodeorient{snk@outinmidpt-\snk@curpt}+180]
+    (snk@outinmidpt-\snk@curpt.left)
+  }
+  --
+  (snk@outinmidpt-\snk@stepoutin.right)
+  \foreach \snk@curpt
+  [remember=\snk@curpt as \snk@prevpt (initially \snk@stepoutin)]
+  in {\snk@laststep,...,0}{
+    to[out=\sankeygetnodeorient{snk@outinmidpt-\snk@prevpt}+180,
+      in=\sankeygetnodeorient{snk@outinmidpt-\snk@curpt}]
+    (snk@outinmidpt-\snk@curpt.right)
+  }
+  -- cycle;
+  \path[/sankey/draw,looseness=1]
+  (snk@outinmidpt-0.left)
+  \foreach \snk@curpt
+  [remember=\snk@curpt as \snk@prevpt (initially 0)]
+  in {1,...,\snk@stepoutin}{
+    to[out=\sankeygetnodeorient{snk@outinmidpt-\snk@prevpt},
+      in=\sankeygetnodeorient{snk@outinmidpt-\snk@curpt}+180]
+    (snk@outinmidpt-\snk@curpt.left)
+  }
+  (snk@outinmidpt-\snk@stepoutin.right)
+  \foreach \snk@curpt
+  [remember=\snk@curpt as \snk@prevpt (initially \snk@stepoutin)]
+  in {\snk@laststep,...,0}{
+    to[out=\sankeygetnodeorient{snk@outinmidpt-\snk@prevpt}+180,
+      in=\sankeygetnodeorient{snk@outinmidpt-\snk@curpt}]
+    (snk@outinmidpt-\snk@curpt.right)
+  };
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\snk@sankeynodealias}
+%   
+%   The \code{\snk@sankeynodealias} macro clones the Sankey node named
+%   \code{#1} into a Sankey node named \code{#2}.
+%
+%    \begin{macrocode}
+\NewDocumentCommand\snk@sankeynodealias{mm}{%name, alias
+  \snk@errorifnotdefined{#1}
+  \path[late options={name=#1,alias=#2}];
+  \snk@setnodeqty{#2}{\sankeygetnodeqty{#1}}
+  \snk@setnodeorient{#2}{\sankeygetnodeorient{#1}}
+}
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\snk@sankeynode}
+%   
+%   The \code{\snk@sankeynode} macro creates the new Sankey
+%   node named \code{#2}.
+%   
+%    \begin{macrocode}
+\NewDocumentCommand\snk@sankeynode{O{}m}{% options, node parameters
+  \begingroup
+  \sankeyset{#1}
+  \sankeyset{node parameters,@initial parameters,/sankey/every node,#2}
+  \snk@makenode{}
+  \snk@makeforkednode{}
+  \iftoggle{sankey node start}{\snk@filldrawstart}{}
+  \iftoggle{sankey node end}{\snk@filldrawend}{}
+  \snk@show@debug{\name}
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\snk@sankeystart}
+%   
+%   The \code{\snk@sankeystart} macro fills and draws a starting lane
+%   attached to the Sankey node named \code{#2}.
+%
+%    \begin{macrocode}
+\NewDocumentCommand\snk@sankeystart{O{}m}{% options, name
+  \snk@errorifnotdefined{#2}
+  \begingroup
+  \sankeyset{#1}
+  \edef\name{#2}
+  \edef\orient{\sankeygetnodeorient{#2}}
+  \edef\qty{\sankeygetnodeqty{#2}}
+  \snk@filldrawstart
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\snk@sankeynodestart}
+%   
+%   The \code{\snk@sankeynodestart} macro creates the new Sankey
+%   node named \code{#2} then fills and draws a starting lane
+%   attached to this new Sankey node.
+%   
+%    \begin{macrocode}
+\NewDocumentCommand\snk@sankeynodestart{O{}m}{% option, node parameters
+  \sankeynode[#1]{start,#2}
+}
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\snk@sankeyend}
+%   
+%   The \code{\snk@sankeyend} macro fills and draws an ending lane
+%   attached to the Sankey node named \code{#2}.
+%   
+%    \begin{macrocode}
+\NewDocumentCommand\snk@sankeyend{O{}m}{%options, name
+  \snk@errorifnotdefined{#2}
+  \begingroup
+  \sankeyset{#1}
+  \edef\name{#2}
+  \edef\orient{\sankeygetnodeorient{#2}}
+  \edef\qty{\sankeygetnodeqty{#2}}
+  \snk@filldrawend
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\snk@sankeynodeend}
+%   
+%   The \code{\snk@sankeynodeend} macro creates the new Sankey
+%   node named \code{#2} then fills and draws an ending lane
+%   attached to this new Sankey node.
+%   
+%    \begin{macrocode}
+\NewDocumentCommand\snk@sankeynodeend{O{}m}{% options, node parameters
+  \sankeynode[#1]{end,#2}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\snk@init@move}
+%
+%   \changes{v3.0.2}{2025/10/10}{Factorization of the node move initialization code}
+%
+%   The \code{\snk@init@move} macro applies options et clones the
+%   current node before its moving.
+%
+%    \begin{macrocode}
+\def\snk@init@move#1#2{% params: options, name
+  \sankeyset{#1}
+  \edef\name{#2}
+  \edef\snk@oldname{#2-old}
+  \sankeynodealias{\name}{\snk@oldname}
+  \edef\qty{\sankeygetnodeqty{\name}}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\snk@sankeyadvance}
+%
+%   The \code{\snk@sankeyadvance} macro moves toward (or backward if
+%   \emph{starred} calls -- \code{#1}) the Sankey node named \code{#3}.
+%   \code{#4} is a distance. The previous position is keeped
+%   by a Sankey node named \code{#3-old}.
+%   
+%    \begin{macrocode}
+\NewDocumentCommand\snk@sankeyadvance{sO{}mm}{%
+  % params: *(reverse), options, name, distance
+  \snk@errorifnotdefined{#3}
+  \begingroup
+  \snk@init@move{#2}{#3}
+  \IfBooleanTF{#1}{
+    % move backward
+    \sankeynode{
+      at={$(\snk@oldname.center)!#4!90:(\snk@oldname.left)$},
+      angle=\sankeygetnodeorient{\snk@oldname},
+      quantity=\sankeygetnodeqty{\snk@oldname},
+      name=\name,
+    }
+    \path[/sankey/fill]
+    (\name.left) -- (\snk@oldname.left)
+    -- (\snk@oldname.right) -- (\name.right) -- cycle;
+    \path[/sankey/draw]
+    (\name.left) -- (\snk@oldname.left)
+    (\snk@oldname.right) -- (\name.right);
+  }{
+    % move forward
+    \sankeynode{
+      at={$(\snk@oldname.center)!#4!-90:(\snk@oldname.left)$},
+      angle=\sankeygetnodeorient{\snk@oldname},
+      quantity=\sankeygetnodeqty{\snk@oldname},
+      name=\name,
+    }
+    \path[/sankey/fill]
+    (\snk@oldname.left) -- (\name.left)
+    -- (\name.right) -- (\snk@oldname.right) -- cycle;
+    \path[/sankey/draw]
+    (\snk@oldname.left) -- (\name.left)
+    (\name.right) -- (\snk@oldname.right);
+  }
+  \snk@show@debug{\name}
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\snk@sankeyturnright}
+%   
+%   \changes{v3.0}{2021/03/14}{New macro}
+%   
+%   The \code{sankeyturnright} macro moves forward the Sankey node named
+%   \code{#3} by turning right. The angle is \code{#4} (the starred
+%   version uses the opposite of \code{#4}). If the angle is
+%   \emph{negative}, the macro calls the \code{\sankeyturnrightbackward}
+%   macro to move backward else the macro fills/draws the lane between
+%   the previous position and the new position. The previous position is
+%   keeped by a Sankey node named \code{#3-old}.
+%
+%    \begin{macrocode}
+\NewDocumentCommand\snk@sankeyturnright{sO{}mm}{
+  % *(reverse), options, name, angle
+  \snk@errorifnotdefined{#3}
+  \begingroup
+  \IfBooleanTF{#1}
+  {\edef\snk@angle{\fpeval{-1*#4}}}
+  {\edef\snk@angle{\fpeval{1*#4}}}
+  \edef\snk@anglesign{\fpeval{sign(\snk@angle)}}
+  \ifnumgreater{\snk@anglesign}{-1}{
+    \snk@init@move{#2}{#3}
+    \edef\orient{\snk@normalize@angle{\sankeygetnodeorient{\name}-\snk@angle}}
+    \snk@getpos\snk@c{$(\name.right)!-\snk@minradius!(\name.left)$}
+    \snk@getpos\pos{$(\snk@c)!1!-\snk@angle:(\name.center)$}
+    \snk@makenode{}
+    % fill the region
+    \path[/sankey/fill] let
+    \p1=(\snk@oldname.left),\p2=(\snk@oldname.right),
+    \p3=(\name.left),\p4=(\name.right),
+    \n1={\sankeyqtytolen{\qty}},
+    \n{maxr}={\snk@minradius+\n1},
+    \n{minr}={\snk@minradius}
+    in
+    (\p1) arc(\orient+\snk@angle+90:\orient+90:\n{maxr}) -- (\p3) --
+    (\p4) arc(\orient+90:\orient+\snk@angle+90:\n{minr}) -- (\p2) -- cycle;
+    % draw left and right borders
+    \path[/sankey/draw] let
+    \p1=(\snk@oldname.left),\p2=(\snk@oldname.right),
+    \p3=(\name.left),\p4=(\name.right),
+    \n1={\sankeyqtytolen{\qty}},
+    \n{maxr}={\snk@minradius+\n1},
+    \n{minr}={\snk@minradius}
+    in
+    (\p1) arc(\orient+\snk@angle+90:\orient+90:\n{maxr}) 
+    (\p4) arc(\orient+90:\orient+\snk@angle+90:\n{minr});
+    \snk@show@debug{\name}
+  }{
+    \sankeyturnrightbackward[#2]{#3}{-1*\snk@angle}
+  }
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\snk@sankeyturnrightbackward}
+%   
+%   \changes{v3.0}{2021/03/14}{New macro}
+%   
+%   The \code{\snk@sankeyturnrightbackward} macro moves backward the
+%   Sankey node named \code{#3} by turning right. The angle is \code{#4}
+%   (the starred version uses the opposite of \code{#4}). If the angle
+%   is \emph{negative}, the macro calls the \code{\sankeyturnright}
+%   macro to move forward else the macro fills/draws the lane between
+%   the previous position and the new position. The previous position is
+%   keeped by a Sankey node named \code{#3-old}.
+%
+%    \begin{macrocode}
+\NewDocumentCommand\snk@sankeyturnrightbackward{sO{}mm}{
+  % *(reverse), options, name, angle
+  \snk@errorifnotdefined{#3}
+  \begingroup
+  \IfBooleanTF{#1}
+  {\edef\snk@angle{\fpeval{-1*#4}}}
+  {\edef\snk@angle{\fpeval{1*#4}}}
+  \edef\snk@anglesign{\fpeval{sign(\snk@angle)}}
+  \ifnumgreater{\snk@anglesign}{-1}{
+    \snk@init@move{#2}{#3}
+    \edef\orient{\snk@normalize@angle{\sankeygetnodeorient{\name}+\snk@angle}}
+    \snk@getpos\snk@c{$(\name.right)!-\snk@minradius!(\name.left)$}
+    \snk@getpos\pos{$(\snk@c)!1!\snk@angle:(\name.center)$}
+    \snk@makenode{}
+    % fill the region
+    \path[/sankey/fill] let
+    \p1=(\name.left),\p2=(\name.right),
+    \p3=(\snk@oldname.left),\p4=(\snk@oldname.right),
+    \n1={\sankeyqtytolen{\qty}},
+    \n{maxr}={\snk@minradius+\n1}, \n{minr}={\snk@minradius}
+    in
+    (\p1) arc(\orient+90:\orient-\snk@angle+90:\n{maxr}) -- (\p3) --
+    (\p4) arc(\orient-\snk@angle+90:\orient+90:\n{minr}) -- (\p2) -- cycle;
+    % draw left and right borders
+    \path[/sankey/draw] let
+    \p1=(\name.left),\p2=(\name.right),
+    \p3=(\snk@oldname.left),\p4=(\snk@oldname.right),
+    \n1={\sankeyqtytolen{\qty}},
+    \n{maxr}={\snk@minradius+\n1}, \n{minr}={\snk@minradius}
+    in
+    (\p1) arc(\orient+90:\orient-\snk@angle+90:\n{maxr}) 
+    (\p4) arc(\orient-\snk@angle+90:\orient+90:\n{minr});
+    \snk@show@debug{\name}
+  }{
+    \sankeyturnright[#2]{#3}{-1*\snk@angle}
+  }
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\snk@sankeyturnleft}
+%   
+%   \changes{v3.0}{2021/03/14}{New macro}
+%   
+%   The \code{\snk@sankeyturnleft} macro moves forward the Sankey node
+%   named \code{#3} by turning left. The angle is \code{#4} (the starred
+%   version uses the opposite of \code{#4}). If the angle is
+%   \emph{negative}, the macro calls the \code{\sankeyturnleftbackward}
+%   macro to move backward else the macro fills/draws the lane between
+%   the previous position and the new position. The previous position is
+%   keeped by a Sankey node named \code{#3-old}.
+%
+%    \begin{macrocode}
+\NewDocumentCommand\snk@sankeyturnleft{sO{}mm}{
+  % *(reverse), options, name, angle
+  \snk@errorifnotdefined{#3}
+  \begingroup
+  \IfBooleanTF{#1}
+  {\edef\snk@angle{\fpeval{-1*#4}}}
+  {\edef\snk@angle{\fpeval{1*#4}}}
+  \edef\snk@anglesign{\fpeval{sign(\snk@angle)}}
+  \ifnumgreater{\snk@anglesign}{-1}{
+    \snk@init@move{#2}{#3}
+    \edef\orient{\snk@normalize@angle{\sankeygetnodeorient{\name}+\snk@angle}}
+    \snk@getpos\snk@c{$(\name.left)!-\snk@minradius!(\name.right)$}
+    \snk@getpos\pos{$(\snk@c)!1!\snk@angle:(\name.center)$}
+    \snk@makenode{}
+    % fill the region
+    \path[/sankey/fill] let
+    \p1=(\snk@oldname.left),\p2=(\snk@oldname.right),
+    \p3=(\name.left),\p4=(\name.right),
+    \n1={\sankeyqtytolen{\qty}},
+    \n{maxr}={\snk@minradius+\n1}, \n{minr}={\snk@minradius}
+    in
+    (\p1) arc(\orient-\snk@angle-90:\orient-90:\n{minr}) -- (\p3) --
+    (\p4) arc(\orient-90:\orient-\snk@angle-90:\n{maxr}) -- (\p2) -- cycle;
+    % draw left and right borders
+    \path[/sankey/draw] let
+    \p1=(\snk@oldname.left),\p2=(\snk@oldname.right),
+    \p3=(\name.left),\p4=(\name.right),
+    \n1={\sankeyqtytolen{\qty}},
+    \n{maxr}={\snk@minradius+\n1}, \n{minr}={\snk@minradius}
+    in
+    (\p1) arc(\orient-\snk@angle-90:\orient-90:\n{minr}) 
+    (\p4) arc(\orient-90:\orient-\snk@angle-90:\n{maxr});
+    \snk@show@debug{\name}
+  }{
+    \sankeyturnleftbackward[#2]{#3}{-1*\snk@angle}
+  }
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\snk@sankeyturnleftbackward}
+%
+%   \changes{v3.0}{2021/03/14}{New macro}
+% 
+%   The \code{\snk@sankeyturnleftbackward} macro moves backward the
+%   Sankey node named \code{#3} by turning left. The angle is \code{#4}
+%   (the starred version uses the opposite of \code{#4}). If the angle
+%   is \emph{negative}, the macro calls the \code{\sankeyturnleft} macro
+%   to move forward else the macro fills/draws the lane between the
+%   previous position and the new position. The previous position is
+%   keeped by a Sankey node named \code{#3-old}.
+%
+%    \begin{macrocode}
+\NewDocumentCommand\snk@sankeyturnleftbackward{sO{}mm}{
+  % *(reverse), options, name, angle
+  \snk@errorifnotdefined{#3}
+  \begingroup
+  \IfBooleanTF{#1}
+  {\edef\snk@angle{\fpeval{-1*#4}}}
+  {\edef\snk@angle{\fpeval{1*#4}}}
+  \edef\snk@anglesign{\fpeval{sign(\snk@angle)}}
+  \ifnumgreater{\snk@anglesign}{-1}{
+    \snk@init@move{#2}{#3}
+    \edef\orient{\snk@normalize@angle{\sankeygetnodeorient{\name}-\snk@angle}}
+    \snk@getpos\snk@c{$(\name.left)!-\snk@minradius!(\name.right)$}
+    \snk@getpos\pos{$(\snk@c)!1!-\snk@angle:(\name.center)$}
+    \snk@makenode{}
+    % fill the region
+    \path[/sankey/fill] let
+    \p1=(\name.left),\p2=(\name.right),
+    \p3=(\snk@oldname.left),\p4=(\snk@oldname.right),
+    \n1={\sankeyqtytolen{\qty}},
+    \n{maxr}={\snk@minradius+\n1}, \n{minr}={\snk@minradius}
+    in
+    (\p1) arc(\orient-90:\orient+\snk@angle-90:\n{minr}) -- (\p3) --
+    (\p4) arc(\orient+\snk@angle-90:\orient-90:\n{maxr}) -- (\p2) -- cycle;
+    % draw left and right borders
+    \path[/sankey/draw] let
+    \p1=(\name.left),\p2=(\name.right),
+    \p3=(\snk@oldname.left),\p4=(\snk@oldname.right),
+    \n1={\sankeyqtytolen{\qty}},
+    \n{maxr}={\snk@minradius+\n1}, \n{minr}={\snk@minradius}
+    in
+    (\p1) arc(\orient-90:\orient+\snk@angle-90:\n{minr}) 
+    (\p4) arc(\orient+\snk@angle-90:\orient-90:\n{maxr});
+    \snk@show@debug{\name}
+  }{
+    \sankeyturnleft[#2]{#3}{-1*\snk@angle}
+  }
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\snk@sankeyturn}
+%   
+%   \changes{v3.0}{2021/03/14}{Simplification by using new \emph{turn} macros}
+%   
+%   The \code{\snk@sankeyturn} macro moves toward (or backward if
+%   \emph{starred} calls -- \code{#1}) the Sankey node named \code{#3}
+%   by turning left (angle \code{#4} is positive) or right (angle
+%   \code{#4} is negative).  The previous position is keeped by a Sankey
+%   node named \code{#3-old}.
+%
+%    \begin{macrocode}
+\NewDocumentCommand\snk@sankeyturn{sO{}mm}{%
+  % *(reverse), options, name, angle
+  \snk@errorifnotdefined{#3}
+  \begingroup
+  \edef\snk@anglesign{\fpeval{sign(#4)}}
+  \IfBooleanTF{#1}{
+    \ifnumgreater{\snk@anglesign}{-1}
+    {\sankeyturnleftbackward[#2]{#3}{#4}}
+    {\sankeyturnrightbackward[#2]{#3}{-1*#4}}
+  }{
+    \ifnumgreater{\snk@anglesign}{-1}
+    {\sankeyturnleft[#2]{#3}{#4}}
+    {\sankeyturnright[#2]{#3}{-1*#4}}
+  }
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\snk@sankeyfork}
+%   
+%   The \code{\snk@sankeyfork} macro forks the Sankey node named
+%   \code{#2} to the list of subnodes given by \code{#3}.
+%   The subnodes are cloned to take into account
+%   the \code{debug} option.
+%   
+%    \begin{macrocode}
+\NewDocumentCommand\snk@sankeyfork{O{}mm}{%options, name, list of forks
+  \snk@errorifnotdefined{#2}
+  \begingroup
+  \sankeyset{#1}
+  \sankeynode[debug=false]{as={#2},forked={#3}}
+  \foreach \qty/\snk@subnodename in {#3}{\sankeynode{as={\snk@subnodename}}}
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\snk@sankeyqtytolen}
+%   
+%   The \code{\snk@sankeyqtytolen} macro converts quantity to length
+%   using \code{\fpeval} and the ratio determined by
+%   \code{\snk@totalqty} and \code{\snk@totallen}.
+%
+%    \begin{macrocode}
+\NewExpandableDocumentCommand\snk@sankeyqtytolen{m}{%
+  \fpeval{(#1)/\snk@totalqty*\snk@totallen}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%^^A % ------------------------------------------------------------
+% \subsection{The \protect\ttintitle{sankeydiagram} environment}
+%^^A % ------------------------------------------------------------
+%
+%
+% \begin{environment}{sankeydiagram}
+%
+%   \changes{v3.0.2}{2025/01/10}{Simplification of the environment by copying internal macros}
+%
+%   The \code{sankeydiagram} environment allows the creation of Sankey
+%   diagrams.
+%   
+%   \DescribeMacro{\sankeyadvance}%
+%   \DescribeMacro{\sankeydubins}%
+%   \DescribeMacro{\sankeyend}%
+%   \DescribeMacro{\sankeyfork}%
+%   \DescribeMacro{\sankeynodealias}%
+%   \DescribeMacro{\sankeynodeend}%
+%   \DescribeMacro{\sankeynodestart}%
+%   \DescribeMacro{\sankeynode}%
+%   \DescribeMacro{\sankeyoutin}%
+%   \DescribeMacro{\sankeyqtytolen}%
+%   \DescribeMacro{\sankeystart}%
+%   \DescribeMacro{\sankeyturnleftbackward}%
+%   \DescribeMacro{\sankeyturnleft}%
+%   \DescribeMacro{\sankeyturnrightbackward}%
+%   \DescribeMacro{\sankeyturnright}%
+%   \DescribeMacro{\sankeyturn}%
+%   It defines locally all the macros used by a Sankey diagram.
+%   
+%   Then it applies the \code{@initial options} and \code{every diagram}
+%   styles (in this order) and applies all the keys provided in its
+%   optional argument.
+%
+%    \begin{macrocode}
+\NewDocumentEnvironment{sankeydiagram}{O{}}{
+  \NewCommandCopy{\sankeyadvance}{\snk@sankeyadvance}
+  \NewCommandCopy{\sankeydubins}{\snk@sankeydubins}
+  \NewCommandCopy{\sankeyend}{\snk@sankeyend}
+  \NewCommandCopy{\sankeyfork}{\snk@sankeyfork}
+  \NewCommandCopy{\sankeynodealias}{\snk@sankeynodealias}
+  \NewCommandCopy{\sankeynodeend}{\snk@sankeynodeend}
+  \NewCommandCopy{\sankeynodestart}{\snk@sankeynodestart}
+  \NewCommandCopy{\sankeynode}{\snk@sankeynode}
+  \NewCommandCopy{\sankeyoutin}{\snk@sankeyoutin}
+  \NewCommandCopy{\sankeyqtytolen}{\snk@sankeyqtytolen}
+  \NewCommandCopy{\sankeystart}{\snk@sankeystart}
+  \NewCommandCopy{\sankeyturnleftbackward}{\snk@sankeyturnleftbackward}
+  \NewCommandCopy{\sankeyturnleft}{\snk@sankeyturnleft}
+  \NewCommandCopy{\sankeyturnrightbackward}{\snk@sankeyturnrightbackward}
+  \NewCommandCopy{\sankeyturnright}{\snk@sankeyturnright}
+  \NewCommandCopy{\sankeyturn}{\snk@sankeyturn}
+  \sankeyset{
+    @initial options,
+    every diagram,
+    % user values
+    #1}
+}
+{} % empty but mandatory ! :-)
+%    \end{macrocode}
+% \end{environment}
+%
+%^^A % ------------------------------------------------------------
+% \subsection{Predefined start and end styles}
+%^^A % ------------------------------------------------------------
+%
+% The \code{none} style.
+%
+%    \begin{macrocode}
+\sankeyset{
+  new start style={none}{}{},
+  new end style={none}{}{},
+}
+%    \end{macrocode}
+%
+% The \code{simple} style.
+%
+%    \begin{macrocode}
+\sankeyset{
+  new start style={simple}{
+    (\name.left) -- ([xshift=-.5\pgflinewidth]\name.left)
+    -- ([xshift=-.5\pgflinewidth]\name.right) -- (\name.right) -- cycle
+  }{
+    (\name.left) -- ([xshift=-.5\pgflinewidth]\name.left)
+    -- ([xshift=-.5\pgflinewidth]\name.right) -- (\name.right)
+  },
+  new end style={simple}{
+    (\name.left) -- ([xshift=2mm]\name.center)
+    -- (\name.right) -- cycle
+  }{
+    (\name.left)  -- ([xshift=2mm]\name.center) -- (\name.right)
+  },
+}
+%    \end{macrocode}
+%
+% The \code{arrow} style.
+%
+%    \begin{macrocode}
+\sankeyset{
+  new start style={arrow}{
+    (\name.left) -- ++(-10pt,0) -- ([xshift=-10pt/6]\name.center)
+    -- ([xshift=-10pt]\name.right) -- (\name.right) -- cycle
+  }{
+    (\name.left) -- ++(-10pt,0) -- ([xshift=-10pt/6]\name.center)
+    -- ([xshift=-10pt]\name.right) -- (\name.right)
+  },
+  new end style={arrow}{
+    (\name.left) -- ([yshift=1mm]\name.left)
+    -- ([xshift=10pt]\name.center) -- ([yshift=-1mm]\name.right)
+    -- (\name.right) -- cycle
+  }{
+    (\name.left) -- ([yshift=1mm]\name.left)
+    -- ([xshift=10pt]\name.center) -- ([yshift=-1mm]\name.right)
+    -- (\name.right)
+  },
+}
+%    \end{macrocode}
+% \iffalse
+%</sankey>
+% \fi
+%
+%^^A % ------------------------------------------------------------
+% \section{\ttintitle{tikzlibrarydubins.code.tex}}
+%^^A % ------------------------------------------------------------
+%
+% Not yet documented nor commented...
+%
+% \iffalse
+%<*tikzlibrarydubins.code.tex>
+% \fi
+% \begin{macro}{\tikzlibrarydubins@version}
+% \begin{macro}{\tikzlibrarydubins@date}
+%    \begin{macrocode}
+\def\tikzlibrarydubins@version{v3.0.2}
+\def\tikzlibrarydubins@date{2025/01/10}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% 
+%    \begin{macrocode}
+\usetikzlibrary{calc}
+\RequirePackage{etoolbox}
+\RequirePackage{xfp}
+
+\newbool{dubinspathreverse}
+%    \end{macrocode}
+%
+% \begin{macro}{\ifpgfmathcond}
+%    \begin{macrocode}
+\def\ifpgfmathcond#1{%
+  \pgfmathparse{(#1)?1:0}%
+  \ifnumequal{\pgfmathresult}{1}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\dbp@getxy}
+%    \begin{macrocode}
+\def\dbp@getxy#1#2#3{%
+  \tikz@scan@one@point\pgfutil@firstofone(#3)\relax%
+  \edef#1{\the\pgf@x}%
+  \edef#2{\the\pgf@y}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\dbp@anglebetween}
+%    \begin{macrocode}
+\def\dbp@anglebetween#1#2#3{%macro, s, t
+  \dbp@getxy\dbp@ax\dbp@ay{#2}
+  \dbp@getxy\dbp@bx\dbp@by{#3}
+  \pgfmathsetmacro#1{atan2(\dbp@by-\dbp@ay,\dbp@bx-\dbp@ax)}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\dbp@distancebetween}
+%    \begin{macrocode}
+\def\dbp@distancebetween#1#2#3{%macro, s, t
+  \dbp@getxy\dbp@ax\dbp@ay{#2}
+  \dbp@getxy\dbp@bx\dbp@by{#3}
+  \edef#1{\fpeval{sqrt(%
+      (\dbp@bx-\dbp@ax)*(\dbp@bx-\dbp@ax)%
+      +(\dbp@by-\dbp@ay)*(\dbp@by-\dbp@ay)%
+      )}}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\dbp@rsr}
+%    \begin{macrocode}
+\newcommand\dbp@rsr{% s, sa, t, ta, as, len, at, r
+  let
+  \p{tr}=([shift={(\dbp@angb-90:\dbp@radius pt)}]\dbp@b),
+  \n1={\dbp@anga+90},
+  \n2={\dbp@angb+90},
+  \n3={\n2+\dbp@lastangle}
+  in
+  arc(\n1:\n1-\dbp@firstangle:\dbp@rradius pt)
+  -- ([shift={(\p{tr})}]\n3:\dbp@rradius pt)
+  arc(\n3:\n2:\dbp@rradius pt)
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\dbp@lsl}
+%    \begin{macrocode}
+\newcommand\dbp@lsl{% s, sa, t, ta, as, len, at, r
+  let
+  \p{tl}=([shift={(\dbp@angb+90:\dbp@radius pt)}]\dbp@b),
+  \n1={\dbp@anga-90},\n2={\n1+\dbp@firstangle},
+  \n3={\dbp@angb-90},\n4={\n3-\dbp@lastangle}
+  in
+  arc(\n1:\n2:\dbp@lradius pt)
+  -- ([shift={(\p{tl})}]\n4:\dbp@lradius pt)
+  arc(\n4:\n3:\dbp@lradius pt)
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\dbp@rsl}
+%    \begin{macrocode}
+\newcommand\dbp@rsl{% s, sa, t, ta, as, len, at, r
+  let
+  \p{tl}=([shift={(\dbp@angb+90:\dbp@radius pt)}]\dbp@b),
+  \n1={\dbp@anga+90},\n2={\n1-\dbp@firstangle},
+  \n3={\dbp@angb-90},\n4={\n3-\dbp@lastangle}
+  in
+  arc(\n1:\n2:\dbp@rradius pt)
+  -- ([shift={(\p{tl})}]\n4:\dbp@lradius pt)
+  arc(\n4:\n3:\dbp@lradius pt)
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\dbp@lsr}
+%    \begin{macrocode}
+\newcommand\dbp@lsr{% s, sa, t, ta, as, len, at, r
+  let
+  \p{tr}=([shift={(\dbp@angb-90:\dbp@radius pt)}]\dbp@b),
+  \n1={\dbp@anga-90},\n2={\n1+\dbp@firstangle},
+  \n3={\dbp@angb+90},\n4={\n3+\dbp@lastangle}
+  in
+  arc(\n1:\n2:\dbp@lradius pt)
+  -- ([shift={(\p{tr})}]\n4:\dbp@rradius pt)
+  arc(\n4:\n3:\dbp@rradius pt)
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\dbp@lrl}
+%    \begin{macrocode}
+\newcommand\dbp@lrl{% s, sa, t, ta, as, ai, at, r
+  let
+  \n1={\dbp@anga-90},\n2={\n1+\dbp@firstangle},
+  \n3={\dbp@angb-90},\n4={\n3-\dbp@lastangle}
+  in
+  arc(\n1:\n2:\dbp@lradius pt)
+  arc(\n2+180:\n2+180-\dbp@midparam:\dbp@rradius pt)
+  arc(\n4:\n3:\dbp@lradius pt)
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\dbp@rlr}
+%    \begin{macrocode}
+\newcommand\dbp@rlr{% s, sa, t, ta, as, ai, at, r
+  let
+  \n1={\dbp@anga+90},\n2={\n1-\dbp@firstangle},
+  \n3={\dbp@angb+90},\n4={\n3+\dbp@lastangle}
+  in
+  arc(\n1:\n2:\dbp@rradius pt)
+  arc(\n2+180:\n2+180+\dbp@midparam:\dbp@lradius pt)
+  arc(\n4:\n3:\dbp@rradius pt)
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\dbp@rev@lsl}
+%    \begin{macrocode}
+\newcommand\dbp@rev@lsl{\dbp@rsr}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\dbp@rev@rsr}
+%    \begin{macrocode}
+\newcommand\dbp@rev@rsr{\dbp@lsl}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\dbp@rev@lsr}
+%    \begin{macrocode}
+\newcommand\dbp@rev@lsr{\dbp@lsr}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\dbp@rev@rsl}
+%    \begin{macrocode}
+\newcommand\dbp@rev@rsl{\dbp@rsl}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\dbp@rev@lrl}
+%    \begin{macrocode}
+\newcommand\dbp@rev@lrl{\dbp@rlr}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\dbp@rev@rlr}
+%    \begin{macrocode}
+\newcommand\dbp@rev@rlr{\dbp@lrl}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\dubinspath}
+%    \begin{macrocode}
+\newcommand\dubinspath[1]{%
+  \pgfextra{
+    \dubinspathset{#1}
+    \ifbool{dubinspathreverse}{
+      \edef\dbp@newa{\dbp@b}
+      \edef\dbp@newb{\dbp@a}
+      \pgfmathsetmacro\dbp@newanga{180+\dbp@angb}
+      \pgfmathsetmacro\dbp@newangb{180+\dbp@anga}
+      \edef\dbp@newfirstangle{\dbp@lastangle}
+      \edef\dbp@newlastangle{\dbp@firstangle}
+      \edef\dbp@newmethod{rev@\dbp@method}
+      \edef\dbp@newlradius{\dbp@rradius}
+      \edef\dbp@newrradius{\dbp@lradius}
+      \dubinspathset{
+        start point=\dbp@newa,
+        end point=\dbp@newb,
+        start angle=\dbp@newanga,
+        end angle=\dbp@newangb,
+        first angle=\dbp@newfirstangle,
+        last angle=\dbp@newlastangle,
+        left and right minimum radii=\dbp@newlradius pt and \dbp@newrradius pt,
+        method=\dbp@newmethod,
+      }
+    }{}
+  }
+  \csname dbp@\dbp@method\endcsname%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\dbp@store}
+% \begin{macro}{\dbp@get}
+%    \begin{macrocode}
+\def\dbp@store#1#2{%
+  \expandafter\xdef\csname dbp@store@#1@#2\endcsname%
+  {\csname dbp@#2\endcsname}%
+}
+\def\dbp@get#1#2{%
+  \csname dbp@store@#1@#2\endcsname%
+}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \begin{macro}{\dbp@setparams}
+%    \begin{macrocode}
+\def\dbp@setparams#1#2#3#4#5{%
+  % method, length, fisrt angle, middle param, last angle
+  \edef\dbp@method{#1}
+  \edef\dbp@length{#2}
+  \edef\dbp@firstangle{#3}
+  \edef\dbp@middleparam{#4}
+  \edef\dbp@lastangle{#5}
+  \ifdef{\dbp@storename}{
+    \foreach \p in {method,length,firstangle,middleparam,lastangle}{
+      \dbp@store{\dbp@storename}{\p}
+    }
+  }{}
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\dbp@updateparams}
+%    \begin{macrocode}
+\def\dbp@updateparams#1#2#3#4#5{
+  \ifpgfmathcond{#2<\dbp@length}{
+    \dbp@setparams{#1}{#2}{#3}{#4}{#5}
+  }{}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+\tikzset{
+  dubins path/.is family,
+  dubins path,
+  start point/.store in=\dbp@a,
+  start angle/.store in=\dbp@anga,
+  end point/.store in=\dbp@b,
+  end angle/.store in=\dbp@angb,
+  store/.store in=\dbp@storename,
+  use store/.style={
+    method=\dbp@get{#1}{method},
+    first angle=\dbp@get{#1}{firstangle},
+    last angle=\dbp@get{#1}{lastangle},
+    middle param=\dbp@get{#1}{middleparam},
+  },
+  minimum radius/.code={
+    \pgfmathsetmacro\dbp@radius{#1}
+    \pgfmathsetmacro\dbp@rradius{#1}
+    \pgfmathsetmacro\dbp@lradius{#1}
+  },
+  left and right minimum radii/.code args={#1 and #2}{
+    \pgfmathsetmacro\dbp@lradius{#1}
+    \pgfmathsetmacro\dbp@rradius{#2}
+    \pgfmathsetmacro\dbp@radius{(\dbp@lradius + \dbp@rradius)/2}
+  },
+  method/.store in=\dbp@method,
+  first angle/.store in=\dbp@firstangle,
+  last angle/.store in=\dbp@lastangle,
+  middle param/.store in=\dbp@midparam,
+  reverse/.is if=dubinspathreverse,
+}
+%    \end{macrocode}
+%
+% \begin{macro}{\dubinspathset}
+%    \begin{macrocode}
+\newcommand\dubinspathset[1]{\tikzset{dubins path,#1}}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \begin{macro}{\dubinspathcalc}
+%    \begin{macrocode}
+\newcommand\dubinspathcalc[1]{%
+  \begingroup
+  \dubinspathset{#1}
+  \tikzset{
+    declare function={
+      angtodist(\dbp@a,\dbp@r)={abs(\dbp@a)*.01745329*\dbp@r};
+      modangr(\dbp@a,\dbp@b)={
+        (
+        Mod(\dbp@a,360)<Mod(\dbp@b,360)
+        ?
+        Mod(\dbp@a,360)
+        :
+        Mod(\dbp@a,360)-360)+\dbp@b-Mod(\dbp@b,360
+        )
+      };
+      modangl(\dbp@a,\dbp@b)={
+        (
+        Mod(\dbp@a,360)<Mod(\dbp@b,360)
+        ?
+        Mod(\dbp@a,360)+360
+        :
+        Mod(\dbp@a,360))+(\dbp@b)-Mod(\dbp@b,360)
+      };
+    },
+  }
+  
+  \pgfmathsetmacro\dbp@radius{\dbp@rradius}
+  \pgfmathsetmacro\dbp@anga{mod((\dbp@anga)+180,360)-180}
+  \pgfmathsetmacro\dbp@angb{mod((\dbp@angb)+180,360)-180}
+  \path
+  let
+  \p{a}=(\dbp@a),
+  \p{b}=(\dbp@b),
+  \p{ar}=($(\p{a}) + (\dbp@anga-90:\dbp@radius pt)$),
+  \p{al}=($(\p{a}) + (\dbp@anga+90:\dbp@radius pt)$),
+  \p{br}=($(\p{b}) + (\dbp@angb-90:\dbp@radius pt)$),
+  \p{bl}=($(\p{b}) + (\dbp@angb+90:\dbp@radius pt)$)
+  in \pgfextra{
+    \pgfinterruptpath
+
+    % RSR (ar and br)
+    \dbp@anglebetween\dbp@rsrarbr{\p{ar}}{\p{br}}
+    \dbp@distancebetween\dbp@rsrdarbr{\p{ar}}{\p{br}}
+    \pgfmathsetmacro\dbp@rsrangone{Mod(\dbp@anga-\dbp@rsrarbr,360)}
+    \pgfmathsetmacro\dbp@rsrangtwo{Mod(\dbp@rsrarbr-\dbp@angb,360)}
+    \pgfmathsetmacro\dbp@rsrlen{\dbp@rsrdarbr}
+    \pgfmathsetmacro\dbp@rsrdist{
+      angtodist(\dbp@rsrangone,\dbp@radius)
+      +\dbp@rsrlen
+      +angtodist(\dbp@rsrangtwo,\dbp@radius)
+    }
+    \dbp@setparams%
+    {rsr}{\dbp@rsrdist}{\dbp@rsrangone}{\dbp@rsrlen}{\dbp@rsrangtwo}
+    
+    % LSL (al and bl)
+    \dbp@anglebetween\dbp@lslalbl{\p{al}}{\p{bl}}
+    \dbp@distancebetween\dbp@lsldalbl{\p{al}}{\p{bl}}
+    \pgfmathsetmacro{\dbp@lslangone}{mod(\dbp@lslalbl-\dbp@anga+720,360)}
+    \pgfmathsetmacro{\dbp@lslangtwo}{mod(\dbp@angb-\dbp@lslalbl+720,360)}
+    \pgfmathsetmacro\dbp@lsllen{\dbp@lsldalbl}
+    \pgfmathsetmacro\dbp@lsldist{
+      angtodist(\dbp@lslangone,\dbp@radius)
+      +\dbp@lsllen
+      +angtodist(\dbp@lslangtwo,\dbp@radius)
+    }
+    \dbp@updateparams%
+    {lsl}{\dbp@lsldist}{\dbp@lslangone}{\dbp@lsllen}{\dbp@lslangtwo}
+    
+    % RSL (ar and bl)
+    \dbp@distancebetween\dbp@rsldarbl{\p{ar}}{\p{bl}}
+    \pgfmathtruncatemacro\dbp@rslok{(\dbp@rsldarbl>=2*\dbp@radius)?1:0}
+    \ifnumequal{\dbp@rslok}{1}{
+      \dbp@anglebetween\dbp@rslarbl{\p{ar}}{\p{bl}}
+      \pgfmathsetmacro\dbp@rslanglesup{
+        asin(\dbp@radius/\dbp@rsldarbl*2)}
+      \pgfmathsetmacro\dbp@rslangone
+      {Mod(\dbp@anga-\dbp@rslarbl+\dbp@rslanglesup,360)}
+      \pgfmathsetmacro\dbp@rslangtwo
+      {Mod(\dbp@angb-\dbp@rslarbl+\dbp@rslanglesup,360)}
+      \pgfmathsetmacro\dbp@rsllen{veclen(\dbp@rsldarbl,\dbp@radius)}
+      \pgfmathsetmacro\dbp@rsldist{
+        angtodist(\dbp@rslangone,\dbp@radius)
+        +\dbp@rsllen
+        +angtodist(\dbp@rslangtwo,\dbp@radius)
+      }
+
+      \dbp@updateparams%
+      {rsl}{\dbp@rsldist}{\dbp@rslangone}{\dbp@rsllen}{\dbp@rslangtwo}
+    }{}
+
+    % LSR (al and br)
+    \dbp@distancebetween\dbp@lsrdalbr{\p{al}}{\p{br}}
+    \pgfmathtruncatemacro\dbp@lsrok{(\dbp@lsrdalbr>=2*\dbp@radius)?1:0}
+    \ifnumequal{\dbp@lsrok}{1}{
+      \dbp@anglebetween\dbp@lsralbr{\p{al}}{\p{br}}
+      \pgfmathsetmacro\dbp@lsranglesup{
+        asin(\dbp@radius/\dbp@lsrdalbr*2)}
+      \pgfmathsetmacro\dbp@lsrangone
+      {Mod(\dbp@lsralbr+\dbp@lsranglesup-\dbp@anga,360)}
+      \pgfmathsetmacro\dbp@lsrangtwo
+      {Mod(\dbp@lsralbr+\dbp@lsranglesup-\dbp@angb,360)}
+      \pgfmathsetmacro\dbp@lsrlen{veclen(\dbp@lsrdalbr,\dbp@radius)}
+      \pgfmathsetmacro\dbp@lsrdist{
+        angtodist(\dbp@lsrangone,\dbp@radius)
+        +\dbp@lsrlen
+        +angtodist(\dbp@lsrangtwo,\dbp@radius)
+      }
+      \dbp@updateparams%
+      {lsr}{\dbp@lsrdist}{\dbp@lsrangone}{\dbp@lsrlen}{\dbp@lsrangtwo}
+    }{}
+    
+    % LRL (al and bl)
+    \dbp@distancebetween\dbp@lrldalbl{\p{al}}{\p{bl}}
+    \pgfmathtruncatemacro\dbp@lrlok{(\dbp@lrldalbl<=4*\dbp@radius)?1:0}
+    \ifnumequal{\dbp@lrlok}{1}{
+      \dbp@anglebetween\dbp@lrlalbl{\p{al}}{\p{bl}}
+      \pgfmathsetmacro\dbp@lrlangsup{acos(\dbp@lrldalbl/\dbp@radius/4)}
+      \pgfmathsetmacro\dbp@lrlangone{
+        modangl(\dbp@lrlalbl+\dbp@lrlangsup,\dbp@anga-90)-(\dbp@anga-90)}
+      \pgfmathsetmacro\dbp@lrlangtwo{%
+        (\dbp@angb-90)-modangr(\dbp@lrlalbl+180-\dbp@lrlangsup,\dbp@angb-90)}
+      \pgfmathsetmacro\dbp@lrlangthree{360-2*(90-\dbp@lrlangsup)}
+      \pgfmathsetmacro\dbp@lrldist{
+        angtodist(\dbp@lrlangone,\dbp@radius)
+        +angtodist(\dbp@lrlangthree,\dbp@radius)
+        +angtodist(\dbp@lrlangtwo,\dbp@radius)
+      }
+      \dbp@updateparams%
+      {lrl}{\dbp@lrldist}{\dbp@lrlangone}{\dbp@lrlangthree}{\dbp@lrlangtwo}
+    }{}
+
+    % RLR (ar and br)
+    \dbp@distancebetween\dbp@rlrdarbr{\p{ar}}{\p{br}}
+    \pgfmathtruncatemacro\dbp@rlrok{(\dbp@rlrdarbr<=4*\dbp@radius)?1:0}
+    \ifnumequal{\dbp@rlrok}{1}{
+      \dbp@anglebetween\dbp@rlrarbr{\p{ar}}{\p{br}}
+      \pgfmathsetmacro\dbp@rlrangsup{acos(\dbp@rlrdarbr/\dbp@radius/4)}
+      \pgfmathsetmacro\dbp@rlrangone{
+        (\dbp@anga+90)-modangr(\dbp@rlrarbr-\dbp@rlrangsup,\dbp@anga+90)}
+      \pgfmathsetmacro\dbp@rlrangtwo{%
+        modangl(\dbp@rlrarbr+180+\dbp@rlrangsup,\dbp@angb+90)-(\dbp@angb+90)}
+      \pgfmathsetmacro\dbp@rlrangthree{360-2*(90-\dbp@rlrangsup)}
+      \pgfmathsetmacro\dbp@rlrdist{
+        angtodist(\dbp@rlrangone,\dbp@radius)
+        +angtodist(\dbp@rlrangthree,\dbp@radius)
+        +angtodist(\dbp@rlrangtwo,\dbp@radius)
+      }
+      \dbp@updateparams%
+      {rlr}{\dbp@rlrdist}{\dbp@rlrangone}{\dbp@rlrangthree}{\dbp@rlrangtwo}
+    }{}
+
+    \endpgfinterruptpath
+  };
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}
+% \iffalse
+%</tikzlibrarydubins.code.tex>
+% \fi
+%
+% \PrintChanges
+%
+% {
+%   \setcounter{IndexColumns}{2}
+%   \let\code\relax
+%   \IndexPrologue{\section{Index} Italic numbers refer page where the
+%   corresponding entry is described; Underlined numbers refer to the
+%   code line of the definition; Roman numbers refer to the code lines
+%   where the entry is used.}
+%
+%   \PrintIndex
+% }
+% \Finale
+%
+% \iffalse
+%<*sankey-doc-preamble>
+\usepackage[paper=a4paper,vmargin=1.5cm,left=4.5cm,right=3.5cm,marginparwidth=3.5cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{cmap}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{inconsolata}
+\usepackage[final,protrusion=true,expansion=true]{microtype}
+\usepackage{xcolor}
+\PassOptionsToPackage{final,colorlinks,linkcolor=cyan!25!blue!75!black}{hyperref}
+\usepackage{dtxdescribe}
+\usepackage[numbered]{hypdoc}
+\usepackage{fancyvrb}
+\usepackage[final]{listings}
+\usepackage{enumitem}
+\usepackage{bookmark}
+\usepackage{siunitx}
+\usepackage{footnote}
+\usepackage{etoc}
+\usepackage{accsupp}
+\usepackage{tikz}
+\usetikzlibrary{positioning,patterns.meta,fit}
+\usepackage[british]{babel}
+\usepackage{varioref}
+\usepackage{embedfile}
+\usepackage{dtx-attach}
+\embedfile[mimetype=text/plain]{sankey.ins}
+\usepackage{sankey}
+
+\colorlet{bgcode}{yellow!50!gray!10}
+\colorlet{keyword}{blue!50!cyan!50!black}
+\colorlet{comment}{red!75!black}
+
+\newcommand\emptyaccsupp[1]{\BeginAccSupp{ActualText={}}#1\EndAccSupp{}}
+
+\lstset{
+  literate=
+  {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+  {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+  {à}{{\`a}}1 {è}{{\`e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1
+  {À}{{\`A}}1 {È}{{\'E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1
+  {ä}{{\"a}}1 {ë}{{\"e}}1 {ï}{{\"i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+  {Ä}{{\"A}}1 {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+  {â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1
+  {Â}{{\^A}}1 {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1
+  {œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1 {ß}{{\ss}}1
+  {ç}{{\c c}}1 {Ç}{{\c C}}1 {ø}{{\o}}1 {å}{{\r a}}1 {Å}{{\r A}}1
+  {€}{{\texteuro}}1 {£}{{\pounds}}1 {°}{{\degres}}1
+  {’}{{\textquoteright}}1 {‘}{{\textquoteleft}}1
+  {«}{{<<}}1 {»}{{>>}}1
+  {—}{{---}}1 {−}{{$-$}}1
+  {\^\^A}{{}}0                % verbatim in .dtx file
+}
+
+\lstset{
+  fancyvrb=true,
+  escapechar=`,
+  extendedchars=true,
+  fontadjust=true,
+  columns=fullflexible,
+  flexiblecolumns=true,
+  inputencoding=utf8,
+  keepspaces=true,
+  backgroundcolor=\color{bgcode},
+  basicstyle=\mdseries\ttfamily,
+  keywordstyle=\color{keyword},
+  stringstyle=\ttfamily\color{green!50!black},
+  commentstyle=\color{comment}\itshape,
+  emphstyle=\bfseries\color{red},
+  numbersep=5pt,
+  %numbers=left,
+  numberstyle=\tiny\emptyaccsupp,
+  showstringspaces=false,
+  upquote=true,
+  aboveskip=.5\parskip,
+  belowskip=.5\parskip,
+  framexleftmargin=1pt,
+  framexrightmargin=1pt,
+  gobble=2,              % \lstlisting code in .dtx
+}
+
+\lstdefinestyle{textsmall}{basicstyle=\color{black}\small\mdseries\ttfamily}
+\lstdefinestyle{textfootnotesize}{basicstyle=\color{black}\footnotesize\mdseries\ttfamily}
+\lstdefinestyle{textscriptsize}{basicstyle=\color{black}\scriptsize\mdseries\ttfamily}
+\lstdefinestyle{texttiny}{basicstyle=\color{black}\tiny\mdseries\ttfamily}
+
+\lstdefinestyle{bash}{
+  language=bash,
+  backgroundcolor=\color{gray!10},
+}
+\lstdefinestyle{bashsmall}{style=bash,style=textsmall}
+\lstdefinestyle{bashfootnotesize}{style=bash,style=footnotesize}
+\lstdefinestyle{bashscriptsize}{style=bash,style=scriptsize}
+
+\lstdefinestyle{LaTeX}{
+  language=[LaTeX]TeX,
+  moretexcs={
+    Lab,
+    LabSet,
+    Qty,
+    QtySet,
+    colorlet,
+    coordinate,
+    countries,
+    country,
+    countryname,
+    definecolor,
+    draw,
+    endcountry,
+    fill,
+    foreach,
+    hashband,
+    hdist,
+    hwidth,
+    node,
+    nodename,
+    path,
+    sankeyadvance,
+    sankeydubins,
+    sankeyend,
+    sankeyend,
+    sankeyfork,
+    sankeynode,
+    sankeynodealias,
+    sankeynodeend,
+    sankeynodestart,
+    sankeyoutin,
+    sankeyset,
+    sankeystart,
+    sankeyturn,
+    sankeyturnleft,
+    sankeyturnleftbackward,
+    sankeyturnright,
+    sankeyturnrightbackward,
+    sisetup,
+    startcountry,
+    tikzset,
+    turnandstop,
+    usepackage,
+    vdist,
+  }
+}
+\lstdefinestyle{LaTeXsmall}{style=LaTeX,style=textsmall}
+\lstdefinestyle{LaTeXfootnotesize}{style=LaTeX,style=textfootnotesize}
+\lstdefinestyle{LaTeXscriptsize}{style=LaTeX,style=textscriptsize}
+\lstdefinestyle{LaTeXtiny}{style=LaTeX,style=texttiny}
+
+\def\code{\lstinline[basicstyle=\mdseries\ttfamily\color{red!50!black}]}
+
+\edef\samplecodename{\jobname-code.vrb}
+
+\newcommand\constant[1]{\textcolor{violet}{\texttt{#1}}}
+\newcommand\ARG[1]{\texttt{\{#1\}}}
+\newcommand\OPTARG[1]{\textcolor{green!50!black}{\texttt{[#1]}}}
+\newcommand\VAR[1]{\textit{\texttt{\ensuremath{\langle}#1\ensuremath{\rangle}}}}
+\newcommand\NOTE[1]{\leavevmode\marginpar{#1}}
+
+\def\mynobreakpar{\par\nobreak\@afterheading}
+\def\docprefix#1{\texttt{\textcolor{gray}{#1}}}
+\def\sankeykeysprefix{/sankey}
+
+\newenvironment{sankeyoption}[5][]{% [prefix] key, val, default, initially
+  \begingroup
+  % 
+  \def\keypath{#1}%
+  \ifdefempty{\keypath}{\def\keypath{\sankeykeysprefix}}{}%
+  \def\key{#2}%
+  \def\val{#3}%
+  \def\default{#4}%
+  \def\initially{#5}%
+  %\setlength\parindent{\dimexpr.5\parindent\relax}%
+  % \vspace{.25\baselineskip plus .25\baselineskip minus 0mm}
+  \parfillskip 0pt plus 1fil%
+  \leavevmode%
+  \expandafter\DescribeKey\expandafter{\key}%
+  \ttfamily%
+  %\hspace*{-1cm}%
+  \textcolor{red!75!black}{\texttt{\docprefix{\keypath/}\key}}%
+  \ifdefempty{\val}{}{=\val}%
+  \hfill%
+  \ifdefempty{\default}{\null}{{\rmfamily (default:\,\constant{\default})}}%
+  \ifdefempty{\initially}{\null}{{\rmfamily (initially:\,\constant{\initially})}}%
+  \mynobreakpar%
+  \endgroup%
+  \parskip=.5\baselineskip plus .25\baselineskip minus .3\baselineskip
+  \parfillskip=30pt plus 1fil
+  \itemize[topsep=0pt,partopsep=0pt,itemsep=0pt]\item[]
+}{%
+  \enditemize%
+}
+
+\newcommand\MACRO{\hspace*{0cm}}
+
+\newlist{sankeyconstantsdesc}{description}{1}
+\setlist[sankeyconstantsdesc]{align=right,labelindent=1.5em,labelsep=.5em,leftmargin=!,font=\normalfont}
+
+\newlength{\myparskip}
+\setlength{\myparskip}{.75\baselineskip plus 8\baselineskip minus .25\baselineskip}
+\usepackage[skip=\myparskip]{parskip}
+\newenvironment{miniblock}{%
+  \vspace{.5\parskip}%
+}{%
+}
+
+\tikzset{
+  every picture/.style={
+    execute at end picture={
+      \begin{pgfonlayer}{background}
+        \node[fit=(current bounding box),inner sep=0](bb){};
+        \def\rs{5mm}
+        \draw[gray!25] let
+        \p{sw}=(bb.south west), \p{ne}=(bb.north east),
+        \n{maxx}={ceil(\x{ne}/\rs)*\rs}, \n{minx}={floor(\x{sw}/\rs)*\rs},
+        \n{maxy}={ceil(\y{ne}/\rs)*\rs}, \n{miny}={floor(\y{sw}/\rs)*\rs}
+        in (\n{minx},\n{miny}) grid (\n{maxx},\n{maxy});
+        \begin{scope}[overlay]
+          \draw[gray!50,-latex] let
+          \p{sw}=(bb.south west), \p{ne}=(bb.north east),
+          \n{maxx}={ceil(\x{ne}/\rs)*\rs}, \n{minx}={floor(\x{sw}/\rs)*\rs},
+          \n{maxy}={ceil(\y{ne}/\rs)*\rs}, \n{miny}={floor(\y{sw}/\rs)*\rs}
+          in (\n{minx},0) -- (\n{maxx}+1mm,0);
+          \draw[gray!50,-latex] let
+          \p{sw}=(bb.south west), \p{ne}=(bb.north east),
+          \n{maxx}={ceil(\x{ne}/\rs)*\rs}, \n{minx}={floor(\x{sw}/\rs)*\rs},
+          \n{maxy}={ceil(\y{ne}/\rs)*\rs}, \n{miny}={floor(\y{sw}/\rs)*\rs}
+          in (0,\n{miny}) -- (0,\n{maxy}+1mm);
+        \end{scope}
+      \end{pgfonlayer}
+    }
+  }
+}
+
+\def\MacroFont{
+  \fontencoding\encodingdefault
+  \fontfamily\ttdefault
+  \fontseries\mddefault
+  \fontshape\updefault
+  \footnotesize
+}
+
+%</sankey-doc-preamble>
+% \fi
+\endinput
+
+% Local Variables:
+% mode: doctex
+% LaTeX-verbatim-macros-with-braces-local: ("code")
+% TeX-master: t
+% End:

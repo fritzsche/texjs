@@ -1,0 +1,861 @@
+# Hey, Emacs!  This is a -*- mode: org -*- file!
+
+#+TITLE:     Support for the banner of the newsletter "La Lettre de GUTenberg"
+#+AUTHOR:    Association GUTenberg
+#+EMAIL:     secretariat@gutenberg-asso.fr
+#+DESCRIPTION: ...
+#+KEYWORDS:  ...
+#+LANGUAGE:  en
+#+OPTIONS:   num:t toc:nil title:nil
+
+#+LATEX_COMPILER: lualatex
+
+#+LaTeX_CLASS: letgut
+#+LaTeX_HEADER: \setmainfont{KpRoman}
+#+LaTeX_HEADER: \setsansfont{KpSans}
+#+LaTeX_HEADER: \setmonofont[Scale = MatchLowercase]{RobotoMono}
+#+LaTeX_HEADER: \letgutsetup{editorial=false}
+#+LaTeX_HEADER: \input{listings-conf}
+# #+LaTeX_HEADER: \input{codehigh-conf}
+# #+LaTeX_HEADER: \letgutsetup{editorial=false,final}
+
+#+PROPERTY: header-args :padline no :tangle ../../../tex/lualatex/letgut/letgut-banner.sty :exports both :noweb yes :eval always
+#+export_file_name: ../../../doc/lualatex/letgut/letgut-banner-code
+
+* Readme file
+:PROPERTIES:
+:CUSTOM_ID: Readmefile-dlkgxqt0fck0
+:END:
+
+#+begin_src markdown :tangle no :exports none
+  letgut-banner - Support for the banner of the newsletter
+                  "La Lettre de GUTenberg"
+  =============================================================
+
+  About
+  -------
+  This package automatically draws the banner of the newsletter "La Lettre de
+  GUTenberg" with the current main font.
+
+  Release
+  -------
+  2024-10-07 v0.10
+
+  Development
+  -----------
+  Follow development, submit issues, and suggest improvements at
+  https://framagit.org/gutenberg/classe-lettre-gut.
+#+end_src
+
+#+NAME: preamble
+#+begin_src
+-------:| ---------------------------------------------------
+ letgut:| Package for the banner of the newsletter
+        | "La Lettre de GUTenberg"
+ Author:| Association GUTenberg
+ E-mail:| secretariat@gutenberg-asso.fr
+License:| Released under the LaTeX Project Public License
+        |  v1.3c or later
+    See:| http://www.latex-project.org/lppl.txt
+
+Copyright (C) 1994-2024 by Association GUTenberg
+                  <secretariat@gutenberg-asso.fr>
+
+This work may be distributed and/or modified under the
+conditions of the LaTeX Project Public License (LPPL), either
+version 1.3c of this license or (at your option) any later
+version.  The latest version of this license is in the file:
+
+http://www.latex-project.org/lppl.txt
+
+This work is "maintained" (as per LPPL maintenance status)
+by Association GUTenberg.
+#+end_src
+
+* Implementation
+:PROPERTIES:
+:CUSTOM_ID: Implementation-ckogxqt0fck0
+:END:
+
+** Identification
+:PROPERTIES:
+:CUSTOM_ID: ImplementationIdentification-gwqgxqt0fck0
+:END:
+
+#+begin_src
+  This is file `letgut-banner.sty,
+  generated with the Emacs Org-babel utility.
+
+  The original source file is letgut-banner.org
+  %% <<preamble>>
+#+end_src
+
+These document classes can only be used with \LaTeXe, so we make
+sure that an appropriate message is displayed when another \TeX{}
+format is used.
+
+#+begin_src latex
+\NeedsTeXFormat{LaTeX2e}[2020-10-01]
+#+end_src
+
+Now, we can announce the package name and its version:
+
+#+begin_src latex
+\ProvidesExplPackage{letgut-banner}
+{2024-10-07}
+{0.10}
+{
+  Package for the banner of the newsletter "La Lettre de GUTenberg"
+}
+#+end_src
+
+** Packages loaded
+:PROPERTIES:
+:CUSTOM_ID: ImplementationPackagesloaded-etvgxqt0fck0
+:END:
+
+Till the Lua-based color will be  added to the core \package{l3color} approach,
+we have to rely on \package{xcolor}
+
+#+begin_src latex
+\RequirePackage{xcolor}
+#+end_src
+
+We want the material added to the first page to be not selectable in order to let the
+reader who wants to copy the interesting text be able to select it (see below).
+
+#+begin_src latex
+\RequirePackage{accsupp}
+#+end_src
+
+#+begin_src latex
+  \cs_generate_variant:Nn \color_fill:nn { nV }
+#+end_src
+
+** Declarations
+:PROPERTIES:
+:CUSTOM_ID: ImplementationDeclarations-u0ygxqt0fck0
+:END:
+
+*** Dimensions
+:PROPERTIES:
+:CUSTOM_ID: ImplementationDeclarationsDimensions-9t0hxqt0fck0
+:END:
+
+   #+begin_src latex
+     \dim_new:N \g__letgutbanner_area_height_dim
+     \dim_new:N \g__letgutbanner_La_height_dim
+     \dim_new:N \g__letgutbanner_La_depth_dim
+     \dim_new:N \g__letgutbanner_La_yoffset_dim
+     \dim_new:N \g__letgutbanner_banner_vertical_contents_width_dim
+     \dim_new:N \g__letgutbanner_largest_LETR_box_height_dim
+     \dim_new:N \g__letgutbanner_between_letters_yoffset_dim
+     \dim_new:N \g__letgutbanner_between_letters_vertical_space_dim
+     \dim_new:N \g__letgutbanner_banner_padding_dim
+     \dim_if_exist:NF \g__letgutbanner_first_page_shrink_dim {
+       \dim_new:N \g__letgutbanner_first_page_shrink_dim
+     }
+     \dim_new:N \g__letgutbanner_textwidth_dim
+   #+end_src
+
+- Dimensions of the page. If the present package is used with the
+  \class*{letgut}, they are borrowed from it. Otherwise, they are set to default
+  values. For this, we first generate a variant of ~\dim_const:Nn~ (see
+  https://github.com/latex3/latex3/issues/947#issuecomment-860950569).
+   #+begin_src latex
+     \cs_generate_variant:Nn \dim_const:Nn { NV }
+     \dim_if_exist:NTF \c__letgut_textheight_dim {
+       \dim_const:NV \c__letgutbanner_textheight_dim
+       \c__letgut_textheight_dim
+     }{
+       \dim_const:Nn \c__letgutbanner_textheight_dim
+       { 25cm }
+     }
+     \dim_if_exist:NTF \c__letgut_textwidth_dim {
+       \dim_gset_eq:NN \g__letgutbanner_textwidth_dim \c__letgut_textwidth_dim
+     }{
+       \dim_gset:Nn \g__letgutbanner_textwidth_dim { 14cm }
+     }
+     \dim_if_exist:NTF \c__letgut_lmargin_dim {
+       \dim_const:NV \c__letgutbanner_lmargin_dim
+         \c__letgut_lmargin_dim
+     }{
+       \dim_const:Nn \c__letgutbanner_lmargin_dim
+       { 5cm }
+     }
+     \dim_if_exist:NTF \c__letgut_tmargin_dim {
+       \dim_const:NV \c__letgutbanner_tmargin_dim
+         \c__letgut_tmargin_dim
+     }{
+       \dim_const:Nn \c__letgutbanner_tmargin_dim
+       { 2.92cm }
+       % \dim_const:Nn \c__letgutbanner_tmargin_dim
+       % { 3cm }
+     }
+     \dim_if_exist:NTF \c__letgut_head_dim {
+       \dim_const:NV \c__letgutbanner_head_dim
+         \c__letgut_head_dim
+     }{
+       \dim_const:Nn \c__letgutbanner_head_dim
+       { 0.6cm }
+     }
+     \dim_if_exist:NTF \c__letgut_headsep_dim {
+       \dim_const:NV \c__letgutbanner_headsep_dim
+         \c__letgut_headsep_dim
+     }{
+       \dim_const:Nn \c__letgutbanner_headsep_dim
+       { 0.82cm }
+       % \dim_const:Nn \c__letgutbanner_headsep_dim
+       % { 0.9cm }
+     }
+     \dim_if_exist:NTF \c__letgut_marginparwidth_dim {
+       \dim_const:NV \c__letgutbanner_marginparwidth_dim
+       \c__letgut_marginparwidth_dim
+     }{
+       \dim_const:Nn \c__letgutbanner_marginparwidth_dim
+       { 3.74cm }
+     }
+   #+end_src
+- Dimensions of the banner. If the present package is used with the
+  \class*{letgut}, they are borrowed from it. Otherwise, they are set to
+  default values.
+  - Thickness of the "L".
+      #+begin_src latex
+        \dim_if_exist:NTF \c__letgut_banner_thickness_dim {
+          \dim_const:NV \c__letgutbanner_banner_thickness_dim
+          \c__letgut_banner_thickness_dim
+        }{
+          \dim_const:Nn \c__letgutbanner_banner_thickness_dim
+          { 4cm }
+        }
+        #+end_src
+  - Height of the "L" (that of the text area plus 3cm).
+      #+begin_src latex
+        \dim_if_exist:NTF \c__letgut_banner_height_dim {
+          \dim_const:NV \c__letgutbanner_banner_height_dim
+            \c__letgut_banner_height_dim
+        }{
+          \dim_const:Nn \c__letgutbanner_banner_height_dim  {
+            \c__letgutbanner_textheight_dim
+            +
+            3cm
+          }
+        }
+      #+end_src
+  - Initial padding of the text embedded in the vertical bar of the "L".
+      #+begin_src latex
+      \dim_const:Nn \c__letgutbanner_banner_padding_dim  { .25cm }
+      #+end_src
+  - Width of the "L" (the width ($w$) of the text zone plus the width ($l$) of
+    the left margin minus half the difference between the width of the left
+    margin and the width ($d$) of the "L": $=w+l-(l-d)/2=w+(l+d)/2$).
+      #+begin_src latex
+        \dim_const:Nn \c__letgutbanner_banner_width_dim  {
+          \g__letgutbanner_textwidth_dim
+          +
+          (
+          \c__letgutbanner_banner_thickness_dim
+          +
+          \c__letgutbanner_lmargin_dim
+          )/2
+        }
+      #+end_src
+  - Initial width of the text embedded in the "L" vertical bar.
+      #+begin_src latex
+        \dim_const:Nn
+        \c__letgutbanner_banner_vertical_contents_width_dim {
+          \c__letgutbanner_banner_thickness_dim
+          -
+          2\c__letgutbanner_banner_padding_dim
+        }
+      #+end_src
+  - Width of the text embedded in the horizontal bar of the "L" (of the text
+    area plus half the difference between that of the left margin and that of
+    the thickness of the "L", minus the padding -- and not 2 times the
+    padding because this text will be stuck to its left "margin").
+      #+begin_src latex
+        \dim_const:Nn
+        \c__letgutbanner_banner_horizontal_contents_width_dim {
+          \g__letgutbanner_textwidth_dim
+          - (
+          \c__letgutbanner_banner_thickness_dim
+          -
+          \c__letgutbanner_lmargin_dim
+          )/2
+          -
+          \c__letgutbanner_banner_padding_dim
+        }
+      #+end_src
+
+*** Boxes
+:PROPERTIES:
+:CUSTOM_ID: ImplementationDeclarationsBoxes-s83hxqt0fck0
+:END:
+
+New boxes, for each of the letters in the word "LETTRE" (!), and then for the
+rest of the content listed in the banner.
+#+begin_src latex
+\box_new:N \g__letgutbanner_L_box
+\box_new:N \g__letgutbanner_E_box
+\box_new:N \g__letgutbanner_T_box
+\box_new:N \g__letgutbanner_R_box
+\box_new:N \g__letgutbanner_La_box
+\box_new:N \g__letgutbanner_GUTenberg_box
+\box_new:N \g__letgutbanner_largest_LETR_box
+\box_new:N \g__letgutbanner_g_box
+#+end_src
+
+*** Floating point numbers
+:PROPERTIES:
+:CUSTOM_ID: ImplementationDeclarationsFloatingpointnumbers-e75hxqt0fck0
+:END:
+
+- Minimum percentage of the common height of the letters of the word "LETTRE"
+  that their line spacing must represent.
+#+begin_src latex
+\fp_const:Nn \c__letgutbanner_leading_minimum_percent_fp { 0.15 }
+#+end_src
+- Factor applied to the line spacing between "La" and the 1st letter of
+  "LETTRE" compared to that between the letters of "LETTRE".
+#+begin_src latex
+\fp_const:Nn \c__letgutbanner_leading_La_factor_fp { 1.5 }
+#+end_src
+
+** Applying the page dimensions
+:PROPERTIES:
+:CUSTOM_ID: ImplementationApplyingthepagedimensions-187hxqt0fck0
+:END:
+
+#+begin_src latex
+  \geometry{
+    asymmetric,
+    textheight    = \c__letgutbanner_textheight_dim,
+    textwidth     = \g__letgutbanner_textwidth_dim,
+    lmargin       = \c__letgutbanner_lmargin_dim,
+    tmargin       = \c__letgutbanner_tmargin_dim,
+    head          = \c__letgutbanner_head_dim,
+    headsep       = \c__letgutbanner_headsep_dim,
+    marginparwidth= \c__letgutbanner_marginparwidth_dim,
+    % showframe,
+    % verbose,
+  }
+#+end_src
+
+** Filling of the boxes
+:PROPERTIES:
+:CUSTOM_ID: ImplementationFillingoftheboxes-q49hxqt0fck0
+:END:
+#+begin_src latex
+  \hbox_gset:Nn \g__letgutbanner_L_box { \textbf{L} }
+  \hbox_gset:Nn \g__letgutbanner_E_box { \textbf{E} }
+  \hbox_gset:Nn \g__letgutbanner_T_box { \textbf{T} }
+  \hbox_gset:Nn \g__letgutbanner_R_box { \textbf{R} }
+  \hbox_gset:Nn \g__letgutbanner_La_box { \textbf{\textit{La}} }
+  \hbox_gset:Nn \g__letgutbanner_GUTenberg_box {
+    \textbf{\textit{GUTenberg}}
+  }
+  \hbox_gset:Nn \g__letgutbanner_g_box { \textbf{g} }
+#+end_src
+
+** Options of the package
+:PROPERTIES:
+:CUSTOM_ID: ImplementationOptionsofthepackage-21ri36v0fck0
+:END:
+
+We define:
+
+- an option for the color of the text in the "L" (that has to be the same as the
+  page color of the document),
+- an option that let us choose another letter than “g” as the watermark letter.
+
+#+begin_src latex
+  \keys_define:nn { letgut-banner }
+  {
+    , pagecolor .clist_gset:N = \g__letgutbanner_pagecolor_clist
+    , pagecolor .initial:n = { 1,1,1 }
+    , watermark~ letter .code:n = {
+      \hbox_gset:Nn \g__letgutbanner_g_box { \textbf{#1} }
+    }
+    , watermark~ scale .tl_gset:N = \g__letgutbanner_watermark_scale_tl
+    , watermark~ scale .initial:n = 1
+  }
+  \ProcessKeyOptions [ letgut-banner ]
+#+end_src
+
+What follows has to be done at this end of the preamble, otherwise the font set
+with ~\setmainfont~ in the preamble isn't taken in account in the banner.
+
+#+begin_src latex
+\AddToHook{begindocument}{
+#+end_src
+
+
+** Computations
+:PROPERTIES:
+:CUSTOM_ID: ImplementationComputations-r7bhxqt0fck0
+:END:
+
+Determination of the widths of each of the letter boxes of the word "LETTRE".
+#+begin_src latex
+  \dim_const:Nn \c__letgutbanner_L_width_dim {
+    \box_wd:N \g__letgutbanner_L_box
+  }
+  \dim_const:Nn \c__letgutbanner_E_width_dim {
+    \box_wd:N \g__letgutbanner_E_box
+  }
+  \dim_const:Nn \c__letgutbanner_T_width_dim {
+    \box_wd:N \g__letgutbanner_T_box
+  }
+  \dim_const:Nn \c__letgutbanner_R_width_dim {
+    \box_wd:N \g__letgutbanner_R_box
+  }
+#+end_src
+Determination of the largest of these widths, stored in the scratch dimension
+~\g_tmpa_dim~.
+#+begin_src latex
+\dim_gset:Nn \g_tmpa_dim {
+  \fp_eval:n {
+    max (
+    \c__letgutbanner_L_width_dim,
+    \c__letgutbanner_E_width_dim,
+    \c__letgutbanner_T_width_dim,
+    \c__letgutbanner_R_width_dim,
+    )
+  }pt
+}
+#+end_src
+Determination of the (1st) box whose width is the largest of all (~argmax~, as
+it were).
+#+begin_src latex
+\box_gset_eq:NN \g__letgutbanner_largest_LETR_box \dim_case:nnF
+{ \g_tmpa_dim }
+{
+  { \c__letgutbanner_L_width_dim } { \g__letgutbanner_L_box }
+  { \c__letgutbanner_E_width_dim } { \g__letgutbanner_E_box }
+  { \c__letgutbanner_T_width_dim } { \g__letgutbanner_T_box }
+  { \c__letgutbanner_R_width_dim } { \g__letgutbanner_R_box }
+}
+{ No~ idea! }
+#+end_src
+Resize the box containing "GUTenberg" to the width of the text embedded in the
+horizontal bar of the "L".
+#+begin_src latex
+  \box_gresize_to_wd:Nn \g__letgutbanner_GUTenberg_box {
+    \c__letgutbanner_banner_horizontal_contents_width_dim
+  }
+#+end_src
+Determination of the height and depth of the box containing "GUTenberg" resized.
+#+begin_src latex
+  \dim_const:Nn \c__letgutbanner_GUTenberg_height_dim {
+    \box_ht:N \g__letgutbanner_GUTenberg_box
+  }
+  \dim_const:Nn \c__letgutbanner_GUTenberg_depth_dim  {
+    \box_dp:N \g__letgutbanner_GUTenberg_box
+  }
+#+end_src
+Determining the size of the vertical offset of the box containing the resized
+"GUTenberg", so that it is vertically centered in the horizontal bar of the "L":
+the box positioned in $0$ would be at the very bottom of the box containing the
+banner so with base line at the bottom the horizontal bar of the "L" so we raise
+it first by its depth ($d$) and then by half the difference between the heights
+($H$) of the horizontal bar of the "L" and ($h+d$) total of the box containing
+"GUTenberg" resized ($=d+H/2-(h+d)/2=(H-h+d)/2$).
+#+begin_src latex
+  \dim_const:Nn \c__letgutbanner_GUTenberg_yoffset_dim {
+    (
+    \c__letgutbanner_banner_thickness_dim
+    -
+    \c__letgutbanner_GUTenberg_height_dim
+    +
+    \c__letgutbanner_GUTenberg_depth_dim
+    )/2
+  }
+#+end_src
+Once the height of the zone devoted to "La LETTRE" in the vertical bar of the
+"L" has been fixed, the line spacing between the letters of the word "LETTRE"
+depends in fact only on the width occupied by the widest of them, by definition
+equal to the width allocated to the text embedded in the vertical bar of the
+"L". The latter, stored in ~\g__letgutbanner_banner_vertical_contents_width_dim~, is
+initially fixed:
+#+begin_src latex
+  \dim_gset:Nn
+  \g__letgutbanner_banner_vertical_contents_width_dim
+  \c__letgutbanner_banner_vertical_contents_width_dim
+#+end_src
+but, to avoid this line spacing being too small (or even negative), we test that
+it is greater than a certain threshold, equal to a certain minimum percentage of
+the height common to the letters of the word "LETTRE", stored in:
+
+~\c__letgutbanner_leading_minimum_percent_fp~
+
+and fixed at 0.15. If this is not the
+case, we reduce (by 1pt):
+
+~\g__letgutbanner_banner_vertical_contents_width_dim~
+
+and loop until it is the case.
+#+begin_src latex
+  \dim_do_until:nNnn {
+    \g__letgutbanner_between_letters_vertical_space_dim
+  }
+  >
+  {
+    \fp_use:N\c__letgutbanner_leading_minimum_percent_fp
+    \g__letgutbanner_largest_LETR_box_height_dim
+  }{
+#+end_src
+Resize the largest of these boxes to the width of the text embedded in the "L".
+#+begin_src latex
+  \box_gresize_to_wd:Nn \g__letgutbanner_largest_LETR_box {
+    \g__letgutbanner_banner_vertical_contents_width_dim
+  }
+#+end_src
+Height of this resized larger box.
+#+begin_src latex
+  \dim_gset:Nn \g__letgutbanner_largest_LETR_box_height_dim {
+    \box_ht:N \g__letgutbanner_largest_LETR_box
+  }
+#+end_src
+Resize the boxes for each of the letters in the word "LETTRE" so that they are
+all the same height as the widest of them.
+#+begin_src latex
+  \box_gresize_to_ht:Nn \g__letgutbanner_L_box {
+    \g__letgutbanner_largest_LETR_box_height_dim
+  }
+  \box_gresize_to_ht:Nn \g__letgutbanner_E_box {
+    \g__letgutbanner_largest_LETR_box_height_dim
+  }
+  \box_gresize_to_ht:Nn \g__letgutbanner_T_box {
+    \g__letgutbanner_largest_LETR_box_height_dim
+  }
+  \box_gresize_to_ht:Nn \g__letgutbanner_R_box {
+    \g__letgutbanner_largest_LETR_box_height_dim
+  }
+#+end_src
+Resize the box containing "La" to the width of the text embedded in the "L"
+vertical bar.
+#+begin_src latex
+  \box_gresize_to_wd:Nn \g__letgutbanner_La_box {
+    \g__letgutbanner_banner_vertical_contents_width_dim
+  }
+#+end_src
+Determine the height ($h$) and depth ($d$) of the resized box containing "La".
+#+begin_src latex
+  \dim_gset:Nn \g__letgutbanner_La_height_dim {
+    \box_ht:N \g__letgutbanner_La_box
+  }
+  \dim_gset:Nn \g__letgutbanner_La_depth_dim  {
+    \box_dp:N \g__letgutbanner_La_box
+  }
+#+end_src
+Determining the size of the vertical offset of the resized box containing "La"
+so that its top is, relative to the top of the "L", offset by the same amount as
+the bottom of the box containing "GUTenberg" is offset from the bottom of the
+"L" (i.e., the distance from the top of the page to the top of "La" and the
+distance from the bottom of the page to the baseline of "GUTenberg" are
+identical).
+#+begin_src latex
+  \dim_gset:Nn \g__letgutbanner_La_yoffset_dim {
+    \c__letgutbanner_banner_height_dim
+    -
+    \c__letgutbanner_GUTenberg_yoffset_dim
+    -
+    \g__letgutbanner_La_height_dim
+    +
+    \g__letgutbanner_La_depth_dim
+  }
+#+end_src
+For the following, the area containing the letters of the word "LETTRE" aligned
+vertically is fixed, defined as follows:
+  - its top is the baseline of "La",
+  - its bottom is the baseline of "GUTenberg".
+Determination of the height of this area.
+#+begin_src latex
+  \dim_gset:Nn \g__letgutbanner_area_height_dim {
+    \g__letgutbanner_La_yoffset_dim
+    -
+    \g__letgutbanner_La_depth_dim
+    -
+    \c__letgutbanner_GUTenberg_yoffset_dim
+  }
+#+end_src
+Determining the vertical jump ($s$) between the letters in the word "LETTRE"
+with the constraints that:
+  - the top of the 1st letter ("L") is $3e/2$ below the top of the area (where
+    $e$ is the common vertical space separating the letters of the word
+    "LETTRE"),
+  - the baseline of the last letter ("E") is merged with the bottom of the area,
+  - this jump must not be less than 20 % of the common height $h$ to all these
+    letters i.e.:
+
+    ~\g__letgutbanner_largest_LETR_box_height_dim~
+
+    otherwise the size of the largest of these boxes is reduced to less than the
+    width of the text embedded in the "L".
+
+The sum of :
+  - the 5 vertical spaces ($5e$) between the letters in the word "LETTRE",
+  - the 6 common heights ($6h$) to all these letters,
+  - $3e/2$,
+must equal the height ($H$) of the zone. So we have $H=3e/2+5e+6h$, that is
+$e=2(H-6h)/13$. Once initialized, the vertical jump between the letters is
+$s=e+h$ that is $s=(2H+h)/13$. Therefore:
+
+1. Determine the vertical half-space between the letters.
+   #+begin_src latex
+     \dim_set:Nn \l_tmpa_dim {
+       (
+       \g__letgutbanner_area_height_dim
+       -
+       6\g__letgutbanner_largest_LETR_box_height_dim
+       )/13
+     }
+   #+end_src
+2. Vertical space between letters.
+   #+begin_src latex
+     \dim_gset:Nn \g__letgutbanner_between_letters_vertical_space_dim {
+       2\l_tmpa_dim
+     }
+   #+end_src
+3. If this space does not check the condition explained above, we reduce:
+
+   ~\g__letgutbanner_banner_vertical_contents_width_dim~
+
+   and loop.
+   #+begin_src latex
+     \dim_gsub:Nn \g__letgutbanner_banner_vertical_contents_width_dim {
+       1pt
+       }
+     }
+   #+end_src
+The width allocated to the text embedded in the vertical bar of the "L" may have
+been re-evaluated, so the padding (which must be symmetrical) may have changed
+as well.
+   #+begin_src latex
+   \dim_gset:Nn \g__letgutbanner_banner_padding_dim {
+     (
+     \c__letgutbanner_banner_thickness_dim
+     -
+     \g__letgutbanner_banner_vertical_contents_width_dim
+     )/2
+   }
+   #+end_src
+4. Determination of the vertical offset of the 1st letter ("L").
+   #+begin_src latex
+     \dim_const:Nn \c__letgutbanner_first_letter_yoffset_dim {
+       \g__letgutbanner_La_yoffset_dim
+       -
+       \g__letgutbanner_largest_LETR_box_height_dim
+       -
+       \fp_use:N \c__letgutbanner_leading_La_factor_fp
+       \g__letgutbanner_between_letters_vertical_space_dim
+     }
+   #+end_src
+5. Determination of the vertical jump between letters.
+   #+begin_src latex
+     \dim_gset:Nn \g__letgutbanner_between_letters_yoffset_dim {
+       \g__letgutbanner_between_letters_vertical_space_dim
+       +
+       \g__letgutbanner_largest_LETR_box_height_dim
+     }
+   #+end_src
+Resize the box containing "g" to the width of the text.
+#+begin_src latex
+  \box_gresize_to_wd:Nn \g__letgutbanner_g_box {
+    \fp_to_dim:n {
+      \g__letgutbanner_watermark_scale_tl
+      *
+      \g__letgutbanner_textwidth_dim
+    }
+  }
+#+end_src
+Calculates the size by which the height of the text box on the 1st page must be
+reduced so that the banner does not encroach on the text. Relative to the top of
+the page:
+  - the top of the horizontal bar of "L" is at a distance equal to the sum of :
+    - the distance between this top of page and the top of the vertical bar of
+      "L", equal to the height ($p$) of the paper minus the height ($l$) of "L"
+#+begin_src latex
+  \dim_gset:Nn \g__letgutbanner_first_page_shrink_dim {
+    \c__letgutbanner_tmargin_dim
+    +
+    \c__letgutbanner_textheight_dim
+    +
+    \c__letgutbanner_banner_thickness_dim
+    -
+    .5\paperheight
+    -
+    .5\c__letgutbanner_banner_height_dim
+    +
+    .5\baselineskip
+  }
+#+end_src
+
+Automatic addition on the 1st page (only) of the banner.
+#+begin_src latex
+\AddToHookNext{shipout/background}{
+#+end_src
+We want the material added to this page to be not selectable in order to let the
+reader who wants to copy the interesting text be able to select it.
+#+begin_src latex
+  \BeginAccSupp{ActualText={}}
+#+end_src
+We put now the big "L" at the right place.
+#+begin_src latex
+  \put(
+  .5\c__letgutbanner_lmargin_dim-.5\c__letgutbanner_banner_thickness_dim
+  ,
+  -.5\paperheight-.5\c__letgutbanner_banner_height_dim
+  ){
+    \put(0,0){
+      \rule{
+        \c__letgutbanner_banner_width_dim
+      }{
+        \c__letgutbanner_banner_thickness_dim
+      }
+    }
+    \put(0,0){
+      \rule{
+        \c__letgutbanner_banner_thickness_dim
+      }{
+        \c__letgutbanner_banner_height_dim
+      }
+    }
+    #+end_src
+The color should not be systematically white, but should be identical to the one
+chosen for the page background.
+#+begin_src latex
+    % \color_fill:nV {rgb}{ \g__letgutbanner_pagecolor_clist }
+    \color[rgb]{ \g__letgutbanner_pagecolor_clist }
+    \put(
+    \g__letgutbanner_banner_padding_dim
+    ,
+    \g__letgutbanner_La_yoffset_dim
+    ){
+      \box_use:N \g__letgutbanner_La_box
+    }
+    \put(
+    \g__letgutbanner_banner_padding_dim
+    ,
+    \c__letgutbanner_first_letter_yoffset_dim
+    -0\g__letgutbanner_between_letters_yoffset_dim
+    ){
+      \box_use:N \g__letgutbanner_L_box
+    }
+    \put(
+    \g__letgutbanner_banner_padding_dim
+    ,
+    \c__letgutbanner_first_letter_yoffset_dim
+    -1\g__letgutbanner_between_letters_yoffset_dim
+    ){
+      \box_use:N \g__letgutbanner_E_box
+    }
+    \put(
+    \g__letgutbanner_banner_padding_dim
+    ,
+    \c__letgutbanner_first_letter_yoffset_dim
+    -2\g__letgutbanner_between_letters_yoffset_dim
+    ){
+      \box_use:N \g__letgutbanner_T_box
+    }
+    \put(
+    \g__letgutbanner_banner_padding_dim
+    ,
+    \c__letgutbanner_first_letter_yoffset_dim
+    -3\g__letgutbanner_between_letters_yoffset_dim
+    ){
+      \box_use:N \g__letgutbanner_T_box
+    }
+    \put(
+    \g__letgutbanner_banner_padding_dim
+    ,
+    \c__letgutbanner_first_letter_yoffset_dim
+    -4\g__letgutbanner_between_letters_yoffset_dim
+    ){
+      \box_use:N \g__letgutbanner_R_box
+    }
+    \put(
+    \g__letgutbanner_banner_padding_dim
+    ,
+    \c__letgutbanner_first_letter_yoffset_dim
+    -5\g__letgutbanner_between_letters_yoffset_dim
+    ){
+      \box_use:N \g__letgutbanner_E_box
+    }
+    \put(
+    \c__letgutbanner_banner_thickness_dim
+    ,
+    \c__letgutbanner_GUTenberg_yoffset_dim
+    ){
+      \box_use:N \g__letgutbanner_GUTenberg_box
+    }
+    % \color_fill:n {black!10}
+    \color{ black!10 }
+    \put(
+    .5\c__letgutbanner_lmargin_dim
+    +
+    .5\c__letgutbanner_banner_thickness_dim
+    +
+    \fp_to_dim:n {
+      (1-\g__letgutbanner_watermark_scale_tl)/2*\g__letgutbanner_textwidth_dim
+    }
+    ,
+    .5\paperheight
+    +
+    .5\c__letgutbanner_banner_height_dim
+    -
+    \c__letgutbanner_tmargin_dim
+    ){
+      \box_move_down:nn {.5\c__letgutbanner_textheight_dim}
+      {\box_use:N \g__letgutbanner_g_box}
+    }
+  }
+  #+end_src
+  We end the part which isn't selectable.
+  #+begin_src latex
+  \EndAccSupp{}
+  }
+#+end_src
+
+We close ~\AddToHook{begindocument}~.
+
+#+begin_src latex
+}
+#+end_src
+
+If the package is used with another class than \class{letgut}, we reduce the
+textheight of the first page of the height of the horizontal bar of the "L".
+
+#+begin_src latex
+\@ifclassloaded{letgut}{
+}{
+  \AddToHook{begindocument/end}{%
+    \enlargethispage{
+      - \g__letgutbanner_first_page_shrink_dim
+    }
+    \thispagestyle{empty}
+  }
+}
+#+end_src
+
+* Example file (=letgut-banner-example.tex=)
+:PROPERTIES:
+:CUSTOM_ID: Examplefileletgutbannerexampletex-heehxqt0fck0
+:END:
+
+#+begin_src latex :tangle ../../../doc/lualatex/letgut/letgut-banner-example.tex :exports none
+  \documentclass[twoside]{article}
+  \usepackage{fontspec}
+  \usepackage[a4paper]{geometry}
+  \usepackage{fancyhdr}
+  \usepackage{letgut-banner}
+  \usepackage{lipsum}
+  \setmainfont{TeX Gyre Schola}
+  \fancyhf{}
+  \fancyhead[RO,LE]{\thepage}
+  \fancyhead[RE,LO]{Test~\textsf{letgut-banner}}
+  \pagestyle{fancy}
+  \begin{document}
+  \lipsum[1-20]
+  \end{document}
+#+end_src

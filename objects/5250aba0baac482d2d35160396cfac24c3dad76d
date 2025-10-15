@@ -1,0 +1,1675 @@
+% \iffalse meta-comment
+% !TEX program  = pdfLaTeX 
+%<*internal>
+\iffalse
+%</internal>
+%<*readme>
+----------------------------------------------------------------
+odesandpdes --- A package for the streamlining of the use of
+odes and pdes in mathematical texts typset by LaTeX
+
+E-mail: anakin@ruc.dk
+Released under the LaTeX Project Public License v1.3c or later
+See http://www.latex-project.org/lppl.txt
+----------------------------------------------------------------
+
+This package is the solution no one asked for, to a problem 
+nobody had. Have you ever thought to yourself "wow, I sure do
+dislike having to remember multiple macros for my odes and pdes"
+and the author of this package has to agree, wholeheartedly.
+In the modern world of "tik-toking" and "family guy surfing", 
+our brains have rotted beyond salvage for even basic levels of 
+cognitive recall. This package aims to fix this, through two
+macros that have been set to each have an identical form and 
+function. with an emphasis on intuitive use. Through setting 
+options, the multiple common notational style are easily
+swapped between, all by a single option.
+You're Welcome.
+
+----------------------------------------------------------------
+%</readme>
+%<*internal>
+\fi
+\def\nameofplainTeX{plain}
+\ifx\fmtname\nameofplainTeX\else
+  \expandafter\begingroup
+\fi
+%</internal>
+%<*install>
+\input docstrip.tex
+\keepsilent
+\askforoverwritefalse
+\preamble
+----------------------------------------------------------------
+odesandpdes --- A package for the streamlining of the use of 
+odes and pdes in mathematical texts typset by LaTeX
+
+E-mail: anakin@ruc.dk
+Released under the LaTeX Project Public License v1.3c or later
+See http://www.latex-project.org/lppl.txt
+----------------------------------------------------------------
+\endpreamble
+\postamble
+File: odesandpdes.dtx
+
+Copyright (C) 2024 by Anakin anakin@ruc.dk
+-----------------------------------------------------------
+
+This work may be distributed and/or modified under the
+conditions of the LaTeX Project Public License (LPPL), either
+version 1.3c of this license or (at your option) any later
+version. The latest version of this license is in the file:
+
+    http://www.latex-project.org/lppl.txt
+
+This work is "maintained" (as per LPPL maintenance status) by
+Anakin.
+
+This work consists of the file  odesandpdes.dtx
+and the derived files           odesandpdes.ins,
+                                odesandpdes.pdf and
+                                odesandpdes.sty.
+
+\endpostamble
+\usedir{tex/latex/odesandpdes}
+\generate{
+  \file{\jobname.sty}{\from{\jobname.dtx}{package}}
+}
+%</install>
+%<install>\endbatchfile
+%<*internal>
+\usedir{source/latex/odesandpdes}
+\generate{
+  \file{\jobname.ins}{\from{\jobname.dtx}{install}}
+}
+\nopreamble\nopostamble
+\usedir{doc/latex/odesandpdes}
+\generate{
+  \file{README.txt}{\from{\jobname.dtx}{readme}}
+}
+\ifx\fmtname\nameofplainTeX
+  \expandafter\endbatchfile
+\else
+  \expandafter\endgroup
+\fi
+%</internal>
+%<*package>
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{odesandpdes}[2024/01/17 v1.0.0 For streamlining ODE and PDE usage]
+%
+%</package>  
+%<*driver>
+\PassOptionsToPackage{hidelinks, breaklinks= true,
+linkcolor = [rgb]{0,0,0}, urlcolor  = [rgb]{0,0,0}, citecolor = [rgb]{0,0,0},
+pdfdisplaydoctitle = true,
+pdfkeywords={LaTeX, dtx, source, odesandpdes, ODE, PDE, differentials},
+pdfsubject={Optimizing useage of ODE and PDE commands for LaTeX},
+pdfauthor={Anakin}, pdftitle={The odesandpdes package}}{hyperref}
+\documentclass[11pt,a4paper]{ltxdoc}
+\usepackage[T1]{fontenc}
+\usepackage{indentfirst}
+\usepackage[centering, vscale = 0.80, hscale = 0.65]{geometry}
+\usepackage{mathptmx,amsmath,fdsymbol}
+\usepackage{\jobname}
+\usepackage{tikz}
+\usetikzlibrary{graphs,quotes}
+\makeatletter
+\setlength{\parskip}{5\p@ plus2\p@ minus2\p@}
+\setlength{\jot}{7\p@}
+\makeatother
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+\begin{document}
+    \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \CheckSum{618}
+%
+% \DoNotIndex{\def,\gdef,\global,\edef,\xdef,\long,\let,\futurelet}
+% \DoNotIndex{\ifnum,\ifdim,\iftrue,\iffalse,\ifx,\ifcase,\else,\or,\fi}
+% \DoNotIndex{\kern,\mkern,\setbox,\box}
+% \DoNotIndex{\bgroup,\egroup,\begingroup,\endgroup,\begin,\end}
+% \DoNotIndex{\relax,\endinput}
+% \DoNotIndex{\csname,\endcsname,\string,\the,\noexpand,\expandafter}
+% \DoNotIndex{\hbox,\raise,\lower,\vbox,\vtop,\vcenter,\left,\right}
+% \DoNotIndex{\newcount,\newbox,\newtoks,\countdef}
+% \DoNotIndex{\above,\atop,\over}
+% \DoNotIndex{\cdot,\cdots,\dot,\dots,\prime}
+% \DoNotIndex{\displaystyle,\scriptstyle,\scriptscriptstyle}
+% \DoNotIndex{\advance,\count,\dimen}
+% \DoNotIndex{\baselineskip,\lineskip}
+% \DoNotIndex{\loop,\repeat}
+% \DoNotIndex{\DeclareOptionX,\ExecuteOptionsX,\ProcessOptionsX}
+% \DoNotIndex{\m@ne,\z@,\@ne,\tw@,\p@,\@@tmp}
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+%
+% \iffalse
+%<*documentation>
+% \fi
+%
+%
+% \GetFileInfo{\jobname.sty}
+%
+% \author{Anakin\\ \texttt{anakin@ruc.dk}}
+% \title{The \textsf{odesandpdes} package\thanks{This document 
+%   corresponds to \textsf{odesandpdes}~\fileversion, dated \filedate.}}
+% \date{Released \filedate}
+%
+% \maketitle
+% 
+%
+% \changes{v1.0}{2024/01/17}{Initial version}
+%
+% \begin{abstract}
+% This package is the solution no one asked for, to a problem 
+% nobody had. Have you ever thought to yourself "wow, I sure do
+% dislike having to remember \emph{multiple} macros for my odes and pdes"
+% and the author of this package has to agree, wholeheartedly.
+% In the modern world of "tik-toking" and "family guy surfing", 
+% our brains have rotted beyond salvage for even basic levels of 
+% cognitive recall. This package aims to fix this, through two
+% macros that have been set to each have an identical form and 
+% function, with an emphasis on intuitive use.
+% Through setting options, the multiple
+% common notational style are easily
+% swapped between, all by a single option.
+% \emph{You're welcome}.
+% \end{abstract}
+%
+%
+%
+%
+% {\setlength{\parskip}{0.25ex}\small
+% \tableofcontents}
+%
+% 
+%
+% \newpage
+% \section*{My funny little ODE/PDE package}
+% \hspace{1em} Start by first having \verb|odesandpdes.sty| downloaded in an
+% accessible directory, or in the same directory as your 
+% overleaf main.tex, using it by inserting; 
+% \begin{center}
+% \cs{usepackage\oarg{options}\{odesandpdes\}}
+% \end{center}
+% into the preamble, Ideally after any font changing packages you use.
+%
+% \section{Usage}
+%
+% If the reader does not wish to be gradually introduced to the package
+% and its features, feel free to skip directly to section \ref{sec:examples}.
+%
+% \subsection{Options}
+%
+% \DescribeMacro{notation}
+% \DescribeMacro{maxprimes}
+% The options included are based off of the three most
+% common notations
+% (according to Wikipedia), Lagrange, Leibniz, and Newton. 
+% They can be accessed through the \oarg{options} when importing the package;
+% \par\hbox to \textwidth{\hss
+% \cs{usepackage[notation=\meta{option}]\{odesandpdes\}} \hss}
+%
+% In the case of Lagrange or Newton notation, there is the |maxprimes| option
+% for determination of how many physical markings are allowed to be
+% made before the notation switches to a symbolic version;
+% \par\hbox to \textwidth{\hss
+% \cs{usepackage[maxprimes=\meta{integer}]\{odesandpdes\}}\hss}
+% \vspace{1ex}
+% 
+%
+% \DescribeMacro{\setDE}
+% However, if one might wish to change it on a section to section basis,
+% the command \cs{setDE}\marg{options} is able
+% to take any package option as an argument and will
+% apply the new option going forward.
+%
+%
+% \par\hbox to \textwidth{\hss
+% \begin{tabular}{lcl}\hline
+%   Option list & Default Value & Valid Arguments \\ \hline
+%   notation & Leibniz & {default, Lagrange, Leibniz, Newton} \\
+%   maxprimes & 3 & $\text{maxprimes} = n, n \in \mathbb N_+$ \\ \hline
+% \end{tabular}\hss}
+%
+% 
+%
+% \subsection{The Meat and Potatoes}
+%
+% \hspace{1em} The command(s) are approached with the philosophy
+% of of an intuitive and modular usage. 
+% The full extent of its usage can look like;
+% \begin{equation*} |\ode*[x]^2 X(x) =\ode T_{\eta} at 0; -\alpha| 
+% \Rightarrow
+% \ode*[x]^2 X(x)=\ode T_{\eta} at 0; -\alpha
+% \end{equation*}
+% very quickly, and very easily building complex interactions
+% of differentials.
+% The quick functional break down of each element that comprises the macro;
+% \newline
+% \centerline{ \cs{ode}\meta{star}\oarg{variable}\string^\meta{degree}
+% \marg{function}at\textvisiblespace\meta{position};}\vspace{1ex}
+% \par\hbox to \textwidth{\hss
+% \begin{tabular}{cl}\hline
+%    Argument &  Usage \\ \hline
+%    \oarg{variable} & The variable being derived \\ 
+%    \meta{degree} & The order/degree of the derivative \\
+%    \marg{function} & The function being derived \\
+%    \textvisiblespace at\textvisiblespace\meta{point}; 
+%       & Where the function is being derived \\ \hline
+% \end{tabular}\hss}\vspace{1ex}
+% All arguments are conditionally optional, only the function is
+% mandatory, but the command can forgo needing a function if a star is placed.
+%
+% \subsubsection*{Notation Style}
+%
+% \DescribeMacro{\LagrODE}
+% \DescribeMacro{\LeibODE}
+% \DescribeMacro{\NewtODE}
+% \DescribeMacro{\LagrPDE}
+% \DescribeMacro{\LeibPDE}
+% \DescribeMacro{\NewtPDE}
+% There are 3 distinct notational styles
+% one can choose between. This choice can be made as a package option
+% in the preamble, in the text with \cs{setDE}\marg{options}, or if 
+% one only needs to use a notation style once, through its respective 
+% macro.
+%
+% In essense, all the \cs{ode} or \cs{pde} commands do are call the 
+% respective notational varient aligned with the currently set option.
+% This makes it simple enough to just use one of the notational varients,
+% should one wish to do so:
+% \begin{equation*} |\LagrODE[x] c = \LeibODE[x] c = \NewtODE[x] c |\quad
+% \Rightarrow\quad \LagrODE[x] c = \LeibODE[x] c = \NewtODE[x] c 
+% \end{equation*}
+% This also means that all these functions are identical in what arguments
+% they take.
+%
+%
+% \subsubsection*{Variable and Function Arguments}
+% \DescribeMacro{\ode}
+% \DescribeMacro{\ode*}
+% The most barebone form can be understood as:\par\noindent
+% \hbox to \textwidth{\hss\vbox{
+% \hbox{\cs{ode}\oarg{variable}\marg{ function}}
+% \hbox{\cs{ode*}\oarg{variable}}}\hss}
+%
+% \DescribeMacro{\pde}
+% \DescribeMacro{\pde*}
+% and for the sake of parity, the PDE usage is identical:\par\noindent
+% \hbox to \textwidth{\hss\vbox{
+% \hbox{\cs{pde}\oarg{variable}\marg{ function}}
+% \hbox{\cs{pde*}\oarg{variable}}}\hss}\par
+% Any value you give to the \emph{optional} \oarg{variable} argument
+% will be represented as the variable being derived. 
+% While the \emph{mandatory} \marg{function} argument will be the function you
+% are deriving. 
+% Say you wish to indicate you are deriving $X(t)$, simple as writing 
+% |\ode[t]{X}|, however, its worth noting that $t$ is the default variable
+% so writing |\ode{X}| will produce identical results.
+% Hence |\ode[t]{X} = \ode{X}| will produce;
+% \begin{equation*} |\ode[t]{X} =\ode{X}| \implies \ode[t]{X} = \ode{X} 
+% \end{equation*}
+%  
+% 
+% While the \marg{function} argument is mandatory using the 
+% non-starred command, using the starred varient
+% omits the need for the \marg{function} argument.
+% Therefor, writing the exact same equation, just starred
+% |\ode*[t]{X} = \ode*{X}| will instead produce;
+% \begin{equation*} |\ode*[t]{X} =\ode*{X}| \implies \ode*[t]{X} = \ode*{X} 
+% \end{equation*}
+% Effectively one can rewrite the `bare-bones' display as:\par\vspace{1ex}
+% \par\hbox to \textwidth{\hss
+% \cs{ode}\meta{star}\oarg{variable}\marg{ function}
+% \hss}
+% 
+% \subsubsection*{Degree of Derivative}
+% The previously shown stated section is something the reader has
+% likely encountered before, made themselves. This is where
+% this package begins to differentiate\footnote{Calculus Pun!} itself.
+% Consider:
+% \par\hbox to \textwidth{\hss
+% \cs{ode}\meta{star}\oarg{variable}$\uparrow$\meta{degree}\marg{function}
+% \hss}
+%
+% A feature of this family of commands, is that it can `\emph{easily}'
+% recognize a following exponent should one be placed. 
+% There was rational in choosing to check for the exponent immediately
+% after the macro command opposed to checking for the exponent at
+% the end after the function. 
+% As, often you would want add a higher degree very
+% quickly as opposed to \emph{after} defining the function. 
+%
+% \hbox to \textwidth{\hss
+% \cs{ode}|^2{f(x)}| as opposed to \cs{ode\{f(x)\}}|^2| \hss}
+%
+%
+% This was one of the main motivations of creating a package to begin with
+% as instead of needing, maybe, two personalized commands,
+% such as ``|\ddt{f}| and |\ddxx{f}|'', or ``|\dd{x}{f}| and |\dd[2]{x}{f}|''.
+% One simply needs to treat the \cs{ode} macro itself as being raised
+% to a higher degree.
+% \begin{equation*} |\ode* \left(\ode{f} \right)=\ode^2{f} | 
+% \Rightarrow \ode* \left(\ode{f} \right)=\ode^2{f} 
+% \end{equation*}
+% 
+%
+% \subsubsection*{Defining Where the Derivative is}
+%
+% Imagine you, as the reader, are trying to quickly and easily
+% write up the boundry conditions of your problem.
+% One could always make another macro, in what is no doubt an impressive
+% display of differential shortcuts.
+% \emph{Or}: \vspace{1ex}
+% \par\hbox to \textwidth{\hss
+% \cs{ode}\meta{star}\oarg{variable}$\uparrow$\meta{degree}\marg{
+% function}\textvisiblespace{}at\textvisiblespace{}\meta{postion};
+% \hss}
+%
+% See, \TeX\ does something very interesting when it uses `\emph{glue}',
+% which is partially replicated by packages such as |TikZ|, where it will
+% happily take `soft' modifiers written directly in plain english.
+% If one wishes to strictly define paragraph spacing in \TeX, they would use
+% `\cs{parskip}|=1ex|'. If one would rather give it a range of tolerance
+% the following construct `\cs{parskip}|=1ex plus 0.5ex minus 0.5ex|'
+% then allows a spacing of $1\pm 0.5$ |ex|.
+%
+% Glue is of course something special, but that does not mean 
+% that the author can not gain inspiration. Say one wishes
+% to define Neumann boundries;
+% \begin{equation*} |\ode[x]{c} at 0;=0\land\ode[x]{c} at L;=1|
+% \Rightarrow \ode[x]{c} at 0;=0\land\ode[x]{c} at L;=1
+% \end{equation*}
+% \begin{equation*} |\ode[x]{c} at 0 = L;=1|
+% \Rightarrow \ode[x]{c} at 0 = L;=1
+% \end{equation*}
+% Literally could not be easier.\footnote{My source is that I made it up}
+% 
+%
+% Those reading til this point may have recalled that the first example
+% did not contain many braces.
+% This is because with the ``proper'' spacing, there is little 
+% need for the use of the braces, so as to help promote a more fluid, 
+% (and readable),
+% workflow without always needing to worry about the f|***|ing brace. 
+% Not that one can not use the brace for personal taste. 
+% In the following section, many examples of use will be illustrated
+% to show the range and versitility of the functions.
+%
+% \noindent
+% \fbox{\parbox{\textwidth}{The most important thing to always remember.
+% \emph{Just because} the author
+% of this package has done as much as they can to `\emph{\rlap{idiot}\hbox{------}
+% user proof}' its functions
+% does not mean the user does not still need to be cautious. This is 
+% \LaTeX\ we are talking about. There are likely many
+% scenarios that the author did not think of, nor accidentally came across.}}
+%
+% \newpage
+% \section{Examples of use}\label{sec:examples}
+% 
+% \stepcounter{subsection}
+%
+% \addcontentsline{toc}{subsection}{\thesubsection\quad Common Use Examples}
+%
+% To show the generality of use. The following examples all take identical form 
+% in the \TeX/\LaTeX\ itself. 
+% Additionally, in order to illustrate the functional boundries of the command with
+% respect to each of the notational styles. 
+% There is a variety of spacing and bracketing to help highlight these features,
+% and will be shown in the following |verbatim| enviroment; 
+%
+% 
+% \begin{minipage}{0.98\textwidth}
+% \begin{verbatim}
+%\begin{align*}
+%\ode A(x)      && \ode[x]{B(x)} && \ode^1 C(x)     && \ode[x]^5 {D(x)} \\
+%\ode* {E(x)}   && \ode*[x] F(x) && \ode*^2 {G(x)}  && \ode*[x]^6H(x)   \\
+%\pde[t] I(x)   && \pde[x] {J(x)}&& \pde[t]^3K(x)   && \pde[x]^7 {L(x)} \\
+%\pde*[t] {M(x)}&& \pde*[x]N(x)  && \pde*[t]^4 O(x) && \pde*[x]^8 P(x)
+%\end{align*}
+% \end{verbatim}
+% \end{minipage}
+% 
+% \vbox{\centering
+% \hbox{\verb|\setDE{notation=Lagrange}| \emph{and/or} \verb|\usepackage[notation=Lagrange]{odesandpdes}|}
+% \fbox{\parbox{0.65\textwidth}{
+% \setDE{notation=Lagrange}
+% \begin{align*}
+%   \ode A(x)      && \ode[x]{B(x)} && \ode^1 C(x)     && \ode[x]^5 {D(x)} \\
+%   \ode* {E(x)}   && \ode*[x] F(x) && \ode*^2 {G(x)}  && \ode*[x]^6H(x)   \\
+%   \pde[t] I(x)   && \pde[x] {J(x)}&& \pde[t]^3K(x)   && \pde[x]^7 {L(x)} \\
+%   \pde*[t] {M(x)}&& \pde*[x]N(x)  && \pde*[t]^4 O(x) && \pde*[x]^8 P(x)
+% \end{align*}
+% }}}\vspace{1.25em}
+% 
+% \vbox{\centering
+% \hbox{\verb|\setDE{notation=Leibniz}| \emph{and/or} \verb|\usepackage[notation=Leibniz]{odesandpdes}|}
+% \fbox{\parbox{0.65\textwidth}{
+% \setDE{notation=Leibniz}
+% \begin{align*}
+%   \ode A(x)      && \ode[x]{B(x)} && \ode^1 C(x)     && \ode[x]^5 {D(x)} \\
+%   \ode* {E(x)}   && \ode*[x] F(x) && \ode*^2 {G(x)}  && \ode*[x]^6H(x)   \\
+%   \pde[t] I(x)   && \pde[x] {J(x)}&& \pde[t]^3K(x)   && \pde[x]^7 {L(x)} \\
+%   \pde*[t] {M(x)}&& \pde*[x]N(x)  && \pde*[t]^4 O(x) && \pde*[x]^8 P(x)
+% \end{align*}
+% }}}\vspace{1.25em}
+% 
+% \vbox{\centering
+% \hbox{\verb|\setDE{notation=Newton}| \emph{and/or} \verb|\usepackage[notation=Newton]{odesandpdes}|}
+% \fbox{\parbox{0.65\textwidth}{
+% \setDE{notation=Newton}
+% \begin{align*}
+%   \ode A(x)      && \ode[x]{B(x)} && \ode^1 C(x)     && \ode[x]^5 {D(x)} \\
+%   \ode* {E(x)}   && \ode*[x] F(x) && \ode*^2 {G(x)}  && \ode*[x]^6H(x)   \\
+%   \pde[t] I(x)   && \pde[x] {J(x)}&& \pde[t]^3K(x)   && \pde[x]^7 {L(x)} \\
+%   \pde*[t] {M(x)}&& \pde*[x]N(x)  && \pde*[t]^4 O(x) && \pde*[x]^8 P(x)
+% \end{align*}
+% }}}
+% 
+% \vbox{\centering
+% \hbox{\verb|\setDE{maxprimes=7}| \emph{and/or} \verb|\usepackage[maxprimes=7]{odesandpdes}|}
+% \fbox{\parbox{0.65\textwidth}{
+% \setDE{notation=Lagrange,maxprimes=7}
+% \begin{align*}
+% \ode^1 f &&\ode^2 f &&\ode^3 f &&\ode^4 f &&
+% \ode^5 f &&\ode^6 f &&\ode^7 f &&\ode^8 f &&\ode^9 f 
+% \end{align*}
+% \setDE{notation=Newton}
+% \vspace{-1.5em}
+% \begin{align*}
+% \ode^1 f &&\ode^2 f &&\ode^3 f &&\ode^4 f &&
+% \ode^5 f &&\ode^6 f &&\ode^7 f &&\ode^8 f &&\ode^9 f 
+% \end{align*}
+% }}}
+%
+% 
+%
+% \subsection{"at x;" Usage Examples}
+%
+% 
+% 
+% \hspace{1em} Now, because the author is not an insane person, and went through the 
+% effort of learning how TEX deconstructs text into constitute 
+% registries and boxes, the way any sane person might. When using 
+% a non-starred version of a command, after the function is defined, you can
+% place an `|at|\textvisiblespace\meta{point}|;|', and the representation will 
+% shown according to notational convention.
+%
+%
+% \vbox{
+% \begin{center}
+% \begin{minipage}[c]{0.45\textwidth}
+% \begin{verbatim}
+%\begin{align*}
+%    \ode[x]  c at 23\pi;   &= 1 \\
+%    \ode[x]^3 c   at 69;   &= 2 \\
+%    \ode[x]^{69} c at L;+t &= 3 \\
+%    \ode[x]^9  c af 420;   &= 4 \\
+%    \ode[x]^6  c  a t 13;  &= 5 
+%\end{align*}
+% \end{verbatim}
+% \end{minipage}
+% \end{center}
+% \noindent
+% \hbox{\begin{minipage}[t]{0.35\textwidth}
+% \setDE{notation=Lagrange}
+% \noindent\setlength{\jot}{2em}
+% \begin{verbatim}
+%\setDE{notation=Lagrange}
+% \end{verbatim}
+% \vspace{-1em}
+%\begin{align*}
+%    \ode[x]  c at 23\pi;   &= 1 \\
+%    \ode[x]^3 c   at 69;   &= 2 \\
+%    \ode[x]^{69} c at L;+t &= 3 \\
+%    \ode[x]^9  c af 420;   &= 4 \\
+%    \ode[x]^6  c  a t 13;  &= 5 
+%\end{align*}
+% \end{minipage}}\vline~
+% \hbox{\begin{minipage}[t]{0.34\textwidth}
+% \setDE{notation=Leibniz} 
+% \noindent\setlength{\jot}{0.70em}
+% \begin{verbatim}
+%\setDE{notation=Leibniz}
+% \end{verbatim}
+% \vspace{-1em}
+%\begin{align*}
+%    \ode[x]  c at 23\pi;   &= 1 \\
+%    \ode[x]^3 c   at 69;   &= 2 \\
+%    \ode[x]^{69} c at L;+t &= 3 \\
+%    \ode[x]^9  c af 420;   &= 4 \\
+%    \ode[x]^6  c  a t 13;  &= 5 
+%\end{align*}
+% \vphantom{l}
+% \end{minipage}}\vline~
+% \hbox{\begin{minipage}[t]{0.32\textwidth}
+% \setDE{notation=Newton}
+% \noindent\setlength{\jot}{1.75em}
+% \begin{verbatim}
+%\setDE{notation=Newton}
+% \end{verbatim}
+% \vspace{-1em}
+%\begin{align*}
+%    \ode[x]  c at 23\pi;   &= 1 \\
+%    \ode[x]^3 c   at 69;   &= 2 \\
+%    \ode[x]^{69} c at L;+t &= 3 \\
+%    \ode[x]^9  c af 420;   &= 4 \\
+%    \ode[x]^6  c  a t 13;  &= 5 
+%\end{align*}
+% \end{minipage}}}
+%
+% \hspace{1em} As can be seen in the examples, this `\emph{modifier}' is robust
+% enough that one can write effectively any combination of characters
+% after the function, excluding, \emph{verbatim}, `|at|\textvisiblespace' 
+% and it will work as intended.
+%
+% \vbox{
+% \hspace{1em} \emph{Important to note}, due to a slight difference in how the
+% notational styles are defined, 
+% only the Leibniz notation can take arguments for the 
+% function that involve subscripts and superscripts without delimiters.
+% Mostly easily illustrated in this following 
+% example using the \cs{pde} command;
+% \begin{center}
+% \begin{minipage}[c]{0.45\textwidth}
+% \begin{verbatim}
+%\begin{align*}
+%   \pde[y]   f_1         &= 1 \\
+%   \pde[y]   f_1   at L; &= 2 \\
+%   \pde[y]   f     at L; &= 3 \\
+%   \pde[y] {(f_1)}       &= 4 \\
+%   \pde[y] {(f_1)} at L; &= 5
+%\end{align*}
+% \end{verbatim}
+% \end{minipage}
+% \end{center}
+% \noindent
+% \hbox{\begin{minipage}[t]{0.35\textwidth}
+% \setDE{notation=Lagrange}
+% \noindent\setlength{\jot}{2.20em}
+% \begin{verbatim}
+%\setDE{notation=Lagrange}
+% \end{verbatim}
+% \vspace{-1em}
+%\begin{align*}
+%   \pde[y]   f_1         &= 1 \\
+%   \pde[y]   f_1   at L; &= 2 \\
+%   \pde[y]   f     at L; &= 3 \\
+%   \pde[y] {(f_1)}       &= 4 \\
+%   \pde[y] {(f_1)} at L; &= 5
+%\end{align*}
+% \end{minipage}}\vline~
+% \hbox{\begin{minipage}[t]{0.34\textwidth}
+% \setDE{notation=Leibniz} 
+% \noindent\setlength{\jot}{0.70em}
+% \begin{verbatim}
+%\setDE{notation=Leibniz}
+% \end{verbatim}
+% \vspace{-1em}
+%\begin{align*}
+%   \pde[y]   f_1         &= 1 \\
+%   \pde[y]   f_1   at L; &= 2 \\
+%   \pde[y]   f     at L; &= 3 \\
+%   \pde[y] {(f_1)}       &= 4 \\
+%   \pde[y] {(f_1)} at L; &= 5
+%\end{align*}
+% \vphantom{l}
+% \end{minipage}}\vline~
+% \hbox{\begin{minipage}[t]{0.32\textwidth}
+% \setDE{notation=Newton}
+% \noindent\setlength{\jot}{2.20em}
+% \begin{verbatim}
+%\setDE{notation=Newton}
+% \end{verbatim}
+% \vspace{-1em}
+%\begin{align*}
+%   \pde[y]   f_1         &= 1 \\
+%   \pde[y]   f_1   at L; &= 2 \\
+%   \pde[y]   f     at L; &= 3 \\
+%   \pde[y] {(f_1)}       &= 4 \\
+%   \pde[y] {(f_1)} at L; &= 5
+%\end{align*}
+% \end{minipage}}
+% }
+%
+% \subsection{Prime Count Limits}
+% \hspace{1em} Because the Newton and Lagrange notation is procedural;
+% the only limit is your imagination, and also the fact that 
+% \TeX\ can only have something like 127 unplaced tokens at a time.\par
+% \hbox to \textwidth{\hss\cs{setDE\{maxprimes=69\}}\hss}
+% \fbox{\parbox{\textwidth}{
+% \setDE{maxprimes=69}
+% \begin{minipage}{0.45\textwidth}
+% \setDE{notation=Lagrange}
+% \begin{equation*}
+%    \begin{split}
+%       \ode^{5}  f \\
+%       \ode^{16} f \\
+%       \ode^{32} f \\
+%       \ode^{54} f \\
+%       \ode^{69} f \\
+%       \ode^{70} f \\
+%    \end{split}
+% \end{equation*}
+% \end{minipage}~
+% \begin{minipage}{0.05\textwidth}
+% \setDE{notation=Lagrange}
+% \begin{equation*}
+%    \begin{split}
+%       \boxed{5}  \\
+%       \boxed{16} \\
+%       \boxed{32} \\
+%       \boxed{54} \\
+%       \boxed{69} \\
+%       \boxed{70} \\
+%    \end{split}
+% \end{equation*}
+% \end{minipage}~
+% \begin{minipage}{0.35\textwidth}
+% \setDE{notation=Newton}
+% \begin{equation*}
+%       \ode^{5}  f \quad
+%       \ode^{16} f \quad
+%       \ode^{32} f \quad
+%       \ode^{54} f \quad
+%       \ode^{69} f \quad
+%       \ode^{70} f \quad
+% \end{equation*}
+% \begin{equation*}
+%       \mkern-15mu\boxed{5}  
+%       \boxed{16}
+%       \boxed{32} 
+%       \boxed{54}
+%       \boxed{69} 
+%       \boxed{70} 
+% \end{equation*}
+% \end{minipage}}}
+%
+%
+% ^^A Truly beautiful.\par\vspace{1em}
+%
+% ^^A In the next semester I expect to try seeing if its possible to, given that you put multiple variable in the options, to procedurally generate partials that address separate variables sequatentially.
+% ^^A  \begin{equation*}
+%  ^^A     \frac{\partial^2}{\partial x \partial y}
+% ^^A  \end{equation*}
+%
+% 
+%
+%\StopEventually{^^A
+%  \PrintChanges
+%	}
+%
+%
+% \iffalse
+%</documentation>
+% \fi
+%
+% ^^A************************************************ [odesandpdes.sty]
+% \newpage
+% \iffalse
+%<*package>
+% \fi
+% \section{Package Implementation}
+% 
+% As a fair warning for anyone interested in the implementation
+% of this package, it is documented in what might be considered, \emph{absurd}
+% levels of detail. This comes from the creation of this package being a great
+% learning experience for the author, and the in-depth documentation of 
+% that understanding is only beneficial. 
+% Futhermore, a lot of the techniques used in this package are not obvious.
+% Some of which, to paraphrase
+% the creator of \TeX, his divine emmisary 
+% \emph{Donald E. Knuth} himself in the ever holy \TeX book,
+% were prefaced with
+% ``\emph{Worthy of being known to, at least a few, wizards able to traverse
+% the nether world of \TeX arcana}''. 
+% 
+% 
+% 
+%
+% \subsection{Set-up}
+% \iffalse
+%<package>%% ----------------------------------------------------------------
+%<package>%% Package initialize
+%<package>%% ----------------------------------------------------------------
+% \fi
+%
+% 
+% Package options are difficult to deal with, so using the |xkeyval| package
+% alleviates much of the \emph{pain} associated with it,
+%    \begin{macrocode}
+\RequirePackage{xkeyval}    
+%    \end{macrocode}
+% 
+% \begin{macro}{\m@xm@rk}\begin{macro}{\exp@c@unt}\begin{macro}{\@detempv@l}
+% \hspace{1em} Being that there are a lot of minor calculations within the package
+% reserving registries for integer counts feels like a good idea
+%    \begin{macrocode}
+\newcount\m@xm@rk%
+\newcount\exp@c@unt%
+\countdef\@detempv@l=255%
+%    \end{macrocode}
+% \end{macro}\end{macro}\end{macro}
+%
+% \begin{macro}{\v@rr@t@ks}\begin{macro}{\func@t@ks}\begin{macro}{\@tpost@ks}
+% As well reserving token registries for tossing arguments around 
+% the groups and macros,
+%    \begin{macrocode}
+\newtoks\v@rr@t@ks%
+\newtoks\func@t@ks%
+\newtoks\@tpost@ks%
+%    \end{macrocode}
+% \end{macro}\end{macro}\end{macro}
+%
+% \begin{macro}{\@dev@rb@x}\begin{macro}{\@defunb@x}\begin{macro}{\@deresb@x}
+% Reserving box registries for the purpose of collecting the components
+% together in \newline a coherent manner,
+%    \begin{macrocode}
+\newbox\@dev@rb@x%
+\newbox\@defunb@x%
+\newbox\@deresb@x%
+%    \end{macrocode}
+% \end{macro}\end{macro}\end{macro}
+%
+%
+% \subsubsection{Package Options}
+% \iffalse
+%<package>%% ----------------------------------------------------------------
+%<package>%% Package Options
+%<package>%% ----------------------------------------------------------------
+% \fi
+%
+%
+% \begin{macro}{\@de@option}
+% \hspace{1em} Defining the package options for notational styles
+% using the \LaTeX\ \cs{providecommand} to reloading times.
+% Important to note that defining the command is not the same
+% as using the command, which is useful in conjunction with \cs{csname}
+% and \cs{endcsname} for macro defintions.
+%    \begin{macrocode}
+\providecommand\@de@option{Leib} 
+%    \end{macrocode}
+%
+% Now using the |keyval| package, it becomes possible to define
+% a family of package options associated with inputing some |notation=#1|.
+% This allows for easily defining the notation for the entire document.
+% The possible options will be defined afterwards,
+%    \begin{macrocode}
+\DeclareOptionX{notation}[default]%
+    {\def\@de@option{\csname @de@not@#1\endcsname}}
+%    \end{macrocode}
+% \end{macro} 
+%
+% \begin{macro}{\@de@not@Lagrange}
+% \begin{macro}{\@de@not@Leibniz}
+% \begin{macro}{\@de@not@Newton}
+%
+% \hspace{1em} Once the package option has been declared, 
+% now the options can be defined. The options take identical form
+% with the exception of the last part of definition.
+% This is because the \cs{@de@option} is not the macro used for 
+% the notation definitions. Rather, \cs{@de@option} is an intermediate
+% that expands into one of the defined options, which subsequently 
+% expands into one of the four character strings,
+% ``|Lagr|'', ``|Leib|'', or ``|Newt|''
+% \begin{center}\vspace{-0.75em}
+% \makeatletter
+% \tikz[every node/.style={minimum size=1.5em},line width=0.9pt] 
+% \graph[no placement,y=0]
+% {\string\@de@option[x=0] ->[bend right,"expands to"'] 
+% \string\@de@not@``option''[x=3.5] ->[bend left,"expands to"] 
+% ``string''[x=6.5]};
+% \makeatother
+% \end{center}
+% 
+%    \begin{macrocode}
+\def\@de@not@Lagrange{Lagr}
+\def\@de@not@Leibniz{Leib}
+\def\@de@not@Newton{Newt}
+%    \end{macrocode}
+% \begin{macro}{\@de@not@default}
+% \hspace{1em} The default option for the notation is defined by 
+% pointing to the definition of the |Leibniz| notation option,
+%    \begin{macrocode}
+\let\@de@not@default\@de@not@Leibniz
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+%
+%
+% A second option is defined to allow freedom in deciding the cut-off point 
+% for the Lagrange and Newton notations where it no longer makes more
+% physical marks and uses the symbolic extension instead, with a default
+% of 3 marks before becoming symbolic.
+%    \begin{macrocode}
+\DeclareOptionX{maxprimes}[3]{\m@xm@rk=#1\advance\m@xm@rk\@ne}
+%    \end{macrocode}
+%
+%
+% To ensure that all other options given to the package will be ignored
+% the star is used to indicate that all undefined options will be directed
+% towrds this declared option,
+%    \begin{macrocode}
+\DeclareOptionX*{\PackageWarning{odesandpdes}{`\CurrentOption' ignored}}
+%    \end{macrocode}
+% Finally the declared options are executed as to allow the default
+% options to initialize and be processed,
+%    \begin{macrocode}
+\ExecuteOptionsX{notation,maxprimes}
+\ProcessOptionsX\relax 
+%    \end{macrocode}
+%
+% \subsection{Package Configuration}\label{sec:options}
+%
+%
+%\iffalse
+%<package>\define@key[package]{@de}{notation}
+%<package>    {\def\@de@option{\csname @de@not@#1\endcsname}}
+%<package>\define@key[package]{@de}{maxprimes}
+%<package>    {\m@xm@rk=#1\advance\m@xm@rk\@ne}
+%\fi
+%
+% \begin{macro}{\setDE}
+% \hspace{1em} In addition to being able to use options directly in the 
+% \cs{usepackage} package command, one also gets access to the command
+% \cs{setDE}.
+% Which can be used at any point in the document to change the style
+% of notation or max prime count. Functionally done in identical manner
+% to how \cs{DeclareOptionX} is used.
+%
+%    \begin{macrocode}
+\newcommand\setDE[1]{\setkeys[package]{@de}{#1}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection{To not conflict with amsmath}
+%
+% \begin{macro}{\@de@ver}
+% \begin{macro}{\@de@top}
+% \begin{macro}{\@de@bove}
+%
+% \hspace{1em} Purely because amsmath is a bitch and doesn't want 
+% anyone enjoying their time in \TeX\ it becomes required to make 
+% compatibility checks and work within their abstracted definitions,
+%    \begin{macrocode}
+\@ifpackageloaded{amsmath}{
+    \let\@de@ver=\@@over%
+    \let\@de@top=\@@atop%
+    \let\@de@bove=\@@above}%
+%    \end{macrocode}
+% Otherwise it just uses the \TeX\ primitive commands for fractions
+% because of increase ease of function and speed of processing,
+%    \begin{macrocode}
+    {\let\@de@ver=\over%    
+    \let\@de@top=\atop% 
+    \let\@de@bove=\above}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+%
+% \subsection{Foundational macros}
+% \iffalse
+%<package>%% ----------------------------------------------------------------
+%<package>%% Package Macros 
+%<package>%% ----------------------------------------------------------------
+% \fi
+%
+% \begin{macro}{\d@@}\begin{macro}{\d@l} 
+% \hspace{1em} Creating protected macro definitions for increase in 
+% speed of processes,
+%    \begin{macrocode}
+\def\d@@{\mathrm d} 
+\let\d@l=\partial   
+%    \end{macrocode}
+% \begin{macro}{\@dest@red}\begin{macro}{\@den@st@r}
+% \hspace{1em} In the same vein, strings are defined for the starred and 
+% unstarred versions of macro commands,
+%    \begin{macrocode}
+\def\@dest@red{st@r@d}
+\def\@den@st@r{n@st@r}
+%    \end{macrocode}
+% \end{macro}\end{macro}
+% \end{macro}\end{macro}
+% 
+%
+% \begin{macro}{\ode}\begin{macro}{\pde}
+% \hspace{1em} The macro definitions of the ODE and PDE commands
+%    \begin{macrocode}
+\def\ode{\csname \@de@option ODE\endcsname}
+\def\pde{\csname \@de@option PDE\endcsname} 
+%    \end{macrocode}
+% In essence these two are the same command.
+% This is done for the sake of consistancy in use and effect.
+% As well, in an attempt to not make the alternative notations
+% \emph{inaccesible}, the main macros are themselves stepping stones
+% to the package declared option. As perhaps multiple notational styles
+% might be useful in a single equation, who knows?
+% \end{macro}\end{macro}
+% 
+%
+%
+% 
+% \begin{macro}{\LagrODE}\begin{macro}{\LeibODE}\begin{macro}{\NewtODE}
+% \hspace{1em} There is unfortunately no way to avoid the process
+% of making an individual macro for each ODE version;
+%    \begin{macrocode}
+\def\LagrODE{\let\@de@perat@r\d@@% sets the d
+    \let\@dec@mm@nd\@de@not@Lagrange
+    \@de@ifst@r}
+\def\LeibODE{\let\@de@perat@r\d@@%
+    \let\@dec@mm@nd\@de@not@Leibniz
+    \@de@ifst@r}
+\def\NewtODE{\let\@de@perat@r\d@@%
+    \let\@dec@mm@nd\@de@not@Newton
+    \@de@ifst@r}
+%    \end{macrocode}
+% \end{macro}\end{macro}\end{macro}
+% \begin{macro}{\LagrPDE}\begin{macro}{\LeibPDE}\begin{macro}{\NewtPDE}
+% As well as making a macro for each PDE version;
+%    \begin{macrocode}
+\def\LagrPDE{\let\@de@perat@r\d@l% sets the del
+    \let\@dec@mm@nd\@de@not@Lagrange
+    \@de@ifst@r} 
+\def\LeibPDE{\let\@de@perat@r\d@l%
+    \let\@dec@mm@nd\@de@not@Leibniz
+    \@de@ifst@r} 
+\def\NewtPDE{\let\@de@perat@r\d@l%
+    \let\@dec@mm@nd\@de@not@Newton
+    \@de@ifst@r} 
+%    \end{macrocode}
+%
+% In terms of usage, these are all the same command, the main
+% differences come from what the operator is defined as,
+% \cs{d@@} or \cs{d@l}, and  which notational form that 
+% \cs{@dec@mm@nd} points at for further processes down the stream.
+% They are however, given all caps for the \emph{ode} and \emph{pde}
+% in order to enhance visual clarity should one use them.
+% 
+% \end{macro}\end{macro}\end{macro}
+%
+% 
+% \subsubsection{The `Yoinkers'}
+% \begin{macro}{\@dest@r@rg}
+% \begin{macro}{\@de@ption@l@rg}\begin{macro}{\@de@exponent@rg}
+% \hspace{1em} Now a group of functions are needed for the processing
+% each of the major elements, the star (|*|), for whether to have a function 
+% parameter. The option (|[|), for determining the variable 
+% being differentiated. And exponent (|^|), for deteriming what order 
+% the differential should be. Whether these functions should be used
+% or not, comes from the use of a macro described in section 
+% \ref{sec:checkpoints}.
+%
+% Importantly each of these elements, should they appear,
+% require the relevant token to be `yoinked' by the macro in question.
+% Should a star appear, \cs{@dest@r@rg} `gobbles' said star and propmts
+% the next element, an optional argument, to be checked for.
+%    \begin{macrocode}
+\def\@dest@r@rg*{\expandafter\@de@ifbr@ck}
+%    \end{macrocode}
+%
+% For an optional argument, \cs{@de@option@l@rg} will yoink the argument,
+% as well as the surrounding brackets,
+%    \begin{macrocode}
+\def\@de@ption@l@rg[#1]{\expandafter\v@rr@t@ks{#1}\relax \@de@ifexp@n}% 
+%    \end{macrocode}
+%
+% If an exponent should appear, \cs{@de@exponent@rg} will yoink the |^|,
+% and the integer following it,
+%    \begin{macrocode}
+\def\@de@exponent@rg^#1{\exp@c@unt#1\relax \@deifst@rred}
+%    \end{macrocode}
+%
+%
+%
+% \begin{macro}{\@dest@r@dy@ink}\begin{macro}{\@den@st@ry@ink}
+%
+% \hspace{1em} Depending on if one is using the starred
+% version of the command,
+% there is a command that yoinks the following function variable
+% and one that ends the compiling here.
+%    \begin{macrocode}
+\def\@dest@r@dy@ink{\expandafter\@dec@mpf@rm}
+\def\@den@st@ry@ink{\expandafter\@dey@inkf@rm}
+%    \end{macrocode}
+% \end{macro}\end{macro}\end{macro}
+% \end{macro}\end{macro}
+%
+% \begin{macro}{\@de@func@ther}\begin{macro}{\@de@func@Leib}
+% \begin{macro}{\@de@func@Lagr}\begin{macro}{\@de@func@Newt}
+% 
+% \hspace{1em} As a consequence of the inherent differences in how
+% the notational styles treat functions,
+% the \cs{@de@func@Leib} macro has to be treated differently. 
+% Whereas both
+% the Lagrange and Newton notations will just accept the first token
+% following the call of the function yoinker. The Leibniz varient will
+% attempt to absorb all the tokens untill the first space token is found. 
+% This is not done in the traditional way of denoting an explicit space
+% token at the end of the control sequence, but rather through a special
+% macro defined in section \ref{sec:nextchar}.
+% This had to be done as a consequence
+% of getting the `|at|\textvisiblespace |x;|' function to work properly.
+%    \begin{macrocode}
+\def\@de@func@ther#1{\expandafter\func@t@ks{#1}\relax
+    \expandafter\@de@if@tpos}
+\def\@de@func@Leib{\expandafter\func@t@ks{}\relax
+    \expandafter\@de@ifbrace}
+\let\@de@func@Lagr\@de@func@ther
+\let\@de@func@Newt\@de@func@ther
+%    \end{macrocode}
+% \end{macro}\end{macro}
+% \end{macro}\end{macro}
+% 
+%
+% \begin{macro}{\@de@tpos@rg}
+% \hspace{1em} Finally, the last element that can be used, is designed to
+% eat all the tokens between its call and the first semi-colon it sees,
+% to ensure a function can be derived anywhere.
+%    \begin{macrocode}
+\def\@de@tpos@rg#1;{\expandafter\@tpost@ks{#1}\relax \@de@tf@rm}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsubsection{Macro `Checkpoints'}\label{sec:checkpoints}
+% \begin{macro}{\@de@ifst@r}
+% \begin{macro}{\@de@ifbr@ck}
+% \begin{macro}{\@de@ifexp@n}
+% \hspace{1em} As can be seen in the definitions of the \cs{ode} and \cs{pde}, 
+% there are no explicitely defined \cs{ode*} or \cs{pde*} macros.
+% A workaround is implemented by making the first step of the macro
+% to check if the first token that appears is a star, or \emph{asterisk}, 
+% if one would prefer the technical language. These macros make use of an
+% ancilliariy function \cs{@deifch@r}, 
+% which is defined in the section \ref{sec:nextchar}.
+%
+%    \begin{macrocode}
+\def\@de@ifst@r{\@deifch@r * 
+    {\@dest@rgument\@dest@red\@dest@r@rg} 
+    {\@dest@rgument\@den@st@r\@dest@r@rg*}}
+\def\@de@ifbr@ck{\@deifch@r [ 
+    \@de@ption@l@rg 
+    {\@de@ption@l@rg[t]}}
+\def\@de@ifexp@n{\@deifch@r ^ 
+    \@de@exponent@rg 
+    {\@de@exponent@rg^\@ne}}
+%    \end{macrocode}
+% \begin{macro}{\@de@ifbrace}
+% \hspace{1em} \cs{@de@ifbrace} is a bit more special than the other \cs{@deif} 
+% conditionals, as it is not a general use conditional. Only the 
+% Leibniz notational style function yoinker makes use of it.
+% This is likely not a good long-term solution, but
+% that just means it's going to be this way for at least a few years.
+%    \begin{macrocode}
+\def\@de@ifbrace{\@deifch@r \bgroup
+    \@de@func@ther
+    \@de@tilsp@ce}
+%    \end{macrocode}
+% \end{macro}\end{macro}\end{macro}\end{macro}
+%
+%
+% \begin{macro}{\@de@if@tpos}\begin{macro}{\@de@tDoubleCheck}
+% \hspace{1em} In the same way, there also exist a macro to check 
+% for the `|at|\textvisiblespace'. The main difference however,
+% is the follow up command that helps
+% \emph{robustify} \cs{@de@if@tpos}. This is done through absorbing all the 
+% tokens after the `|a|' until the next space token, if only 
+% a single token is absorbed, and that token is a `|t|', then success! Otherwise
+% nothing happens.\footnotemark
+%    \begin{macrocode} 
+\def\@de@if@tpos{\@deifch@r a \@de@tDoubleCheck \@dec@mpf@rm}
+\def\@de@tDoubleCheck a#1 {\ifx t#1\expandafter\@de@tpos@rg\else
+    \@dec@mpf@rm a#1\fi}%
+%    \end{macrocode}
+%
+% \footnotetext{There is a way to make this function in a far more generalized way using
+% \cs{csname} and \cs{endcsname}. However, as this package makes use of 
+% this feature exactly \emph{once}, there is no benefit to
+% generalizing the functionality.}
+% \end{macro}\end{macro}
+%
+% 
+%
+% 
+% \subsection{Ancilliary Functions}
+% There are a lot of macros or command sequences that need to be used
+% in addendum to the main commands that one would download this package for.
+% As a consequence, there are a plethora of ancilliary functions to pull from
+% defined in this section.
+%
+%
+% \iffalse
+%<package>%% ----------------------------------------------------------------
+%<package>%% Ancilliary Package Functions
+%<package>%% ----------------------------------------------------------------
+% \fi
+% \subsubsection{Variable Macronames}
+%
+% \begin{macro}{\@dest@rgument}
+% \begin{macro}{\@deifst@rred}
+% \begin{macro}{\@dec@mpf@rm}
+%
+% \hspace{1em}It becomes useful to be able to freely define which macro 
+% to be used when going through the option tree.
+% Subsequently, three macros are defined
+% to fufill that purpose. \cs{@dest@rgument} takes an argument and defines 
+% two macros \cs{@deifst@rred} which defines 
+% whether the function `yoinker' exists or not, and \cs{@dec@mpf@rm}
+% which works with \cs{@de@option},defined in subsection \ref{sec:options}, 
+% to define the final ODE or PDE form.
+%    \begin{macrocode}
+\def\@dest@rgument#1{%
+    \def\@deifst@rred{\csname @de#1y@ink\endcsname}%
+    \def\@dec@mpf@rm{\csname#1@\@dec@mm@nd\endcsname}}
+%    \end{macrocode}
+% \end{macro}\end{macro}\end{macro}
+% 
+%
+%
+%
+%
+% \begin{macro}{\@de@tf@rm}\begin{macro}{\@dey@inkf@rm}
+% \hspace{1em} Additional macros are also defined for determining 
+% intermediate forms during the construction
+% process of the resulting ODEs and PDEs
+%    \begin{macrocode}
+\def\@de@tf@rm{\csname @de@t@\@dec@mm@nd\endcsname}%
+\def\@dey@inkf@rm{\csname @de@func@\@dec@mm@nd\endcsname}%
+%    \end{macrocode}
+% \end{macro}\end{macro}
+%
+%
+% 
+% \subsubsection{Determing the next token}\label{sec:nextchar}
+% An integral part of the `\emph{mastication}' process
+% is the identification of the proceeding token in the oncoming token stream.
+% Therefore, a macro is defined to streamline this process instead of needing
+% to create a unique \cs{futurelet} sequence for each token type.\par
+% The use of \cs{futurelet} is a strange and arcane process
+% that better described by occult terminology than the proper scientific
+% terms one would use in daily life.
+% However, it is important to understand at least a little bit for the
+% implementation of the \cs{@deifch@r} macro. 
+%
+% \begin{macro}{\@deifch@r}\begin{macro}{\@detesttoken}
+% 
+% \begin{macro}{\@de@tmpA}\begin{macro}{\@de@tmpB}
+%
+% \hspace{1em} \cs{@deifch@r} takes in three tokens as arguments, 
+% the first argument will assign \cs{@detesttoken} and be
+% what the macro looks out for, 
+% while the other two arguments are for storage to be executed later. 
+% Building off this, there are two main elements that compose the macro, 
+% the namesake \cs{@deifch@r}, and its supplement macro 
+% \cs{@denext@rg}. This is because \cs{futurelet} is a primitive that will
+% act as the \cs{let} primitive, just one token removed.
+%
+% \begin{minipage}[b]{0.45\textwidth}
+%    \tikz \graph[grow right = 1.5cm]{ 
+%    \string\let -!- token1 <- token2 -!- token3 };
+% \end{minipage}~
+% \begin{minipage}[b]{0.45\textwidth}
+%    \tikz \graph[grow right = 1.5cm]{ 
+%    \string\futurelet -!- token1 -!- token2 -!- token3, 
+%    token1 <-[bend left, "\string\let\ token1 token3"] token3 };
+% \end{minipage}
+%
+% 
+% The most important consequence is that, 
+% should \cs{futurelet} be enacted upon a stream of three 
+% tokens, ``\cs{futurelet}| token1 token2 token3|''; |token1| will be \cs{let} 
+% to point at |token3| \emph{before} 
+% |token2| is expanded. What this means, is one is able to have |token3|
+% \emph{act upon the unexpanded} 
+% |token2|.\footnote{If this means something to you, it's too late. 
+% You've lost your chance of escaping \TeX.} 
+%    \begin{macrocode}
+\def\@deifch@r#1#2#3{%
+    \let\@dew@tcht@k=#1\relax
+    \def\@de@tmpA{#2} \def\@de@tmpB{#3}
+    \futurelet\@detesttoken\@denext@rg}
+%    \end{macrocode}
+% \hspace{1em} Using this \emph{enlightenment}, 
+% define the token representing an
+% `|if-then-else|' control sequence \cs{@denext@rg}. In 
+% \cs{@deifch@r},  \cs{@dew@tcht@k} becomes a macro for
+% the token we want to check against. Using this to our advantage, 
+% before \TeX\ expands \cs{@denext@rg}, it will assign \cs{@detesttoken}
+% to point to a third, currently, unknown token after \cs{@denext@rg}.
+% This is where the magic happens; because \cs{@denext@rg} only expands
+% \emph{after} the assignment of \cs{@detesttoken}, meaning it becomes
+% possible to compare \cs{@detesttoken} and \cs{@dew@tcht@k} against
+% eachother to determine which outcome should be executed.\par
+% \end{macro}\end{macro}
+% 
+% \end{macro}\end{macro}
+% 
+%
+%
+% \begin{macro}{\@denext@rg}\begin{macro}{\@de@nextact}
+% 
+% \hspace{1em} The first half of \cs{@denext@rg} ensures that a
+% space tokens does not get in the way of assignment,
+% as unfortunate as it is, the \cs{futurelet} primitive \emph{does}
+% consider a space token to be a valid token to point to.
+% 
+%    \begin{macrocode}
+\def\@denext@rg{%
+    \ifx\@detesttoken\@sptoken\relax
+        \let\@de@nextact\@desp@cegobbler\else
+%    \end{macrocode}
+% \hspace{1em} The second half of \cs{@denext@rg} is what does 
+% the actual comparison. Should the comparison be positive,
+% \cs{@detesttoken} = \cs{@dew@tcht@k}, then the code stored
+% in \cs{@de@tmpA} will be executed, otherwise, \cs{@de@tmpB} 
+% will be executed
+%    \begin{macrocode}
+        \ifx\@detesttoken\@dew@tcht@k\relax  % if 
+            \let\@de@nextact\@de@tmpA\else       % ifn't
+            \let\@de@nextact\@de@tmpB\fi\fi
+    \@de@nextact}
+%    \end{macrocode}
+%
+% \begin{macro}{\@desp@cegobbler}
+% \iffalse
+%<package>\let\@desavedef\<
+% \fi
+%
+% \hspace{1em} Ensuring that the space(s), explicit or implicit, trailing after
+% \cs{@deifch@r} requires some \TeX\ \emph{tomfoolary}. 
+% By defining the function with a non-character token, the trailing space 
+% will matter for the macro definition, thereby, creating a macro that gobbles
+% one space token on use.
+%    \begin{macrocode}
+\def\<{\@desp@cegobbler} 
+\expandafter\def\< {\futurelet\@detesttoken\@denext@rg}
+%    \end{macrocode}
+% These three macros work together as a three point cycle discarding spaces
+% until the first non-space token is found, in which case the \cs{if}-\cs{else}
+% will be executed.
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\@de@tilsp@ce}
+%
+% \hspace{1em} While the previous macro gobbles space tokens until it finds
+% a non-space token \cs{@de@tilsp@ce} gobbles non-space
+% tokens until it finds a space token. 
+% There is a difference however, in that \cs{@de@tilsp@ce} stores the
+% gobbled tokens until it finds that space token, subsequently 
+% \rlap{ {ejaculating} }\hbox{---------------}
+% \emph{returning} the the tokens as a registry list.
+%    \begin{macrocode}
+\def\@de@tilsp@ce#1 {%
+    \beginnext%
+    \toks0={#1}
+    \edef\next{\func@t@ks=\expandafter{\the\toks0}}
+    \endnext \@de@if@tpos}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \begin{macro}{\beginnext}
+% \begin{macro}{\endnext}
+%
+% \hspace{1em} The \cs{beginnext}, \cs{endnext} construct
+% is a relatively common construct one finds when working with
+% variable macros and subsequently working with \cs{edef} commands. 
+% Using the explicit \cs{begingroup} and \cs{endgroup} group denotions
+% means that one can play all sorts of registry based games, 
+% that can not be broken by implicit groupings.
+% By \cs{edef}'ing \cs{next} inside this construct, whatever finalized
+% product you have assigned to \cs{next}, will be a fully expanded 
+% assortment of values from those registries.
+%    \begin{macrocode}
+\def\beginnext{\begingroup
+    \let\next\undefined}
+\def\endnext{\expandafter\endgroup\next}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+%
+%
+%
+% \subsection{Notational Morphology}
+% \iffalse
+%<package>%% ----------------------------------------------------------------
+%<package>%% Package Notations
+%<package>%% ----------------------------------------------------------------
+% \fi
+% 
+% There is nothing particularly interesting about the methodology
+% behind preparing the output forms, just using the classical 
+% \TeX\ methods of exponents and fractions. So while these macro definitions
+% will be left in, there won't be much commenting on them directly.
+% The follow-up section will be illustrating the macros used 
+% \emph{within} the ode replacement text, those will be explained.
+%
+% One thing of note, is that these macros make \emph{heavy} use of the 
+% `\cs{the}\cs{registry}' commands to expand registries previously 
+% used for storing tokens, and integers. Another hugely important
+% element in these macros are the \cs{box} commands for arranging and
+% subsequently storing said arrangement into a \emph{box} which can 
+% then float to the top of the groupings like a message in a bottle.
+% 
+% \subsubsection*{Starred Forms}
+% \begin{macro}{\st@r@d@Lagr}
+% Macro for Lagr+star
+%    \begin{macrocode}
+\def\st@r@d@Lagr{%
+    \setbox\@deresb@x\hbox{$
+        {f^{\mkern1mu\@dedr@wm@rk\lagr@prime\lagr@prime\br@ced@xpon}
+        _{\m@kep@rtLagr}}\mkern-\tw@ mu\left(\the\v@rr@t@ks\right)
+        $}%
+    \@derele@se}%
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \begin{macro}{\st@r@d@Leib}
+%  Macro for Leib+star
+%    \begin{macrocode}
+\def\st@r@d@Leib{%
+    \setbox\@defunb@x\hbox{$\@de@perat@r^{\@deem@rex}$}%
+    \b@se@Leib}%
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \begin{macro}{\st@r@d@Newt}
+%  Macro for Newt+star
+%    \begin{macrocode}
+\def\st@r@d@Newt{%     
+    \setbox\@dev@rb@x\hbox{$\the\v@rr@t@ks$} \b@se@Newt}%
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+%
+% \subsubsection*{Unstarred Forms}
+% \begin{macro}{\n@st@r@Lagr}
+% Macro for Lagr
+%    \begin{macrocode}
+\def\n@st@r@Lagr{%
+    \setbox\@deresb@x\hbox{$
+        {\the\func@t@ks
+        ^{\mkern\@ne mu\@dedr@wm@rk\lagr@prime\lagr@prime\br@ced@xpon}
+        _{\m@kep@rtLagr}}\mkern\m@ne mu$}%
+    \@derele@se}%
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \begin{macro}{\n@st@r@Leib}
+%  Macro for Leib
+%    \begin{macrocode}
+\def\n@st@r@Leib{%  
+    \setbox\@defunb@x\hbox{$
+        \@de@perat@r^{\@deem@rex}\mkern0.40mu\the\func@t@ks$} 
+        \b@se@Leib}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \begin{macro}{\n@st@r@Newt}
+%  Macro for Newt
+%    \begin{macrocode}
+\def\n@st@r@Newt{% 
+    \setbox\@dev@rb@x\hbox{$\the\func@t@ks$} \b@se@Newt}%
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection*{``At Position'' Forms}
+% \begin{macro}{\@de@t@Lagr}
+% Macro for Lagr at point
+%    \begin{macrocode}
+\def\@de@t@Lagr{%
+    \noexpand\hbox{$
+        \n@st@r@Lagr\mkern-\thr@@ mu\left(\the\@tpost@ks\right)
+        $}}%
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \begin{macro}{\@de@t@Leib}
+% Macro for Leib at point
+%    \begin{macrocode}
+\def\@de@t@Leib{%
+    \noexpand\hbox{$
+        \left.\n@st@r@Leib\mkern\@ne mu\right|
+        _{\mkern1mu\displaystyle\the\v@rr@t@ks\mkern2mu
+        \rlap{$\scriptstyle=\mkern\thinmuskip\the\@tpost@ks$}}
+        $}%
+    }%
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \begin{macro}{\@de@t@Newt}
+% Macro for Newton at point
+%    \begin{macrocode}
+\def\@de@t@Newt{%
+    \noexpand\hbox{$
+        \n@st@r@Newt\mkern-\tw@ mu\left(\the\@tpost@ks\right)
+        $}}%
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+%
+%
+%
+% \subsubsection*{Foundational forms}
+%
+%
+% \begin{macro}{\m@kep@rtLagr}
+% Macro for Lagr partial notations
+%    \begin{macrocode}
+\def\m@kep@rtLagr{\ifx\@de@perat@r\d@l\the\v@rr@t@ks\else\empty\fi}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \begin{macro}{\b@se@Leib}
+% Macro for the base Leibniz form
+%    \begin{macrocode}
+\def\b@se@Leib{%
+    \setbox\@dev@rb@x\hbox{$
+        \@de@perat@r\mkern0.40mu\the\v@rr@t@ks^{\@deem@rex}$}%
+    \setbox\@deresb@x\hbox{\kern0.5\p@%
+        $\raise2\p@\box\@defunb@x\@de@ver\lower5\p@\box\@dev@rb@x$%
+        \kern0.5\p@}%
+    \@derele@se}%
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \begin{macro}{\b@se@Newt}
+% Macro for the base Newton form
+%    \begin{macrocode}
+\def\b@se@Newt{%
+    \setbox\@defunb@x\hbox{\vbox{\baselineskip=\z@\lineskip=\m@ne\p@%
+        \@dedr@wm@rk\@de@ned@ts\@detw@d@ts\@denewt@nd@t}}%
+    \setbox\@deresb@x\hbox{\vbox{\baselineskip=\z@\lineskip=-0.5\p@%
+        \hbox to\wd\@dev@rb@x{\hss\raise\z@\box\@defunb@x\hss}%
+        \hbox{\raise\z@\box\@dev@rb@x}}}%
+    \@derele@se}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\m@kep@rtNewt}
+% Macro for Newt partial notations
+%    \begin{macrocode}
+\def\m@kep@rtNewt{\ifx\@de@perat@r\d@l\empty\fi}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+%
+%
+% \subsection{Notational Shaping Tools}
+%
+% Here's where some spice comes back into play. 
+% One of the major challenges\footnote{Aside from my mental challenges.}
+% was ensuring that the appropriate number of primes or dots were
+% placed when changing the |maxprimes| option.
+%
+% Did the author realistically need to make it so one could have
+% a procedural number of primes/dots? Nope. Would there ever be a realistic
+% use-case for a derivative of order 3 or higher in 
+% which one would use markings? Of course not. Did the author do it anyways?
+% Absolutely.
+%
+%
+% \begin{macro}{\lagr@prime}
+% \begin{macro}{\br@ced@xpon}
+% \hspace{1em} The macro for the Lagrangian prime is very straightforward
+% each time \cs{lagr@prime} is used, a prime mark will be placed,
+% and the exponent count will reduce by one. The function does this
+% repeatedly until the exponent count is reduced to 1.
+%    \begin{macrocode}
+\def\lagr@prime{\mkern0.35mu\prime\global\advance\exp@c@unt\m@ne}
+%    \end{macrocode}
+% 
+% Should the exponent count be greater than the maximum allowed prime
+% markings, \cs{br@ced@xpon} will be used instead, which will display 
+% the general form of an integer enclosed by parenthesis.
+%    \begin{macrocode}
+\def\br@ced@xpon{\left(\the\exp@c@unt\right)}
+%    \end{macrocode}
+%
+%
+% \end{macro}
+% \end{macro}
+%
+%
+%
+% \begin{macro}{\@detw@d@ts}
+% \begin{macro}{\@de@ned@ts}
+% \hspace{1em} The dots for the Newtonian notation are more complicated than 
+% just incrementing a counter by one for each placed mark.
+% Because Newtonian notation is built with a point at the top, it
+% requires the initial dot to be place prior the rest of the dots as
+% the \cs{vbox} primitive builds top down
+% 
+% In order to deal with that, this set of macros, \cs{@detw@d@ts} 
+% and \cs{@de@ned@ts}
+% will take the exponent count, and determine if the number is $\equiv|mod2|$
+% if it is congruent. There is no initial dot created, if it is not congruent
+% \emph{and} a greater value than the set maxprimes, an initial dot is 
+% placed into the token stream to become the star on top.
+%
+% The reason for these macros to be so complicated, is that \TeX\ only has
+% addition, and multiplication with integer registries. There is no divsion
+% or float value functionality.
+%    \begin{macrocode}
+\def\@detw@d@ts{\ifnum\exp@c@unt>\@ne%
+        \advance\exp@c@unt-\tw@\hbox to 5\p@{\hss$\cdot\cdot$\hss}\fi}%    
+\def\@de@ned@ts{\@detempv@l=\the\exp@c@unt%
+    \loop\ifnum\@detempv@l>\tw@%
+        \advance\@detempv@l-\tw@\repeat%
+    \ifnum\@detempv@l<\tw@%
+        \advance\exp@c@unt\m@ne\hbox to 5\p@{\hss$\cdot$\hss}\fi}%    
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\@denewt@nd@t}
+% \hspace{1em} The generalized form of the the Newtonian derivative notation is 
+% is just a glorified fraction, with a dot as the denominator, and a number
+% as the numerator.
+%    \begin{macrocode}
+\def\@denewt@nd@t{\hbox{\vbox{%
+    \hbox to 5\p@{\hss\raise\thr@@\p@\hbox{$\scriptstyle\@deem@rex$}\hss}%
+    \hbox to 5\p@{\hss\hbox{$\displaystyle\cdot$}\hss}}}}%
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@deem@rex}
+% For the Leibniz notation, there is no reason to display the exponent
+% should it be an integer value less than 2, therefor, any 
+% exponent count less than two will be replaced with \cs{empty}.
+%    \begin{macrocode}
+\def\@deem@rex{\ifnum\tw@>\exp@c@unt\empty\else\the\exp@c@unt\fi}
+%    \end{macrocode}
+%
+% \begin{macro}{\@dedr@wm@rk}
+% \hspace{1em} Because both the Lagrangian and Newtonian notational styles involve
+% a physical marking being repeated, common macro was made that 
+% takes 3 arguments, the first will be for the initial placement,
+% the second argument is fed into a follow-up macro \cs{@derepe@tdr@w},
+% and the third argument is what
+% will be placed should the exponent count be higher than the max allowed.
+%
+% Effectively \cs{@dedr@wm@rk} is what checks whether it should be a marking 
+% or the more symbolic generalized form. 
+%    \begin{macrocode}
+\def\@dedr@wm@rk#1#2#3{
+    \ifnum\exp@c@unt<\m@xm@rk
+        #1\@derepe@tdr@w#2\else
+        #3\fi}
+%    \end{macrocode}
+% \begin{macro}{\@derepe@tdr@w}
+% While \cs{@derepe@tdr@w} is what provides the 
+% conditional looping enviroment to ensure the markings are placed;
+%    \begin{macrocode}
+\def\@derepe@tdr@w#1{\loop\ifnum\exp@c@unt>\z@#1\repeat}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\@derele@se}
+% Shorthand for allowing the final formed ode or pde to rise to the surface
+%    \begin{macrocode}
+\def\@derele@se{\noexpand{\box\@deresb@x}}
+%    \end{macrocode}
+% \end{macro}
+% 
+% \iffalse
+%</package>
+% \fi
+%
+% 
+% \iffalse
+%<package>\let\<\@desavedef
+%<package>\endinput
+% \fi
+%
+%
+%
+%
+% \Finale

@@ -1,0 +1,108 @@
+%% gitinfo-lua.sty
+%% Copyright 2024 E. Nijenhuis
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3c
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+% http://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+% This work has the LPPL maintenance status ‘maintained’.
+%
+% The Current Maintainer of this work is E. Nijenhuis.
+%
+% This work consists of the files gitinfo-lua.sty gitinfo-lua.pdf
+% gitinfo-lua-cmd.lua, gitinfo-lua-recorder.lua and gitinfo-lua.lua
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{gitinfo-lua}[2024/09/14 1.2.0 Xerdi's Git Package]
+
+\directlua{git = require('gitinfo-lua')}
+
+\RequirePackage{pgfopts}
+
+\newif\ifgit@multipleauthors
+\newif\ifgit@setmacros
+\newif\ifgit@toroot
+\pgfkeys{/gitinfo-lua/.is family,
+    /gitinfo-lua,
+    author sort/.default=false,
+    author sort/.store in=\git@author@sort,
+    author sort,
+    contrib/.style = {/git/author sort=true},
+    alpha/.style = {/git/author sort=false},
+    multiple authors/.is if=git@multipleauthors,
+    multiple authors=false,
+    author/.style={multiple authors=false},
+    authors/.style={multiple authors=true},
+    set title page macros/.is if=git@setmacros,
+    set title page macros=false,
+    titlepage/.style={set title page macros=true},
+    rootdir/.is if=git@toroot,
+    rootdir=false
+}
+
+\ProcessPgfPackageOptions*
+
+\newcommand*\git@single@arg[1]{#1}
+
+\newcommand*\gitversion{\directlua{git:write_version()}}
+\newcommand*\gitauthor{\directlua{git:write_local_author()}}
+\newcommand*\gitemail{\directlua{git:write_local_email()}}
+\newcommand*\gitdate{\directlua{git:cs_last_commit('git@single@arg', 'cs')}}
+\newcommand*\gitdirectory[1]{\directlua{git:dir('#1')}}
+\newcommand*\gitunsetdirectory{\directlua{git:dir(nil)}}
+\newcommand*\ifgitdirty[2]{%
+    \def\@dirtytrue{1}%
+    \edef\@dirty{\directlua{git:write_is_dirty()}}%
+    \ifx\@dirty\@dirtytrue
+        #1%
+    \else
+        #2%
+    \fi
+}
+
+\newcommand\git@format@author[2]{%
+    #1
+    \ifcsname href\endcsname%
+        \textlangle\href{mailto:#2}{#2}\textrangle%
+    \else%
+        \textlangle\texttt{#2}\textrangle%
+    \fi%
+}
+
+\newcommand*\dogitauthors[1][,~]{%
+    \directlua{git:cs_for_authors('git@format@author', '#1', \git@author@sort)}%
+}
+
+\newcommand*\forgitauthors[2][\authorconjunction]{%
+    \directlua{git:cs_for_authors('#2', '#1', \git@author@sort)}%
+}
+
+\def\git@default@tag@format{refname:short,(taggername)(taggername,taggeremail,taggerdate:short)(authorname,authoremail,authordate:short),subject,body}
+\newcommand{\gitcommit}[3][h,an,ae,as,s,b]{\directlua{git:cs_commit('#2', '#3', '#1')}}
+\newcommand{\forgitcommit}[3][h,an,ae,as,s,b]{\directlua{git:cs_for_commit('#2', '#3', '#1')}}
+\newcommand{\gittag}[3][\git@default@tag@format]{%
+    \directlua{git:cs_tag('#2', '#1', '#3')}%
+}
+\newcommand{\forgittag}[2][\git@default@tag@format]{%
+    \directlua{git:cs_for_tag('#2', '#1')}%
+}
+\newcommand{\forgittagseq}[1]{\directlua{git:cs_for_tag_sequence('#1')}}
+
+\ifgit@toroot
+    \directlua{git:dir_to_root()}
+\fi
+
+\ifgit@setmacros
+    \ifgit@multipleauthors
+        \author{\dogitauthors[\\\\]}
+    \else
+        \author{\gitauthor}
+    \fi
+    \directlua{git:set_date()}
+    \date{\today}
+\fi
+
+\endinput

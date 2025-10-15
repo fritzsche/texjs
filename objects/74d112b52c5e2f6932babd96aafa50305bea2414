@@ -1,0 +1,420 @@
+%% This is file `quran-en.sty', and it's completely relies on the quran package.
+%%
+%% Copyright © 2023-2025 by Seiied-Mohammad-Javad Razavian
+%% <javadr@gmail.com>
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either version 1.3c
+%% of this license or (at your option) any later version.
+%% The latest version of this license is in
+%%   http://www.latex-project.org/lppl.txt
+%% and version 1.3c or later is part of all distributions of LaTeX
+%% version 2005/12/01 or later.
+%%
+%% This work has the LPPL maintenance status `maintained'.
+%%
+%% This work is “author-maintained” (as per LPPL maintenance status)
+%% by Seiied-Mohammad-Javad Razavian..
+%% The Current Maintainer of this work is Seiied-Mohammad-Javad Razavian.
+%%
+%% This work consists of the files quran-en.sty,
+%% qurantext-enX.translation.def X \in [ii, ..., xvi],
+%% quran-en-doc.tex, quran-en-doc.pdf, and quran.png.
+%%
+%% To one having devoted his life to the Holy Quran
+%%
+\NeedsTeXFormat{LaTeX2e}
+\def\quranendate{2025/03/31}
+\def\quranenversion{0.11}
+\ProvidesPackage{quran-en}[%
+\quranendate\space v\quranenversion\space^^J
+English translation extension to the quran package.%
+]
+\RequirePackage{xstring}
+\RequirePackage{xkeyval}
+\define@boolkeys{quran-en.sty}[en@]{ahmedali,ahmedraza,arberry,daryabadi,hilali,itani,maududi,mubarakpuri,pickthall,qarai,qaribullah,sahih,sarwar,shakir,wahiduddin,yusufali,all}[true]
+\DeclareOptionX*{\PassOptionsToPackage{\CurrentOption}{quran}}
+\DeclareOption*{\PackageWarning{quran-en}{Unknown option ‘\CurrentOption’}}
+\ProcessOptionsX\relax
+\ifen@all
+    \ExecuteOptionsX{ahmedali,ahmedraza,arberry,daryabadi,hilali,itani,maududi,mubarakpuri,pickthall,qarai,qaribullah,sahih,sarwar,shakir,wahiduddin,yusufali}
+\else
+    \ExecuteOptionsX{ahmedali}
+\fi
+\RequirePackage[transen]{quran}[2020/03/03]
+%
+\ifen@ahmedali\PackageInfo{quran-en}{ahmedali's translation is chosen.}\fi%
+\ifen@ahmedraza\PackageInfo{quran-en}{ahmedraza's translation is chosen.}\fi%
+\ifen@arberry\PackageInfo{quran-en}{arberry's translation is chosen.}\fi%
+\ifen@daryabadi\PackageInfo{quran-en}{daryabadi's translation is chosen.}\fi%
+\ifen@hilali\PackageInfo{quran-en}{hilali's translation is chosen.}\fi%
+\ifen@itani\PackageInfo{quran-en}{itani's translation is chosen.}\fi%
+\ifen@maududi\PackageInfo{quran-en}{maududi's translation is chosen.}\fi%
+\ifen@mubarakpuri\PackageInfo{quran-en}{mubarakpuri's translation is chosen.}\fi%
+\ifen@pickthall\PackageInfo{quran-en}{pickthall's translation is chosen.}\fi%
+\ifen@qarai\PackageInfo{quran-en}{qarai's translation is chosen.}\fi%
+\ifen@qaribullah\PackageInfo{quran-en}{qaribullah's translation is chosen.}\fi%
+\ifen@sahih\PackageInfo{quran-en}{sahih's translation is chosen.}\fi%
+\ifen@sarwar\PackageInfo{quran-en}{sarwar's translation is chosen.}\fi%
+\ifen@shakir\PackageInfo{quran-en}{shakir's translation is chosen.}\fi%
+\ifen@wahiduddin\PackageInfo{quran-en}{wahiduddin's translation is chosen.}\fi%
+\ifen@yusufali\PackageInfo{quran-en}{yusufali's translation is chosen.}\fi%
+%
+\newcount\trans@en%
+\trans@en=\z@%
+\define@choicekey*+{quran-en}{trans}[\val\nr]{ahmedali,ahmedraza,arberry,daryabadi,hilali,itani,maududi,mubarakpuri,pickthall,qarai,qaribullah,sahih,sarwar,shakir,wahiduddin,yusufali}{%
+    \ifcase\nr\relax\global\trans@en=\z@\relax%
+    \or\global\trans@en=\@ne\relax%
+    \or\global\trans@en=\tw@\relax%
+    \or\global\trans@en=\thr@@\relax%
+    \or\global\trans@en=4\relax%
+    \or\global\trans@en=5\relax%
+    \or\global\trans@en=6\relax%
+    \or\global\trans@en=7\relax%
+    \or\global\trans@en=8\relax%
+    \or\global\trans@en=9\relax%
+    \or\global\trans@en=10\relax%
+    \or\global\trans@en=11\relax%
+    \or\global\trans@en=12\relax%
+    \or\global\trans@en=13\relax%
+    \or\global\trans@en=14\relax%
+    \or\global\trans@en=15\relax%
+ \fi}{%
+    \PackageWarning{quran-en}{\string \enSetTrans' paramenter should be one of  `ahmedali', `ahmedraza', `arberry', `daryabadi', `hilali', `itani', `maududi', `mubarakpuri', `pickthall', `qarai', `qaribullah', `sahih', `sarwar', `shakir', `wahiduddin', or `yusufali'. The package sets to `ahmedali' by default.}{}%
+    \global\trans@en=\z@\relax%
+}%
+\newcommand*{\enGetTrans}{%
+    \ifcase\trans@en ahmedali%
+    \or ahmedraza%
+    \or arberry%
+    \or daryabadi%
+    \or hilali%
+    \or itani%
+    \or maududi%
+    \or mubarakpuri%
+    \or pickthall%
+    \or qarai%
+    \or qaribullah%
+    \or sahih%
+    \or sarwar%
+    \or shakir%
+    \or wahiduddin%
+    \or yusufali%
+    \fi%
+}
+%
+\newcommand{\enSetTrans}[1]{%
+\IfInteger{#1}%
+{%Yes
+\count255=#1%
+\advance\count255 by -1\relax%
+\trans@en=\count255%
+}{%NO
+\setkeys{quran-en}{trans=#1}%
+}%
+%
+%\let\bidi@newrobustcmd\bidi@renewrobustcmd
+\ifqt@wordwise%
+    \makeatother\let\qt@newcmd\renewcommand\makeatletter%
+\else%
+    \makeatother\let\qt@newcmd\bidi@renewrobustcmd\makeatletter%
+\fi%
+\ifcase\trans@en%
+    \ifen@ahmedali%1
+        \ifx\basmalahen\relax\else%
+            \def\basmalahen{In the name of Allah, most benevolent, ever-merciful. \qt@par}%
+        \fi%
+        \bidi@renewrobustcmd\ToggleBasmalahen{%
+            \ifx\basmalahen\relax%
+                \def\basmalahen{In the name of Allah, most benevolent, ever-merciful. \qt@par}%
+            \else%
+                \let\basmalahen\relax%
+            \fi%
+        }%
+        \input{qurantext-en.translation.def}%
+    \else%
+        \PackageError{quran-en}{Ahmedali's translation has not been loaded}{}%
+    \fi%
+\or%
+    \ifen@ahmedraza%2
+        \ifx\basmalahen\relax\else%
+            \def\basmalahen{Allah - beginning with the name of - the Most Gracious, the Most Merciful. \qt@par}%
+        \fi
+        \bidi@renewrobustcmd\ToggleBasmalahen{%
+            \ifx\basmalahen\relax%
+                \def\basmalahen{Allah - beginning with the name of - the Most Gracious, the Most Merciful. \qt@par}%
+            \else%
+                \let\basmalahen\relax%
+            \fi%
+        }%
+        \input{qurantext-enii.translation.def}%
+    \else%
+        \PackageError{quran-en}{'s translation has not been loaded}{}%
+    \fi
+    \or%
+    \ifen@arberry%3
+        \ifx\basmalahen\relax\else%
+            \def\basmalahen{In the Name of God, the Merciful, the Compassionate. \qt@par}%
+        \fi
+        \bidi@renewrobustcmd\ToggleBasmalahen{%
+            \ifx\basmalahen\relax%
+                \def\basmalahen{In the Name of God, the Merciful, the Compassionate. \qt@par}%
+            \else%
+                \let\basmalahen\relax%
+            \fi%
+        }%
+        \input{qurantext-eniii.translation.def}%
+    \else%
+        \PackageError{quran-en}{Ahmedraza's translation has not been loaded}{}%
+    \fi
+    \or%
+    \ifen@daryabadi%4
+        \ifx\basmalahen\relax\else%
+            \def\basmalahen{In the name of Allah, the Compassionate, the Merciful. \qt@par}%
+        \fi
+        \bidi@renewrobustcmd\ToggleBasmalahen{%
+            \ifx\basmalahen\relax%
+                \def\basmalahen{In the name of Allah, the Compassionate, the Merciful. \qt@par}%
+            \else%
+                \let\basmalahen\relax%
+            \fi%
+        }%
+        \input{qurantext-eniv.translation.def}%
+    \else%
+        \PackageError{quran-en}{Daryabadi's translation has not been loaded}{}%
+    \fi
+    \or%
+    \ifen@hilali%5
+        \ifx\basmalahen\relax\else%
+            \def\basmalahen{In the Name of Allah, the Most Beneficent, the Most Merciful. \qt@par}%
+        \fi
+        \bidi@renewrobustcmd\ToggleBasmalahen{%
+            \ifx\basmalahen\relax%
+                \def\basmalahen{In the Name of Allah, the Most Beneficent, the Most Merciful. \qt@par}%
+            \else%
+                \let\basmalahen\relax%
+            \fi%
+        }%
+        \input{qurantext-env.translation.def}%
+    \else%
+        \PackageError{quran-en}{Hilali's translation has not been loaded}{}%
+    \fi
+    \or%
+    \ifen@itani%6
+        \ifx\basmalahen\relax\else%
+            \def\basmalahen{In the name of God, the Gracious, the Merciful. \qt@par}%
+        \fi
+        \bidi@renewrobustcmd\ToggleBasmalahen{%
+            \ifx\basmalahen\relax%
+                \def\basmalahen{In the name of God, the Gracious, the Merciful. \qt@par}%
+            \else%
+                \let\basmalahen\relax%
+            \fi%
+        }%
+        \input{qurantext-envi.translation.def}%
+    \else%
+        \PackageError{quran-en}{Itani's translation has not been loaded}{}%
+    \fi
+    \or%
+    \ifen@maududi%7
+        \ifx\basmalahen\relax\else%
+            \def\basmalahen{In the name of Allah, the Merciful, the Compassionate. \qt@par}%
+        \fi
+        \bidi@renewrobustcmd\ToggleBasmalahen{%
+            \ifx\basmalahen\relax%
+                \def\basmalahen{In the name of Allah, the Merciful, the Compassionate. \qt@par}%
+            \else%
+                \let\basmalahen\relax%
+            \fi%
+        }%
+        \input{qurantext-envii.translation.def}%
+    \else%
+        \PackageError{quran-en}{Maududi's translation has not been loaded}{}%
+    \fi
+    \or%
+    \ifen@mubarakpuri%8
+        \ifx\basmalahen\relax\else%
+            \def\basmalahen{In the Name of Allah, the Most Gracious, the Most Merciful. \qt@par}%
+        \fi
+        \bidi@renewrobustcmd\ToggleBasmalahen{%
+            \ifx\basmalahen\relax%
+                \def\basmalahen{In the Name of Allah, the Most Gracious, the Most Merciful. \qt@par}%
+            \else%
+                \let\basmalahen\relax%
+            \fi%
+        }%
+        \input{qurantext-enviii.translation.def}%
+    \else%
+        \PackageError{quran-en}{Mubarakpuri's translation has not been loaded}{}%
+    \fi
+    \or%
+    \ifen@pickthall%9
+        \ifx\basmalahen\relax\else%
+            \def\basmalahen{In the name of Allah, the Beneficent, the Merciful. \qt@par}%
+        \fi
+        \bidi@renewrobustcmd\ToggleBasmalahen{%
+            \ifx\basmalahen\relax%
+                \def\basmalahen{In the name of Allah, the Beneficent, the Merciful. \qt@par}%
+            \else%
+                \let\basmalahen\relax%
+            \fi%
+        }%
+        \input{qurantext-enix.translation.def}%
+    \else%
+        \PackageError{quran-en}{Pickthall's translation has not been loaded}{}%
+    \fi
+    \or%
+    \ifen@qarai%10
+        \ifx\basmalahen\relax\else%
+            \def\basmalahen{In the Name of Allah, the All-beneficent, the All-merciful. \qt@par}%
+        \fi
+        \bidi@renewrobustcmd\ToggleBasmalahen{%
+            \ifx\basmalahen\relax%
+                \def\basmalahen{In the Name of Allah, the All-beneficent, the All-merciful. \qt@par}%
+            \else%
+                \let\basmalahen\relax%
+            \fi%
+        }%
+        \input{qurantext-enx.translation.def}%
+    \else%
+        \PackageError{quran-en}{Qarai's translation has not been loaded}{}%
+    \fi
+    \or%
+    \ifen@qaribullah%11
+        \ifx\basmalahen\relax\else%
+            \def\basmalahen{In the Name of Allah, the Merciful, the Most Merciful. \qt@par}%
+        \fi
+        \bidi@renewrobustcmd\ToggleBasmalahen{%
+            \ifx\basmalahen\relax%
+                \def\basmalahen{In the Name of Allah, the Merciful, the Most Merciful. \qt@par}%
+            \else%
+                \let\basmalahen\relax%
+            \fi%
+        }%
+        \input{qurantext-enxi.translation.def}%
+    \else%
+        \PackageError{quran-en}{Qaribullah's translation has not been loaded}{}%
+    \fi
+    \or%
+    \ifen@sahih%12
+        \ifx\basmalahen\relax\else%
+            \def\basmalahen{In the name of Allah, the Entirely Merciful, the Especially Merciful. \qt@par}%
+        \fi
+        \bidi@renewrobustcmd\ToggleBasmalahen{%
+            \ifx\basmalahen\relax%
+                \def\basmalahen{In the name of Allah, the Entirely Merciful, the Especially Merciful. \qt@par}%
+            \else%
+                \let\basmalahen\relax%
+            \fi%
+        }%
+        \input{qurantext-enxii.translation.def}%
+    \else%
+        \PackageError{quran-en}{Sahih's translation has not been loaded}{}%
+    \fi
+    \or%
+    \ifen@sarwar%13
+        \ifx\basmalahen\relax\else%
+            \def\basmalahen{In the Name of Allah, the Beneficent, the Merciful. \qt@par}%
+        \fi
+        \bidi@renewrobustcmd\ToggleBasmalahen{%
+            \ifx\basmalahen\relax%
+                \def\basmalahen{In the Name of Allah, the Beneficent, the Merciful. \qt@par}%
+            \else%
+                \let\basmalahen\relax%
+            \fi%
+        }%
+        \input{qurantext-enxiii.translation.def}%
+    \else%
+        \PackageError{quran-en}{Sarwar's translation has not been loaded}{}%
+    \fi
+    \or%
+    \ifen@shakir%14
+        \ifx\basmalahen\relax\else%
+            \def\basmalahen{In the name of Allah, the Beneficent, the Merciful. \qt@par}%
+        \fi
+        \bidi@renewrobustcmd\ToggleBasmalahen{%
+            \ifx\basmalahen\relax%
+                \def\basmalahen{In the name of Allah, the Beneficent, the Merciful. \qt@par}%
+            \else%
+                \let\basmalahen\relax%
+            \fi%
+        }%
+        \input{qurantext-enxiv.translation.def}%
+    \else%
+        \PackageError{quran-en}{Shakir's translation has not been loaded}{}%
+    \fi
+    \or%
+    \ifen@wahiduddin%15
+        \ifx\basmalahen\relax\else%
+            \def\basmalahen{In the name of God, the Most Gracious, the Most Merciful. \qt@par}%
+        \fi
+        \bidi@renewrobustcmd\ToggleBasmalahen{%
+            \ifx\basmalahen\relax%
+                \def\basmalahen{In the name of God, the Most Gracious, the Most Merciful. \qt@par}%
+            \else%
+                \let\basmalahen\relax%
+            \fi%
+        }%
+        \input{qurantext-enxv.translation.def}%
+    \else%
+        \PackageError{quran-en}{wahiduddin's translation has not been loaded}{}%
+    \fi
+    \or%
+    \ifen@yusufali%16
+        \ifx\basmalahen\relax\else%
+            \def\basmalahen{In the name of Allah, Most Gracious, Most Merciful. \qt@par}%
+        \fi
+        \bidi@renewrobustcmd\ToggleBasmalahen{%
+            \ifx\basmalahen\relax%
+                \def\basmalahen{In the name of Allah, Most Gracious, Most Merciful. \qt@par}%
+            \else%
+                \let\basmalahen\relax%
+            \fi%
+        }%
+        \input{qurantext-enxvi.translation.def}%
+    \else%
+        \PackageError{quran-en}{Yusufali's translation has not been loaded}{}%
+    \fi
+\else%
+    \PackageError{quran-en}{\string \enSetTrans{} paramenter should be between 1 to 16 }{}%
+\fi
+}%
+\bidi@renewrobustcmd\ToggleBasmalahen{%
+    \ifx\basmalahen\relax%
+        \ifcase\trans@en%1 ahmedali
+            \def\basmalahen{In the name of Allah, most benevolent, ever-merciful. \qt@par}%
+        \or%2 ahmedraza
+            \def\basmalahen{Allah - beginning with the name of - the Most Gracious, the Most Merciful. \qt@par}%
+        \or%3 arberry
+            \def\basmalahen{In the Name of God, the Merciful, the Compassionate. \qt@par}%
+        \or%4 daryabadi
+            \def\basmalahen{In the name of Allah, the Compassionate, the Merciful. \qt@par}%
+        \or%5 hilali
+            \def\basmalahen{In the Name of Allah, the Most Beneficent, the Most Merciful. \qt@par}%
+        \or%6 itani
+            \def\basmalahen{In the name of God, the Gracious, the Merciful. \qt@par}%
+        \or%7 maududi
+            \def\basmalahen{In the name of Allah, the Merciful, the Compassionate. \qt@par}%
+        \or%8 mubarakpuri
+            \def\basmalahen{In the Name of Allah, the Most Gracious, the Most Merciful. \qt@par}%
+        \or%9 pickthall
+            \def\basmalahen{In the name of Allah, the Beneficent, the Merciful. \qt@par}%
+        \or%10 qarai
+            \def\basmalahen{In the Name of Allah, the All-beneficent, the All-merciful. \qt@par}%
+        \or%11 qaribullah
+            \def\basmalahen{In the Name of Allah, the Merciful, the Most Merciful. \qt@par}%
+        \or%12 sahih
+            \def\basmalahen{In the name of Allah, the Entirely Merciful, the Especially Merciful. \qt@par}%
+        \or%13 sarwar
+            \def\basmalahen{In the Name of Allah, the Beneficent, the Merciful. \qt@par}%
+        \or%14 shakir
+            \def\basmalahen{In the name of Allah, the Beneficent, the Merciful. \qt@par}%
+        \or%15 wahiduddin
+            \def\basmalahen{In the name of God, the Most Gracious, the Most Merciful. \qt@par}%
+        \or%16 yusufali
+            \def\basmalahen{In the name of Allah, Most Gracious, Most Merciful. \qt@par}%
+        \fi%
+    \else%
+        \let\basmalahen\relax%
+    \fi%
+}%
+%% End of file `quran-en.sty'.

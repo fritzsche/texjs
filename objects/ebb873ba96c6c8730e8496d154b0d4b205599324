@@ -1,0 +1,70 @@
+% -*- coding: utf-8 -*-
+% ----------------------------------------------------------------------------
+% Author:  Jianrui Lyu <tolvjr@163.com>
+% License: The LaTeX Project Public License 1.3c
+% ----------------------------------------------------------------------------
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{freealign}[2024-01-01 v2024A Align math formulas in different lines]
+
+\RequirePackage{etoolbox,zref-savepos}
+
+\@ifundefined{zsaveposx}{\let\zsaveposx\zsavepos}{} % 旧版本无 \zsaveposx 命令
+
+\newcounter{saveposcnt}
+\newcounter{useposcnt}
+\renewcommand*{\thesaveposcnt}{savepos\number\value{saveposcnt}}
+\renewcommand*{\theuseposcnt}{usepos\number\value{useposcnt}}
+
+\def\my@alignment@offset{}
+
+\def\my@alignment@list{}
+\forcsvlist{\listadd\my@alignment@list}{=,<,>,\le,\ge,\leq,\geq,\approx}
+
+\newlength{\my@alignment@kern}
+
+\newcommand*{\my@alignment@check}[1]{%
+  \ifx\my@let@token #1%
+    \def\my@alignment@offset{5}%
+    \expandafter\listbreak
+  \fi
+}
+
+\newcommand{\my@alignment@next}{%
+  \ifdefempty{\my@alignment@offset}{%
+    \def\my@alignment@offset{0}%
+    \forlistloop{\my@alignment@check}{\my@alignment@list}%
+  }{}%
+  \settowidth{\my@alignment@kern}{$\mkern\my@alignment@offset mu$}%
+  \stepcounter{saveposcnt}%
+  \rlap{\kern\my@alignment@kern\zsaveposx{\thesaveposcnt}}%
+}
+
+\newcommand*{\tabpoint}[1][]{%
+  \leavevmode
+  \def\my@alignment@offset{#1}%
+  \futurelet\my@let@token\my@alignment@next
+}
+\let \? = \tabpoint
+
+\newcommand*{\tabto}{%
+  \stepcounter{useposcnt}%
+  \zsaveposx{\theuseposcnt}%
+  \noindent
+  \hskip\zposx{\thesaveposcnt}sp\relax
+  \hskip-\zposx{\theuseposcnt}sp\relax
+  \ignorespaces
+}
+\let \+ = \tabto
+
+\newcommand*{\tableft}{%
+  \settowidth{\my@alignment@kern}{$=\mkern5mu$}%
+  \stepcounter{useposcnt}%
+  \zsaveposx{\theuseposcnt}%
+  \noindent
+  \hskip\zposx{\thesaveposcnt}sp\relax
+  \hskip-\zposx{\theuseposcnt}sp\relax
+  \hskip-\my@alignment@kern
+  \ignorespaces
+}
+\let \< = \tableft

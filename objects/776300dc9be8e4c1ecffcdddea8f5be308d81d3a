@@ -1,0 +1,99 @@
+  %% Copyright 2023 Francesco Lambertini
+  %
+  % This work may be distributed and/or modified under the
+  % conditions of the LaTeX Project Public License, either version 1.3c
+  % of this license or any later version.
+  % The latest version of this license is in
+  %   http://www.latex-project.org/lppl.txt
+  % and version 1.3c or later is part of all distributions of LaTeX
+  % version 2023/04/17 or later.
+  %
+  % This work has the LPPL maintenance status `maintained'.
+  % 
+  % The Current Maintainer of this work is Francesco Lambertini.
+  %
+  % This work consists of the files quickreaction.sty, quickreaction.tex and quickreaction.pdf.
+  %
+  % v1.02.01 2023/04/17
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{quickreaction}[2023/04/17]
+
+\RequirePackage{tikz}
+\RequirePackage{xparse}
+
+\usetikzlibrary{matrix}
+\usetikzlibrary{positioning}
+
+\DeclareOption{iupac}{%
+\renewcommand{\printatom}[1]{%
+\fontsize{8pt}{10pt}\selectfont{\ensuremath{\mathsf{#1}}}}
+\setchemfig{
+cram rectangle=false,
+cram width=2.5pt,
+cram dash width=0.5pt,
+cram dash sep=1.5pt,
+atom sep=16pt,
+bond offset=1pt,
+double bond sep=2pt,
+bond join = true,
+bond style={line width=0.5pt}
+}
+}
+\ProcessOptions\relax
+
+\makeatletter
+\newcommand{\settomaxwidth}[1]{\saltyarrow@settomax{\wd}{#1}}
+\newcommand{\saltyarrow@settomax}[3]{%
+\newdimen\pippo
+\pippo=1cm
+  #2\pippo
+  \@for\next:=#3\do{%
+    \sbox\z@{\next}%
+    \ifdim#1\z@>#2%
+      #2=#1\z@
+    \fi}%
+}
+\makeatother
+
+\newlength{\saltyarrowmax}
+
+\newlength{\fixrow}
+
+\NewDocumentEnvironment{quickreaction}{O{} O{} b}{%
+%
+\newbox\fixa
+\newbox\fixb
+\savebox{\fixa}{#1}
+\savebox{\fixb}{#2}
+\def\a{\the\dp\fixa}
+\def\aa{\the\ht\fixa}
+\def\b{\the\dp\fixb}
+\def\bb{\the\ht\fixb}
+\pgfmathsetlength{\fixrow}{(\a+\aa-\b-\bb)/2)}
+%
+\newcommand{\reactionbody}{#3}
+    \begin{tikzpicture}[baseline=(current  bounding  box.center)]
+     \matrix (reaction) [%
+     ampersand replacement=\&,
+     matrix of nodes,
+     column sep=\pgflinewidth, 
+     row sep=\pgflinewidth, 
+     nodes={anchor=center},
+     ] {\reactionbody};
+     \end{tikzpicture}%
+     }{}
+
+\NewDocumentCommand{\quickarrow}{O{} O{}}{%
+\newcommand{\argone}{#1}%
+\newcommand{\argtwo}{#2}%
+\settomaxwidth{\saltyarrowmax}{\argone, \argtwo}%
+\begin{tikzpicture}
+ \draw [-stealth] (-0.5,0) -- node[anchor=center] (X) {} (\the\saltyarrowmax,0); 
+     \node (A) [above= 0pt of X] {\argone};
+     \node (B) [below= 0pt of X] {\argtwo};
+    \phantom{ \node (AA) [below= 0pt of X] {\argone};}
+    \phantom{ \node (BB) [above= 0pt of X] {\argtwo};}
+\end{tikzpicture}
+}
+
+

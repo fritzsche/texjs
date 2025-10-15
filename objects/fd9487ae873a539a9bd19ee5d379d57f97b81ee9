@@ -1,0 +1,791 @@
+%%%
+% Pyramide de calculs
+%%%
+\def\filedatePyraCalc{2025/05/29}%
+\def\fileversionPyraCalc{0.2a}%
+\message{-- \filedatePyraCalc\space v\fileversionPyraCalc}%
+%
+\setKVdefault[PyraCrea]{ValeurMin=1,ValeurMax=10,NbEtages=5,Graine=1,Solution=false,Largeur=1cm,Hauteur=8mm,Multiplication=false,Litteral=false,Lettre=x,Fond=false,Couleur={},CouleurSolution={}}%
+\defKV[PyraCrea]{%
+  CouleurSolution=\ifempty{#1}{}{\setKV[PyraCrea]{Solution}},%
+  Couleur=\ifempty{#1}{}{\setKV[PyraCrea]{CouleurSolution=#1}}%
+}%
+%
+\NewDocumentCommand\PyramideNombreCreation{o}{%
+  \useKVdefault[PyraCrea]%
+  \setKV[PyraCrea]{#1}%
+  \xdef\PyraCreaEtages{\useKV[PyraCrea]{NbEtages}}%
+  \xdef\PyraCreaVMin{\useKV[PyraCrea]{ValeurMin}}%
+  \xdef\PyraCreaVMax{\useKV[PyraCrea]{ValeurMax}}%
+  \PfCGraineAlea{\useKV[PyraCrea]{Graine}}%
+  \ChoixAleaMultiMix{\PyraCreaEtages}{\PyraCreaVMin}{\PyraCreaVMax}{0}{\ListeNombresAv}%
+  \ifboolKV[PyraCrea]{Litteral}{%
+    \ChoixAleaMultiMix{\PyraCreaEtages}{\PyraCreaVMin}{\PyraCreaVMax}{0}{\ListeCoefAv}%
+    \BuildMPPyraCreaRegroupe{\PyraCreaEtages}{\ListeNombresAv}{\ListeCoefAv}%
+  }{%
+    \BuildMPPyraCreaRegroupe{\PyraCreaEtages}{\ListeNombresAv}{}%
+  }%
+}%
+%
+\NewDocumentCommand\BuildMPPyraCreaRegroupe{mmm}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \mplibnumbersystem{double}%
+    \begin{mplibcode}
+      randomseed:=\useKV[PyraCrea]{Graine};
+      
+      boolean Solution,Multiplication,Litteral,Fond;
+      Solution=\useKV[PyraCrea]{Solution};
+      Multiplication=\useKV[PyraCrea]{Multiplication};
+      Litteral=\useKV[PyraCrea]{Litteral};
+      Fond=\useKV[PyraCrea]{Fond};
+      
+      if Solution:
+      color CouleurSolution;
+      CouleurSolution=\useKV[PyraCrea]{CouleurSolution};
+      fi;
+      
+      NbEtages=#1;
+
+      numeric Lignes[][];
+      numeric PyraNombre[];
+      numeric Allumage[][];%etage/colonne
+
+      picture RetiensEtiquette[][];
+      
+      Largeur=\useKV[PyraCrea]{Largeur};
+      Hauteur=\useKV[PyraCrea]{Hauteur};
+
+      def ChoixAlea=ceiling(uniformdeviate(2)) enddef;
+
+      Allumage[1][1]=ChoixAlea;
+      for k=2 upto NbEtages-1:
+        Allumage[k][1]=ChoixAlea;
+        for l=2 upto k:
+          if (Allumage[k][l-1]+Allumage[k-1][l-1])=4:
+            Allumage[k][l]=1;
+          else:
+            Allumage[k][l]=ChoixAlea;
+          fi;
+        endfor;
+      endfor;
+
+      if Allumage[NbEtages-1][1]=1:
+        Allumage[NbEtages][1]=2;
+      else:
+        Allumage[NbEtages][1]=ChoixAlea;
+      fi;
+      for k=2 upto NbEtages:
+      if Allumage[NbEtages][k-1]=1:
+        Allumage[NbEtages][k]=2;
+      else:
+        if Allumage[NbEtages-1][k-1]=1:
+          Allumage[NbEtages][k]=2;
+        else:
+        Allumage[NbEtages][k]=1;
+        fi;
+        fi;
+      endfor;
+      % Definition première ligne
+      nb=0;
+      for p_=#2:
+      nb:=nb+1;
+      Lignes[NbEtages][nb]=p_;
+      endfor;
+      nb:=0;
+      if Litteral:
+      for p_=#3:
+      nb:=nb+1;
+      LignesLitteral[NbEtages][nb]=p_;
+      endfor;
+      fi;
+      %
+      %Dessin
+      path Case[][];
+      for k=1 upto NbEtages:
+        Case[NbEtages][k]=(unitsquare xscaled Largeur yscaled Hauteur) shifted((k-1)*(Largeur,0));
+        RetiensEtiquette[NbEtages][k]=image(
+        if Litteral:
+          label(TEX("\Affichage[Lettre=\useKV[PyraCrea]{Lettre}]{0}{"&decimal(LignesLitteral[NbEtages][k])&"}{"&decimal(Lignes[NbEtages][k])&"}"),center Case[NbEtages][k]);
+        else:
+          label(TEX("\num{"&decimal(Lignes[NbEtages][k])&"}"),center Case[NbEtages][k]);
+        fi;
+        );
+        if Allumage[NbEtages][k]=1:
+          if Solution:
+            if Fond:
+              fill Case[NbEtages][k] withcolor CouleurSolution;
+            else:
+              drawoptions(withcolor CouleurSolution);
+            fi;
+            draw RetiensEtiquette[NbEtages][k];
+            drawoptions();
+          fi;
+        else:
+          draw RetiensEtiquette[NbEtages][k];
+        fi;
+      endfor;
+      for k=NbEtages-1 downto 1:
+        for l=1 upto k:
+          if Multiplication:
+            Lignes[k][l]=Lignes[k+1][l]*Lignes[k+1][l+1];
+          else:
+            Lignes[k][l]=Lignes[k+1][l]+Lignes[k+1][l+1];
+            if Litteral:
+              LignesLitteral[k][l]=LignesLitteral[k+1][l]+(LignesLitteral[k+1][l+1]);
+            fi;
+          fi;
+          Case[k][l]=(unitsquare xscaled Largeur yscaled Hauteur) shifted(((l-1)*Largeur,(NbEtages-k)*Hauteur)+(NbEtages-k)*(0.5*Largeur,0));
+          %trace Case[k][l];
+          RetiensEtiquette[k][l]=image(
+            if Litteral:
+              label(TEX("\Affichage[Lettre=\useKV[PyraCrea]{Lettre}]{0}{"&decimal(LignesLitteral[k][l])&"}{"&decimal(Lignes[k][l])&"}"),center Case[k][l]);
+            else:
+              label(TEX("\num{"&decimal(Lignes[k][l])&"}"),center Case[k][l]);
+            fi;
+          );
+          if Allumage[k][l]=1:
+            if Solution:
+              if Fond:
+              fill Case[k][l] withcolor CouleurSolution;
+              else:
+                drawoptions(withcolor CouleurSolution);
+              fi;
+              draw RetiensEtiquette[k][l];
+              drawoptions();
+            fi;
+          else:
+            draw RetiensEtiquette[k][l];
+          fi;  
+        endfor;
+      endfor;
+      for k=NbEtages downto 1:
+        for l=1 upto k:
+          trace Case[k][l];
+        endfor;
+      endfor;
+    \end{mplibcode}%
+    \mplibnumbersystem{scaled}%
+  \fi%
+}%
+%
+\newcommand\DessinePyramideNombreMul[1]{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}%
+    pair A[],B[],O;
+    cote:=\useKV[ClesPyramide]{Cote};
+    boolean Aide,Produit,Solution,Vide;
+    Aide:=\useKV[ClesPyramide]{Aide};
+    Vide:=\useKV[ClesPyramide]{Vide};
+    Produit:=\useKV[ClesPyramide]{Produit};
+    Solution:=\useKV[ClesPyramide]{Solution};
+    A1=u*(1,1);
+    A2-A1=cote*(1,0);
+    A3=rotation(A2,A1,60);
+    A4=A1;
+    B1=iso(A1,A2);
+    B2=iso(A2,A3);
+    B3=iso(A3,A1);
+    O=iso(A1,A2,A3);
+    path BoiteRec;
+    BoiteRec=((-0.4,-0.5)--(0.4,-0.5){dir0}..{dir90}(0.5,-0.4)--(0.5,0.4){dir90}..{dir180}(0.4,0.5)--(-0.4,0.5){dir180}..{dir-90}(-0.5,0.4)--(-0.5,-0.4){dir-90}..cycle) scaled 1u;
+    % On trace et on affiche...éventuellement :)
+    trace polygone(A1,A2,A3);
+    for k=1 upto 3:
+    trace segment(O,B[k]) dashed withdots scaled 0.25;
+    draw BoiteRec shifted (1.75[O,B[k]]-center BoiteRec) dashed evenly scaled 0.5;
+    endfor;
+    if Vide:
+    else:
+    % On récupère les valeurs pour déterminer les produits
+    k=0;
+    for p_=#1:
+    k:=k+1;
+    Facteur[k]=p_;
+    endfor;
+    Produit[1]=Facteur[1] * Facteur[2];
+    Produit[2]=Facteur[2] * Facteur[3];
+    Produit[3]=Facteur[3] * Facteur[1];
+    for k=1 upto 3:
+    if Produit or Solution:
+    label(TEX("\num{"&decimal(Produit[k])&"}"),(1.75[O,B[k]]-center BoiteRec));
+    fi;
+    if Produit:
+    else:
+    label(TEX("\num{"&decimal(Facteur[k])&"}"),(0.5[O,A[k]]-center BoiteRec));
+    fi;
+    endfor;
+    fi;
+    if Aide:
+    for k=1 upto 3:
+    drawarrow (0.5[O,A[k]]--1.75[O,B[k]]) cutbefore segment(A[k],A[k+1]) cutafter BoiteRec shifted (1.75[O,B[k]]-center BoiteRec) dashed evenly scaled 0.5;
+    drawarrow (0.5[O,A[k+1]]--1.75[O,B[k]]) cutbefore segment(A[k],A[k+1]) cutafter BoiteRec shifted (1.75[O,B[k]]-center BoiteRec) dashed evenly scaled 0.5;
+    endfor;
+    fi;
+  \end{mplibcode}%
+  \else%
+  \begin{mpost}[mpsettings={cote:=\useKV[ClesPyramide]{Cote};
+      boolean Aide,Produit,Solution,Vide;
+      Aide:=\useKV[ClesPyramide]{Aide};
+      Vide:=\useKV[ClesPyramide]{Vide};
+      Produit:=\useKV[ClesPyramide]{Produit};
+      Solution:=\useKV[ClesPyramide]{Solution};}]
+    pair A[],B[],O;
+    A1=u*(1,1);
+    A2-A1=cote*(1,0);
+    A3=rotation(A2,A1,60);
+    A4=A1;
+    B1=iso(A1,A2);
+    B2=iso(A2,A3);
+    B3=iso(A3,A1);
+    O=iso(A1,A2,A3);
+    path BoiteRec;
+    BoiteRec=((-0.4,-0.5)--(0.4,-0.5){dir0}..{dir90}(0.5,-0.4)--(0.5,0.4){dir90}..{dir180}(0.4,0.5)--(-0.4,0.5){dir180}..{dir-90}(-0.5,0.4)--(-0.5,-0.4){dir-90}..cycle) scaled 1u;
+    % On trace et on affiche...éventuellement :)
+    trace polygone(A1,A2,A3);
+    for k=1 upto 3:
+    trace segment(O,B[k]) dashed withdots scaled 0.25;
+    draw BoiteRec shifted (1.75[O,B[k]]-center BoiteRec) dashed evenly scaled 0.5;
+    endfor;
+    if Vide:
+    else:
+    % On récupère les valeurs pour déterminer les produits
+    k=0;
+    for p_=#1:
+    k:=k+1;
+    Facteur[k]=p_;
+    endfor;
+    Produit[1]=Facteur[1] * Facteur[2];
+    Produit[2]=Facteur[2] * Facteur[3];
+    Produit[3]=Facteur[3] * Facteur[1];
+    for k=1 upto 3:
+    if Produit or Solution:
+    label(LATEX("\num{"&decimal(Produit[k])&"}"),(1.75[O,B[k]]-center BoiteRec));
+    fi;
+    if Produit:
+    else:
+    label(LATEX("\num{"&decimal(Facteur[k])&"}"),(0.5[O,A[k]]-center BoiteRec));
+    fi;
+    endfor;
+    fi;
+    if Aide:
+    for k=1 upto 3:
+    drawarrow (0.5[O,A[k]]--1.75[O,B[k]]) cutbefore segment(A[k],A[k+1]) cutafter BoiteRec shifted (1.75[O,B[k]]-center BoiteRec) dashed evenly scaled 0.5;
+    drawarrow (0.5[O,A[k+1]]--1.75[O,B[k]]) cutbefore segment(A[k],A[k+1]) cutafter BoiteRec shifted (1.75[O,B[k]]-center BoiteRec) dashed evenly scaled 0.5;
+    endfor;
+    fi;
+  \end{mpost}%
+  \fi%
+}%
+
+\newcommand\DessinePyramideNombre[1]{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}%
+    pair A[][],B[];
+    path Case[];
+    color CaseCouleur;
+    nbetages:=\useKV[ClesPyramide]{Etages};
+    largeur:=\useKV[ClesPyramide]{Largeur};
+    hauteur:=\useKV[ClesPyramide]{Hauteur};
+    CaseCouleur:=\useKV[ClesPyramide]{Couleur};
+    boolean Double;
+    Double=\useKV[ClesPyramide]{Double};
+    Nbeb:=0;%Pour associer les textes avec les points. Plus facile :)
+    if Double:
+    for k=nbetages downto 1:
+    for l=0 upto (k-1):
+    Nbeb:=Nbeb+1;
+    A[k][l]=(0,0)+(nbetages-k)*(largeur/2,0)+(l*largeur,(nbetages-k)*hauteur);
+    B[Nbeb]=A[k][l];
+    Case[Nbeb]=((unitsquare xscaled largeur) yscaled hauteur) shifted (A[k][l]-0.5*(largeur,hauteur));
+    trace Case[Nbeb];
+    endfor;
+    endfor;
+    for k=nbetages-1 downto 1:
+    for l=0 upto (k-1):
+    Nbeb:=Nbeb+1;
+    A[-k][l]=(0,0)+(nbetages-k)*(largeur/2,0)+(l*largeur,-(nbetages-k)*hauteur);
+    B[Nbeb]=A[-k][l];
+    Case[Nbeb]=((unitsquare xscaled largeur) yscaled hauteur) shifted (A[-k][l]-0.5*(largeur,hauteur));
+    trace Case[Nbeb];
+    endfor;
+    endfor;
+    else:
+    if \useKV[ClesPyramide]{Inverse}:
+    change:=-1;
+    else:
+    change=1;
+    fi;
+    for k=nbetages downto 1:
+    for l=0 upto (k-1):
+    Nbeb:=Nbeb+1;
+    A[k][l]=(0,0)+(nbetages-k)*(largeur/2,0)+(l*largeur,change*(nbetages-k)*hauteur);
+    B[Nbeb]=A[k][l];
+    Case[Nbeb]=((unitsquare xscaled largeur) yscaled hauteur) shifted (A[k][l]-0.5*(largeur,hauteur));
+    trace Case[Nbeb];
+    endfor;
+    endfor;
+    fi;
+    if \useKV[ClesPyramide]{Vide}:
+    else:
+    Nbeb:=0;
+    for p_=#1:
+    Nbeb:=Nbeb+1;
+    if (substring(0,1) of p_)="*":
+    fill Case[Nbeb] withcolor CaseCouleur;
+    trace Case[Nbeb];
+    label(TEX(substring(1,length p_) of p_),B[Nbeb]);
+    elseif (substring(0,1) of p_)="!":
+    drawoptions(withcolor \useKV[ClesPyramide]{CouleurNombre});
+    label(TEX(substring(1,length p_) of p_),B[Nbeb]);
+    drawoptions();
+    else:
+    label(TEX(p_),B[Nbeb]);
+    fi;
+    endfor;
+    fi;
+  \end{mplibcode}%
+  \else%
+  \begin{mpost}[mpsettings={nbetages:=\useKV[ClesPyramide]{Etages};largeur:=\useKV[ClesPyramide]{Largeur};hauteur:=\useKV[ClesPyramide]{Hauteur};boolean Vide,Inverse,Double;Vide=\useKV[ClesPyramide]{Vide};Inverse=\useKV[ClesPyramide]{Inverse};Double=\useKV[ClesPyramide]{Double};color CaseCouleur;CouleurNombre; CaseCouleur:=\useKV[ClesPyramide]{Couleur};CouleurNombre=\useKV[ClesPyramide]{CouleurNombre};}]
+    pair A[][],B[];
+    path Case[];
+    Nbeb:=0;
+    if Double:
+    for k=nbetages downto 1:
+    for l=0 upto (k-1):
+    Nbeb:=Nbeb+1;
+    A[k][l]=(0,0)+(nbetages-k)*(largeur/2,0)+(l*largeur,(nbetages-k)*hauteur);
+    B[Nbeb]=A[k][l];
+    Case[Nbeb]=((unitsquare xscaled largeur) yscaled hauteur) shifted (A[k][l]-0.5*(largeur,hauteur));
+    trace Case[Nbeb];
+    endfor;
+    endfor;
+    for k=nbetages-1 downto 1:
+    for l=0 upto (k-1):
+    Nbeb:=Nbeb+1;
+    A[-k][l]=(0,0)+(nbetages-k)*(largeur/2,0)+(l*largeur,-(nbetages-k)*hauteur);
+    B[Nbeb]=A[-k][l];
+    Case[Nbeb]=((unitsquare xscaled largeur) yscaled hauteur) shifted (A[-k][l]-0.5*(largeur,hauteur));
+    trace Case[Nbeb];
+    endfor;
+    endfor;
+    else:
+    if Inverse:
+    change:=-1;
+    else:
+    change=1;
+    fi;
+    for k=nbetages downto 1:
+    for l=0 upto (k-1):
+    Nbeb:=Nbeb+1;
+    A[k][l]=(0,0)+(nbetages-k)*(largeur/2,0)+(l*largeur,change*(nbetages-k)*hauteur);
+    B[Nbeb]=A[k][l];
+    Case[Nbeb]=((unitsquare xscaled largeur) yscaled hauteur) shifted (A[k][l]-0.5*(largeur,hauteur));
+    trace Case[Nbeb];
+    endfor;
+    endfor;
+    fi;
+    if Vide:
+    else:
+    Nbeb:=0;
+    for p_=#1:
+    Nbeb:=Nbeb+1;
+    if (substring(0,1) of p_)="*":
+    fill Case[Nbeb] withcolor CaseCouleur;
+    trace Case[Nbeb];
+    label(LATEX(substring(1,length p_) of p_),B[Nbeb]);
+    elseif (substring(0,1) of p_)="!":
+    drawoptions(withcolor CouleurNombre);
+    label(LATEX(substring(1,length p_) of p_),B[Nbeb]);
+    drawoptions();
+    else:
+    label(LATEX(p_),B[Nbeb]);
+    fi;
+    endfor;
+    fi;
+  \end{mpost}%
+  \fi%
+}%
+
+\setKVdefault[ClesPyramide]{ToutesOperations=false,Etages=5,Largeur=2cm,Hauteur=1cm,Vide=false,Inverse=false,Double=false,Couleur=Crimson,Multiplication=false,CouleurNombre=blue,Produit=false,Solution=false,Aide=false,Cote=4cm,Creation=false}%
+
+\newtoks\toklistecaseP%
+\def\UpdatetoksPyramide#1\nil{\addtotok\toklistecaseP{"#1",}}%
+\def\UpdatetoksPyramideMul#1\nil{\addtotok\toklistecaseP{#1,}}%
+
+\NewDocumentCommand\PyramideNombre{o m}{%
+  \useKVdefault[ClesPyramide]%
+  \setKV[ClesPyramide]{#1}%
+  \ifboolKV[ClesPyramide]{Creation}{%
+    \PyramideNombreCreation[#1]%
+  }{%
+    \ifboolKV[ClesPyramide]{ToutesOperations}{%
+      \PyramideOp[#1]{#2}%
+    }{%
+      \ifboolKV[ClesPyramide]{Multiplication}{%
+        \ifx\bla#2\bla%
+          \setKV[ClesPyramide]{Vide=true}%
+          \DessinePyramideNombreMul{\the\toklistecaseP}%
+        \else
+          \setsepchar{,}%
+          \readlist*\ListePyramide{#2}%
+          \DessinePyramideNombreMul{\ListePyramide[1],\ListePyramide[2],\ListePyramide[3]}%
+        \fi
+      }{%
+        \ifx\bla#2\bla%
+          \setKV[ClesPyramide]{Vide=true}%
+          \DessinePyramideNombre{\the\toklistecaseP}%
+        \else%
+          \setsepchar{,}%
+          \readlist*\ListePyramide{#2}%
+          \ifboolKV[ClesPyramide]{Double}{%
+            \def\CalculNombreComposants{\fpeval{\useKV[ClesPyramide]{Etages}*\useKV[ClesPyramide]{Etages}}}%
+          }{%
+            \def\CalculNombreComposants{\fpeval{\useKV[ClesPyramide]{Etages}*(\useKV[ClesPyramide]{Etages}+1)/2}}%
+          }%
+          \xintifboolexpr{\ListePyramidelen==\CalculNombreComposants}{%
+            \toklistecaseP{}%
+            \foreachitem\compteur\in\ListePyramide{\expandafter\UpdatetoksPyramide\compteur\nil}%
+            \DessinePyramideNombre{\the\toklistecaseP}%
+          }{Le nombre d'éléments dans la liste des propositions n'est pas compatible avec le nombre d'étages choisi.}%
+        \fi%
+      }%
+    }%
+  }%
+}%
+
+\setKVdefault[PyramideOp]{Rayon=5mm,Graines=false,Etages=5,Solution=false,Relatifs=false,Case=-1,Graine={},CouleurSolution={}}
+\defKV[PyramideOp]{%
+  Graine=\ifempty{#1}{}{\setKV[PyramideOp]{Graines}},%
+  CouleurSolution=\ifempty{#1}{}{\setKV[PyramideOp]{Solution}}%
+}%
+
+\NewDocumentCommand\PyramideOp{om}{%
+  \useKVdefault[PyramideOp]%
+  \setKV[PyramideOp]{#1}%
+  \ifboolKV[PyramideOp]{Relatifs}{%
+    \BuildPyramideOpRelatifs{#2}%
+  }{%
+    \BuildPyramideOp{#2}%
+  }%
+}%
+
+\NewDocumentCommand\BuildPyramideOp{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \mplibnumbersystem{double}%
+    \begin{mplibcode}
+      Etages=\useKV[PyramideOp]{Etages};
+      Rayon=\useKV[PyramideOp]{Rayon};
+%      Case=\useKV[PyramideOp]{Case};
+      
+      boolean Graines,Solution;%,Allume[][];
+      numeric Allume[][];
+      
+      Graines=\useKV[PyramideOp]{Graines};
+      if Graines:
+      randomseed:=\useKV[PyramideOp]{Graine};
+      fi;
+
+      Solution=\useKV[PyramideOp]{Solution};
+      if Solution:
+      color CouleurSolution;
+      CouleurSolution=\useKV[PyramideOp]{CouleurSolution};
+      fi;
+      
+      vardef ChoixOperation(expr Nba,Nbb)=
+      if (Nba<Nbb) or (Nba=Nbb) or (Nbb=0):
+        if Nba*Nbb>200:
+          ChoixOp:=ceiling(uniformdeviate(1));
+        else:
+          ChoixOp:=ceiling(uniformdeviate(2));
+        fi;
+      else:
+        if (Nba mod Nbb)<>0:
+          if Nba*Nbb>200:
+            ChoixAleaA:=uniformdeviate(1);
+            if ChoixAleaA<0.5:
+              ChoixOp:=1;
+            else:
+              ChoixOp:=3;
+            fi;
+          else:
+            ChoixOp:=ceiling(uniformdeviate(3));
+          fi;
+        else:
+          if Nba*Nbb>200:
+            ChoixAleaA:=uniformdeviate(1);
+            if ChoixAlea<0.5:
+              ChoixOp:=1;
+            else:
+              ChoixOp:=ceiling(2+uniformdeviate(2));
+            fi;
+          else:
+            ChoixOp:=ceiling(uniformdeviate(4));
+          fi;
+        fi;
+      fi;
+      enddef;
+      
+      numeric Nb[][],ChoixOp[][];
+      
+      pair M[][],N[][];
+      
+      for k=0 upto Etages-1:
+      for l=0 upto Etages-1-k:
+      M[k][l]=Rayon*(1,1)+2*Rayon*(l,k)+k*2*Rayon*(0.5,-1+cosd(30));
+      Allume[k][l]:=1;
+      endfor;
+      endfor;
+      for k=0 upto Etages-2:
+      for l=0 upto Etages-2-k:
+      N[k][l]=Rayon*(1,1)+(Rayon,0)+2*Rayon*(l,k)+k*2*Rayon*(0.5,-1+cosd(30));
+      endfor;
+      endfor;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      
+      def ChoixAlea=ceiling(uniformdeviate(2)) enddef;
+
+      Allume[Etages-1][0]:=ChoixAlea;
+      for k=Etages-2 downto 1:
+        Allume[k][0]:=ChoixAlea;
+        for l=1 upto k-1:
+          if (Allume[k][l-1]+Allume[k-1][l-1])=4:
+            Allume[k][l]:=1;
+          else:
+            Allume[k][l]:=ChoixAlea;
+          fi;
+        endfor;
+      endfor;
+
+      if Allume[1][0]=1:
+        Allume[0][0]:=2;
+      else:
+        Allume[0][0]:=ChoixAlea;
+      fi;
+      for k=1 upto Etages-1:
+        if Allume[0][k-1]=1:
+          Allume[0][k]:=2;
+        else:
+          if Allume[1][k-1]=1:
+            Allume[Etages][k]:=2;
+          else:
+            Allume[Etages][k]:=1;
+          fi;
+        fi;
+      endfor;
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+      
+      n:=0;
+      
+      for p_=#1:
+      Nb[0][n]=p_;
+%      if n=Case:
+%      if n<Etages-1:
+%      Allume[1][n]:=true;
+%      else:
+%      Allume[1][n-1]:=true;
+%      fi;
+%      else:
+%      Allume[0][n]:=true;
+%      fi;
+      n:=n+1;
+      endfor;
+
+      string Op[][];
+      
+      % Détermination des opérations et des valeurs à indiquer.
+      for k=0 upto Etages-1:
+      for l=0 upto Etages-2-k:
+      ChoixOperation(Nb[k][l],Nb[k][l+1]);
+      if ChoixOp=1:
+      Op[k][l]="$+$";
+      Nb[k+1][l]=Nb[k][l]+Nb[k][l+1];
+      elseif ChoixOp=2:
+      Op[k][l]="$\times$";
+      Nb[k+1][l]=Nb[k][l]*Nb[k][l+1];
+      elseif ChoixOp=3:
+      Op[k][l]="$\_$";
+      Nb[k+1][l]=Nb[k][l]-Nb[k][l+1];
+      elseif ChoixOp=4:
+      Op[k][l]="$\div$";
+      Nb[k+1][l]=Nb[k][l]/Nb[k][l+1];
+      fi;
+      endfor;
+      endfor;
+      %Affichage
+      for k=0 upto Etages-1:
+      for l=0 upto Etages-1-k:
+      if Allume[k][l]=1:
+      if Solution:
+      fill cercles(M[k][l],Rayon) withcolor CouleurSolution;
+      label(TEX("\num{"&decimal(Nb[k][l])&"}"),M[k][l]);
+      fi;
+      else:
+      label(TEX("\num{"&decimal(Nb[k][l])&"}"),M[k][l]);
+      fi;
+      trace cercles(M[k][l],Rayon);
+      endfor;
+      endfor;
+      for k=0 upto Etages-2:
+      for l=0 upto Etages-2-k:
+      fill cercles(N[k][l],2mm) withcolor 0.8white;
+      trace cercles(N[k][l],2mm);
+      label(TEX(Op[k][l]),N[k][l]);
+      endfor;
+      endfor;
+    \end{mplibcode}%
+    \mplibnumbersystem{scaled}%
+  \fi%
+}%
+
+\NewDocumentCommand\BuildPyramideOpRelatifs{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \mplibnumbersystem{double}%
+    \begin{mplibcode}
+      Etages=\useKV[PyramideOp]{Etages};
+      Rayon=\useKV[PyramideOp]{Rayon};
+      Case=\useKV[PyramideOp]{Case};
+      
+      boolean Graines,Solution,Allume[][];
+      
+      Graines=\useKV[PyramideOp]{Graines};
+      if Graines:
+      randomseed:=\useKV[PyramideOp]{Graine};
+      fi;
+
+      Solution=\useKV[PyramideOp]{Solution};
+      if Solution:
+      color CouleurSolution;
+      CouleurSolution=\useKV[PyramideOp]{CouleurSolution};
+      fi;
+      
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      vardef ChoixOperation(expr Nba,Nbb)=
+      if (Nba=Nbb):
+      if Nba*Nbb>200:
+      ChoixOp:=ceiling(uniformdeviate(1));
+      else:
+      ChoixOp:=ceiling(uniformdeviate(2));
+      fi;
+      elseif (Nba+Nbb=0):
+      if abs(Nba*Nbb)>200:
+      ChoixOp:=3;
+      else:
+      ChoixAlea:=uniformdeviate(1);
+      if ChoixAlea<0.5:
+      ChoixOp:=2;
+      else:
+      ChoixOp:=3;
+      fi;
+      fi;
+      else:
+      if (abs(Nba) mod abs(Nbb))<>0:
+      if abs(Nba*Nbb)>200:
+      ChoixAlea:=uniformdeviate(1);
+      if ChoixAlea<0.5:
+      ChoixOp:=1;
+      else:
+      ChoixOp:=3;
+      fi;
+      else:
+      ChoixOp:=ceiling(uniformdeviate(3));
+      fi;
+      else:
+      if abs(Nba*Nbb)>200:
+      ChoixAlea:=uniformdeviate(1);
+      if ChoixAlea<0.5:
+      ChoixOp:=1;
+      else:
+      ChoixOp:=ceiling(2+uniformdeviate(2));
+      fi;
+      else:
+      ChoixOp:=ceiling(uniformdeviate(4));
+      fi;
+      fi;
+      fi;
+      enddef;
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      
+      numeric Nb[][],ChoixOp[][];
+      
+      pair M[][],N[][];
+      
+      for k=0 upto Etages-1:
+      for l=0 upto Etages-1-k:
+      M[k][l]=Rayon*(1,1)+2*Rayon*(l,k)+k*2*Rayon*(0.5,-1+cosd(30));
+      Allume[k][l]=false;
+      endfor;
+      endfor;
+      for k=0 upto Etages-2:
+      for l=0 upto Etages-2-k:
+      N[k][l]=Rayon*(1,1)+(Rayon,0)+2*Rayon*(l,k)+k*2*Rayon*(0.5,-1+cosd(30));
+      endfor;
+      endfor;
+
+      n:=0;
+      
+      for p_=#1:
+      Nb[0][n]=p_;
+      if n=Case:
+      if n<Etages-1:
+      Allume[1][n]:=true;
+      else:
+      Allume[1][n-1]:=true;
+      fi;
+      else:
+      Allume[0][n]:=true;
+      fi;
+      n:=n+1;
+      endfor;
+
+      string Op[][];
+      
+      % Détermination des opérations et des valeurs à indiquer.
+      for k=0 upto Etages-1:
+      for l=0 upto Etages-2-k:
+      ChoixOperation(Nb[k][l],Nb[k][l+1]);
+      if ChoixOp=1:
+      Op[k][l]="$+$";
+      Nb[k+1][l]=Nb[k][l]+Nb[k][l+1];
+      elseif ChoixOp=2:
+      Op[k][l]="$\times$";
+      Nb[k+1][l]=Nb[k][l]*Nb[k][l+1];
+      elseif ChoixOp=3:
+      Op[k][l]="$\_$";
+      Nb[k+1][l]=Nb[k][l]-Nb[k][l+1];
+      elseif ChoixOp=4:
+      Op[k][l]="$\div$";
+      Nb[k+1][l]=Nb[k][l]/Nb[k][l+1];
+      fi;
+      endfor;
+      endfor;
+      %Affichage
+      for k=0 upto Etages-1:
+      for l=0 upto Etages-1-k:
+      if Allume[k][l]=false:
+      if Solution:
+      fill cercles(M[k][l],Rayon) withcolor CouleurSolution;
+      label(TEX("\num{"&decimal(Nb[k][l])&"}"),M[k][l]);
+      fi;
+      else:
+      label(TEX("\num{"&decimal(Nb[k][l])&"}"),M[k][l]);
+      fi;
+      trace cercles(M[k][l],Rayon);
+      endfor;
+      endfor;
+      for k=0 upto Etages-2:
+      for l=0 upto Etages-2-k:
+      fill cercles(N[k][l],2mm) withcolor 0.8white;
+      trace cercles(N[k][l],2mm);
+      label(TEX(Op[k][l]),N[k][l]);
+      endfor;
+      endfor;
+    \end{mplibcode}%
+    \mplibnumbersystem{scaled}%
+  \fi%
+}%

@@ -1,0 +1,125 @@
+%%%
+% PfCCheque
+%%%
+\def\filedateCheque{2024/09/03}%
+\def\fileversionCheque{0.1}%
+\message{-- \filedateCheque\space v\fileversionCheque}%
+\newlength{\oldbaseline}
+\newlength{\PfCTailleCursive}
+
+\setKVdefault[Cheque]{Sigle=CMF,Banque=Crédit Mathématique de France,Date=\today,Lieu={},Lire=false,Destinataire=Institut Curie,Solution=false,Longueur=15,Taille=\normalsize,Ajust=0pt}
+
+%https://tex.stackexchange.com/questions/406015/defining-macro-gsetlength-as-global-setlength-reliable
+\makeatletter
+\gdef\gsetlength#1#2{%
+  \begingroup
+    \setlength\skip@{#2}% Local assignment to a scratch register.
+    \global#1=\skip@    % Global assignement to #1;
+                        % \relax is not necessary because of the following \endgroup.
+  \endgroup             % \skip@ is restored by end of group.
+}
+\makeatother
+
+\NewDocumentCommand\Cheque{om}{%
+  \useKVdefault[Cheque]%
+  \setKV[Cheque]{#1}%
+  \setbox1=\hbox{\useKV[Cheque]{Taille}\myfontCursive abcdefghijklmnopqrstuvwxyz}%
+  {\useKV[Cheque]{Taille}\myfontCursive\gsetlength{\oldbaseline}{\baselineskip}\normalsize}%
+  \setlength{\PfCTailleCursive}{0.5\ht1+\useKV[Cheque]{Ajust}}%
+  \BuildCheque{#2}%
+}%
+
+\NewDocumentCommand\BuildCheque{m}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      boolean Solution,Lire;
+      Solution=\useKV[Cheque]{Solution};
+      Lire=\useKV[Cheque]{Lire};
+      Longueur=\useKV[Cheque]{Longueur};
+      baselinecp=\fpeval{\oldbaseline};
+      %
+      pair A,B,C,D,M[],N[];
+      A=(0,0);
+      B-A=u*(Longueur,0);
+      C-B=u*(0,5);
+      D-C=A-B;
+      %
+      M1=1/3[D,A];
+      %
+      picture Payez;
+      Payez=image(
+      label.rt(TEX("Payez contre ce chèque"),M1);
+      );
+      %
+      M20=(xpart(M1),ypart(llcorner Payez));
+      M2-M20=(0,-baselinecp);
+      M3-M2=u*(0,-0.5);
+      M4-M3=M2-M1;
+      M5-M4=u*(0.4*Longueur,-0.25);
+      M6-M4=u*(0,-0.25)+u*(0.5,0);
+      M7-M6=u*(2,0);
+      %
+      A:=(xpart(M4),ypart(M6)-1u);
+      B:=A+C-D;
+      %
+      N1=1/2[M1,M2]+0.8*(B-A);
+      N2-N1=M2-M1;
+      N3-N2=0.18*(B-A);
+      N4-N3=N1-N2;
+      drawoptions(withcolor NavyBlue);
+      picture BaseLettre;
+      %%%%%%%%%%%%%%%% 
+      fill polygone(A,B,C,D) withcolor 0.8[LightSteelBlue,white];
+      trace polygone(A,B,C,D);
+      draw Payez;
+      label.rt(TEX("{\sffamily \Huge \useKV[Cheque]{Sigle}}"),D+u*(0,-0.5));
+      label.rt(TEX("{\sffamily \useKV[Cheque]{Banque}}"),D+u*(0,-1));
+      trace (lrcorner Payez)--(0.75[(xpart(M1),ypart(lrcorner Payez)),(xpart(M1+B-A),ypart(lrcorner Payez))]);
+      label.rt(TEX("\tiny non endossable sauf au profit d'une banque ou d'un établissement assimilé."),M1+u*(0,-0.300));
+      trace 1/90[M2,M2+B-A]--(0.75[M2,M2+B-A]);
+      label.rt(TEX("À \useKV[Cheque]{Destinataire}"),M3);
+      trace 1/45[M3+u*(0,-0.2),M3+u*(0,-0.2)+B-A]--(0.75[M3+u*(0,-0.2),M3+u*(0,-0.2)+B-A]);
+      fill polygone(N1,N2,N3,N4) withcolor white;
+      trace polygone(N1,N2,N3,N4) withpen pencircle scaled 1.2 withcolor NavyBlue;
+      if Lire=false:
+      label.rt(TEX("\si{\EuRo}~#1"),iso(N1,N2));
+      else:
+      if Solution:
+      label.rt(TEX("\si{\EuRo}~\num{#1}"),iso(N1,N2));
+      fi;
+      fi;
+      label.rt(TEX("À~\hbox to"&decimal(Longueur/5)&"cm{\hrulefill}\quad Le~\hbox to"&decimal(Longueur/5)&"cm{\hrulefill}"),M5);
+      label.top(TEX("\Huge \si{\EuRo}uro"),iso(N4,N1)+u*(0,1));
+      label(TEX("\tiny « à régler exclusivement en euros »"),iso(N4,N1)+u*(-0.5,1));
+      label(TEX("\ChoixAlea{100000}{999999}{\numcheque}\numcheque"),iso(M6,M7));
+      trace cotationmil(M6,M7,2.5mm,25,TEX("\scriptsize chèque \no"));
+      %%
+%      drawoptions(withcolor red);
+%      draw (llcorner Payez)--(llcorner Payez+B-A);
+%      draw M2--(M2+B-A);
+%      drawoptions();
+      picture Sous;
+      Sous=image(%
+      label(TEX("\begin{minipage}{\fpeval{0.75*"&decimal(Longueur)&"}cm}
+        \hspace{"&decimal(abs(lrcorner Payez-llcorner Payez))&"pt}\myfontCursive\useKV[Cheque]{Taille}\Ecriture{#1}~euros
+      \end{minipage}"),(0,0));
+      );
+      pair PointBase,PointTest,Decalage;
+      PointBase=1/2[M20,M2+(u*0.75Longueur,0)];
+      PointTest=(0,0);%
+      if abs(llcorner Sous-ulcorner Sous)>baselinecp:
+      Decalage=(8pt,\fpeval{\PfCTailleCursive});
+      else:
+      Decalage=(8pt,2*\fpeval{\PfCTailleCursive});
+      fi;
+      if Lire:
+      draw Sous shifted (PointBase-PointTest+Decalage);
+      else:
+      if Solution:
+      draw Sous shifted (PointBase-PointTest+Decalage);
+      fi;
+      fi;      
+    \end{mplibcode}
+  \fi%
+}%

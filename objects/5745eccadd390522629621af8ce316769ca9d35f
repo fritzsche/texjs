@@ -1,0 +1,649 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2018 - 2021 by ChairX
+%
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either
+% version 1.3 of this license or (at your option) any later
+% version.  The latest version of this license is in:
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of
+% LaTeX version 2005/12/01 or later.
+%
+% This file contains the implementation of the environment handling.
+%
+% Macros have to be described by (delete the first %)
+% %\begin{macro}{\macro}
+% % Description of the implementation.
+% %    \begin{macrocode}
+%\newcommand{\macro}[]         {}
+% %    \end{macrocode}
+% %\end{macro}
+%
+% The implementation and description will appear in the implementation
+% part of the documentation. Use \subsubsection{} etc. for
+% structuring.
+%
+% The documentation of the macros defined here has to be written in
+% chairxEnvDoc.dtx
+% \fi
+%
+%
+% \begin{macro}{\claimch@irxname}
+% \begin{macro}{\conjecturech@irxname}
+% \begin{macro}{\conventionch@irxname}
+% \begin{macro}{\corollarych@irxname}
+% \begin{macro}{\definitionch@irxname}
+% \begin{macro}{\examplech@irxname}
+% \begin{macro}{\exercisech@irxname}
+% \begin{macro}{\hintch@irxname}
+% \begin{macro}{\lemmach@irxname}
+% \begin{macro}{\maintheoremch@irxname}
+% \begin{macro}{\notationch@irxname}
+% \begin{macro}{\proofch@irxname}
+% \begin{macro}{\propositionch@irxname}
+% \begin{macro}{\questionch@irxname}
+% \begin{macro}{\remarkch@irxname}
+% \begin{macro}{\subproofch@irxname}
+% \begin{macro}{\theoremch@irxname}
+%
+%     First we define the names of the environments in English.
+%     Currently we support German and English if the |babel| package
+%     is loaded, insert more as you like.
+%
+%    \begin{macrocode}
+\newcommand{\claimch@irxname}{Claim}
+\newcommand{\conjecturech@irxname}{Conjecture}
+\newcommand{\conventionch@irxname}{Convention}
+\newcommand{\corollarych@irxname}{Corollary}
+\newcommand{\definitionch@irxname}{Definition}
+\newcommand{\examplech@irxname}{Example}
+\newcommand{\exercisech@irxname}{Exercise}
+\newcommand{\hintch@irxname}{Hint}
+\newcommand{\lemmach@irxname}{Lemma}
+\newcommand{\maintheoremch@irxname}{Main Theorem}
+\newcommand{\notationch@irxname}{Notation}
+\newcommand{\proofch@irxname}{Proof}
+\newcommand{\propositionch@irxname}{Proposition}
+\newcommand{\questionch@irxname}{Question}
+\newcommand{\remarkch@irxname}{Remark}
+\newcommand{\subproofch@irxname}{Proof}
+\newcommand{\theoremch@irxname}{Theorem}
+%    \end{macrocode}
+%
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% If the |babel| package is loaded with the option for English we fill
+% them with the correct English words. Note that we also need the
+% |strings| option to make this work. Otherwise we do nothing.
+% Careful: no spaces allowed in the list!
+%
+%    \begin{macrocode}
+\@ifpackagewith{babel}{english,strings}{%
+  \StartBabelCommands{english}{extras}
+  \SetString{\chapterch@irxname}{Chapter}
+  \SetString{\sectionch@irxname}{Section}
+  \SetString{\subsectionch@irxname}{Section}
+  \SetString{\subsubsectionch@irxname}{Section}
+  \SetString{\lemmach@irxname}{Lemma}
+  \SetString{\propositionch@irxname}{Proposition}
+  \SetString{\theoremch@irxname}{Theorem}
+  \SetString{\corollarych@irxname}{Corollary}
+  \SetString{\definitionch@irxname}{Definition}
+  \SetString{\claimch@irxname}{Claim}
+  \SetString{\examplech@irxname}{Example}
+  \SetString{\remarkch@irxname}{Remark}
+  \SetString{\questionch@irxname}{Question}
+  \SetString{\conjecturech@irxname}{Conjecture}
+  \SetString{\conventionch@irxname}{Convention}
+  \SetString{\exercisech@irxname}{Exercise}
+  \SetString{\maintheoremch@irxname}{Main Theorem}
+  \SetString{\notationch@irxname}{Notation}
+  \SetString{\proofch@irxname}{Proof}
+  \SetString{\subproofch@irxname}{Proof}
+  \SetString{\hintch@irxname}{Hint}
+  \EndBabelCommands
+}{}
+%    \end{macrocode}
+%
+%    Same thing in German.
+%
+%    \begin{macrocode}
+\@ifpackagewith{babel}{german,strings}{%
+  \StartBabelCommands{german}{extras}
+  \SetString{\chapterch@irxname}{Kapitel}
+  \SetString{\sectionch@irxname}{Abschnitt}
+  \SetString{\subsectionch@irxname}{Abschnitt}
+  \SetString{\subsubsectionch@irxname}{Abschnitt}
+  \SetString{\lemmach@irxname}{Lemma}
+  \SetString{\propositionch@irxname}{Proposition}
+  \SetString{\theoremch@irxname}{Satz}
+  \SetString{\corollarych@irxname}{Korollar}
+  \SetString{\definitionch@irxname}{Definition}
+  \SetString{\claimch@irxname}{Behauptung}
+  \SetString{\examplech@irxname}{Beispiel}
+  \SetString{\remarkch@irxname}{Bemerkung}
+  \SetString{\questionch@irxname}{Frage}
+  \SetString{\conjecturech@irxname}{Vermutung}
+  \SetString{\conventionch@irxname}{Konvention}
+  \SetString{\exercisech@irxname}{\"Ubung}
+  \SetString{\maintheoremch@irxname}{Theorem}
+  \SetString{\notationch@irxname}{Notation}
+  \SetString{\proofch@irxname}{Beweis}
+  \SetString{\subproofch@irxname}{Beweis}
+  \SetString{\hintch@irxname}{Hinweis}
+  \EndBabelCommands
+}{}
+%    \end{macrocode}
+%
+% Now we define the actual environments.  We start with header in bold
+% and body in italic.
+%
+%    \begin{macrocode}
+\theoremheaderfont{\normalfont\bfseries}
+\theorembodyfont{\itshape}
+%    \end{macrocode}
+%
+% \begin{environment}{claim}
+% \begin{environment}{conjecture}
+% \begin{environment}{corollary}
+% \begin{environment}{definition}
+% \begin{environment}{lemma}
+% \begin{environment}{proposition}
+% \begin{environment}{theorem}
+%
+%     Now those environments with this styling, all share the common
+%     numbering scheme.  In order to make |\autoref| work properly we
+%     need to define alias counter.  For each environment we also
+%     define |\*autorefname|.
+%
+%    \begin{macrocode}
+\newtheorem{claim}{\claimch@irxname}[section]
+\newtheorem*{nnclaim}{\claimch@irxname}
+\newaliascnt{conjecture}{claim}
+\newtheorem{conjecture}[conjecture]{\conjecturech@irxname}
+\newtheorem*{nnconjecture}{\conjecturech@irxname}
+\aliascntresetthe{conjecture}
+\newaliascnt{corollary}{claim}
+\newtheorem{corollary}[corollary]{\corollarych@irxname}
+\newtheorem*{nncorollary}{\corollarych@irxname}
+\aliascntresetthe{corollary}
+\newaliascnt{definition}{claim}
+\newtheorem{definition}[definition]{\definitionch@irxname}
+\newtheorem*{nndefinition}{\definitionch@irxname}
+\aliascntresetthe{definition}
+\newaliascnt{lemma}{claim}
+\newtheorem{lemma}[lemma]{\lemmach@irxname}
+\newtheorem*{nnlemma}{\lemmach@irxname}
+\aliascntresetthe{lemma}
+\newaliascnt{proposition}{claim}
+\newtheorem{proposition}[proposition]{\propositionch@irxname}
+\newtheorem*{nnproposition}{\propositionch@irxname}
+\aliascntresetthe{proposition}
+\newaliascnt{theorem}{claim}
+\newtheorem{theorem}[theorem]{\theoremch@irxname}
+\newtheorem*{nntheorem}{\theoremch@irxname}
+\aliascntresetthe{theorem}
+%    \end{macrocode}
+%
+% \end{environment}
+% \end{environment}
+% \end{environment}
+% \end{environment}
+% \end{environment}
+% \end{environment}
+% \end{environment}
+%
+% Next we set the body font to roman.
+%
+%    \begin{macrocode}
+\theorembodyfont{\rmfamily}
+%    \end{macrocode}
+%
+% \begin{environment}{example}
+% \begin{environment}{convention}
+% \begin{environment}{notation}
+% \begin{environment}{question}
+% \begin{environment}{remark}
+%
+%     And have some more environments, still numbered with the same
+%     counter.
+%
+%    \begin{macrocode}
+\newaliascnt{example}{claim}
+\newtheorem{example}[example]{\examplech@irxname}
+\newtheorem*{nnexample}{\examplech@irxname}
+\aliascntresetthe{example}
+\newaliascnt{convention}{claim}
+\newtheorem{convention}[convention]{\conventionch@irxname}
+\newtheorem*{nnconvention}{\conventionch@irxname}
+\aliascntresetthe{convention}
+\newaliascnt{notation}{claim}
+\newtheorem{notation}[notation]{\notationch@irxname}
+\newtheorem*{nnnotation}{\notationch@irxname}
+\aliascntresetthe{notation}
+\newaliascnt{question}{claim}
+\newtheorem{question}[question]{\questionch@irxname}
+\newtheorem*{nnquestion}{\questionch@irxname}
+\aliascntresetthe{question}
+\newaliascnt{remark}{claim}
+\newtheorem{remark}[remark]{\remarkch@irxname}
+\newtheorem*{nnremark}{\remarkch@irxname}
+\aliascntresetthe{remark}
+%    \end{macrocode}
+%
+% \end{environment}
+% \end{environment}
+% \end{environment}
+% \end{environment}
+% \end{environment}
+%
+% \begin{environment}{exercise}
+%
+%     The exercise environment has a separate counter.
+%
+%    \begin{macrocode}
+\newtheorem{exercise}{\exercisech@irxname}[section]
+\newtheorem*{nnexercise}{\exercisech@irxname}
+%    \end{macrocode}
+%
+% \end{environment}
+%
+% \begin{environment}{maintheorem}
+%
+%     We change now for the main theorem styling
+%
+%    \begin{macrocode}
+\theorembodyfont{\itshape}
+\theoremnumbering{Roman}
+\newtheorem{maintheorem}{\maintheoremch@irxname}
+\newtheorem*{nnmaintheorem}{\maintheoremch@irxname}
+%    \end{macrocode}
+% \end{environment}
+%
+% \begin{environment}{proof}
+% \begin{environment}{subproof}
+%
+%     The proof environments. We use the boxempty symbol from the AMSa
+%     font.
+%
+%    \begin{macrocode}
+\DeclareMathSymbol\ch@irxboxempty{\mathord}{AMSa}{"03}
+\theoremheaderfont{\scshape}
+\theorembodyfont{\normalfont}
+\theoremstyle{nonumberplain}
+\theoremseparator{:}
+\theoremsymbol{\hbox{$\ch@irxboxempty$}}
+\newtheorem{proof}{\proofch@irxname}
+\theoremsymbol{\hbox{$\triangledown$}}
+\newtheorem{subproof}{\proofch@irxname}
+%    \end{macrocode}
+% \end{environment}
+% \end{environment}
+%
+% \begin{environment}{hint}
+%
+%     The hint environment, without numbers and very small.
+%
+%    \begin{macrocode}
+\newenvironment{hint}{\par\footnotesize\medskip\noindent\hintch@irxname: }{\par\smallskip\normalsize}
+%    \end{macrocode}
+%
+% \end{environment}
+%
+% In the theorem titles only the ordinary text in boldface, not the
+% math formulas. Nice hack from David Carlisle via tex.stackexchange
+%
+%    \begin{macrocode}
+\def\theorem@checkbold{}
+%    \end{macrocode}
+%
+% To make these new environments compatible with the |\autoref|
+% macro of the |hyperref|-package, we need the following
+% |\*autorefname| commands.
+%    \begin{macrocode}
+\providecommand{\claimautorefname}{\claimch@irxname}
+\providecommand{\conjectureautorefname}{\conjecturech@irxname}
+\providecommand{\conventionautorefname}{\conventionch@irxname}
+\providecommand{\corollaryautorefname}{\corollarych@irxname}
+\providecommand{\definitionautorefname}{\definitionch@irxname}
+\providecommand{\lemmaautorefname}{\lemmach@irxname}
+\providecommand{\propositionautorefname}{\propositionch@irxname}
+\providecommand{\exampleautorefname}{\examplech@irxname}
+\providecommand{\notationautorefname}{\notationch@irxname}
+\providecommand{\questionautorefname}{\questionch@irxname}
+\providecommand{\remarkautorefname}{\remarkch@irxname}
+\providecommand{\exerciseautorefname}{\exercisech@irxname}
+\providecommand{\thmautorefname}{\theoremch@irxname}
+\providecommand{\maintheoremautorefname}{\maintheoremch@irxname}
+%    \end{macrocode}
+%
+% To redefine |\*autorefname| commands which are predefined in |hyperref|,
+% we need a little hack: to allow that |hyperref| is loaded after |nchairx|
+% we put these commands at the beginning of the document part.
+%    \begin{macrocode}
+\AtBeginDocument{
+%    \end{macrocode}
+% Now we fill the |\*autorefname| macros with the language specific names,
+% in order to guarantee compatibility with |babel|.
+% First in english
+%    \begin{macrocode}
+\@ifpackagewith{babel}{english,strings}{%
+	\StartBabelCommands{english}{extras}
+	\SetString{\chapterautorefname}{\chapterch@irxname}
+	\SetString{\sectionautorefname}{\sectionch@irxname}
+	\SetString{\subsectionautorefname}{\subsectionch@irxname}
+	\SetString{\subsubsectionautorefname}{\subsubsectionch@irxname}
+	\SetString{\theoremautorefname}{\theoremch@irxname}
+	\EndBabelCommands
+}{}
+%    \end{macrocode}
+% then in german
+%    \begin{macrocode}
+\@ifpackagewith{babel}{german,strings}{%
+	\StartBabelCommands{german}{extras}
+	\SetString{\chapterautorefname}{\chapterch@irxname}
+	\SetString{\sectionautorefname}{\sectionch@irxname}
+	\SetString{\subsectionautorefname}{\subsectionch@irxname}
+	\SetString{\subsubsectionautorefname}{\subsubsectionch@irxname}
+	\SetString{\theoremautorefname}{\theoremch@irxname}
+	\EndBabelCommands
+}{}
+%    \end{macrocode}
+% Close the |\AtBeginDocument| command.
+%    \begin{macrocode}
+}
+%    \end{macrocode}
+%
+%
+% \begin{environment}{claimlist}
+% \begin{environment}{conjecturelist}
+% \begin{environment}{conventionlist}
+% \begin{environment}{corollarylist}
+% \begin{environment}{definitionlist}
+% \begin{environment}{lemmalist}
+% \begin{environment}{propositionlist}
+% \begin{environment}{theoremlist}
+% \begin{environment}{prooflist}
+%
+%     Next, we define list environments for all the above types of
+%     math environments. They are build using the |enumitem| package
+%     and use a rather compact appearance. Each math environment has
+%     its own list, though all of them are equal at the moment.
+%
+%    \begin{macrocode}
+\newenvironment{claimlist}[1][]{%
+  \enumerate[%
+      topsep = 0.2em,
+      partopsep = 0em,
+      itemsep = 0.2em,
+      parsep = 0.1em,
+      label=\textit{\roman*.)},
+      #1%
+      ]%
+    }%
+    {\endenumerate}
+\newenvironment{conjecturelist}[1][]{%
+  \enumerate[%
+      topsep = 0.2em,
+      partopsep = 0em,
+      itemsep = 0.2em,
+      parsep = 0.1em,
+      label=\textit{\roman*.)},
+      #1%
+      ]%
+    }%
+    {\endenumerate}
+\newenvironment{conventionlist}[1][]{%
+	\enumerate[%
+	topsep = 0.2em,
+	partopsep = 0em,
+	itemsep = 0.2em,
+	parsep = 0.1em,
+	label=\textit{\roman*.)},
+	#1%
+	]%
+}%
+{\endenumerate}
+\newenvironment{corollarylist}[1][]{%
+  \enumerate[%
+      topsep = 0.2em,
+      partopsep = 0em,
+      itemsep = 0.2em,
+      parsep = 0.1em,
+      label=\textit{\roman*.)},
+      #1%
+      ]
+    }%
+    {\endenumerate}
+\newenvironment{definitionlist}[1][]{%
+  \enumerate[%
+      topsep = 0.2em,
+      partopsep = 0em,
+      itemsep = 0.2em,
+      parsep = 0.1em,
+      label=\textit{\roman*.)},
+      #1%
+      ]
+    }%
+    {\endenumerate}
+\newenvironment{lemmalist}[1][]{%
+  \enumerate[%
+      topsep = 0.2em,
+      partopsep = 0em,
+      itemsep = 0.2em,
+      parsep = 0.1em,
+      label=\textit{\roman*.)},
+      #1%
+      ]
+    }%
+    {\endenumerate}
+\newenvironment{propositionlist}[1][]{%
+  \enumerate[%
+      topsep = 0.2em,
+      partopsep = 0em,
+      itemsep = 0.2em,
+      parsep = 0.1em,
+      label=\textit{\roman*.)},
+      #1%
+      ]
+    }%
+    {\endenumerate}
+\newenvironment{theoremlist}[1][]{%
+  \enumerate[%
+      topsep = 0.2em,
+      partopsep = 0em,
+      itemsep = 0.2em,
+      parsep = 0.1em,
+      label=\textit{\roman*.)},
+      #1%
+      ]
+    }%
+    {\endenumerate}
+\newenvironment{prooflist}[1][]{%
+	\enumerate[%
+	topsep = 0.2em,
+	partopsep = 0em,
+	itemsep = 0.2em,
+	parsep = 0.1em,
+	label=\textit{\roman*.)},
+	#1%
+	]
+}%
+{\endenumerate}
+%    \end{macrocode}
+%
+% \end{environment}
+% \end{environment}
+% \end{environment}
+% \end{environment}
+% \end{environment}
+% \end{environment}
+% \end{environment}
+% \end{environment}
+% \end{environment}
+%
+% \begin{environment}{examplelist}
+% \begin{environment}{notationlist}
+% \begin{environment}{questionlist}
+% \begin{environment}{remarklist}
+%
+%     Also for the following environments we have lists:
+%
+%    \begin{macrocode}
+\newenvironment{examplelist}[1][]{%
+  \enumerate[%
+      topsep = 0.2em,
+      partopsep = 0em,
+      itemsep = 0.2em,
+      parsep = 0.1em,
+      label=\textit{\roman*.)},
+      #1%
+      ]%
+    }%
+    {\endenumerate}
+\newenvironment{notationlist}[1][]{%
+  \enumerate[%
+      topsep = 0.2em,
+      partopsep = 0em,
+      itemsep = 0.2em,
+      parsep = 0.1em,
+      label=\textit{\roman*.)},
+      #1%
+      ]%
+    }%
+    {\enumerate}
+\newenvironment{questionlist}[1][]{%
+  \enumerate[%
+      topsep = 0.2em,
+      partopsep = 0em,
+      itemsep = 0.2em,
+      parsep = 0.1em,
+      label=\textit{\roman*.)},
+      #1%
+      ]%
+    }%
+    {\endenumerate}
+\newenvironment{remarklist}[1][]{%
+  \enumerate[%
+      topsep = 0.2em,
+      partopsep = 0em,
+      itemsep = 0.2em,
+      parsep = 0.1em,
+      label=\textit{\roman*.)},
+      #1%
+      ]%
+    }%
+    {\endenumerate}
+%    \end{macrocode}
+% \end{environment}
+% \end{environment}
+% \end{environment}
+% \end{environment}
+%
+% \begin{environment}{exerciselist}
+%
+%     For the exercises we also need a separate list.
+%
+%    \begin{macrocode}
+\newenvironment{exerciselist}[1][]{%
+  \enumerate[%
+      topsep = 0.2em,
+      partopsep = 0em,
+      itemsep = 0.2em,
+      parsep = 0.1em,
+      label=\textit{\roman*.)},
+      #1%
+    ]%
+  }%
+  {\endenumerate}
+%    \end{macrocode}
+% \end{environment}
+%
+% \begin{environment}{maintheoremlist}
+%
+%     And the main theorem might also consist of several parts which
+%     we want to number.
+%
+%    \begin{macrocode}
+\newenvironment{maintheoremlist}[1][]{%
+  \enumerate[%
+      topsep = 0.2em,
+      partopsep = 0em,
+      itemsep = 0.2em,
+      parsep = 0.1em,
+      label=\textit{\roman*.)},
+      #1%
+      ]%
+    }%
+    {\endenumerate}
+%    \end{macrocode}
+% \end{environment}
+%
+% We also provide compact versions of the lists in general (similar to
+% the |paralist| package)
+%
+% \begin{environment}{cptenum}
+%    \begin{macrocode}
+\newenvironment{cptenum}[1][]{%
+  \enumerate[%
+      topsep = 0.2em,
+      partopsep = 0em,
+      itemsep = 0.2em,
+      parsep = 0.1em,
+      label=\textit{\roman*.)},
+      #1%
+      ]
+    }%
+    {\endenumerate}
+%    \end{macrocode}
+% \end{environment}
+%
+% \begin{environment}{cptitem}
+%    \begin{macrocode}
+\newenvironment{cptitem}[1][]{%
+  \begin{itemize}[%
+      topsep = 0.2em,
+      partopsep = 0em,
+      itemsep = 0.2em,
+      parsep = 0.1em,
+      #1%
+      ]
+    }%
+    {\end{itemize}}
+%    \end{macrocode}
+% \end{environment}
+%
+% \begin{environment}{cptdesc}
+%    \begin{macrocode}
+\newenvironment{cptdesc}[1][]{%
+  \begin{description}[%
+      topsep = 0.2em,
+      partopsep = 0em,
+      itemsep = 0.2em,
+      parsep = 0.1em,
+      #1%
+      ]
+    }%
+    {\end{description}}
+%    \end{macrocode}
+% \end{environment}
+%

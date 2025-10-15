@@ -1,0 +1,895 @@
+% \iffalse     ---!!! FIRST META-COMMENT !!!---
+% 
+% 
+% This file is innerscript-code.dtx from version 1.4a
+% of the free and open-source LaTeX package "innerscript,"
+% released May 2025, to be used with the LuaTeX engine.
+% 
+% Running Plain TeX on innerscript-code.dtx will
+% produce the following files:
+% 
+%   (1) the package file innerscript.sty;
+% 
+%   (2) the derived files innerscript-heading.tex
+%       and innerscript-user-guide.tex, which are
+%       used for typesetting documentation;
+% 
+%     and
+% 
+%   (3) a number of other derived files.
+% 
+% Running LaTeX on innerscript-code.dtx will produce the
+% files listed above as well as the following:
+% 
+%   (4) the pdf documentation file innerscript-code.pdf;
+% 
+%     and
+% 
+%   (5) a number of other derived files.
+% 
+% To install innerscript on your computer, run this file
+% through Plain TeX or LaTeX and move innerscript.sty
+% to a directory searchable by TeX. See the associated
+% README.txt file for installation information.
+% 
+% 
+% \fi
+% \iffalse     ---!!! SECOND META-COMMENT !!!---
+% 
+% 
+% This file is from version 1.4a of the free and open-source
+% LaTeX package "innerscript," released May 2025, to be 
+% used with the LuaTeX engine.
+% 
+% Copyright 2021, 2023-2025 Conrad Kosowsky
+% 
+% This file may be distributed and modified under the terms 
+% of the LaTeX Public Project License, version 1.3c or any 
+% later version. The most recent version of this license is 
+% available online at
+% 
+%            https://www.latex-project.org/lppl/
+% 
+% This Work has the LPPL status "maintained," and the current
+% maintainer is the package author, Conrad Kosowsky. He can 
+% be reached at kosowsky.latex@gmail.com. The Work consists 
+% of the following items:
+% 
+%   (1) the base file innerscript.dtx;
+% 
+%   (2) the package file innerscript.sty;
+% 
+%   (3) the pdf documentation files innerscript-code.pdf
+%       and innerscript-user-guide.pdf;
+% 
+%   (4) the derived file innerscript-heading.tex;
+% 
+%   (4) all other files created through the configuration 
+%       process;
+% 
+%     and
+% 
+%   (5) the associated README.txt file.
+%
+% PLEASE KNOW THAT THIS FREE SOFTWARE IS PROVIDED WITHOUT
+% ANY WARRANTY. SPECIFICALLY, THE "NO WARRANTY" SECTION OF
+% THE LATEX PROJECT PUBLIC LICENSE STATES THE FOLLOWING:
+% 
+% THERE IS NO WARRANTY FOR THE WORK. EXCEPT WHEN OTHERWISE
+% STATED IN WRITING, THE COPYRIGHT HOLDER PROVIDES THE WORK
+% `AS IS’, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
+% OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+% PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE
+% OF THE WORK IS WITH YOU. SHOULD THE WORK PROVE DEFECTIVE,
+% YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR, OR
+% CORRECTION.
+% 
+% IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED
+% TO IN WRITING WILL THE COPYRIGHT HOLDER, OR ANY AUTHOR
+% NAMED IN THE COMPONENTS OF THE WORK, OR ANY OTHER PARTY
+% WHO MAY DISTRIBUTE AND/OR MODIFY THE WORK AS PERMITTED
+% ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL,
+% SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT
+% OF ANY USE OF THE WORK OR OUT OF INABILITY TO USE THE WORK
+% (INCLUDING, BUT NOT LIMITED TO, LOSS OF DATA, DATA BEING
+% RENDERED INACCURATE, OR LOSSES SUSTAINED BY ANYONE AS A
+% RESULT OF ANY FAILURE OF THE WORK TO OPERATE WITH ANY
+% OTHER PROGRAMS), EVEN IF THE COPYRIGHT HOLDER OR SAID
+% AUTHOR OR SAID OTHER PARTY HAS BEEN ADVISED OF THE
+% POSSIBILITY OF SUCH DAMAGES.
+% 
+% For more information, see the LaTeX Project Public License.
+% Derivative works based on this software may come with their
+% own license or terms of use, and the package author is not
+% responsible for any third-party software.
+% 
+% Happy TeXing!
+% 
+% 
+% \fi
+% \iffalse
+% 
+% The installation and driver files are incorporated into 
+% innerscript-code.dtx, so we do not need to generate them
+% separately. The <batchfile> and <driver> tags are for
+% reference.
+% 
+%<*batchfile>
+\begingroup
+\input docstrip.tex
+\keepsilent
+\askforoverwritefalse
+\preamble
+
+This file is from version 1.4a of the free and open-source
+LaTeX package "innerscript," released May 2025, to be 
+used with the LuaTeX engine.
+
+Copyright 2021, 2023-2025 Conrad Kosowsky
+
+This file may be distributed and modified under the terms 
+of the LaTeX Public Project License, version 1.3c or any 
+later version. The most recent version of this license is 
+available online at
+
+          https://www.latex-project.org/lppl/
+
+This work has the LPPL status "maintained," and the current
+maintainer is the package author, Conrad Kosowsky. He can 
+be reached at kosowsky.latex@gmail.com.
+
+PLEASE KNOW THAT THIS FREE SOFTWARE IS PROVIDED WITHOUT
+ANY WARRANTY. SPECIFICALLY, THE "NO WARRANTY" SECTION OF
+THE LATEX PROJECT PUBLIC LICENSE STATES THE FOLLOWING:
+
+THERE IS NO WARRANTY FOR THE WORK. EXCEPT WHEN OTHERWISE
+STATED IN WRITING, THE COPYRIGHT HOLDER PROVIDES THE WORK
+`AS IS’, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
+OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE
+OF THE WORK IS WITH YOU. SHOULD THE WORK PROVE DEFECTIVE,
+YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR, OR
+CORRECTION.
+
+IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED
+TO IN WRITING WILL THE COPYRIGHT HOLDER, OR ANY AUTHOR
+NAMED IN THE COMPONENTS OF THE WORK, OR ANY OTHER PARTY
+WHO MAY DISTRIBUTE AND/OR MODIFY THE WORK AS PERMITTED
+ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL,
+SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT
+OF ANY USE OF THE WORK OR OUT OF INABILITY TO USE THE WORK
+(INCLUDING, BUT NOT LIMITED TO, LOSS OF DATA, DATA BEING
+RENDERED INACCURATE, OR LOSSES SUSTAINED BY ANYONE AS A
+RESULT OF ANY FAILURE OF THE WORK TO OPERATE WITH ANY
+OTHER PROGRAMS), EVEN IF THE COPYRIGHT HOLDER OR SAID
+AUTHOR OR SAID OTHER PARTY HAS BEEN ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGES.
+
+For more information, see the LaTeX Project Public License.
+Derivative works based on this software may come with their
+own license or terms of use, and the package author is not
+responsible for any third-party software.
+
+Happy TeXing!
+
+\endpreamble
+\generate{\file{innerscript.sty}{\from{innerscript-code.dtx}{package}}
+  \file{innerscript-user-guide.tex}{\from{innerscript-code.dtx}{user}}
+  \file{innerscript-heading.tex}{\from{innerscript-code.dtx}{heading}}}
+\catcode`\ =12\relax
+\message{^^J%
+****************************************************^^J%
+* Step 1 of the innerscript installation complete! *^^J%
+****************************************************^^J^^J%
+****************************************************^^J%
+*      To finish installing the package, move      *^^J%
+* innerscript.sty to a directory searchable by TeX *^^J%
+*  after innerscript-code.tex is done typesetting  *^^J%
+****************************************************^^J^^J^^J}
+\endgroup
+\ifx\LaTeX\undefined
+  \message{Plain TeX format used; quitting now.}
+  \message{To create innerscript-code.pdf, run^^J%
+    innerscript-code.dtx through LaTeX.^^J^^J^^J}
+  \expandafter\end
+\fi
+%</batchfile>
+%<*driver>
+\makeatletter
+\documentclass[12pt,doc2,letterpaper]{ltxdoc}
+\usepackage[margin=72.27pt]{geometry}
+\usepackage[factor=700,stretch=14,shrink=14,step=1]{microtype}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{amsmath}
+\usepackage{multicol}
+\usepackage{graphicx}
+\c@IndexColumns=2
+\c@topnumber\@ne
+\predisplaypenalty=100
+\columnsep=20pt
+\MacroIndent=16pt
+\let\index@prologue\relax
+\EnableCrossrefs\CodelineIndex
+\expandafter\def\expandafter\MacroFont\expandafter{\MacroFont
+  \baselineskip=\the\baselineskip plus 0.5pt minus 0.5pt}
+\begin{document}
+  \def\documentname{Implementation}
+  \input innerscript-heading.tex
+  
+  \flushbottom
+  \DocInput{innerscript-code.dtx}
+  \vfil\eject
+  
+  \immediate\closeout\@indexfile
+  \ifx\directlua\@undefined
+    \immediate\write18{makeindex -s gind.ist innerscript-code.idx}
+  \else
+    \directlua{os.execute("makeindex -s gind.ist innerscript-code.idx")}
+  \fi
+  
+  \section*{Index}
+  
+  \input innerscript-code.ind
+  
+  
+  
+\end{document}
+%</driver>
+%<*package>
+% 
+% \fi
+% 
+% 
+% 
+% \CheckSum{413}
+% \init@checksum
+% 
+% \makeatother
+% \CharacterTable
+%   {Upper-case   \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation     \!      Double quote   \"      Hash (number)   \#
+%   Dollar          \$      Percent        \%      Ampersand       \&
+%   Acute accent    \'      Left paren     \(      Right paren     \)
+%   Asterisk        \*      Plus           \+      Comma           \,
+%   Minus           \-      Point          \.      Solidus         \/
+%   Colon           \:      Semicolon      \;      Less than       \<
+%   Equals          \=      Greater than   \>      Question mark   \?
+%   Commercial at   \@      Left bracket   \[      Backslash       \\
+%   Right bracket   \]      Circumflex     \^      Underscore      \_
+%   Grave accent    \`      Left brace     \{      Vertical bar    \|
+%   Right brace     \}      Tilde          \~}
+% \makeatletter
+% 
+% 
+% 
+% \DoNotIndex{\@for,\@gobbletwo,\@i,\@j,\@m,\@tempa,\@tfor,\@undefined,%
+%   \AtEndOfPackage,\bgroup,\egroup,\GenericError,\catcode,\csname,\endcsname,%
+%   \def,\edef,\do,\else,\endinput,\expandafter,\fi,\ifx,\let,\MessageBreak,%
+%   \muexpr,\NeedsTeXFormat,\ProvidesPackage,\newif,\on@line,\ProcessOptions,%
+%   \PackageWarningNoLine,\relax,\space,\string,\the,\wlog,\DeclareOption,%
+%   \IS@info,\expanded}
+% 
+% 
+% 
+% 
+% 
+% \noindent This file documents the code for the \textsf{innerscript} package. It is not a user guide! If you are looking for instructions on how to load \textsf{innerscript} and what it can do for your document, see |innerscript-user-guide.pdf|, which is included with the \textsf{innerscript} installation and is available on \textsc{ctan}. Section~1 begins with the package declaration and option processing. Sections~2 and 3 contain the code to adjust spacing between symbols in |\scriptstyle| and |\scriptscriptstyle| respectively, and Section~4 contains the code for adjusting the spacing around |\mathinner| subformulas. Section~5 handles spacing between |\mathclose| and |\mathord| atoms, and section~6 fills out the resizable delimiter heights. Version history appears at the end of the document.
+% 
+% 
+% 
+% \section{Setup}
+% 
+% We begin the implementation by declaring the package and defining a general informational macro. The first 60 lines of |innerscript.sty| are comments.
+% \c@CodelineNo=60\relax
+%    \begin{macrocode}
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{innerscript}[2025/05/08 v. 1.4a]
+\def\IS@info#1{\wlog{Package innerscript Info: #1}}
+%    \end{macrocode}
+% Check whether |\Umathordordspacing| is defined. If not, issue an error and |\endinput|. We normally can't print multiple spaces at once, so within a group, we change the space catcode to 12.
+%    \begin{macrocode}
+\ifx\Umathordordspacing\@undefined
+\bgroup
+\catcode`\ =12\relax
+\def\NoLuaTeXError{\GenericError{}%
+{\MessageBreak\MessageBreak
+Package innerscript error:%
+\MessageBreak\MessageBreak
+*******************\MessageBreak
+*                 *\MessageBreak
+*   CANNOT LOAD   *\MessageBreak
+*   INNERSCRIPT   *\MessageBreak
+*  LuaTeX Needed  *\MessageBreak
+*                 *\MessageBreak
+*******************\MessageBreak\@gobbletwo}%
+{See the innerscript package documentation for explanation.}%
+{I need LuaTeX to make the innerscript package work. It\MessageBreak
+looks like the current engine is something else, so I\MessageBreak
+can't load the package file. To use innerscript, please\MessageBreak
+typeset with LuaLaTeX. To continue without innerscript,\MessageBreak
+press return.}}%
+\expandafter\egroup
+\NoLuaTeXError
+  \AtEndOfPackage{\IS@info{Failed to load \on@line!}}
+  \expandafter\endinput % we \endinput with a balanced conditional
+\fi
+%    \end{macrocode}
+% The conditionals will encode package option information.
+%    \begin{macrocode}
+\newif\ifIS@script
+\newif\ifIS@scriptscript
+\newif\ifIS@legacyscript
+\newif\ifIS@legacyscriptscript
+\newif\ifIS@inner
+\newif\ifIS@close
+\newif\ifIS@cover
+%    \end{macrocode}
+% And set default options.
+%    \begin{macrocode}
+\IS@scripttrue
+\IS@scriptscripttrue
+\IS@legacyscriptfalse
+\IS@legacyscriptscriptfalse
+\IS@innertrue
+\IS@closetrue
+\IS@covertrue
+%    \end{macrocode}
+% Now define and process the package options.
+%    \begin{macrocode}
+\DeclareOption{script}             {\IS@scripttrue
+  \IS@legacyscriptfalse}
+\DeclareOption{scriptscript}       {\IS@scriptscripttrue
+  \IS@legacyscriptscriptfalse}
+\DeclareOption{legacy-script}      {\IS@scripttrue
+  \IS@legacyscripttrue}
+\DeclareOption{legacy-scriptscript}{\IS@scriptscripttrue
+  \IS@legacyscriptscripttrue}
+\DeclareOption{inner}              {\IS@innertrue}
+\DeclareOption{close}              {\IS@closetrue}
+\DeclareOption{cover}              {\IS@covertrue}
+\DeclareOption{no-script}          {\IS@scriptfalse
+  \IS@legacyscriptfalse}
+\DeclareOption{no-scriptscript}    {\IS@scriptscriptfalse
+  \IS@legacyscriptscriptfalse}
+\DeclareOption{no-inner}           {\IS@innerfalse}
+\DeclareOption{no-close}           {\IS@closefalse}
+\DeclareOption{no-cover}           {\IS@coverfalse}
+\ProcessOptions*
+%    \end{macrocode}
+% If the user requested a legacy option for super or subscripts, issue a warning. We store the warning in |\@tempa|, and if both |\ifIS@legacyscript| and |\ifIS@legacyscriptscript| and false, we turn |\@tempa| into |\relax|. The |\@gobbletwo| eats |\on@line| and a period from |\PackageWarning|.
+%    \begin{macrocode}
+\def\@tempa{%
+  \AtEndOfPackage{\PackageWarning{innerscript}
+  {I'm ignoring your request for\MessageBreak
+  legacy spacing\on@line\MessageBreak
+  and using the default space\MessageBreak
+  adjustments instead. (The\MessageBreak
+  package options for legacy\MessageBreak
+  spacing are deprecated.)\@gobbletwo}}}
+\ifIS@legacyscript
+\else
+  \ifIS@legacyscriptscript
+  \else
+    \let\@tempa\relax
+  \fi
+\fi
+\@tempa
+%    \end{macrocode}
+% 
+% \section{Superscripts and Subscripts}
+% 
+% 
+% \begin{figure}[t!]
+% \centerline{\bfseries\strut Table 1: Space Inserted between Atoms}
+% \begin{tabularx}{\textwidth}{XX}\toprule
+% Consecutive Atom Types & Default space added\\\midrule
+% |\mathord||\mathop| & |\thinmuskip| \\
+% |\mathord||\mathbin| & |\medmuskip| \\
+% |\mathord||\mathrel| & |\thickmuskip| \\
+% |\mathord||\mathinner| & |\thinmuskip| \\\midrule
+% |\mathop||\mathord| & |\thinmuskip| \\
+% |\mathop||\mathop| & |\thinmuskip| \\
+% |\mathop||\mathrel| & |\thickmuskip| \\
+% |\mathop||\mathinner| & |\thickmuskip| \\\midrule
+% |\mathbin||\mathord| & |\medmuskip| \\
+% |\mathbin||\mathop| & |\medmuskip| \\
+% |\mathbin||\mathopen| & |\medmuskip| \\
+% |\mathbin||\mathinner| & |\medmuskip| \\\midrule
+% |\mathrel||\mathord| & |\thickmuskip| \\
+% |\mathrel||\mathop| & |\thickmuskip| \\
+% |\mathrel||\mathopen| & |\thickmuskip| \\
+% |\mathrel||\mathinner| & |\thickmuskip| \\\midrule
+% |\mathclose||\mathop| & |\thinmuskip| \\
+% |\mathclose||\mathbin| & |\medmuskip| \\
+% |\mathclose||\mathrel| & |\thickmuskip| \\
+% |\mathclose||\mathinner| & |\thinmuskip| \\\midrule
+% |\mathpunct||\mathord| & |\thinmuskip| \\
+% |\mathpunct||\mathop| & |\thinmuskip| \\
+% |\mathpunct||\mathrel| & |\thinmuskip| \\
+% |\mathpunct||\mathopen| & |\thinmuskip| \\
+% |\mathpunct||\mathclose| & |\thinmuskip| \\
+% |\mathpunct||\mathpunct| & |\thinmuskip| \\
+% |\mathpunct||\mathinner| & |\thinmuskip| \\\midrule
+% |\mathinner||\mathord| & |\thinmuskip| \\
+% |\mathinner||\mathop| & |\thinmuskip| \\
+% |\mathinner||\mathbin| & |\medmuskip| \\
+% |\mathinner||\mathrel| & |\thickmuskip| \\
+% |\mathinner||\mathopen| & |\thinmuskip| \\
+% |\mathinner||\mathpunct| & |\thinmuskip| \\
+% |\mathinner||\mathinner| & |\thinmuskip| \\\bottomrule
+% \end{tabularx}
+% \end{figure}
+% 
+% 
+% First we set the spacing for |\scriptstyle| and |\scriptscriptstyle| atoms. Each space adjustment has the form
+% \begin{trivlist}
+% \item\hskip 2em |\Umath|\argtext{classes}|spacing|\meta{style}|\muexpr|\meta{skip}|*|\meta{factor}|\relax|.
+% \end{trivlist}^^A\tracingpages=2\tracingonline=1
+% The \meta{classes} are a pair of choices from |ord|, |op|, |bin|, |rel|, |open|, |close|, |punct|, and |inner|, and the \meta{style} is either |\scriptstyle|, |\scriptscriptstyle|, or the cramped version of each style. The \meta{skip} is the amount of muglue that typically appears between the \meta{classes} while in |\textstyle| or |\displaystyle|. The package takes that muglue and scales it by 0.6 for superscripts and subscripts and by 0.4 for second-order superscripts and subscripts. Table~1 shows the usual amounts of space between consecutive atom types. To actually code it, we define |\@tempa| to expand to various space-adjustment commands depending on package options.
+%    \begin{macrocode}
+\ifIS@script         % change \scriptstyle
+  \IS@info{Adjusting space for \string\scriptstyle.}
+  \IS@info{Adjusting space for \string\crampedscriptstyle.}
+  \ifIS@scriptscript % change \scriptscriptstyle
+    \IS@info{Adjusting space for \string\scriptscriptstyle.}
+    \IS@info{Adjusting space for \string\crampedscriptscriptstyle.}
+%    \end{macrocode}
+% In this branch, |\@tempa| expands to space-adjustment commands for all four styles of superscripts and subscripts. The |#1| argument is a |\Umath| spacing primitive, and |#2| is a muglue register.
+%    \begin{macrocode}
+    \def\@tempa#1#2{%
+      #1\scriptstyle             \muexpr #2 * 6 / 10\relax
+      #1\crampedscriptstyle      \muexpr #2 * 6 / 10\relax
+      #1\scriptscriptstyle       \muexpr #2 * 4 / 10\relax
+      #1\crampedscriptscriptstyle\muexpr #2 * 4 / 10\relax}
+  \else              % do not change \scriptscriptstyle
+    \IS@info{No space changes for \string\scriptscriptstyle.}
+    \IS@info{No space changes for \string\crampedscriptscriptstyle.}
+%    \end{macrocode}
+% Now change just first-order superscripts and subscripts.
+%    \begin{macrocode}
+    \def\@tempa#1#2{%
+      #1\scriptstyle             \muexpr #2 * 6 / 10\relax
+      #1\crampedscriptstyle      \muexpr #2 * 6 / 10\relax}
+  \fi
+\else                  % do not change \scriptstyle
+  \IS@info{No space changes for \string\scriptstyle.}
+  \IS@info{No space changes for \string\crampedscriptstyle.}
+  \ifIS@scriptscript % change \scriptscriptstyle
+    \IS@info{Adjusting space for \string\scriptscriptstyle.}
+    \IS@info{Adjusting space for \string\crampedscriptscriptstyle.}
+%    \end{macrocode}
+% In this case, change just second-order superscripts and subscripts.
+%    \begin{macrocode}
+    \def\@tempa#1#2{%
+      #1\scriptscriptstyle       \muexpr #2 * 4 / 10\relax
+      #1\crampedscriptscriptstyle\muexpr #2 * 4 / 10\relax}
+  \else              % do not change \scriptscriptstyle
+    \IS@info{No space changes for \string\scriptscriptstyle.}
+    \IS@info{No space changes for \string\crampedscriptscriptstyle.}
+%    \end{macrocode}
+% And here change nothing.
+%    \begin{macrocode}
+    \let\@tempa\@gobbletwo
+  \fi
+\fi
+%    \end{macrocode}
+% Now actually make the space changes as applicable.
+%    \begin{macrocode}
+  \@tempa{\Umathordopspacing}     {\thinmuskip}
+  \@tempa{\Umathordbinspacing}    {\medmuskip}
+  \@tempa{\Umathordrelspacing}    {\thickmuskip}
+  \@tempa{\Umathordinnerspacing}  {\thinmuskip}
+  \@tempa{\Umathopordspacing}     {\thinmuskip}
+  \@tempa{\Umathopopspacing}      {\thinmuskip}
+  \@tempa{\Umathoprelspacing}     {\thickmuskip}
+  \@tempa{\Umathopinnerspacing}   {\thickmuskip}
+  \@tempa{\Umathbinordspacing}    {\medmuskip}
+  \@tempa{\Umathbinopspacing}     {\medmuskip}
+  \@tempa{\Umathbinopenspacing}   {\medmuskip}
+  \@tempa{\Umathbininnerspacing}  {\medmuskip}
+  \@tempa{\Umathrelordspacing}    {\thickmuskip}
+  \@tempa{\Umathrelopspacing}     {\thickmuskip}
+  \@tempa{\Umathrelopenspacing}   {\thickmuskip}
+  \@tempa{\Umathrelinnerspacing}  {\thickmuskip}
+  \@tempa{\Umathcloseopspacing}   {\thinmuskip}
+  \@tempa{\Umathclosebinspacing}  {\medmuskip}
+  \@tempa{\Umathcloserelspacing}  {\thickmuskip}
+  \@tempa{\Umathcloseinnerspacing}{\thinmuskip}
+  \@tempa{\Umathpunctordspacing}  {\thinmuskip}
+  \@tempa{\Umathpunctopspacing}   {\thinmuskip}
+  \@tempa{\Umathpunctrelspacing}  {\thinmuskip}
+  \@tempa{\Umathpunctopenspacing} {\thinmuskip}
+  \@tempa{\Umathpunctclosespacing}{\thinmuskip}
+  \@tempa{\Umathpunctpunctspacing}{\thinmuskip}
+  \@tempa{\Umathpunctinnerspacing}{\thinmuskip}
+  \@tempa{\Umathinnerordspacing}  {\thinmuskip}
+  \@tempa{\Umathinneropspacing}   {\thinmuskip}
+  \@tempa{\Umathinnerbinspacing}  {\medmuskip}
+  \@tempa{\Umathinnerrelspacing}  {\thickmuskip}
+  \@tempa{\Umathinneropenspacing} {\thinmuskip}
+  \@tempa{\Umathinnerpunctspacing}{\thinmuskip}
+  \@tempa{\Umathinnerinnerspacing}{\thinmuskip}
+%    \end{macrocode}
+% 
+% \section{Mathclose Spacing}
+% 
+% In |\textstyle| and |\displaystyle|, we add half a |\thinmuskip| between |\mathclose| and |\mathord| atoms. As with the |script| and |scriptscript| options, we scale the spacing by 0.6 and 0.4 for |\scriptstyle| and |\scriptscriptstyle| respectively. Even though |close| comes after |inner| in the options list in the user guide, it is important to put it before |inner| in the implementation. We should set all interatom spacing before changing the spacing around |\mathinner| subformulas because the |inner| spacing changes reference values of other |\Umath| spacing primitives.
+%    \begin{macrocode}
+\ifIS@close
+  \IS@info{Adding space after closing grouping symbols.}
+  \Umathcloseordspacing\displaystyle        \muexpr\thinmuskip / 2\relax
+  \Umathcloseordspacing\textstyle           \muexpr\thinmuskip / 2\relax
+  \Umathcloseordspacing\crampeddisplaystyle \muexpr\thinmuskip / 2\relax
+  \Umathcloseordspacing\crampedtextstyle    \muexpr\thinmuskip / 2\relax
+  \ifIS@script
+    \Umathcloseordspacing\scriptstyle       \muexpr\thinmuskip * 3 / 10\relax
+    \Umathcloseordspacing\crampedscriptstyle\muexpr\thinmuskip * 3 / 10\relax
+  \fi
+  \ifIS@scriptscript
+    \Umathcloseordspacing\scriptscriptstyle \muexpr\thinmuskip / 5\relax
+    \Umathcloseordspacing\crampedscriptscriptstyle
+      \muexpr\thinmuskip / 5\relax
+  \fi
+\else
+  \IS@info{No changes to space after delimiters.}
+\fi
+%    \end{macrocode}
+% 
+% 
+% 
+% 
+% \section{Mathinner Subformulas}
+% 
+% Now set the spacing for |\mathinner| subformulas. Prior to version 1.4, \textsf{innerscript} spaced |\mathinner| subformulas under the |inner| option like |\mathord| atoms, but as of version 1.4, \textsf{innerscript} treats these subformulas like |\mathopen| on the left and |\mathclose| on the right. Every space adjustment in this section has the form
+% \begin{trivlist}
+% \item \hskip 2em |\Umath|\meta{classes}|spacing|\meta{style}|=\the\Umath|\meta{other classes}|spacing|\meta{style}|\relax|.
+% \end{trivlist}
+% In most cases, the \meta{classes} are a pair of |inner| and one of |ord|, |op|, |bin|, |rel|, |open|, |close|, or |punct|, and the \meta{other classes} are the same except with |inner| replaced with |open| or |close| depending on whether it appears on the left or the right. We can also have \meta{classes} be |innerinner|, in which case \meta{other classes} is |closeopen|. The \meta{style} is one of the eight math style commands: |\displaystyle|, |\textstyle|, |\scriptstyle|, |\scriptscriptstyle|, and the cramped versions. This section comes after |script| and |close| in the implementation because the spacing here depends on the spacing of other math classes.
+%    \begin{macrocode}
+\ifIS@inner
+  \IS@info{Adjusting space around \string\mathinner\space subformulas.}
+%    \end{macrocode}
+% First, we loop through the math classes and let |\@i| be a math class.
+%    \begin{macrocode}
+  \@tfor\@i:=\displaystyle\crampeddisplaystyle
+    \textstyle\crampedtextstyle
+    \scriptstyle\crampedscriptstyle
+    \scriptscriptstyle\crampedscriptscriptstyle
+    \do{%
+%    \end{macrocode}
+% For each style, first set |\Umathinnerinnerspacing|, and then loop through the math classes. We simultaneously set the spacing for atom pairs where |inner| appears either first or second. Using |\expanded| solves a problem where the |\Umath|\meta{atom}|inner| primitives don't behave properly if they appear on both sides of an assignment. I am unclear if this is a bug in Lua\TeX?
+%    \begin{macrocode}
+      \expanded{\Umathinnerinnerspacing\@i=\the\expandafter
+        \Umathcloseopenspacing\@i\relax}
+      \@for\@j:=ord,op,bin,rel,open,close,punct\do{%
+        \expanded{%
+          \csname Umath\@j innerspacing\endcsname\@i=\the
+            \csname Umath\@j openspacing\expandafter\endcsname\@i\relax
+          \csname Umathinner\@j spacing\endcsname\@i=\the
+            \csname Umathclose\@j spacing\expandafter\endcsname\@i\relax}}}
+\else
+  \IS@info{No changes to space for \string\mathinner\space subformulas.}
+\fi
+%    \end{macrocode}
+% 
+% 
+% \section{Delimiter Heights}
+% 
+% Finally, filling out the delimiter heights is easy. We set |\delimiterfactor| to 1000.
+%    \begin{macrocode}
+\ifIS@cover
+  \IS@info{Setting delimiters to full height.}
+  \delimiterfactor\@m
+\else
+  \IS@info{No changes to delimiter heights.}
+\fi
+\wlog{}
+%    \end{macrocode}
+% And that's a wrap!
+% 
+% \vfil\eject
+% \section*{Version History}
+% \begin{multicols*}{2}
+% 
+% \raggedright\parskip\z@\parindent\z@\leftskip1em\obeylines
+% \setbox0\hbox{\hskip 1pt.\hskip 1pt}
+% \def\version#1#2{\bigskip\hbox to \hsize{\textbf{#1} \cleaders\copy0\hfill\ #2}\par}
+% \def\item{---\kern0.2ex\relax}
+% 
+% \version{1.0}{February 2021}
+% \item initial release
+% 
+% \version{1.1}{February 2021}
+% \item bug fix for |\mathinner| spacing
+% \item added |\IS@skip| muglue register
+% 
+% \version{1.2}{November 2023}
+% \item redesigned spacing for options |script| and |scriptscript|
+% \item no more |\IS@skip|---options |script| and |scriptscript| now use |\the|
+% \item added option |close|
+% \item added option |cover|
+% \item separated implementation and user guide
+% \item added |\scalemu|
+% 
+% \version{1.3}{August 2024}
+% \item bug fix involving |\cramedisplaystyle| typo
+% 
+% \version{1.4}{April 2025}
+% \item refactored package code
+% \item |legacy-| package options for superscripts and subscripts now same as default options
+% \item use |\muexpr| instead of |\scalemu|
+% \item |inner| option changed to look more like |\mathopen| and |\mathclose| atoms
+% 
+% \version{1.4a}{May 2025}
+% \item bug fix involving |inner| adjustments not registering properly
+% 
+% \end{multicols*}
+% 
+% 
+% 
+% \iffalse
+%</package>
+%<*user>
+\makeatletter
+\documentclass[12pt]{article}
+\usepackage[margin=72.27pt]{geometry}
+\usepackage[factor=700,stretch=14,shrink=14,step=1]{microtype}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{amsmath}
+\usepackage{doc}[=v2]
+\MakeShortVerb{|}
+\interfootnotelinepenalty=0
+
+\newbox\fracbox
+\setbox\fracbox\hbox{$\displaystyle\left(\frac x2\right)$}
+
+\c@topnumber=1
+\def\floatpagefraction{0}
+\@fpsep=\fill
+
+\begin{document}
+
+\def\documentname{User Guide}
+\input innerscript-heading.tex
+
+\def\@oddhead{\ifnum\c@page>\@ne
+  \ifodd\c@page
+    \hfil\the\c@page
+  \else
+    \the\c@page\hfil
+  \fi\fi}
+
+\noindent For several years before the first release of \textsf{innerscript}, I wondered whether it was possible to adjust two features of \TeX's automatic mathematics spacing, namely adding more space in superscripts and subscripts and removing the extra space around |\left|-|\right| delimiter pairs. Lua\TeX's extra math-mode primitives make these changes possible, and \textsf{innerscript} grew out of my desire to implement them in my documents. For example, compare the next two lines:
+\begin{flalign}
+&&\sum_{i=1}^n{}&x_i^{1+a}
+  &f(x)&=g\left(\frac1x\right)
+  &x(t)&y(t)
+  &\hskip0.5\wd\fracbox &\clap@math{\left(\frac{x}2\right)}
+    \hskip0.5\wd\fracbox
+  &&\\
+&&\sum_{i\mskip\scalemu{\thickmuskip}{0.6}=
+    \mskip\scalemu{\thickmuskip}{0.6}1}^n
+    {}&x_i^{1\mskip\scalemu{\medmuskip}{0.6}+
+    \mskip\scalemu{\medmuskip}{0.6} a}
+  &f(x)&=g{\left(\frac1x\right)}
+  &x(t)\mskip\scalemu{\thinmuskip}{0.25}&\mskip\scalemu{\thinmuskip}{0.25}y(t)
+  &\hskip0.5\wd\fracbox & \clap@math{\left(\frac{\vphantom{1}x}2\right)}
+    \hskip0.5\wd\fracbox
+  &&
+\end{flalign}
+Equation~(1) uses traditional \TeX\ formatting, and equation~(2) incorporates the small tweaks characteristic of \textsf{innerscript}. If you like equation~(2) more than equation~(1), then \textsf{innerscript} is the package for you! This file explains how to load \textsf{innerscript} and enable whichever adjustments you want to use. For version history and documentation of the code, see |innerscript-code.pdf|, which is included with the package installation and is available on \textsc{ctan}.
+
+\begin{figure}[p]
+\centerline{\strut\bfseries Table~1: Package Behavior Shown in Equation (2)}
+\begin{tabular*}\textwidth{@{\extracolsep{\fill}}lllll}\toprule
+Part of equation (2) & Summation & Functions & Product & Fraction\\\midrule
+Option shown & |script| & |inner| & |close| & |cover|\\\bottomrule
+\end{tabular*}
+\end{figure}
+
+\begin{figure}[p]
+\centerline{\strut\bfseries Table~2: Package Options for \textsf{innerscript}}
+\begin{tabular*}\hsize{@{\extracolsep{\fill}}l>{\raggedright\arraybackslash}l}
+\toprule
+Package Option & Meaning\\
+\midrule
+|script| & Change |\scriptstyle| (and cramped style) spacing\\
+|scriptscript| & Change |\scriptscriptstyle| (and cramped style) spacing\\
+|inner| & Use |\mathord| spacing for |\mathinner| subformulas\\
+|close| & Extra space between \vrb\mathclose\vrb\mathord\ pairs\\
+|cover| & Resizable delimiters (i.e.\ |\left| and |\right|) fully cover contents\\\midrule
+|no-script| & No changes to |\scriptstyle| spacing\\
+|no-scriptscript| & No changes to |\scriptscriptstyle| spacing\\
+|no-inner| & No changes to treatment of |\mathinner| subformulas\\
+|no-close| & No changes to |\mathclose| atoms\\
+|no-cover| & No changes to resizable delimiters\\
+\bottomrule
+\end{tabular*}
+\end{figure}
+
+
+\begin{figure}[p]
+\centerline{\bfseries\strut Table 3: Usual Space Inserted by \TeX\ between Atoms}
+\begin{tabularx}{\textwidth}{Xp{1.1in}Xp{1.1in}}\toprule
+Consecutive Atom Types & Space Added & Consecutive Atom Types & Space Added\\\midrule
+\end{tabularx}
+\hb@xt@\hsize{\hss\bgroup
+\aboverulesep=0.7ex\relax
+\belowrulesep=0.7ex\relax
+\def\arraystretch{1.06}
+\begin{tabularx}{0.495\textwidth}{Xp{1.1in}}
+|\mathord||\mathop| & |\thinmuskip| \\
+|\mathord||\mathbin| & |\medmuskip| \\
+|\mathord||\mathrel| & |\thickmuskip| \\
+|\mathord||\mathinner| & |\thinmuskip| \\\midrule
+|\mathop||\mathord| & |\thinmuskip| \\
+|\mathop||\mathop| & |\thinmuskip| \\
+|\mathop||\mathrel| & |\thickmuskip| \\
+|\mathop||\mathinner| & |\thickmuskip| \\\midrule
+|\mathbin||\mathord| & |\medmuskip| \\
+|\mathbin||\mathop| & |\medmuskip| \\
+|\mathbin||\mathopen| & |\medmuskip| \\
+|\mathbin||\mathinner| & |\medmuskip| \\\midrule
+|\mathrel||\mathord| & |\thickmuskip| \\
+|\mathrel||\mathop| & |\thickmuskip| \\
+|\mathrel||\mathopen| & |\thickmuskip| \\
+|\mathrel||\mathinner| & |\thickmuskip| \\
+\end{tabularx}\egroup
+\hskip 0.01\textwidth
+\begin{tabularx}{0.495\textwidth}{Xp{1.1in}}
+|\mathclose||\mathop| & |\thinmuskip| \\
+|\mathclose||\mathbin| & |\medmuskip| \\
+|\mathclose||\mathrel| & |\thickmuskip| \\
+|\mathclose||\mathinner| & |\thinmuskip| \\\midrule
+|\mathpunct||\mathord| & |\thinmuskip| \\
+|\mathpunct||\mathop| & |\thinmuskip| \\
+|\mathpunct||\mathrel| & |\thinmuskip| \\
+|\mathpunct||\mathopen| & |\thinmuskip| \\
+|\mathpunct||\mathclose| & |\thinmuskip| \\
+|\mathpunct||\mathpunct| & |\thinmuskip| \\
+|\mathpunct||\mathinner| & |\thinmuskip| \\\midrule
+|\mathinner||\mathord| & |\thinmuskip| \\
+|\mathinner||\mathop| & |\thinmuskip| \\
+|\mathinner||\mathbin| & |\medmuskip| \\
+|\mathinner||\mathrel| & |\thickmuskip| \\
+|\mathinner||\mathopen| & |\thinmuskip| \\
+|\mathinner||\mathpunct| & |\thinmuskip| \\
+|\mathinner||\mathinner| & |\thinmuskip| \\
+\end{tabularx}}
+\vskip\aboverulesep
+\hrule height \heavyrulewidth
+\end{figure}
+
+Table~1 explains which parts of equation~(2) show different aspects of \textsf{innerscript}'s behavior. At far left, the subscript under the summation symbol and the superscript of $x_i$ have small amounts of extra space around the |=| and |+| signs respectively, and at center-left, the $g$ is directly next to the parenthesis. At center-right, the closing parenthesis is offset from the following $y$, and on the right, the parentheses cover the entire fraction instead of covering only most of it. Using this package will automate some or all of these changes.
+
+Users can load \textsf{innerscript} with the standard |\usepackage| syntax, and to do so, you must typeset with Lua\TeX. If it detects a different engine, \textsf{innerscript} will raise an error and stop loading, so you will not see any changes to the math in your document. The package provides no user-level commands---rather, you control its functionality through the ten options in Table~2. Options |script|, and |no-script| determine how \textsf{innerscript} treats superscripts and subscripts, and options |scriptscript|, and |no-scriptscript| are the same except that they deal with second-order superscripts and subscripts.\footnote{Version 1.2 of \textsf{innerscript} provided |legacy-| options for superscripts and subscripts with slightly different spacing. As of version 1.4, those options are officially deprecated. For backwards compatibility, \textsf{innerscript} still accepts |legacy-script| and |legacy-scriptscript| options, but they now produce the same space adjustments as |script| and |scriptscript|.} The |inner| option tells \TeX\ to avoid placing some extra spaces around |\mathinner| subformulas. Specifically, with this option, \TeX\ treats the left side of a |\mathinner| subformula like a left parenthesis and treats the right side like a right parenthesis for spacing purposes. The |close| option adds a small amount of space after a closing grouping symbol, such as a right parenthesis, when it comes before a regular variable or number, and |cover| tells \TeX\ to make sure that resizable delimiters fully cover their contents. The |no-| variants disable formatting adjustments, and by default, \textsf{innerscript} enables all space adjustments described here.
+
+The |inner|, |close|, and |cover| options are straightforward, but the options |script| and |scriptscript| warrant more explanation. With its usual math formatting, \TeX\ adds small amounts of space between different math-mode characters depending on what types of symbols they represent, and \TeX's fine-tuned math spacing is part of what makes it a great program for typesetting equations.\footnote{\TeX\ classifies math symbols into eight categories: \vrb\mathord\ (ordinary), \vrb\mathop\ (big operator), \vrb\mathbin\ (binary operation), \vrb\mathrel\ (relation), \vrb\mathopen\ (opening delimiter), \vrb\mathclose\ (closing delimiter), \vrb\mathpunct\ (punctuation), and \vrb\mathinner\ (``inner'' subformula). As part of its definition, every math-mode character is assigned a math class. See Donald Knuth, \textit{The \TeX book} (Addison Wesley, 1986), 170; David Salomon, \textit{The Advanced \TeX book} (Springer, 1995), 256--258.} However, some spacing additions from inline and display math don't appear inside superscripts and subscripts. The |script| and |scriptscript| options address this situation by setting the interatom space in superscripts and subscripts to scaled-down versions of the standard spacing rules. Table~3 lists the space that \TeX\ inserts between atoms of different types in display or inline math. With option |script|, \textsf{innerscript} sets the interatom spacing in superscripts and subscripts to be 60\% of the amounts in Table~3, and with option |scriptscript|, \textsf{innerscript} sets the interatom space to be 40\% of the amounts in Table~3.\footnote{Technically, \textsf{innerscript} scales down the standard spacing twice because the exact length of a \vrb\muskip\ register varies proportionally with the surrounding font size. For example, a \vrb\thinmuskip\ inside a superscript or subscript will be about two-thirds the size of a \vrb\thinmuskip\ in regular inline math. If \textsf{innerscript} inserted the same \vrb\muskip\ amounts from Table~3 in superscripts and subscripts, the spacing would be exactly proportional to inline and display spacing. However, doing so produces math where the symbols appear too far apart visually, so before using them, \textsf{innerscript} scales down the \vrb\muskip\ amounts in Table~3.} Atom pairs that do not appear in Table~3 do not by default receive extra space from \TeX\ or \textsf{innerscript}.
+
+Finally, you are of course welcome to change the size of |\thinmuskip|, |\medmuskip|, or |\thickmuskip|, but I encourage you to do so before you load \textsf{innerscript}. If you do so after loading the package, some of your changes will not show up in \TeX's automatic interatom spacing.
+
+\end{document}
+% 
+%</user>
+%<*heading>
+% 
+
+\csname count@\endcsname\catcode`\@
+\makeatletter
+
+% identifying macros
+\def\packageversion{1.4a}
+\def\packagedate{May 2025}
+
+% general macros
+\MacroIndent=1.3em
+\def\scalemu#1#2{\muexpr#2#1
+  \@plus\muexpr#2\gluetomu\gluestretch\mutoglue#1\relax
+  \@minus\muexpr#2\gluetomu\glueshrink\mutoglue#1\relax\relax}
+\baselineskip=\the\baselineskip plus 0.3pt minus 0.3pt\relax
+
+% section, header, and footer commands
+\let\@@section\section
+\def\section{\@ifstar\star@sect\no@star@sect}
+\def\star@sect#1{\sectionhook{#1}\@@section*{#1}}
+\def\no@star@sect#1{\sectionhook{#1}\@@section{#1}}
+
+
+\def\sectionhook#1{%
+  \vskip 1in\relax
+  \kern\z@
+  \vskip -1in\relax
+  \kern\z@
+  \vskip\z@
+  \def\sectionname{#1}}
+
+\def\@oddhead{%
+  \ifnum\count0>1\relax
+    \ifodd\c@page
+      \rlap{\textit{\sectionname}}\hfil
+      \hbox to 0pt{\hss\documentname\hss}\hfil
+      \llap{\the\count0}%
+    \else
+      \rlap{\the\count0}\hfil
+      \hbox to 0pt{\hss\documentname\hss}\hfil
+      \llap{\textit{\sectionname}}%
+    \fi
+  \fi}
+\def\@oddfoot{\hfil\ifnum\count0=1\relax1\fi\hfil}
+
+
+% penalties
+\pretolerance=-1
+\hyphenpenalty=20
+\exhyphenpenalty=15
+\brokenpenalty=0
+\clubpenalty=0
+\widowpenalty=0
+\finalhyphendemerits=500
+\doublehyphendemerits=2000
+
+
+% code environment
+\def\argtext#1{\ensuremath{\langle$\textit{#1}$\rangle}}
+\def\vrb#1{\expandafter\texttt\expandafter{\string#1}}
+\def\clap@math#1{\hb@xt@\z@{\hss$\displaystyle#1$\hss}}
+
+
+% title line
+{\large
+\parindent=0pt
+\leftskip=0pt plus 1 fil
+\rightskip=0pt plus 1fil
+\parfillskip=0pt
+{\strut\Large Package \textsf{innerscript} v.\ \packageversion\ \documentname\par}
+\strut Conrad Kosowsky\par
+\strut \packagedate\par
+\strut\texttt{kosowsky.latex@gmail.com}\par}
+
+{\let\thefootnote\relax\footnotetext{Acknowledgements: Thanks to Sheldon Axler and Clea F. Rees for pointing a bug in a previous version of \textsf{innerscript}.}}
+
+\bigskip
+
+% off-the-shelf insert
+\hrule height \p@
+\@@line{\vrule width \p@\kern-\p@
+  \vbox{\medskip
+    \leftskip=8em\relax\rightskip=8em\relax
+      \noindent\strut For easy, off-the-shelf use, type the following
+      in your document preamble and compile using Lua\LaTeX:
+    \vskip\medskipamount
+      \noindent\hfil\strut|\usepackage{innerscript}|\hfil
+    \vskip\medskipamount}\relax
+  \kern-\p@\vrule width \p@}
+\hrule height \p@
+
+\bigskip
+
+% abstract
+{\small
+\leftskip=0.5in
+\rightskip=0.5in
+\centerline{\bfseries Overview\strut}
+\noindent The \textsf{innerscript} package optionally modifies four aspects of \TeX's automatic math formatting to improve typesetting: (1) it adds extra space around relation and operation symbols in superscripts and subscripts; (2) it removes extra space around |\left|-|\right| delimiter pairs; (3) it adds extra space after right delimiters in certain situations; and (4) it forces |\left| and |\right| delimiters to completely cover their contents. Using Lua\LaTeX\ is required.\par}
+
+\bigskip\bigskip\nointerlineskip
+\centerline{\vrule height 0.5pt width 2.5in}\bigskip\bigskip
+\nointerlineskip
+
+\catcode`\@\count@
+
+% 
+%</heading>
+% \fi
+% 
+% 
+% \check@checksum
+% 
+% 
+\endinput

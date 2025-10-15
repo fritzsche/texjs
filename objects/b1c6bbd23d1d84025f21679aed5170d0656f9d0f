@@ -1,0 +1,149 @@
+%%%
+% Labyrinthe
+%%%
+\def\filedateLabyJeu{2024/08/04}%
+\def\fileversionLabyJeu{0.1}%
+\message{-- \filedateLabyJeu\space v\fileversionLabyJeu}%
+%
+\setKVdefault[Labyrinthe]{Lignes=6,Colonnes=3,Longueur=4,Hauteur=2,Passages=false,EcartH=1,EcartV=1,CouleurF=gray!50,Texte=\color{black},SensImpose=false,Slop}%
+%
+\tikzset{FDirect/.style={-stealth}}
+\tikzset{FIndirect/.style={stealth-}}
+\tikzset{FBidirect/.style={stealth-stealth}}
+\tikzset{PfCStyleI/.style={near start}}
+\tikzset{PfCStyle/.style={near start}}
+
+\newlength{\LabyLongCM}
+
+\newcommand\Labyrinthe[3][]{%
+  \useKVdefault[Labyrinthe]%
+  \setKV[Labyrinthe]{#1}%
+  \setsepchar[*]{,*/}%
+  \readlist*\ListeLaby{#2}%
+  \xdef\LabySlop{\ifboolKV[Labyrinthe]{Slop}{sloped}{}}%
+  \ifboolKV[Labyrinthe]{Passages}{%
+    \readlist*\ListeLabySol{#3}%
+  }{}%
+  \xdef\LabyLong{\useKV[Labyrinthe]{Longueur}}%
+%  \setlength{\LabyLongCM}{\fpeval{\LabyLong*28.3465}pt}%
+  \xdef\LabyHaut{\useKV[Labyrinthe]{Hauteur}}%
+  \ifboolKV[Labyrinthe]{SensImpose}{%
+    \xdef\TotalLaby{\fpeval{4*(\useKV[Labyrinthe]{Colonnes}-1)+1}}%
+  }{%
+    \xdef\TotalLaby{\fpeval{3*\useKV[Labyrinthe]{Colonnes}-2}}%
+  }%
+  \xdef\CouleurF{\useKV[Labyrinthe]{CouleurF}}%
+  \xdef\MotifTexte{\noexpand\useKV[Labyrinthe]{Texte}}%
+  \xintifboolexpr{\ListeLabylen==\fpeval{\useKV[Labyrinthe]{Lignes}*\useKV[Labyrinthe]{Colonnes}}}{%
+    \begin{tikzpicture}[remember picture]%
+%      % on dessine les cadres
+      \foreach \compteurv in {1,...,\useKV[Labyrinthe]{Lignes}}{%
+        \foreach \compteurh in {1,...,\useKV[Labyrinthe]{Colonnes}}{%
+          \xdef\ColorFill{\ListeLaby[\fpeval{\useKV[Labyrinthe]{Colonnes}*(\compteurv-1)+\compteurh},2]}%
+          \node[fill=\ColorFill,draw,minimum height=\LabyHaut*1cm,minimum width=\LabyLong*1cm,name=A-\compteurh-\compteurv] at
+          (\fpeval{\LabyLong+\useKV[Labyrinthe]{EcartH}}*\compteurh,-\fpeval{\LabyHaut+\useKV[Labyrinthe]{EcartV}}*\compteurv) {%
+%            \begin{minipage}{\LabyLongCM}
+              \ListeLaby[\fpeval{\useKV[Labyrinthe]{Colonnes}*(\compteurv-1)+\compteurh},1]%
+%            \end{minipage}
+          };%
+        }%
+      }%
+      % fin des cadres
+      % on dessine les fl\`eches
+      \ifboolKV[Labyrinthe]{SensImpose}{%
+        %verticales
+        \foreach \compteurv in {1,...,\fpeval{\useKV[Labyrinthe]{Lignes}-1}}{%
+          \foreach \compteurh in {1,...,\useKV[Labyrinthe]{Colonnes}}{%
+            \ifboolKV[Labyrinthe]{Passages}{%
+              \xdef\NomNode{\noexpand\ListeLabySol[\fpeval{\TotalLaby*(\compteurv-1)+\useKV[Labyrinthe]{Colonnes}+3*(\compteurh-1)},1]}%
+              \xintifboolexpr{\ListeLabySol[\fpeval{\TotalLaby*(\compteurv-1)+\useKV[Labyrinthe]{Colonnes}+3*(\compteurh-1)},2]>0}{\xintifboolexpr{\ListeLabySol[\fpeval{\TotalLaby*(\compteurv-1)+\useKV[Labyrinthe]{Colonnes}+3*(\compteurh-1)},2]==1}{\xdef\NomStyle{FDirect}}{\xintifboolexpr{\ListeLabySol[\fpeval{\TotalLaby*(\compteurv-1)+\useKV[Labyrinthe]{Colonnes}+3*(\compteurh-1)},2]==2}{\xdef\NomStyle{FIndirect}}{\xdef\NomStyle{FBidirect}}}%
+                \draw[\CouleurF,line width=3pt,\NomStyle] (A-\compteurh-\compteurv) -- node[fill=white,midway,inner sep=2pt]{\MotifTexte\NomNode}(A-\compteurh-\fpeval{\compteurv+1});}{}%
+            }{%
+              \draw[\CouleurF,line width=3pt,FBidirect] (A-\compteurh-\compteurv) -- (A-\compteurh-\fpeval{\compteurv+1});%
+            }%
+          }%
+        }%
+%        % horizontales
+        \foreach \compteurv in {1,...,\useKV[Labyrinthe]{Lignes}}{%
+          \foreach \compteurh in {1,...,\fpeval{\useKV[Labyrinthe]{Colonnes}-1}}{%
+            \ifboolKV[Labyrinthe]{Passages}{%
+              \xdef\NomNode{\noexpand\ListeLabySol[\fpeval{\TotalLaby*(\compteurv-1)+\compteurh},1]}%
+              \xintifboolexpr{\ListeLabySol[\fpeval{\TotalLaby*(\compteurv-1)+\compteurh},2]>0}{\xintifboolexpr{\ListeLabySol[\fpeval{\TotalLaby*(\compteurv-1)+\compteurh},2]==1}{\xdef\NomStyle{FDirect}}{\xintifboolexpr{\ListeLabySol[\fpeval{\TotalLaby*(\compteurv-1)+\compteurh},2]==2}{\xdef\NomStyle{FIndirect}}{\xdef\NomStyle{FBidirect}}}%
+              \draw[\CouleurF,line width=3pt,\NomStyle](A-\compteurh-\compteurv) -- node[fill=white,midway,\LabySlop,inner sep=2pt]{\MotifTexte\NomNode}(A-\fpeval{\compteurh+1}-\compteurv);}{}
+            }{%
+              \draw[\CouleurF,line width=3pt,FBidirect](A-\compteurh-\compteurv) -- (A-\fpeval{\compteurh+1}-\compteurv);%
+            }%
+          }%
+        }%
+%        % diagonales "inverses"
+        \foreach \compteurv in {2,...,\fpeval{\useKV[Labyrinthe]{Lignes}}}{%
+          \foreach \compteurh in {1,...,\fpeval{\useKV[Labyrinthe]{Colonnes}-1}}{%
+            \ifboolKV[Labyrinthe]{Passages}{%
+              \xdef\NomNode{\noexpand\ListeLabySol[\fpeval{\TotalLaby*(\compteurv-2)+\useKV[Labyrinthe]{Colonnes}+3*(\compteurh-1)+2},1]}%
+              \xintifboolexpr{\ListeLabySol[\fpeval{\TotalLaby*(\compteurv-2)+\useKV[Labyrinthe]{Colonnes}+3*(\compteurh-1)+2},2]>0}{\xintifboolexpr{\ListeLabySol[\fpeval{\TotalLaby*(\compteurv-2)+\useKV[Labyrinthe]{Colonnes}+3*(\compteurh-1)+2},2]==1}{\xdef\NomStyle{FDirect}}{\xintifboolexpr{\ListeLabySol[\fpeval{\TotalLaby*(\compteurv-2)+\useKV[Labyrinthe]{Colonnes}+3*(\compteurh-1)+2},2]==2}{\xdef\NomStyle{FIndirect}}{\xdef\NomStyle{FBidirect}}}%
+                \draw[\CouleurF,line width=3pt,\NomStyle] (A-\compteurh-\compteurv) -- node[fill=white,PfCStyleI,\LabySlop,inner sep=2pt]{\MotifTexte\NomNode}(A-\fpeval{\compteurh+1}-\fpeval{\compteurv-1});
+              }{}
+            }{%
+              \draw[\CouleurF,line width=3pt,FBidirect] (A-\compteurh-\compteurv) -- (A-\fpeval{\compteurh+1}-\fpeval{\compteurv-1});
+            }%
+          }%
+        }%
+%%        % diagonales directes
+        \foreach \compteurv in {1,...,\fpeval{\useKV[Labyrinthe]{Lignes}-1}}{%
+          \foreach \compteurh in {1,...,\fpeval{\useKV[Labyrinthe]{Colonnes}-1}}{%
+            \ifboolKV[Labyrinthe]{Passages}{%
+              \xdef\NomNode{\noexpand\ListeLabySol[\fpeval{\TotalLaby*(\compteurv-1)+\useKV[Labyrinthe]{Colonnes}+3*(\compteurh-1)+1},1]}%
+              \xintifboolexpr{\ListeLabySol[\fpeval{\TotalLaby*(\compteurv-1)+\useKV[Labyrinthe]{Colonnes}+3*(\compteurh-1)+1},2]>0}{%
+                \xintifboolexpr{\ListeLabySol[\fpeval{\TotalLaby*(\compteurv-1)+\useKV[Labyrinthe]{Colonnes}+3*(\compteurh-1)+1},2]==1}{\xdef\NomStyle{FDirect}}{\xintifboolexpr{\ListeLabySol[\fpeval{\TotalLaby*(\compteurv-1)+\useKV[Labyrinthe]{Colonnes}+3*(\compteurh-1)+1},2]==2}{\xdef\NomStyle{FIndirect}}{\xdef\NomStyle{FBidirect}}}
+                \draw[\CouleurF,line width=3pt,\NomStyle] (A-\compteurh-\compteurv) -- node[fill=white,PfCStyle,\LabySlop,inner sep=2pt]{\MotifTexte\NomNode}(A-\fpeval{\compteurh+1}-\fpeval{\compteurv+1});
+              }{}%
+            }{%
+              \draw[\CouleurF,line width=3pt,FBidirect] (A-\compteurh-\compteurv) -- node[fill=white,PfCStyle,\LabySlop]{\MotifTexte\NomNode}(A-\fpeval{\compteurh+1}-\fpeval{\compteurv+1});
+            }%          
+          }%
+        }%
+      }{%
+        \foreach \compteurv in {1,...,\fpeval{\useKV[Labyrinthe]{Lignes}-1}}{%
+          \foreach \compteurh in {1,...,\useKV[Labyrinthe]{Colonnes}}{%
+            \ifboolKV[Labyrinthe]{Passages}{%
+              \xdef\NomNode{\noexpand\ListeLabySol[1,\fpeval{\TotalLaby*(\compteurv-1)+\useKV[Labyrinthe]{Colonnes}+2*(\compteurh-1)}]}%
+              \draw[\CouleurF,line width=3pt,stealth-stealth] (A-\compteurh-\compteurv) -- node[fill=white,midway]{\MotifTexte\NomNode}(A-\compteurh-\fpeval{\compteurv+1});%
+            }{%
+              \draw[\CouleurF,line width=3pt,stealth-stealth] (A-\compteurh-\compteurv) -- (A-\compteurh-\fpeval{\compteurv+1});%
+            }%
+          }%
+        }%
+        \foreach \compteurv in {1,...,\useKV[Labyrinthe]{Lignes}}{%
+          \foreach \compteurh in {1,...,\fpeval{\useKV[Labyrinthe]{Colonnes}-1}}{%
+            \ifboolKV[Labyrinthe]{Passages}{%
+              \xdef\NomNode{\noexpand\ListeLabySol[1,\fpeval{\TotalLaby*(\compteurv-1)+\compteurh}]}%
+              \draw[\CouleurF,line width=3pt,stealth-stealth]
+              (A-\compteurh-\compteurv) -- node[fill=white,midway]{\MotifTexte\NomNode}(A-\fpeval{\compteurh+1}-\compteurv);
+            }{%
+              \draw[\CouleurF,line width=3pt,stealth-stealth]
+              (A-\compteurh-\compteurv) -- (A-\fpeval{\compteurh+1}-\compteurv);
+            }%
+          }
+        }
+        \foreach \compteurv in {2,...,\fpeval{\useKV[Labyrinthe]{Lignes}}}{%
+          \foreach \compteurh in {1,...,\fpeval{\useKV[Labyrinthe]{Colonnes}-1}}{%
+            \draw[\CouleurF,line width=3pt,stealth-stealth] (A-\compteurh-\compteurv) -- (A-\fpeval{\compteurh+1}-\fpeval{\compteurv-1});
+          }
+        }
+        \foreach \compteurv in {1,...,\fpeval{\useKV[Labyrinthe]{Lignes}-1}}{%
+          \foreach \compteurh in {1,...,\fpeval{\useKV[Labyrinthe]{Colonnes}-1}}{%
+            \ifboolKV[Labyrinthe]{Passages}{%
+              \xdef\NomNode{\noexpand\ListeLabySol[1,\fpeval{\TotalLaby*(\compteurv-1)+\useKV[Labyrinthe]{Colonnes}+2*(\compteurh-1)+1}]}%
+              \draw[\CouleurF,line width=3pt,stealth-stealth] (A-\compteurh-\compteurv) -- node[fill=white,midway]{\MotifTexte\NomNode}(A-\fpeval{\compteurh+1}-\fpeval{\compteurv+1});
+            }{%
+              \draw[\CouleurF,line width=3pt,stealth-stealth] (A-\compteurh-\compteurv) -- (A-\fpeval{\compteurh+1}-\fpeval{\compteurv+1});
+            }%          
+          }%
+        }%
+%      % fin des fl\`eches
+    }
+  \end{tikzpicture}
+   }{
+  \textbf{! Le nombre d'informations n'est pas compatible avec les
+    d\'efinitions de {\ttfamily Colonnes} et {\ttfamily Lignes} !}}%
+}

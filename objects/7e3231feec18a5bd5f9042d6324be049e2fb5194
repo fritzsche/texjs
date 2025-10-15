@@ -1,0 +1,267 @@
+%D \module
+%D   [     file=t-sudoku,
+%D      version=2023-06-03,
+%D        title=\CONTEXT\ User Module,
+%D     subtitle=Sudokus for ConTeXt,
+%D       author=Jairo A. del Rio,
+%D         date=\currentdate,
+%D    copyright=Jairo A. del Rio,
+%D        email=jairoadelrio6@gmail.com,
+%D      license=MIT License]
+
+%C Copyright (c) 2021-2023 Jairo A. del Rio
+%C
+%C Permission is hereby granted, free of charge, to any person obtaining
+%C a copy of this software and associated documentation files (the
+%C "Software"), to deal in the Software without restriction, including
+%C without limitation the rights to use, copy, modify, merge, publish,
+%C distribute, sublicense, and/or sell copies of the Software, and to
+%C permit persons to whom the Software is furnished to do so, subject to
+%C the following conditions:
+%C
+%C The above copyright notice and this permission notice shall be
+%C included in all copies or substantial portions of the Software.
+%C
+%C THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+%C EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%C MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+%C IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+%C CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+%C TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+%C SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+%D I'm not fond of sudokus. In fact, I seldom solve one or two in a row.
+%D However, they come in handy in puzzle books and existing packages are 
+%D LaTeX or Python specific. Being so, a ConTeXt dedicated module is 
+%D more comfortable and customizable. After all, ConTeXt is about control
+%D as Hans often says.
+
+\writestatus{loading}{Sudokus for ConTeXt}
+\writestatus{loading}{A Lua port of Peter Norvig's sudoku solver}
+
+\startmodule[sudoku]
+
+%D As always, Lua does the hard job
+
+\ctxloadluafile{t-sudoku}
+
+\unprotect
+
+%D \type{\definesudoku} is not really required
+
+\installnamespace                      {sudoku}
+\installsimplecommandhandler\????sudoku{sudoku}\????sudoku
+
+%D Some aliases
+
+\let\setupsudokus\setupsudoku
+
+%D Basic setups
+%D
+%D In order not to define new constants/variables, recycling existing 
+%D ones looks better (trick learnt from Aditya Mahajan's modules).
+
+\setupsudokus
+  [\c!size=1.5em,
+   \c!align={\v!middle,\v!lohi},
+   \v!even\c!background=\v!color,
+   \v!odd\c!background=\v!color,
+   \v!even\c!backgroundcolor=white,     
+   \v!odd\c!backgroundcolor=gray,
+   \c!n=42,
+   \c!placeholder\c!label a=Invalid sudoku,
+   \c!placeholder\c!label b=Invalid sudoku file,
+   \c!placeholder\c!label c=Impossible to find a solution,
+   \c!placeholder\c!command=\framed]
+
+%D A generic sudoku generator macro
+%D Yeah, I'm that lazy
+
+\unexpanded\def\sudokufunction_name{\dodoubleempty\sudokufunction_direct}
+
+%D Passing values to TABLE's is easier and unknown keys will be ignored. 
+%D However, we need to enforce a square shape.Hence the need to passing 
+%D values twice.
+
+\def\sudokufunction_direct[#name][#parameters]#content%
+  {\begingroup%
+   \ifsecondargument
+     \setupTABLE[#parameters]%
+     \setupsudokus[#parameters]%
+   \fi
+   \bTABLE
+    [\c!align=\sudokuparameter\c!align,
+     \c!width=\sudokuparameter\c!size,
+     \c!height=\sudokuparameter\c!size]%
+     \clf_sudokufunction
+      [name                =#name,
+       content             ={#content},
+       evenbackground      =\sudokuparameter{\v!even\c!background},
+       oddbackground       =\sudokuparameter{\v!odd\c!background},
+       evenbackgroundcolor =\sudokuparameter{\v!even\c!backgroundcolor},
+       oddbackgroundcolor  =\sudokuparameter{\v!odd\c!backgroundcolor}]
+   \eTABLE%
+   \endgroup}
+
+%D Random sudokus
+
+\unexpanded\def\randomsudoku{\dosingleempty\randomsudoku_direct}
+
+\def\randomsudoku_direct[#parameters]%
+  {\begingroup%
+   \iffirstargument
+   \setupTABLE[#parameters]%
+    \setupsudokus[#parameters]%
+   \fi
+   \bTABLE
+    [\c!align=\sudokuparameter\c!align,
+     \c!width=\sudokuparameter\c!size,
+     \c!height=\sudokuparameter\c!size]%
+   \clf_randomsudoku
+    [n                   =\sudokuparameter\c!n,
+     evenbackground      =\sudokuparameter{\v!even\c!background},
+     oddbackground       =\sudokuparameter{\v!odd\c!background},
+     evenbackgroundcolor =\sudokuparameter{\v!even\c!backgroundcolor},
+     oddbackgroundcolor  =\sudokuparameter{\v!odd\c!backgroundcolor}]
+   \eTABLE%
+   \endgroup}
+
+%D Sudoku macros
+
+\def\sudoku{\sudokufunction_name[sudoku]}
+\def\sudokufile{\sudokufunction_name[sudokufile]}
+\def\sudokubuffer{\sudokufunction_name[sudokubuffer]}
+\def\sudokusolvebuffer{\sudokufunction_name[sudokusolvebuffer]}
+\def\solvesudoku{\sudokufunction_name[solvesudoku]}
+\def\solvesudokufile{\sudokufunction_name[solvesudokufile]}
+
+%D More aliases
+
+\let\solvedsudoku\solvesudoku
+\let\solvedsudokufile\solvesudokufile
+
+\protect
+
+\stopmodule
+
+\continueifinputfile{t-sudoku.mkvi}
+
+%D Some examples
+
+\usecolors[svg]
+\setupsudokus[oddbackgroundcolor=paleturquoise,evenbackgroundcolor=aliceblue]
+
+\starttext
+
+\startsection[title={\type{\sudoku}}]
+
+\sudoku{
+......... ........1 .....2.3.
+....1...4 ..3.5.... .26....7.
+14...8... 5........ 7....6.2.
+}
+
+\blank[line]
+
+\sudoku{
+000000001 000002030 004056000
+000004500 010700000 080000400
+000030000 000100008 205000000
+}
+
+\blank[line]
+
+\sudoku
+{
+000000000 111111111 222222222
+333333333 444444444 555555555
+666666666 777777777 888888888
+}
+
+\blank[line]
+
+\sudoku{666}
+
+\stopsection
+
+\startsection[title={\type{\solvesudoku}}]
+
+\solvesudoku[size=9mm,evenbackgroundcolor=gray,oddbackgroundcolor=white]{
+.......... .......1 .....2.3.
+....1...4. .3.5.... .26....7.
+14...8...5 ........ 7....6.2.
+}
+
+\blank[line]
+
+\solvedsudoku{
+000000001 000002030 004056000
+000004500 010700000 080000400
+000030000 000100008 205000000
+}
+
+\blank[line]
+
+\solvesudoku
+{
+000000000 111111111 222222222
+333333333 444444444 555555555
+666666666 777777777 888888888
+}
+
+\stopsection
+
+\startbuffer[lmao]
+.......... .......1 .....2.3.
+....1...4. .3.5.... .26....7.
+14...8...5 ........ 7....6.2.
+\stopbuffer
+
+\startsection[title={\type{\sudokubuffer}}]
+
+\sudokubuffer{lmao}
+
+\stopsection
+
+\startsection[title={\type{\sudokusolvebuffer}}]
+
+\sudokusolvebuffer{lmao}
+
+\stopsection
+
+\startsection[title={\type{\sudokufile}}]
+
+\sudokufile[evenbackgroundcolor=cornsilk,oddbackgroundcolor=pink]{t-sudoku-test-01.txt}
+
+\blank[line]
+
+\sudokufile{t-sudoku-test-03.txt}
+
+\blank[line]
+
+\sudokufile[rulethickness=2pt,evenbackgroundcolor=cornsilk]{t-sudoku-test-02.txt}
+
+\stopsection
+
+\startsection[title={\type{\solvesudokufile}}]
+
+\setupsudokus[oddbackgroundcolor=plum,evenbackgroundcolor=pink]%
+\solvesudokufile[oddbackgroundcolor=thistle]{t-sudoku-test-01.txt}
+
+\blank[line]
+
+\solvesudokufile{t-sudoku-test-02.txt}
+
+\blank[line]
+
+\solvesudokufile{t-sudoku-test-03.txt}
+
+\stopsection
+
+\startsection[title={\type{\randomsudoku}}]
+
+\randomsudoku[n=45]
+
+\stopsection
+
+\stoptext

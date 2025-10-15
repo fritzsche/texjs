@@ -1,0 +1,508 @@
+%%%
+% PixelArt
+%%%
+\def\filedatePixelArt{2025/05/26}%
+\def\fileversionPixelArt{0.1a}%
+\message{-- \filedatePixelArt\space v\fileversionPixelArt}%
+%
+\newtoks\toklistePANombre%
+\def\UpdatetoksPANombre#1\nil{\addtotok\toklistePANombre{"#1",}}%
+
+\setKVdefault[ClesPixelArt]{Largeur=29,Hauteur=29,Solution=false,Lettres=ABCDEFGHIJK,Nombres=false,ListeCouleurs={Orange,Red,LightGray,Maroon,Purple,black,black,Plum,Orange,White,White},Unite=5mm,Geant=false,HauteurD=1,LargeurD=1,Complet=false,Numero=1,Separations=false,Deforme=false,Coefx=0.25,Coefy=0.25,Borne=false,Graines=false,ListeNombres={},Graine={}}%
+\defKV[ClesPixelArt]{%
+  ListeNombres=\ifempty{#1}{}{\setKV[ClesPixelArt]{Nombres}},%
+  Graine=\ifempty{#1}{}{\setKV[ClesPixelArt]{Graines}}%
+}%
+%
+\NewDocumentCommand\PixelArt{o m}{%
+  \toklistePANombre{}%
+  \useKVdefault[ClesPixelArt]%
+  \setKV[ClesPixelArt]{#1}%
+  \xdef\ListeAvantCouleurs{\useKV[ClesPixelArt]{ListeCouleurs}}%
+  \ifboolKV[ClesPixelArt]{Nombres}{%
+    \xdef\ListeAvantNombres{\useKV[ClesPixelArt]{ListeNombres}}%
+    \setsepchar{,}%
+    \readlist*\ListePANombre{\ListeAvantNombres}%
+    \foreachitem\compteur\in\ListePANombre{\expandafter\UpdatetoksPANombre\compteur\nil}%
+  }{}
+  \ifboolKV[ClesPixelArt]{Geant}{%
+    % Découpe en hauteur : \fpeval{\useKV[ClesPixelArt]{Hauteur}/\useKV[ClesPixelArt]{HauteurD}}\\
+    % Découpe en largeur : \fpeval{\useKV[ClesPixelArt]{Largeur}/\useKV[ClesPixelArt]{LargeurD}-1}}\par
+    \ifboolKV[ClesPixelArt]{Complet}{%
+      \xintFor* ##1 in{\xintSeq{0}{\fpeval{\useKV[ClesPixelArt]{Hauteur}/\useKV[ClesPixelArt]{HauteurD}-1}}}\do{%
+        \xintFor* ##2 in{\xintSeq{0}{\fpeval{\useKV[ClesPixelArt]{Largeur}/\useKV[ClesPixelArt]{LargeurD}-1}}}\do{%
+          \fpeval{##1*\useKV[ClesPixelArt]{Hauteur}/\useKV[ClesPixelArt]{HauteurD}+##2} : \BuildPixelArtGeant{#2}{\useKV[ClesPixelArt]{Lettres}}{\ListeAvantCouleurs}{\the\toklistePANombre}{##1}{##2}\\%
+        }%
+      }%
+    }{%
+%      \quotient{\fpeval{\useKV[ClesPixelArt]{Numero}-1}}{\fpeval{\useKV[ClesPixelArt]{Hauteur}/\useKV[ClesPixelArt]{HauteurD}}}%
+%      \modulo{\fpeval{\useKV[ClesPixelArt]{Numero}-1}}{\fpeval{\useKV[ClesPixelArt]{Hauteur}/\useKV[ClesPixelArt]{HauteurD}}}%
+      \quotient{\fpeval{\useKV[ClesPixelArt]{Numero}-1}}{\fpeval{\useKV[ClesPixelArt]{Largeur}/\useKV[ClesPixelArt]{LargeurD}}}%
+      \modulo{\fpeval{\useKV[ClesPixelArt]{Numero}-1}}{\fpeval{\useKV[ClesPixelArt]{Largeur}/\useKV[ClesPixelArt]{LargeurD}}}%
+%      quotient = \the\intquotient -- remainder = \the\remainder :\\
+      \BuildPixelArtGeant{#2}{\useKV[ClesPixelArt]{Lettres}}{\ListeAvantCouleurs}{\the\toklistePANombre}{\the\intquotient}{\the\remainder}%
+    }%
+  }{%
+    \ifboolKV[ClesPixelArt]{Deforme}{%
+        \BuildPixelArtDeforme{#2}{\useKV[ClesPixelArt]{Lettres}}{\ListeAvantCouleurs}{\the\toklistePANombre}%
+      }{%
+      \BuildPixelArt{#2}{\useKV[ClesPixelArt]{Lettres}}{\ListeAvantCouleurs}{\the\toklistePANombre}%
+    }%
+  }%
+}%
+
+\NewDocumentCommand\BuildPixelArtDeforme{m m m m}{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+%    largeur:=\useKV[ClesPixelArt]{Largeur};
+%    hauteur:=\useKV[ClesPixelArt]{Hauteur};
+    largeurd:=\useKV[ClesPixelArt]{LargeurD};
+    hauteurd:=\useKV[ClesPixelArt]{HauteurD};
+    Unite:=\useKV[ClesPixelArt]{Unite};
+
+    %Deformation
+    Coefx=\useKV[ClesPixelArt]{Coefx};
+    Coefy=\useKV[ClesPixelArt]{Coefy};
+    boolean Borne,Graines;
+    Borne=\useKV[ClesPixelArt]{Borne};
+    Graines=\useKV[ClesPixelArt]{Graines};
+    if Graines:
+    randomseed:=\useKV[ClesPixelArt]{Graine};
+    fi;
+    %
+    boolean Solution,Nombres,Separations;
+    Solution:=\useKV[ClesPixelArt]{Solution};
+    Nombres:=\useKV[ClesPixelArt]{Nombres};
+    Separations:=\useKV[ClesPixelArt]{Separations};
+    
+    string BaseLettres;
+    BaseLettres=str #2;
+    numeric EchelleScale;
+    EchelleScale=Unite/10mm;
+    
+    color ColorEntier[],ColFond;
+    n:=0;
+    for p_=#3:
+    n:=n+1;
+    ColorEntier[n]:=p_;
+    endfor;
+
+    string RetiensNombres[];
+    if Nombres:
+    n:=0;
+    for p_=#4:
+    n:=n+1;
+    RetiensNombres[n]=p_;
+    endfor;
+    fi;
+
+        vardef Largeur(expr nomfichier)=
+      string p_;
+      p_=readfrom nomfichier;
+      largeur=(length p_+1) div 2;
+      closefrom nomfichier;
+    enddef;
+
+    vardef Hauteur(expr nomfichier)=
+      string p_;
+      hauteur=0;
+      p_=readfrom nomfichier;
+      forever: exitif p_=EOF;
+        hauteur:=hauteur+1;
+        p_:=readfrom nomfichier;
+      endfor;
+      closefrom nomfichier;
+    enddef;
+    
+    vardef Lecturecsv(expr nomfichier)=
+    for h=hauteur downto 1:
+    string p_;
+    p_=readfrom nomfichier;
+    l:=0;
+    for p=0 step 2 until 2*largeur-2:
+    l:=l+1;
+    if (substring(p,p+1) of p_)="-":
+    else:
+    if Nombres:
+    for m=0 upto (length BaseLettres-1):
+    if (substring(p,p+1) of p_)=substring(m,m+1) of BaseLettres:
+    label(TEX(RetiensNombres[m+1]) scaled EchelleScale,iso(M[h+1][l],M[h][l],M[h][l+1],M[h+1][l+1]));
+    fi;
+    endfor;
+    else:
+    label(TEX(substring(p,p+1) of p_) scaled EchelleScale,iso(M[h+1][l],M[h][l],M[h][l+1],M[h+1][l+1]));
+    fi;
+    if Solution:
+    for m=0 upto (length BaseLettres-1):
+    if (substring(p,p+1) of p_)=substring(m,m+1) of BaseLettres:
+    ColFond:=ColorEntier[m+1];
+    fi;
+    endfor;
+    if unknown ColFond: else: fill polygone(M[h+1][l],M[h][l],M[h][l+1],M[h+1][l+1]) withcolor ColFond fi;
+    fi;
+    trace polygone(M[h+1][l],M[h][l],M[h][l+1],M[h+1][l+1]);
+   fi;
+    endfor;
+    endfor;
+    closefrom nomfichier;
+    enddef;
+
+    Largeur("#1");
+    Hauteur("#1");
+
+    pair M[][];
+    for l=1 upto hauteur+1:
+      for c=1 upto largeur+1:
+      if Borne:
+      if (l=1) or (l=hauteur+1):
+      M[l][c]=Unite*(c,l)+Unite*(-Coefx+uniformdeviate(2*Coefx),0);
+      if (c=1) or (c=largeur+1):
+      M[l][c]:=Unite*(c,l);
+      fi;
+      else:
+      if (c=1) or (c=largeur+1):
+      M[l][c]=Unite*(c,l-1)+Unite*(0,uniformdeviate(Coefy));
+      else:
+      M[l][c]=Unite*(c,l)+Unite*(-Coefx+uniformdeviate(2*Coefx),-Coefy+uniformdeviate(2*Coefy));
+      fi;
+      fi;
+      else:
+      M[l][c]=Unite*(c,l)+Unite*(-Coefx+uniformdeviate(2*Coefx),-Coefy+uniformdeviate(2*Coefy));
+      fi;
+      %dotlabel("",M[l][c]);
+      endfor;
+    endfor;
+    
+    Lecturecsv("#1");
+%    if Separations:
+%    drawoptions(withcolor Purple);
+%    for k=hauteur step -hauteurd until 0:
+%    draw (Unite*(-1,k-0.5)--Unite*(largeur,k-0.5)) withpen pencircle scaled 1.25;
+%    endfor;
+%    for k=0 step largeurd until largeur:
+%    draw (Unite*(k-0.5,hauteur+0.125)--Unite*(k-0.5,-0.875)) withpen pencircle scaled 1.25;
+%    endfor;
+%    drawoptions();
+%    fi;
+  \end{mplibcode}
+\fi
+}%
+
+\NewDocumentCommand\BuildPixelArt{m m m m}{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+%    largeur:=\useKV[ClesPixelArt]{Largeur};
+%    hauteur:=\useKV[ClesPixelArt]{Hauteur};
+    largeurd:=\useKV[ClesPixelArt]{LargeurD};
+    hauteurd:=\useKV[ClesPixelArt]{HauteurD};
+    Unite:=\useKV[ClesPixelArt]{Unite};
+
+    boolean Solution,Nombres,Separations;
+    Solution:=\useKV[ClesPixelArt]{Solution};
+    Nombres:=\useKV[ClesPixelArt]{Nombres};
+    Separations:=\useKV[ClesPixelArt]{Separations};
+    
+    string BaseLettres;
+    BaseLettres=str #2;
+    numeric EchelleScale;
+    EchelleScale=Unite/5mm;
+    
+    color ColorEntier[],ColFond;
+    n:=0;
+    for p_=#3:
+    n:=n+1;
+    ColorEntier[n]:=p_;
+    endfor;
+
+    string RetiensNombres[];
+    if Nombres:
+    k:=0;
+    for p_=#4:
+    k:=k+1;
+    RetiensNombres[k]=p_;
+    endfor;
+    else:
+    m:=0;
+    for p_=0 upto n-1:
+    m:=m+1;
+    RetiensNombres[m]=substring(p_,p_+1) of BaseLettres;
+    endfor;
+    fi;
+
+    picture Etiquette[];
+    for k=1 upto n:
+    Etiquette[k]=image(
+    label(TEX(RetiensNombres[k]) scaled EchelleScale,(0,0));
+    );
+    endfor;
+
+    vardef Largeur(expr nomfichier)=
+      string p_;
+      p_=readfrom nomfichier;
+      largeur=(length p_+1) div 2;
+      closefrom nomfichier;
+    enddef;
+
+    vardef Hauteur(expr nomfichier)=
+      string p_;
+      hauteur=0;
+      p_=readfrom nomfichier;
+      forever: exitif p_=EOF;
+        hauteur:=hauteur+1;
+        p_:=readfrom nomfichier;
+      endfor;
+      closefrom nomfichier;
+    enddef;
+    
+    vardef Lecturecsv(expr nomfichier)=
+    for h=hauteur downto 1:
+      string p_;
+      p_=readfrom nomfichier;
+      l:=0;
+      for p=0 step 2 until 2*largeur-2:
+        l:=l+1;
+        if Solution=false:
+          if (substring(p,p+1) of p_)="-":
+          else:
+            for m=0 upto (length BaseLettres-1):
+              if (substring(p,p+1) of p_)=substring(m,m+1) of BaseLettres:
+              draw Etiquette[m+1] shifted((l-1)*Unite,(h-1)*Unite);
+              fi;
+            endfor;
+          fi;
+        fi;
+        if Solution:
+          if (substring(p,p+1) of p_)="-":
+          else:
+            for m=0 upto (length BaseLettres-1):
+              if (substring(p,p+1) of p_)=substring(m,m+1) of BaseLettres:
+                ColFond:=ColorEntier[m+1];
+              fi;
+            endfor;
+            if unknown ColFond:
+            else:
+              fill (unitsquare scaled Unite) shifted ((l-1)*Unite-0.5*Unite,(h-1)*Unite-0.5*Unite) withcolor ColFond
+            fi;
+          fi;
+        fi;
+        trace (unitsquare scaled Unite) shifted ((l-1)*Unite-0.5*Unite,(h-1)*Unite-0.5*Unite);  
+      endfor;
+    endfor;
+    closefrom nomfichier;
+    enddef;
+
+    Largeur("#1");
+    Hauteur("#1");
+    Lecturecsv("#1");
+    if Separations:
+    drawoptions(withcolor Purple);
+    for k=hauteur step -hauteurd until 0:
+    draw (Unite*(-1,k-0.5)--Unite*(largeur,k-0.5)) withpen pencircle scaled 1.25;
+    endfor;
+    for k=0 step largeurd until largeur:
+    draw (Unite*(k-0.5,hauteur+0.125)--Unite*(k-0.5,-0.875)) withpen pencircle scaled 1.25;
+    endfor;
+    drawoptions();
+    fi;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={largeur:=\useKV[ClesPixelArt]{Largeur}; hauteur:=\useKV[ClesPixelArt]{Hauteur}; Unite:=\useKV[ClesPixelArt]{Unite}; boolean Solution,Nombres,Separations; Solution:=\useKV[ClesPixelArt]{Solution}; Nombres:=\useKV[ClesPixelArt]{Nombres}; Separations:=\useKV[ClesPixelArt]{Separations};}]
+    string BaseLettres;
+    BaseLettres=str #2;
+    numeric EchelleScale;
+    EchelleScale=Unite/5mm;
+    
+    color ColorEntier[],ColFond;
+    n:=0;
+    for p_=#3:
+    n:=n+1;
+    ColorEntier[n]:=p_;
+    endfor;
+
+    string RetiensNombres[];
+    if Nombres:
+    k:=0;
+    for p_=#4:
+    k:=k+1;
+    RetiensNombres[k]=p_;
+    endfor;
+    else:
+    m:=0;
+    for p_=0 upto n-1:
+    m:=m+1;
+    RetiensNombres[m]=substring(p_,p_+1) of BaseLettres;
+    endfor;
+    fi;
+
+    picture Etiquette[];
+    for k=1 upto n:
+    Etiquette[k]=image(
+    label(LATEX(RetiensNombres[k]) scaled EchelleScale,(0,0));
+    );
+    endfor;
+
+    vardef Largeur(expr nomfichier)=
+      string p_;
+      p_=readfrom nomfichier;
+      largeur=(length p_+1) div 2;
+      closefrom nomfichier;
+    enddef;
+
+    vardef Hauteur(expr nomfichier)=
+      string p_;
+      hauteur=0;
+      p_=readfrom nomfichier;
+      forever: exitif p_=EOF;
+        hauteur:=hauteur+1;
+        p_:=readfrom nomfichier;
+      endfor;
+      closefrom nomfichier;
+    enddef;
+    
+    vardef Lecturecsv(expr nomfichier)=
+    for h=hauteur downto 1:
+    string p_;
+    p_=readfrom nomfichier;
+    l:=0;
+    for p=0 step 2 until 2*largeur-2:
+    l:=l+1;
+    if Solution=false:
+    if (substring(p,p+1) of p_)="-":
+    else:
+    for m=0 upto (length BaseLettres-1):
+    if (substring(p,p+1) of p_)=substring(m,m+1) of BaseLettres:
+    draw Etiquette[m+1] shifted((l-1)*Unite,(h-1)*Unite);
+    fi;
+    endfor;
+    fi;
+    fi;
+    if Solution:
+    for m=0 upto (length BaseLettres-1):
+    if (substring(p,p+1) of p_)=substring(m,m+1) of BaseLettres:
+    ColFond:=ColorEntier[m+1];
+    fi;
+    endfor;
+    if unknown ColFond: else: fill (unitsquare scaled Unite) shifted ((l-1)*Unite-0.5*Unite,(h-1)*Unite-0.5*Unite) withcolor ColFond fi;
+    fi;
+    trace (unitsquare scaled Unite) shifted ((l-1)*Unite-0.5*Unite,(h-1)*Unite-0.5*Unite);
+    endfor;
+    endfor;
+    closefrom nomfichier;
+    enddef;
+
+    Largeur("#1");
+    Hauteur("#1");
+    Lecturecsv("#1");
+    if Separations:
+    drawoptions(withcolor Purple);
+    for k=hauteur step -hauteurd until 0:
+    draw (Unite*(-1,k-0.5)--Unite*(largeur,k-0.5)) withpen pencircle scaled 1.25;
+    endfor;
+    for k=0 step largeurd until largeur:
+    draw (Unite*(k-0.5,hauteur+0.125)--Unite*(k-0.5,-0.875)) withpen pencircle scaled 1.25;
+    endfor;
+    drawoptions();
+    fi;
+  \end{mpost}
+  \fi
+}%
+
+\NewDocumentCommand\BuildPixelArtGeant{m m m m m m}{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}%
+%    largeur:=\useKV[ClesPixelArt]{Largeur};
+%    hauteur:=\useKV[ClesPixelArt]{Hauteur};
+    largeurd:=\useKV[ClesPixelArt]{LargeurD};
+    hauteurd:=\useKV[ClesPixelArt]{HauteurD};
+    
+    Unite:=\useKV[ClesPixelArt]{Unite};
+
+    boolean Solution,Nombres;
+    Solution:=\useKV[ClesPixelArt]{Solution};
+    Nombres:=\useKV[ClesPixelArt]{Nombres};
+    
+    string BaseLettres;
+    BaseLettres=str #2;
+
+    numeric EchelleScale;
+    EchelleScale=Unite/5mm;
+    
+    color ColorEntier[],ColFond;
+    n:=0;
+    for p_=#3:
+    n:=n+1;
+    ColorEntier[n]:=p_;
+    endfor;
+
+    string RetiensNombres[];
+    if Nombres:
+    n:=0;
+    for p_=#4:
+    n:=n+1;
+    RetiensNombres[n]=p_;
+    endfor;
+    fi;
+
+    vardef Largeur(expr nomfichier)=
+      string p_;
+      p_=readfrom nomfichier;
+      largeur=(length p_+1) div 2;
+      closefrom nomfichier;
+    enddef;
+
+    vardef Hauteur(expr nomfichier)=
+      string p_;
+      hauteur=0;
+      p_=readfrom nomfichier;
+      forever: exitif p_=EOF;
+        hauteur:=hauteur+1;
+        p_:=readfrom nomfichier;
+      endfor;
+      closefrom nomfichier;
+    enddef;
+    
+    vardef Lecturecsv(expr nomfichier)=
+    % for h=hauteur-#5*hauteurd downto hauteur-(#5+1)*hauteurd:
+    for h=hauteur downto 1:
+    string p_;
+    p_=readfrom nomfichier;
+    l:=0;
+    if (h>hauteur-(#5+1)*hauteurd) and (h<hauteur-#5*hauteurd+1):
+    for p=2*#6*largeurd step 2 until 2*(#6+1)*largeurd-2:
+    l:=l+1;
+    if (substring(p,p+1) of p_)="-":
+    else:
+    if Nombres:
+    for m=0 upto (length BaseLettres-1):
+    if (substring(p,p+1) of p_)=substring(m,m+1) of BaseLettres:
+    label(TEX(RetiensNombres[m+1]) scaled EchelleScale,((l-1)*Unite,(h-1)*Unite));
+    fi;
+    endfor;
+    else:
+    label(TEX(substring(p,p+1) of p_) scaled EchelleScale,((l-1)*Unite,(h-1)*Unite));
+    fi;
+    if Solution:
+    for m=0 upto (length BaseLettres-1):
+    if (substring(p,p+1) of p_)=substring(m,m+1) of BaseLettres:
+    ColFond:=ColorEntier[m+1];
+    fi;
+    endfor;
+    if unknown ColFond: else: fill (unitsquare scaled Unite) shifted ((l-1)*Unite-0.5*Unite,(h-1)*Unite-0.5*Unite) withcolor ColFond fi;
+    fi;
+    trace (unitsquare scaled Unite) shifted ((l-1)*Unite-0.5*Unite,(h-1)*Unite-0.5*Unite);
+   fi;
+   endfor;
+   fi;
+    endfor;
+    closefrom nomfichier;
+    enddef;
+
+    Largeur("#1");
+    Hauteur("#1");
+    Lecturecsv("#1");
+  \end{mplibcode}
+  \fi%
+}%

@@ -1,0 +1,44 @@
+%%%
+% Jeton
+%%%
+\def\filedateJeton{2025/08/14}%
+\def\fileversionJeton{0.1a}%
+\message{-- \filedateJeton\space v\fileversionJeton}%
+%
+\setKVdefault[Jeton]{Diametre=5mm,Impression=false}%
+
+\NewDocumentCommand\Jeton{om}{%
+  \useKVdefault[Jeton]%
+  \setKV[Jeton]{#1}%
+  \ifluatex%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\PfCListeJeton{#2}%
+    \foreachitem\compteur\in\PfCListeJeton{\BuildJeton{\PfCListeJeton[\compteurcnt]}}%
+    \reademptyitems%
+  \fi%
+}%
+
+\NewDocumentCommand\BuildJeton{m}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      input fiziko;
+      
+      boolean Impression;
+      Impression=\useKV[Jeton]{Impression};
+      numeric Diametre;
+      Diametre=\useKV[Jeton]{Diametre};
+      color Fond;
+      Fond= if Impression:white else:BurlyWood fi;
+      
+      path p;
+      p:=fullcircle scaled Diametre;
+      fill p withcolor Fond;
+      JetonAngle:=45+uniformdeviate(30);
+      Intensite:=0.3+uniformdeviate(2)/10;
+      draw woodenThing(p,JetonAngle) withcolor Intensite*Fond;
+      draw p;
+      label(TEX("\bfseries \num{#1}"),(0,0));
+    \end{mplibcode}
+  \fi%
+}%

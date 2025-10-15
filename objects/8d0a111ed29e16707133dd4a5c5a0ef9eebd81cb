@@ -1,0 +1,240 @@
+% \iffalse meta-comment
+%
+% File: ltx-talk-title.dtx Copyright (C) 2025 Joseph Wright
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+% This file is part of the "ltx-talk bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% The released version of this bundle is available from CTAN.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/josephwright/xbeameltx-talkr
+%
+% for those people who are interested.
+%
+% -----------------------------------------------------------------------
+%
+%<*driver>
+\documentclass{l3doc}
+% Additional commands needed in this source
+\NewDocumentCommand\email{m}{\href{mailto:#1}{\nolinkurl{#1}}}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% ^^A As we are dealing with a class, this has to be done manually
+% \def\filedate{2025-10-10}
+% \def\fileversion{v0.2.3}
+%
+% \title{^^A
+%   \pkg{ltx-talk-title} -- Title pages^^A
+%   \thanks{This file describes \fileversion,
+%     last revised \filedate.}^^A
+% }
+%
+% \author{^^A
+%  Joseph Wright^^A
+%  \thanks{^^A
+%    E-mail: \email{joseph@texdev.net}^^A
+%   }^^A
+% }
+%
+% \date{Released \filedate}
+%
+% \maketitle
+%
+% \begin{documentation}
+%
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{ltx-talk-title} implementation}
+%
+% Start the \pkg{DocStrip} guards.
+%    \begin{macrocode}
+%<*class>
+%    \end{macrocode}
+%
+% Identify the internal prefix.
+%    \begin{macrocode}
+%<@@=talk>
+%    \end{macrocode}
+%
+% \begin{macro}{\institute, \subtitle}
+% \begin{variable}{\@institute, \@subtitle}
+%   Simple storage at present: we use names similar to the kernel ones for
+%   author, etc., as this makes data management easier.
+%    \begin{macrocode}
+\cs_new_nopar:Npn \@institute { }
+\cs_new_nopar:Npn \@subtitle { }
+\NewDocumentCommand \institute { = { short-institute } O {#2} m }
+  { \cs_gset_nopar:Npn \@institute {#2} }
+\NewDocumentCommand \subtitle { = { short-subtitle } O {#2} m }
+  { \cs_gset_nopar:Npn \@subtitle {#2} }
+%    \end{macrocode}
+% \end{variable}
+% \end{macro}
+%
+% \begin{variable}
+%   {
+%     \l_@@_titlelem_after_skip ,
+%     \l_@@_titlelem_before_skip ,
+%     \l_@@_titlelem_color_tl ,
+%     \l_@@_titlelem_font_tl ,
+%     \l_@@_titlelem_tag_begin_tl ,
+%     \l_@@_titlelem_tag_end_tl ,
+%   }
+%   As the various elements of the titlepage share certain characteristics, we
+%   use a single template and split them as instances.
+%    \begin{macrocode}
+\NewTemplateType { titlepage-element } { 1 }
+\DeclareTemplateInterface { titlepage-element } { talk } { 1 }
+  {
+    after-skip : length = 0em ,
+    before-skip : length = 0em ,
+    color : tokenlist = . ,
+    font : tokenlist = \normalfont ,
+    tag-begin : tokenlist = ,
+    tag-end : tokenlist =
+  }
+\DeclareTemplateCode { titlepage-element } { talk } { 1 }
+  {
+    after-skip  = \l_@@_titlelem_after_skip ,
+    before-skip = \l_@@_titlelem_before_skip ,
+    color       = \l_@@_titlelem_color_tl ,
+    font        = \l_@@_titlelem_font_tl ,
+    tag-begin   = \l_@@_titlelem_tag_begin_tl ,
+    tag-end     = \l_@@_titlelem_tag_end_tl
+  }
+  {
+    \tl_if_empty:nF {#1}
+      {
+        \vspace { \l_@@_titlelem_before_skip }
+        \group_begin:
+          \tl_if_empty:NF \l_@@_titlelem_color_tl
+            { \color_select:V \l_@@_titlelem_color_tl }
+          \l_@@_titlelem_font_tl
+          \l_@@_titlelem_tag_begin_tl
+          #1
+          \par
+          \l_@@_titlelem_tag_end_tl
+        \group_end:
+        \vspace { \l_@@_titlelem_after_skip }
+      }
+  }
+%    \end{macrocode}
+%   Standard settings are taken from \cls{beamer} with minor adjustments.
+%    \begin{macrocode}
+\DeclareInstance { titlepage-element } { author } { talk }
+  { before-skip = 1em }
+\DeclareInstance { titlepage-element } { date } { talk }
+  { after-skip = 0.5em }
+\DeclareInstance { titlepage-element } { institute } { talk }
+  { font = \scriptsize }
+\DeclareInstance { titlepage-element } { subtitle } { talk }
+  { before-skip = 0.25em , color = structure }
+\DeclareInstance { titlepage-element } { title } { talk }
+  {
+    color = structure ,
+    font = \Large ,
+    tag-begin = \tag_struct_begin:n { tag = Title } ,
+    tag-end = \tag_struct_end:
+  }
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}
+%   {
+%     \l_@@_titlepage_order_clist  ,
+%     \l_@@_titlepage_alignment_tl  ,
+%     \l_@@_titlepage_framestyle_tl ,
+%     \l_@@_frame_alignment_tl
+%   }
+%   Here, we deal with the overall style: notice that frame vertical alignment
+%   actually applies elsewhere, which is why it doesn't show up in the template
+%   code part. As a result, we have a slightly repetitive key interface.
+%    \begin{macrocode}
+\NewTemplateType { titlepage } { 0 }
+\DeclareTemplateInterface { titlepage } { talk } { 0 }
+  {
+    element-order : commalist =
+      {
+        title     ,
+        subtitle  ,
+        author    ,
+        institute ,
+        date
+      } ,
+    framestyle : tokenlist = talk ,
+    horizontal-alignment : choice { left , center ,  right } = center ,
+    vertical-alignment : choice { bottom , center , stretch , top } = center
+  }
+\DeclareTemplateCode { titlepage } { talk } { 0 }
+  {
+    element-order = \l_@@_titlepage_order_clist ,
+    framestyle = \l_@@_titlepage_framestyle_tl ,
+    horizontal-alignment =
+      {
+        left = \tl_set:Nn \l_@@_titlepage_alignment_tl { flushleft } ,
+        center = \tl_set:Nn \l_@@_titlepage_alignment_tl { center } ,
+        right = \tl_set:Nn \l_@@_titlepage_alignment_tl { flushright }
+      } ,
+    vertical-alignment =
+      {
+        bottom = \tl_set:Nn \l_@@_frame_alignment_tl { bottom } ,
+        center = \tl_set:Nn \l_@@_frame_alignment_tl { center } ,
+        stretch = \tl_set:Nn \l_@@_frame_alignment_tl { stretch } ,
+        top = \tl_set:Nn \l_@@_frame_alignment_tl { top }
+      }
+  }
+  {
+    \tl_if_empty:NF \l_@@_titlepage_framestyle_tl
+      { \exp_args:NV \thispagestyle \l_@@_titlepage_framestyle_tl }
+    \begin { \l_@@_titlepage_alignment_tl }
+      \cs_set_protected:Npn \and { \quad }
+      \clist_map_inline:Nn \l_@@_titlepage_order_clist
+        {
+          \ExpandArgs { nnv } \UseInstance { titlepage-element }
+            {##1} { @ ##1 }
+        }
+    \end { \l_@@_titlepage_alignment_tl }
+  }
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}{\maketitle}
+%   A very simple setup.
+%    \begin{macrocode}
+\NewDocumentCommand \maketitle { O {} }
+  {
+    \bool_if:NTF \l_@@_frame_bool
+      { \UseTemplate { titlepage } { talk } {#1} }
+      {
+        \begin { frame }
+          \UseTemplate { titlepage } { talk } {#1}
+        \end { frame }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</class>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \PrintIndex

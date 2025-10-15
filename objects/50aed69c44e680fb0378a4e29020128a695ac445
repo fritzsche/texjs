@@ -1,0 +1,3544 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{pmdraw}[2025-10-07 v2.0 pmdraw]
+
+% *------------------------------*
+% |6````````````````````````````6|
+% |`````____````____`````````````|
+% |````|MFMF\  /MFMF|````````````|
+% |````|MF|MF\/MF|MF|````````````|
+% |````|MF|\MFMF/|MF|_______`````|
+% |````|MF|``````|MFMFMFMFMF|````|
+% |````|MF|``````|MF|````````````|
+% |````|MF|``````|MF|___`````````|
+% |``````````````|MFMFMF|````````|
+% |``````````````|MF|````````````|
+% |``````````````|MF|````````````|
+% |``````````````|MF|````````````|
+% |5````````````````````````````5|
+% *------------------------------*
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                        %
+% Required packages                                      %
+%                                                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \RequirePackage{datetime}
+\RequirePackage{xkeyval}
+\RequirePackage{tikz}
+\usetikzlibrary{math,decorations.pathreplacing,calligraphy,backgrounds}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                        %
+%  Internal control and option commands                  %
+%   - loosely ordered alphabetically                     %
+%   - includes default values where appropriate          %
+%                                                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\pmdraw@braceLabel}{}% Label of brace
+
+\newcommand{\pmdraw@bracketLabel}{}% Label of bracket
+\newcommand{\pmdraw@BracketSep}{}% Separation for bracket
+\newcommand{\pmdraw@BracketShift}{}% Shift of bracket
+\newcommand{\pmdraw@BracketShiftUp}{}% Makes bracket higher
+\newcommand{\pmdraw@BracketShiftDown}{}% Makes bracket lower
+
+\newcommand{\pmdraw@diagSep}{1}% Vertical separation between bottom row of top diagram and top row of bottom diagram in product diagram
+
+\newcommand{\pmdraw@drawAedgesOptions}{}% Draw options for added edges in product diagram
+\newcommand{\pmdraw@drawAedgesOptionsDefault}{}% Default draw options for added edges in product diagram
+\newcommand{\pmdraw@drawAedges}[2]{% Draws added edges in product diagram from #1 vertex to #2 vertex, assumes #1<#2
+    \@ifclassloaded{beamer}{% If in beamer
+        \uncover<\pmdraw@edgesAddedUncover>{% Uncovers added edges
+            \foreach \x in {#1,...,#2} {% For each vertex in range
+                \ifnum\value{pmdraw@ifEdgesAdded}=0% If drawing added edges
+                    \draw[dotted,thick,apply style/.expand once=\pmdraw@drawAedgesOptionsDefault,apply style/.expand once=\pmdraw@drawAedgesOptions] (\x,0) -- (\x,-\pmdraw@diagSep);% Draw concatenation edge
+                \else% If hiding top vertices
+                    \phantom{%
+                        \draw[dotted,thick,apply style/.expand once=\pmdraw@drawAedgesOptionsDefault,apply style/.expand once=\pmdraw@drawAedgesOptions] (\x,0) -- (\x,-\pmdraw@diagSep);% Draw concatenation edge
+                    }%
+                \fi%
+            }%
+        }%
+    }{% If not in beamer
+        \foreach \x in {#1,...,#2} {% For each vertex in range
+            \ifnum\value{pmdraw@ifEdgesAdded}=0% If drawing added edges
+                \draw[dotted,thick,apply style/.expand once=\pmdraw@drawAedgesOptionsDefault,apply style/.expand once=\pmdraw@drawAedgesOptions] (\x,0) -- (\x,-\pmdraw@diagSep);% Draw concatenation edge
+            \else% If hiding top vertices
+                \phantom{%
+                    \draw[dotted,thick,apply style/.expand once=\pmdraw@drawAedgesOptionsDefault,apply style/.expand once=\pmdraw@drawAedgesOptions] (\x,0) -- (\x,-\pmdraw@diagSep);% Draw concatenation edge
+                }%
+            \fi%
+        }%
+    }%
+    \pmdraw@AedgesLoop% Restart for loop
+}
+
+\newcommand{\pmdraw@drawBraceDrawOptions}{}% Draw options for brace
+\newcommand{\pmdraw@drawBraceNodeOptions}{}% Node options for brace
+\newcommand{\pmdraw@drawBraceDefault}[3]{% Draws a brace starting from #1 vertex to #2 vertex with label #3, assumes #1<#2 - DEFAULT
+    \ifnum\pmdraw@ifProdDiag=1% If drawing a product diagram or if placing brace above diagram
+        \draw[
+            very thick,
+            decorate,
+            decoration={calligraphic brace,amplitude=6pt},
+            apply style/.expand once=\pmdraw@drawBraceDrawOptions
+        ] (#1-0.17,\pmdraw@rowSep+0.5) -- (#2+0.17,\pmdraw@rowSep+0.5)
+        node[
+            pos=0.5,
+            above=6pt,
+            apply style/.expand once=\pmdraw@drawBraceNodeOptions
+        ] {\(#3\)};% Draw brace on top of diagram
+    \else% If not drawing a product diagram or if placing brace below diagram
+        \draw[
+            very thick,
+            decorate,
+            decoration={calligraphic brace,mirror,amplitude=6pt},
+            apply style/.expand once=\pmdraw@drawBraceDrawOptions
+        ] (#1-0.17,-0.5) -- (#2+0.17,-0.5)
+        node[
+            pos=0.5,
+            below=6pt,
+            apply style/.expand once=\pmdraw@drawBraceNodeOptions
+        ] {\(#3\)};% Draw brace on bottom of diagram
+    \fi%
+}
+\let\pmdraw@drawBrace\pmdraw@drawBraceDefault% Draws a brace starting from #1 vertex to #2 vertex with label #3, assumes #1<#2
+
+\newcommand{\pmdraw@drawBracketDrawOptions}{}% Draw options for bracket
+\newcommand{\pmdraw@drawBracketNodeOptions}{}% Node options for bracket
+\newcommand{\pmdraw@drawBracketDefault}[1]{% Draws a bracket to the left or right of a diagram with label #1
+    \begin{scope}[shift={(\pmdraw@BracketShift,0)}]% Shifts bracket horizontally
+        \ifnum\pmdraw@ifBracketLeft=1% If placing bracket to the left of the brick
+            \draw[
+                |-|,
+                apply style/.expand once=\pmdraw@drawBracketDrawOptions
+            ] ({1-\pmdraw@BracketSep},{0-\pmdraw@BracketShiftDown}) -- ({1-\pmdraw@BracketSep},{\pmdraw@rowSep+\pmdraw@BracketShiftUp})
+            node[
+                pos=0.5,
+                left=3pt,
+                apply style/.expand once=\pmdraw@drawBracketNodeOptions
+            ] {\(#1\)};% Draw bracket on left of brick
+        \else% If placing bracket to the right of the brick
+            \draw[
+                |-|,
+                apply style/.expand once=\pmdraw@drawBracketDrawOptions
+            ] ({\value{pmdraw@degreeB}+\pmdraw@BracketSep},{0-\pmdraw@BracketShiftDown}) -- ({\value{pmdraw@degreeB}+\pmdraw@BracketSep},{\pmdraw@rowSep+\pmdraw@BracketShiftUp})
+            node[
+                pos=0.5,
+                right=3pt,
+                apply style/.expand once=\pmdraw@drawBracketNodeOptions
+            ] {\(#1\)};% Draw bracket on right of brick
+        \fi%
+    \end{scope}%
+}
+\let\pmdraw@drawBracket\pmdraw@drawBracketDefault% Draws a bracket to the left or right of a diagram with label #1
+
+\newcommand{\pmdraw@drawDotsDrawOptions}{}% Draw options for dots between bricks
+\newcommand{\pmdraw@drawDotsNodeOptions}{}% Node options for dots between bricks
+\newcommand{\pmdraw@drawDotsDefault}[2]{% Draws dots between bricks at (#1,#2) - DEFAULT
+    \draw[apply style/.expand once=\pmdraw@drawDotsDrawOptions] (#1,#2) node[apply style/.expand once=\pmdraw@drawDotsNodeOptions] {\(\dots\)};%
+}
+\let\pmdraw@drawDots\pmdraw@drawDotsDefault% Draws dots between bricks at (#1,#2)
+
+\newcommand{\pmdraw@drawEdgeDrawOptions}{}% Draw options for edge
+
+\newcommand{\pmdraw@drawEdgeLabelOptions}{}% Node options for label of edge
+
+\newcommand{\pmdraw@drawEdgeRadius}{}% Radius of arc in edge
+\newcommand{\pmdraw@drawEdgeRadiusLeft}{}% Radius of left arc in edge
+\newcommand{\pmdraw@drawEdgeRadiusRight}{}% Radius of arc right in edge
+
+\newcommand{\pmdraw@drawLabelBDrawOptions}{}% Draw options for label of a vertex in bottom row
+\newcommand{\pmdraw@drawLabelBNodeOptions}{}% Node options for label of a vertex in bottom row
+\newcommand{\pmdraw@drawLabelBottomDefault}[3]{% For bottom row, draws the label #3 for a vertex at (#1,#2) - DEFAULT
+    \draw[apply style/.expand once=\pmdraw@drawLabelBDrawOptions] (#1,#2) node[below=6pt,apply style/.expand once=\pmdraw@drawLabelBNodeOptions] {\(#3'\)};%
+}
+\let\pmdraw@drawLabelBottom\pmdraw@drawLabelBottomDefault% For bottom row, draws the label #3 for a vertex at (#1,#2)
+
+\newcommand{\pmdraw@drawLabelTDrawOptions}{}% Draw options for label of a vertex in top row
+\newcommand{\pmdraw@drawLabelTNodeOptions}{}% Node options for label of a vertex in top row
+\newcommand{\pmdraw@drawLabelTopDefault}[3]{% For top row, draws the label #3 for a vertex at (#1,#2) - DEFAULT
+    \draw[apply style/.expand once=\pmdraw@drawLabelTDrawOptions] (#1,#2) node[above=6pt,apply style/.expand once=\pmdraw@drawLabelTNodeOptions] {\(#3\)};%
+}
+\let\pmdraw@drawLabelTop\pmdraw@drawLabelTopDefault% For top row, draws the label #3 for a vertex at (#1,#2)
+
+\newcommand{\pmdraw@drawLedgesDrawOptions}{}% Draw options for lower non-transversal edges
+\newcommand{\pmdraw@drawLedgesDrawOptionsDefault}{}% Default draw options for lower non-transversal edges
+\newcommand{\pmdraw@drawLedgesDrawDefault}[2]{% Draws lower non-transversal edge from #1 vertex to #2 vertex, assumes #1<#2 - DEFAULT
+    \ifnum\pmdraw@ifEquiv=1% If drawing an equivalence relation
+        \begin{scope}[shift={(0,2)}]% Shift bottom row to top row
+    \fi%
+    \ifnum\pmdraw@ifRadiusChange=1% If drawing a non default radius
+        \draw[apply style/.expand once=\pmdraw@drawLedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawLedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1,0) --  (#1,{\pmdraw{edgeHeight}-\pmdraw@drawEdgeRadius});% Draw left vertical line
+        \draw[apply style/.expand once=\pmdraw@drawLedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawLedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1,{\pmdraw{edgeHeight}-\pmdraw@drawEdgeRadius}) arc (180:90:\pmdraw@drawEdgeRadius);% Draw left arch
+        \draw[apply style/.expand once=\pmdraw@drawLedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawLedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#2-\pmdraw@drawEdgeRadius,\pmdraw{edgeHeight}) arc (90:0:\pmdraw@drawEdgeRadius);% Draw right arc
+        \draw[apply style/.expand once=\pmdraw@drawLedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawLedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#2,0) --  (#2,{\pmdraw{edgeHeight}-\pmdraw@drawEdgeRadius});% Draw right vertical line
+        \if\relax\pmdraw@NTedgeLabel\relax% If label is empty
+            \draw[apply style/.expand once=\pmdraw@drawLedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawLedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1+\pmdraw@drawEdgeRadius,\pmdraw{edgeHeight}) -- (#2-\pmdraw@drawEdgeRadius,\pmdraw{edgeHeight});% Draw straight line
+        \else% If label is non-empty
+            \draw[apply style/.expand once=\pmdraw@drawLedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawLedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1+\pmdraw@drawEdgeRadius,\pmdraw{edgeHeight}) -- (#2-\pmdraw@drawEdgeRadius,\pmdraw{edgeHeight}) node[fill=white, pos=0.5, apply style/.expand once=\pmdraw@drawEdgeLabelOptions] {\pmdraw@NTedgeLabel};% Draw straight line with label
+        \fi%
+    \else% If drawing the default radius
+        \draw[apply style/.expand once=\pmdraw@drawLedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawLedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1,0) arc (180:90:\pmdraw{edgeHeight});% Draw left arch
+        \draw[apply style/.expand once=\pmdraw@drawLedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawLedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#2-\pmdraw{edgeHeight},\pmdraw{edgeHeight}) arc (90:0:\pmdraw{edgeHeight});% Draw right arc
+        \if\relax\pmdraw@NTedgeLabel\relax% If label is empty
+            \draw[apply style/.expand once=\pmdraw@drawLedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawLedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1+\pmdraw{edgeHeight},\pmdraw{edgeHeight}) -- (#2-\pmdraw{edgeHeight},\pmdraw{edgeHeight});% Draw straight line
+        \else% If label is non-empty
+            \draw[apply style/.expand once=\pmdraw@drawLedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawLedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1+\pmdraw{edgeHeight},\pmdraw{edgeHeight}) -- (#2-\pmdraw{edgeHeight},\pmdraw{edgeHeight}) node[fill=white, pos=0.5, apply style/.expand once=\pmdraw@drawEdgeLabelOptions] {\pmdraw@NTedgeLabel};% Draw straight line with label
+        \fi%
+    \fi%
+    \ifnum\pmdraw@ifEquiv=1% If drawing an equivalence relation
+        \end{scope}%
+    \fi%
+    \renewcommand{\pmdraw@drawEdgeDrawOptions}{}% Reset draw options for edge
+    \renewcommand{\pmdraw@ifRadiusChange}{0}% Reset if drawing an edge with a custom radius
+}
+\let\pmdraw@drawLedgesDraw\pmdraw@drawLedgesDrawDefault% Draws lower non-transversal edge from #1 vertex to #2 vertex, assumes #1<#2
+
+\newcommand{\pmdraw@drawGhostVertexBa}{-1}% 1st vertex to draw as ghost in bottom row
+\newcommand{\pmdraw@drawGhostVertexBb}{-1}% 2nd vertex to draw as ghost in bottom row
+\newcommand{\pmdraw@drawGhostVertexBc}{-1}% 3rd vertex to draw as ghost in bottom row
+\newcommand{\pmdraw@drawGhostVertexBd}{-1}% 4th vertex to draw as ghost in bottom row
+\newcommand{\pmdraw@drawGhostVertexBe}{-1}% 5th vertex to draw as ghost in bottom row
+\newcommand{\pmdraw@drawGhostVertexBf}{-1}% 6th vertex to draw as ghost in bottom row
+\newcommand{\pmdraw@drawGhostVertexBg}{-1}% 7th vertex to draw as ghost in bottom row
+\newcommand{\pmdraw@drawGhostVertexBh}{-1}% 8th vertex to draw as ghost in bottom row
+\newcommand{\pmdraw@drawGhostVertexBi}{-1}% 9th vertex to draw as ghost in bottom row
+\newcommand{\pmdraw@drawGhostVertexTa}{-1}% 1st vertex to draw as ghost in top row
+\newcommand{\pmdraw@drawGhostVertexTb}{-1}% 2nd vertex to draw as ghost in top row
+\newcommand{\pmdraw@drawGhostVertexTc}{-1}% 3rd vertex to draw as ghost in top row
+\newcommand{\pmdraw@drawGhostVertexTd}{-1}% 4th vertex to draw as ghost in top row
+\newcommand{\pmdraw@drawGhostVertexTe}{-1}% 5th vertex to draw as ghost in top row
+\newcommand{\pmdraw@drawGhostVertexTf}{-1}% 6th vertex to draw as ghost in top row
+\newcommand{\pmdraw@drawGhostVertexTg}{-1}% 7th vertex to draw as ghost in top row
+\newcommand{\pmdraw@drawGhostVertexTh}{-1}% 8th vertex to draw as ghost in top row
+\newcommand{\pmdraw@drawGhostVertexTi}{-1}% 9th vertex to draw as ghost in top row
+
+\newcommand{\pmdraw@drawNoLabelBa}{-1}% 1st vertex to skip label in bottom row
+\newcommand{\pmdraw@drawNoLabelBb}{-1}% 2nd vertex to skip label in bottom row
+\newcommand{\pmdraw@drawNoLabelBc}{-1}% 3rd vertex to skip label in bottom row
+\newcommand{\pmdraw@drawNoLabelBd}{-1}% 4th vertex to skip label in bottom row
+\newcommand{\pmdraw@drawNoLabelBe}{-1}% 5th vertex to skip label in bottom row
+\newcommand{\pmdraw@drawNoLabelBf}{-1}% 6th vertex to skip label in bottom row
+\newcommand{\pmdraw@drawNoLabelBg}{-1}% 7th vertex to skip label in bottom row
+\newcommand{\pmdraw@drawNoLabelBh}{-1}% 8th vertex to skip label in bottom row
+\newcommand{\pmdraw@drawNoLabelBi}{-1}% 9th vertex to skip label in bottom row
+\newcommand{\pmdraw@drawNoLabelTa}{-1}% 1st vertex to skip label in top row
+\newcommand{\pmdraw@drawNoLabelTb}{-1}% 2nd vertex to skip label in top row
+\newcommand{\pmdraw@drawNoLabelTc}{-1}% 3rd vertex to skip label in top row
+\newcommand{\pmdraw@drawNoLabelTd}{-1}% 4th vertex to skip label in top row
+\newcommand{\pmdraw@drawNoLabelTe}{-1}% 5th vertex to skip label in top row
+\newcommand{\pmdraw@drawNoLabelTf}{-1}% 6th vertex to skip label in top row
+\newcommand{\pmdraw@drawNoLabelTg}{-1}% 7th vertex to skip label in top row
+\newcommand{\pmdraw@drawNoLabelTh}{-1}% 8th vertex to skip label in top row
+\newcommand{\pmdraw@drawNoLabelTi}{-1}% 9th vertex to skip label in top row
+
+\newcommand{\pmdraw@drawNoVertexBa}{-1}% 1st vertex to skip in bottom row
+\newcommand{\pmdraw@drawNoVertexBb}{-1}% 2nd vertex to skip in bottom row
+\newcommand{\pmdraw@drawNoVertexBc}{-1}% 3rd vertex to skip in bottom row
+\newcommand{\pmdraw@drawNoVertexBd}{-1}% 4th vertex to skip in bottom row
+\newcommand{\pmdraw@drawNoVertexBe}{-1}% 5th vertex to skip in bottom row
+\newcommand{\pmdraw@drawNoVertexBf}{-1}% 6th vertex to skip in bottom row
+\newcommand{\pmdraw@drawNoVertexBg}{-1}% 7th vertex to skip in bottom row
+\newcommand{\pmdraw@drawNoVertexBh}{-1}% 8th vertex to skip in bottom row
+\newcommand{\pmdraw@drawNoVertexBi}{-1}% 9th vertex to skip in bottom row
+\newcommand{\pmdraw@drawNoVertexTa}{-1}% 1st vertex to skip in top row
+\newcommand{\pmdraw@drawNoVertexTb}{-1}% 2nd vertex to skip in top row
+\newcommand{\pmdraw@drawNoVertexTc}{-1}% 3rd vertex to skip in top row
+\newcommand{\pmdraw@drawNoVertexTd}{-1}% 4th vertex to skip in top row
+\newcommand{\pmdraw@drawNoVertexTe}{-1}% 5th vertex to skip in top row
+\newcommand{\pmdraw@drawNoVertexTf}{-1}% 6th vertex to skip in top row
+\newcommand{\pmdraw@drawNoVertexTg}{-1}% 7th vertex to skip in top row
+\newcommand{\pmdraw@drawNoVertexTh}{-1}% 8th vertex to skip in top row
+\newcommand{\pmdraw@drawNoVertexTi}{-1}% 9th vertex to skip in top row
+
+\newcommand{\pmdraw@drawTedgesDrawOptions}{}% Draw options for transversal edges
+\newcommand{\pmdraw@drawTedgesDrawOptionsDefault}{}% Default draw options for transversal edges
+\newcommand{\pmdraw@drawTedgesDrawDefault}[2]{% Draws transversal edge from #1 vertex in top row to #2 vertex in bottom row - DEFAULT
+    \ifnum\pmdraw@ifTedgeHorizontal=0% If drawing a straight line edge
+        \if\relax\pmdraw@TedgeLabel\relax% If label is empty
+            \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1,\pmdraw@rowSep) -- (#2,0) ;% Draw straight line
+        \else% If label is non-empty
+            \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1,\pmdraw@rowSep) -- (#2,0) node[fill=white, pos=0.5, apply style/.expand once=\pmdraw@drawEdgeLabelOptions] {\pmdraw@TedgeLabel};% Draw straight line with label
+        \fi%
+    \else% If transversal edge is drawn horizontally
+        \ifnum#1>#2% If edge goes from top right to bottom left
+            \ifnum\pmdraw@ifRadiusChange=1% If drawing a non default radius
+                \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#2,0) --  (#2,{\pmdraw{Tlevel}-\pmdraw@drawEdgeRadiusLeft});% Draw left vertical line
+                \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#2,\pmdraw{Tlevel}-\pmdraw@drawEdgeRadiusLeft) arc (180:90:\pmdraw@drawEdgeRadiusLeft);% Draw bottom arch
+                \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1-\pmdraw@drawEdgeRadiusRight,\pmdraw{Tlevel}) arc (270:360:\pmdraw@drawEdgeRadiusRight);% Draw top arc
+                \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1,\pmdraw@rowSep) --  (#1,{\pmdraw{Tlevel}+\pmdraw@drawEdgeRadiusRight});% Draw right vertical line
+                \if\relax\pmdraw@TedgeLabel\relax% If label is empty
+                    \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#2+\pmdraw@drawEdgeRadiusLeft,\pmdraw{Tlevel}) -- (#1-\pmdraw@drawEdgeRadiusRight, \pmdraw{Tlevel});% Draw straight line
+                \else% If label is non-empty
+                    \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#2+\pmdraw@drawEdgeRadiusLeft,\pmdraw{Tlevel}) -- (#1-\pmdraw@drawEdgeRadiusRight, \pmdraw{Tlevel}) node[fill=white, pos=0.5, apply style/.expand once=\pmdraw@drawEdgeLabelOptions] {\pmdraw@TedgeLabel};% Draw straight line with label
+                \fi%
+            \else% If drawing the default radius
+                \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#2,0) arc (180:90:\pmdraw{Tlevel});% Draw bottom arch
+                \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1-\pmdraw@rowSep+\pmdraw{Tlevel},\pmdraw{Tlevel}) arc (270:360:{\pmdraw@rowSep-\pmdraw{Tlevel}});% Draw top arc
+                \if\relax\pmdraw@TedgeLabel\relax% If label is empty
+                    \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#2+\pmdraw{Tlevel},\pmdraw{Tlevel}) -- (#1-\pmdraw@rowSep+\pmdraw{Tlevel}, \pmdraw{Tlevel});% Draw straight line
+                \else% If label is non-empty
+                    \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#2+\pmdraw{Tlevel},\pmdraw{Tlevel}) -- (#1-\pmdraw@rowSep+\pmdraw{Tlevel}, \pmdraw{Tlevel}) node[fill=white, pos=0.5, apply style/.expand once=\pmdraw@drawEdgeLabelOptions] {\pmdraw@TedgeLabel};% Draw straight line with label
+                \fi%
+            \fi%
+        \else% If edge goes from top left to bottom right
+            \ifnum\pmdraw@ifRadiusChange=1% If drawing a non default radius
+                \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1,\pmdraw@rowSep) --  (#1,{\pmdraw{Tlevel}+\pmdraw@drawEdgeRadiusLeft});% Draw left vertical line
+                \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1+\pmdraw@drawEdgeRadiusLeft,\pmdraw{Tlevel}) arc (270:180:\pmdraw@drawEdgeRadiusLeft);% Draw top arc
+                \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#2,\pmdraw{Tlevel}-\pmdraw@drawEdgeRadiusRight) arc (0:90:\pmdraw@drawEdgeRadiusRight);% Draw bottom arch
+                \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#2,0) --  (#2,\pmdraw{Tlevel}-\pmdraw@drawEdgeRadiusRight);% Draw right vertical line
+                \if\relax\pmdraw@TedgeLabel\relax% If label is empty
+                    \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#2-\pmdraw@drawEdgeRadiusRight,\pmdraw{Tlevel}) -- (#1+\pmdraw@drawEdgeRadiusLeft, \pmdraw{Tlevel});% Draw straight line
+                \else% If label is non-empty
+                    \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#2-\pmdraw@drawEdgeRadiusRight,\pmdraw{Tlevel}) -- (#1+\pmdraw@drawEdgeRadiusLeft, \pmdraw{Tlevel}) node[fill=white, pos=0.5, apply style/.expand once=\pmdraw@drawEdgeLabelOptions] {\pmdraw@TedgeLabel};% Draw straight line with label
+                \fi%
+            \else% If drawing the default radius
+                \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#2,0) arc (0:90:\pmdraw{Tlevel});% Draw bottom arch
+                \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1+\pmdraw@rowSep-\pmdraw{Tlevel},\pmdraw{Tlevel}) arc (270:180:{\pmdraw@rowSep-\pmdraw{Tlevel}});% Draw top arc
+                \if\relax\pmdraw@TedgeLabel\relax% If label is empty
+                    \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#2-\pmdraw{Tlevel},\pmdraw{Tlevel}) -- (#1+\pmdraw@rowSep-\pmdraw{Tlevel}, \pmdraw{Tlevel});% Draw straight line
+                \else% If label is non-empty
+                    \draw[apply style/.expand once=\pmdraw@drawTedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawTedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#2-\pmdraw{Tlevel},\pmdraw{Tlevel}) -- (#1+\pmdraw@rowSep-\pmdraw{Tlevel}, \pmdraw{Tlevel}) node[fill=white, pos=0.5, apply style/.expand once=\pmdraw@drawEdgeLabelOptions] {\pmdraw@TedgeLabel};% Draw straight line with label
+                \fi%
+            \fi%
+        \fi%
+        \renewcommand{\pmdraw@ifTedgeHorizontal}{0}% Reset flag to default
+    \fi%
+    \renewcommand{\pmdraw@drawEdgeDrawOptions}{}% Reset draw options for edge
+    \renewcommand{\pmdraw@ifRadiusChange}{0}% Reset if drawing an edge with a custom radius
+}
+\let\pmdraw@drawTedgesDraw\pmdraw@drawTedgesDrawDefault% Draws transversal edge from #1 vertex in top row to #2 vertex in bottom row
+
+\newcommand{\pmdraw@drawUedgesDrawOptions}{}% Draw options for upper non-transversal edges
+\newcommand{\pmdraw@drawUedgesDrawOptionsDefault}{}% Default draw options for upper non-transversal edges
+\newcommand{\pmdraw@drawUedgesDrawDefault}[2]{% Draws upper non-transversal edge from #1 vertex to #2 vertex, assumes #1<#2 - DEFAULT
+    \ifnum\pmdraw@ifRadiusChange=1% If drawing a non default radius
+        \draw[apply style/.expand once=\pmdraw@drawLedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawLedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1,\pmdraw@rowSep) --  (#1,{\pmdraw@rowSep-\pmdraw{edgeHeight}+\pmdraw@drawEdgeRadius});% Draw left vertical line
+        \draw[apply style/.expand once=\pmdraw@drawUedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawUedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1,{\pmdraw@rowSep-\pmdraw{edgeHeight}+\pmdraw@drawEdgeRadius}) arc (180:270:\pmdraw@drawEdgeRadius);% Draw left arch
+        \draw[apply style/.expand once=\pmdraw@drawUedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawUedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#2-\pmdraw@drawEdgeRadius,{\pmdraw@rowSep-\pmdraw{edgeHeight}}) arc (270:360:\pmdraw@drawEdgeRadius);% Draw right arc
+        \draw[apply style/.expand once=\pmdraw@drawLedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawLedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#2,\pmdraw@rowSep) --  (#2,{\pmdraw@rowSep-\pmdraw{edgeHeight}+\pmdraw@drawEdgeRadius});% Draw right vertical line
+        \if\relax\pmdraw@NTedgeLabel\relax% If label is empty
+            \draw[apply style/.expand once=\pmdraw@drawUedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawUedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1+\pmdraw@drawEdgeRadius,\pmdraw@rowSep-\pmdraw{edgeHeight}) -- (#2-\pmdraw@drawEdgeRadius,\pmdraw@rowSep-\pmdraw{edgeHeight});% Draw straight line
+        \else% If label is non-empty
+            \draw[apply style/.expand once=\pmdraw@drawUedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawUedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1+\pmdraw@drawEdgeRadius,\pmdraw@rowSep-\pmdraw{edgeHeight}) -- (#2-\pmdraw@drawEdgeRadius,\pmdraw@rowSep-\pmdraw{edgeHeight}) node[fill=white, pos=0.5, apply style/.expand once=\pmdraw@drawEdgeLabelOptions] {\pmdraw@NTedgeLabel};% Draw straight line with label
+        \fi%
+    \else% If drawing the default radius
+        \draw[apply style/.expand once=\pmdraw@drawUedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawUedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1,\pmdraw@rowSep) arc (180:270:\pmdraw{edgeHeight});% Draw left arch
+        \draw[apply style/.expand once=\pmdraw@drawUedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawUedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#2-\pmdraw{edgeHeight},\pmdraw@rowSep-\pmdraw{edgeHeight}) arc (270:360:\pmdraw{edgeHeight});% Draw right arc
+        \if\relax\pmdraw@NTedgeLabel\relax% If label is empty
+            \draw[apply style/.expand once=\pmdraw@drawUedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawUedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1+\pmdraw{edgeHeight},\pmdraw@rowSep-\pmdraw{edgeHeight}) -- (#2-\pmdraw{edgeHeight},\pmdraw@rowSep-\pmdraw{edgeHeight});% Draw straight line
+        \else% If label is non-empty
+            \draw[apply style/.expand once=\pmdraw@drawUedgesDrawOptionsDefault,apply style/.expand once=\pmdraw@drawUedgesDrawOptions,apply style/.expand once=\pmdraw@drawEdgeDrawOptions] (#1+\pmdraw{edgeHeight},\pmdraw@rowSep-\pmdraw{edgeHeight}) -- (#2-\pmdraw{edgeHeight},\pmdraw@rowSep-\pmdraw{edgeHeight}) node[fill=white, pos=0.5, apply style/.expand once=\pmdraw@drawEdgeLabelOptions] {\pmdraw@NTedgeLabel};% Draw straight line with label
+        \fi%
+    \fi%
+    \renewcommand{\pmdraw@drawEdgeDrawOptions}{}% Reset draw options for edge
+    \renewcommand{\pmdraw@ifRadiusChange}{0}% Reset if drawing an edge with a custom radius
+}
+\let\pmdraw@drawUedgesDraw\pmdraw@drawUedgesDrawDefault% Draws upper non-transversal edge from #1 vertex to #2 vertex, assumes #1<#2
+
+\newcommand{\pmdraw@drawVertexOptions}{}% Draw options for vertices
+\newcommand{\pmdraw@drawVertexOptionsDefault}{}% Default draw options for vertices
+\newcommand{\pmdraw@drawVertexDefault}[2]{% Draws a vertex at (#1,#2) - Default
+    \fill[apply style/.expand once=\pmdraw@drawVertexOptionsDefault,apply style/.expand once=\pmdraw@drawVertexOptions] (#1,#2) circle (.17);%
+}
+\let\pmdraw@drawVertex\pmdraw@drawVertexDefault% Draws a ghost at (#1,#2)
+\newcommand{\pmdraw@drawGhostOptions}{fill=black!7}% Draw options for ghosts
+\newcommand{\pmdraw@drawGhostOptionsDefault}{fill=black!7}% Default draw options for ghosts
+\newcommand{\pmdraw@drawGhostDefault}[2]{% Draws a ghost at (#1,#2) - Default
+    \draw[apply style/.expand once=\pmdraw@drawGhostOptionsDefault,apply style/.expand once=\pmdraw@drawGhostOptions] (#1,#2) circle (.17);%
+}
+\let\pmdraw@drawVertexGhost\pmdraw@drawGhostDefault% Draws a ghost at (#1,#2)
+
+\newcommand{\pmdraw@edgeUncover}{1-}% Sets the uncover options of edge
+\newcommand{\pmdraw@edgesAddedUncover}{1-}% Sets the uncover options of added edges
+\newcommand{\pmdraw@edgesUncover}{1-}% Sets the uncover options of edges
+
+\newcommand{\pmdraw@hookAfterBrick}{}% Hook after drawing a brick
+\newcommand{\pmdraw@hookAfterDiagram}{}% Hook after drawing a diagram
+\newcommand{\pmdraw@hookBeforeBrick}{}% Hook before drawing a brick
+\newcommand{\pmdraw@hookBeforeDiagram}{}% Hook before drawing a diagram
+
+\newcommand{\pmdraw@ifBracketLeft}{1}% Boolean if drawing bracket on left of brick
+\newcommand{\pmdraw@ifDiagWDots}{0}% Boolean if drawing a diagram with dots
+\newcommand{\pmdraw@ifEdgesFirst}{0}% Boolean if drawing edges before vertices
+\newcommand{\pmdraw@ifEquiv}{0}% Boolean if drawing an equivalence relation
+\newcommand{\pmdraw@ifGrid}{0}% Boolean if displaying helper grid
+\newcommand{\pmdraw@ifLabelsB}{0}% Boolean if displaying labels for vertices in bottom row
+\newcommand{\pmdraw@ifLabelsT}{0}% Boolean if displaying labels for vertices in top row
+\newcommand{\pmdraw@ifProdDiag}{0}% Boolean if drawing a product diagram
+\newcommand{\pmdraw@ifRadiusChange}{0}% Boolean if drawing an edge with a custom radius
+\newcommand{\pmdraw@ifTedgesFirst}{0}% Boolean if drawing transversal edges before non-transversal edges
+\newcommand{\pmdraw@ifTedgeHorizontal}{0}% Boolean if transversal edge is drawn horizontally
+
+\newcommand{\pmdraw@NTedgesHeight}{-1000}% Height of non-transversal edges if manually set, a value of -1000 sets height automatically
+\newcommand{\pmdraw@NTedgeLabel}{}% Label of non-transversal edge
+
+\newcommand{\pmdraw@reset}{% Resets user keys and other flags to default values after drawing diagram
+    \renewcommand{\pmdraw@diagSep}{1}% Resets vertical space between product diagrams
+    \renewcommand{\pmdraw@drawAedgesOptions}{}% Resets draw options for added edges in product diagram
+    \let\pmdraw@drawDots\pmdraw@drawDotsDefault% Resets drawing of dots between bricks
+    \renewcommand{\pmdraw@edgesAddedUncover}{1-}% Resets the uncover options of added edges
+    \renewcommand{\pmdraw@hookAfterDiagram}{}% Clears hook after drawing a diagram
+    \renewcommand{\pmdraw@hookBeforeDiagram}{}% Clears hook before drawing a diagram
+    \renewcommand{\pmdraw@ifBracketLeft}{1}% Resets drawing bracket on left of brick
+    \renewcommand{\pmdraw@ifGrid}{0}% Hides grid
+    \renewcommand{\pmdraw@ifDiagWDots}{0}% Reset if drawing a diagram with dots
+    \renewcommand{\pmdraw@ifEquiv}{0}% Reset if drawing an equivalence realtion
+    \renewcommand{\pmdraw@rowSep}{2}% Resets vertical separation between rows of vertices in brick
+    \renewcommand{\pmdraw@tikz}{}% Resets tikz options
+    \renewcommand{\pmdraw@vertexSep}{0}% Resets vertical space between product diagrams
+    \setcounter{pmdraw@blankB}{0}% Resets number of blank vertices in bottom row to the left of brick
+    \setcounter{pmdraw@blankT}{0}% Resets number of blank vertices in top row to the left of brick
+    \setcounter{pmdraw@bottomShift}{0}% Resets shift on right end of bottom row of brick
+    \setcounter{pmdraw@topShift}{0}% Resets shift on right end of top row of brick
+    \setcounter{pmdraw@ifDiagWDotsFirst}{1}% Reset if drawing first brick of diagram
+    \setcounter{pmdraw@ifEdgesAdded}{0}% Resets boolean if hiding added edges
+}
+
+\newcommand{\pmdraw@rowSep}{2}% Vertical separation between rows of vertices in brick
+
+\newcommand{\pmdraw@TedgeLabel}{}% Label of transversal edge
+
+\newcommand{\pmdraw@tikz}{}% Tikz options
+
+\newcommand{\pmdraw@verticesBottomUncover}{1-}% Sets the uncover options of bottom vertices
+\newcommand{\pmdraw@verticesTopUncover}{1-}% Sets the uncover options of top vertices
+
+\newcommand{\pmdraw@vertexSep}{0}% Vertical separation between bottom row of top diagram and top row of bottom diagram in product diagram not for added edges
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                        %
+%  Counters                                              %
+%   - loosely ordered alphabetically                     %
+%   - includes default values where appropriate          %
+%                                                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcounter{pmdraw@blankB}% Number of blank vertices in bottom row to the left of brick
+\newcounter{pmdraw@blankT}% Number of blank vertices in top row to the left of brick
+
+\newcounter{pmdraw@bottomTotal}% Size of bottom row of brick
+\newcounter{pmdraw@bottomShift}% Shift on right end of bottom row of brick
+
+\newcounter{pmdraw@braceL}% Left starting vertex of brace
+\newcounter{pmdraw@braceR}% Right terminating vertex of brace
+
+\newcounter{pmdraw@brickShift}% Shift required for bricks after dots in diagram with dots
+
+\newcounter{pmdraw@degreeB}% Degree (number of vertices) of bottom row of brick
+\newcounter{pmdraw@degreeT}% Degree (number of vertices) of top row of brick
+
+\newcounter{pmdraw@ifDiagWDotsFirst}% In drawing with dots, boolean if drawing first brick of diagram
+\setcounter{pmdraw@ifDiagWDotsFirst}{1}
+
+\newcounter{pmdraw@ifEdge}% Boolean if hiding edge
+\setcounter{pmdraw@ifEdge}{0}
+\newcounter{pmdraw@ifEdgesAdded}% Boolean if hiding added edges
+\setcounter{pmdraw@ifEdgesAdded}{0}
+\newcounter{pmdraw@ifEdges}% Boolean if hiding edges
+\setcounter{pmdraw@ifEdges}{0}
+
+\newcounter{pmdraw@ifVerticesBottom}% Boolean if hiding bottom row of vertices
+\setcounter{pmdraw@ifVerticesBottom}{0}
+\newcounter{pmdraw@ifVerticesTop}% Boolean if hiding top row of vertices
+\setcounter{pmdraw@ifVerticesTop}{0}
+
+\newcounter{pmdraw@labelStartB}% Starting value of labels of vertices in bottom row
+\setcounter{pmdraw@labelStartB}{1}
+\newcounter{pmdraw@labelStartT}% Starting value of labels of vertices in top row
+\setcounter{pmdraw@labelStartT}{1}
+
+\newcounter{pmdraw@NTlevel}% Level corresponding to a height for a non-transversal edge
+
+\newcounter{pmdraw@topTotal}% Size of top row of brick
+\newcounter{pmdraw@topShift}% Shift on right end of top row of brick
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                        %
+%  Keys for bricks                                       %
+%   - ordered as per manual                              %
+%                                                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% To pass draw options to \draw command
+% Verbatim copy from:
+% https://tex.stackexchange.com/a/64237
+\tikzset{apply style/.code={\tikzset{#1}}}
+
+\define@key{pmdraw@brick}{degree}{% Sets degree (number of vertices per row) of diagram
+    \setcounter{pmdraw@degreeB}{#1}% Sets degree (number of vertices per row) for bottom row
+    \setcounter{pmdraw@degreeT}{#1}% Sets degree (number of vertices per row) for top row
+}
+\define@key{pmdraw@brickDefault}{degree}{% Sets default degree (number of vertices per row) of diagram
+    \setkeys{pmdraw@brick}{%
+        \savevalue{degree bottom}=#1%
+    }%
+    \setkeys{pmdraw@brick}{%
+        \savevalue{degree top}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{degree bottom}{% Sets degree (number of vertices per row) for bottom row
+    \setcounter{pmdraw@degreeB}{#1}%
+}
+\define@key{pmdraw@brickDefault}{degree bottom}{% Sets default degree (number of vertices per row) for bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{degree bottom}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{degree top}{% Sets degree (number of vertices per row) for top row
+    \setcounter{pmdraw@degreeT}{#1}%
+}
+\define@key{pmdraw@brickDefault}{degree top}{% Sets default degree (number of vertices per row) for top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{degree top}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{blank bottom}{% Sets the number of blank vertices on left of bottom row
+    \setcounter{pmdraw@blankB}{#1}%
+}
+\define@key{pmdraw@brickDefault}{blank bottom}{% Sets the default number of blank vertices on left of bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{blank bottom}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{blank top}{% Sets the number of blank vertices on left of top row
+    \setcounter{pmdraw@blankT}{#1}%
+}
+\define@key{pmdraw@brickDefault}{blank top}{% Sets the default number of blank vertices on left of top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{blank top}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{row sep}{% Sets vertical separation between rows of vertices in brick
+    \renewcommand{\pmdraw@rowSep}{#1}%
+}
+\define@key{pmdraw@brickDefault}{row sep}{% Sets default vertical separation between rows of vertices in brick
+    \setkeys{pmdraw@brick}{%
+        \savevalue{row sep}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{vertices}{% Sets the draw options of vertices
+    \renewcommand{\pmdraw@drawVertexOptions}{#1}%
+}
+\define@key{pmdraw@brick}{verticesDefault}{% Sets the default draw options of vertices
+    \renewcommand{\pmdraw@drawVertexOptionsDefault}{#1}%
+}
+\define@key{pmdraw@brickDefault}{vertices}{% Sets the default draw options of vertices
+    \setkeys{pmdraw@brick}{%
+        \savevalue{verticesDefault}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{no vertex bottom 1}{% Sets 1st vertex to skip in bottom row
+    \renewcommand{\pmdraw@drawNoVertexBa}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no vertex bottom 1}{% Sets default 1st vertex to skip in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no vertex bottom 1}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no vertex bottom 2}{% Sets 2nd vertex to skip in bottom row
+    \renewcommand{\pmdraw@drawNoVertexBb}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no vertex bottom 2}{% Sets default 2nd vertex to skip in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no vertex bottom 2}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no vertex bottom 3}{% Sets 3rd vertex to skip in bottom row
+    \renewcommand{\pmdraw@drawNoVertexBc}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no vertex bottom 3}{% Sets default 3rd vertex to skip in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no vertex bottom 3}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no vertex bottom 4}{% Sets 4th vertex to skip in bottom row
+    \renewcommand{\pmdraw@drawNoVertexBd}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no vertex bottom 4}{% Sets default 4th vertex to skip in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no vertex bottom 4}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no vertex bottom 5}{% Sets 5th vertex to skip in bottom row
+    \renewcommand{\pmdraw@drawNoVertexBe}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no vertex bottom 5}{% Sets default 5th vertex to skip in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no vertex bottom 5}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no vertex bottom 6}{% Sets 6th vertex to skip in bottom row
+    \renewcommand{\pmdraw@drawNoVertexBf}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no vertex bottom 6}{% Sets default 6th vertex to skip in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no vertex bottom 6}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no vertex bottom 7}{% Sets 7th vertex to skip in bottom row
+    \renewcommand{\pmdraw@drawNoVertexBg}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no vertex bottom 7}{% Sets default 7th vertex to skip in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no vertex bottom 7}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no vertex bottom 8}{% Sets 8th vertex to skip in bottom row
+    \renewcommand{\pmdraw@drawNoVertexBh}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no vertex bottom 8}{% Sets default 8th vertex to skip in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no vertex bottom 8}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no vertex bottom 9}{% Sets 9th vertex to skip in bottom row
+    \renewcommand{\pmdraw@drawNoVertexBi}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no vertex bottom 9}{% Sets default 9th vertex to skip in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no vertex bottom 9}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no vertex top 1}{% Sets 1st vertex to skip in top row
+    \renewcommand{\pmdraw@drawNoVertexTa}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no vertex top 1}{% Sets default 1st vertex to skip in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no vertex top 1}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no vertex top 2}{% Sets 2nd vertex to skip in top row
+    \renewcommand{\pmdraw@drawNoVertexTb}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no vertex top 2}{% Sets default 2nd vertex to skip in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no vertex top 2}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no vertex top 3}{% Sets 3rd vertex to skip in top row
+    \renewcommand{\pmdraw@drawNoVertexTc}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no vertex top 3}{% Sets default 3rd vertex to skip in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no vertex top 3}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no vertex top 4}{% Sets 4th vertex to skip in top row
+    \renewcommand{\pmdraw@drawNoVertexTd}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no vertex top 4}{% Sets default 4th vertex to skip in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no vertex top 4}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no vertex top 5}{% Sets 5th vertex to skip in top row
+    \renewcommand{\pmdraw@drawNoVertexTe}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no vertex top 5}{% Sets default 5th vertex to skip in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no vertex top 5}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no vertex top 6}{% Sets 6th vertex to skip in top row
+    \renewcommand{\pmdraw@drawNoVertexTf}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no vertex top 6}{% Sets default 6th vertex to skip in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no vertex top 6}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no vertex top 7}{% Sets 7th vertex to skip in top row
+    \renewcommand{\pmdraw@drawNoVertexTg}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no vertex top 7}{% Sets default 7th vertex to skip in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no vertex top 7}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no vertex top 8}{% Sets 8th vertex to skip in top row
+    \renewcommand{\pmdraw@drawNoVertexTh}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no vertex top 8}{% Sets default 8th vertex to skip in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no vertex top 8}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no vertex top 9}{% Sets 9th vertex to skip in top row
+    \renewcommand{\pmdraw@drawNoVertexTi}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no vertex top 9}{% Sets default 9th vertex to skip in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no vertex top 9}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{ghost vertex bottom 1}{% Sets 1st vertex to ghost in bottom row
+    \renewcommand{\pmdraw@drawGhostVertexBa}{#1}%
+}
+\define@key{pmdraw@brickDefault}{ghost vertex bottom 1}{% Sets default 1st vertex to ghost in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{ghost vertex bottom 1}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{ghost vertex bottom 2}{% Sets 2nd vertex to ghost in bottom row
+    \renewcommand{\pmdraw@drawGhostVertexBb}{#1}%
+}
+\define@key{pmdraw@brickDefault}{ghost vertex bottom 2}{% Sets default 2nd vertex to ghost in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{ghost vertex bottom 2}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{ghost vertex bottom 3}{% Sets 3rd vertex to ghost in bottom row
+    \renewcommand{\pmdraw@drawGhostVertexBc}{#1}%
+}
+\define@key{pmdraw@brickDefault}{ghost vertex bottom 3}{% Sets default 3rd vertex to ghost in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{ghost vertex bottom 3}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{ghost vertex bottom 4}{% Sets 4th vertex to ghost in bottom row
+    \renewcommand{\pmdraw@drawGhostVertexBd}{#1}%
+}
+\define@key{pmdraw@brickDefault}{ghost vertex bottom 4}{% Sets default 4th vertex to ghost in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{ghost vertex bottom 4}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{ghost vertex bottom 5}{% Sets 5th vertex to ghost in bottom row
+    \renewcommand{\pmdraw@drawGhostVertexBe}{#1}%
+}
+\define@key{pmdraw@brickDefault}{ghost vertex bottom 5}{% Sets default 5th vertex to ghost in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{ghost vertex bottom 5}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{ghost vertex bottom 6}{% Sets 6th vertex to ghost in bottom row
+    \renewcommand{\pmdraw@drawGhostVertexBf}{#1}%
+}
+\define@key{pmdraw@brickDefault}{ghost vertex bottom 6}{% Sets default 6th vertex to ghost in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{ghost vertex bottom 6}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{ghost vertex bottom 7}{% Sets 7th vertex to ghost in bottom row
+    \renewcommand{\pmdraw@drawGhostVertexBg}{#1}%
+}
+\define@key{pmdraw@brickDefault}{ghost vertex bottom 7}{% Sets default 7th vertex to ghost in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{ghost vertex bottom 7}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{ghost vertex bottom 8}{% Sets 8th vertex to ghost in bottom row
+    \renewcommand{\pmdraw@drawGhostVertexBh}{#1}%
+}
+\define@key{pmdraw@brickDefault}{ghost vertex bottom 8}{% Sets default 8th vertex to ghost in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{ghost vertex bottom 8}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{ghost vertex bottom 9}{% Sets 9th vertex to ghost in bottom row
+    \renewcommand{\pmdraw@drawGhostVertexBi}{#1}%
+}
+\define@key{pmdraw@brickDefault}{ghost vertex bottom 9}{% Sets default 9th vertex to ghost in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{ghost vertex bottom 9}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{ghost vertex top 1}{% Sets 1st vertex to ghost in top row
+    \renewcommand{\pmdraw@drawGhostVertexTa}{#1}%
+}
+\define@key{pmdraw@brickDefault}{ghost vertex top 1}{% Sets default 1st vertex to ghost in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{ghost vertex top 1}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{ghost vertex top 2}{% Sets 2nd vertex to ghost in top row
+    \renewcommand{\pmdraw@drawGhostVertexTb}{#1}%
+}
+\define@key{pmdraw@brickDefault}{ghost vertex top 2}{% Sets default 2nd vertex to ghost in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{ghost vertex top 2}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{ghost vertex top 3}{% Sets 3rd vertex to ghost in top row
+    \renewcommand{\pmdraw@drawGhostVertexTc}{#1}%
+}
+\define@key{pmdraw@brickDefault}{ghost vertex top 3}{% Sets default 3rd vertex to ghost in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{ghost vertex top 3}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{ghost vertex top 4}{% Sets 4th vertex to ghost in top row
+    \renewcommand{\pmdraw@drawGhostVertexTd}{#1}%
+}
+\define@key{pmdraw@brickDefault}{ghost vertex top 4}{% Sets default 4th vertex to ghost in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{ghost vertex top 4}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{ghost vertex top 5}{% Sets 5th vertex to ghost in top row
+    \renewcommand{\pmdraw@drawGhostVertexTe}{#1}%
+}
+\define@key{pmdraw@brickDefault}{ghost vertex top 5}{% Sets default 5th vertex to ghost in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{ghost vertex top 5}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{ghost vertex top 6}{% Sets 6th vertex to ghost in top row
+    \renewcommand{\pmdraw@drawGhostVertexTf}{#1}%
+}
+\define@key{pmdraw@brickDefault}{ghost vertex top 6}{% Sets default 6th vertex to ghost in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{ghost vertex top 6}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{ghost vertex top 7}{% Sets 7th vertex to ghost in top row
+    \renewcommand{\pmdraw@drawGhostVertexTg}{#1}%
+}
+\define@key{pmdraw@brickDefault}{ghost vertex top 7}{% Sets default 7th vertex to ghost in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{ghost vertex top 7}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{ghost vertex top 8}{% Sets 8th vertex to ghost in top row
+    \renewcommand{\pmdraw@drawGhostVertexTh}{#1}%
+}
+\define@key{pmdraw@brickDefault}{ghost vertex top 8}{% Sets default 8th vertex to ghost in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{ghost vertex top 8}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{ghost vertex top 9}{% Sets 9th vertex to ghost in top row
+    \renewcommand{\pmdraw@drawGhostVertexTi}{#1}%
+}
+\define@key{pmdraw@brickDefault}{ghost vertex top 9}{% Sets default 9th vertex to ghost in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{ghost vertex top 9}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{ghosts}{% Sets the draw options of ghosts
+    \renewcommand{\pmdraw@drawGhostOptions}{#1}%
+}
+\define@key{pmdraw@brick}{ghostsDefault}{% Sets the default draw options of ghosts
+    \renewcommand{\pmdraw@drawGhostOptionsDefault}{#1}%
+}
+\define@key{pmdraw@brickDefault}{ghosts}{% Sets the default draw options of ghosts
+    \setkeys{pmdraw@brick}{%
+        \savevalue{ghostsDefault}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{vertices options}{% Sets the draw command of vertices
+    \renewcommand{\pmdraw@drawVertex}[2]{#1}%
+}
+
+\define@key{pmdraw@brick}{ghosts options}{% Sets the draw command of ghost vertices
+    \renewcommand{\pmdraw@drawVertexGhost}[2]{#1}%
+}
+
+\define@key{pmdraw@brick}{labels}[1]{% Draws labels for vertices
+    \renewcommand{\pmdraw@ifLabelsB}{#1}%
+    \renewcommand{\pmdraw@ifLabelsT}{#1}%
+}
+\define@key{pmdraw@brickDefault}{labels}[1]{% Sets the default drawing labels for vertices
+    \setkeys{pmdraw@brick}{%
+        \savevalue{labels}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{labels bottom}[1]{% Draws labels for bottom vertices
+    \renewcommand{\pmdraw@ifLabelsB}{#1}%
+}
+\define@key{pmdraw@brickDefault}{labels bottom}[1]{% Sets the default drawing labels for bottom vertices
+    \setkeys{pmdraw@brick}{%
+        \savevalue{labels bottom}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{labels top}[1]{% Draws labels for top vertices
+    \renewcommand{\pmdraw@ifLabelsT}{#1}%
+}
+\define@key{pmdraw@brickDefault}{labels top}[1]{% Sets the default drawing labels for top vertices
+    \setkeys{pmdraw@brick}{%
+        \savevalue{labels top}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{labels start}{% Sets starting number for vertex labels
+    \setcounter{pmdraw@labelStartT}{#1}%
+    \setcounter{pmdraw@labelStartB}{#1}%
+}
+\define@key{pmdraw@brickDefault}{labels start}{% Sets the default starting number for vertex labels
+    \setkeys{pmdraw@brick}{%
+        \savevalue{labels start}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{labels bottom start}{% Sets starting number for bottom vertex labels
+    \setcounter{pmdraw@labelStartB}{#1}%
+}
+\define@key{pmdraw@brickDefault}{labels bottom start}{% Sets the default starting number for bottom vertex labels
+    \setkeys{pmdraw@brick}{%
+        \savevalue{labels bottom start}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{labels top start}{% Sets starting number for top vertex labels
+    \setcounter{pmdraw@labelStartT}{#1}%
+}
+\define@key{pmdraw@brickDefault}{labels top start}{% Sets the default starting number for top vertex labels
+    \setkeys{pmdraw@brick}{%
+        \savevalue{labels top start}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{no label bottom 1}{% Sets 1st label to skip in bottom row
+    \renewcommand{\pmdraw@drawNoLabelBa}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no label bottom 1}{% Sets the default 1st label to skip in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no label bottom 1}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no label bottom 2}{% Sets 2nd label to skip in bottom row
+    \renewcommand{\pmdraw@drawNoLabelBb}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no label bottom 2}{% Sets the default 2nd label to skip in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no label bottom 2}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no label bottom 3}{% Sets 3rd label to skip in bottom row
+    \renewcommand{\pmdraw@drawNoLabelBc}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no label bottom 3}{% Sets the default 3rd label to skip in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no label bottom 3}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no label bottom 4}{% Sets 4th label to skip in bottom row
+    \renewcommand{\pmdraw@drawNoLabelBd}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no label bottom 4}{% Sets the default 4th label to skip in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no label bottom 4}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no label bottom 5}{% Sets 5th label to skip in bottom row
+    \renewcommand{\pmdraw@drawNoLabelBe}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no label bottom 5}{% Sets the default 5th label to skip in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no label bottom 5}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no label bottom 6}{% Sets 6th label to skip in bottom row
+    \renewcommand{\pmdraw@drawNoLabelBf}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no label bottom 6}{% Sets the default 6th label to skip in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no label bottom 6}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no label bottom 7}{% Sets 7th label to skip in bottom row
+    \renewcommand{\pmdraw@drawNoLabelBg}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no label bottom 7}{% Sets the default 7th label to skip in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no label bottom 7}=#1%
+    }%
+}
+\define@key{pmdraw@brickDefault}{no label bottom 8}{% Sets the default 8th label to skip in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no label bottom 8}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no label bottom 8}{% Sets 8th label to skip in bottom row
+    \renewcommand{\pmdraw@drawNoLabelBh}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no label bottom 8}{% Sets the default 8th label to skip in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no label bottom 8}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no label bottom 9}{% Sets 9th label to skip in bottom row
+    \renewcommand{\pmdraw@drawNoLabelBi}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no label bottom 9}{% Sets the default 9th label to skip in bottom row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no label bottom 9}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no label top 1}{% Sets 1st label to skip in top row
+    \renewcommand{\pmdraw@drawNoLabelTa}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no label top 1}{% Sets the default 1st label to skip in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no label top 1}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no label top 2}{% Sets 2nd label to skip in top row
+    \renewcommand{\pmdraw@drawNoLabelTb}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no label top 2}{% Sets the default 2nd label to skip in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no label top 2}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no label top 3}{% Sets 3rd label to skip in top row
+    \renewcommand{\pmdraw@drawNoLabelTc}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no label top 3}{% Sets the default 3rd label to skip in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no label top 3}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no label top 4}{% Sets 4th label to skip in top row
+    \renewcommand{\pmdraw@drawNoLabelTd}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no label top 4}{% Sets the default 4th label to skip in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no label top 4}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no label top 5}{% Sets 5th label to skip in top row
+    \renewcommand{\pmdraw@drawNoLabelTe}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no label top 5}{% Sets the default 5th label to skip in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no label top 5}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no label top 6}{% Sets 6th label to skip in top row
+    \renewcommand{\pmdraw@drawNoLabelTf}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no label top 6}{% Sets the default 6th label to skip in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no label top 6}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no label top 7}{% Sets 7th label to skip in top row
+    \renewcommand{\pmdraw@drawNoLabelTg}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no label top 7}{% Sets the default 7th label to skip in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no label top 7}=#1%
+    }%
+}
+\define@key{pmdraw@brickDefault}{no label top 8}{% Sets the default 8th label to skip in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no label top 8}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no label top 8}{% Sets 8th label to skip in top row
+    \renewcommand{\pmdraw@drawNoLabelTh}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no label top 8}{% Sets the default 8th label to skip in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no label top 8}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{no label top 9}{% Sets 9th label to skip in top row
+    \renewcommand{\pmdraw@drawNoLabelTi}{#1}%
+}
+\define@key{pmdraw@brickDefault}{no label top 9}{% Sets the default 9th label to skip in top row
+    \setkeys{pmdraw@brick}{%
+        \savevalue{no label top 9}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{labels bottom draw}{% Sets the draw options for labels of bottom vertices
+    \renewcommand{\pmdraw@drawLabelBDrawOptions}{#1}%
+}
+\define@key{pmdraw@brickDefault}{labels bottom draw}{% Sets the default draw options for labels of bottom vertices
+    \setkeys{pmdraw@brick}{%
+        \savevalue{labels bottom draw}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{labels bottom node}{% Sets the node options for labels of bottom vertices
+    \renewcommand{\pmdraw@drawLabelBNodeOptions}{#1}%
+}
+\define@key{pmdraw@brickDefault}{labels bottom node}{% Sets the default node options for labels of bottom vertices
+    \setkeys{pmdraw@brick}{%
+        \savevalue{labels bottom node}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{labels top draw}{% Sets the draw options for labels of top vertices
+    \renewcommand{\pmdraw@drawLabelTDrawOptions}{#1}%
+}
+\define@key{pmdraw@brickDefault}{labels top draw}{% Sets the default draw options for labels of top vertices
+    \setkeys{pmdraw@brick}{%
+        \savevalue{labels top draw}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{labels top node}{% Sets the node options for labels of top vertices
+    \renewcommand{\pmdraw@drawLabelTNodeOptions}{#1}%
+}
+\define@key{pmdraw@brickDefault}{labels top node}{% Sets the default node options for labels of top vertices
+    \setkeys{pmdraw@brick}{%
+        \savevalue{labels top node}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{labels bottom options}{% Sets the draw command of labels of bottom vertices
+    \renewcommand{\pmdraw@drawLabelBottom}[3]{#1}%
+}
+\define@key{pmdraw@brick}{labels top options}{% Sets the draw command of labels of top vertices
+    \renewcommand{\pmdraw@drawLabelTop}[3]{#1}%
+}
+
+\define@key{pmdraw@brick}{no dots}[1]{% Does not draw dots in bricks
+    \setcounter{pmdraw@ifDiagWDotsFirst}{#1}%
+}
+
+\define@key{pmdraw@brick}{dots draw}{% Sets the draw options for drawing of dots
+    \renewcommand{\pmdraw@drawDotsDrawOptions}{#1}%
+}
+\define@key{pmdraw@brickDefault}{dots draw}{% Sets the default draw options for drawing of dots
+    \setkeys{pmdraw@brick}{%
+        \savevalue{dots draw}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{dots node}{% Sets the node options for drawing of dots
+    \renewcommand{\pmdraw@drawDotsNodeOptions}{#1}%
+}
+\define@key{pmdraw@brickDefault}{dots node}{% Sets the default node options for drawing of dots
+    \setkeys{pmdraw@brick}{%
+        \savevalue{dots node}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{vertices bottom phantom}[1]{% Does not draw bottom vertices
+    \setcounter{pmdraw@ifVerticesBottom}{#1}%
+}
+\define@key{pmdraw@brickDefault}{vertices bottom phantom}{% Sets the default to not draw bottom vertices
+    \setkeys{pmdraw@brick}{%
+        \savevalue{vertices bottom phantom}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{vertices top phantom}[1]{% Does not draw top vertices
+    \setcounter{pmdraw@ifVerticesTop}{#1}%
+}
+\define@key{pmdraw@brickDefault}{vertices top phantom}{% Sets the default to not draw top vertices
+    \setkeys{pmdraw@brick}{%
+        \savevalue{vertices top phantom}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{vertices bottom uncover}{% Sets the uncover options of bottom vertices
+    \renewcommand{\pmdraw@verticesBottomUncover}{#1}%
+}
+\define@key{pmdraw@brickDefault}{vertices bottom uncover}{% Sets the default uncover options of bottom vertices
+    \setkeys{pmdraw@brick}{%
+        \savevalue{vertices bottom uncover}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{vertices top uncover}{% Sets the uncover options of top vertices
+    \renewcommand{\pmdraw@verticesTopUncover}{#1}%
+}
+\define@key{pmdraw@brickDefault}{vertices top uncover}{% Sets the default uncover options of top vertices
+    \setkeys{pmdraw@brick}{%
+        \savevalue{vertices top uncover}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{levels}[1]{% Sets number of horizontal levels for non-transversal edges and evenly spaces them
+    \tikzmath{%
+        \pmdraw{edgeSepU} = (0.5*\pmdraw@rowSep)/(#1 + 1);% Calculates vertical separation between each edge
+        \pmdraw{edgeSepL} = \pmdraw{edgeSepU};% Calculates vertical separation between each edge
+    }%
+}
+\define@key{pmdraw@brickDefault}{levels}{% Sets the default number of horizontal levels for non-transversal edges and evenly spaces them
+    \setkeys{pmdraw@brick}{%
+        \savevalue{levels}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{levels bottom}{% Sets number of horizontal levels for lower non-transversal edges and evenly spaces them
+    \tikzmath{%
+        \pmdraw{edgeSepL} = (0.5*\pmdraw@rowSep)/(#1 + 1);% Calculates vertical separation between each edge
+    }%
+}
+\define@key{pmdraw@brickDefault}{levels bottom}{% Sets the default number of horizontal levels for lower non-transversal edges and evenly spaces them
+    \setkeys{pmdraw@brick}{%
+        \savevalue{levels bottom}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{levels top}{% Sets number of horizontal levels for upper non-transversal edges and evenly spaces them
+    \tikzmath{%
+        \pmdraw{edgeSepU} = (0.5*\pmdraw@rowSep)/(#1 + 1);% Calculates vertical separation between each edge
+    }%
+}
+\define@key{pmdraw@brickDefault}{levels top}{% Sets the default number of horizontal levels for upper non-transversal edges and evenly spaces them
+    \setkeys{pmdraw@brick}{%
+        \savevalue{levels top}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{levels sep}{% Sets vertical separation of horizontal levels for non-transversal edges
+    \tikzmath{%
+        \pmdraw{edgeSepU} = #1;%
+        \pmdraw{edgeSepL} = \pmdraw{edgeSepU};%
+    }%
+}
+\define@key{pmdraw@brickDefault}{levels sep}{% Sets the default vertical separation of horizontal levels for non-transversal edges
+    \setkeys{pmdraw@brick}{%
+        \savevalue{levels sep}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{levels sep bottom}{% Sets vertical separation of lower horizontal levels for non-transversal edges
+    \tikzmath{%
+        \pmdraw{edgeSepL} = #1;%
+    }%
+}
+\define@key{pmdraw@brickDefault}{levels sep bottom}{% Sets the default vertical separation of lower horizontal levels for non-transversal edges
+    \setkeys{pmdraw@brick}{%
+        \savevalue{levels sep bottom}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{levels sep top}{% Sets vertical separation of upper horizontal levels for non-transversal edges
+    \tikzmath{%
+        \pmdraw{edgeSepU} = #1;%
+    }%
+}
+\define@key{pmdraw@brickDefault}{levels sep top}{% Sets the default vertical separation of upper horizontal levels for non-transversal edges
+    \setkeys{pmdraw@brick}{%
+        \savevalue{levels sep top}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{edges}{% Sets the draw options of all edges
+    \renewcommand{\pmdraw@drawUedgesDrawOptions}{#1}%
+    \renewcommand{\pmdraw@drawLedgesDrawOptions}{#1}%
+    \renewcommand{\pmdraw@drawTedgesDrawOptions}{#1}%
+}
+\define@key{pmdraw@brick}{edgesDefault}{% Sets the default draw options of all edges
+    \renewcommand{\pmdraw@drawUedgesDrawOptionsDefault}{#1}%
+    \renewcommand{\pmdraw@drawLedgesDrawOptionsDefault}{#1}%
+    \renewcommand{\pmdraw@drawTedgesDrawOptionsDefault}{#1}%
+}
+\define@key{pmdraw@brickDefault}{edges}{% Sets the default draw options of all edges
+    \setkeys{pmdraw@brick}{%
+        \savevalue{edgesDefault}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{edges non-transversal}{% Sets the draw options of non-transversal edges
+    \renewcommand{\pmdraw@drawUedgesDrawOptions}{#1}%
+    \renewcommand{\pmdraw@drawLedgesDrawOptions}{#1}%
+}
+\define@key{pmdraw@brick}{edges non-transversalDefault}{% Sets the default draw options of non-transversal edges
+    \renewcommand{\pmdraw@drawUedgesDrawOptionsDefault}{#1}%
+    \renewcommand{\pmdraw@drawLedgesDrawOptionsDefault}{#1}%
+}
+\define@key{pmdraw@brickDefault}{edges non-transversal}{% Sets the default draw options of non-transversal edges
+    \setkeys{pmdraw@brick}{%
+        \savevalue{edges non-transversalDefault}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{edges upper}{% Sets the draw options of upper non-transversal edges
+    \renewcommand{\pmdraw@drawUedgesDrawOptions}{#1}%
+}
+\define@key{pmdraw@brick}{edges upperDefault}{% Sets the default draw options of upper non-transversal edges
+    \renewcommand{\pmdraw@drawUedgesDrawOptionsDefault}{#1}%
+}
+\define@key{pmdraw@brickDefault}{edges upper}{% Sets the default draw options of upper non-transversal edges
+    \setkeys{pmdraw@brick}{%
+        \savevalue{edges upperDefault}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{edges lower}{% Sets the draw options of lower non-transversal edges
+    \renewcommand{\pmdraw@drawLedgesDrawOptions}{#1}%
+}
+\define@key{pmdraw@brick}{edges lowerDefault}{% Sets the defaultdraw options of lower non-transversal edges
+    \renewcommand{\pmdraw@drawLedgesDrawOptionsDefault}{#1}%
+}
+\define@key{pmdraw@brickDefault}{edges lower}{% Sets the default draw options of lower non-transversal edges
+    \setkeys{pmdraw@brick}{%
+        \savevalue{edges lowerDefault}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{edges transversal}{% Sets the draw options of transversal edges
+    \renewcommand{\pmdraw@drawTedgesDrawOptions}{#1}%
+}
+\define@key{pmdraw@brick}{edges transversalDefault}{% Sets the default draw options of transversal edges
+    \renewcommand{\pmdraw@drawTedgesDrawOptionsDefault}{#1}%
+}
+\define@key{pmdraw@brickDefault}{edges transversal}{% Sets the default draw options of transversal edges
+    \setkeys{pmdraw@brick}{%
+        \savevalue{edges transversalDefault}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{edges first}[1]{% Draws edges before vertices
+    \renewcommand{\pmdraw@ifEdgesFirst}{#1}%
+}
+\define@key{pmdraw@brickDefault}{edges first}{% Sets the default to draw edges before vertices
+    \setkeys{pmdraw@brick}{%
+        \savevalue{edges first}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{transversals first}[1]{% Draws transversal edges before non-transversal edges
+    \renewcommand{\pmdraw@ifTedgesFirst}{#1}%
+}
+\define@key{pmdraw@brickDefault}{transversals first}{% Sets the default to draw transversal edges before non-transversal edges
+    \setkeys{pmdraw@brick}{%
+        \savevalue{transversals first}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{edges phantom}[1]{% Does not draw edges
+    \setcounter{pmdraw@ifEdges}{#1}%
+}
+\define@key{pmdraw@brickDefault}{edges phantom}{% Sets the default to not draw edge
+    \setkeys{pmdraw@brick}{%
+        \savevalue{edges phantom}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{edges uncover}{% Sets the uncover options of edges
+    \renewcommand{\pmdraw@edgesUncover}{#1}%
+}
+\define@key{pmdraw@brickDefault}{edges uncover}{% Sets the default uncover options of edges
+    \setkeys{pmdraw@brick}{%
+        \savevalue{edges uncover}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{brace}{% Draws a brace
+    \setkeys{pmdraw@brace}{% Sets default keys for brace
+        left=\usevalue{left},
+        right=\usevalue{right},
+        above=\usevalue{above}
+    }%
+    \setkeys{pmdraw@brace}{#1}% Processes details of brace
+    \pmdraw@drawBrace{\value{pmdraw@braceL}}{\value{pmdraw@braceR}}{\pmdraw@braceLabel}% Draws brace
+    \let\pmdraw@drawBrace\pmdraw@drawBraceDefault% Resets brace options if changed
+}
+\define@key{pmdraw@brickDefault}{brace}{% Sets the default brace
+    \setkeys{pmdraw@brick}{%
+        \savevalue{brace}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{brace draw}{% Sets the draw options for drawing of brace
+    \renewcommand{\pmdraw@drawBraceDrawOptions}{#1}%
+}
+\define@key{pmdraw@brickDefault}{brace draw}{% Sets the default draw options for drawing of brace
+    \setkeys{pmdraw@brick}{%
+        \savevalue{brace draw}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{brace node}{% Sets the node options for drawing of brace
+    \renewcommand{\pmdraw@drawBraceNodeOptions}{#1}%
+}
+\define@key{pmdraw@brickDefault}{brace node}{% Sets the default node options for drawing of brace
+    \setkeys{pmdraw@brick}{%
+        \savevalue{brace node}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{bracket}{% Draws a bracket
+    \setkeys{pmdraw@bracket}{% Sets default keys for bracket
+        left=\usevalue{left},
+        right=\usevalue{right},
+        sep=\usevalue{sep},
+        up=\usevalue{up},
+        down=\usevalue{down}
+    }%
+    \setkeys{pmdraw@bracket}{#1}% Processes details of bracket
+    \pmdraw@drawBracket{\pmdraw@bracketLabel}% Draws bracket
+    \let\pmdraw@drawBracket\pmdraw@drawBracketDefault% Resets bracket options if changed
+}
+\define@key{pmdraw@brickDefault}{bracket}{% Sets the default bracket
+    \setkeys{pmdraw@brick}{%
+        \savevalue{bracket}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{bracket draw}{% Sets the draw options for drawing of bracket
+    \renewcommand{\pmdraw@drawBracketDrawOptions}{#1}%
+}
+\define@key{pmdraw@brickDefault}{bracket draw}{% Sets the default draw options for drawing of bracket
+    \setkeys{pmdraw@brick}{%
+        \savevalue{bracket draw}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{bracket node}{% Sets the node options for drawing of bracket
+    \renewcommand{\pmdraw@drawBracketNodeOptions}{#1}%
+}
+\define@key{pmdraw@brickDefault}{bracket node}{% Sets the default node options for drawing of bracket
+    \setkeys{pmdraw@brick}{%
+        \savevalue{bracket node}=#1%
+    }%
+}
+
+\define@key{pmdraw@brick}{decorate before}{% Hook for decorations before brick is drawn
+    \renewcommand{\pmdraw@hookBeforeBrick}{#1}%
+}
+\define@key{pmdraw@brickDefault}{decorate before}{% Sets the default hook for decorations before brick is drawn
+    \setkeys{pmdraw@brick}{%
+        \savevalue{decorate before}=#1%
+    }%
+}
+\define@key{pmdraw@brick}{decorate after}{% Hook for decorations after brick is drawn
+    \renewcommand{\pmdraw@hookAfterBrick}{#1}%
+}
+\define@key{pmdraw@brickDefault}{decorate after}{% Sets the default hook for decorations after brick is drawn
+    \setkeys{pmdraw@brick}{%
+        \savevalue{decorate after}=#1%
+    }%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                        %
+%  Keys for edges                                        %
+%   - ordered as per manual                              %
+%                                                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\define@key{pmdraw@NTedges}{level}{% Sets level of non-transversal edge
+    \setcounter{pmdraw@NTlevel}{#1}%
+}
+\define@key{pmdraw@NTedgesDefault}{level}{% Sets the default level of non-transversal edge
+    \setkeys{pmdraw@NTedges}{%
+        \savevalue{level}=#1%
+    }%
+}
+
+\define@key{pmdraw@NTedges}{height}{% Sets manual height of non-transversal edge
+    \renewcommand{\pmdraw@NTedgesHeight}{#1}%
+}
+\define@key{pmdraw@NTedgesDefault}{height}{% Sets the default manual height of non-transversal edge
+    \setkeys{pmdraw@NTedges}{%
+        \savevalue{height}=#1%
+    }%
+}
+
+\define@key{pmdraw@NTedges}{radius}{% Sets radius of arc of non-transversal edge
+    \renewcommand{\pmdraw@drawEdgeRadius}{#1}%
+    \renewcommand{\pmdraw@ifRadiusChange}{1}%
+}
+
+\define@key{pmdraw@NTedges}{label}{% Sets label of non-transversal edge
+    \renewcommand{\pmdraw@NTedgeLabel}{#1}% Sets label
+}
+\define@key{pmdraw@NTedgesDefault}{label}{% Sets the default label of non-transversal edge
+    \setkeys{pmdraw@NTedges}{%
+        \savevalue{label}=#1%
+    }%
+}
+
+\define@key{pmdraw@NTedges}{label node}{% Sets the node options for label of edge
+    \renewcommand{\pmdraw@drawEdgeLabelOptions}{#1}%
+}
+\define@key{pmdraw@NTedgesDefault}{label node}{% Sets the default node options for label of edge
+    \setkeys{pmdraw@NTedges}{%
+        \savevalue{label node}=#1%
+    }%
+}
+
+\define@key{pmdraw@NTedges}{edge draw}{% Sets the draw options for drawing of edge
+    \renewcommand{\pmdraw@drawEdgeDrawOptions}{#1}%
+}
+\define@key{pmdraw@NTedgesDefault}{edge draw}{% Sets the default draw options for drawing of edge
+    \setkeys{pmdraw@NTedges}{%
+        \savevalue{edge draw}=#1%
+    }%
+}
+
+\define@key{pmdraw@NTedges}{options}{% Sets the draw command of non-transversal edge
+    \renewcommand{\pmdraw@drawUedgesDraw}[2]{#1}%
+    \renewcommand{\pmdraw@drawLedgesDraw}[2]{#1}%
+}
+
+\define@key{pmdraw@NTedges}{phantom}[1]{% Does not draw edge
+    \setcounter{pmdraw@ifEdge}{#1}%
+}
+\define@key{pmdraw@NTedgesDefault}{phantom}{% Sets the default to not draw edge
+    \setkeys{pmdraw@NTedges}{%
+        \savevalue{phantom}=#1%
+    }%
+}
+
+\define@key{pmdraw@NTedges}{uncover}{% Sets the uncover options of edge
+    \renewcommand{\pmdraw@edgeUncover}{#1}%
+}
+\define@key{pmdraw@NTedgesDefault}{uncover}{% Sets the default uncover options of edge
+    \setkeys{pmdraw@NTedges}{%
+        \savevalue{uncover}=#1%
+    }%
+}
+
+\define@key{pmdraw@Tedges}{height}{% Sets manual height of transversal edge
+    \tikzmath{%
+        \pmdraw{Tlevel} = #1;%
+    }%
+    \renewcommand{\pmdraw@ifTedgeHorizontal}{1}% Flags manual height
+}
+\define@key{pmdraw@TedgesDefault}{height}{% Sets the default manual height of transversal edge
+    \setkeys{pmdraw@Tedges}{%
+        \savevalue{height}=#1%
+    }%
+}
+
+\define@key{pmdraw@Tedges}{radius}{% Sets radius of arc of transversal edge
+    \renewcommand{\pmdraw@drawEdgeRadiusLeft}{#1}%
+    \renewcommand{\pmdraw@drawEdgeRadiusRight}{#1}%
+    \renewcommand{\pmdraw@ifRadiusChange}{1}%
+}
+\define@key{pmdraw@Tedges}{radius left}{% Sets radius of left arc of transversal edge
+    \renewcommand{\pmdraw@drawEdgeRadiusLeft}{#1}%
+    \renewcommand{\pmdraw@ifRadiusChange}{1}%
+}
+\define@key{pmdraw@Tedges}{radius right}{% Sets radius of right arc of transversal edge
+    \renewcommand{\pmdraw@drawEdgeRadiusRight}{#1}%
+    \renewcommand{\pmdraw@ifRadiusChange}{1}%
+}
+
+\define@key{pmdraw@Tedges}{label}{% Sets label of transversal edge
+    \renewcommand{\pmdraw@TedgeLabel}{#1}% Sets label
+}
+\define@key{pmdraw@TedgesDefault}{label}{% Sets the default label of transversal edge
+    \setkeys{pmdraw@Tedges}{%
+        \savevalue{label}=#1%
+    }%
+}
+
+\define@key{pmdraw@Tedges}{label node}{% Sets the node options for label of edge
+    \renewcommand{\pmdraw@drawEdgeLabelOptions}{#1}%
+}
+\define@key{pmdraw@TedgesDefault}{label node}{% Sets the default node options for label of edge
+    \setkeys{pmdraw@Tedges}{%
+        \savevalue{label node}=#1%
+    }%
+}
+
+\define@key{pmdraw@Tedges}{edge draw}{% Sets the draw options for drawing of edge
+    \renewcommand{\pmdraw@drawEdgeDrawOptions}{#1}%
+}
+\define@key{pmdraw@TedgesDefault}{edge draw}{% Sets the default draw options for drawing of edge
+    \setkeys{pmdraw@Tedges}{%
+        \savevalue{edge draw}=#1%
+    }%
+}
+
+\define@key{pmdraw@Tedges}{options}{% Sets the draw command of transversal edge
+    \renewcommand{\pmdraw@drawTedgesDraw}[2]{#1}%
+}
+
+\define@key{pmdraw@Tedges}{phantom}[1]{% Does not draw edge
+    \setcounter{pmdraw@ifEdge}{#1}%
+}
+\define@key{pmdraw@TedgesDefault}{phantom}{% Sets the default to not draw edge
+    \setkeys{pmdraw@Tedges}{%
+        \savevalue{phantom}=#1%
+    }%
+}
+
+\define@key{pmdraw@Tedges}{uncover}{% Sets the uncover options of edge
+    \renewcommand{\pmdraw@edgeUncover}{#1}%
+}
+\define@key{pmdraw@TedgesDefault}{uncover}{% Sets the default uncover options of edge
+    \setkeys{pmdraw@Tedges}{%
+        \savevalue{uncover}=#1%
+    }%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                        %
+%  Keys for brace                                        %
+%   - ordered as per manual                              %
+%                                                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\define@key{pmdraw@brace}{left}{% Sets starting position of brace
+    \setcounter{pmdraw@braceL}{#1}%
+}
+\define@key{pmdraw@braceDefault}{left}{% Sets the default starting position of brace
+    \setkeys{pmdraw@brace}{%
+        \savevalue{left}=#1%
+    }%
+}
+
+\define@key{pmdraw@brace}{right}{% Sets terminating position of brace
+    \setcounter{pmdraw@braceR}{#1}%
+}
+\define@key{pmdraw@braceDefault}{right}{% Sets the default terminating position of brace
+    \setkeys{pmdraw@brace}{%
+        \savevalue{right}=#1%
+    }%
+}
+
+\define@key{pmdraw@brace}{label}{% Sets label of brace
+    \renewcommand{\pmdraw@braceLabel}{#1}%
+}
+
+\define@key{pmdraw@brace}{above}[1]{% Set flag to draw brace above diagram
+    \renewcommand{\pmdraw@ifProdDiag}{#1}%
+}
+\define@key{pmdraw@braceDefault}{above}{% Sets the default flag to draw brace above diagram
+    \setkeys{pmdraw@brace}{%
+        \savevalue{above}=#1%
+    }%
+}
+
+\define@key{pmdraw@brace}{options}{% Sets the draw command of brace
+    \renewcommand{\pmdraw@drawBrace}[3]{#1}%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                        %
+%  Keys for bracket                                      %
+%   - ordered as per manual                              %
+%                                                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\define@key{pmdraw@bracket}{label}{% Sets label of bracket
+    \renewcommand{\pmdraw@bracketLabel}{#1}%
+}
+
+\define@key{pmdraw@bracket}{left}[1]{% Sets position of bracket to be on left of brick
+    \renewcommand{\pmdraw@ifBracketLeft}{#1}%
+}
+\define@key{pmdraw@bracketDefault}{left}[1]{% Sets the default position of bracket to be on left of brick
+    \setkeys{pmdraw@bracket}{%
+        \savevalue{left}=#1%
+    }%
+}
+
+\define@key{pmdraw@bracket}{right}[0]{% Sets position of bracket to be on right of brick
+    \renewcommand{\pmdraw@ifBracketLeft}{#1}%
+}
+\define@key{pmdraw@bracketDefault}{right}[0]{% Sets the default position of bracket to be on right of brick
+    \setkeys{pmdraw@bracket}{%
+        \savevalue{right}=#1%
+    }%
+}
+
+\define@key{pmdraw@bracket}{shift}{% Sets the manual horizontal shift of bracket
+    \renewcommand{\pmdraw@BracketShift}{#1}%
+}
+\define@key{pmdraw@bracketDefault}{shift}{% Sets the default manual horizontal shift of bracket
+    \setkeys{pmdraw@bracket}{%
+        \savevalue{shift}=#1%
+    }%
+}
+
+\define@key{pmdraw@bracket}{sep}{% Sets the separation of bracket and brick
+    \renewcommand{\pmdraw@BracketSep}{#1}%
+}
+\define@key{pmdraw@bracketDefault}{sep}{% Sets the default separation of bracket and brick
+    \setkeys{pmdraw@bracket}{%
+        \savevalue{sep}=#1%
+    }%
+}
+
+\define@key{pmdraw@bracket}{up}{% Extends the bracket upwards
+    \renewcommand{\pmdraw@BracketShiftUp}{#1}%
+}
+\define@key{pmdraw@bracketDefault}{up}{% Sets the default of bracket upwards
+    \setkeys{pmdraw@bracket}{%
+        \savevalue{up}=#1%
+    }%
+}
+
+\define@key{pmdraw@bracket}{down}{% Extends the bracket downwards
+    \renewcommand{\pmdraw@BracketShiftDown}{#1}%
+}
+\define@key{pmdraw@bracketDefault}{down}{% Sets the default of bracket downwards
+    \setkeys{pmdraw@bracket}{%
+        \savevalue{down}=#1%
+    }%
+}
+
+\define@key{pmdraw@bracket}{options}{% Sets the draw command of bracket
+    \renewcommand{\pmdraw@drawBracket}[1]{#1}%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                        %
+%  Keys for diagrams and product diagrams                %
+%   - ordered as per manual                              %
+%                                                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\define@key{pmdraw@diagram}{row sep}{% Sets vertical separation between rows of vertices in diagram
+    \renewcommand{\pmdraw@rowSep}{#1}%
+}
+\define@key{pmdraw@diagramDefault}{row sep}{% Sets the default vertical separation between rows of vertices in diagram
+    \setkeys{pmdraw@diagram}{%
+        \savevalue{row sep}=#1%
+    }%
+}
+
+\define@key{pmdraw@diagram}{tikz}{% Sets the tikz options
+    \renewcommand{\pmdraw@tikz}{#1}%
+}
+\define@key{pmdraw@diagramDefault}{tikz}{% Sets the default tikz options
+    \setkeys{pmdraw@diagram}{%
+        \savevalue{tikz}=#1%
+    }%
+}
+
+\define@key{pmdraw@diagram}{dots options}{% Sets the draw command of dots between bricks
+    \renewcommand{\pmdraw@drawDots}[2]{#1}%
+}
+
+
+\define@key{pmdraw@diagram}{grid}[1]{% Flag for drawing coordinate grid
+    \renewcommand{\pmdraw@ifGrid}{#1}%
+}
+\define@key{pmdraw@diagramDefault}{grid}{% Sets the default flag for drawing coordinate grid
+    \setkeys{pmdraw@diagram}{%
+        \savevalue{grid}=#1%
+    }%
+}
+
+\define@key{pmdraw@diagram}{decorate before}{% Hook before drawing diagrams
+    \renewcommand{\pmdraw@hookBeforeDiagram}{#1}%
+}
+\define@key{pmdraw@diagramDefault}{decorate before}{% Sets the default hook before drawing diagrams
+    \setkeys{pmdraw@diagram}{%
+        \savevalue{decorate before}=#1%
+    }%
+}
+\define@key{pmdraw@diagram}{decorate after}{% Hook after drawing diagrams
+    \renewcommand{\pmdraw@hookAfterDiagram}{#1}%
+}
+\define@key{pmdraw@diagramDefault}{decorate after}{% Sets the default hook after drawing diagrams
+    \setkeys{pmdraw@diagram}{%
+        \savevalue{decorate after}=#1%
+    }%
+}
+
+\define@key{pmdraw@diagram}{diagram sep}{% Sets vertical separation between bottom row of top diagram and top row of bottom diagram in product diagram
+    \renewcommand{\pmdraw@diagSep}{#1}%
+}
+\define@key{pmdraw@diagramDefault}{diagram sep}{% Sets the default vertical separation between bottom row of top diagram and top row of bottom diagram in product diagram
+    \setkeys{pmdraw@diagram}{%
+        \savevalue{diagram sep}=#1%
+    }%
+}
+\define@key{pmdraw@diagram}{vertex sep}{% Sets vertical separation between bottom row of top diagram and top row of bottom diagram in product diagram not for added edges
+    \renewcommand{\pmdraw@vertexSep}{#1}%
+}
+\define@key{pmdraw@diagramDefault}{vertex sep}{% Sets the default vertical separation between bottom row of top diagram and top row of bottom diagram in product diagram not for added edges
+    \setkeys{pmdraw@diagram}{%
+        \savevalue{vertex sep}=#1%
+    }%
+}
+
+\define@key{pmdraw@diagram}{edges added}{% Sets the draw options for drawing of added edges in product diagram
+    \renewcommand{\pmdraw@drawAedgesOptions}{#1}%
+}
+\define@key{pmdraw@diagram}{edges addedDefault}{% Sets the default draw options for drawing of added edges in product diagram
+    \renewcommand{\pmdraw@drawAedgesOptionsDefault}{#1}%
+}
+\define@key{pmdraw@diagramDefault}{edges added}{% Sets the default draw options for drawing of added edges in product diagram
+    \setkeys{pmdraw@diagram}{%
+        \savevalue{edges addedDefault}=#1%
+    }%
+}
+\define@key{pmdraw@diagram}{edges added phantom}[1]{% Does not draw added edges
+    \setcounter{pmdraw@ifEdgesAdded}{#1}%
+}
+\define@key{pmdraw@diagramDefault}{edges added phantom}{% Sets the default to not draw added edges
+    \setkeys{pmdraw@diagram}{%
+        \savevalue{edges added phantom}=#1%
+    }%
+}
+\define@key{pmdraw@diagram}{edges added uncover}{% Sets the uncover options of added edges
+    \renewcommand{\pmdraw@edgesAddedUncover}{#1}%
+}
+\define@key{pmdraw@diagramDefault}{edges added uncover}{% Sets the default uncover options of added edges
+    \setkeys{pmdraw@diagram}{%
+        \savevalue{edges added uncover}=#1%
+    }%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                        %
+%  Keys for default key settings                         %
+%   - ordered as per manual                              %
+%                                                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\define@key{pmdraw@default}{brick}{% Sets the default key options of brick keys
+    \setkeys{pmdraw@brickDefault}{#1}%
+}
+
+\define@key{pmdraw@default}{NTedges}{% Sets the default key options of non-transversal edge keys
+    \setkeys{pmdraw@NTedgesDefault}{#1}%
+}
+
+\define@key{pmdraw@default}{Tedges}{% Sets the default key options of transversal edge keys
+    \setkeys{pmdraw@TedgesDefault}{#1}%
+}
+
+\define@key{pmdraw@default}{brace}{% Sets the default key options of brace keys
+    \setkeys{pmdraw@braceDefault}{#1}%
+}
+
+\define@key{pmdraw@default}{bracket}{% Sets the default key options of bracket keys
+    \setkeys{pmdraw@bracketDefault}{#1}%
+}
+
+\define@key{pmdraw@default}{diagram}{% Sets the default key options of diagram keys
+    \setkeys{pmdraw@diagramDefault}{#1}%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                        %
+%  User commands                                         %
+%   - loosely ordered alphabetically                     %
+%                                                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\pmdBrick}[4][]{% Draws brick
+    % #1 Options
+    % #2 Upper non-transversal edges, as list [<options>]{<left vertex>}{<right vertex>}, eg [level=1]{2}{3}
+    % #3 Lower non-transversal edges, as list [<options>]{<left vertex>}{<right vertex>}, eg [level=1]{2}{3}
+    % #4 Transversals, as list [<options>]{<upper vertex>}{<lower vertex>}, eg [level=1]{2}{3}
+    \pmdDiagram{{[#1]{#2}{#3}{#4}}}% Uses complete diagram method to draw brick
+}
+
+\newcommand{\pmdDiagram}[2][]{% Draws diagram
+    % #1 Options
+    % #2 List of bricks
+    \setkeys{pmdraw@diagram}{% Sets default key values for diagrams
+        row sep=\usevalue{row sep},
+        tikz=\usevalue{tikz},
+        grid=\usevalue{grid},
+        decorate before=\usevalue{decorate before},
+        decorate after=\usevalue{decorate after},
+        diagram sep=\usevalue{diagram sep},
+        vertex sep=\usevalue{vertex sep},
+        edges added phantom=\usevalue{edges added phantom},
+        edges added uncover=\usevalue{edges added uncover}
+    }%
+    \setkeys{pmdraw@diagram}{#1}% Processes options
+    \renewcommand{\pmdraw@ifDiagWDots}{1}% Flags that diagram has dots
+    \setcounter{pmdraw@brickShift}{0}% Reset shifting of individual bricks
+    \ifmmode% If drawing diagram in a maths equation
+        \,% Add space
+        \ifnum\pmdraw@ifGrid=1% If displaying helper grid
+            \begin{tikzpicture}[scale=.5,baseline=0.405cm,show grid=true,apply style/.expand once=\pmdraw@tikz]%
+        \else% If not displaying helper grid
+            \begin{tikzpicture}[scale=.5,baseline=0.405cm,apply style/.expand once=\pmdraw@tikz]%
+        \fi%
+            \pmdraw@hookBeforeDiagram% Hook before drawing diagrams
+            \pmdraw@bricksLoop% Commences loop for each brick to be drawn
+            #2%
+            \pmdEmpty% Terminates loop
+            \pmdraw@hookAfterDiagram% Hook after drawing diagrams
+        \end{tikzpicture}%
+        \,% Add space
+    \else% If drawing diagram in normal text
+        \raisebox{0.5cm}{% Raise diagram so bottom row is on text baseline
+            \ifnum\pmdraw@ifGrid=1% If displaying helper grid
+                \begin{tikzpicture}[scale=.5,baseline=0.405cm,show grid=true,apply style/.expand once=\pmdraw@tikz]%
+            \else% If not displaying helper grid
+                \begin{tikzpicture}[scale=.5,baseline=0.405cm,apply style/.expand once=\pmdraw@tikz]%
+            \fi%
+                \pmdraw@hookBeforeDiagram% Hook before drawing diagrams
+                \pmdraw@bricksLoop% Commences loop for each brick to be drawn
+                #2%
+                \pmdEmpty% Terminates loop
+                \pmdraw@hookAfterDiagram% Hook after drawing diagrams
+            \end{tikzpicture}%
+        }%
+    \fi%
+    \pmdraw@reset% Resets user keys and other flags to default values
+}
+
+\newcommand{\pmdEmpty}{}% Indicates no edges, internally halts input loops, always is = {}
+
+\newcommand{\pmdEquiv}[2][]{% Draws equivalence relation
+    % #1 Options
+    % #2 List of equivalence bricks
+    \setkeys{pmdraw@diagram}{% Sets default key values for diagrams
+        row sep=\usevalue{row sep},
+        tikz=\usevalue{tikz},
+        grid=\usevalue{grid},
+        decorate before=\usevalue{decorate before},
+        decorate after=\usevalue{decorate after},
+        diagram sep=\usevalue{diagram sep},
+        vertex sep=\usevalue{vertex sep},
+        edges added phantom=\usevalue{edges added phantom},
+        edges added uncover=\usevalue{edges added uncover}
+    }%
+    \setkeys{pmdraw@diagram}{#1}% Processes options
+    \renewcommand{\pmdraw@ifDiagWDots}{1}% Flags that diagram has dots
+    \renewcommand{\pmdraw@ifEquiv}{1}% Flags that drawing an equivalence relation
+    \setcounter{pmdraw@brickShift}{0}% Reset shifting of individual E bricks
+    \ifmmode% If drawing diagram in a maths equation
+        \,% Add space
+        \ifnum\pmdraw@ifGrid=1% If displaying helper grid
+            \begin{tikzpicture}[scale=.5,baseline=0.905cm,show grid=true,apply style/.expand once=\pmdraw@tikz]%
+        \else% If not displaying helper grid
+            \begin{tikzpicture}[scale=.5,baseline=0.905cm,apply style/.expand once=\pmdraw@tikz]%
+        \fi%
+            \pmdraw@hookBeforeDiagram% Hook before drawing diagrams
+            \pmdraw@bricksLoopE% Commences loop for each E brick to be drawn
+            #2%
+            \pmdEmpty% Terminates loop
+            \pmdraw@hookAfterDiagram% Hook after drawing diagrams
+        \end{tikzpicture}%
+        \,% Add space
+    \else% If drawing diagram in normal text
+        \ifnum\pmdraw@ifGrid=1% If displaying helper grid
+            \begin{tikzpicture}[scale=.5,baseline=0.905cm,show grid=true,apply style/.expand once=\pmdraw@tikz]%
+        \else% If not displaying helper grid
+            \begin{tikzpicture}[scale=.5,baseline=0.905cm,apply style/.expand once=\pmdraw@tikz]%
+        \fi%
+            \pmdraw@hookBeforeDiagram% Hook before drawing diagrams
+            \pmdraw@bricksLoopE% Commences loop for each E brick to be drawn
+            #2%
+            \pmdEmpty% Terminates loop
+            \pmdraw@hookAfterDiagram% Hook after drawing diagrams
+        \end{tikzpicture}%
+    \fi%
+    \pmdraw@reset% Resets user keys and other flags to default values
+}
+
+\newcommand{\pmdProduct}[4][]{% Draws product diagram
+    % #1 Options
+    % #2 List of added edges
+    % #3 Top diagram as list of bricks
+    % #4 Bottom diagram as list of bricks
+    \setkeys{pmdraw@diagram}{% Sets default key values for diagrams
+        row sep=\usevalue{row sep},
+        tikz=\usevalue{tikz},
+        grid=\usevalue{grid},
+        decorate before=\usevalue{decorate before},
+        decorate after=\usevalue{decorate after},
+        diagram sep=\usevalue{diagram sep},
+        vertex sep=\usevalue{vertex sep},
+        edges added phantom=\usevalue{edges added phantom},
+        edges added uncover=\usevalue{edges added uncover}
+    }%
+    \setkeys{pmdraw@diagram}{#1}% Processes options
+    \ifmmode% If drawing diagram in a maths equation
+        \,% Add space
+        \ifnum\pmdraw@ifGrid=1% If displaying helper grid
+            \begin{tikzpicture}[scale=.5,baseline=-.3475cm,show grid=true,apply style/.expand once=\pmdraw@tikz]%
+        \else% If not displaying helper grid
+            \begin{tikzpicture}[scale=.5,baseline=-.3475cm,apply style/.expand once=\pmdraw@tikz]%
+        \fi%
+            \pmdraw@hookBeforeDiagram% Hook before drawing diagrams
+            \pmdraw@AedgesLoop% Commences loop for added edges to be drawn
+            #2%
+            \pmdEmpty% Terminates loop
+            \renewcommand{\pmdraw@ifDiagWDots}{1}% Flags that diagram has dot
+            \renewcommand{\pmdraw@ifProdDiag}{1}% Flags that diagram is product
+            \setcounter{pmdraw@brickShift}{0}% Reset shifting of individual bricks
+            \pmdraw@bricksLoop% Commences loop for each brick to be drawn
+            #3%
+            \pmdEmpty% Terminates loop
+            \renewcommand{\pmdraw@ifProdDiag}{0}% Resets flag that diagram is product
+            \setcounter{pmdraw@ifDiagWDotsFirst}{1}% Reset if drawing first brick of diagram
+            \setcounter{pmdraw@brickShift}{0}% Reset shifting of individual bricks
+            \begin{scope}[shift={(0,-\pmdraw@diagSep-\pmdraw@rowSep-\pmdraw@vertexSep)}]% Shift coordinates to be underneath top diagram
+                \pmdraw@bricksLoop% Commences loop for each brick to be drawn
+                #4%
+                \pmdEmpty% Terminates loop
+                \renewcommand{\pmdraw@ifDiagWDots}{0}% Reset if drawing a diagram with dots
+                \setcounter{pmdraw@ifDiagWDotsFirst}{1}% Reset if drawing first brick of diagram
+            \end{scope}%
+            \pmdraw@hookAfterDiagram% Hook after drawing diagrams
+        \end{tikzpicture}%
+        \,% Add space
+    \else% If drawing diagram in normal text
+        \raisebox{2cm}{% Raise diagram so bottom row is on text baseline
+            \ifnum\pmdraw@ifGrid=1% If displaying helper grid
+                \begin{tikzpicture}[scale=.5,baseline=0.405cm,show grid=true,apply style/.expand once=\pmdraw@tikz]%
+            \else% If not displaying helper grid
+                \begin{tikzpicture}[scale=.5,baseline=0.405cm,apply style/.expand once=\pmdraw@tikz]%
+            \fi%
+                \pmdraw@hookBeforeDiagram% Hook before drawing diagrams
+                \pmdraw@AedgesLoop% Commences loop for added edges to be drawn
+                #2%
+                \pmdEmpty% Terminates loop
+                \renewcommand{\pmdraw@ifDiagWDots}{1}% Flags that diagram has dot
+                \renewcommand{\pmdraw@ifProdDiag}{1}% Flags that diagram is product
+                \setcounter{pmdraw@brickShift}{0}% Reset shifting of individual bricks
+                \pmdraw@bricksLoop% Commences loop for each brick to be drawn
+                #3%
+                \pmdEmpty% Terminates loop
+                \renewcommand{\pmdraw@ifProdDiag}{0}% Resets flag that diagram is products
+                \setcounter{pmdraw@ifDiagWDotsFirst}{1}% Reset if drawing first brick of diagram
+                \setcounter{pmdraw@brickShift}{0}% Reset shifting of individual bricks
+                \begin{scope}[shift={(0,-\pmdraw@diagSep-\pmdraw@rowSep-\pmdraw@vertexSep)}]% Shift coordinates to be underneath top diagram
+                    \pmdraw@bricksLoop% Commences loop for each brick to be drawn
+                    #4%
+                    \pmdEmpty% Terminates loop
+                    \renewcommand{\pmdraw@ifDiagWDots}{0}% Reset if drawing a diagram with dots
+                    \setcounter{pmdraw@ifDiagWDotsFirst}{1}% Reset if drawing first brick of diagram
+                \end{scope}%
+                \pmdraw@hookAfterDiagram% Hook after drawing diagrams diagram
+            \end{tikzpicture}%
+        }%
+    \fi%
+    \pmdraw@reset% Resets user keys and other flags to default values
+}
+
+\newcommand{\pmdProductTriple}[6][]{% Draws triple product diagram
+    % #1 Options
+    % #2 List of top added edges
+    % #3 List of bottom added edges
+    % #4 Top diagram as list of bricks
+    % #5 Middle diagram as list of bricks
+    % #6 Bottom diagram as list of bricks
+    \setkeys{pmdraw@diagram}{% Sets default key values for diagrams
+        row sep=\usevalue{row sep},
+        tikz=\usevalue{tikz},
+        grid=\usevalue{grid},
+        decorate before=\usevalue{decorate before},
+        decorate after=\usevalue{decorate after},
+        diagram sep=\usevalue{diagram sep},
+        vertex sep=\usevalue{vertex sep},
+        edges added phantom=\usevalue{edges added phantom},
+        edges added uncover=\usevalue{edges added uncover}
+    }%
+    \setkeys{pmdraw@diagram}{#1}% Processes options
+    \ifmmode% If drawing diagram in a maths equation
+        \,% Add space
+        \ifnum\pmdraw@ifGrid=1% If displaying helper grid
+            \begin{tikzpicture}[scale=.5,baseline=-1.0975cm,show grid=true,apply style/.expand once=\pmdraw@tikz]%
+        \else% If not displaying helper grid
+            \begin{tikzpicture}[scale=.5,baseline=-1.0975cm,apply style/.expand once=\pmdraw@tikz]%
+        \fi%
+            \pmdraw@hookBeforeDiagram% Hook before drawing diagrams
+            \pmdraw@AedgesLoop% Commences loop for top added edges to be drawn
+            #2%
+            \pmdEmpty% Terminates loop
+            \renewcommand{\pmdraw@ifDiagWDots}{1}% Flags that diagram has dot
+            \renewcommand{\pmdraw@ifProdDiag}{1}% Flags that diagram is product
+            \setcounter{pmdraw@brickShift}{0}% Reset shifting of individual bricks
+            \pmdraw@bricksLoop% Commences loop for each top brick to be drawn
+            #4%
+            \pmdEmpty% Terminates loop
+            \renewcommand{\pmdraw@ifProdDiag}{0}% Resets flag that diagram is product
+            \setcounter{pmdraw@ifDiagWDotsFirst}{1}% Reset if drawing first brick of diagram
+            \setcounter{pmdraw@brickShift}{0}% Reset shifting of individual bricks
+            \begin{scope}[shift={(0,-\pmdraw@diagSep-\pmdraw@rowSep-\pmdraw@vertexSep)}]% Shift coordinates to be underneath top diagram
+                \pmdraw@AedgesLoop% Commences loop for bottom added edges to be drawn
+                #3%
+                \pmdEmpty% Terminates loop
+                \pmdraw@bricksLoop% Commences loop for each middle brick to be drawn
+                #5%
+                \pmdEmpty% Terminates loop
+                \setcounter{pmdraw@ifDiagWDotsFirst}{1}% Reset if drawing first brick of diagram
+                \setcounter{pmdraw@brickShift}{0}% Reset shifting of individual bricks
+                \begin{scope}[shift={(0,-\pmdraw@diagSep-\pmdraw@rowSep-\pmdraw@vertexSep)}]% Shift coordinates to be underneath middle diagram
+                    \pmdraw@bricksLoop% Commences loop for each bottom brick to be drawn
+                    #6%
+                    \pmdEmpty% Terminates loop
+                    \setcounter{pmdraw@brickShift}{0}% Reset shifting of individual bricks
+                \end{scope}%
+            \end{scope}%
+            \renewcommand{\pmdraw@ifDiagWDots}{0}% Reset if drawing a diagram with dots
+            \pmdraw@hookAfterDiagram% Hook after drawing diagrams
+        \end{tikzpicture}%
+        \,% Add space
+    \else% If drawing diagram in normal text
+        \raisebox{2cm}{% Raise diagram so bottom row is on text baseline
+            \ifnum\pmdraw@ifGrid=1% If displaying helper grid
+                \begin{tikzpicture}[scale=.5,baseline=-1.095cm,show grid=true,apply style/.expand once=\pmdraw@tikz]%
+            \else% If not displaying helper grid
+                \begin{tikzpicture}[scale=.5,baseline=-1.095cm,apply style/.expand once=\pmdraw@tikz]%
+            \fi%
+                \pmdraw@hookBeforeDiagram% Hook before drawing diagrams
+                \pmdraw@AedgesLoop% Commences loop for added edges to be drawn
+                #2%
+                \pmdEmpty% Terminates loop
+                \renewcommand{\pmdraw@ifDiagWDots}{1}% Flags that diagram has dot
+                \renewcommand{\pmdraw@ifProdDiag}{1}% Flags that diagram is product
+                \setcounter{pmdraw@brickShift}{0}% Reset shifting of individual bricks
+                \pmdraw@bricksLoop% Commences loop for each brick to be drawn
+                #4%
+                \pmdEmpty% Terminates loop
+                \renewcommand{\pmdraw@ifProdDiag}{0}% Resets flag that diagram is product
+                \setcounter{pmdraw@ifDiagWDotsFirst}{1}% Reset if drawing first brick of diagram
+                \setcounter{pmdraw@brickShift}{0}% Reset shifting of individual bricks
+                \begin{scope}[shift={(0,-\pmdraw@diagSep-\pmdraw@rowSep-\pmdraw@vertexSep)}]% Shift coordinates to be underneath top diagram
+                    \pmdraw@AedgesLoop% Commences loop for bottom added edges to be drawn
+                    #3%
+                    \pmdEmpty% Terminates loop
+                    \pmdraw@bricksLoop% Commences loop for each middle brick to be drawn
+                    #5%
+                    \pmdEmpty% Terminates loop
+                    \setcounter{pmdraw@ifDiagWDotsFirst}{1}% Reset if drawing first brick of diagram
+                    \setcounter{pmdraw@brickShift}{0}% Reset shifting of individual bricks
+                    \begin{scope}[shift={(0,-\pmdraw@diagSep-\pmdraw@rowSep-\pmdraw@vertexSep)}]% Shift coordinates to be underneath middle diagram
+                        \pmdraw@bricksLoop% Commences loop for each bottom brick to be drawn
+                        #6%
+                        \pmdEmpty% Terminates loop
+                        \setcounter{pmdraw@brickShift}{0}% Reset shifting of individual bricks
+                    \end{scope}%
+                \end{scope}%
+                \renewcommand{\pmdraw@ifDiagWDots}{0}% Reset if drawing a diagram with dots
+                \pmdraw@hookAfterDiagram% Hook after drawing diagrams
+            \end{tikzpicture}%
+        }%
+    \fi%
+    \pmdraw@reset% Resets user keys and other flags to default values
+}
+
+\newcommand{\pmdSetDefault}[1]{% Sets the entered styles as the default
+    \setkeys{pmdraw@default}{#1}%
+}
+
+\newcommand{\pmdSetToOriginalDefault}{% Sets the styles as the default of the package
+    \setkeys{pmdraw@default}{% Saves values
+        brick={% Sets default for brick keys
+            degree=0,
+            degree bottom=0,
+            degree top=0,
+            blank bottom=0,
+            blank top=0,
+            row sep=2,
+            no vertex bottom 1=-1,
+            no vertex bottom 2=-1,
+            no vertex bottom 3=-1,
+            no vertex bottom 4=-1,
+            no vertex bottom 5=-1,
+            no vertex bottom 6=-1,
+            no vertex bottom 7=-1,
+            no vertex bottom 8=-1,
+            no vertex bottom 9=-1,
+            no vertex top 1=-1,
+            no vertex top 2=-1,
+            no vertex top 3=-1,
+            no vertex top 4=-1,
+            no vertex top 5=-1,
+            no vertex top 6=-1,
+            no vertex top 7=-1,
+            no vertex top 8=-1,
+            no vertex top 9=-1,
+            ghost vertex bottom 1=-1,
+            ghost vertex bottom 2=-1,
+            ghost vertex bottom 3=-1,
+            ghost vertex bottom 4=-1,
+            ghost vertex bottom 5=-1,
+            ghost vertex bottom 6=-1,
+            ghost vertex bottom 7=-1,
+            ghost vertex bottom 8=-1,
+            ghost vertex bottom 9=-1,
+            ghost vertex top 1=-1,
+            ghost vertex top 2=-1,
+            ghost vertex top 3=-1,
+            ghost vertex top 4=-1,
+            ghost vertex top 5=-1,
+            ghost vertex top 6=-1,
+            ghost vertex top 7=-1,
+            ghost vertex top 8=-1,
+            ghost vertex top 9=-1,
+            labels=0,
+            labels bottom=0,
+            labels top=0,
+            labels start=1,
+            labels bottom start=1,
+            labels top start=1,
+            no label bottom 1=-1,
+            no label bottom 2=-1,
+            no label bottom 3=-1,
+            no label bottom 4=-1,
+            no label bottom 5=-1,
+            no label bottom 6=-1,
+            no label bottom 7=-1,
+            no label bottom 8=-1,
+            no label bottom 9=-1,
+            no label top 1=-1,
+            no label top 2=-1,
+            no label top 3=-1,
+            no label top 4=-1,
+            no label top 5=-1,
+            no label top 6=-1,
+            no label top 7=-1,
+            no label top 8=-1,
+            no label top 9=-1,
+            labels bottom draw={},
+            labels bottom node={},
+            labels top draw={},
+            labels top node={},
+            dots draw={},
+            dots node={},
+            vertices bottom phantom=0,
+            vertices top phantom=0,
+            vertices bottom uncover={1-},
+            vertices top uncover={1-},
+            levels=1,
+            levels bottom=1,
+            levels top=1,
+            levels sep=(0.5*\pmdraw@rowSep)/2,
+            levels sep bottom=(0.5*\pmdraw@rowSep)/2,
+            levels sep top=(0.5*\pmdraw@rowSep)/2,
+            edges first=0,
+            transversals first=0,
+            edges phantom=0,
+            edges uncover={1-},
+            brace draw={},
+            brace node={},
+            bracket draw={},
+            bracket node={},
+            decorate before={},
+            decorate after={}
+        }
+    }
+    \setkeys{pmdraw@default}{% Saves values
+        NTedges={% Sets default for non-transversal edge keys
+            level=1,
+            height=-1000,
+            edge draw={},
+            phantom=0,
+            uncover={1-},
+            label={},
+            label node={}
+        }
+    }
+    \setkeys{pmdraw@default}{% Saves values
+        Tedges={% Sets default for transversal edge keys
+            edge draw={},
+            phantom=0,
+            uncover={1-},
+            label={},
+            label node={}
+        }
+    }
+    \setkeys{pmdraw@default}{% Saves values
+        brace={% Sets default for brace keys
+            left=0,
+            right=0,
+            above=0
+        }
+    }
+    \setkeys{pmdraw@default}{% Saves values
+        bracket={% Sets default for bracket keys
+            left=1,
+            right=1,
+            shift=0,
+            sep=0.7,
+            up=0,
+            down=0
+        }
+    }
+    \setkeys{pmdraw@default}{% Saves values
+        diagram={% Sets default for diagram keys
+            row sep=2,
+            tikz={},
+            grid=0,
+            decorate before={},
+            decorate after={},
+            diagram sep=1,
+            vertex sep=0,
+            edges added phantom=0,
+            edges added uncover={1-}
+        }
+    }
+    \renewcommand{\pmdraw@drawVertexOptionsDefault}{}% Resets default draw options for vertices
+    \renewcommand{\pmdraw@drawGhostOptionsDefault}{}% Resets default draw options for vertices
+    \renewcommand{\pmdraw@drawLedgesDrawOptionsDefault}{}% Resets default draw options for lower non-transversal edges
+    \renewcommand{\pmdraw@drawUedgesDrawOptionsDefault}{}% Resets default draw options for upper non-transversal edges
+    \renewcommand{\pmdraw@drawTedgesDrawOptionsDefault}{}% Resets Default draw options for transversal edges
+    \renewcommand{\pmdraw@drawAedgesOptionsDefault}{}% Resets default draw options for added edges in product diagram
+}
+\pmdSetToOriginalDefault% Sets original default values
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                        %
+%  For loop commands                                     %
+%   - loosely ordered alphabetically                     %
+%                                                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\pmdraw@AedgesLoop}{% Starts loop for added edges in product diagram
+    \@ifnextchar\pmdEmpty{}{% If not at end of list
+        \pmdraw@drawAedges% Draw each edge
+    }%
+}
+\newcommand{\pmdraw@bricksLoop}{% Starts loop to iterate over each brick in diagram
+    \@ifnextchar\pmdEmpty{}{% If not at end of list
+        \pmdraw@drawBrickInit% Draw each brick
+    }%
+}
+\newcommand{\pmdraw@bricksLoopE}{% Starts loop to iterate over each E brick in diagram
+    \@ifnextchar\pmdEmpty{}{% If not at end of list
+        \pmdraw@drawBrickInitE% Draw each E brick
+    }%
+}
+\newcommand{\pmdraw@LedgesLoop}{% Starts loop for lower non-transversal edges
+    \@ifnextchar\pmdEmpty{}{% If not at end of list
+        \pmdraw@drawLedges% Draw each edge
+    }%
+}
+\newcommand{\pmdraw@TedgesLoop}{% Starts loop for transversal edges
+    \@ifnextchar\pmdEmpty{}{% If not at end of list
+        \pmdraw@drawTedges% Draw each edge
+    }%
+}
+\newcommand{\pmdraw@UedgesLoop}{% Starts loop for upper non-transversal edges
+    \@ifnextchar\pmdEmpty{}{% If not at end of list
+        \pmdraw@drawUedges% Draw each edge
+    }%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                        %
+%  Draw commands                                         %
+%   - loosely ordered alphabetically                     %
+%                                                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\pmdraw@drawBottomVertices}{% Draws bottom row of vertices
+    \setcounter{pmdraw@bottomTotal}{\value{pmdraw@blankB}}% Store size of bottom row of vertices
+    \addtocounter{pmdraw@bottomTotal}{\value{pmdraw@degreeB}}% Store size of bottom row of vertices
+    \ifnum\value{pmdraw@ifDiagWDotsFirst}=1% If drawing first brick of diagram
+        \setcounter{pmdraw@ifDiagWDotsFirst}{0}% Mark that first brick has been drawn
+    \else% If not drawing first brick of diagram
+        \pmdraw@drawDots{0.5*\value{pmdraw@topShift}+0.5*\value{pmdraw@blankT}}{\pmdraw@rowSep}% Draw upper dots
+        \pmdraw@drawDots{0.5*\value{pmdraw@bottomShift}+0.5*\value{pmdraw@blankB}}{0}% Draw lower dots
+    \fi%
+    \ifnum\value{pmdraw@topTotal}>\value{pmdraw@bottomTotal}% If top row is longer than bottom row
+        \ifnum\pmdraw@ifDiagWDots=1% If drawing a diagram with dots
+            \addtocounter{pmdraw@brickShift}{\value{pmdraw@topTotal}}% Keep track of size of diagram
+            % Store shifts
+            \setcounter{pmdraw@topShift}{-\value{pmdraw@topTotal}}%
+            \addtocounter{pmdraw@topShift}{\value{pmdraw@topTotal}}%
+            \setcounter{pmdraw@bottomShift}{-\value{pmdraw@topTotal}}%
+            \addtocounter{pmdraw@bottomShift}{\value{pmdraw@bottomTotal}}%
+        \else% If drawing a diagram without dots
+            \setcounter{pmdraw@brickShift}{\value{pmdraw@topTotal}}% Keep track of size of diagram
+        \fi%
+    \else% If bottom row is longer than top row
+        \ifnum\pmdraw@ifDiagWDots=1% If drawing a diagram with dots
+            \addtocounter{pmdraw@brickShift}{\value{pmdraw@bottomTotal}}% Keep track of size of diagram
+            % Store shifts
+            \setcounter{pmdraw@topShift}{-\value{pmdraw@bottomTotal}}%
+            \addtocounter{pmdraw@topShift}{\value{pmdraw@topTotal}}%
+            \setcounter{pmdraw@bottomShift}{-\value{pmdraw@bottomTotal}}%
+            \addtocounter{pmdraw@bottomShift}{\value{pmdraw@bottomTotal}}%
+        \else% If drawing a diagram without dots
+            \setcounter{pmdraw@brickShift}{\value{pmdraw@bottomTotal}}% Keep track of size of diagram
+        \fi%
+    \fi%
+    \foreach \x in {1,...,\value{pmdraw@degreeB}} {% For each vertex in row
+        \ifnum\pmdraw@drawNoVertexTa=\x\else% If not skipping vertex
+            \ifnum\pmdraw@drawNoVertexTb=\x\else% If not skipping vertex
+                \ifnum\pmdraw@drawNoVertexTc=\x\else% If not skipping vertex
+                    \ifnum\pmdraw@drawNoVertexTd=\x\else% If not skipping vertex
+                        \ifnum\pmdraw@drawNoVertexTe=\x\else% If not skipping vertex
+                            \ifnum\pmdraw@drawNoVertexTf=\x\else% If not skipping vertex
+                                \ifnum\pmdraw@drawNoVertexTg=\x\else% If not skipping vertex
+                                    \ifnum\pmdraw@drawNoVertexTh=\x\else% If not skipping vertex
+                                        \ifnum\pmdraw@drawNoVertexTi=\x\else% If not skipping vertex
+                                            \ifnum\pmdraw@drawGhostVertexBa=\x% If ghosting vertex
+                                                \pmdraw@drawVertexGhost{\x + \value{pmdraw@blankB}}{0}% Draw ghost upper vertex
+                                            \else% If not ghosting vertex
+                                                \ifnum\pmdraw@drawGhostVertexBb=\x% If ghosting vertex
+                                                    \pmdraw@drawVertexGhost{\x + \value{pmdraw@blankB}}{0}% Draw ghost upper vertex
+                                                \else% If not ghosting vertex
+                                                    \ifnum\pmdraw@drawGhostVertexBc=\x% If ghosting vertex
+                                                        \pmdraw@drawVertexGhost{\x + \value{pmdraw@blankB}}{0}% Draw ghost upper vertex
+                                                    \else% If not ghosting vertex
+                                                        \ifnum\pmdraw@drawGhostVertexBd=\x% If ghosting vertex
+                                                            \pmdraw@drawVertexGhost{\x + \value{pmdraw@blankB}}{0}% Draw ghost upper vertex
+                                                        \else% If not ghosting vertex
+                                                            \ifnum\pmdraw@drawGhostVertexBe=\x% If ghosting vertex
+                                                                \pmdraw@drawVertexGhost{\x + \value{pmdraw@blankB}}{0}% Draw ghost upper vertex
+                                                            \else% If not ghosting vertex
+                                                                \ifnum\pmdraw@drawGhostVertexBf=\x% If ghosting vertex
+                                                                    \pmdraw@drawVertexGhost{\x + \value{pmdraw@blankB}}{0}% Draw ghost upper vertex
+                                                                \else% If not ghosting vertex
+                                                                    \ifnum\pmdraw@drawGhostVertexBg=\x% If ghosting vertex
+                                                                        \pmdraw@drawVertexGhost{\x + \value{pmdraw@blankB}}{0}% Draw ghost upper vertex
+                                                                    \else% If not ghosting vertex
+                                                                        \ifnum\pmdraw@drawGhostVertexBh=\x% If ghosting vertex
+                                                                            \pmdraw@drawVertexGhost{\x + \value{pmdraw@blankB}}{0}% Draw ghost upper vertex
+                                                                        \else% If not ghosting vertex
+                                                                            \ifnum\pmdraw@drawGhostVertexBi=\x% If ghosting vertex
+                                                                                \pmdraw@drawVertexGhost{\x + \value{pmdraw@blankB}}{0}% Draw ghost upper vertex
+                                                                            \else% If not ghosting vertex
+                                                                                \pmdraw@drawVertex{\x + \value{pmdraw@blankB}}{0}% Draw upper vertex
+                                                                            \fi%
+                                                                        \fi%
+                                                                    \fi%
+                                                                \fi%
+                                                            \fi%
+                                                        \fi%
+                                                    \fi%
+                                                \fi%
+                                            \fi%
+                                        \fi%
+                                    \fi%
+                                \fi%
+                            \fi%
+                        \fi%
+                    \fi%
+                \fi%
+            \fi%
+        \fi%
+        \ifnum\pmdraw@drawNoLabelBa=\x\else% If not skipping label
+            \ifnum\pmdraw@drawNoLabelBb=\x\else% If not skipping label
+                \ifnum\pmdraw@drawNoLabelBc=\x\else% If not skipping label
+                    \ifnum\pmdraw@drawNoLabelBd=\x\else% If not skipping label
+                        \ifnum\pmdraw@drawNoLabelBe=\x\else% If not skipping label
+                            \ifnum\pmdraw@drawNoLabelBf=\x\else% If not skipping label
+                                \ifnum\pmdraw@drawNoLabelBg=\x\else% If not skipping label
+                                    \ifnum\pmdraw@drawNoLabelBh=\x\else% If not skipping label
+                                        \ifnum\pmdraw@drawNoLabelBi=\x\else% If not skipping label
+                                            \ifnum\pmdraw@ifLabelsB=1% If drawing labels
+                                                \pmdraw@drawLabelBottom{\x + \value{pmdraw@blankT}}{0}{\thepmdraw@labelStartB}% Draw label
+                                            \fi%
+                                        \fi%
+                                    \fi%
+                                \fi%
+                            \fi%
+                        \fi%
+                    \fi%
+                \fi%
+            \fi%
+        \fi%
+        \stepcounter{pmdraw@labelStartB}% Update label counter
+    }%
+}
+\newcommand{\pmdraw@drawBrickInit}[1]{% Initialises the drawing of a brick
+    \ifnum\value{pmdraw@ifDiagWDotsFirst}=0% If not drawing first brick in diagram
+        \stepcounter{pmdraw@brickShift}% Makes space for dots to left of current brick
+    \fi%
+    \begin{scope}[shift={(\value{pmdraw@brickShift},0)}]% Shift brick to the right of already drawn bricks
+        \pmdraw@drawBrick#1% Draw brick
+    \end{scope}%
+    \pmdraw@bricksLoop% Restart for loop
+}
+\newcommand{\pmdraw@drawBrickInitE}[1]{% Initialises the drawing of an E brick
+    \ifnum\value{pmdraw@ifDiagWDotsFirst}=0% If not drawing first E brick in diagram
+        \stepcounter{pmdraw@brickShift}% Makes space for dots to left of current E brick
+    \fi%
+    \begin{scope}[shift={(\value{pmdraw@brickShift},0)}]% Shift E brick to the right of already drawn bricks
+        \pmdraw@drawBrickE#1% Draw E brick
+    \end{scope}%
+    \pmdraw@bricksLoopE% Restart for loop
+}
+\newcommand{\pmdraw@drawBrick}[4][]{% Draws a brick
+    % #1 Options
+    % #2 Upper non-transversal edges, as list [<options>]{<left vertex>}{<right vertex>}, eg [level=1]{2}{3}
+    % #3 Lower non-transversal edges, as list [<options>]{<left vertex>}{<right vertex>}, eg [level=1]{2}{3}
+    % #4 Transversals, as list [<options>]{<upper vertex>}{<lower vertex>}, eg [level=1]{2}{3}
+    \setkeys{pmdraw@brick}{% Set default values for brick keys
+        degree bottom=\usevalue{degree bottom},
+        degree top=\usevalue{degree top},
+        blank bottom=\usevalue{blank bottom},
+        blank top=\usevalue{blank top},
+        row sep=\usevalue{row sep},
+        no vertex bottom 1=\usevalue{no vertex bottom 1},
+        no vertex bottom 2=\usevalue{no vertex bottom 2},
+        no vertex bottom 3=\usevalue{no vertex bottom 3},
+        no vertex bottom 4=\usevalue{no vertex bottom 4},
+        no vertex bottom 5=\usevalue{no vertex bottom 5},
+        no vertex bottom 6=\usevalue{no vertex bottom 6},
+        no vertex bottom 7=\usevalue{no vertex bottom 7},
+        no vertex bottom 8=\usevalue{no vertex bottom 8},
+        no vertex bottom 9=\usevalue{no vertex bottom 9},
+        no vertex top 1=\usevalue{no vertex top 1},
+        no vertex top 2=\usevalue{no vertex top 2},
+        no vertex top 3=\usevalue{no vertex top 3},
+        no vertex top 4=\usevalue{no vertex top 4},
+        no vertex top 5=\usevalue{no vertex top 5},
+        no vertex top 6=\usevalue{no vertex top 6},
+        no vertex top 7=\usevalue{no vertex top 7},
+        no vertex top 8=\usevalue{no vertex top 8},
+        no vertex top 9=\usevalue{no vertex top 9},
+        ghost vertex bottom 1=\usevalue{ghost vertex bottom 1},
+        ghost vertex bottom 2=\usevalue{ghost vertex bottom 2},
+        ghost vertex bottom 3=\usevalue{ghost vertex bottom 3},
+        ghost vertex bottom 4=\usevalue{ghost vertex bottom 4},
+        ghost vertex bottom 5=\usevalue{ghost vertex bottom 5},
+        ghost vertex bottom 6=\usevalue{ghost vertex bottom 6},
+        ghost vertex bottom 7=\usevalue{ghost vertex bottom 7},
+        ghost vertex bottom 8=\usevalue{ghost vertex bottom 8},
+        ghost vertex bottom 9=\usevalue{ghost vertex bottom 9},
+        ghost vertex top 1=\usevalue{ghost vertex top 1},
+        ghost vertex top 2=\usevalue{ghost vertex top 2},
+        ghost vertex top 3=\usevalue{ghost vertex top 3},
+        ghost vertex top 4=\usevalue{ghost vertex top 4},
+        ghost vertex top 5=\usevalue{ghost vertex top 5},
+        ghost vertex top 6=\usevalue{ghost vertex top 6},
+        ghost vertex top 7=\usevalue{ghost vertex top 7},
+        ghost vertex top 8=\usevalue{ghost vertex top 8},
+        ghost vertex top 9=\usevalue{ghost vertex top 9},
+        labels=\usevalue{labels},
+        labels bottom=\usevalue{labels bottom},
+        labels top=\usevalue{labels top},
+        labels start=\usevalue{labels start},
+        labels bottom start=\usevalue{labels bottom start},
+        labels top start=\usevalue{labels top start},
+        no label bottom 1=\usevalue{no label bottom 1},
+        no label bottom 2=\usevalue{no label bottom 2},
+        no label bottom 3=\usevalue{no label bottom 3},
+        no label bottom 4=\usevalue{no label bottom 4},
+        no label bottom 5=\usevalue{no label bottom 5},
+        no label bottom 6=\usevalue{no label bottom 6},
+        no label bottom 7=\usevalue{no label bottom 7},
+        no label bottom 8=\usevalue{no label bottom 8},
+        no label bottom 9=\usevalue{no label bottom 9},
+        no label top 1=\usevalue{no label top 1},
+        no label top 2=\usevalue{no label top 2},
+        no label top 3=\usevalue{no label top 3},
+        no label top 4=\usevalue{no label top 4},
+        no label top 5=\usevalue{no label top 5},
+        no label top 6=\usevalue{no label top 6},
+        no label top 7=\usevalue{no label top 7},
+        no label top 8=\usevalue{no label top 8},
+        no label top 9=\usevalue{no label top 9},
+        labels bottom draw=\usevalue{labels bottom draw},
+        labels bottom node=\usevalue{labels bottom node},
+        labels top draw=\usevalue{labels top draw},
+        labels top node=\usevalue{labels top node},
+        dots draw=\usevalue{dots draw},
+        dots node=\usevalue{dots node},
+        vertices bottom phantom=\usevalue{vertices bottom phantom},
+        vertices top phantom=\usevalue{vertices top phantom},
+        vertices bottom uncover=\usevalue{vertices bottom uncover},
+        vertices top uncover=\usevalue{vertices top uncover},
+        levels=\usevalue{levels},
+        levels bottom=\usevalue{levels bottom},
+        levels top=\usevalue{levels top},
+        levels sep=\usevalue{levels sep},
+        levels sep bottom=\usevalue{levels sep bottom},
+        levels sep top=\usevalue{levels sep top},
+        edges first=\usevalue{edges first},
+        transversals first=\usevalue{transversals first},
+        edges phantom=\usevalue{edges phantom},
+        edges uncover=\usevalue{edges uncover},
+        brace draw=\usevalue{brace draw},
+        brace node=\usevalue{brace node},
+        bracket draw=\usevalue{bracket draw},
+        bracket node=\usevalue{bracket node},
+        decorate before=\usevalue{decorate before},
+        decorate after=\usevalue{decorate after}
+    }%
+    \setkeys{pmdraw@brick}{levels,#1}% Processes options and set default levels
+    \pmdraw@hookBeforeBrick% Hook before drawing brick
+    \ifnum\pmdraw@ifEdgesFirst=0% If drawing vertices first
+        \@ifclassloaded{beamer}{% If in beamer
+            \uncover<\pmdraw@verticesTopUncover>{% Uncovers top vertices
+                \ifnum\value{pmdraw@ifVerticesTop}=0% If drawing top vertices
+                    \pmdraw@drawTopVertices% Draw base diagram
+                \else% If hiding top vertices
+                    \phantom{%
+                        \pmdraw@drawTopVertices% Draw base diagram
+                    }%
+                \fi%
+            }%
+            \uncover<\pmdraw@verticesBottomUncover>{% Uncovers bottom vertices
+                \ifnum\value{pmdraw@ifVerticesBottom}=0% If drawing bottom vertices
+                    \pmdraw@drawBottomVertices% Draw base diagram
+                \else% If hiding top vertices
+                    \phantom{%
+                        \pmdraw@drawBottomVertices% Draw base diagram
+                    }%
+                \fi%
+            }%
+            \uncover<\pmdraw@edgesUncover>{% Uncovers edges
+                \ifnum\value{pmdraw@ifEdges}=0% If drawing edges
+                    \ifnum\pmdraw@ifTedgesFirst=0% If drawing non-transversals first
+                        \pmdraw@UedgesLoop% Draws upper edges
+                        #2%
+                        \pmdEmpty%
+                        \pmdraw@LedgesLoop% Draws lower edges
+                        #3%
+                        \pmdEmpty%
+                        \pmdraw@TedgesLoop% Draws transversals
+                        #4%
+                        \pmdEmpty%
+                    \else% If drawing transversal first
+                        \pmdraw@TedgesLoop% Draws transversals
+                        #4%
+                        \pmdEmpty%
+                        \pmdraw@UedgesLoop% Draws upper edges
+                        #2%
+                        \pmdEmpty%
+                        \pmdraw@LedgesLoop% Draws lower edges
+                        #3%
+                        \pmdEmpty%
+                    \fi%
+                \else% If hiding edges
+                    \phantom{%
+                        \ifnum\pmdraw@ifTedgesFirst=0% If drawing non-transversals first
+                            \pmdraw@UedgesLoop% Draws upper edges
+                            #2%
+                            \pmdEmpty%
+                            \pmdraw@LedgesLoop% Draws lower edges
+                            #3%
+                            \pmdEmpty%
+                            \pmdraw@TedgesLoop% Draws transversals
+                            #4%
+                            \pmdEmpty%
+                        \else% If drawing transversal first
+                            \pmdraw@TedgesLoop% Draws transversals
+                            #4%
+                            \pmdEmpty%
+                            \pmdraw@UedgesLoop% Draws upper edges
+                            #2%
+                            \pmdEmpty%
+                            \pmdraw@LedgesLoop% Draws lower edges
+                            #3%
+                            \pmdEmpty%
+                        \fi%
+                    }%
+                \fi%
+            }%
+        }{% If not in beamer
+            \ifnum\value{pmdraw@ifVerticesTop}=0% If drawing top vertices
+                \pmdraw@drawTopVertices% Draw base diagram
+            \else% If hiding top vertices
+                \phantom{%
+                    \pmdraw@drawTopVertices% Draw base diagram
+                }%
+            \fi%
+            \ifnum\value{pmdraw@ifVerticesBottom}=0% If drawing bottom vertices
+                \pmdraw@drawBottomVertices% Draw base diagram
+            \else% If hiding top vertices
+                \phantom{%
+                    \pmdraw@drawBottomVertices% Draw base diagram
+                }%
+            \fi%
+            \ifnum\value{pmdraw@ifEdges}=0% If drawing edges
+                \ifnum\pmdraw@ifTedgesFirst=0% If drawing non-transversals first
+                    \pmdraw@UedgesLoop% Draws upper edges
+                    #2%
+                    \pmdEmpty%
+                    \pmdraw@LedgesLoop% Draws lower edges
+                    #3%
+                    \pmdEmpty%
+                    \pmdraw@TedgesLoop% Draws transversals
+                    #4%
+                    \pmdEmpty%
+                \else% If drawing transversal first
+                    \pmdraw@TedgesLoop% Draws transversals
+                    #4%
+                    \pmdEmpty%
+                    \pmdraw@UedgesLoop% Draws upper edges
+                    #2%
+                    \pmdEmpty%
+                    \pmdraw@LedgesLoop% Draws lower edges
+                    #3%
+                    \pmdEmpty%
+                \fi%
+            \else% If hiding edges
+                \phantom{%
+                    \ifnum\pmdraw@ifTedgesFirst=0% If drawing non-transversals first
+                        \pmdraw@UedgesLoop% Draws upper edges
+                        #2%
+                        \pmdEmpty%
+                        \pmdraw@LedgesLoop% Draws lower edges
+                        #3%
+                        \pmdEmpty%
+                        \pmdraw@TedgesLoop% Draws transversals
+                        #4%
+                        \pmdEmpty%
+                    \else% If drawing transversal first
+                        \pmdraw@TedgesLoop% Draws transversals
+                        #4%
+                        \pmdEmpty%
+                        \pmdraw@UedgesLoop% Draws upper edges
+                        #2%
+                        \pmdEmpty%
+                        \pmdraw@LedgesLoop% Draws lower edges
+                        #3%
+                        \pmdEmpty%
+                    \fi%
+                }%
+            \fi%
+        }%
+    \else% If drawing edges first
+        \@ifclassloaded{beamer}{% If in beamer
+            \uncover<\pmdraw@edgesUncover>{% Uncovers edges
+                \ifnum\value{pmdraw@ifEdges}=0% If drawing edges
+                    \ifnum\pmdraw@ifTedgesFirst=0% If drawing non-transversals first
+                        \pmdraw@UedgesLoop% Draws upper edges
+                        #2%
+                        \pmdEmpty%
+                        \pmdraw@LedgesLoop% Draws lower edges
+                        #3%
+                        \pmdEmpty%
+                        \pmdraw@TedgesLoop% Draws transversals
+                        #4%
+                        \pmdEmpty%
+                    \else% If drawing transversal first
+                        \pmdraw@TedgesLoop% Draws transversals
+                        #4%
+                        \pmdEmpty%
+                        \pmdraw@UedgesLoop% Draws upper edges
+                        #2%
+                        \pmdEmpty%
+                        \pmdraw@LedgesLoop% Draws lower edges
+                        #3%
+                        \pmdEmpty%
+                    \fi%
+                \else% If hiding edges
+                    \phantom{%
+                        \ifnum\pmdraw@ifTedgesFirst=0% If drawing non-transversals first
+                            \pmdraw@UedgesLoop% Draws upper edges
+                            #2%
+                            \pmdEmpty%
+                            \pmdraw@LedgesLoop% Draws lower edges
+                            #3%
+                            \pmdEmpty%
+                            \pmdraw@TedgesLoop% Draws transversals
+                            #4%
+                            \pmdEmpty%
+                        \else% If drawing transversal first
+                            \pmdraw@TedgesLoop% Draws transversals
+                            #4%
+                            \pmdEmpty%
+                            \pmdraw@UedgesLoop% Draws upper edges
+                            #2%
+                            \pmdEmpty%
+                            \pmdraw@LedgesLoop% Draws lower edges
+                            #3%
+                            \pmdEmpty%
+                        \fi%
+                    }%
+                \fi%
+            }%
+            \uncover<\pmdraw@verticesTopUncover>{% Uncovers top vertices
+                \ifnum\value{pmdraw@ifVerticesTop}=0% If drawing top vertices
+                    \pmdraw@drawTopVertices% Draw base diagram
+                \else% If hiding top vertices
+                    \phantom{%
+                        \pmdraw@drawTopVertices% Draw base diagram
+                    }%
+                \fi%
+            }%
+            \uncover<\pmdraw@verticesBottomUncover>{% Uncovers bottm vertices
+                \ifnum\value{pmdraw@ifVerticesBottom}=0% If drawing bottom vertices
+                    \pmdraw@drawBottomVertices% Draw base diagram
+                \else% If hiding top vertices
+                    \phantom{%
+                        \pmdraw@drawBottomVertices% Draw base diagram
+                    }%
+                \fi%
+            }%
+        }{% If not in beamer
+            \ifnum\value{pmdraw@ifEdges}=0% If drawing edges
+                \ifnum\pmdraw@ifTedgesFirst=0% If drawing non-transversals first
+                    \pmdraw@UedgesLoop% Draws upper edges
+                    #2%
+                    \pmdEmpty%
+                    \pmdraw@LedgesLoop% Draws lower edges
+                    #3%
+                    \pmdEmpty%
+                    \pmdraw@TedgesLoop% Draws transversals
+                    #4%
+                    \pmdEmpty%
+                \else% If drawing transversal first
+                    \pmdraw@TedgesLoop% Draws transversals
+                    #4%
+                    \pmdEmpty%
+                    \pmdraw@UedgesLoop% Draws upper edges
+                    #2%
+                    \pmdEmpty%
+                    \pmdraw@LedgesLoop% Draws lower edges
+                    #3%
+                    \pmdEmpty%
+                \fi%
+            \else% If hiding edges
+                \phantom{%
+                    \ifnum\pmdraw@ifTedgesFirst=0% If drawing non-transversals first
+                        \pmdraw@UedgesLoop% Draws upper edges
+                        #2%
+                        \pmdEmpty%
+                        \pmdraw@LedgesLoop% Draws lower edges
+                        #3%
+                        \pmdEmpty%
+                        \pmdraw@TedgesLoop% Draws transversals
+                        #4%
+                        \pmdEmpty%
+                    \else% If drawing transversal first
+                        \pmdraw@TedgesLoop% Draws transversals
+                        #4%
+                        \pmdEmpty%
+                        \pmdraw@UedgesLoop% Draws upper edges
+                        #2%
+                        \pmdEmpty%
+                        \pmdraw@LedgesLoop% Draws lower edges
+                        #3%
+                        \pmdEmpty%
+                    \fi%
+                }%
+            \fi%
+            \ifnum\value{pmdraw@ifVerticesTop}=0% If drawing top vertices
+                \pmdraw@drawTopVertices% Draw base diagram
+            \else% If hiding top vertices
+                \phantom{%
+                    \pmdraw@drawTopVertices% Draw base diagram
+                }%
+            \fi%
+            \ifnum\value{pmdraw@ifVerticesBottom}=0% If drawing bottom vertices
+                \pmdraw@drawBottomVertices% Draw base diagram
+            \else% If hiding top vertices
+                \phantom{%
+                    \pmdraw@drawBottomVertices% Draw base diagram
+                }%
+            \fi%
+        }%
+    \fi%
+    \pmdraw@hookAfterBrick% Hook after drawing brick
+    % Resets user keys and other flags to default values
+    \renewcommand{\pmdraw@drawBraceDrawOptions}{}%
+    \renewcommand{\pmdraw@drawBraceNodeOptions}{}%
+    \renewcommand{\pmdraw@drawBracketDrawOptions}{}%
+    \renewcommand{\pmdraw@drawBracketNodeOptions}{}%
+    \renewcommand{\pmdraw@drawDotsDrawOptions}{}%
+    \renewcommand{\pmdraw@drawDotsNodeOptions}{}%
+    \renewcommand{\pmdraw@drawLabelBDrawOptions}{}%
+    \renewcommand{\pmdraw@drawLabelBNodeOptions}{}%
+    \renewcommand{\pmdraw@drawLabelTDrawOptions}{}%
+    \renewcommand{\pmdraw@drawLabelTNodeOptions}{}%
+    \renewcommand{\pmdraw@drawLedgesDrawOptions}{}%
+    \renewcommand{\pmdraw@drawNoLabelBa}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelBb}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelBc}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelBd}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelBe}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelBf}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelBg}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelBh}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelBi}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelTa}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelTb}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelTc}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelTd}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelTe}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelTf}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelTg}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelTh}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelTi}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexBa}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexBb}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexBc}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexBd}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexBe}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexBf}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexBg}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexBh}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexBi}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexTa}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexTb}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexTc}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexTd}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexTe}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexTf}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexTg}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexTh}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexTi}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexBa}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexBb}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexBc}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexBd}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexBe}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexBf}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexBg}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexBh}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexBi}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexTa}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexTb}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexTc}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexTd}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexTe}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexTf}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexTg}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexTh}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexTi}{-1}%
+    \renewcommand{\pmdraw@drawTedgesDrawOptions}{}%
+    \renewcommand{\pmdraw@drawUedgesDrawOptions}{}%
+    \renewcommand{\pmdraw@drawVertexOptions}{}%
+    \renewcommand{\pmdraw@drawGhostOptions}{}%
+    \renewcommand{\pmdraw@hookBeforeBrick}{}%
+    \renewcommand{\pmdraw@hookAfterBrick}{}%
+    \renewcommand{\pmdraw@ifEdgesFirst}{0}%
+    \renewcommand{\pmdraw@ifLabelsB}{0}%
+    \renewcommand{\pmdraw@ifLabelsT}{0}%
+    \renewcommand{\pmdraw@ifTedgesFirst}{0}%
+    \renewcommand{\pmdraw@edgesUncover}{1-}%
+    \renewcommand{\pmdraw@verticesBottomUncover}{1-}%
+    \renewcommand{\pmdraw@verticesTopUncover}{1-}%
+    \let\pmdraw@drawLabelBottom\pmdraw@drawLabelBottomDefault%
+    \let\pmdraw@drawLabelTop\pmdraw@drawLabelTopDefault%
+    \let\pmdraw@drawLabelBottom\pmdraw@drawLabelBottomDefault%
+    \let\pmdraw@drawVertex\pmdraw@drawVertexDefault%
+    \let\pmdraw@drawVertexGhost\pmdraw@drawGhostDefault%
+    \setcounter{pmdraw@blankB}{0}%
+    \setcounter{pmdraw@blankT}{0}%
+    \setcounter{pmdraw@labelStartB}{1}%
+    \setcounter{pmdraw@labelStartT}{1}%
+    \setcounter{pmdraw@ifEdges}{0}%
+    \setcounter{pmdraw@ifVerticesBottom}{0}%
+    \setcounter{pmdraw@ifVerticesTop}{0}%
+}
+\newcommand{\pmdraw@drawBrickE}[3][]{% Draws an E brick
+    % #1 Options
+    % #2 Upper non-transversal edges, as list [<options>]{<left vertex>}{<right vertex>}, eg [level=1]{2}{3}
+    % #3 Lower non-transversal edges, as list [<options>]{<left vertex>}{<right vertex>}, eg [level=1]{2}{3}
+    \setkeys{pmdraw@brick}{% Set default values for brick keys
+        degree bottom=\usevalue{degree bottom},
+        degree top=\usevalue{degree top},
+        blank bottom=\usevalue{blank bottom},
+        blank top=\usevalue{blank top},
+        row sep=\usevalue{row sep},
+        no vertex bottom 1=\usevalue{no vertex bottom 1},
+        no vertex bottom 2=\usevalue{no vertex bottom 2},
+        no vertex bottom 3=\usevalue{no vertex bottom 3},
+        no vertex bottom 4=\usevalue{no vertex bottom 4},
+        no vertex bottom 5=\usevalue{no vertex bottom 5},
+        no vertex bottom 6=\usevalue{no vertex bottom 6},
+        no vertex bottom 7=\usevalue{no vertex bottom 7},
+        no vertex bottom 8=\usevalue{no vertex bottom 8},
+        no vertex bottom 9=\usevalue{no vertex bottom 9},
+        no vertex top 1=\usevalue{no vertex top 1},
+        no vertex top 2=\usevalue{no vertex top 2},
+        no vertex top 3=\usevalue{no vertex top 3},
+        no vertex top 4=\usevalue{no vertex top 4},
+        no vertex top 5=\usevalue{no vertex top 5},
+        no vertex top 6=\usevalue{no vertex top 6},
+        no vertex top 7=\usevalue{no vertex top 7},
+        no vertex top 8=\usevalue{no vertex top 8},
+        no vertex top 9=\usevalue{no vertex top 9},
+        ghost vertex bottom 1=\usevalue{ghost vertex bottom 1},
+        ghost vertex bottom 2=\usevalue{ghost vertex bottom 2},
+        ghost vertex bottom 3=\usevalue{ghost vertex bottom 3},
+        ghost vertex bottom 4=\usevalue{ghost vertex bottom 4},
+        ghost vertex bottom 5=\usevalue{ghost vertex bottom 5},
+        ghost vertex bottom 6=\usevalue{ghost vertex bottom 6},
+        ghost vertex bottom 7=\usevalue{ghost vertex bottom 7},
+        ghost vertex bottom 8=\usevalue{ghost vertex bottom 8},
+        ghost vertex bottom 9=\usevalue{ghost vertex bottom 9},
+        ghost vertex top 1=\usevalue{ghost vertex top 1},
+        ghost vertex top 2=\usevalue{ghost vertex top 2},
+        ghost vertex top 3=\usevalue{ghost vertex top 3},
+        ghost vertex top 4=\usevalue{ghost vertex top 4},
+        ghost vertex top 5=\usevalue{ghost vertex top 5},
+        ghost vertex top 6=\usevalue{ghost vertex top 6},
+        ghost vertex top 7=\usevalue{ghost vertex top 7},
+        ghost vertex top 8=\usevalue{ghost vertex top 8},
+        ghost vertex top 9=\usevalue{ghost vertex top 9},
+        labels=\usevalue{labels},
+        labels bottom=\usevalue{labels bottom},
+        labels top=\usevalue{labels top},
+        labels start=\usevalue{labels start},
+        labels bottom start=\usevalue{labels bottom start},
+        labels top start=\usevalue{labels top start},
+        no label bottom 1=\usevalue{no label bottom 1},
+        no label bottom 2=\usevalue{no label bottom 2},
+        no label bottom 3=\usevalue{no label bottom 3},
+        no label bottom 4=\usevalue{no label bottom 4},
+        no label bottom 5=\usevalue{no label bottom 5},
+        no label bottom 6=\usevalue{no label bottom 6},
+        no label bottom 7=\usevalue{no label bottom 7},
+        no label bottom 8=\usevalue{no label bottom 8},
+        no label bottom 9=\usevalue{no label bottom 9},
+        no label top 1=\usevalue{no label top 1},
+        no label top 2=\usevalue{no label top 2},
+        no label top 3=\usevalue{no label top 3},
+        no label top 4=\usevalue{no label top 4},
+        no label top 5=\usevalue{no label top 5},
+        no label top 6=\usevalue{no label top 6},
+        no label top 7=\usevalue{no label top 7},
+        no label top 8=\usevalue{no label top 8},
+        no label top 9=\usevalue{no label top 9},
+        labels bottom draw=\usevalue{labels bottom draw},
+        labels bottom node=\usevalue{labels bottom node},
+        labels top draw=\usevalue{labels top draw},
+        labels top node=\usevalue{labels top node},
+        dots draw=\usevalue{dots draw},
+        dots node=\usevalue{dots node},
+        vertices bottom phantom=\usevalue{vertices bottom phantom},
+        vertices top phantom=\usevalue{vertices top phantom},
+        vertices bottom uncover=\usevalue{vertices bottom uncover},
+        vertices top uncover=\usevalue{vertices top uncover},
+        levels=\usevalue{levels},
+        levels bottom=\usevalue{levels bottom},
+        levels top=\usevalue{levels top},
+        levels sep=\usevalue{levels sep},
+        levels sep bottom=\usevalue{levels sep bottom},
+        levels sep top=\usevalue{levels sep top},
+        edges first=\usevalue{edges first},
+        transversals first=\usevalue{transversals first},
+        edges phantom=\usevalue{edges phantom},
+        edges uncover=\usevalue{edges uncover},
+        brace draw=\usevalue{brace draw},
+        brace node=\usevalue{brace node},
+        bracket draw=\usevalue{bracket draw},
+        bracket node=\usevalue{bracket node},
+        decorate before=\usevalue{decorate before},
+        decorate after=\usevalue{decorate after}
+    }%
+    \setkeys{pmdraw@brick}{levels,#1}% Processes options and set default levels
+    \pmdraw@hookBeforeBrick% Hook before drawing brick
+    \ifnum\pmdraw@ifEdgesFirst=0% If drawing vertices first
+        \@ifclassloaded{beamer}{% If in beamer
+            \uncover<\pmdraw@verticesTopUncover>{% Uncovers top vertices
+                \ifnum\value{pmdraw@ifVerticesTop}=0% If drawing top vertices
+                    \pmdraw@drawTopVertices% Draw base diagram
+                \else% If hiding top vertices
+                    \phantom{%
+                        \pmdraw@drawTopVertices% Draw base diagram
+                    }%
+                \fi%
+                \ifnum\value{pmdraw@ifDiagWDotsFirst}=1% If drawing first brick of diagram
+                    \setcounter{pmdraw@ifDiagWDotsFirst}{0}% Mark that first brick has been drawn
+                \else% If not drawing first brick of diagram
+                    \pmdraw@drawDots{0.5*\value{pmdraw@topShift}+0.5*\value{pmdraw@blankT}}{\pmdraw@rowSep}% Draw upper dots
+                \fi%
+                \ifnum\pmdraw@ifDiagWDots=1% If drawing a diagram with dots
+                    \addtocounter{pmdraw@brickShift}{\value{pmdraw@topTotal}}% Keep track of size of diagram
+                    % Store shifts
+                    \setcounter{pmdraw@topShift}{-\value{pmdraw@topTotal}}%
+                    \addtocounter{pmdraw@topShift}{\value{pmdraw@topTotal}}%
+                    \setcounter{pmdraw@bottomShift}{-\value{pmdraw@topTotal}}%
+                    \addtocounter{pmdraw@bottomShift}{\value{pmdraw@topTotal}}%
+                \else% If drawing a diagram without dots
+                    \setcounter{pmdraw@brickShift}{\value{pmdraw@topTotal}}% Keep track of size of diagram
+                \fi%
+            }%
+            \uncover<\pmdraw@edgesUncover>{% Uncovers edges
+                \ifnum\value{pmdraw@ifEdges}=0% If drawing edges
+                    \pmdraw@UedgesLoop% Draws upper edges
+                    #2%
+                    \pmdEmpty%
+                    \pmdraw@LedgesLoop% Draws lower edges
+                    #3%
+                    \pmdEmpty%
+                \else% If hiding edges
+                    \phantom{%
+                        \pmdraw@UedgesLoop% Draws upper edges
+                        #2%
+                        \pmdEmpty%
+                        \pmdraw@LedgesLoop% Draws lower edges
+                        #3%
+                        \pmdEmpty%
+                    }%
+                \fi%
+            }%
+        }{% If not in beamer
+            \ifnum\value{pmdraw@ifVerticesTop}=0% If drawing top vertices
+                \pmdraw@drawTopVertices% Draw base diagram
+            \else% If hiding top vertices
+                \phantom{%
+                    \pmdraw@drawTopVertices% Draw base diagram
+                }%
+            \fi%
+            \ifnum\value{pmdraw@ifDiagWDotsFirst}=1% If drawing first brick of diagram
+                \setcounter{pmdraw@ifDiagWDotsFirst}{0}% Mark that first brick has been drawn
+            \else% If not drawing first brick of diagram
+                \pmdraw@drawDots{0.5*\value{pmdraw@topShift}+0.5*\value{pmdraw@blankT}}{\pmdraw@rowSep}% Draw upper dots
+            \fi%
+            \ifnum\pmdraw@ifDiagWDots=1% If drawing a diagram with dots
+                \addtocounter{pmdraw@brickShift}{\value{pmdraw@topTotal}}% Keep track of size of diagram
+                % Store shifts
+                \setcounter{pmdraw@topShift}{-\value{pmdraw@topTotal}}%
+                \addtocounter{pmdraw@topShift}{\value{pmdraw@topTotal}}%
+                \setcounter{pmdraw@bottomShift}{-\value{pmdraw@topTotal}}%
+                \addtocounter{pmdraw@bottomShift}{\value{pmdraw@topTotal}}%
+            \else% If drawing a diagram without dots
+                \setcounter{pmdraw@brickShift}{\value{pmdraw@topTotal}}% Keep track of size of diagram
+            \fi%
+            \ifnum\value{pmdraw@ifEdges}=0% If drawing edges
+                \pmdraw@UedgesLoop% Draws upper edges
+                #2%
+                \pmdEmpty%
+                \pmdraw@LedgesLoop% Draws lower edges
+                #3%
+                \pmdEmpty%
+            \else% If hiding edges
+                \phantom{%
+                    \pmdraw@UedgesLoop% Draws upper edges
+                    #2%
+                    \pmdEmpty%
+                    \pmdraw@LedgesLoop% Draws lower edges
+                    #3%
+                    \pmdEmpty%
+                }%
+            \fi%
+        }%
+    \else% If drawing edges first
+        \@ifclassloaded{beamer}{% If in beamer
+            \uncover<\pmdraw@edgesUncover>{% Uncovers edges
+                \ifnum\value{pmdraw@ifEdges}=0% If drawing edges
+                    \pmdraw@UedgesLoop% Draws upper edges
+                    #2%
+                    \pmdEmpty%
+                    \pmdraw@LedgesLoop% Draws lower edges
+                    #3%
+                    \pmdEmpty%
+                \else% If hiding edges
+                    \phantom{%
+                        \pmdraw@UedgesLoop% Draws upper edges
+                        #2%
+                        \pmdEmpty%
+                        \pmdraw@LedgesLoop% Draws lower edges
+                        #3%
+                        \pmdEmpty%
+                    }%
+                \fi%
+            }%
+            \uncover<\pmdraw@verticesTopUncover>{% Uncovers top vertices
+                \ifnum\value{pmdraw@ifVerticesTop}=0% If drawing top vertices
+                    \pmdraw@drawTopVertices% Draw base diagram
+                \else% If hiding top vertices
+                    \phantom{%
+                        \pmdraw@drawTopVertices% Draw base diagram
+                    }%
+                \fi%
+                \ifnum\value{pmdraw@ifDiagWDotsFirst}=1% If drawing first brick of diagram
+                    \setcounter{pmdraw@ifDiagWDotsFirst}{0}% Mark that first brick has been drawn
+                \else% If not drawing first brick of diagram
+                    \pmdraw@drawDots{0.5*\value{pmdraw@topShift}+0.5*\value{pmdraw@blankT}}{\pmdraw@rowSep}% Draw upper dots
+                \fi%
+                \ifnum\pmdraw@ifDiagWDots=1% If drawing a diagram with dots
+                    \addtocounter{pmdraw@brickShift}{\value{pmdraw@topTotal}}% Keep track of size of diagram
+                    % Store shifts
+                    \setcounter{pmdraw@topShift}{-\value{pmdraw@topTotal}}%
+                    \addtocounter{pmdraw@topShift}{\value{pmdraw@topTotal}}%
+                    \setcounter{pmdraw@bottomShift}{-\value{pmdraw@topTotal}}%
+                    \addtocounter{pmdraw@bottomShift}{\value{pmdraw@topTotal}}%
+                \else% If drawing a diagram without dots
+                    \setcounter{pmdraw@brickShift}{\value{pmdraw@topTotal}}% Keep track of size of diagram
+                \fi%
+            }%
+        }{% If not in beamer
+            \ifnum\value{pmdraw@ifEdges}=0% If drawing edges
+                \pmdraw@UedgesLoop% Draws upper edges
+                #2%
+                \pmdEmpty%
+                \pmdraw@LedgesLoop% Draws lower edges
+                #3%
+                \pmdEmpty%
+            \else% If hiding edges
+                \phantom{%
+                    \pmdraw@UedgesLoop% Draws upper edges
+                    #2%
+                    \pmdEmpty%
+                    \pmdraw@LedgesLoop% Draws lower edges
+                    #3%
+                    \pmdEmpty%
+                }%
+            \fi%
+            \ifnum\value{pmdraw@ifDiagWDotsFirst}=1% If drawing first brick of diagram
+                \setcounter{pmdraw@ifDiagWDotsFirst}{0}% Mark that first brick has been drawn
+            \else% If not drawing first brick of diagram
+                \pmdraw@drawDots{0.5*\value{pmdraw@topShift}+0.5*\value{pmdraw@blankT}}{\pmdraw@rowSep}% Draw upper dots
+            \fi%
+            \ifnum\value{pmdraw@ifVerticesTop}=0% If drawing top vertices
+                \pmdraw@drawTopVertices% Draw base diagram
+            \else% If hiding top vertices
+                \phantom{%
+                    \pmdraw@drawTopVertices% Draw base diagram
+                }%
+            \fi%
+            \ifnum\pmdraw@ifDiagWDots=1% If drawing a diagram with dots
+                \addtocounter{pmdraw@brickShift}{\value{pmdraw@topTotal}}% Keep track of size of diagram
+                % Store shifts
+                \setcounter{pmdraw@topShift}{-\value{pmdraw@topTotal}}%
+                \addtocounter{pmdraw@topShift}{\value{pmdraw@topTotal}}%
+                \setcounter{pmdraw@bottomShift}{-\value{pmdraw@topTotal}}%
+                \addtocounter{pmdraw@bottomShift}{\value{pmdraw@topTotal}}%
+            \else% If drawing a diagram without dots
+                \setcounter{pmdraw@brickShift}{\value{pmdraw@topTotal}}% Keep track of size of diagram
+            \fi%
+        }%
+    \fi%
+    \pmdraw@hookAfterBrick% Hook after drawing brick
+    % Resets user keys and other flags to default values
+    \renewcommand{\pmdraw@drawBraceDrawOptions}{}%
+    \renewcommand{\pmdraw@drawBraceNodeOptions}{}%
+    \renewcommand{\pmdraw@drawBracketDrawOptions}{}%
+    \renewcommand{\pmdraw@drawBracketNodeOptions}{}%
+    \renewcommand{\pmdraw@drawDotsDrawOptions}{}%
+    \renewcommand{\pmdraw@drawDotsNodeOptions}{}%
+    \renewcommand{\pmdraw@drawLabelBDrawOptions}{}%
+    \renewcommand{\pmdraw@drawLabelBNodeOptions}{}%
+    \renewcommand{\pmdraw@drawLabelTDrawOptions}{}%
+    \renewcommand{\pmdraw@drawLabelTNodeOptions}{}%
+    \renewcommand{\pmdraw@drawLedgesDrawOptions}{}%
+    \renewcommand{\pmdraw@drawNoLabelBa}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelBb}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelBc}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelBd}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelBe}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelBf}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelBg}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelBh}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelBi}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelTa}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelTb}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelTc}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelTd}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelTe}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelTf}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelTg}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelTh}{-1}%
+    \renewcommand{\pmdraw@drawNoLabelTi}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexBa}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexBb}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexBc}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexBd}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexBe}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexBf}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexBg}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexBh}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexBi}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexTa}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexTb}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexTc}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexTd}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexTe}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexTf}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexTg}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexTh}{-1}%
+    \renewcommand{\pmdraw@drawNoVertexTi}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexBa}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexBb}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexBc}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexBd}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexBe}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexBf}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexBg}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexBh}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexBi}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexTa}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexTb}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexTc}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexTd}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexTe}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexTf}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexTg}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexTh}{-1}%
+    \renewcommand{\pmdraw@drawGhostVertexTi}{-1}%
+    \renewcommand{\pmdraw@drawTedgesDrawOptions}{}%
+    \renewcommand{\pmdraw@drawUedgesDrawOptions}{}%
+    \renewcommand{\pmdraw@drawVertexOptions}{}%
+    \renewcommand{\pmdraw@drawGhostOptions}{}%
+    \renewcommand{\pmdraw@hookBeforeBrick}{}%
+    \renewcommand{\pmdraw@hookAfterBrick}{}%
+    \renewcommand{\pmdraw@ifEdgesFirst}{0}%
+    \renewcommand{\pmdraw@ifLabelsB}{0}%
+    \renewcommand{\pmdraw@ifLabelsT}{0}%
+    \renewcommand{\pmdraw@ifTedgesFirst}{0}%
+    \renewcommand{\pmdraw@edgesUncover}{1-}%
+    \renewcommand{\pmdraw@verticesBottomUncover}{1-}%
+    \renewcommand{\pmdraw@verticesTopUncover}{1-}%
+    \let\pmdraw@drawLabelBottom\pmdraw@drawLabelBottomDefault%
+    \let\pmdraw@drawLabelTop\pmdraw@drawLabelTopDefault%
+    \let\pmdraw@drawLabelBottom\pmdraw@drawLabelBottomDefault%
+    \let\pmdraw@drawVertex\pmdraw@drawVertexDefault%
+    \let\pmdraw@drawVerteGhost\pmdraw@drawGhostDefault%
+    \setcounter{pmdraw@blankB}{0}%
+    \setcounter{pmdraw@blankT}{0}%
+    \setcounter{pmdraw@labelStartB}{1}%
+    \setcounter{pmdraw@labelStartT}{1}%
+    \setcounter{pmdraw@ifEdges}{0}%
+    \setcounter{pmdraw@ifVerticesBottom}{0}%
+    \setcounter{pmdraw@ifVerticesTop}{0}%
+}
+\newcommand{\pmdraw@drawLedges}[3][]{% Draws lower non-transversal edge, #1 options, #2 L vertex, #3 R vertex
+    \setcounter{pmdraw@NTlevel}{1}% Store default level of edge
+    \setkeys{pmdraw@NTedges}{% Sets default non-transversal edge keys
+        level=\usevalue{level},
+        height=\usevalue{height},
+        edge draw=\usevalue{edge draw},
+        phantom=\usevalue{phantom},
+        uncover=\usevalue{uncover},
+        label=\usevalue{label},
+        label node=\usevalue{label node}
+    }%
+    \setkeys{pmdraw@NTedges}{#1}% Processes options
+    \ifdim\pmdraw@NTedgesHeight pt=-1000pt% If using default heights
+        \tikzmath{%
+            \pmdraw{edgeHeight}=\value{pmdraw@NTlevel}*\pmdraw{edgeSepL};% Calculates height based on level of edge
+        }%
+    \else% If using manual heights
+        \tikzmath{%
+            \pmdraw{edgeHeight}=\pmdraw@NTedgesHeight;% Set manual height
+        }%
+    \fi%
+    \@ifclassloaded{beamer}{% If in beamer
+        \uncover<\pmdraw@edgeUncover>{% Uncovers edge
+            \ifnum\value{pmdraw@ifEdge}=0% If drawing edge
+                \pmdraw@drawLedgesDraw{#2}{#3}% Draw edge
+            \else% If hiding edge
+                \phantom{%
+                    \pmdraw@drawLedgesDraw{#2}{#3}% Draw edge
+                }%
+            \fi%
+        }%
+    }{% If not in beamer
+        \ifnum\value{pmdraw@ifEdge}=0% If drawing edge
+            \pmdraw@drawLedgesDraw{#2}{#3}% Draw edge
+        \else% If hiding edge
+            \phantom{%
+                \pmdraw@drawLedgesDraw{#2}{#3}% Draw edge
+            }%
+        \fi%
+    }%
+    % Resets user keys and other flags to default values
+    \renewcommand{\pmdraw@NTedgesHeight}{-1000}%
+    \renewcommand{\pmdraw@edgeUncover}{1-}%
+    \setcounter{pmdraw@ifEdge}{0}%
+    \let\pmdraw@drawLedgesDraw\pmdraw@drawLedgesDrawDefault%
+    \pmdraw@LedgesLoop% Restart for loop
+}
+\newcommand{\pmdraw@drawTedges}[3][]{% Draws transversal edge, #1 options, #2 upper vertex, #3 lower vertex
+    \setkeys{pmdraw@Tedges}{% Sets default key values for transversal edges
+        edge draw=\usevalue{edge draw},
+        phantom=\usevalue{phantom},
+        uncover=\usevalue{uncover},
+        label=\usevalue{label},
+        label node=\usevalue{label node}
+    }%
+   \setkeys{pmdraw@Tedges}{#1}% Processes options
+   \@ifclassloaded{beamer}{% If in beamer
+       \uncover<\pmdraw@edgeUncover>{% Uncovers edge
+           \ifnum\value{pmdraw@ifEdge}=0% If drawing edge
+               \pmdraw@drawTedgesDraw{#2}{#3}% Draw edge
+           \else% If hiding edge
+               \phantom{%
+                   \pmdraw@drawTedgesDraw{#2}{#3}% Draw edge
+               }%
+           \fi%
+       }%
+   }{% If not in beamer
+       \ifnum\value{pmdraw@ifEdge}=0% If drawing edge
+           \pmdraw@drawTedgesDraw{#2}{#3}% Draw edge
+       \else% If hiding edge
+           \phantom{%
+               \pmdraw@drawTedgesDraw{#2}{#3}% Draw edge
+           }%
+       \fi%
+   }%
+   % Resets user keys and other flags to default values
+   \renewcommand{\pmdraw@edgeUncover}{1-}%
+   \setcounter{pmdraw@ifEdge}{0}%
+   \let\pmdraw@drawTedgesDraw\pmdraw@drawTedgesDrawDefault%
+   \pmdraw@TedgesLoop% Restart for loop
+}
+\newcommand{\pmdraw@drawTopVertices}{% Draws top row of vertices
+    \setcounter{pmdraw@topTotal}{\value{pmdraw@blankT}}% Store size of top row of vertices
+    \addtocounter{pmdraw@topTotal}{\value{pmdraw@degreeT}}% Store size of top row of vertices
+    \foreach \x in {1,...,\value{pmdraw@degreeT}} {% For each vertex in row
+        \ifnum\pmdraw@drawNoVertexTa=\x\else% If not skipping vertex
+            \ifnum\pmdraw@drawNoVertexTb=\x\else% If not skipping vertex
+                \ifnum\pmdraw@drawNoVertexTc=\x\else% If not skipping vertex
+                    \ifnum\pmdraw@drawNoVertexTd=\x\else% If not skipping vertex
+                        \ifnum\pmdraw@drawNoVertexTe=\x\else% If not skipping vertex
+                            \ifnum\pmdraw@drawNoVertexTf=\x\else% If not skipping vertex
+                                \ifnum\pmdraw@drawNoVertexTg=\x\else% If not skipping vertex
+                                    \ifnum\pmdraw@drawNoVertexTh=\x\else% If not skipping vertex
+                                        \ifnum\pmdraw@drawNoVertexTi=\x\else% If not skipping vertex
+                                            \ifnum\pmdraw@drawGhostVertexTa=\x% If ghosting vertex
+                                                \pmdraw@drawVertexGhost{\x + \value{pmdraw@blankT}}{\pmdraw@rowSep}% Draw ghost upper vertex
+                                            \else% If not ghosting vertex
+                                                \ifnum\pmdraw@drawGhostVertexTb=\x% If ghosting vertex
+                                                    \pmdraw@drawVertexGhost{\x + \value{pmdraw@blankT}}{\pmdraw@rowSep}% Draw ghost upper vertex
+                                                \else% If not ghosting vertex
+                                                    \ifnum\pmdraw@drawGhostVertexTc=\x% If ghosting vertex
+                                                        \pmdraw@drawVertexGhost{\x + \value{pmdraw@blankT}}{\pmdraw@rowSep}% Draw ghost upper vertex
+                                                    \else% If not ghosting vertex
+                                                        \ifnum\pmdraw@drawGhostVertexTd=\x% If ghosting vertex
+                                                            \pmdraw@drawVertexGhost{\x + \value{pmdraw@blankT}}{\pmdraw@rowSep}% Draw ghost upper vertex
+                                                        \else% If not ghosting vertex
+                                                            \ifnum\pmdraw@drawGhostVertexTe=\x% If ghosting vertex
+                                                                \pmdraw@drawVertexGhost{\x + \value{pmdraw@blankT}}{\pmdraw@rowSep}% Draw ghost upper vertex
+                                                            \else% If not ghosting vertex
+                                                                \ifnum\pmdraw@drawGhostVertexTf=\x% If ghosting vertex
+                                                                    \pmdraw@drawVertexGhost{\x + \value{pmdraw@blankT}}{\pmdraw@rowSep}% Draw ghost upper vertex
+                                                                \else% If not ghosting vertex
+                                                                    \ifnum\pmdraw@drawGhostVertexTg=\x% If ghosting vertex
+                                                                        \pmdraw@drawVertexGhost{\x + \value{pmdraw@blankT}}{\pmdraw@rowSep}% Draw ghost upper vertex
+                                                                    \else% If not ghosting vertex
+                                                                        \ifnum\pmdraw@drawGhostVertexTh=\x% If ghosting vertex
+                                                                            \pmdraw@drawVertexGhost{\x + \value{pmdraw@blankT}}{\pmdraw@rowSep}% Draw ghost upper vertex
+                                                                        \else% If not ghosting vertex
+                                                                            \ifnum\pmdraw@drawGhostVertexTi=\x% If ghosting vertex
+                                                                                \pmdraw@drawVertexGhost{\x + \value{pmdraw@blankT}}{\pmdraw@rowSep}% Draw ghost upper vertex
+                                                                            \else% If not ghosting vertex
+                                                                                \pmdraw@drawVertex{\x + \value{pmdraw@blankT}}{\pmdraw@rowSep}% Draw upper vertex
+                                                                            \fi%
+                                                                        \fi%
+                                                                    \fi%
+                                                                \fi%
+                                                            \fi%
+                                                        \fi%
+                                                    \fi%
+                                                \fi%
+                                            \fi%
+                                        \fi%
+                                    \fi%
+                                \fi%
+                            \fi%
+                        \fi%
+                    \fi%
+                \fi%
+            \fi%
+        \fi%
+        \ifnum\pmdraw@drawNoLabelTa=\x\else% If not skipping label
+            \ifnum\pmdraw@drawNoLabelTb=\x\else% If not skipping label
+                \ifnum\pmdraw@drawNoLabelTc=\x\else% If not skipping label
+                    \ifnum\pmdraw@drawNoLabelTd=\x\else% If not skipping label
+                        \ifnum\pmdraw@drawNoLabelTe=\x\else% If not skipping label
+                            \ifnum\pmdraw@drawNoLabelTf=\x\else% If not skipping label
+                                \ifnum\pmdraw@drawNoLabelTg=\x\else% If not skipping label
+                                    \ifnum\pmdraw@drawNoLabelTh=\x\else% If not skipping label
+                                        \ifnum\pmdraw@drawNoLabelTi=\x\else% If not skipping label
+                                            \ifnum\pmdraw@ifLabelsT=1% If drawing labels
+                                                \pmdraw@drawLabelTop{\x + \value{pmdraw@blankT}}{\pmdraw@rowSep}{\thepmdraw@labelStartT}% Draw label
+                                            \fi%
+                                        \fi%
+                                    \fi%
+                                \fi%
+                            \fi%
+                        \fi%
+                    \fi%
+                \fi%
+            \fi%
+        \fi%
+        \stepcounter{pmdraw@labelStartT}% Update label counter
+    }%
+}
+\newcommand{\pmdraw@drawUedges}[3][]{% Draws upper non-transversal edge, #1 options, #2 L vertex, #3 R vertex
+    \setcounter{pmdraw@NTlevel}{1}% Store default level of edge
+    \setkeys{pmdraw@NTedges}{% Sets default non-transversal edge keys
+        level=\usevalue{level},
+        height=\usevalue{height},
+        edge draw=\usevalue{edge draw},
+        phantom=\usevalue{phantom},
+        uncover=\usevalue{uncover},
+        label=\usevalue{label},
+        label node=\usevalue{label node}
+    }%
+    \setkeys{pmdraw@NTedges}{#1}% Processes options
+    \ifdim\pmdraw@NTedgesHeight pt=-1000pt% If using default heights
+        \tikzmath{%
+            \pmdraw{edgeHeight}=\value{pmdraw@NTlevel}*\pmdraw{edgeSepU};% Calculates height based on level of edge
+        }%
+    \else% If using manual heights
+        \tikzmath{%
+            \pmdraw{edgeHeight}=\pmdraw@rowSep-\pmdraw@NTedgesHeight;% Set manual height
+        }%
+    \fi%
+    \@ifclassloaded{beamer}{% If in beamer
+        \uncover<\pmdraw@edgeUncover>{% Uncovers edge
+            \ifnum\value{pmdraw@ifEdge}=0% If drawing edge
+                \pmdraw@drawUedgesDraw{#2}{#3}% Draw edge
+            \else% If hiding edge
+                \phantom{%
+                    \pmdraw@drawUedgesDraw{#2}{#3}% Draw edge
+                }%
+            \fi%
+        }%
+    }{% If not in beamer
+        \ifnum\value{pmdraw@ifEdge}=0% If drawing edge
+            \pmdraw@drawUedgesDraw{#2}{#3}% Draw edge
+        \else% If hiding edge
+            \phantom{%
+                \pmdraw@drawUedgesDraw{#2}{#3}% Draw edge
+            }%
+        \fi%
+    }%
+    % Resets user keys and other flags to default values
+    \renewcommand{\pmdraw@NTedgesHeight}{-1000}%
+    \renewcommand{\pmdraw@edgeUncover}{1-}%
+    \setcounter{pmdraw@ifEdge}{0}%
+    \let\pmdraw@drawLedgesDraw\pmdraw@drawLedgesDrawDefault%
+    \let\pmdraw@drawUedgesDraw\pmdraw@drawUedgesDrawDefault%
+    \pmdraw@UedgesLoop% Restart for loop
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                        %
+%  Grid creation                                         %
+%                                                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% This is a verbatim copy of:
+% https://tex.stackexchange.com/a/467908
+
+\newif\if@showgrid@grid
+\newif\if@showgrid@left
+\newif\if@showgrid@right
+\newif\if@showgrid@below
+\newif\if@showgrid@above
+\tikzset{%
+    every show grid/.style={},
+    show grid/.style={execute at end picture={\@showgrid{grid=true,#1}}},%
+    show grid/.default={true},
+    show grid/.cd,
+    labels/.style={font={\sffamily\small},help lines},
+    xlabels/.style={},
+    ylabels/.style={},
+    keep bb/.code={\useasboundingbox (current bounding box.south west) rectangle (current bounding box.north west);},
+    true/.style={left,below},
+    false/.style={left=false,right=false,above=false,below=false,grid=false},
+    none/.style={left=false,right=false,above=false,below=false},
+    all/.style={left=true,right=true,above=true,below=true},
+    grid/.is if=@showgrid@grid,
+    left/.is if=@showgrid@left,
+    right/.is if=@showgrid@right,
+    below/.is if=@showgrid@below,
+    above/.is if=@showgrid@above,
+    false,
+}
+
+\def\@showgrid#1{%
+    \begin{scope}[every show grid,show grid/.cd,#1]
+    \if@showgrid@grid
+    \begin{pgfonlayer}{background}
+    \draw [help lines]
+        (current bounding box.south west) grid
+        (current bounding box.north east);
+%
+    \pgfpointxy{1}{1}%
+    \edef\xs{\the\pgf@x}%
+    \edef\ys{\the\pgf@y}%
+    \pgfpointanchor{current bounding box}{south west}
+    \edef\xa{\the\pgf@x}%
+    \edef\ya{\the\pgf@y}%
+    \pgfpointanchor{current bounding box}{north east}
+    \edef\xb{\the\pgf@x}%
+    \edef\yb{\the\pgf@y}%
+    \pgfmathtruncatemacro\xbeg{ceil(\xa/\xs)}
+    \pgfmathtruncatemacro\xend{floor(\xb/\xs)}
+    \if@showgrid@below
+    \foreach \X in {\xbeg,...,\xend} {
+        \node [below,show grid/labels,show grid/xlabels] at (\X,\ya) {\X};
+    }
+    \fi
+    \if@showgrid@above
+    \foreach \X in {\xbeg,...,\xend} {
+        \node [above,show grid/labels,show grid/xlabels] at (\X,\yb) {\X};
+    }
+    \fi
+    \pgfmathtruncatemacro\ybeg{ceil(\ya/\ys)}
+    \pgfmathtruncatemacro\yend{floor(\yb/\ys)}
+    \if@showgrid@left
+    \foreach \Y in {\ybeg,...,\yend} {
+        \node [left,show grid/labels,show grid/ylabels] at (\xa,\Y) {\Y};
+    }
+    \fi
+    \if@showgrid@right
+    \foreach \Y in {\ybeg,...,\yend} {
+        \node [right,show grid/labels,show grid/ylabels] at (\xb,\Y) {\Y};
+    }
+    \fi
+    \end{pgfonlayer}
+    \fi
+    \end{scope}
+}
+\tikzset{every show grid/.style={show grid/keep bb}}%  Keep the original bounding box!
+
+\endinput

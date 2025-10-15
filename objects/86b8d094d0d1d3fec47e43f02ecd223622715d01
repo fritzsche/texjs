@@ -1,0 +1,91 @@
+%%%%
+% Scratch
+%%%%
+\def\filedateScratch{2025/02/17}%
+\def\fileversionScratch{0.1b}%
+\message{-- \filedateScratch\space v\fileversionScratch}%
+%
+\newlength{\longbarreheight}
+\setlength{\longbarreheight}{2.1ex+3pt}
+
+\newlength{\longbarredepth}
+\setlength{\longbarredepth}{0.9ex+3pt}
+\def\longbarre{\vrule height\longbarreheight depth\longbarredepth width0pt}%
+
+\def\barre{\vrule height2.1ex depth.9ex width0pt}%
+\def\demibarre{\vrule height1.4ex depth.6ex width0pt}%
+
+\setKVdefault[Scratch]{ModeleCouleur=5,Impression=false,Numerotation=false,Echelle=1,Naturel=false,Dys=false}%
+
+\ifluatex
+\NewDocumentEnvironment{Scratch}{o +b}{%
+  \useKVdefault[Scratch]%
+  \setKV[Scratch]{#1}%
+  \ifPfCPfMScratchDys\relax\setKV[Scratch]{Dys}\fi
+  \mplibforcehmode%
+  \ifboolKV[Scratch]{Naturel}{}{\myfontScratch}%
+    \begin{mplibcode}%
+      defaultcolormodel:=\useKV[Scratch]{ModeleCouleur};
+      boolean Naturel,ScratchDys;
+      Naturel=\useKV[Scratch]{Naturel};
+      Echelle=\useKV[Scratch]{Echelle};
+      if Naturel: input PfCPseudo; print:=true; else: input PfCScratch; print:=\useKV[Scratch]{Impression}; fi;
+      NumeroteLignes:=\useKV[Scratch]{Numerotation};%
+      if \useKV[Scratch]{Dys}:
+      print:=true;
+      Echelle:=1;
+      fi;
+      if defaultcolormodel=7:
+      cmykcolor white,White,CoulLignes;
+      coefprint:=1-coefprint;
+      White=(0,0,0,1);
+      white=(0,0,0,0);
+      CoulLignes=(0,0,0,1);
+      fi;
+      #2%
+      picture recap;%
+      recap:=currentpicture scaled Echelle;%
+      currentpicture:=nullpicture;%
+      draw recap;%
+    \end{mplibcode}%
+  }{}
+\else%
+\NewDocumentEnvironment{Scratch}{o +b}{%
+  \setKV[Scratch]{#1}%
+  \begin{mpost}[mpsettings={boolean Naturel;Naturel=\useKV[Scratch]{Naturel};if Naturel: input PfCPseudo; print:=true; else: input PfCScratchpdf; print:=\useKV[Scratch]{Impression}; fi;NumeroteLignes:=\useKV[Scratch]{Numerotation};Echelle:=\useKV[Scratch]{Echelle};}]%
+    #2%
+    picture recap;%
+    recap:=currentpicture scaled Echelle;%
+    currentpicture:=nullpicture;%
+    draw recap;%
+  \end{mpost}
+}{}%
+\fi%
+
+%\newlength\PfCScratchHeight%
+%\newlength\PfCScratchDepth%
+%
+%\settoheight{\PfCScratchHeight}{%
+%  ÉàÈÇABCDEFGHIJKLMNOPQRSTUVWXYZ%
+%  abcdefghijklmnopqrstuvwxyzàéèçùoôö%
+%}%
+%\settodepth{\PfCScratchDepth}{%
+%  ÉàÈÇABCDEFGHIJKLMNOPQRSTUVWXYZ%
+%  abcdefghijklmnopqrstuvwxyzàéèçùoôö%
+%}%
+
+\NewDocumentCommand\ScratchEnLigne{sO{}m}{%
+  \IfBooleanTF{#1}{%
+    \raisebox{-\PfCScratchDepth}{%
+      \begin{Scratch}[Echelle=\fpeval{(\PfCScratchHeight+\PfCScratchDepth)/1cm},#2]%
+        Placer #3;
+      \end{Scratch}%
+    }%  
+  }{%
+    \raisebox{-0.5\height}{%
+      \begin{Scratch}[#2]
+        Placer #3;
+      \end{Scratch}%
+    }%
+  }%
+}%

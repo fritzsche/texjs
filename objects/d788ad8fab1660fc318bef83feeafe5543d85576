@@ -1,0 +1,3281 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2025 by Charles P. Schaum <charles[dot]schaum@comcast.net>
+% -----------------------------------------------
+%
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either
+% version 1.3 of this license or (at your option) any
+% later version. The latest version of this license is in:
+%
+%   http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions
+% of LaTeX version 2005/12/01 or later.
+%
+% This work includes all source and generated files
+% described as such in README.md, included herein.
+%
+% -----------------------------------------------
+%
+%<*internal>
+\iffalse
+%</internal>
+%<*readme>
+%<<readmevb
+# 1 Short Description
+
+The schemata package helps the creation of topical outlines that illustrate the breakdown of concepts and categories in academic texts from the late medieval to early modern periods.
+
+# 2 Installing a Distro Package
+
+One can find `nameauth` in one's current TeX distribution. See the appropriate documentation in TeXlive, MikTeX, MacTeX, Linux distro, BSD, etc. Use those tools to ensure that `nameauth` is installed. **You are done.**
+
+# 3 Obtaining from CTAN
+
+## 3.1 Getting the Package Archive
+
+If not using the tools above, one can download `schemata.zip` from [CTAN](https://mirrors.ctan.org/macros/generic/schemata.zip). After downloading, unpack `schemata.zip` in an appropriate directory. Change to the directory containing the supplied files. The following files are included in the archive that is uploaded to CTAN:
+
+| Filename         | Description                             |
+| :--------------- | :-------------------------------------- |
+| `schemata.dtx`   | commented style file; source file       |
+| `Makefile`       | For use with GNU make; with source file |
+| `schemata.eps`   | Image file for the manual; source file  |
+| `schemata.sty`   | style file          (generated file)    |
+| `schemata.pdf`   | Documentation       (generated file)    |
+| `README.md`      | This file           (generated file)    |
+| `schematest.tex` | Test file           (generated file)    |
+
+## 3.2 Determining the Installation type
+
+### 3.2.1 Read `Makefile` First
+
+`Makefile` has an extensive comment on usage, as well as other helpful comments. It lists all required programs needed to use the GNU make file for installation in a POSIX-compliant environment, such as GNU/Linux, various BSDs, MacOS, and WSL or Cygwin on Windows.
+
+Minimum required programs include `bash` or an equivalent shell (for which one must edit `Makefile`), and `make`, plus a TeX distribution. To distribute the package, one also requires at least `sed`, and `zip`.
+
+### 3.2.2 POSIX Cases
+
+If one is using a TeX distribution in a POSIX environment (MacOS, Linux distro, BSD, etc.) and has the required programs listed in `Makefile`, one may do one of the following:
+
+1. Use GNU make to build and install. **Section 4.1**
+
+2. Build and install manually. **Section 4.2**
+
+### 3.2.3 Windows Cases
+
+Windows offers the largest number of possibilities:
+
+* Cygwin offers a POSIX environment and its own TeX distribution. Avoid installing another TeX distro via WSL or Windows native. **Section 4.1**
+
+* WSL offers a POSIX environment and its own TeX distribution. Avoid installing another TeX distro via Cygwin or Windows native. **Section 4.1**
+
+* Use `make` within either Cygwin or WSL to build this package for native Windows TeX distributions MikTeX or TeXlive. Install needed build components in either Cygwin or WSL, alongside either MikTeX or TeXlive, but not both distros. Avoid installing another TeX distro in either Cygwin or WSL.
+
+    * One can use `make` to build this package. **Section 4.1.1**
+
+    * Installation must be manual. **Section 4.2.2**
+
+* Directly using native Windows TeX distributions (MikTeX or TeXlive)
+
+    All building and installation must be manual. **Section 4.2**
+
+* Other POSIX environments running under DOS, Windows, and other systems have not been tested and are not supported.
+
+* `Makefile` contains tests that will mitigate some issues:
+
+    * If a `.exe` extension is needed by programs used in the building process, that is detected automatically.
+
+    * If `ltxfileinfo` does not exist, the make process will produce a zip file that avoids potential problems in Windows.
+
+    * If `dvipdf` from Ghostscript is installed in a non-Windows environment, the make process will use that. Otherwise it will fall back to `dvipdfmx`.
+
+    * When installing, the make process will check if the path to the install directory exists. If it does not, it will produce an error message and exit.
+
+    If this error message occurs, which is more likely in Windows, please refer to installation of local packages in MikTeX [here](https://docs.miktex.org/manual/localadditions.html#id573803) and [here](https://miktex.org/kb/texmf-roots). Otherwise see the [TeX FAQ](https://www.texfaq.org/FAQ-privinst) and [this page](https://en.wikibooks.org/wiki/LaTeX/Installing_Extra_Packages).
+
+Here is a table showing the feasibility of a few scenarios. Any case that is not mentioned below has not been tested and is not recommended.
+
+| Build Env. | TeX Distro Platform | Make builds pkg/zip            | Make installs package           |
+| :--------- | :------------------ | :----------------------------- | :------------------------------ |
+| POSIX      | POSIX               | Yes<sup>1</sup>                | Yes                             |
+| Cygwin     | Cygwin (packages)   | Not tested; likely<sup>1</sup> | Not tested; likely <sup>2</sup> |
+| Cygwin     | MikTeX (Windows)    | Yes<sup>1, 3</sup>             | No;<sup>4</sup> do manually     |
+| Cygwin     | TeXlive (Windows)   | Not tested; likely<sup>1</sup> | Not tested; do manually         |
+| WSL        | WSL Linux packages  | Yes<sup>1</sup>                | Yes<sup>5</sup>                 |
+| WSL        | MikTeX (Windows)    | Yes<sup>1, 3</sup>             | No;<sup>4</sup> do manually     |
+| WSL        | TeXlive (Windows)   | Not tested; likely<sup>1</sup> | Not tested; do manually         |
+
+<sup>1</sup> All dependencies must be met. Bear in mind possible MacOS issues.
+
+<sup>2</sup> Installs only to Cygwin environment; not to Windows environment.
+
+<sup>3</sup> The `make images` target using `pdfjam` likely will not work as desired. **Section 6.2.3 Images**
+
+<sup>4</sup> Neither `ltxfileinfo` nor `kpsewhich` will give useful results; do a manual install.
+
+<sup>5</sup> Installs only to WSL Linux distro environment; not to Windows environment.
+
+# 4 Building and Installing
+
+Regarding command line options longer than one letter, the programs included with major TeX distributions use either single dashes or GNU-style double dashes.
+
+Here, for the sake of consistency, we use the GNU convention of single dashes with one-letter options and double dashes for longer options.
+
+## 4.1 GNU `make` for Building and Installation
+
+### 4.1.1 Build
+
+In the directory where the files unpacked from the zip archive are located, type `make`. This will do a fresh build of the package using `pdflatex`. To add more options, use, e.g.: `make ADDOPTS="--synctex=1"`.
+
+There is a make target, `make unpack`, that does not build the package. It only regenerates files from `schemata.dtx`.
+
+### 4.1.2 Install
+
+Currently, `Makefile` only installs into POSIX environments.
+
+For individual use, one must have a TDS-compliant tree set up in order for installation to work. For more info in setting up those trees, see **Section 4.2.3** for the individual case and **Section 4.2.4** for the site-wide case.
+
+For site-wide use, one must be able to get root privileges via `sudo`.
+
+* Type `make inst` to install the package files in the user's personal TDS-compliant directory tree.
+
+* Type `make install` to install the package files in the site-wide, local TDS-compliant directory tree. The user will be prompted for the `sudo` password.
+
+### 4.1.3 Remove
+
+The same constraints that apply to installation also apply to removal. If one can do the former, one can do the latter.
+
+* Type `make uninst` to remove the package files in the user's personal TDS-compliant directory tree.
+
+* Type `make uninstall` to remove the package files in the site-wide, local TDS-compliant directory tree. The user will be prompted for the `sudo` password.
+
+`Makefile` will produce listings from the remaining texmf trees after uninstalling the package.
+
+## 4.2 Manual Building and Installation
+
+Unlike the case with the supplied `Makefile`, which automates adding extensions, in certain cases using Windows TeX distros, one may have to add the ".exe" extension to the programs.
+
+### 4.2.1 Build
+
+1. Using the unpacked files from the zip archive, we begin by creating the installation driver, unpacking additional files from `schemata.dtx`, and generating a copy of the documentation without the table of contents and cross-references:
+
+        pdflatex --shell-escape --recorder --interaction=batchmode schemata.dtx
+
+    a. We see the following main files:
+
+    `Makefile`, `README.md`, `schemata.dtx`, `schemata.eps`, `schemata.ins`, `schemata.pdf`, `schemata.sty`, and `schematest.tex`.
+
+    b. We also see the following temporary files:
+
+    `schemata.aux`, `schemata.fls`, `schemata.glo`, `schemata.hd`, `schemata.idx`, `schemata.log`, `schemata.out`, `schemata.tmp`, and `schemata.toc`; also `schemata-eps-converted-to.pdf`.
+
+2. Generate the TOC and cross-references within the documentation:
+
+        pdflatex --recorder --interaction=nonstopmode schemata.dtx
+
+3. Generate the index and glossary files using `makeindex`:
+
+        makeindex -q -s gglo.ist -o schemata.gls schemata.glo
+        makeindex -q -s gind.ist -o schemata.ind schemata.idx
+
+    This adds three files: `schemata.gls`, `schemata.ilg`, and `schemata.ind`.
+
+4. Integrate the glossary (list of changes) and index into the documentation. The second run updates the TOC:
+
+        pdflatex --recorder --interaction=nonstopmode schemata.dtx
+        pdflatex --recorder --interaction=nonstopmode schemata.dtx
+
+    The list of files now looks like:
+
+| Filename         | Description                    |
+| :--------------- | :----------------------------- |
+| `Makefile`       | for use with GNU make          |
+| `schemata.dtx`   | commented style file           |
+| `schemata.eps`   | Image file used for the manual |
+|                  |                                |
+| `README.md`      | this file                      |
+| `schemata.pdf`   | package documentation          |
+| `schematest.tex` | test file                      |
+|                  |                                |
+| `schemata.ins`   | installation driver            |
+| `schemata.sty`   | style file                     |
+|                  |                                |
+| `schemata.aux`   | auxiliary file                 |
+| `schemata.fls`   | shows files read               |
+| `schemata.glo`   | raw glossary entries           |
+| `schemata.gls`   | typeset glossary entries       |
+| `schemata.hd`    |                                |
+| `schemata.idx`   | raw index entries              |
+| `schemata.ilg`   | `makeindex` log file           |
+| `schemata.ind`   | typeset index entries          |
+| `schemata.log`   | log file                       |
+| `schemata.out`   | pdf bookmark/hypertext info    |
+| `schemata.tmp`   | temp file used with fancyvrb   |
+| `schemata.toc`   | table of contents info         |
+
+Also, there is the automatically-generated `schemata-eps-converted-to.pdf`.
+
+### 4.2.2 General Install Info
+
+In order to perform manual installation, one should be familiar with the general information at the [TeX FAQ](https://www.texfaq.org/FAQ-installthings).
+
+Different TeX distributions have somewhat different ways to store TDS-compliant configuration and package data. See, for example, for MikTeX [here](https://docs.miktex.org/manual/localadditions.html#id573803) and [here](https://miktex.org/kb/texmf-roots). Otherwise see the [TeX FAQ](https://www.texfaq.org/FAQ-privinst) and [this page](https://en.wikibooks.org/wiki/LaTeX/Installing_Extra_Packages).
+
+The instructions below conform generally to a Unix-like system. There are some cases under Windows where this method may not work. For other non-POSIX systems, one will have to know the appropriate procedures and documentation as needed for those cases, which are not covered here.
+
+The user must already have a TDS-compliant tree set up in order for installation to work. We assume that one knows how to become superuser, create directories, move files, and the like.
+
+### 4.2.3 Install for a User
+
+`TEXMFHOME` is an environment (shell) variable that points to the root of a TDS-compliant directory tree available to a user. To get its value on POSIX-compliant systems, use:
+
+* `kpsewhich --var-value TEXMFHOME`
+
+Quite often, `$TEXMFHOME` is equivalent to `$HOME/texmf`. The dollar sign in front of the variable denotes the value of the variable instead of its name. If `$HOME` is `/home/bob`, then `$TEXMFHOME` would be `/home/bob/texmf`. We can understand the following paths to be under this home directory.
+
+| Path                                 | Files            |
+| :----------------------------------- | :--------------- |
+| `$TEXMFHOME/source/generic/schemata` | `schemata.ins`   |
+|                                      | `schemata.dtx`   |
+|                                      | `schemata.eps`   |
+|                                      | `Makefile`       |
+|                                      |                  |
+| `$TEXMFHOME/tex/generic/schemata`    | `schemata.sty`   |
+|                                      |                  |
+| `$TEXMFHOME/doc/generic/schemata`    | `schemata.pdf`   |
+| `$TEXMFHOME/doc/generic/schemata`    | `README.md`      |
+| `$TEXMFHOME/doc/generic/schemata`    | `schematest.tex` |
+
+Create the directories in the left-hand column, or the equivalent. For manual installation, move or copy the files in the right-hand column to their respective directories in the left-hand column. On older TeX distributions, run `mktexlsr` on `$TEXMFHOME` to complete the install process (current distributions may not need this).
+
+### 4.2.4 Install Site-Wide
+
+`TEXMFLOCAL` is a variable that points to the root of a TDS-compliant directory tree available to all users on a local site, system-wide installation. To get its value, use:
+
+* `kpsewhich --var-value TEXMFLOCAL`
+
+See the [TeX FAQ](https://www.texfaq.org/FAQ-what-TDS). We can understand the following paths to be under this local site, system-wide directory:
+
+| Path                                  | Files            |
+| :------------------------------------ | :--------------- |
+| `$TEXMFLOCAL/source/generic/schemata` | `schemata.ins`   |
+|                                       | `schemata.dtx`   |
+|                                       | `schemata.eps`   |
+|                                       | `Makefile`       |
+|                                       |                  |
+| `$TEXMFLOCAL/tex/generic/schemata`    | `schemata.sty`   |
+|                                       |                  |
+| `$TEXMFLOCAL/doc/generic/schemata`    | `schemata.pdf`   |
+|                                       | `README.md`      |
+|                                       | `schematest.tex` |
+
+Create the directories in the left-hand column. For manual installation, move or copy the files in the right-hand column to their respective directories in the left-hand column. Change file ownership as needed. If needed, run `mktexlsr` with the appropriate permissions on `$TEXMFLOCAL` to complete the install process. See also the discussion on [this page](https://tex.stackexchange.com/questions/45231/how-to-install-system-wide-packages-without-requiring-an-ls-r-database-with-tex).
+
+# 5 More on Package Building
+
+* The package and manual build on current and older TeX distributions, being designed with that in mind.
+
+* The documentation is built only with `pdflatex`. The test file can generate output with multiple formats.
+
+* This release was tested on Linux (Pop! OS; vanilla TL, both current and 2017) and Windows 10 (MikTeX using shells from both Cygwin and WSL).
+
+* The CTAN release was created with the current vanilla TL on Pop! OS. See also [this page](https://wiki.debian.org/TeXLive) for Debian-based systems. For Arch-based systems, the AUR has a package that takes care of dependencies.
+
+* TeXlive versions are managed on Pop! OS using [tl-switch](https://github.com/ServusCarolus/tl-switch).
+
+# 6 Testing
+
+The file `schematest.tex` is designed to test this package on a wide variety of formats.
+
+To test `schemata`, either test the files right after installing, or create a new testing directory. One then can copy the files from the TDS-compliant source dir and optionally, the documentation directory as well, or unpack the CTAN zip file into the test directory and build the package.
+
+## 6.1 Using GNU `make`
+
+The make file will not allow `make` to process `dvilualatex` as a target. For caveats regarding the `eplain` target, see below.
+
+* Type `make test` to use `pdflatex` and Greek via `babel`.
+
+* If one wants to change engines and re-test, type `make testclean`.
+
+* One can add the value of ENGINE:
+
+For Greek via `polyglossia`; requires `GFSDidot.otf`:
+:
+        make test ENGINE=xelatex
+        make test ENGINE=lualatex
+
+For Greek via `babel`:
+        make test ENGINE=pdflatex (default)
+        make test ENGINE=latex
+
+For transliterated Greek:
+        make test ENGINE=tex
+        make test ENGINE=luatex
+        make test ENGINE=dviluatex
+        make test ENGINE=xetex
+        make test ENGINE=eplain
+        make test ENGINE=lollipop
+
+* The `eplain` executable may not exist in some TeX distributions. If this is the case, `make` will use `pdftex` to load the eplain macros and process the test files.
+
+* To add more options, use, e.g.:
+
+        make test ADDOPTS="--synctex=1"
+
+## 6.2 Manual Method
+
+Using `dvilualatex` has more complicated setup prerequisites that go beyond the scope of this document. One would have to install TFM files generated from `GFSDidot.otf` or use a different font.
+
+* Compile `schematest.tex`.
+
+Shows Greek text via `polyglossia`; requires `GFSDidot.otf`:
+
+        lualatex --interaction=nonstopmode schematest
+        xelatex --interaction=nonstopmode schematest
+
+Shows Greek text via `babel`:
+
+        latex --interaction=nonstopmode schematest
+        pdflatex --interaction=nonstopmode schematest
+
+Shows transliterated Greek:
+
+        tex --interaction=nonstopmode schematest
+        pdftex --interaction=nonstopmode schematest
+        luatex --interaction=nonstopmode schematest
+        dviluatex --interaction=nonstopmode schematest
+        xetex --interaction=nonstopmode schematest
+
+        eplain --interaction=nonstopmode schematest
+
+        lollipop --interaction=nonstopmode schematest
+
+* If `eplain` is not available as a command in the shell, one can invoke `pdftex` thus:
+
+        $ pdftex
+        This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdftex)
+        restricted \write18 enabled.
+        **&eplain schematest
+
+* Another step is used only when a `dvi` file is produced.
+
+    We default to `dvipdfmx` in case Ghostscript is not installed. If Ghostscript is already installed, one may be able to use `dvipdf` instead, but this can depend on one's system and TeX distribution. If a file `schematest.out.ps` exists, one may delete it after creating the pdf file.
+
+        dvipdfmx schematest
+
+If one changes LaTeX engines, one first must remove all of the auxiliary files.
+
+# 7 Copyright
+
+Copyright (C) 2025 by Charles P. Schaum <charles[dot]schaum@comcast.net>
+
+This file may be distributed and/or modified under the
+conditions of the LaTeX Project Public License, either
+version 1.3 of this license or (at your option) any
+later version. The latest version of this license is in:
+
+[https://www.latex-project.org/lppl.txt](https://www.latex-project.org/lppl.txt)
+
+and version 1.3 or later is part of all distributions
+of LaTeX version 2005/12/01 or later.
+
+This work includes all source and generated files
+described as such in this file, README.md.
+%readmevb
+%</readme>
+%<*internal>
+\fi
+\def\nameofplainTeX{plain}
+\ifx\fmtname\nameofplainTeX\else
+  \expandafter\begingroup
+\fi
+%</internal>
+%<*install>
+\input docstrip.tex
+\keepsilent
+\askforoverwritefalse
+
+\preamble
+
+This is a generated file.
+
+Copyright (C) 2025 by Charles P. Schaum <charles[dot]schaum@comcast.net>
+
+This file may be distributed and/or modified under the conditions of
+the LaTeX Project Public License, either version 1.3 of this license
+or (at your option) any later version.  The latest version of this
+license is in:
+
+   https://www.latex-project.org/lppl.txt
+
+and version 1.3 or later is part of all distributions of LaTeX version
+2005/12/01 or later.
+
+\endpreamble
+
+\usedir{tex/latex/nameauth}
+\generate{
+  \file{\jobname.sty}{\from{\jobname.dtx}{package}}
+}
+%</install>
+%<install>\endbatchfile
+%<*internal>
+\usedir{source/generic/schemata}
+\generate{
+  \file{\jobname.ins}{\from{\jobname.dtx}{install}}
+}
+\usedir{doc/generic/schemata}
+\nopostamble
+\generate{
+  \file{schematest.tex}{\from{\jobname.dtx}{examples}}
+}
+\nopreamble
+\generate{
+  \file{README.md}{\from{\jobname.dtx}{readme}}
+}
+\ifx\fmtname\nameofplainTeX
+  \expandafter\endbatchfile
+\else
+  \expandafter\endgroup
+\fi
+%</internal>
+% \fi
+%
+% \iffalse
+%<*driver>
+\ProvidesFile{schemata.dtx}
+%</driver>
+%
+%<package>\expandafter\ifx \csname schemataLaTeX\endcsname\relax
+%<package>  \def\schemataLaTeX{LaTeX2e}\fi
+%<package>\ifx\fmtname\schemataLaTeX
+%<package>\expandafter\NeedsTeXFormat\expandafter{\schemataLaTeX}[2005/12/01]
+%<package>\ProvidesPackage{schemata}
+%<*package>
+  [2025/08/27 1.5 generic package to aid construction of topical categories]
+%</package>
+%<package>\else
+%<package>\catcode`@=11\relax
+%<package>\fi
+%
+%<*driver>
+\documentclass[11pt]{ltxdoc}
+%^^A Now only built with pdflatex.
+
+%^^A Only load inputenc id on a sufficiently older distro.
+\IfFileExists{utf8-2018.def}{}{\usepackage[utf8]{inputenc}}
+
+%^^A Load polytonic Greek and US English.
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[polutonikogreek,american]{babel}
+\newcommand{\gk}[1]{\foreignlanguage{polutonikogreek}{#1}}
+
+\usepackage[textwidth=140mm,textheight=237mm,right=25mm,nohead]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+%^^A Dangerous bend ahead...
+\usepackage{manfnt}
+%^^A Use the MetaPost logo
+\usepackage{mflogo}
+\usepackage[toc]{multitoc}
+\usepackage{\jobname}[2025/08/27]
+\usepackage[numbered]{hypdoc}
+
+\usepackage{fancyvrb}
+
+%^^A Define fancyvrb defaults.
+\fvset{gobble=2,numbers=left,fontsize=\small}
+
+%^^A Display examples
+\newcommand\DisplayEx[1][\empty]{%
+  \edef\arg{#1}%
+  \begin{minipage}{0.55\textwidth}
+  \ifx\arg\empty
+    \VerbatimInput[gobble=0]{\jobname.tmp}
+  \else
+    \VerbatimInput[gobble=0,#1]{\jobname.tmp}
+  \fi
+  \end{minipage}
+  \begin{minipage}{0.2\textwidth}
+  \input{\jobname.tmp}\medskip
+  \end{minipage}
+}
+
+%^^A Macros for marginalia.
+\newcommand*\Warn{{\unless\ifinner\marginpar{\strut\small\raggedleft\dbend}\fi}}
+\newcommand*\Info[1]{{\unless\ifinner\marginpar{\strut\small\raggedleft#1}\fi}}
+
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \CheckSum{642}
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+%
+% \changes{0.5}{2013/02/14}{Initial version}
+% \changes{0.7}{2013/09/23}{Changed contact info}
+% \changes{0.8}{2016/01/25}{Rewrote manual}
+% \changes{1.0}{2020/03/13}{Ensure better multi-format operation}
+% \changes{1.1}{2020/03/14}{Fix issue with \texttt{dtx} guards}
+% \changes{1.2}{2020/11/23}{Updates to \texttt{Readme.md}, \texttt{Makefile}, \texttt{schematest.tex}, combine \texttt{Readme.md} and \texttt{schematest.tex} files in \texttt{dtx}}
+% \changes{1.4}{2021/02/27}{Updates to \texttt{Readme.md}}
+% \changes{1.5}{2025/08/27}{Updates to \texttt{Readme.md}, \texttt{Makefile}, \texttt{schematest.tex}, and this manual}
+%
+% \GetFileInfo{\jobname.dtx}
+% \DoNotIndex{\advance, \atop, \bgroup, \catcode, \DeclareOption, \def, \edef, \dp, \egroup, \else, \endinput, \ExecuteOptions, \fi, \fmtname, \futurelet, \hbox, \hfil, \ht, \ifdim, \ifinner, \ifmmode, \ifx, \ignorespaces, \left, \long, \let, \newbox, \newcommand, \newdimen, \newif, \next, \ProcessOptions, \relax, \RequirePackage, \setbox, \right, \strut, \vbox, \vcenter, \vfil, \vskip, \wd}
+%
+%\title{\textsf{schemata} --- Generic package to aid construction of topical categories\thanks{This file
+%   describes version \fileversion, last revised \filedate.}
+%}
+%\author{Charles P. Schaum\thanks{E-mail: charles[dot]schaum@comcast.net}}
+%\date{Released \filedate}
+%
+%\maketitle
+%
+% \begin{abstract}
+% \noindent The \textsf{schemata} package helps the creation of topical outlines that illustrate the breakdown of concepts and categories in academic texts from the late medieval to early modern periods.
+% \end{abstract}\smallskip
+%
+% \tableofcontents
+%
+% \section{Introduction}
+%
+% This package uses boxes and math mode to typeset \emph{schemata} (plural of \gk{t'o sq~hma} or \emph{schema}, meaning \emph{form}, \emph{shape}, \emph{appearance}, etc.). One sees them in academic literature from at least the seventeenth through the nineteenth centuries.\footnote{Books that use this package include: Löhe, \textit{The Pastor} [\textit{Der evangelische Geistliche}] (St.~Louis, 2015) and Schaum and Coll\-ver, \textit{Breath of God, Yet Work of Man} (St.~Louis, 2019).}
+%
+% Packages like \emph{TikZ}, \textsf{PSTricks}, \MP, or other solutions have advantages over this one, especially for those seeking a top-to-bottom diagram.\footnote{For example: \textsc{H.~Dembowski}, \emph{Einf{\"u}hrung in die Christologie} (Darmstadt, 1993), 146.}
+% Yet these packages may present challenges if one has to implement both open \emph{and} closed braces in a schema, which math mode allows.
+% \newpage
+%
+% \section{Usage}
+%
+% \subsection[Loading and Options]{Package Loading and Options}
+%
+% The \textsf{schemata} package is a minimal ``wrapper'' for math mode. It can be used with \LaTeX{} or with ``generic'' formats, including \PlainTeX, eplain, and Lollipop. Currently, \textsf{schemata} will operate with \textsc{Con\TeX t} without halting, but the way that it sizes and aligns delimiters does not work well with \textsc{Con\TeX t}.
+% \begin{quote}
+% \fbox{\begin{tabular}{ll}
+% {\Large\strut}For \LaTeX{} invoke: & \cmd{\usepackage}\oarg{options}\texttt{\{schemata\}}\\
+% {\Large\strut}For generic use: & \cmd{\input}\texttt{\textvisiblespace schemata.sty}
+% \end{tabular}}
+% \end{quote}\smallskip
+%
+% \DescribeMacro{\schemataLaTeX}
+% Normally, \textsf{schemata} uses generic \TeX{} macros if the format is not \LaTeXe. When using a \LaTeX-like format with a different name than \texttt{LaTeX2e}, one could insert the following before |\usepackage{schemata}|:
+% \begin{quote}
+% |\edef\schemataLaTeX{\fmtname}|
+% \end{quote}
+%
+% Yet\Warn{} this is usually unneeded. Normally we want \cmd{\schemataLaTeX} to be undefined before \texttt{schemata.sty} is loaded to get the default value \texttt{LaTeX2e}. We recommend not using this macro unless you know what you are doing.\medskip
+%
+% \LaTeX\Info{options} users can choose one among four package options: \texttt{braces}, \texttt{brackets}, \texttt{parens}, and \texttt{groups}. These set the defaults for the delimiters used with \cmd{\schema} and \cmd{\Schema}. If no options are chosen, the default is \texttt{braces}.
+%
+% \subsection{Macro Overview}
+%
+% One can describe schemata as a grouping of boxes that contain content, whose relationships are demonstrated by delimiters. We start with the boxes and their content. Subsequently, we deal with the delimiters, then later, the manner of grouping and arrangement, as well as tweaks and tutorials.
+%
+% One need not enclose schemata within any math mode delimiters but one can use, for example, display math when constructing large schemata. The \cmd{\schema} and \cmd{\Schema} macros will ensure that they use math mode. Only the large examples in this manual are contained in a math environment.
+%
+% \subsubsection[\texttt{\textbackslash schemabox}]{Containers: \texttt{\textbackslash schemabox}}
+%
+% \DescribeMacro{\schemabox}
+% Schemata contain vertically-centered lists of material in inner vertical mode. By design, it is \emph{not} a \cmd{\long} macro. When in a \cmd{\schema} or a \cmd{\Schema} (see below), a \cmd{\schemabox} stacks one or more lines of \cmd{\hbox}-enclosed text in a \cmd{\vbox.} It redefines the macro |\\| to close the current \cmd{\hbox} and begin a new one. A \cmd{\schemabox} can add kerns before and after each line of text to aid horizontal spacing (Section~\ref{sec:tweakschema}).
+% \begin{quote}
+% \fbox{\begin{tabular}{l}
+% {\Large\strut}\cmd{\schemabox}\oarg{width}\marg{text}\\
+% \end{tabular}}
+% \end{quote}
+% The \meta{width} of a \cmd{\schemabox} is a dimension, e.g., \texttt{3cm}. No text wrapping (as in a \cmd{\parbox}) takes place. If there is more than one line of text, each line of \meta{text} must be terminated explicitly by |\\|, except the final line. Usually, the first line of a \cmd{\schemabox} inserts a \cmd{\strut}, but that can be modified (Section~\ref{sec:tweakschema}).
+% \newpage
+%
+% When not in internal vertical mode, \cmd{\schemabox} ignores \meta{width}, does not redefine the macro |\\|, and prints its argument as text to mitigate errors:
+% \begin{quote}
+% |Some text has \schemabox{line 1\\ line 2}.|
+%
+% Some text has \schemabox{line 1\\ line 2}.
+% \end{quote}
+%
+% \subsubsection{Delimiters}
+%
+% \DescribeMacro{\DoBraces}
+% Both generic \TeX{} and \LaTeX{} users can use these four macros to set or change the type of delimiters.
+% \DescribeMacro{\DoBrackets}
+% In both generic \TeX{} and \LaTeX, the default delimiter is braces.
+% \DescribeMacro{\DoParens}
+% \cmd{\DoBraces}, \cmd{\DoBrackets}, \cmd{\DoParens}, and \cmd{\DoGroups} do the same thing as the respective package options,
+% \DescribeMacro{\DoGroups}
+% except they also can change the delimiters within \cmd{\schema} and \cmd{\Schema}. They remain in force until the end of a given scope:\medskip
+%
+% Default assumptions include using braces, at least one uppercase letter on each side of a delimiter, and that delimiters open from left to right.
+% \begin{quote}
+% \begin{VerbatimOut}{\jobname.tmp}
+% \schema
+%   {\schemabox{A}}
+%   {\schemabox{B\\C}}
+% \end{VerbatimOut}
+% \DisplayEx
+% \end{quote}
+%
+% Now we change to brackets (\cmd{\DoBrackets}). We add a ``nudge'' before B and C for better spacing (Section~\ref{sec:tweakschema}):
+% \begin{quote}
+% \begin{VerbatimOut}{\jobname.tmp}
+% \DoBrackets
+% \schema
+%   {\schemabox{A}}
+%   {\NudgeSB[left]\schemabox{B\\C}}
+% \end{VerbatimOut}
+% \DisplayEx
+% \end{quote}
+%
+% Change to parentheses. We use \cmd{\schema} with a closing delimiter and add a ``nudge'' after A and B for better spacing:
+% \begin{quote}
+% \begin{VerbatimOut}{\jobname.tmp}
+% \DoParens
+% \schema[close]
+%   {\NudgeSB\schemabox{A\\B}}
+%   {\schemabox{C}}
+% \end{VerbatimOut}
+% \DisplayEx
+% \end{quote}
+%
+% As we change to groups we use the more complex macro \cmd{\Schema} with a nested closing delimiter on the right-hand side, as well as a ``nudge'' after B and C:
+% \begin{quote}
+% \begin{VerbatimOut}{\jobname.tmp}
+% \DoGroups
+% \Schema{0ex}{3ex}
+%   {\smallskip\schemabox{A}}
+%   {\Schema[close]{0ex}{3ex}
+%     {\NudgeSB\schemabox{B\\C}}
+%     {\smallskip\schemabox{D}}
+% }
+% \end{VerbatimOut}
+% \DisplayEx
+% \end{quote}
+%
+% We change delimiters within the schema below. We insert ``nudges'' both before and after B and C, and before D. See also Section~\ref{sec:multiple}.
+% \begin{quote}
+% \begin{VerbatimOut}{\jobname.tmp}
+% \DoBrackets
+% \Schema{0ex}{2.4ex}
+%   {\schemabox{A}}
+%   {\DoParens\Schema[close]{0ex}{2.4ex}
+%     {\NudgeSB[left]\NudgeSB[right]
+%      \schemabox{B\\C}}
+%     {\NudgeSB[left]\schemabox{D}}
+%   }
+% \end{VerbatimOut}
+% \DisplayEx
+% \end{quote}
+%
+% One can add new delimiter types.\footnote{See \emph{The \TeX book}, page~146. Avoid using \cmd{\langle}, \cmd{\rangle}, \texttt{/}, and \cmd{\textbackslash}. They do not scale like the other delimiters and will not produce expected results in some cases.}
+% In  \PlainTeX\ one might see the following example. Both \cmd{\SwitchSB} and \cmd{\NudgeSB} are described in Section~\ref{sec:tweakschema}:
+% \begin{quote}
+% \begin{VerbatimOut}{\jobname.tmp}
+% \catcode`@=11\relax
+% \def\DoVerts{%
+%   \let\@schemata@LD\Vert%
+%   \let\@schemata@RD\Vert}
+% \catcode`@=12\relax
+% \DoVerts
+% \schema{\SwitchSB\schemabox{A}}
+%   {\NudgeSB[left]\schemabox{B\\C\\D}}
+% \end{VerbatimOut}
+% \DisplayEx
+% \end{quote}
+%
+% \subsubsection[\texttt{\textbackslash schema}]{Leaf Nodes: \texttt{\textbackslash schema}}
+%
+% \DescribeMacro{\schema}
+% A ``simple'' schema has a left-hand side with vertically-centered vertical material, a brace, and a right-hand side with vertically-centered vertical material:
+% \begin{quote}
+% \fbox{\begin{tabular}{l}
+% {\Large\strut}\cmd{\schema}\oarg{type}\marg{left side}\marg{right side}\\
+% \end{tabular}}
+% \end{quote}
+% The \meta{left side} and \meta{right side} are vertical material in order to allow a \cmd{\smallskip} or other vertical adjustment as needed. The \meta{type} of a schema is \texttt{open} by default. The delimiter opens toward the right:
+% \begin{quote}
+% \begin{VerbatimOut}{\jobname.tmp}
+% \schema
+%   {\schemabox{A}}
+%   {\schemabox{B\\C}}
+% \end{VerbatimOut}
+% \DisplayEx
+% \end{quote}
+%
+% Any value of \meta{type} other than the string \texttt{open} makes a ``closed'' schema (the delimiter opens to the left). Especially with closed braces, one often adds a ``nudge'' to the left-hand side to negates a kern of \texttt{-0.2em} added by default.
+% \begin{quote}
+% \begin{VerbatimOut}{\jobname.tmp}
+% \schema[closed]
+%   {\NudgeSB\schemabox{A}}
+%   {\schemabox{B\\C}}
+% \end{VerbatimOut}
+% \DisplayEx
+% \end{quote}
+%\smallskip
+% In practice, \cmd{\schema} does not nest, so it is only useful for the rightmost elements or ``leaves'' of a large schema to make formatting the leaves more efficient. Using boxes, below we show where one would use \cmd{\schema} to populate the leaves:
+% \begin{quote}
+% \begin{VerbatimOut}{\jobname.tmp}
+% \Schema{-0.4ex}{4.2ex}
+%   {\schemabox{A}}
+%   {\vbox{\noindent%
+%     \fbox{\schema
+%       {\schemabox{B}}
+%       {\schemabox{C\\D}}}\\[1ex]
+%     \fbox{\schema
+%       {\schemabox{E}}
+%       {\schemabox{F\\G}}}}}
+% \end{VerbatimOut}
+% \DisplayEx
+% \end{quote}
+%
+% The sizing of a \cmd{\schema} changes automatically, depending on the height, depth, and context of the letters. This can look ugly if uniform delimiter size is desired. Use \cmd{\Schema} (next section) to enforce such uniformity.
+% \newpage
+%
+% \subsubsection[\texttt{\textbackslash Schema}]{Branches and Root: \texttt{\textbackslash Schema}}
+%
+% \DescribeMacro{\Schema}
+% The ``complex'' form of a schema also has a left-hand side with vertically-centered vertical material, a brace, and a right-hand side of vertically-centered vertical material, along with two arguments that adjust the layout:
+% \begin{quote}
+% \fbox{\begin{tabular}{l}
+% {\Large\strut}\cmd{\Schema}\oarg{type}\marg{adjust}\marg{size}\marg{left side}\marg{right side}\\
+% \end{tabular}}
+% \end{quote}
+%The \meta{type} is |open| by default. As above, any other \meta{type} except the exact string |open| will make it a ``closed'' schema. Both \meta{adjust} and \meta{size} are dimensions. We recommend expressing them as \texttt{ex}. This allows for easier scaling of the schema when changing the font size. Here is how to set \meta{adjust}:\footnote{Instead of setting \meta{adjust}, one could put vertical skips either before or after \cmd{\schemabox}, \cmd{\schema}, or \cmd{\Schema}. Yet using braces as delimiters tends to draw material toward the center cusp (if applicable), where \meta{adjust} keeps that centered look while allowing some adjustments.}
+% \begin{quote}
+% \begin{tabular}{lll}
+% \textbf{negative} & left side and delimiter up & right side down\\[0.5ex]
+% \textbf{positive} & left side and delimiter down & right side up\\
+% \end{tabular}
+% \end{quote}
+%
+% Set the delimiter \meta{size} to be a scaled value of ex just a bit larger than the number of lines of text that the delimiter spans.
+%
+% Adjustments must be done from right to left. Once a leaf or sub-tree is balanced, any attempt to re-balance the schema from left to right will throw everything off. We will return to this point especially in Section~\ref{sec:Loci} and thereafter.
+%
+% By using \cmd{\Schema} to adjust the delimiter height and centering, one can bypass the shortcomings of \cmd{\schema}, but at the cost of time. One has to traverse the schema at least twice to get the desired layout.
+%
+% \cmd{\Schema} lets one produce multiple schemata with the same look, i.e., the same brace heights and general appearance. One can nest and combine these similar schemata into complex layouts. See Section~\ref{sec:OpenClose}.\bigskip
+%
+% \begin{VerbatimOut}{\jobname.tmp}
+% Both \cmd{\schema} and \cmd{\Schema} can be in running text:\\[1ex]
+% \indent Here is one \schema{\schemabox{A}}{\schemabox{B\\C}}
+% and the other \Schema{0ex}{2.5ex}{\schemabox{D}}{\schemabox{E\\F}}
+% \end{VerbatimOut}
+%
+% \input{\jobname.tmp}
+%
+% \begin{quote}
+% \VerbatimInput[gobble=0]{\jobname.tmp}
+% \end{quote}
+%
+% Both \cmd{\schema} and \cmd{\Schema} will stack vertically if set sequentially. It does not matter which type of schema precedes or follows; for example:
+%
+% \begin{quote}
+% \renewcommand*\SBNudgeFactor{\kern 0.22em}
+% \begin{VerbatimOut}{\jobname.tmp}
+% \schema
+%   {\schemabox{A}}
+%   {\schemabox{B\\C}}
+%
+% \Schema{0ex}{2.5ex}
+%   {\schemabox{D}}
+%   {\schemabox{E\\F}}
+% \end{VerbatimOut}
+% \DisplayEx
+% \end{quote}
+% \newpage
+%
+% Certainly, one need not use a \cmd{\schemabox} in either \cmd{\schema} or \cmd{\Schema}. For example, we make a macro \cmd{\Box} below to create one square centimeter of content:
+% \def\Box{%^^A
+%   \hbox{%^^A
+%     \vrule%^^A
+%     \vbox to 1cm{\hrule\hbox to 1cm{\hfil}\vfil\hrule}%^^A
+%     \vrule%^^A
+%   }%^^A
+% }
+% \begin{quote}
+% \begin{Verbatim}
+% \def\Box{%
+%   \hbox{%
+%     \vrule%
+%     \vbox to 1cm{\hrule\hbox to 1cm{\hfil}\vfil\hrule}%
+%     \vrule%
+%   }%
+% }
+% \end{Verbatim}
+% \end{quote}
+%
+% Now we begin with the trivial example of one \cmd{\Box} on each side of the delimiter:
+% \begin{quote}
+% \begin{VerbatimOut}{\jobname.tmp}
+% \schema{\Box}{\Box}
+% \end{VerbatimOut}
+% \DisplayEx[numbers=none]
+% \end{quote}
+%
+% This example is more complex, showing how each side stacks boxes vertically:
+% \begin{quote}
+% \begin{VerbatimOut}{\jobname.tmp}
+% \schema{\Box}{\Box\Box}
+% \end{VerbatimOut}
+% \DisplayEx[numbers=none]
+% \end{quote}
+%
+% Finally we use \cmd{\Schema} to get a schema that is both open and closed:
+% \begin{quote}
+% \begin{VerbatimOut}{\jobname.tmp}
+% \Schema{-0.2ex}{0.9cm}
+% {\Box}
+% {
+%   \Schema[close]
+%     {-0.2ex}{0.9cm}
+%   {\Box\hbox{\Box\kern0.2em}}
+%   {\Box}
+% }
+% \end{VerbatimOut}
+% \DisplayEx
+% \end{quote}
+%
+% A kern of \texttt{0.2em} was added above to compensate for the automatic kern of \texttt{-0.2em}. This correction mimics the behavior of \cmd{\NudgeSB}.
+%
+% If not expressed in terms of \texttt{ex} height, which is quite useful for correlating the number of lines of text and white space in a schema to the actual height of a brace that is needed, then \meta{size} should be expressed as above: slightly less than half the height of the contents, e.g., \texttt{0.9cm} for a height of \texttt{2cm}.
+%
+% \subsection{Romancing the \texttt{\textbackslash schema}}
+% \label{sec:tweakschema}
+%
+% \DescribeMacro{\LCschema}
+% By default, a \cmd{\schemabox} adds a \cmd{\strut} to the first line because the topics in a schema often start with a capital letter.
+% \DescribeMacro{\UCschema}
+% The \cmd{\strut} causes the delimiter of a \cmd{\schema} to have the proper size in order to span that letter.
+%
+% If the first letter is not a capital letter, or if the text seems a little off-center, you can turn off this default feature of \cmd{\schemabox} by placing \cmd{\LCschema} before the \cmd{\schemabox} where the change is to occur. \cmd{\LCschema} prevents all subsequent uses of \cmd{\schemabox} from adding \cmd{\strut}. One restores the default behavior with \cmd{\UCschema}, also best placed before the intended \cmd{\schemabox}.
+% \newpage
+%
+% Here is an example where an entire schema is in lowercase. Instead of putting \cmd{\LCschema} before a particular \cmd{\schemabox}, we change the look of the whole thing and then restore the default via \cmd{\UCschema}:\footnote{Based on axioms in August Pfeiffer, \textit{Thesaurus Hermeneuticus} (Frankfurt am Main, 1698).}
+%
+% \begin{VerbatimOut}{\jobname.tmp}
+% \LCschema
+% \Schema{0.1ex}{4.8ex}
+% {\schemabox{sensus literalis}}
+% {\schema
+%   {\schemabox{sensus\\literalis\\(improprie)}}
+%   {\schemabox{e parallelismo clarior\\
+%      ex analogia fidei\\ex evidentia rei}}
+%   \smallskip
+%   \schemabox{sensus literae}
+% }
+% \UCschema
+% \end{VerbatimOut}
+%
+% \begin{quote}
+% \VerbatimInput[gobble=0]{\jobname.tmp}
+% \end{quote}
+%
+% \begin{displaymath}
+% \input{\jobname.tmp}
+% \end{displaymath}
+%
+% \DescribeMacro{\SwitchSB}
+% The macro \cmd{\SwitchSB} toggles the insertion of a \cmd{\strut} to the opposite of what is in effect for just one \cmd{\schemabox}. Thus:
+% 
+% \begin{quote}
+% \begin{tabular}{ll}
+% Current State & Using \cmd{\SwitchSB}\\[1ex]
+% \strut\cmd{\UCschema} & no \cmd{\strut}\\
+% \strut\cmd{\LCschema} & insert a \cmd{\strut}
+% \end{tabular}
+% \end{quote}
+%
+% \cmd{\SwitchSB} should be placed immediately before the \cmd{\schemabox} to be affected. Its effects are reset when that particular \cmd{\schemabox} terminates. 
+%
+% Note, however, that mixing lowercase and uppercase-styles of \cmd{\schemabox} may put parts of a schema slightly  off-center, meaning that one must \meta{adjust} a \cmd{\Schema} by a tenth of an ex, give or take. Also remember that one can add \cmd{\strut} as needed to make manual adjustments.\medskip
+%
+% \DescribeMacro{\NudgeSB}
+% The macro \cmd{\NudgeSB} is another ``per-use'' macro that, by default, causes a particular \cmd{\schemabox} to add either one or two \texttt{0.2em} kerns to the end(s) of every line of text. This behavior resets outside of that \cmd{\schemabox}.
+% \begin{quote}
+% \fbox{\begin{tabular}{l}
+% {\Large\strut}\cmd{\NudgeSB}\oarg{direction}\\
+% \end{tabular}}
+% \end{quote}
+%
+% The default argument of \meta{direction} is \texttt{right}; the kern is added to the right side of the text. Any other value for \meta{direction} causes a \cmd{\schemabox} to add a kern to the left side. One can add kerns to both sides of every line of text, e.g.:
+% \begin{quote}
+% |\NudgeSB[left]\NudgeSB[right]\schemabox{text}|
+% \end{quote}
+%
+% Both \cmd{\schema} and \cmd{\Schema} insert a kern of \texttt{-0.2em} between the left-hand side and the delimiter to correct spacing when a delimiter opens to the right, especially braces. In some cases, we bypass the default with a nudge.
+% \newpage
+%
+% \DescribeMacro{\SBNudgeFactor}
+% This macro is the kern used by \cmd{\NudgeSB} to make its corrective. Sometimes you feel like a nudge, sometimes you don't, and sometimes you want to change the size of a nudge. Next we show how to do that within a local scope:
+% \begin{quote}
+% \begin{VerbatimOut}{\jobname.tmp}
+% \bgroup
+%   \DoBrackets
+%   \renewcommand\SBNudgeFactor{\kern 1em}
+%   \Schema{0ex}{2.3ex}
+%   {
+%     \NudgeSB
+%     \schemabox{a}
+%   }
+%   {
+%     \Schema[close]{0ex}{2.4ex}
+%     {
+%       \NudgeSB[right]
+%       \NudgeSB[left]
+%       \schemabox{b\\c}
+%     }
+%     {
+%       \NudgeSB[left]
+%       \schemabox{d}
+%     }
+%   }
+% \egroup
+% \end{VerbatimOut}
+% \DisplayEx
+% \end{quote}
+%
+% \subsection{Tutorial}
+%
+% Now that we have explained what the macros do, let's take a journey together to discover a methodology for creating general forms of schemata.
+%
+% \subsubsection{Starting Off Basic}
+%
+% Let's ignore most of what we have learned so far and naively try \cmd{\schema}:
+% \begin{quote}
+% \begin{VerbatimOut}{\jobname.tmp}
+% \schema{A}{B\\C}
+% \end{VerbatimOut}
+% \DisplayEx[numbers=none]
+% \end{quote}
+%
+% Oh dear, that went badly. Oh, wait! Schemata hold internal vertical lists. That weird \cmd{\schemabox} is designed for internal vertical mode:
+% \begin{quote}
+% \begin{VerbatimOut}{\jobname.tmp}
+% \schema
+%   {\schemabox{A}}
+%   {\schemabox{B\\C}}
+% \end{VerbatimOut}
+% \DisplayEx
+% \end{quote}
+%
+% Now we are getting somewhere! But we really need a ``big'' side of a schema, or else we get:
+% \begin{quote}
+% \begin{VerbatimOut}{\jobname.tmp}
+% \schema
+%   {\schemabox{A}}
+%   {\schemabox{B}}
+% \end{VerbatimOut}
+% \DisplayEx
+% \end{quote}
+% \newpage
+%
+% \subsubsection{\textit{Loci} 101}
+% \label{sec:Loci}
+%
+% We move on from trivial examples to several real-world examples based on published material. Let's try a few examples from \emph{Loci Theologici} by Martin Chemnitz. We begin by using only \cmd{\schema}:
+% \begin{quote}
+% \begin{VerbatimOut}{\jobname.tmp}
+% \schema
+% {
+%   \schemabox{Subjectum theo-\\
+%     logi\ae{} est Notitia\\
+%     Dei. Considerat\\
+%     ergo, Dei, vel}
+% }
+% {
+%   \schema
+%   {
+%     \schemabox{\textsc{Essentiam},}
+%   }
+%   {
+%     \schemabox{Unitate natur\ae{}.\\
+%     Trinitate personarum.\\
+%     Operibus ad intra.}
+%   }
+%   \schema
+%   {
+%     \schemabox{\textsc{Voluntatem},\\
+%     manifestatam in\\
+%     operibus ad extra;\\
+%     ut in}
+%   }
+%   {
+%     \schemabox{Creatione.\\
+%     Sustentatione natur\ae{} laps\ae{}.\\
+%     Reparatione.\\
+%     Conversione.\\
+%     Justificatione.\\
+%     Sanctificatione \&\\
+%     Glorificatione ejusdem.}
+%   }
+% }
+% \end{VerbatimOut}
+% \VerbatimInput[gobble=0]{\jobname.tmp}
+%
+% \input{\jobname.tmp}
+% \end{quote}
+% \newpage
+%
+% This is not what we want to see; \cmd{\schema} works for the leaves on the right, but not for the ``root'' on the left. The brace adjusts to the entire right-hand side. Below, we demonstrate what we want and then show how we got there:
+%
+% \begin{quote}
+% \begin{VerbatimOut}{\jobname.tmp}
+% \Schema{-1ex}{8.7ex}
+% {
+%   \schemabox{Subjectum theo-\\
+%   logi\ae{} est Notitia\\
+%   Dei. Considerat\\
+%   ergo, Dei, vel}
+% }
+% {
+% \schema
+%   {
+%     \schemabox{\textsc{Essentiam},}
+%   }
+%   {
+%     \schemabox{Unitate natur\ae{}.\\
+%     Trinitate personarum.\\
+%     Operibus ad intra.}
+%   }\smallskip
+%   \schema
+%   {
+%     \schemabox{\textsc{Voluntatem},\\
+%     manifestatam in\\
+%     operibus ad extra;\\
+%     ut in}
+%   }
+%   {
+%     \schemabox{Creatione.\\
+%     Sustentatione natur\ae{} %
+%     laps\ae{}.\\
+%     Reparatione.\\
+%     Conversione.\\
+%     Justificatione.\\
+%     Sanctificatione \&\\
+%     Glorificatione ejusdem.}
+%   }
+% }
+% \end{VerbatimOut}
+% \input{\jobname.tmp}
+% \vskip -2.5ex
+% \end{quote}
+%
+% \begin{enumerate}
+% \item We first adjust the spacing, starting from the leaves at right, going to the root on the left. We add a \cmd{\smallskip}, shown in \textcolor{red}{\bfseries red boldface}:
+% \begin{quote}
+% \VerbatimInput[gobble=0,firstline=13,lastline=16]{\jobname.tmp}
+% \VerbatimInput[gobble=0,firstline=17,lastline=17,
+%   formatcom=\vskip -1ex,formatcom*=\color{red},
+%   formatcom*=\bfseries]{\jobname.tmp}
+% \end{quote}
+%
+% One should be attentive to format-dependent macro behavior.\footnote{Using \cmd{\vskip} in \PlainTeX{} starts a new paragraph, so \cmd{\smallskip} cannot be used within the horizontal mode of a \cmd{\schemabox} when using \PlainTeX. \LaTeX\ allows more flexibility and permits one to place vertical skips more freely.}
+% In some cases, putting vertical space in the first or last lines of a \cmd{\schemabox}, regardless of format, will affect centering negatively.
+%
+% \item We have two \cmd{\schema} leaves and one root, so we only change one \cmd{\schema} into a \cmd{\Schema}. We count the lines of text, estimate, then revise.
+%
+% Below we have 8--9 lines of text from ``\textsc{Essentiam}'' to ``ut in.'' We estimate \meta{size} at \texttt{8.5ex} and \meta{adjust} at \texttt{0ex}. The large brace is too low, so we \meta{adjust} to \texttt{-1ex}, raising the left side and the delimiter, while lowering the right. We then refine \meta{size} to \texttt{8.7ex}.\footnote{Changes in \TeX\ distributions can change font metrics and thus, the metrics of your schemata.}
+% \begin{quote}
+%   \VerbatimInput[gobble=0,firstline=1,lastline=1,
+%   formatcom*=\color{red},formatcom*=\bfseries]{\jobname.tmp}
+% \end{quote}
+% \end{enumerate}
+%
+% After those two changes, we have the finished schema:
+% \begin{quote}
+%   \VerbatimInput[gobble=0,firstline=1,lastline=7]{\jobname.tmp}
+%
+%   \VerbatimInput[gobble=0,firstline=8]{\jobname.tmp}
+% \end{quote}
+%
+% \subsubsection{Going Big}
+%
+% Thus far, we have dealt with trivial examples while gaining knowledge:
+%
+% \begin{enumerate}
+% \item We usually use \cmd{\schemabox} for the contents of a schema.
+% \item Schemata usually open from left to right, from root to leaves.
+% \item We usually typeset leaves with \cmd{\schema} to save time.
+% \item We typeset other parts with \cmd{\Schema}.
+% \item We adjust spacing and delimiters by working from the leaves to the root.
+% \item We may need to consider differences among formats when using \cmd{\vskip}, \cmd{\smallskip}, etc. Also, \cmd{\newbox} is an \cmd{\outer} macro in \PlainTeX.
+% \item Sometimes, we need to use \cmd{\UCschema}, \cmd{\LCschema}, \cmd{\SwitchSB}, and \cmd{\NudgeSB}.
+% \end{enumerate}
+%
+% With this information, we will reproduce a schema found on page 13 of Martin Chemnitz, \textit{Loci Theologici} (Frankfurt, 1653). The image of the schema was obtained by the present author.\vfill
+%
+% \leavevmode\noindent\includegraphics[width=0.9\textwidth]{schemata.eps}
+%
+% \begin{itemize}
+% \item The braces are composed of vertical rules and other type sorts. We will replace them with the analogous standard \TeX\ brace delimiters.
+%
+% \item The Latin uses roman, italic and small caps. We will use \emph{s-finalis} where the original uses \emph{s-medialis}. We will retain some old-style ligatures.
+%
+% \item We will improve spacing between elements and we will not aim for an exact reproduction of line breaks.
+% \end{itemize}
+%
+% We begin by looking at the leaves, the rightmost bits of text enclosed by braces. We can use \cmd{\schema} in these cases. That results in the following individual snippets:
+%
+% \begin{quote}
+%
+% The first snippet starts at the top right of the original schema:
+% \begin{VerbatimOut}{\jobname.tmp}
+% \schema
+% {\schemabox{\textsc{Per se}:\\ scilicet.}}
+% {
+%   \schemabox{Unus in essentia.}
+%   \schemabox{Trinus in personis.}
+% }
+% \end{VerbatimOut}
+% \VerbatimInput[gobble=0]{\jobname.tmp}
+% \ \qquad\input{\jobname.tmp}
+% \newpage
+%
+% Next is the first large \cmd{\schema}, easy to confuse with the other large one:
+% \begin{VerbatimOut}{\jobname.tmp}
+% \schema
+% {\schemabox{Ad hominem\\ quem vel}}
+% {
+%   \schemabox{Accusat \& terret, \textsc{Per Legem},\\
+%   Consolatur \& erigit, \textsc{Per Evangelium}.\\
+%   Salvat, \textsc{Per Christum}.\\
+%   Renovat, \textsc{Per Spiritum Sanctum}.\\
+%   Sanctificat, \textsc{Per Verbum} \& \textsc{Sacramenta}.\\
+%   Castigat, tentat \& exercet, \textsc{Per Crucem}.\\
+%   Glorificat \textsc{Per Resurrectionem Carnis}\\
+%   \textsc{\quad Ad Vitam \AE{}ternam}.}
+% }
+% \end{VerbatimOut}
+% \VerbatimInput[gobble=0]{\jobname.tmp}
+% \ \qquad\input{\jobname.tmp}\medskip
+%
+% Next we have just one line of text, which is almost tucked in front of the leaf that comes after it, but it still is a leaf in its own right:
+% \begin{VerbatimOut}{\jobname.tmp}
+% \schemabox{Ante lapsum.}
+% \end{VerbatimOut}
+% \VerbatimInput[gobble=0]{\jobname.tmp}
+% \ \qquad\input{\jobname.tmp}
+% \end{quote}
+%
+% \begin{quote}
+% This next example looks bad, but structure precedes aesthetics. Later we will add vertical skips to get two groups of two lines each:
+% \begin{VerbatimOut}{\jobname.tmp}
+% \schema
+% {\schemabox{Post lapsum:}}
+% {
+%   \schemabox{Ante Regenerationem \&\\
+%   Renovationem S. Sancti.}
+%   \schemabox{Post Regenerationem \&\\
+%   Renovationem S. Sancti.}
+% }
+% \end{VerbatimOut}
+% \VerbatimInput[gobble=0]{\jobname.tmp}
+% \ \qquad\input{\jobname.tmp}\medskip
+% \newpage
+%
+% Here is the second large \cmd{\schema}, easy to confuse with the first:
+% \begin{VerbatimOut}{\jobname.tmp}
+% \schema
+% {\schemabox{\textsc{Deum},}}
+% {
+%   \schemabox{P\oe{}nitentia agens, agnitis peccatis \&\\
+%   ira Dei cognita \textsc{Ex Lege}.\\
+%   Erigens se \textsc{Voce Evangelii}.\\
+%   Credens \textsc{In Christum Salvatorem}.\\
+%   Non repugnans \textsc{Spiritui Sancto} impellenti.\\
+%   Audiens \textsc{Verbum}: \& utens \textsc{Sacramentis}.\\
+%   Patienter \& constanter sufferens \textsc{Crucem}.\\
+%   Sperans \& expectans glorificationem\\
+%   \textsc{\quad In Resurrectione Carnis}\\
+%   \textsc{\quad Ad Vitam \AE{}ternam}.}
+% }
+% \end{VerbatimOut}
+% \VerbatimInput[gobble=0]{\jobname.tmp}
+% \ \qquad\input{\jobname.tmp}\medskip
+%
+% Using one \cmd{\schemabox} on the right can do a decent job with spacing:
+% \begin{VerbatimOut}{\jobname.tmp}
+% \schema
+% {\schemabox{seipsum ratione}}
+% {\schemabox{Anim\ae{}\\ vel\\ Corporis}}
+% \end{VerbatimOut}
+% \VerbatimInput[gobble=0]{\jobname.tmp}
+% \ \qquad\input{\jobname.tmp}
+% \end{quote}
+%
+% \begin{quote}
+% Here we have a large leaf, later followed by another ``one-liner'':
+% \begin{VerbatimOut}{\jobname.tmp}
+% \schema
+% {\schemabox{Amicum ra-\\ tione vel}}
+%  {
+%   \schemabox{Religionis.\\
+%   Politic\ae{} \& \OE{}conomic\ae{}.\\
+%   Cognationis.\\
+%   Agnationis.}
+% }
+% \end{VerbatimOut}
+% \VerbatimInput[gobble=0]{\jobname.tmp}
+% \ \qquad\input{\jobname.tmp}\medskip
+% \newpage
+%
+% And here is the second ``one-liner'' in the larger schema:
+% \begin{VerbatimOut}{\jobname.tmp}
+% \schemabox{Inimicum.}
+% \end{VerbatimOut}
+% \VerbatimInput[gobble=0]{\jobname.tmp}
+% \ \qquad\input{\jobname.tmp}
+% \end{quote}
+%
+% \phantomsection
+% \label{page:firstbig}
+% We build the leaves into the larger schema using \cmd{\Schema} with dummy values for both \meta{adjust} and \meta{size} in order to verify that the basic design is accurate:
+%
+% \begin{VerbatimOut}{\jobname.tmp}
+% \Schema{0ex}{5ex}
+% {
+%   \schemabox{Subjectum \&\\
+%   summa univer-\\
+%   s\ae{} Scriptur\ae{},\\
+%   est \textsc{Cognitio}\\
+%   vel}
+% }
+% {
+%   \Schema{0ex}{5ex}
+%   {
+%     \schemabox{\textsc{Dei}, qua-\\lis sit, aut}
+%   }
+%   {
+%     \schema
+%     {\schemabox{\textsc{Per se}:\\ scilicet.}}
+%     {
+%       \schemabox{Unus in essentia.}
+%       \schemabox{Trinus in personis.}
+%     }
+%     \schema
+%     {\schemabox{Ad hominem\\ quem vel}}
+%     {
+%       \schemabox{Accusat \& terret, \textsc{Per Legem},\\
+%       Consolatur \& erigit, \textsc{Per Evangelium}.\\
+%       Salvat, \textsc{Per Christum}.\\
+%       Renovat, \textsc{Per Spiritum Sanctum}.\\
+%       Sanctificat, \textsc{Per Verbum} \& \textsc{Sacramenta}.\\
+%       Castigat, tentat \& exercet, \textsc{Per Crucem}.\\
+%       Glorificat \textsc{Per Resurrectionem Carnis}\\
+%       \textsc{\quad Ad Vitam \AE{}ternam}.}
+%     }
+%   }
+%   \Schema{0ex}{5ex}
+%   {
+%     \schemabox{\textsc{Hominis},\\ qualis sit}
+%   }
+%   {
+%     \Schema{0ex}{5ex}
+%     {\schemabox{\textsc{Per se}:}}
+%     {
+%       \schemabox{Ante lapsum.}
+%       \schema
+%       {\schemabox{Post lapsum:}}
+%       {
+%         \schemabox{Ante Regenerationem \&\\
+%         Renovationem S. Sancti.}
+%         \schemabox{Post Regenerationem \&\\
+%         Renovationem S. Sancti.}
+%       }
+%     }
+%     \Schema{0ex}{5ex}
+%     {\schemabox{Ad}}
+%     {
+%       \schema
+%       {\schemabox{\textsc{Deum},}}
+%       {
+%         \schemabox{P\oe{}nitentia agens, agnitis peccatis \&\\
+%         ira Dei cognita \textsc{Ex Lege}.\\
+%         Erigens se \textsc{Voce Evangelii}.\\
+%         Credens \textsc{In Christum Salvatorem}.\\
+%         Non repugnans \textsc{Spiritui Sancto} impellenti.\\
+%         Audiens \textsc{Verbum}: \& utens \textsc{Sacramentis}.\\
+%         Patienter \& constanter sufferens \textsc{Crucem}.\\
+%         Sperans \& expectans glorificationem\\
+%         \textsc{\quad In Resurrectione Carnis}\\
+%         \textsc{\quad Ad Vitam \AE{}ternam}.}
+%       }
+%       \schema
+%         {\schemabox{seipsum ratione}}
+%         {\schemabox{Anim\ae{}\\ vel\\ Corporis}}
+%       \Schema{0ex}{5ex}
+%       {\schemabox{Proximum,}}
+%       {
+%         \schema
+%         {\schemabox{Amicum ra-\\ tione vel}}
+%         {
+%           \schemabox{Religionis.\\
+%           Politic\ae{} \& \OE{}conomic\ae{}.\\
+%           Cognationis.\\
+%           Agnationis.}
+%         }
+%         \schemabox{Inimicum.}
+%       }
+%     }
+%   }
+% }
+% \end{VerbatimOut}
+% \bgroup\small\begin{displaymath}
+% \input{\jobname.tmp}
+% \end{displaymath}\egroup\bigskip
+%
+% Although the initial result is not pleasing to the eye, the following code listing illustrates the structure of the schema above and serves as a basis for later revisions.
+%
+% \begin{quote}
+% \VerbatimInput[gobble=0,lastline=8]{\jobname.tmp}
+%
+% \VerbatimInput[gobble=0,firstline=9]{\jobname.tmp}
+% \end{quote}
+%
+% \begin{VerbatimOut}{\jobname.tmp}
+% \Schema{0ex}{5ex}
+% {
+%   \schemabox{Subjectum \&\\
+%   summa univer-\\
+%   s\ae{} Scriptur\ae{},\\
+%   est \textsc{Cognitio}\\
+%   vel}
+% }
+% {
+%   \Schema{0ex}{5ex}
+%   {
+%     \schemabox{\textsc{Dei}, qua-\\lis sit, aut}
+%   }
+%   {
+%     \schema
+%     {\schemabox{\textsc{Per se}:\\ scilicet.}}
+%     {
+%       \schemabox{Unus in essentia.}\smallskip
+%       \schemabox{Trinus in personis.}
+%     }\smallskip
+%     \schema
+%     {\schemabox{Ad hominem\\ quem vel}}
+%     {
+%       \schemabox{Accusat \& terret, \textsc{Per Legem},\\
+%       Consolatur \& erigit, \textsc{Per Evangelium}.\\
+%       Salvat, \textsc{Per Christum}.\\
+%       Renovat, \textsc{Per Spiritum Sanctum}.\\
+%       Sanctificat, \textsc{Per Verbum} \& \textsc{Sacramenta}.\\
+%       Castigat, tentat \& exercet, \textsc{Per Crucem}.\\
+%       Glorificat \textsc{Per Resurrectionem Carnis}\\
+%       \textsc{\quad Ad Vitam \AE{}ternam}.}
+%     }\medskip
+%   }
+%   \Schema{0ex}{5ex}
+%   {
+%     \schemabox{\textsc{Hominis},\\ qualis sit}
+%   }
+%   {
+%     \Schema{0ex}{5ex}
+%     {\schemabox{\textsc{Per se}:}}
+%     {
+%       \schemabox{Ante lapsum.}\smallskip
+%       \schema
+%       {\schemabox{Post lapsum:}}
+%       {
+%         \schemabox{Ante Regenerationem \&\\
+%         Renovationem S. Sancti.}\medskip
+%         \schemabox{Post Regenerationem \&\\
+%         Renovationem S. Sancti.}\smallskip
+%       }\smallskip
+%     }
+%     \Schema{0ex}{5ex}
+%     {\schemabox{Ad}}
+%     {
+%       \schema
+%       {\schemabox{\textsc{Deum},}}
+%       {
+%         \schemabox{P\oe{}nitentia agens, agnitis peccatis \&\\
+%         ira Dei cognita \textsc{Ex Lege}.\\
+%         Erigens se \textsc{Voce Evangelii}.\\
+%         Credens \textsc{In Christum Salvatorem}.\\
+%         Non repugnans \textsc{Spiritui Sancto} impellenti.\\
+%         Audiens \textsc{Verbum}: \& utens \textsc{Sacramentis}.\\
+%         Patienter \& constanter sufferens \textsc{Crucem}.\\
+%         Sperans \& expectans glorificationem\\
+%         \textsc{\quad In Resurrectione Carnis}\\
+%         \textsc{\quad Ad Vitam \AE{}ternam}.}
+%       }\smallskip
+%       \schema
+%         {\schemabox{seipsum ratione}}
+%         {\schemabox{Anim\ae{}\\ vel\\ Corporis}}\smallskip
+%       \Schema{0ex}{5ex}
+%       {\schemabox{Proximum,}}
+%       {
+%         \schema
+%         {\schemabox{Amicum ra-\\ tione vel}}
+%         {
+%           \schemabox{Religionis.\\
+%           Politic\ae{} \& \OE{}conomic\ae{}.\\
+%           Cognationis.\\
+%           Agnationis.}
+%         }\smallskip
+%         \schemabox{Inimicum.}
+%       }
+%     }
+%   }
+% }
+% \end{VerbatimOut}
+%
+% Now we show how to correct the spacing within and among elements. \textbf{Here we must work from leaves to root.} Any other approach would waste time repeatedly adjusting the leaves and branches. We show those lines that were changed in \textcolor{red}{\bfseries red boldface}, with some surrounding context. Remember that you can add a \cmd{\smallskip} within a \cmd{\schemabox} in \LaTeX{}, but not in \PlainTeX.
+%
+% We have split the text below into two boxes to make it format-agnostic. The first \cmd{\smallskip} adds space between two instances of \cmd{\schemabox}. The second \cmd{\smallskip} follows the closing brace of the right-hand side, not the \cmd{\schemabox}, in order to adjust the entire \cmd{\schema}.
+% \begin{quote}
+% \VerbatimInput[gobble=0,firstline=15,lastline=17]{\jobname.tmp}
+%
+% \VerbatimInput[gobble=0,firstline=18,lastline=18,
+%   formatcom=\vskip -2.7ex,formatcom*=\color{red},
+%   formatcom*=\bfseries]{\jobname.tmp}
+%
+% \VerbatimInput[gobble=0,firstline=19,lastline=19,
+%   formatcom=\vskip -4.4ex]{\jobname.tmp}
+%
+% \VerbatimInput[gobble=0,firstline=20,lastline=20,
+%   formatcom=\vskip -2.7ex,formatcom*=\color{red},
+%   formatcom*=\bfseries]{\jobname.tmp}
+% \end{quote}
+%
+% Again, the skip comes after the close of a \cmd{\schema} to adjust the whole thing.
+% \begin{quote}
+% \VerbatimInput[gobble=0,firstline=29,lastline=31]{\jobname.tmp}
+%
+% \VerbatimInput[gobble=0,firstline=32,lastline=32,
+%   formatcom=\vskip -2.7ex,formatcom*=\color{red},
+%   formatcom*=\bfseries]{\jobname.tmp}
+% \end{quote}
+%
+% Below, the first \cmd{\smallskip} helps to separate the lone \cmd{\schemabox} from the \cmd{\schema} beneath it. The result allows us to ``tuck'' that small element as its own leaf in front of and above the larger leaf that follows.
+%
+% This also illustrates how the internal vertical lists contained by \cmd{\Schema} and \cmd{\schema} can hold heterogeneous material, which one can arrange as needed.
+%
+% A \cmd{\medskip} is placed between two instances of \cmd{\schemabox}, which slightly throws off the way that the brace spans the boxes. A small skip is put at the end of the last \cmd{\schemabox} to correct that.
+%
+% In simple cases like this particular leaf, we can offset one change in spacing with another change to avoid using \cmd{\Schema}. With anything more complex than that, however, using \cmd{\Schema} becomes inevitable.
+%
+% Finally, a \cmd{\smallskip} is added after the entire \cmd{\schema} on the right-hand side.
+% \begin{quote}
+% \VerbatimInput[gobble=0,firstline=39,lastline=41]{\jobname.tmp}
+%
+% \VerbatimInput[gobble=0,firstline=42,lastline=42,
+%   formatcom=\vskip -2.7ex,formatcom*=\color{red},
+%   formatcom*=\bfseries]{\jobname.tmp}
+%
+% \VerbatimInput[gobble=0,firstline=43,lastline=46,
+%   formatcom=\vskip -4.4ex]{\jobname.tmp}
+%
+% \VerbatimInput[gobble=0,firstline=47,lastline=47,
+%   formatcom=\vskip -2.7ex,formatcom*=\color{red},
+%   formatcom*=\bfseries]{\jobname.tmp}
+%
+% \VerbatimInput[gobble=0,firstline=48,lastline=48,
+%   formatcom=\vskip -4.4ex]{\jobname.tmp}
+%
+% \VerbatimInput[gobble=0,firstline=49,lastline=50,
+%   formatcom=\vskip -2.7ex,formatcom*=\color{red},
+%   formatcom*=\bfseries]{\jobname.tmp}
+%
+% \VerbatimInput[gobble=0,firstline=51,lastline=51,
+%   formatcom=\vskip -4.4ex]{\jobname.tmp}
+% \end{quote}
+%
+% The skips below follow predictably at the end of each \cmd{\schema}:
+% \begin{quote}
+% \VerbatimInput[gobble=0,firstline=65,lastline=67]{\jobname.tmp}
+%
+% \VerbatimInput[gobble=0,firstline=68,lastline=68,
+%   formatcom=\vskip -2.7ex,formatcom*=\color{red},
+%   formatcom*=\bfseries]{\jobname.tmp}
+%
+% \VerbatimInput[gobble=0,firstline=69,lastline=70,
+%   formatcom=\vskip -4.4ex]{\jobname.tmp}
+%
+% \VerbatimInput[gobble=0,firstline=71,lastline=71,
+%   formatcom=\vskip -2.7ex,formatcom*=\color{red},
+%   formatcom*=\bfseries]{\jobname.tmp}
+%
+% \VerbatimInput[gobble=0,firstline=72,lastline=81,
+%   formatcom=\vskip -4.4ex]{\jobname.tmp}
+%
+% \VerbatimInput[gobble=0,firstline=82,lastline=82,
+%   formatcom=\vskip -2.7ex,formatcom*=\color{red},
+%   formatcom*=\bfseries]{\jobname.tmp}
+% \end{quote}
+%
+% Notice in the following schema how the addition of vertical space among the various elements helps make the entire schema easier to read. This is a big improvement over the original version done with a letterpress!
+%
+% Thus we have come to a rough halfway point. We have identified the various smaller elements of the schema, put them together in a larger structure, and given them the spacing needed to be aesthetically pleasing. 
+%
+% \bgroup\small\begin{displaymath}
+% \input{\jobname.tmp}
+% \end{displaymath}\egroup\medskip
+%
+% \begin{VerbatimOut}{\jobname.tmp}
+% \Schema{0ex}{23ex}
+% {
+%   \schemabox{Subjectum \&\\
+%   summa univer-\\
+%   s\ae{} Scriptur\ae{},\\
+%   est \textsc{Cognitio}\\
+%   vel}
+% }
+% {
+%   \Schema{0ex}{8ex}
+%   {
+%     \schemabox{\textsc{Dei}, qua-\\lis sit, aut}
+%   }
+%   {
+%     \schema
+%     {\schemabox{\textsc{Per se}:\\ scilicet.}}
+%     {
+%       \schemabox{Unus in essentia.}\smallskip
+%       \schemabox{Trinus in personis.}
+%     }\smallskip
+%     \schema
+%     {\schemabox{Ad hominem\\ quem vel}}
+%     {
+%       \schemabox{Accusat \& terret, \textsc{Per Legem},\\
+%       Consolatur \& erigit, \textsc{Per Evangelium}.\\
+%       Salvat, \textsc{Per Christum}.\\
+%       Renovat, \textsc{Per Spiritum Sanctum}.\\
+%       Sanctificat, \textsc{Per Verbum} \& \textsc{Sacramenta}.\\
+%       Castigat, tentat \& exercet, \textsc{Per Crucem}.\\
+%       Glorificat \textsc{Per Resurrectionem Carnis}\\
+%       \textsc{\quad Ad Vitam \AE{}ternam}.}
+%     }\medskip
+%   }
+%   \Schema{0ex}{16ex}
+%   {
+%     \schemabox{\textsc{Hominis},\\ qualis sit}
+%   }
+%   {
+%     \Schema{0ex}{5ex}
+%     {\schemabox{\textsc{Per se}:}}
+%     {
+%       \schemabox{Ante lapsum.}\smallskip
+%       \schema
+%       {\schemabox{Post lapsum:}}
+%       {
+%         \schemabox{Ante Regenerationem \&\\
+%         Renovationem S. Sancti.}\medskip
+%         \schemabox{Post Regenerationem \&\\
+%         Renovationem S. Sancti.}\smallskip
+%       }\smallskip
+%     }
+%     \Schema{0ex}{16ex}
+%     {\schemabox{Ad}}
+%     {
+%       \schema
+%       {\schemabox{\textsc{Deum},}}
+%       {
+%         \schemabox{P\oe{}nitentia agens, agnitis peccatis \&\\
+%         ira Dei cognita \textsc{Ex Lege}.\\
+%         Erigens se \textsc{Voce Evangelii}.\\
+%         Credens \textsc{In Christum Salvatorem}.\\
+%         Non repugnans \textsc{Spiritui Sancto} impellenti.\\
+%         Audiens \textsc{Verbum}: \& utens \textsc{Sacramentis}.\\
+%         Patienter \& constanter sufferens \textsc{Crucem}.\\
+%         Sperans \& expectans glorificationem\\
+%         \textsc{\quad In Resurrectione Carnis}\\
+%         \textsc{\quad Ad Vitam \AE{}ternam}.}
+%       }\smallskip
+%       \schema
+%         {\schemabox{seipsum ratione}}
+%         {\schemabox{Anim\ae{}\\ vel\\ Corporis}}\smallskip
+%       \Schema{0ex}{5ex}
+%       {\schemabox{Proximum,}}
+%       {
+%         \schema
+%         {\schemabox{Amicum ra-\\ tione vel}}
+%         {
+%           \schemabox{Religionis.\\
+%           Politic\ae{} \& \OE{}conomic\ae{}.\\
+%           Cognationis.\\
+%           Agnationis.}
+%         }\smallskip
+%         \schemabox{Inimicum.}
+%       }
+%     }
+%   }
+% }
+% \end{VerbatimOut}
+%
+% Next we estimate lines of text and blank lines between the top and bottom elements on the right-hand side of each \cmd{\Schema}. We put that number as ex height in \meta{size}. We can use the listing itself for estimating.
+% 
+% \begin{itemize}
+% \item From ``\textsc{Dei}, qualis sit, aut'' (``Salvat'' at right) to ``\textsc{Hominis}, qualis sit'' (``Sperans'' at right), put in the \cmd{\Schema} with ``Subjectum \& summa\dots''.
+% \VerbatimInput[gobble=0,lastline=1]{\jobname.tmp}
+%
+% \item From ``\textsc{Per se}: scilicet'' (``Unus'' at right) to ``Ad hominem quem vel'' (``Sanctificat'' at right), put in the \cmd{\Schema} with ``\textsc{Dei}, qualis sit, aut''.
+% \VerbatimInput[gobble=0,firstline=10,lastline=10]{\jobname.tmp}
+%
+% \item From ``\textsc{Per se}'' (``Renovationem'' at right) to ``Ad'' (``\textsc{ad Vitam}'' at right), put in the \cmd{\Schema} with ``Ad hominem quem vel''.
+% \VerbatimInput[gobble=0,firstline=34,lastline=34]{\jobname.tmp}
+%
+% \item From ``Ante lapsum'' to ``Post lapsum'', put in the \cmd{\Schema} with ``\textsc{Per se}''.
+% \VerbatimInput[gobble=0,firstline=39,lastline=39]{\jobname.tmp}
+%
+% \item From ``\textsc{Deum}'' (``Non repugnans'' at right) to ``Proximum'' (``Cognationis'' at right), put in the \cmd{\Schema} with ``Ad''.
+% \VerbatimInput[gobble=0,firstline=52,lastline=52]{\jobname.tmp}
+%
+% \item From ``Amicum ratione vel'' (``Politic\ae{}'' at right) to ``Inimicum'', put in the \cmd{\Schema} with ``Proximum''.
+% \VerbatimInput[gobble=0,firstline=72,lastline=72]{\jobname.tmp}
+% \end{itemize}
+%
+% The following schema illustrates our ``ball park'' figures:
+%
+% \bgroup\small\begin{displaymath}
+% \input{\jobname.tmp}
+% \end{displaymath}\egroup\bigskip
+%
+% Finally we tweak \meta{adjust} values by counting the lines (\texttt{ex}) in the direction the left side needs to move relative to the right, multiply the result by two, and make it negative for up and positive for down. We also adjust the final \meta{size} of the braces.
+% \begin{VerbatimOut}{\jobname.tmp}
+% \Schema{-25ex}{20.6ex}
+% {
+%   \schemabox{Subjectum \&\\
+%   summa univer-\\
+%   s\ae{} Scriptur\ae{},\\
+%   est \textsc{Cognitio}\\
+%   vel}
+% }
+% {
+%   \Schema{-6.4ex}{8.5ex}
+%   {
+%     \schemabox{\textsc{Dei}, qua-\\lis sit, aut}
+%   }
+%   {
+%     \schema
+%     {\schemabox{\textsc{Per se}:\\ scilicet.}}
+%     {
+%       \schemabox{Unus in essentia.}\smallskip
+%       \schemabox{Trinus in personis.}
+%     }\smallskip
+%     \schema
+%     {\schemabox{Ad hominem\\ quem vel}}
+%     {
+%       \schemabox{Accusat \& terret, \textsc{Per Legem},\\
+%       Consolatur \& erigit, \textsc{Per Evangelium}.\\
+%       Salvat, \textsc{Per Christum}.\\
+%       Renovat, \textsc{Per Spiritum Sanctum}.\\
+%       Sanctificat, \textsc{Per Verbum} \& \textsc{Sacramenta}.\\
+%       Castigat, tentat \& exercet, \textsc{Per Crucem}.\\
+%       Glorificat \textsc{Per Resurrectionem Carnis}\\
+%       \textsc{\quad Ad Vitam \AE{}ternam}.}
+%     }\medskip
+%   }
+%   \Schema{-13.4ex}{17.4ex}
+%   {
+%     \schemabox{\textsc{Hominis},\\ qualis sit}
+%   }
+%   {
+%     \Schema{-4.4ex}{5ex}
+%     {\schemabox{\textsc{Per se}:}}
+%     {
+%       \schemabox{Ante lapsum.}\smallskip
+%       \schema
+%       {\schemabox{Post lapsum:}}
+%       {
+%         \schemabox{Ante Regenerationem \&\\
+%         Renovationem S. Sancti.}\medskip
+%         \schemabox{Post Regenerationem \&\\
+%         Renovationem S. Sancti.}\smallskip
+%       }\smallskip
+%     }
+%     \Schema{4.2ex}{14.4ex}
+%     {\schemabox{Ad}}
+%     {
+%       \schema
+%       {\schemabox{\textsc{Deum},}}
+%       {
+%         \schemabox{P\oe{}nitentia agens, agnitis peccatis \&\\
+%         ira Dei cognita \textsc{Ex Lege}.\\
+%         Erigens se \textsc{Voce Evangelii}.\\
+%         Credens \textsc{In Christum Salvatorem}.\\
+%         Non repugnans \textsc{Spiritui Sancto} impellenti.\\
+%         Audiens \textsc{Verbum}: \& utens \textsc{Sacramentis}.\\
+%         Patienter \& constanter sufferens \textsc{Crucem}.\\
+%         Sperans \& expectans glorificationem\\
+%         \textsc{\quad In Resurrectione Carnis}\\
+%         \textsc{\quad Ad Vitam \AE{}ternam}.}
+%       }\smallskip
+%       \schema
+%         {\schemabox{seipsum ratione}}
+%         {\schemabox{Anim\ae{}\\ vel\\ Corporis}}\smallskip
+%       \Schema{2ex}{5.1ex}
+%       {\schemabox{Proximum,}}
+%       {
+%         \schema
+%         {\schemabox{Amicum ra-\\ tione vel}}
+%         {
+%           \schemabox{Religionis.\\
+%           Politic\ae{} \& \OE{}conomic\ae{}.\\
+%           Cognationis.\\
+%           Agnationis.}
+%         }\smallskip
+%         \schemabox{Inimicum.}
+%       }
+%     }
+%   }
+% }
+% \end{VerbatimOut}
+%
+% \begin{quote}
+% \VerbatimInput[gobble=0,lastline=1]{\jobname.tmp}
+%
+% \VerbatimInput[gobble=0,firstline=10,lastline=10]{\jobname.tmp}
+%
+% \VerbatimInput[gobble=0,firstline=34,lastline=34]{\jobname.tmp}
+%
+% \VerbatimInput[gobble=0,firstline=39,lastline=39]{\jobname.tmp}
+%
+% \VerbatimInput[gobble=0,firstline=52,lastline=52]{\jobname.tmp}
+%
+% \VerbatimInput[gobble=0,firstline=72,lastline=72]{\jobname.tmp}
+% \end{quote}
+%
+% \bgroup\small\begin{displaymath}
+% \input{\jobname.tmp}
+% \end{displaymath}\egroup
+% \newpage
+%
+% Here is the final listing for our schema:
+%
+% \begin{quote}
+% \VerbatimInput[gobble=0,lastline=51]{\jobname.tmp}
+% \newpage
+%
+% \VerbatimInput[gobble=0,firstline=52]{\jobname.tmp}
+% \end{quote}
+%
+% \subsubsection{Another example}
+%
+% We use \cmd{\DoGroups} in a local scope for this next schema. The listing illustrates a more extensive use of spacing. The macro \cmd{\gk} uses \textsf{babel} to create Greek text. The version of \cmd{\gk} in \texttt{schematest.tex} can use either \textsf{babel} or \textsf{polyglossia} to create Greek text, or it can just show a transliteration. In this listing we do not break each line following the macro \cmd{\\} in a \cmd{\schemabox}.
+%
+% \begin{VerbatimOut}{\jobname.tmp}
+% \DoGroups
+% \Schema{-26ex}{21.5ex}
+% {
+%   \schemabox{Sacr\ae{}\\ litter\ae{}\\ loquuntur,\\ de}
+% }
+% {
+%   \schema
+%   {
+%     \schemabox{\textsc{Deo}}
+%   }
+%   {
+%     \schemabox{Uno, in Trinitate.}\smallskip
+%     \schemabox{Trino, in unitate.}
+%   }
+%   \Schema{-16.5ex}{23.4ex}
+%   {
+%     \vskip30ex
+%     \schemabox{\textsc{Dei}\\ \textsc{Operibus}}
+%   }
+%   {
+%     \schema
+%     {
+%       \schemabox{\textsc{Intra},\\ qu\ae{} sunt\\ divisa, ut}
+%     }
+%     {
+%       \schemabox{\textsc{Patris}, ab \ae{}terno gignere.\\
+%       \textsc{Filii}, ab \ae{}terno genitum esse.\\
+%       \textsc{Spiritus Sancti}, ab utroque\\
+%       ab \ae{}terno procedete.}
+%     }\medskip
+%     \Schema{-2ex}{21ex}
+%     {
+%       \schemabox{\textsc{Extra},\\ qu\ae{} sunt\\ indivisa;\\
+%       tervata\\ tamen\\ cujusque\\ person\ae{}\\
+%       divinitatis\\ sua pro-\\ prietate}
+%     }
+%     {
+%       \Schema{-0.8ex}{6.4ex}
+%       {
+%         \schemabox{Creatione\\ natur\ae{}}
+%       }
+%       {
+%         \schema
+%         {
+%           \schemabox{Brute ut}
+%         }
+%         {
+%           \schemabox{C\oe{}li} \smallskip
+%           \schemabox{Elementorum} \smallskip
+%           \schemabox{Mundi}
+%         }\smallskip
+%         \schema
+%         {
+%           \schemabox{\gk{logik~hs}, ut}
+%         }
+%         {
+%           \schemabox{Angelorum.} \smallskip
+%           \schemabox{Hominum: Ad\ae{},\\
+%           Ev\ae{} \& procreatorum\\ exipsis.}
+%         }
+%       }
+%       \schema
+%       {
+%         \schemabox{Sustenatione\\ natur\ae{} laps\ae{},}
+%       }
+%       {
+%         \schemabox{Angelorum malorum,} \smallskip
+%         \schemabox{Hominum: Ad\ae{}, Ev\ae{}\\
+%         \& procreatorum exipsis.}
+%       }
+%       \Schema{2.6ex}{8.8ex}
+%       {
+%         \schemabox{Beneficiis\\ erga Ecc-\\ lesiam: ea\\
+%         versantur\\ aut circa}
+%       }
+%       {
+%         \Schema{2.2ex}{7ex}
+%         {
+%           \schemabox{Res, ut}
+%         }
+%         {
+%           \schema
+%           {
+%             \schemabox{Verbum}
+%           }
+%           {
+%             \schemabox{Legis} \smallskip
+%             \schemabox{Evangelii} \smallskip
+%             \schemabox{Sacramentorum}
+%           }\smallskip
+%           \schema
+%           {
+%             \schemabox{Signa vel Veteris\\
+%             vel Novi Testa-\\ mentum ut sunt:}
+%           }
+%           {
+%             \schemabox{Ceremoni\ae{}} \smallskip
+%             \schemabox{Miracula}
+%           }
+%         }
+%         \smallskip
+%         \Schema{1ex}{5ex}
+%         {
+%           \schemabox{Personas}
+%         }
+%         {
+%           \schema
+%           {
+%             \schemabox{Ecclesi\ae{}}
+%           }
+%           {
+%             \schemabox{Universalis} \smallskip
+%             \schemabox{Particularis}
+%           }
+%           \smallskip
+%           \schemabox{Politi\ae, ut Magistratuum}
+%           \smallskip
+%           \schemabox{\OE{}conomi\ae, ut privatorum}
+%         }
+%       }\vskip 2ex
+%     }
+%   }
+% }
+% \end{VerbatimOut}
+%
+% \begin{quote}
+% \VerbatimInput[gobble=0,lastline=5]{\jobname.tmp}
+% \newpage
+%
+% \VerbatimInput[gobble=0,firstline=6,lastline=61]{\jobname.tmp}
+% \newpage
+%
+% \VerbatimInput[gobble=0,firstline=62,lastline=114]{\jobname.tmp}
+% \newpage
+%
+% \VerbatimInput[gobble=0,firstline=115]{\jobname.tmp}
+% \end{quote}
+%
+% \bgroup\footnotesize\begin{displaymath}
+% \input{\jobname.tmp}
+% \end{displaymath}\egroup
+% \newpage
+%
+% \subsubsection[Open and Closed]{Open and Closed Schemata}
+% \label{sec:OpenClose}
+%
+% Now we look at schemata that have both open and closed braces. One must use \cmd{\Schema} to get delimiters to be the same height. These schemata take the form:
+% \begin{quote}\ttfamily
+% \cmd{\Schema}\{\textrm{\meta{adjust}}\}\{\textrm{\meta{height}}\}\\
+% \{\textrm{\meta{$left_1$}}\}\\
+% \{\\
+% \hbox{}\quad\cmd{\Schema}[close]\{\textrm{\meta{adjust}}\}\{\textrm{\meta{height}}\}\\
+% \hbox{}\quad\{\textrm{\meta{$left_2$}}\}\\
+% \hbox{}\quad\{\textrm{\meta{$right_2$}}\}\\
+% \}
+% \end{quote}
+%
+% \newbox\mybox
+% \def\Box#1{%^^A
+%   \setbox\mybox=\hbox{\vrule\vbox{\hrule%^^A
+%     \vfil\hbox{\strut\space #1\space}%^^A
+%     \vfil\hrule}\vrule}%^^A
+%   \dimen0=\ht\mybox%^^A
+%   \advance\dimen0 by2ex%^^A
+%   \hbox{\vrule\vbox to \dimen0{\hrule%^^A
+%     \vfil\hbox{{\Large\strut}\space #1\space}%^^A
+%     \vfil\hrule}\vrule}}
+% Perhaps we can better illustrate this nesting by using a modified version of the \cmd{\Box} macro from above:
+%
+% \begin{displaymath}
+% \Schema{0ex}{2ex}
+%   {\Box{\,$left_1$}}
+%   {%^^A
+%     \Box{%^^A
+%       \Schema[close]{0ex}{2ex}
+%       {\hbox{\Box{\,$left_2$}\kern0.2em}}
+%       {\Box{\,$right_2$}}%^^A
+%     }%^^A
+%   }
+% \end{displaymath}\medskip
+%
+% Here is another, more complex example:\medskip
+%
+% \begin{quote}
+% \begin{Verbatim}
+% \Schema{0ex}{6ex}
+% {\Box{a}}
+% {%
+%   \Box{%
+%     \Schema[close]{0ex}{6ex}
+%     {%
+%       \Box{%
+%         \Schema{0ex}{3ex}
+%         {\Box{b}}
+%         {%
+%           \Box{%
+%             \Schema[close]{0ex}{3ex}
+%             {\hbox{\Box{c}\kern0.2em}}
+%             {\Box{d}}
+%           }
+%         }
+%       }
+%     }
+%     {\Box{e}}
+%   }
+% }
+% \end{Verbatim}
+% \end{quote}
+%
+% \begin{displaymath}
+% \Schema{0ex}{6ex}
+% {\Box{a}}
+% {%^^A
+%   \Box{%^^A
+%     \Schema[close]{0ex}{6ex}
+%     {%^^A
+%       \Box{%^^A
+%         \Schema{0ex}{3ex}
+%         {\Box{b}}
+%         {%^^A
+%           \Box{%^^A
+%             \Schema[close]{0ex}{3ex}
+%             {\hbox{\Box{c}\kern0.2em}}
+%             {\Box{d}}
+%           }
+%         }
+%       }
+%     }
+%     {\Box{e}}
+%   }
+% }
+% \end{displaymath}
+%
+% Now we move on to another example from the \textit{Loci}. As above, one must use \cmd{\Schema} to prevent the opening braces from being slightly larger than the closing braces. First we show the schema, then we show the listing.
+%
+% \begin{VerbatimOut}{\jobname.tmp}
+% \Schema{-1.4ex}{10ex}
+% {\schemabox{Qu\ae{} sit\\ \textsc{Dei}, vel}}
+% {
+%   \Schema{-1ex}{5ex}
+%   {\schemabox{\textsc{Essentia}, in}}
+%   {
+%     \vskip1ex\schemabox{Unitate divina,}
+%     \medskip
+%     \Schema{0ex}{3.4ex}
+%     {\schemabox{Tribus perso-\\ nis divinitatis}}
+%     {
+%       \Schema[close]{0ex}{3.4ex}
+%       {\NudgeSB\schemabox{Patre,\\ Filio,\\ Spiritui Sancto}}
+%       {\schemabox{\gk{<omoous'iois}\\ \& co\ae{}ternis}}
+%     }
+%   }
+%   \medskip
+%   \Schema{-0.2ex}{6.4ex}
+%   {\schemabox{\textsc{Voluntas},\\ revelatur in\\ actione, sive}}
+%   {
+%     \Schema{0ex}{3.4ex}
+%     {\schemabox{Universali}}
+%     {
+%       \Schema[close]{0ex}{3.4ex}
+%       {\schemabox{Creationis,\\ Sustenationis,\\ Propagationis,}}
+%       {\schemabox{rerum creatarum.}}
+%     }
+%     \medskip
+%     \schema
+%     {\schemabox{Speciali, in beneficiis\\ erga Ecclesiam, eam}}
+%     {\schemabox{Colligendo.\\ Justificando.\\
+%      Conservando.\\ Glorificando.}}
+%   }
+% }
+% \end{VerbatimOut}
+%
+% The macro \cmd{\gk} uses \textsf{babel}. The version included in \texttt{schematest.tex} can use \textsf{babel}, \textsf{polyglossia} or just transliterated text.
+%
+% \begin{quote}
+% \VerbatimInput[gobble=0]{\jobname.tmp}
+% \end{quote}
+%
+% \bgroup\small\begin{displaymath}
+% \input{\jobname.tmp}
+% \end{displaymath}\egroup
+% \newpage
+%
+% \subsection{Fixed-Width Boxes}
+% \label{sec:multiple}
+%
+% \begin{VerbatimOut}{\jobname.tmp}
+% \Schema{0ex}{15ex}
+% {\schemabox{\bfseries Curricula\\\bfseries Texts}}
+% {
+%   \DoBrackets%
+%   \setbox\mybox=\hbox{\bfseries III. Philosophical }%
+%   \dimen0=\wd\mybox%
+%   \schema
+%     {\schemabox[\dimen0]
+%       {\bfseries I. General\\Studies}}
+%     {\NudgeSB[before]%
+%      \schemabox
+%       {1. Collected Works\\
+%        2. Encyclopedias}}
+%   \medskip
+%   \schema
+%     {\schemabox[\dimen0]
+%       {\bfseries II. Literary\\Disciplines}}
+%     {\NudgeSB[before]%
+%      \schemabox{1. Philology\\
+%        2. Historical Introduction\\
+%        3. Literary Theory\\
+%        4. Application}}
+%   \medskip
+%   \schema
+%       {\schemabox[\dimen0]
+%         {\bfseries III. Philosophical\\Disciplines}}
+%       {\NudgeSB[before]%
+%        \schemabox{1. Source Texts\\
+%          2. History of Philosophy\\
+%          3. General Surveys\\
+%          4. Specific Studies}}
+%   \medskip
+%   \schema
+%       {\schemabox[\dimen0]
+%         {\bfseries IV. Historical\\Disciplines}}
+%       {\NudgeSB[before]%
+%         \schemabox{1. General Surveys\\
+%         2. Specialized Works}}
+% }
+% \end{VerbatimOut}
+%
+% This final example illustrates using \cmd{\schemabox} with a fixed width. We have defined \cmd{\mybox} elsewhere with \cmd{\newbox}. Bear in mind that \cmd{\newbox} is an outer macro in \PlainTeX.
+%
+% \begin{quote}
+% \VerbatimInput[gobble=0]{\jobname.tmp}
+% \end{quote}
+% \newpage
+%
+% \bgroup\begin{displaymath}
+% \input{\jobname.tmp}
+% \end{displaymath}\egroup
+%
+%\StopEventually{^^A
+%  \newgeometry{textwidth=160mm,textheight=237mm,right=25mm}
+%  \PrintChanges\newpage\PrintIndex
+%}
+% \iffalse
+%<*package>
+% \fi
+%
+% \section{Implementation}
+%
+% Shorter macros are written entirely in both \LaTeX\ and \TeX. Longer macros implement both a \LaTeX\ front end and a generic front end with a common \TeX\ back end. If the format is \texttt{LaTeX2e} then the macros use the \LaTeXe{} front end. Otherwise they use generic \TeX, meaning \PlainTeX, eplain, and Lollipop\,---\,maybe others too, but they are not supported.
+%
+%In order to support the largest diversity of formats and \TeX\ engines, we avoid newer primitives like  \cmd{\unless} and \texttt{\textbackslash ifdefined}. Thus, we must revert to the ``old'' way of testing whether or not a macro is defined.
+%
+% \begin{macro}{\schemataLaTeX}
+% \changes{1.0}{2020/03/13}{Added format-specific features}
+% \changes{1.3}{2020/03/13}{Fix format detection bug}
+% Below we manually duplicate with verbatim material what we put early in the \texttt{dtx} file for the versioning information to work. The \cmd{\schemataLaTeX} macro normally is undefined until it is assigned the value of \texttt{LaTeX2e}, to be compared with \cmd{\fmtname}. If we are not using \LaTeXe, we do the equivalent of \cmd{\makeatletter} in either \PlainTeX\ or eplain.\medskip
+%
+% \begin{quote}
+% \begin{Verbatim}[fontsize=\footnotesize]
+% %<package>\expandafter\ifx \csname schemataLaTeX\endcsname\relax
+% %<package>  \def\schemataLaTeX{LaTeX2e}\fi
+% %<package>\ifx\fmtname\schemataLaTeX
+% %<package>\expandafter\NeedsTeXFormat\expandafter{\schemataLaTeX}[2005/12/01]
+% %<package>\ProvidesPackage{schemata}
+% %<*package>
+%   [2025/08/27 1.5 generic package to aid construction of topical categories]
+% %</package>
+% %<package>\else
+% %<package>\catcode`@=11\relax
+% %<package>\fi
+% \end{Verbatim}
+% \end{quote}
+% \end{macro}
+% \makeatletter\advance\c@CodelineNo by 11\makeatother
+%
+% \subsection{Internal Variables}
+%
+% \begin{macro}{\@schemata@LaTeX}
+% \changes{1.3}{2020/12/02}{Added}
+% We declare the macro \cmd{\@schemata@LaTeX} to be the value of \cmd{\schemataLaTeX} to safeguard package operation. From this point onward we can display or query \cmd{\schemataLaTeX} for user-side tests without affecting package internals.
+%
+%    \begin{macrocode}
+\edef\@schemata@LaTeX{\schemataLaTeX}
+%    \end{macrocode}
+% \end{macro}
+%
+%Two box registers and two dimen registers are used to analyze the left-hand and right-hand vertical sizes of the boxes in a schema. Three more dimen registers are for scratchwork.
+%
+%    \begin{macrocode}
+\newbox\@schemata@rhs%
+\newbox\@schemata@lhs%
+\newdimen\@schemata@rheight%
+\newdimen\@schemata@lheight%
+\newdimen\@schemata@one%
+\newdimen\@schemata@two%
+\newdimen\@schemata@three%
+%    \end{macrocode}
+%
+% Two Boolean flags affect the height of a \cmd{\schemabox}, respectively setting and toggling that height for lowercase and uppercase content in order to add or remove space for boxes with only lowercase text.
+%
+%    \begin{macrocode}
+\newif\if@schemata@LCBox%
+\newif\if@schemata@SWBox%
+%    \end{macrocode}
+%
+% These Boolean flags determine if a kern should be added to the beginning or the end of each line in a \cmd{\schemabox} (helps with closed braces and certain delimiters).
+%
+%    \begin{macrocode}
+\newif\if@schemata@LNudge%
+\newif\if@schemata@RNudge%
+%    \end{macrocode}
+%
+% \subsection{Package Options}
+%
+% We set braces to be the default set of delimiters. Apart from \LaTeXe{} we ignore the options. Four options are implemented, namely, \texttt{braces} (the default), \texttt{brackets}, \texttt{parens}, and \texttt{groups}. Since the options are used infrequently, we naively process them in whatever order we get, each overwriting the last. 
+%
+%    \begin{macrocode}
+\ifx\fmtname\@schemata@LaTeX
+  \DeclareOption{braces}%
+    {\let\@schemata@LD\lbrace%
+     \let\@schemata@RD\rbrace}
+  \DeclareOption{brackets}%
+    {\let\@schemata@LD\lbrack%
+     \let\@schemata@RD\rbrack}
+  \DeclareOption{parens}%
+    {\let\@schemata@LD(%
+     \let\@schemata@RD)}
+  \DeclareOption{groups}%
+    {\let\@schemata@LD\lgroup%
+     \let\@schemata@RD\rgroup}
+  \ExecuteOptions{braces}%
+  \ProcessOptions\relax
+\else
+  \let\@schemata@LD\lbrace%
+  \let\@schemata@RD\rbrace%
+\fi
+%    \end{macrocode}
+% \newpage
+%
+% \subsection {Macros}
+%
+% \begin{macro}{\DoBraces}
+% \changes{0.6}{2013/03/10}{Added macro}
+% \changes{1.0}{2020/03/13}{Ensure short macro}
+% Set the delimiters to be braces. This is local to a scope, including within a schema.
+%
+%    \begin{macrocode}
+\ifx\fmtname\@schemata@LaTeX
+  \newcommand*{\DoBraces}%
+    {\let\@schemata@LD\lbrace%
+     \let\@schemata@RD\rbrace}
+\else
+  \def\DoBraces%
+    {\let\@schemata@LD\lbrace%
+     \let\@schemata@RD\rbrace}
+\fi
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\DoBrackets}
+% \changes{0.6}{2013/03/10}{Added macro}
+% \changes{1.0}{2020/03/13}{Ensure short macro}
+% Set the delimiters to be brackets. This is local, as above.
+%
+%    \begin{macrocode}
+\ifx\fmtname\@schemata@LaTeX
+  \newcommand*{\DoBrackets}%
+    {\let\@schemata@LD\lbrack%
+     \let\@schemata@RD\rbrack}
+\else
+  \def\DoBrackets%
+    {\let\@schemata@LD\lbrack%
+     \let\@schemata@RD\rbrack}
+\fi
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\DoParens}
+% \changes{0.6}{2013/03/10}{Added macro}
+% \changes{1.0}{2020/03/13}{Ensure short macro}
+% Set the delimiters to be parentheses. This is local, as above.
+%
+%    \begin{macrocode}
+\ifx\fmtname\@schemata@LaTeX
+  \newcommand*{\DoParens}%
+    {\let\@schemata@LD(%
+     \let\@schemata@RD)}
+\else
+  \def\DoParens%
+    {\let\@schemata@LD(%
+     \let\@schemata@RD)}
+\fi
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\DoGroups}
+% \changes{1.0}{2020/03/13}{Added macro}
+% Set the delimiters to be parentheses. This is local, as above.
+%
+%    \begin{macrocode}
+\ifx\fmtname\@schemata@LaTeX
+  \newcommand*{\DoGroups}%
+    {\let\@schemata@LD\lgroup%
+     \let\@schemata@RD\rgroup}
+\else
+  \def\DoGroups%
+    {\let\@schemata@LD\lgroup%
+     \let\@schemata@RD\rgroup}
+\fi
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\LCschema}
+% \changes{0.6}{2013/03/10}{Added macro}
+% \changes{1.0}{2020/03/13}{Ensure short macro}
+% Prevent \cmd{\schemabox} from adding a \cmd{\strut} in the first line.
+%
+%    \begin{macrocode}
+\ifx\fmtname\@schemata@LaTeX
+  \newcommand*{\LCschema}{\@schemata@LCBoxtrue}
+\else
+  \def\LCschema{\@schemata@LCBoxtrue}
+\fi
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\UCschema}
+% \changes{0.6}{2013/03/10}{Added macro}
+% \changes{1.0}{2020/03/13}{Ensure short macro}
+% Permit \cmd{\schemabox} to add a \cmd{\strut} in the first line (default).
+%
+%    \begin{macrocode}
+\ifx\fmtname\@schemata@LaTeX
+  \newcommand*{\UCschema}{\@schemata@LCBoxfalse}
+\else
+  \def\UCschema{\@schemata@LCBoxfalse}
+\fi
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\SwitchSB}
+% \changes{0.6}{2013/03/10}{Added macro}
+% \changes{1.0}{2020/03/13}{Ensure short macro}
+% Flip the UC/LC settings for one \cmd{\schemabox}, which will reset this value on exit.
+%
+%    \begin{macrocode}
+\ifx\fmtname\@schemata@LaTeX
+  \newcommand*{\SwitchSB}{\@schemata@SWBoxtrue}%
+\else
+  \def\SwitchSB{\@schemata@SWBoxtrue}
+\fi
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\NudgeSB}
+% \changes{0.8}{2016/01/25}{Added macro}
+% \changes{1.0}{2020/03/13}{Ensure short macro}
+% \changes{1.5}{2025/08/27}{Select kerns for left or right}
+% Add a kern to the beginning or the end (or both, if invoked twice) of each line in one \cmd{\schemabox}. This will be reset on exit from that \cmd{\schemabox}. First comes the front end:
+%
+%    \begin{macrocode}
+\ifx\fmtname\@schemata@LaTeX
+  \newcommand*{\NudgeSB}[1][right]{\@schemata@NudgeSB[#1]}
+\else
+  \def\NudgeSB{\futurelet\@schemata@testchar\@schemata@N@dgeSB}
+  \def\@schemata@N@dgeSB{%
+    \ifx[\@schemata@testchar
+      \let\next\@schemata@NudgeSB%
+    \else
+      \let\next\@schemata@@NudgeSB%
+    \fi
+    \next%
+  }%
+  \def\@schemata@@NudgeSB{\@schemata@NudgeSB[right]}
+\fi
+%    \end{macrocode}
+% Next comes the common back end:
+%    \begin{macrocode}
+\def\@schemata@NudgeSB[#1]{%
+  \edef\@schemata@NudgeTest{#1}%
+  \def\@schemata@NudgeDefault{right}%
+  \ifx\@schemata@NudgeTest\@schemata@NudgeDefault
+    \@schemata@RNudgetrue%
+  \else
+    \@schemata@LNudgetrue%
+  \fi
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\SBNudgeFactor}
+% \changes{1.0}{2020/03/13}{Added macro}
+% Define the \texttt{\textbackslash kern} to be added to the end of each line in one \cmd{\schemabox}. The default is \texttt{0.2em}, equal to the horizontal corrective.
+%
+%    \begin{macrocode}
+\ifx\fmtname\@schemata@LaTeX
+  \newcommand{\SBNudgeFactor}{\kern0.2em}
+\else
+  \def\SBNudgeFactor{\kern0.2em}
+\fi
+%    \end{macrocode}
+% \end{macro}
+% \newpage
+%
+% \begin{macro}{\schemabox}
+% \changes{0.6}{2013/03/10}{Added lowercase tweaks}
+% \changes{0.8}{2016/01/25}{Added nudge feature; fix errors when not in internal vertical mode}
+% \changes{1.0}{2020/03/13}{Create front- and back-end; ensure short}
+% \changes{1.2}{2020/11/23}{Fix namespace}
+% \changes{1.5}{2025/08/27}{Add kerns on left, right, or both}
+%  If in internal vertical mode, restricted horizontal mode, or math mode, wrap a stack of \cmd{\hbox}es in a \cmd{\vbox}, then put that inside an \cmd{\hbox}. The first argument sets an optional width for those \cmd{\hbox}es. Normally insert a \cmd{\strut} in the first \cmd{\hbox}. The second argument contains the rows of horizontal material, where |\\| is redefined to end one \cmd{\hbox} and begin another. Add kerns as directed by \cmd{\NudgeSB}. When in any other mode, just display the second argument as text. First is the front end:
+%
+%    \begin{macrocode}
+\ifx\fmtname\@schemata@LaTeX
+  \newcommand*{\schemabox}[2][0pt]{\@schemata@schemabox[#1]{#2}}
+\else
+  \def\schemabox{\futurelet\@schemata@testchar\@schemata@schemab@x}
+  \def\@schemata@schemab@x{%
+    \ifx[\@schemata@testchar
+      \let\next\@schemata@schemabox%
+    \else
+      \let\next\@schemata@@schemab@x%
+    \fi
+    \next%
+  }%
+  \def\@schemata@@schemab@x#1{\@schemata@schemabox[0pt]{#1}}
+\fi
+%    \end{macrocode}
+% Next comes the common back end:
+%    \begin{macrocode}
+\def\@schemata@schemabox[#1]#2{%
+  \ifinner
+    \if@schemata@LCBox
+      \def\@schemata@Adj{}%
+      \if@schemata@SWBox\def\@schemata@Adj{\strut}\fi
+    \else
+      \def\@schemata@Adj{\strut}%
+      \if@schemata@SWBox\def\@schemata@Adj{}\fi
+    \fi
+    \if@schemata@RNudge
+      \let\@schemata@NudgeR\SBNudgeFactor%
+    \else
+      \def\@schemata@NudgeR{}%
+    \fi
+    \if@schemata@LNudge
+      \let\@schemata@NudgeL\SBNudgeFactor%
+    \else
+      \def\@schemata@NudgeL{}%
+    \fi
+    \ifdim#1<1pt
+      \def\\{\@schemata@NudgeR\egroup%
+        \hbox\bgroup\@schemata@NudgeL\ignorespaces }%
+      \vbox{\hbox\bgroup%
+        \@schemata@Adj\@schemata@NudgeL\ignorespaces #2%
+        \@schemata@NudgeR\egroup}%
+    \else
+      \def\\{\hfil\egroup%
+        \hbox to #1\bgroup\@schemata@NudgeL\ignorespaces }%
+      \vbox{\hbox to #1\bgroup%
+        \@schemata@Adj\@schemata@NudgeL\ignorespaces #2%
+        \hfil\egroup}%
+    \fi
+  \else
+    #2%
+  \fi
+  \@schemata@SWBoxfalse%
+  \@schemata@RNudgefalse%
+  \@schemata@LNudgefalse%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\schema}
+% \changes{1.0}{2020/03/13}{Create front- and back-end; ensure long}
+% \changes{1.2}{2020/11/23}{Fix namespace}
+% \changes{1.5}{2025/08/27}{Better arg check}
+% This ``simple'' schema vertically centers two boxes of internal vertical material and puts a ``simple'' brace between the boxes based on the height of the box and the options passed to the schema.
+%
+% There is something of a ``magic'' value for adjusting the height used for the larger side of a \cmd{\schema}, namely \texttt{1.44265ex}. By using this adjustment, which is slightly larger than $\sqrt{2}$ times the ex-height of the font, the results look more aesthetically pleasing in terms of centering and size of the braces.
+%
+% By default, a schema has a box to the left, an open delimiter, and a box to the right. If any optional argument other than \texttt{open} is used, the schema prints a box to the left, a close brace, and a box to the right. First is the front end:
+%
+%    \begin{macrocode}
+\ifx\fmtname\@schemata@LaTeX
+  \newcommand{\schema}[3][open]{%
+    \@schemata@schema[#1]{#2}{#3}}
+\else
+  \long\def\schema{\futurelet\@schemata@testchar\@schemata@schem@}
+  \long\def\@schemata@schem@{%
+    \ifx[\@schemata@testchar
+      \let\next\@schemata@schema%
+    \else
+      \let\next\@schemata@@schem@%
+    \fi
+    \next%
+  }%
+  \long\def\@schemata@@schem@#1#2{%
+    \@schemata@schema[open]{#1}{#2}}
+\fi
+%    \end{macrocode}
+% Next comes the common back end:
+%    \begin{macrocode}
+\long\def\@schemata@schema[#1]#2#3{%
+  \edef\@schemata@option{#1}%
+  \def\@schemata@open{open}%
+  \ifx\@schemata@option\@schemata@open
+    \setbox\@schemata@rhs=\vbox{#3}%
+    \@schemata@rheight=\ht\@schemata@rhs%
+    \advance\@schemata@rheight\dp\@schemata@rhs%
+    \advance\@schemata@rheight by 1.44265ex%
+    \hbox{$\vcenter{#2}%
+      \@schemata@lbrace{\@schemata@rheight}%
+      \vcenter{#3}$}%
+  \else
+    \setbox\@schemata@lhs=\vbox{#2}%
+    \@schemata@lheight=\ht\@schemata@lhs%
+    \advance\@schemata@lheight\dp\@schemata@lhs%
+    \advance\@schemata@lheight by 1.44265ex%
+    \hbox{$\vcenter{#2}%
+      \kern-0.2em\@schemata@rbrace{\@schemata@lheight}%
+      \vcenter{#3}$}%
+  \fi
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\Schema}
+% \changes{1.0}{2020/03/13}{Create front- and back-end; ensure long}
+% \changes{1.2}{2020/11/23}{Fix namespace}
+% \changes{1.5}{2025/08/27}{Better arg check}
+% This is the general-purpose form of schemata. The arguments include whether it is an open or closed schema, the vertical adjustment of the left-hand side and delimiter over against the right-hand side, the size of the brace, and the contents of the left and right-hand sizes. It works about the same as above, but requires manual adjustment of the braces. Again we see the ``magic'' height adjustment value of \texttt{1.44265ex}. First is the front end:
+%
+%    \begin{macrocode}
+\ifx\fmtname\@schemata@LaTeX
+  \newcommand{\Schema}[5][open]{%
+    \@schemata@Schema[#1]{#2}{#3}{#4}{#5}}
+\else
+  \long\def\Schema{\futurelet\@schemata@testchar\@schemata@Schem@}
+  \long\def\@schemata@Schem@{%
+    \ifx[\@schemata@testchar
+      \let\next\@schemata@Schema%
+    \else
+      \let\next\@schemata@@Schem@%
+    \fi
+    \next%
+  }%
+  \long\def\@schemata@@Schem@#1#2#3#4{%
+    \@schemata@Schema[open]{#1}{#2}{#3}{#4}}
+\fi
+%    \end{macrocode}
+% Next comes the common back end:
+%    \begin{macrocode}
+\long\def\@schemata@Schema[#1]#2#3#4#5{%
+  \edef\@schemata@option{#1}%
+  \def\@schemata@open{open}%
+  \@schemata@one=#2%
+  \ifx\@schemata@option\@schemata@open
+    \hbox{$\vcenter{\vskip1.44265\@schemata@one#4}%
+      \@schemata@biglbrace{#2}{#3}\vcenter{#5}$}%
+  \else
+    \hbox{$\vcenter{\vskip1.44265\@schemata@one#4}\kern-0.2em%
+      \@schemata@bigrbrace{#2}{#3}\vcenter{#5}$}%
+  \fi
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@schemata@lbrace}
+% \changes{0.8}{2016/01/25}{Renamed}
+% \changes{1.0}{2020/03/13}{Ensure short macro}
+% Draw an on-center delimiter to the left of a simple box.
+%
+%    \begin{macrocode}
+\ifx\fmtname\@schemata@LaTeX
+  \newcommand*{\@schemata@lbrace}[1]{%
+    \ifmmode
+      \left.\vcenter{\vbox to #1{\vfil}}\right\@schemata@LD%
+    \fi
+  }
+\else
+  \def\@schemata@lbrace#1{%
+    \ifmmode
+      \left.\vcenter{\vbox to #1{\vfil}}\right\@schemata@LD%
+    \fi
+  }
+\fi
+%    \end{macrocode}
+% \end{macro}
+% \newpage
+%
+% \begin{macro}{\@schemata@rbrace}
+% \changes{0.8}{2016/01/25}{Renamed}
+% \changes{1.0}{2020/03/13}{Ensure short macro}
+% Draw an on-center delimiter to the right of a simple box.
+%
+%    \begin{macrocode}
+\ifx\fmtname\@schemata@LaTeX
+  \newcommand*{\@schemata@rbrace}[1]{%
+    \ifmmode
+      \left\@schemata@RD\vcenter{\vbox to #1{\vfil}}\right.%
+    \fi
+  }
+\else
+  \def\@schemata@rbrace#1{%
+    \ifmmode
+      \left\@schemata@RD\vcenter{\vbox to #1{\vfil}}\right.%
+    \fi
+  }
+\fi
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@schemata@biglbrace}
+% \changes{0.8}{2016/01/25}{Renamed; use absolute value of brace size}
+% \changes{1.0}{2020/03/13}{Ensure short; front- and back-end}
+% Draw a vertically-adjustable delimiter to the left of a complex assortment of boxes. Again we see the ``magic'' height adjustment value of \texttt{1.44265ex}, but both positive and negative. First is the front end:
+%
+%    \begin{macrocode}
+\ifx\fmtname\@schemata@LaTeX
+  \newcommand*{\@schemata@biglbrace}[2]{%
+    \@schemata@@biglbrace{#1}{#2}}
+\else
+  \def\@schemata@biglbrace#1#2{%
+    \@schemata@@biglbrace{#1}{#2}}
+\fi
+%    \end{macrocode}
+% Next comes the common back end:
+%    \begin{macrocode}
+\def\@schemata@@biglbrace#1#2{%
+  \@schemata@one=#1%
+  \@schemata@two=#2%
+  \@schemata@three=-\@schemata@two%
+  \ifdim\@schemata@three>\@schemata@two%
+    \@schemata@two=\@schemata@three\fi
+  \ifdim\@schemata@one<0pt
+    \ifmmode\vcenter{\hbox{$\left.%
+      \vbox to 1.44265\@schemata@two{\vfil}%
+      \right\@schemata@LD%
+      \atop\vbox to -1.44265\@schemata@one{\vfil}$}}\fi
+  \else
+    \ifmmode\vcenter{\hbox{$\vbox to 1.44265\@schemata@one{\vfil}%
+      \atop\left.%
+      \vbox to 1.44265\@schemata@two{\vfil}%
+      \right\@schemata@LD$}}\fi
+  \fi
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@schemata@bigrbrace}
+% \changes{0.8}{2016/01/25}{Renamed; Use absolute value of brace size}
+% \changes{1.0}{2020/03/13}{Ensure short; front- and back-end}
+% Draw a vertically-adjustable delimiter to the right of a complex assortment of boxes. Again we see the ``magic'' height adjustment value of \texttt{1.44265ex}, but both positive and negative.  First is the front end:
+%
+%    \begin{macrocode}
+\ifx\fmtname\@schemata@LaTeX
+  \newcommand*{\@schemata@bigrbrace}[2]{%
+    \@schemata@@bigrbrace{#1}{#2}%
+  }
+\else
+  \def\@schemata@bigrbrace#1#2{%
+    \@schemata@@bigrbrace{#1}{#2}%
+  }
+\fi
+%    \end{macrocode}
+% Next comes the common back end:
+%    \begin{macrocode}
+\def\@schemata@@bigrbrace#1#2{%
+  \@schemata@one=#1%
+  \@schemata@two=#2%
+  \@schemata@three=-\@schemata@two%
+  \ifdim\@schemata@three>\@schemata@two%
+    \@schemata@two=\@schemata@three\fi
+  \ifdim\@schemata@one<0pt
+    \ifmmode\vcenter{\hbox{$\left.%
+      \vbox to 1.44265\@schemata@two{\vfil}%
+      \right\@schemata@RD%
+      \atop\vbox to -1.44265\@schemata@one{\vfil}$}}\fi
+  \else
+    \ifmmode\vcenter{\hbox{$\vbox to 1.44265\@schemata@one{\vfil}%
+      \atop\left.%
+      \vbox to 1.44265\@schemata@two{\vfil}%
+      \right\@schemata@RD$}}\fi
+  \fi
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% If we are not using \LaTeXe, we do the equivalent of \cmd{\makeatother}.
+%
+%    \begin{macrocode}
+\ifx\fmtname\@schemata@LaTeX\else
+  \catcode`@=12\relax
+\fi
+%    \end{macrocode}
+% \Finale
+% \endinput
+%</package>
+%<*examples>
+%<<examplesvb
+\def\nameofplain{plain}
+\def\nameofeplain{eplain}
+\def\nameoflatex{LaTeX2e}
+\def\nameoflollipop{Lollipop}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% See README.md for compiling this document.
+%
+\ifx\fmtname\nameoflatex
+  \documentclass[10pt]{article}
+  \expandafter\ifx \csname Umathchar\endcsname\relax
+    \usepackage[T1]{fontenc}
+    \usepackage[polutonikogreek,american]{babel}
+  \else
+    \usepackage{fontspec}
+    \usepackage{polyglossia}
+    \setdefaultlanguage{american}
+    \setotherlanguage[variant=ancient]{greek}
+    \newfontfamily\greekfont{GFSDidot.otf}
+  \fi
+%
+% Using the default option is a secondary test for mode detection.
+%
+  \usepackage[braces]{schemata}[2021/02/27]
+  \begin{document}
+\else
+  \def\bfseries{\bf}
+  \ifx\fmtname\nameoflollipop
+    \input schemata.sty
+    \font\scshape=cmcsc10
+    \def\textsc#1{\bgroup\scshape #1\egroup}
+    \Start
+  \else
+    \input schemata.sty
+    \font\scshape=cmcsc10
+    \def\textsc#1{\bgroup\scshape #1\egroup}
+  \fi
+\fi
+%
+% Handle various ways of dealing with Greek.
+%
+\def\gk#1#2#3{%
+% Only show Greek text when using LaTeX2e
+  \ifx\fmtname\nameoflatex
+    \expandafter\ifx \csname Umathchar\endcsname\relax
+% pdflatex / latex
+      \foreignlanguage{polutonikogreek}{#2}%
+    \else
+% xelatex / lualatex
+      \textgreek{#1}%
+    \fi
+% All other formats
+  \else
+% Show transliterated equivalents for Greek
+    \bgroup\it #3\egroup%
+  \fi
+}
+
+Format: \fmtname\par
+Test value: \schemataLaTeX\par
+\catcode`@=11\relax
+Internal test value: \@schemata@LaTeX\par
+\catcode`@=12\relax\par
+
+Due to restrictions for dealing with so many formats,\par
+Greek character text will appear with:\par
+\ \kern 1em pdflatex / latex (babel, converted Latin characters)\par
+\ \kern 1em xelatex / lualatex (polyglossia, native Greek text)\par
+All other formats will have transliterated text instead of Greek.\par
+\vfil
+
+$$
+\Schema{-1ex}{8.7ex}
+{
+  \schemabox{Subjectum theo-\\
+  logi\ae{} est Notitia\\
+  Dei. Considerat\\
+  ergo, Dei, vel}
+}
+{
+\schema
+  {
+    \schemabox{\textsc{Essentiam},}
+  }
+  {
+    \schemabox{Unitate natur\ae{}.\\
+    Trinitate personarum.\\
+    Operibus ad intra.}
+  }\smallskip
+  \schema
+  {
+    \schemabox{\textsc{Voluntatem},\\
+    manifestatam in\\
+    operibus ad extra;\\
+    ut in}
+  }
+  {
+    \schemabox{Creatione.\\
+    Sustentatione natur\ae{} %
+    laps\ae{}.\\
+    Reparatione.\\
+    Conversione.\\
+    Justificatione.\\
+    Sanctificatione \&\\
+    Glorificatione ejusdem.}
+  }
+}
+$$
+
+\vfil
+\eject
+
+\hbox{\ }
+\vfil
+
+$$
+\Schema{-25ex}{20.6ex}
+{
+  \schemabox{Subjectum \&\\
+  summa univer-\\
+  s\ae{} Scriptur\ae{},\\
+  est \textsc{Cognitio}\\
+  vel}
+}
+{
+  \Schema{-6.4ex}{8.5ex}
+  {
+    \schemabox{\textsc{Dei}, qua-\\lis sit, aut}
+  }
+  {
+    \schema
+    {\schemabox{\textsc{Per se}:\\ scilicet.}}
+    {
+      \schemabox{Unus in essentia.}\smallskip
+      \schemabox{Trinus in personis.}
+    }\smallskip
+    \schema
+    {\schemabox{Ad hominem\\ quem vel}}
+    {
+      \schemabox{Accusat \& terret, \textsc{Per Legem},\\
+      Consolatur \& erigit, \textsc{Per Evangelium}.\\
+      Salvat, \textsc{Per Christum}.\\
+      Renovat, \textsc{Per Spiritum Sanctum}.\\
+      Sanctificat, \textsc{Per Verbum} \& \textsc{Sacramenta}.\\
+      Castigat, tentat \& exercet, \textsc{Per Crucem}.\\
+      Glorificat \textsc{Per Resurrectionem Carnis}\\
+      \textsc{\quad Ad Vitam \AE{}ternam}.}
+    }\medskip
+  }
+  \Schema{-13.4ex}{17.4ex}
+  {
+    \schemabox{\textsc{Hominis},\\ qualis sit}
+  }
+  {
+    \Schema{-4.4ex}{5ex}
+    {\schemabox{\textsc{Per se}:}}
+    {
+      \schemabox{Ante lapsum.}\smallskip
+      \schema
+      {\schemabox{Post lapsum:}}
+      {
+        \schemabox{Ante Regenerationem \&\\
+        Renovationem S. Sancti.}\medskip
+        \schemabox{Post Regenerationem \&\\
+        Renovationem S. Sancti.}\smallskip
+      }\smallskip
+    }
+    \Schema{4.2ex}{14.4ex}
+    {\schemabox{Ad}}
+    {
+      \schema
+      {\schemabox{\textsc{Deum},}}
+      {
+        \schemabox{P\oe{}nitentia agens, agnitis peccatis \&\\
+        ira Dei cognita \textsc{Ex Lege}.\\
+        Erigens se \textsc{Voce Evangelii}.\\
+        Credens \textsc{In Christum Salvatorem}.\\
+        Non repugnans \textsc{Spiritui Sancto} impellenti.\\
+        Audiens \textsc{Verbum}: \& utens \textsc{Sacramentis}.\\
+        Patienter \& constanter sufferens \textsc{Crucem}.\\
+        Sperans \& expectans glorificationem\\
+        \textsc{\quad In Resurrectione Carnis}\\
+        \textsc{\quad Ad Vitam \AE{}ternam}.}
+      }\smallskip
+      \schema
+        {\schemabox{seipsum ratione}}
+        {\schemabox{Anim\ae{}\\ vel\\ Corporis}}\smallskip
+      \Schema{2ex}{5.1ex}
+      {\schemabox{Proximum,}}
+      {
+        \schema
+        {\schemabox{Amicum ra-\\ tione vel}}
+        {
+          \schemabox{Religionis.\\
+          Politic\ae{} \& \OE{}conomic\ae{}.\\
+          Cognationis.\\
+          Agnationis.}
+        }\smallskip
+        \schemabox{Inimicum.}
+      }
+    }
+  }
+}
+$$
+
+\vfil
+\eject
+
+\bgroup
+{\tt\char`\\ DoParens}\DoParens
+\hbox{\ }
+\vfil
+
+$$
+\Schema{-26ex}{21.5ex}
+{
+  \schemabox{Sacr\ae{}\\
+  litter\ae{}\\
+  loquuntur,\\
+  de}
+}
+{
+  \schema
+  {
+    \schemabox{\textsc{Deo}}
+  }
+  {
+    \schemabox{Uno, in Trinitate.}\smallskip
+    \schemabox{Trino, in unitate.}
+  }
+  \Schema{-16.5ex}{23.4ex}
+  {
+    \vskip30ex
+    \schemabox{\textsc{Dei}\\
+    \textsc{Operibus}}
+  }
+  {
+    \schema
+    {
+      \schemabox{\textsc{Intra},\\
+      qu\ae{} sunt\\
+      divisa, ut}
+    }
+    {
+      \schemabox{\textsc{Patris}, ab \ae{}terno gignere.\\
+      \textsc{Filii}, ab \ae{}terno genitum esse.\\
+      \textsc{Spiritus Sancti}, ab utroque\\
+      ab \ae{}terno procedete.}
+    }
+    \medskip
+    \Schema{-2ex}{21ex}
+    {
+      \schemabox{\textsc{Extra},\\
+       qu\ae{} sunt\\
+       indivisa;\\
+       tervata\\
+       tamen\\
+       cujusque\\
+       person\ae{}\\
+       divinitatis\\
+       sua pro-\\
+       prietate}
+    }
+    {
+      \Schema{-0.8ex}{6.4ex}
+      {
+        \schemabox{Creatione\\
+        natur\ae{}}
+      }
+      {
+        \schema
+        {
+          \schemabox{Brute ut}
+        }
+        {
+          \schemabox{C\oe{}li} \smallskip
+          \schemabox{Elementorum} \smallskip
+          \schemabox{Mundi}
+        }
+        \smallskip
+        \schema
+        {
+          \schemabox{\gk{λογικῆς}{logik~hs}{logik\=es}, ut}
+        }
+        {
+          \schemabox{Angelorum.} \smallskip
+          \schemabox{Hominum: Ad\ae{},\\
+          Ev\ae{} \& procreatorum\\
+          exipsis.}
+        }
+      }
+      \schema
+      {
+        \schemabox{Sustenatione\\
+        natur\ae{} laps\ae{},}
+      }
+      {
+        \schemabox{Angelorum malorum,} \smallskip
+        \schemabox{Hominum: Ad\ae{}, Ev\ae{}\\
+        \& procreatorum exipsis.}
+      }
+      \Schema{2.6ex}{8.8ex}
+      {
+        \schemabox{Beneficiis\\
+        erga Ecc-\\
+        lesiam: ea\\
+        versantur\\
+        aut circa}
+      }
+      {
+        \Schema{2.2ex}{7ex}
+        {
+          \schemabox{Res, ut}
+        }
+        {
+          \schema
+          {
+            \schemabox{Verbum}
+          }
+          {
+            \schemabox{Legis} \smallskip
+            \schemabox{Evangelii} \smallskip
+            \schemabox{Sacramentorum}
+          }
+          \smallskip
+          \schema
+          {
+            \schemabox{Signa vel Veteris\\
+            vel Novi Testa-\\
+            mentum ut sunt:}
+          }
+          {
+            \schemabox{Ceremoni\ae{}} \smallskip
+            \schemabox{Miracula}
+          }
+        }
+        \smallskip
+        \Schema{1ex}{5ex}
+        {
+          \schemabox{Personas}
+        }
+        {
+          \schema
+          {
+            \schemabox{Ecclesi\ae{}}
+          }
+          {
+            \schemabox{Universalis} \smallskip
+            \schemabox{Particularis}
+          }
+          \smallskip
+          \schemabox{Politi\ae, ut Magistratuum}
+          \smallskip
+          \schemabox{\OE{}conomi\ae, ut privatorum}
+        }
+      }\vskip2ex
+    }
+  }
+}
+$$
+
+\vfil
+\eject
+
+{\tt\char`\\ DoGroups}\DoGroups
+\hbox{\ }
+\vfil
+
+$$
+\Schema{-26.5ex}{21ex}
+{
+  \schemabox{Sacr\ae{}\\ litter\ae{}\\ loquuntur,\\ de}
+}
+{
+  \schema
+  {
+    \schemabox{\textsc{Deo}}
+  }
+  {
+    \schemabox{Uno, in Trinitate.}\smallskip\schemabox{Trino, in unitate.}
+  }
+  \Schema{-17ex}{23.4ex}
+  {
+    \vskip30ex
+    \schemabox{\textsc{Dei}\\ \textsc{Operibus}}
+  }
+  {
+    \schema
+    {
+      \schemabox{\textsc{Intra},\\ qu\ae{} sunt\\ divisa, ut}
+    }
+    {
+      \schemabox{\textsc{Patris}, ab \ae{}terno gignere.\\ \textsc{Filii}, ab \ae{}terno genitum esse.\\ \textsc{Spiritus Sancti}, ab utroque\\ ab \ae{}terno procedete.\strut}
+    }
+    \medskip
+    \Schema{-2ex}{21ex}
+    {
+      \schemabox{\textsc{Extra},\\ qu\ae{} sunt\\ indivisa;\\ tervata\\ tamen\\ cujusque\\ person\ae{}\\ divinitatis\\ sua pro-\\prietate}
+    }
+    {
+      \Schema{-0.8ex}{6.4ex}
+      {
+        \schemabox{Creatione\\ natur\ae{}}
+      }
+      {
+        \schema
+        {
+          \schemabox{Brute ut}
+        }
+        {
+          \schemabox{C\oe{}li} \smallskip \schemabox{Elementorum} \smallskip \schemabox{Mundi}
+        }
+        \smallskip
+        \schema
+        {
+          \schemabox{\gk{λογικῆς}{logik~hs}{logik\=es}, ut}
+        }
+        {
+          \schemabox{Angelorum.} \smallskip \schemabox{Hominum: Ad\ae{},\\ Ev\ae{} \& procreatorum\\ exipsis.\strut}
+        }
+      }
+      \schema
+      {
+        \schemabox{Sustenatione\\ natur\ae{} laps\ae{},}
+      }
+      {
+        \schemabox{Angelorum malorum,} \smallskip \schemabox{Hominum: Ad\ae{}, Ev\ae{}\\ \& procreatorum exipsis.}
+      }
+      \Schema{2.6ex}{8.8ex}
+      {
+        \schemabox{Beneficiis\\ erga Ecc-\\ lesiam: ea\\ versantur\\ aut circa}
+      }
+      {
+        \Schema{2.2ex}{7ex}
+        {
+          \schemabox{Res, ut}
+        }
+        {
+          \schema
+          {
+            \schemabox{Verbum}
+          }
+          {
+            \schemabox{Legis} \smallskip \schemabox{Evangelii} \smallskip \schemabox{Sacramentorum}
+          }
+          \smallskip
+          \schema
+          {
+            \schemabox{Signa vel Veteris\\ vel Novi Testa-\\ mentum ut sunt:}
+          }
+          {
+            \schemabox{Ceremoni\ae{}} \smallskip \schemabox{Miracula}
+          }
+        }
+        \smallskip
+        \Schema{0.6ex}{5.5ex}
+        {
+          \schemabox{Personas}
+        }
+        {
+          \schema
+          {
+            \schemabox{Ecclesi\ae{}}
+          }
+          {
+            \schemabox{Universalis} \smallskip \schemabox{Particularis}
+          }
+          \smallskip
+          \schemabox{Politi\ae, ut Magistratuum}
+          \smallskip
+          \schemabox{\OE{}conomi\ae, ut privatorum}
+        }
+      }\vskip2ex
+    }
+  }
+}
+$$
+
+\vfil
+\egroup
+\eject
+
+\hbox{\ }
+\vfil
+
+$$
+\Schema{-1.4ex}{10ex}
+{
+  \schemabox{Qu\ae{} sit\\ \textsc{Dei}, vel}
+}
+{
+  \Schema{-1ex}{5ex}
+  {
+    \schemabox{\textsc{Essentia}, in}
+  }
+  {
+    \vskip1ex\schemabox{Unitate divina,}
+    \medskip
+    \Schema{0ex}{3.4ex}
+    {
+      \schemabox{Tribus perso-\\ nis divinitatis}
+    }
+    {
+      \Schema[close]{0ex}{3.4ex}
+      {
+        \NudgeSB\schemabox{Patre,\\ Filio,\\ Spiritui Sancto}
+      }
+      {
+        \schemabox{\gk{ὁμοουσίοις}{<omoous'iois}{homoousiois}\\ \& co\ae{}ternis}
+      }
+    }
+  }
+  \medskip
+  \Schema{-0.2ex}{6.4ex}
+  {
+    \schemabox{\textsc{Voluntas},\\ revelatur in\\ actione, sive}
+  }
+  {
+    \Schema{0ex}{3.4ex}
+    {
+      \schemabox{Universali}
+    }
+    {
+      \Schema[close]{0ex}{3.4ex}
+      {
+        \schemabox{Creationis,\\Sustenationis,\\ Propagationis,}
+      }
+      {
+        \schemabox{rerum creatarum.}
+      }
+    }
+    \medskip
+    \schema
+    {
+      \schemabox{Speciali, in beneficiis\\ erga Ecclesiam, eam}
+    }
+    {
+      \schemabox{Colligendo.\\ Justificando.\\ Conservando.\\
+      Glorificando.}
+    }
+  }
+}
+$$
+
+\vfil
+% Use here especially in Plain TeX and the like.
+\newbox\mybox
+
+$$
+\Schema{0ex}{15ex}
+{\schemabox{\bfseries Curricula\\\bfseries Texts}}
+{
+  \DoBrackets%
+  \setbox\mybox=\hbox{\bfseries III. Philosophical }%
+  \dimen0=\wd\mybox%
+  \schema
+    {\schemabox[\dimen0]
+      {\bfseries I. General\\Studies}}
+    {\NudgeSB[before]%
+     \schemabox
+      {1. Collected Works\\
+       2. Encyclopedias}}
+  \medskip
+  \schema
+    {\schemabox[\dimen0]
+      {\bfseries II. Literary\\Disciplines}}
+    {\NudgeSB[before]%
+     \schemabox{1. Philology\\
+       2. Historical Introduction\\
+       3. Literary Theory\\
+       4. Application}}
+  \medskip
+  \schema
+      {\schemabox[\dimen0]
+        {\bfseries III. Philosophical\\Disciplines}}
+      {\NudgeSB[before]%
+       \schemabox{1. Source Texts\\
+         2. History of Philosophy\\
+         3. General Surveys\\
+         4. Specific Studies}}
+  \medskip
+  \schema
+      {\schemabox[\dimen0]
+        {\bfseries IV. Historical\\Disciplines}}
+      {\NudgeSB[before]%
+        \schemabox{1. General Surveys\\
+        2. Specialized Works}}
+}
+$$
+
+\vfil
+\eject
+
+\ifx\fmtname\nameoflatex \end{document} \fi
+\ifx\fmtname\nameoflollipop \Stop \fi
+\bye
+%examplesvb
+%</examples>
+\endinput

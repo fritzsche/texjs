@@ -1,0 +1,229 @@
+picture skin[];
+
+nbhair=6;
+
+path hair[], shirt, undershirt, shirthigh,undershirthigh,rayure,laniere;
+
+hair1=pointarc(tete,150)..(pointarc(tete,150)+u*((0.4+uniformdeviate(0.2))*0.7,-0.05+uniformdeviate(0.1)))..pointarc(tete,40+uniformdeviate(20))..arccercle(pointarc(tete,60),pointarc(tete,150),center tete)--cycle;
+%2
+hair2=pointarc(tete,180){dir70}..{dir-70}(pointarc(tete,90)+u*(0,-0.5+uniformdeviate(0.15))){dir70}..{dir-70}pointarc(tete,0)..arccercle(pointarc(tete,0),pointarc(tete,180),center tete)--cycle;
+%3
+hair3=pointarc(tete,180-uniformdeviate(10)){dir(60+uniformdeviate(10))}..{dir(-60-uniformdeviate(10))}pointarc(tete,uniformdeviate(10))..arccercle(pointarc(tete,10),pointarc(tete,180),center tete)--cycle;
+%4
+hair4=pointarc(tete,180-uniformdeviate(10)){dir85}..(pointarc(tete,150)+u*(0.1,0))--(pointarc(tete,150)+u*(0.1+0.1*uniformdeviate(1),-0.1+0.1*uniformdeviate(1)))--(pointarc(tete,150)+u*(0.3+0.1*uniformdeviate(1),0.1*uniformdeviate(1)))--(pointarc(tete,150)+u*(0.5+0.1*uniformdeviate(1),-0.1+0.1*uniformdeviate(1)))--(pointarc(tete,150)+u*(0.7+0.1*uniformdeviate(1),0.1*uniformdeviate(1)))--(pointarc(tete,150)+u*(0.8+0.1*uniformdeviate(1),-0.1+0.1*uniformdeviate(1)))..{dir-90}pointarc(tete,uniformdeviate(10))..arccercle(pointarc(tete,10),pointarc(tete,170),center tete)--cycle;
+%
+hair5=pointarc(tete,180-uniformdeviate(10)){dir85}..{dir90}(pointarc(tete,85+uniformdeviate(10))+u*(0,-0.1-uniformdeviate(0.3))){dir-90}..{dir-90}pointarc(tete,uniformdeviate(10))..arccercle(pointarc(tete,10),pointarc(tete,170),center tete)--cycle;
+%
+hair6:=pointarc(tete,180-uniformdeviate(10)){dir85}..{dir0}(pointarc(tete,120)+u*(0,-0.2)){dir-10}..{dir10}(pointarc(tete,60)+u*(0,-0.2)){dir0}..{dir-85}arccercle(pointarc(tete,10),pointarc(tete,170),center tete)--cycle;
+%
+skin1=image(
+  fill corps withcolor ColCorps;
+trace corps;
+fill tete withcolor ColCorps;
+trace tete;
+if typehair<nbhair+1:
+fill hair[typehair] withcolor ColCheveu;
+trace hair[typehair];
+fi;
+shirthigh=pointarc(corps,55){dir-150}..{dir150}pointarc(corps,125);
+shirt=shirthigh..arccercle(pointarc(corps,125),pointarc(corps,55),center corps)--cycle;
+fill shirt withcolor ColShirt;
+trace shirt;
+);
+%%%%%%%%%%%%%%%%%%%%%
+skin2=image(
+  fill corps withcolor ColCorps;
+trace corps;
+fill tete withcolor ColCorps;
+trace tete;
+if typehair<nbhair+1:
+fill hair[typehair] withcolor ColCheveu;
+trace hair[typehair];
+fi;
+shirthigh:=pointarc(corps,55){dir-150}..{dir150}pointarc(corps,125);
+shirt:=shirthigh..arccercle(pointarc(corps,125),pointarc(corps,55),center corps)--cycle;
+fill shirt withcolor ColShirt;
+trace shirt;
+  undershirthigh:=shirthigh cutbefore chemin((point(0.25*length shirthigh) of shirthigh),(point(0.25*length shirthigh) of shirthigh)) cutafter chemin((point(0.75*length shirthigh) of shirthigh),(point(0.75*length shirthigh) of shirthigh));
+  undershirt:=(point(0.25*length shirthigh) of shirthigh){dir-90}..{dir-90}(center corps){dir90}..{dir90}(point(0.75*length shirthigh) of shirthigh)--reverse(undershirthigh)--cycle;
+  fill undershirt withcolor ColSShirt;
+  trace undershirt;
+);
+%%%%%%%%%%%%%%%%%%%%%%%
+skin3=image(
+  fill corps withcolor ColCorps;
+trace corps;
+fill tete withcolor ColCorps;
+trace tete;
+if typehair<nbhair+1:
+fill hair[typehair] withcolor ColCheveu;
+trace hair[typehair];
+fi;
+shirthigh:=pointarc(corps,55){dir-150}..{dir150}pointarc(corps,125);
+shirt:=shirthigh..arccercle(pointarc(corps,125),pointarc(corps,55),center corps)--cycle;
+fill shirt withcolor ColShirt;
+trace shirt;
+rayure=(shirt cutbefore ((center corps--pointarc(corps,150))) cutafter ((center corps--pointarc(corps,160)))){dir-30}..{dir30}pointarc(corps,20)--(shirt cutbefore ((center corps--pointarc(corps,30))) cutafter ((center corps--pointarc(corps,30)))){dir-150}..{dir150}pointarc(corps,150)--cycle;
+fill rayure withcolor ColSShirt;
+  trace rayure;
+);
+%%%%%%%%%%%%%%%%%%%%%%%
+pair lanierea,laniereb;
+skin4=image(
+  fill corps withcolor ColCorps;
+trace corps;
+shirthigh:=pointarc(corps,45){dir-150}..{dir150}pointarc(corps,135);
+shirt:=shirthigh..arccercle(pointarc(corps,135),pointarc(corps,45),center corps)--cycle;
+fill shirt withcolor ColShirt;
+trace shirt;
+rayure:=(shirt cutbefore ((center corps--pointarc(corps,135))) cutafter ((center corps--pointarc(corps,155)))){dir-30}..{dir30}pointarc(corps,25)--(shirt cutbefore ((center corps--pointarc(corps,25))) cutafter ((center corps--pointarc(corps,45)))){dir-150}..{dir150}pointarc(corps,135)--cycle;
+fill rayure withcolor ColSShirt;
+trace rayure;
+lanierea=pointarc(corps,110);
+laniereb=pointarc(corps,125);
+laniere=arccercle(lanierea,laniereb,center corps)--(laniereb+u*(0,-0.75))--(laniereb+u*(0.1,-0.85))--(laniereb+u*(0.2,-0.75))--lanierea--cycle;
+fill laniere withcolor 0.15[ColShirt,black];
+trace laniere;
+fill cercles(laniereb+u*(0.1,-0.75),0.025u) withcolor ColBouton;
+fill symetrie(laniere,center corps,center tete) withcolor 0.15[ColShirt,black];
+trace symetrie(laniere,center corps,center tete);
+fill symetrie(cercles(laniereb+u*(0.1,-0.75),0.025u),center corps,center tete) withcolor ColBouton;
+fill tete withcolor ColCorps;
+trace tete;
+if typehair<nbhair+1:
+fill hair[typehair] withcolor ColCheveu;
+trace hair[typehair];
+fi;
+);
+%%%%%%%%%%%%%%%%%%%%%%%
+skin5=image(
+  fill corps withcolor ColCorps;
+trace corps;
+shirthigh:=pointarc(corps,75){dir-150}..{dir150}pointarc(corps,105);
+shirt:=shirthigh..arccercle(pointarc(corps,105),pointarc(corps,75),center corps)--cycle;
+fill shirt withcolor ColShirt;
+trace shirt;
+path fermeture;
+fermeture=(point(0.5*length shirthigh) of shirthigh)--center corps;
+trace fermeture;
+for k=1 step 2 until 9:
+  fill cercles((point(0.1*k*length fermeture) of fermeture) shifted(u*(0.05,0)),0.025u) withcolor ColBouton;
+endfor;
+fill tete withcolor ColCorps;
+trace tete;
+if typehair<nbhair+1:
+fill hair[typehair] withcolor ColCheveu;
+trace hair[typehair];
+fi;
+);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+skin6=image(
+  fill corps withcolor ColCorps;
+trace corps;
+shirthigh:=pointarc(corps,75){dir-150}..{dir150}pointarc(corps,105);
+shirt:=shirthigh..arccercle(pointarc(corps,105),pointarc(corps,75),center corps)--cycle;
+fill shirt withcolor ColShirt;
+trace shirt;
+path doublure;
+doublure=arccercle(pointarc(corps,110),pointarc(corps,120),center corps)--(pointarc(corps,120)+u*(-0.1,-0.2))--(pointarc(corps,120)+u*(0.05,-0.25))--(pointarc(corps,120)+u*(0,-0.3))--(point(6) of corps){dir90}..{dir90}cycle;
+fill symetrie((point(6) of corps){dir90}..{dir90}pointarc(corps,110),center corps,center tete)--arccercle(pointarc(corps,70),pointarc(corps,110),center corps)--reverse((point(6) of corps){dir90}..{dir90}pointarc(corps,110))--cycle withcolor ColSShirt;
+trace doublure;
+trace symetrie(doublure,center corps,center tete);
+fill tete withcolor ColCorps;
+trace tete;
+if typehair<nbhair+1:
+fill hair[typehair] withcolor ColCheveu;
+  trace hair[typehair];
+  fi;
+  );
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+skin7=image(
+  fill corps withcolor ColCorps;
+trace corps;
+shirthigh:=pointarc(corps,75){dir-150}..{dir150}pointarc(corps,105);
+shirt:=shirthigh..arccercle(pointarc(corps,105),pointarc(corps,75),center corps)--cycle;
+fill shirt withcolor ColShirt;
+  trace shirt;
+  fill (center corps+u*(0,0.5))--arccercle(pointarc(corps,70),pointarc(corps,110),center corps)--cycle withcolor ColCorps;
+path col;
+col=arccercle(pointarc(corps,110),pointarc(corps,120),center corps)--(pointarc(corps,120)+u*(-0.1,-0.2))--(pointarc(corps,120)+u*(-0.15,-0.25))--(pointarc(corps,120)+u*(0.15,-0.2))--(center corps+u*(0,0.5))--cycle;
+trace col;
+trace symetrie(col,center corps,center tete);
+fill tete withcolor ColCorps;
+trace tete;
+if typehair<nbhair+1:
+fill hair[typehair] withcolor ColCheveu;
+  trace hair[typehair];
+  fi;
+  );
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+skin8=image(
+  fill corps withcolor ColCorps;
+  trace corps;
+  shirthigh:=pointarc(corps,75){dir-150}..{dir150}pointarc(corps,105);
+  shirt:=arccercle(pointarc(corps,120),pointarc(corps,60),center corps)--reverse((center corps+u*(0,-0.15)){dir85}..{dir90}pointarc(corps,60))--reverse(pointarc(corps,120){dir-90}..{dir-85}(center corps+u*(0,-0.15)))--cycle;
+  path col;
+  col=pointarc(corps,120){dir-90}..{dir-85}(center corps+u*(0,-0.15)){dir85}..{dir90}pointarc(corps,60)--cycle;
+  fill col withcolor ColSShirt;
+  trace col;
+  path noeud,cravate;
+  noeud=pointarc(tete,265)--(pointarc(tete,265)+u*(-0.02,-0.1))--(pointarc(tete,275)+u*(0.02,-0.1))--pointarc(tete,275)--cycle;
+  fill noeud withcolor ColCravate;
+  cravate=(pointarc(tete,265)+u*(-0.02,-0.1))--(pointarc(tete,265)+u*(-0.1,-0.15))--(pointarc(tete,265)+u*(-0.05,-1))--(pointarc(tete,275)+u*(0.05,-1))--(pointarc(tete,275)+u*(0.1,-0.15))--(pointarc(tete,275)+u*(0.02,-0.1))--cycle;
+  fill cravate withcolor ColCravate;
+  trace noeud;
+  trace cravate;
+  fill shirt withcolor ColShirt;
+  trace shirt;
+  fill tete withcolor ColCorps;
+  trace tete;
+  if typehair<nbhair+1:
+    fill hair[typehair] withcolor ColCheveu;
+    trace hair[typehair];
+  fi;
+  );
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+skin9=image(
+  fill tete withcolor ColCorps;
+  trace arccercle(pointarc(tete,330),pointarc(tete,210),center tete);
+  path menton;
+  menton=arccercle(pointarc(tete,210),pointarc(tete,330),center tete){dir-170}..{dir170}cycle;
+  fill corps withcolor ColShirt;
+  fill menton withcolor ColShirt;
+  trace corps cutafter arccercle(pointarc(tete,270),pointarc(tete,0),center tete);
+  trace corps cutbefore arccercle(pointarc(tete,180),pointarc(tete,270),center tete);
+  trace menton cutafter arccercle(pointarc(corps,110),pointarc(corps,180),center corps);
+  trace menton cutbefore arccercle(pointarc(corps,0),pointarc(corps,70),center corps);
+  trace ((center tete--center Etiquette) cutbefore (pointarc(tete,330){dir-170}..{dir170}pointarc(tete,210)) cutafter Etiquette) withpen pensquare scaled 1.5;
+  trace ((center tete--center Etiquette) cutbefore (pointarc(tete,330){dir-170}..{dir170}pointarc(tete,210)) cutafter Etiquette) withpen pensquare scaled 1.05 withcolor white;
+  path bonnet;
+  bonnet=pointarc(tete,10)--(xpart(pointarc(tete,10)),ypart(pointarc(tete,30)))--pointarc(tete,30)--arccercle(pointarc(tete,30),pointarc(tete,150),center tete)--(xpart(pointarc(tete,170)),ypart(pointarc(tete,150)))--pointarc(tete,170)--cycle;
+  fill bonnet withcolor 0.5[white,ColBonnet];
+  trace (xpart(pointarc(tete,10)),ypart(pointarc(tete,30)))--(xpart(pointarc(tete,170)),ypart(pointarc(tete,150)));
+  trace bonnet;
+);
+%%%%%%%%%%%%%%%%%%%%%%%
+skin10=image(
+  fill corps withcolor ColCorps;
+  trace corps;
+  shirthigh:=pointarc(corps,75){dir-150}..{dir150}pointarc(corps,105);
+  shirt:=shirthigh..arccercle(pointarc(corps,105),pointarc(corps,75),center corps)--cycle;
+  fill shirt withcolor ColShirt;
+  trace shirt;
+  path fermeture;
+  fermeture=pointarc(corps,120)--(xpart(pointarc(corps,120)),ypart(center corps));
+  trace fermeture;
+  for k=1 step 2 until 9:
+  fill cercles((point(0.1*k*length fermeture) of fermeture) shifted(u*(0.05,0)),0.025u) withcolor ColBouton;
+  endfor;
+  path poche;
+  poche=(center corps+u*(0.25,0.2))..(center corps+u*(0.45,0.2)){dir60}..(center corps+u*(0.5,0.45))--(center corps+u*(0.2,0.45))..{dir-60}cycle;
+  trace poche;
+  trace (center corps+u*(0.5,0.425))--(center corps+u*(0.5,0.425));
+fill tete withcolor ColCorps;
+trace tete;
+if typehair<nbhair+1:
+fill hair[typehair] withcolor ColCheveu;
+trace hair[typehair];
+fi;
+);

@@ -1,0 +1,456 @@
+% \iffalse meta-comment
+% !TEX encoding = UTF-8 Unicode
+%<*internal>
+\begingroup
+\input docstrip.tex
+\keepsilent
+\preamble
+  ____________________________________________________
+  The FiXLtxHyph package 
+  Copyright (C) 2011-2024 Claudio Beccari 
+  All rights reserved
+
+  License information appended
+
+\endpreamble
+\postamble
+
+Copyright 2011-2024 Claudio Beccari
+
+Distributable under the LaTeX Project Public 
+License, version 1.3c or higher (your choice). 
+The latest version of this license is at: 
+http://www.latex-project.org/lppl.txt
+
+This work is "author-maintained"
+
+This work consists of this file .dtx, a README file
+the derived file fixltxhyph.sty, and the English 
+documentation fixltxhyph.pdf.
+ 
+
+By running pdflatex on fixltxhyph.dtx the user gets 
+the .sty file, and the English documentation file in PDF format.
+
+\endpostamble
+
+\askforoverwritefalse
+
+\generateFile{fixltxhyph.sty}{f}%
+  {\from{fixltxhyph.dtx}{style}}
+
+\def\tmpa{plain}
+\ifx\tmpa\fmtname\endgroup\expandafter\bye\fi
+\endgroup
+%</internal>
+%
+% \fi
+%
+% \iffalse
+%<*driver>
+\documentclass{ltxdoc}
+\ProvidesFile{fixltxhyph.dtx}[2024-12-28 v.0.5 Documented TeX file for the FixLtxHyph package]
+\GetFileInfo{fixltxhyph.dtx}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{color}
+\usepackage{multicol}
+\title{\centering The FixLtxHyph package\protect\\
+A small fix in order to hyphenate emphasised words after a vocalic elision\protect}
+\date{\fileversion\space\filedate}
+ \author{Claudio Beccari}
+\usepackage{array}
+\usepackage{metalogo}
+\def\prog#1{\textsf{#1}}
+\def\amb#1{\textsf{\slshape#1}}
+\def\omissis{[\dots\!]}
+\begin{document}\errorcontextlines=9
+\maketitle
+\begin{multicols}{2}
+\tableofcontents
+\end{multicols}
+ \setlength\hfuzz{20pt}
+ \DocInput{fixltxhyph.dtx}
+\end{document}
+%</driver>
+% \fi
+% \CheckSum{16}
+%
+% \begin{abstract}
+% This file fixes a small feature of the hyphenation
+% algorithm used by the \TeX\ system typesetting 
+% engines that manifests itself only with those 
+% languages that use the apostrophe for marking a
+% vocalic elision. This small package was set up to
+% fix this little undesirable feature in Italian,
+% but it was extended to Catalan, French, the
+% fourth official Swiss language Rumantsch Grischun
+% (Romansh in English) and  the Regional Language
+% Friulan, spoken and written in North Eastern
+% Italy. This fix operates correctly with
+% \prog{pdflatex}, \prog{lualate}, and
+% \prog{xelatex}.
+% \end{abstract}
+%
+% \section{What is the feature to be fixed}
+% The five languages Catalan, French, Italian,
+% Romansh, and Friulian use the apostrophe for
+% marking the vocalic elision of the ending vowel
+% at the end of prepositions, articles, articulated
+% prepositions, definite adjectives, and other words
+% playing similar rôles when they just precede
+% nouns, adjectives, verbs, numerals, that start
+% with a vowel. Probably there are other languages
+% that use the apostrophe in a similar way. I can
+% easily upgrade this small package if \LaTeX\ users
+% of other languages let me know about such
+% languages.
+% 
+% This feature is common to most Romance languages
+% (from West to East) from Catalan and Valencian,
+% to French, Langue d'oc, Occitan, Provençal,
+% Vivaroalpin, Italian, Piedmontese, Lombard,
+% Romansh, Ladin, Friulian; up to now only Catalan,
+% French, Italian, Romansh, Friulian, Piedmontese,
+% and Occitan are handled by the \TeX-system
+% programs; at the same time most of these languages
+% are minority ones and are being protected by local
+% legislation or are supported by specific cultural
+% or linguistic institutions; Romansh has got a
+% national/federal legal status in Switzerland and
+% is being used in legal and official documents in
+% the whole Swiss Confederation, not only in its
+% area of everyday use, the Kanton Graubunden or
+% Canton Grigioni or Chantun Grischun  (where seven
+% Romansh varieties are being spoken, besides
+% Swiss German, Italian, and other languages). The
+% Friulian language has an official regional status
+% in the North-eastern Italian Region
+% Friuli\,-Venezia Giulia.
+%
+% This spelling rule is very rigorous in French;
+% I suppose it is also a rigorous rule in Catalan,
+% Romansh, and Friulian but I am not so familiar
+% with these languages even if I can understand them
+% while reading texts written in these languages.
+% In Italian it used to be a rigorous rule many
+% years ago, but nowadays it is less frequently
+% used when plurals are involved. Nevertheless
+% apostrophes are practically the only analphabetic
+% sign you see in an Italian texts besides
+% punctuation and quotation marks.
+%
+% In order to hyphenate correctly these word
+% combinations all such languages have to declare
+% the apostrophe, that has a category code of~12,
+% as a glyph with non zero lower case code. In facts 
+% all such languages declare:
+%\begin{verbatim}
+%\lccode`\'=`\'
+%\end{verbatim}
+% or something equivalent. With this little trick,
+% the typesetting engine considers the apostrophe as
+% a valid word character and treats the whole string
+% as a single word; the hyphenation patterns of
+% these languages, of course, take into
+% consideration also the apostrophe so that the
+% resulting correct line breaks are easily found:
+%\begin{center}
+%\begin{tabular}{l>{\ttfamily}ll}
+%Catalan		& d'aquesta		  & d'a-ques-ta		    \\
+%French		 	& l'électricité	& l'élec-tri-ci-té	\\
+%Friulian		& l'arbul		    & l'ar-bul          \\
+%Italian		& dell'eleganza	& del-l'e-le-gan-za	\\
+%Romansh		& l'identitad	  & l'i-den-ti-tad	  
+%\end{tabular}
+%\end{center}
+%
+% So where is the problem? It emerges when the
+% second part of the string is emphasised,
+% because in this case no hyphenation takes place:
+%\begin{center}
+%\begin{tabular}{l>{\ttfamily}ll}
+%Catalan	& d'\string\emph\{aquesta\}		  & d'\emph{aquesta}		\\
+%French		& l'\string\emph\{électricité\}	& l'\emph{électricité}	\\
+%Friulian	& l'\string\emph\{arbul\}		    & l'\emph{arbul}\\
+%Italian	& dell'\string\emph\{eleganza\}	& dell'\emph{eleganza}	\\
+%Romansh	& l'\string\emph\{identitad\}	  & l'\emph{identitad}	
+%\end{tabular}
+%\end{center}
+%
+% This behaviour is easily explained, so that it is
+% not to be considered a bug, but a feature; a 
+% feature that is annoying only when using the
+% above named languages.
+%
+% The point is that all \TeX\ system typesetting
+% engines consider a word to be that character
+% string starting after a character invalid in a
+% word and finishing with the first token invalid
+% in a word. Notice that when the hyphenating
+% algorithm comes to work the command |\emph| has
+% already been expanded and it ends up with the
+% qualifications of the selected font; therefore a
+% string such as \verb*| d'aquesta | (starting after
+% a space and ending before the following space) is
+% made up of valid characters; but 
+% \verb*| d'\emph{aquesta} | is a “word” starting
+% after a space and ending before a space, but
+% containing a font change. And this makes the word
+% invalid for hyphenation.
+%
+% The \TeX\-book is clear on this respect:
+% \begin{quote}If a suitable letter is found [as a
+% starting character], let it be in font $f$.
+% \omissis\ \TeX\ continues to scan forward until
+% coming to something that's not one of the 
+% following three “admissible items”: (1) a
+% character in font $f$ whose |\lccode| is not zero;
+% (2) a ligature formed entirely from characters of
+% type (1); (3) an implicit kern. \omissis\ Notice
+% that all these items are in font~$f$.\end{quote}
+%
+% This was a specific programming choice decided by
+% Donald~E.\ Knuth together with Frank Liang, his
+% PhD student who developed the hyphenation
+% algorithm implemented in the typesetting engines
+% of the \TeX\ system\footnote{I have been told that
+% Lua\TeX\ developed a different algorithm that
+% eliminates this feature.}.
+% All such decisions are a compromise between
+% accuracy and speed. Remember also that at the
+% beginning \prog{tex} the program was used
+% essentially with English, a language that does not
+% use accented letters and uses elision in a much
+% different way as the ones we are speaking here.
+% The problem did non exist and, I suppose, it will
+% never exist in English.
+%
+% \section{The solutions}
+% As a compromise I decided to solve the problem in
+% an automatic way only when the second part of the
+% “word” to be hyphenated is \emph{emphasised}. I
+% assume it is the most frequent situation, although
+% no one can avoid thinking to other situations; for
+% example: the second part of such “word” after the
+% apostrophe is bolded, is coloured, is written in
+% another font selected on purpose or is in another
+% alphabet, is in italics (with no automatic
+% inclination switching); in such cases the solution
+% is manual and remains manual, because there are
+% too many possibilities and it is cumbersome to
+% deal with all of them.
+%
+% But manual or automatic, how should we proceed?
+% Simply we must convince the typesetting program
+% that the starting letter must not be the start of
+% the part preceding the apostrophe, but what
+% follows it.
+%
+% This is simple: it suffices to put after the
+% apostrophe an unbreakable, zero width glob of
+% glue so that \TeX\ starts looking for a potential
+% starting letter after the glue. Therefore the
+% manual solution consists in defining a short macro
+% such as the following one:
+%\begin{verbatim}
+%\newcommand\hz{\nobreak\hskip\z@skip}
+%\end{verbatim}
+% or, if you want to avoid setting this short
+% command into a personal \texttt{.sty} file,
+% simply change |\z@skip| with |0pt|. You will then
+% have to modify the font changing
+% phrase into something such as:
+%\begin{verbatim}
+%... d'\hz\textbf{aquesta} ...
+%\end{verbatim}
+% The |\hz|, whose name reminds the phrase
+% “Horizontal skip of an unbreakable Zero width
+% glob of glue”, finishes the preceding word and
+% sets the grounds for starting the search of a new
+% starting letter of another word; it will be found
+% after the font selection code introduced in the
+% horizontal list by the selected font
+% identification.
+%
+% The automatic solution, on the opposite, implies
+% a small but substantial modification of the
+% |\emph| command. In facts the text command uses
+% the text declaration |\em|; on turn |\em| is a
+% robust command, that is defined as
+% \verb*|\protect\em |: it would be very unwise to
+% modify a protected command, so it is necessary to
+% modify the \texttt{protect}ed one, and this
+% operation is not trivial because of the space in
+% this macro name. 
+%
+% In any case if we find out how, we must add |\hz|
+% to the definition of \verb*|\em | before its
+% substitution text, so that the \TeX\ search of the
+% first character of a real word  starts at the end
+% of the substitution code.
+%
+% This small package does exactly this only with
+% the |\emph| command. Its functionalities actually
+% are  in force for any language, non only for the
+% above named languages.
+
+% The |\hz| command is globally available to the
+% user, so that when this package is loaded, the
+% manual solution remains valid in any situation,
+% as, for example, for the first line of a list
+% item for the text that follows the \cs{item}
+% command and its argument.
+% It is necessary, especially within a
+% \amb{description} environment, because sometimes
+% the item mandatory argument entry might be pretty
+% long and the first line might require hyphenation
+% at its end.
+%
+% It has been tested with the above named five
+% languages with both \prog{pdflatex},
+% \prog{xelatex}, and also with \prog{lualatex}; and
+% apparently it works as expected; it has been
+% throughly tested in all situations with Italian;
+% it should work properly also in French, in
+% Romansh, and in Friulian; certainly it works with
+% \texttt{utf8} text encoding. The adopted solution
+% does not fiddle with active characters and
+% therefore it does not interfere with the internal
+% workings and settings of Catalan and other
+% languages.
+%
+% \section{Installation}
+% With modern \TeX\ distributions these instructions
+% are superfluous; should you need to manually
+% install this package, download from \textsc{ctan}
+% in a scratch directory (possibly create one, and
+% after finishing, delete the whole directory with
+% its contents) run this file
+% \texttt{fixltxhyph.dtx} through \prog{pdflatex};
+% you get two files and move them as follows:
+%\begin{itemize}
+%\item
+% Move all the files in the following directories
+% on your disk; if you don't already have those
+% directories, create them.
+%\item 
+% These directories should be created in your
+% personal \texttt{texmf} tree; if you don't have
+% one, create it; how to do this and where to root
+% it depends on your operating system; before doing
+% any change to your hard disk, please read
+% carefully the TeX Live or the MiKTeX
+% documentations in order to find out what a
+% personal tree is.
+%\item 
+% Move \texttt{fixltxhyph.dtx} to \texttt{.../texmf/source/latex/FixLtxHyph/};
+%\item 
+% Move \texttt{fixltxhyph.pdf} to \texttt{.../texmf/doc/latex/FixLtxHyph/};
+%\item
+% Move \texttt{fixltxhyph.sty} to \texttt{.../texmf/tex/latex/FixLtxHyph/};
+%\item
+% if your distribution requires it, refresh the file name database.
+%\end{itemize}
+% You are now ready to use the package by simply
+% invoking it in the preamble of your
+% documents:
+%\begin{verbatim}
+%\usepackage{fixltxhyph}
+%\end{verbatim}
+%
+%\section{Aknowledgements}
+% I wish to thank Lorenzo Pantieri who tested the
+% preliminary and the actual versions of this
+% package and directly or indirectly helped
+% debugging the code, especially in the preliminary
+% version that used active characters and was
+% particularly buggy. Another big thank you to
+% Enrico Gregorio who spotted the protection problem
+% of the |\em| command.
+%
+% \StopEventually{}
+%
+%\section{The documented code}
+% We start by identifying the package and the
+% necessary format file:
+%\iffalse
+%<*style>
+%\fi
+%    \begin{macrocode}
+\ProvidesPackage{fixltxhyph}[2024/12/01 v.0.5 
+  Small fix for hyphenating emphasised words]
+\NeedsTeXFormat{LaTeX2e}[2022/01/01]
+%    \end{macrocode}
+%
+% We need the package |etoolbox| in order to perform
+% any action on control sequences that contain
+% spaces in their names. We keep the old 
+% \verb|\@ifpackageloaded| command, not because we
+% love vintage commands, because since 2024
+% it is available the \verb|\IfPackageLoadedF|
+% command, that is more easily maintainable 
+% and does not require the empty argument, 
+% but because users sometimes work with vintage
+% \TeX-system installations.
+%
+% First we define a very short command |\hz| in
+% order to have available a handy command for
+% inserting an unbreakable zero-width glob of glue
+% in case we needed to manually do some sort of
+% patching. 
+%    \begin{macrocode}
+\newcommand\hz{\nobreak\hskip\z@skip}
+%    \end{macrocode}
+%
+% Next we patch the \cs{em\textvisiblespace}
+% command. To do so in an efficient way we need
+% the |etooolbox| package.
+%    \begin{macrocode}
+\IfPackageLoadedF{etoolbox}{\RequirePackage{etoolbox}}
+%    \end{macrocode}
+% In a previous version we tested if one of the
+% certainly (vulnerable languages that use the
+% vocalic elision replaced by an apostrophe) was
+% the current language; in this new package version
+% 0.5 we omit such test because the patch is
+% harmless even if the apostrophe does not imply any
+% vocalic elision.
+%
+% The next bit of code  defines an alias in
+% order to keep the original meaning of the
+% declaration |\em|; in order to patch an alias to
+% be used only in the redefinition of the same named new macro.
+%    \begin{macrocode}
+\letcs{\FLH@originalem}{em }
+\RenewDocumentCommand{\em }{m}{\FLH@originalem\hz}
+%    \end{macrocode}
+% Notice that the \cs{em\textvisiblespace} defined
+% by means of the  \LaTeX3 \cs{RenewDocumentCommand}
+% is robust as all commands defined by means of this
+% kind of \LaTeX3 commands.
+%
+% Eventually let us conclude with a comment:
+% compared with the previous version 0.4 of this
+% package the number of control sequences contained
+% in this new version is drastically diminished
+% from 84 to 16. This is one of the advantages
+% gained by using the \LaTeX3 language besides the
+% \texttt{etoolbox} facilities. 
+%
+%
+% This documented file is now finished and its
+% final commands are issued:
+%    \begin{macrocode}
+\endinput
+%    \end{macrocode}
+% together with the |docstrip| command \cs{Finale}
+% that allows to control if the final extracted code
+% is complete.
+%\iffalse
+%</style>
+%\fi
+%
+% \Finale
+% \endinput

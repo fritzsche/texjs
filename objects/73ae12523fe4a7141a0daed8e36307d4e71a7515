@@ -1,0 +1,456 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2018 - 2021 by ChairX
+%
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either
+% version 1.3 of this license or (at your option) any later
+% version.  The latest version of this license is in:
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of
+% LaTeX version 2005/12/01 or later.
+%
+% This file contains the implementation of all analysis related macros .
+%
+% Macros have to be described by (delete the first %)
+% %\begin{macro}{\macro}
+% % Description of the implementation.
+% %    \begin{macrocode}
+%\newcommand{\macro}[]         {}
+% %    \end{macrocode}
+% %\end{macro}
+%
+% The implementation and description will appear in the implementation
+% part of the documentation. Use \subsubsection{} etc. for structuring.
+%
+% The documentation of the macros defined here has to be written in
+% chairxmathAnalysisDoc.dtx
+%\fi
+%
+% First we check of macros should be included:
+%    \begin{macrocode}
+\if@loadmath
+%    \end{macrocode}
+%
+% \subsubsection{General Analysis} \label{sec:GeneralMacrosAnalysis}
+%
+%\begin{macro}{\vol}
+%    \begin{macrocode}
+\newcommand{\vol}{\ch@irxoperatorfont{vol}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\complete}
+%    \begin{macrocode}
+\newcommand{\complete}[1]{\widehat{#1}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Ball}
+%    \begin{macrocode}
+\newcommand{\Ball}{\ch@irxoperatorfont{B}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\abs}
+%    \begin{macrocode}
+\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\norm}
+%    \begin{macrocode}
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\supnorm}
+%    \begin{macrocode}
+\newcommand{\@supnormstar}[1]{\norm*{#1}_\infty}
+\newcommand{\@supnormnostar}[2][]{\norm[#1]{#2}_\infty}
+\newcommand{\supnorm}{\@ifstar\@supnormstar\@supnormnostar}
+%    \end{macrocode}
+%\end{macro}
+%
+% \begin{macro}{\expands}
+%    \begin{macrocode}
+\newcommand{\expands}[1][2.5]{\mathrel{\scalebox{#1}[1.1]{$\sim$}}}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \subsubsection{Pseudodifferential Operators}
+%
+% \begin{macro}{\std}
+%    \begin{macrocode}
+\newcommand{\std}{{\scriptscriptstyle{\ch@irxscriptfont{std}}}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\Weyl}
+%    \begin{macrocode}
+\newcommand{\Weyl}{{\scriptscriptstyle{\ch@irxscriptfont{Weyl}}}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\Op}
+%    \begin{macrocode}
+\newcommand{\Op}{\operatorname{Op}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\Opstd}
+%    \begin{macrocode}
+\newcommand{\Opstd}{\operatorname{Op}_\std}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\OpWeyl}
+%    \begin{macrocode}
+\newcommand{\OpWeyl}{\operatorname{Op}_\Weyl}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%\subsubsection{Function Spaces}
+%
+% \begin{macro}{\spacename}
+%     \begin{macrocode}
+\newcommand{\spacename}[1]{\ch@irxspacefont{#1}}
+%    \end{macrocode}
+% \end{macro}
+%
+%\begin{macro}{\Bounded}
+%    \begin{macrocode}
+\newcommand{\Bounded}{\ch@irxspacefont{B}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Continuous}
+%    \begin{macrocode}
+\newcommand{\Continuous}{\ch@irxspacefont{C}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Contbound}
+%    \begin{macrocode}
+\newcommand{\Contbound}{\Continuous_{\mathrm{b}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Fun}
+%    \begin{macrocode}
+\newcommand{\Fun}[1][k]{\ch@irxspacefont{C}^{#1}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Cinfty}
+%    \begin{macrocode}
+\newcommand{\Cinfty}{\Fun[\infty]}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Comega}
+%    \begin{macrocode}
+\newcommand{\Comega}{\Fun[\omega]}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Holomorphic}
+%    \begin{macrocode}
+\newcommand{\Holomorphic}{\ch@irxspacefont{O}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\AntiHolomorphic}
+%    \begin{macrocode}
+\newcommand{\AntiHolomorphic}{\cc{\Holomorphic}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Schwartz}
+%    \begin{macrocode}
+\newcommand{\Schwartz}{\ch@irxspacefont{S}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Riemann}
+%    \begin{macrocode}
+\newcommand{\Riemann}{\ch@irxspacefont{R}}
+%    \end{macrocode}
+%\end{macro}
+%
+%
+%\subsubsection{Locally Convex Spaces}
+%
+%\begin{macro}{\singsupp}
+%    \begin{macrocode}
+\newcommand{\singsupp}{\operatorname{sing\,supp}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\seminorm}
+%    \begin{macrocode}
+\newcommand{\seminorm}[1]{\mathrm{#1}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\ord}
+%    \begin{macrocode}
+\newcommand{\ord}{\operatorname{ord}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\conv}
+%    \begin{macrocode}
+\newcommand{\conv}{\operatorname{conv}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\extreme}
+%    \begin{macrocode}
+\newcommand{\extreme}{\operatorname{extreme}}
+%    \end{macrocode}
+%\end{macro}
+%
+%
+%\subsubsection{Hilbert Spaces}
+%
+%\begin{macro}{\hilbert}
+%    \begin{macrocode}
+\newcommand{\hilbert}[1]{\ch@irxhilbertfont{#1}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\prehilb}
+%    \begin{macrocode}
+\newcommand{\prehilb}[1]{\ch@irxprehilbfont{#1}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Adjointable}
+%    \begin{macrocode}
+\newcommand{\Adjointable}[1][{}]{\mathfrak{B}_{\scriptscriptstyle{#1}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Finite}
+%    \begin{macrocode}
+\newcommand{\Finite}[1][{}]{\mathfrak{F}_{\scriptscriptstyle{#1}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Compact}
+%    \begin{macrocode}
+\newcommand{\Compact}[1][{}]{\mathfrak{K}_{\scriptscriptstyle{#1}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\opdomain}
+%    \begin{macrocode}
+\newcommand{\opdomain}{\ch@irxhilbertfont{D}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\spec}
+%    \begin{macrocode}
+\newcommand{\spec}{\operatorname{\ch@irxoperatorfont{spec}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\closure}
+%    \begin{macrocode}
+\newcommand{\closure}[1]{\overline{#1}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\res}
+%    \begin{macrocode}
+\newcommand{\res}{\operatorname{\ch@irxoperatorfont{res}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Res}
+%    \begin{macrocode}
+\newcommand{\Res}{\operatorname{\ch@irxoperatorfont{Res}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\specrad}
+%    \begin{macrocode}
+\newcommand{\specrad}{\operatorname{\varrho}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\slim}
+%    \begin{macrocode}
+\newcommand{\slim}{\operatorname*{\ch@irxoperatorfont{s-lim}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\wlim}
+%    \begin{macrocode}
+\newcommand{\wlim}{\operatorname*{\ch@irxoperatorfont{w-lim}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%
+%\subsubsection{Dirac's bra and ket}
+%
+%\begin{macro}{\bra}
+%\begin{macro}{\ket}
+%\begin{macro}{\braket}
+%\begin{macro}{\ketbra}
+%    \begin{macrocode}
+\DeclarePairedDelimiter{\ketbr@}{\vert}{\vert}
+\DeclarePairedDelimiter{\ket}{\vert}{\rangle}
+\DeclarePairedDelimiter{\bra}{\langle}{\vert}
+\newcommand{\braket}[3][]{\SP[#1]{#2 \,#1\vert\, #3}}
+\newcommand{\ketbra}[3][]{\ketbr@[#1]{#2 #1\rangle #1\langle #3}}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%
+%
+%\subsubsection{Operator Algebras}
+%
+%\begin{macro}{\Spec}
+%    \begin{macrocode}
+\newcommand{\Spec}{\operatorname{\ch@irxoperatorfont{Spec}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Rad}
+%    \begin{macrocode}
+\newcommand{\Rad}{\operatorname{\ch@irxoperatorfont{Rad}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\ind}
+%    \begin{macrocode}
+\newcommand{\ind}{\operatorname{\ch@irxoperatorfont{ind}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%
+%\subsubsection{Measure Theory and Integration}
+%
+%\begin{macro}{\Measurable}
+%    \begin{macrocode}
+\newcommand{\Measurable}{\ch@irxspacefont{M}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Meas}
+%    \begin{macrocode}
+\newcommand{\Meas}{\ch@irxoperatorfont{Meas}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\BoundMeas}
+%    \begin{macrocode}
+\newcommand{\BoundMeas}{\ch@irxspacefont{BM}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Lp}
+%    \begin{macrocode}
+\newcommand{\Lp}[1][{p}]{\mathrm{L}^{#1}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Lone}
+%    \begin{macrocode}
+\newcommand{\Lone}{\Lp[1]}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Ltwo}
+%    \begin{macrocode}
+\newcommand{\Ltwo}{\Lp[2]}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Linfty}
+%    \begin{macrocode}
+\newcommand{\Linfty}{\Lp[\infty]}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Intp}
+%    \begin{macrocode}
+\newcommand{\Intp}[1][{p}]{\ch@irxspacefont{L}^{#1}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Intone}
+%    \begin{macrocode}
+\newcommand{\Intone}{\Intp[1]}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Inttwo}
+%    \begin{macrocode}
+\newcommand{\Inttwo}{\Intp[2]}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\Intinfty}
+%    \begin{macrocode}
+\newcommand{\Intinfty}{\Intp[\infty]}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\essrange}
+%    \begin{macrocode}
+\newcommand{\essrange}{\operatorname{\ch@irxoperatorfont{ess\,range}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\esssup}
+%    \begin{macrocode}
+\newcommand*{\esssup}{\operatorname*{\ch@irxoperatorfont{ess}\,\ch@irxoperatorfont{\sup}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\esssupnormstar}
+%    \begin{macrocode}
+\newcommand{\@esssupnormstar}[1]{\norm*{#1}_{\esssup}}
+\newcommand{\@esssupnormnostar}[2][]{\norm[#1]{#2}_{\esssup}}
+\newcommand{\esssupnorm}{\@ifstar\@esssupnormstar\@esssupnormnostar}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\ac}
+%    \begin{macrocode}
+\newcommand{\ac}{\ch@irxscriptfont{ac}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\sing}
+%    \begin{macrocode}
+\newcommand{\sing}{\ch@irxscriptfont{sing}}
+%    \end{macrocode}
+%\end{macro}
+%
+% \subsubsection{Limits} \label{sec:Limits}
+%
+%\begin{macro}{\indlim}
+%    \begin{macrocode}
+\newcommand{\indlim}{\operatorname*{{ind\,lim}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\projlim}
+%    \begin{macrocode}
+\renewcommand{\projlim}{\operatorname*{{proj\,lim}}}
+%    \end{macrocode}
+%\end{macro}
+%
+%    \begin{macrocode}
+\fi
+%    \end{macrocode}

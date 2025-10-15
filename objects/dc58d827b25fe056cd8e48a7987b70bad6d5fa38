@@ -1,0 +1,341 @@
+%%%
+% Enigme Aire
+%%%
+\def\filedateEnigmeAire{2025/05/27}%
+\def\fileversionEnigmeAire{0.1a}%
+\message{-- \filedateEnigmeAire\space v\fileversionEnigmeAire}%
+%
+\setKVdefault[EnigmeAire]{Modele=A,Couleur=LightSteelBlue,Echelle=7mm,Etape=1,Solution=false,Graines=false,Graine={}}%
+\defKV[EnigmeAire]{Graine=\ifempty{#1}{}{\setKV[EnigmeAire]{Graines}}}%
+
+\def\MPEnigmeAireA{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    boolean Graines,Solution;
+    Graines:=\useKV[EnigmeAire]{Graines};
+    Solution:=\useKV[EnigmeAire]{Solution};
+    
+    if Graines:
+    randomseed:=\useKV[EnigmeAire]{Graine};
+    fi;
+    
+    u:=\useKV[EnigmeAire]{Echelle};
+    
+    pair A[],B[];
+    numeric la[];
+    la1=ceiling(3+uniformdeviate(7));
+    la2=ceiling(3+uniformdeviate(7));
+    la3=ceiling(3+uniformdeviate(7));
+    la4=ceiling(4+uniformdeviate(6));
+    A1=u*(1,1);
+    A2-A1=u*(10,0);
+    A3-A2=u*(0,5);
+    A4-A3=A1-A2;
+    B1=(la1/(la1+la2+la3))[A1,A2];
+    B2=((la1+la2)/(la1+la2+la3))[A1,A2];
+    B3-B2=A4-A1;
+    B4-B1=B3-B2;
+    fill polygone(B1,B2,B3,B4) withcolor \useKV[EnigmeAire]{Couleur};
+    trace polygone(B1,B2,B3,B4);
+    trace polygone(A1,A2,A3,A4);
+    label(TEX("\Aire[m]{"&decimal(la1*la4)&"}"),iso(A1,B4));
+    if Solution:
+    label(TEX(decimal(la2*la4)&"\,\si{\square\meter}"),iso(B1,B3));
+    else:
+    label(TEX("?\,\si{\square\meter}"),iso(B1,B3));
+    fi;
+    
+    label(TEX("\Aire[m]{"&decimal(la3*la4)&"}"),iso(B2,A3));
+    trace cotation(A4,B3,3mm,3mm,TEX("\Lg[m]{"&decimal(la1+la2)&"}"));
+    trace cotation(B1,A2,-3mm,-3mm,TEX("\Lg[m]{"&decimal(la3+la2)&"}"));
+  \end{mplibcode}
+  \fi%
+}%
+
+\def\MPEnigmeAireB{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    boolean Graines,Solution;
+    Graines:=\useKV[EnigmeAire]{Graines};
+    Solution:=\useKV[EnigmeAire]{Solution};
+    
+    if Graines:
+    randomseed:=\useKV[EnigmeAire]{Graine};
+    fi;
+    
+    u:=\useKV[EnigmeAire]{Echelle};
+    pair A[],B[];
+    numeric La[],la[],Ca[];
+    la1=ceiling(3+uniformdeviate(7));
+    la2=ceiling(3+uniformdeviate(7));
+    La1=ceiling(8+uniformdeviate(7));
+    La2=ceiling(uniformdeviate(5));
+    Ca1=1+ceiling(uniformdeviate(La1-La2-2));
+    Ca2=ceiling(uniformdeviate(la2-2));
+    A1=u*(1,1);
+    A2-A1=u*(10,0);
+    A3-A2=u*(0,2);
+    A4-A3=u*(-7,0);
+    A5-A4=u*(0,4);
+    A6-A5=(xpart(A1-A4),0);
+    A7-A6=A4-A5;
+    B1=(Ca1/(La1-La2))[A4,A3];
+    B3=((Ca2+1)/la2)[A4,A5];
+    B2-B1=B3-A4;
+    fill polygone(A4,B1,B2,B3) withcolor \useKV[EnigmeAire]{Couleur};
+    trace chemin(B1,B2,B3);
+    trace polygone(A1,A2,A3,A4,A5,A6);
+    trace chemin(A7,A4);
+    label(TEX("\Aire[m]{"&decimal(la1*La1)&"}"),iso(A1,A3));
+    if Solution:
+    label(TEX(decimal(Ca1*Ca2)&"\,\si{\square\meter}"),iso(B1,B3));
+    else:
+    label(TEX("?\,\si{\square\meter}"),iso(B1,B3));
+    fi;
+    
+    label(TEX("\Aire[m]{"&decimal(la2*La2)&"}"),iso(A7,A5));
+    trace appelation(A6,A5,3mm,TEX("\Lg[m]{"&decimal(La2)&"}"));
+    trace appelation(B1,A3,3mm,TEX("\Lg[m]{"&decimal(La1-La2-Ca1)&"}"));
+    label.rt(TEX("\Lg[m]{"&decimal(la2-Ca2)&"}"),iso(A5,B3));
+    label.rt(TEX("\Lg[m]{"&decimal(la1)&"}"),iso(A2,A3));
+  \end{mplibcode}
+  \fi%
+}%
+
+\def\MPEnigmeAireC{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    boolean Graines,Solution;
+    Graines:=\useKV[EnigmeAire]{Graines};
+    Solution:=\useKV[EnigmeAire]{Solution};
+    
+    if Graines:
+    randomseed:=\useKV[EnigmeAire]{Graine};
+    fi;
+    
+    u:=\useKV[EnigmeAire]{Echelle};
+    pair A[];
+    numeric la[],La[];
+    La1=ceiling(3+uniformdeviate(7));
+    La2=ceiling(3+uniformdeviate(7));
+    La3=ceiling(3+uniformdeviate(7));
+    la1=ceiling(3+uniformdeviate(7));
+    la2=ceiling(3+uniformdeviate(7));
+    la3=ceiling(3+uniformdeviate(7));
+    A1=u*(1,1);
+    A4-A1=if La1+La2+La3>la1+la2+la3:
+    u*(10,0)
+    else:
+    u*(8,0);
+    fi;
+    A2=(La1/(La1+La2+La3))[A1,A4];
+    A3=((La1+La2)/(La1+La2+La3))[A1,A4];
+    A5-A4=if La1+La2+La3>la1+la2+la3:
+    u*(0,7)
+    else:
+    u*(0,10);
+    fi;
+    A6-A5=A3-A4;
+    A7-A3=((la1+la2)/(la1+la2+la3))[A4,A5]-A4;
+    A8-A7=A2-A3;
+    A9-A2=(la1/(la1+la2+la3))[A4,A5]-A4;
+    A10-A9=A1-A2;
+    trace polygone(A1,A4,A5,A6,A7,A8,A9,A10);
+    trace segment(A2,A9);
+    trace segment(A3,A7);
+    label(TEX("\Aire[cm]{"&decimal(la1*La1)&"}"),iso(A1,A9));
+    label(TEX("\Aire[cm]{"&decimal((la1+la2)*La2)&"}"),iso(A2,A7));
+    label(TEX("\Aire[cm]{"&decimal((la1+la2+la3)*La3)&"}"),iso(A3,A5));
+    trace cotation(A1,A4,-3mm,-3mm,TEX("\Lg[cm]{"&decimal(La1+La2+La3)&"}"));
+    label.lft(TEX("\Lg{"&decimal(la1)&"}"),iso(A1,A10));
+    label.lft(TEX("\Lg{"&decimal(la2)&"}"),iso(A9,A8));
+    if Solution:
+    label.lft(TEX(decimal(la3)&"\,\si{\centi\meter}"),iso(A7,A6));
+    else:
+    label.lft(TEX("?\,\si{\centi\meter}"),iso(A7,A6));
+    fi;
+  \end{mplibcode}%
+  \fi%
+}%
+
+\def\MPEnigmeAireD{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    boolean Graines,Solution;
+    Graines:=\useKV[EnigmeAire]{Graines};
+    Solution:=\useKV[EnigmeAire]{Solution};
+    
+    if Graines:
+    randomseed:=\useKV[EnigmeAire]{Graine};
+    fi;
+    
+    u:=\useKV[EnigmeAire]{Echelle};
+    Etape:=\useKV[EnigmeAire]{Etape};
+    pair A[];
+    numeric la[],La[];
+    la[1]=ceiling(3+uniformdeviate(7));
+    la[2]=ceiling(3+uniformdeviate(7));
+    k=1;
+    La[k]=ceiling(3+uniformdeviate(7));
+    A[1]=u*(9,-9);
+    A[6*(k-1)+2]-A[6*(k-1)+1]=u*(0,3);
+    A[6*(k-1)+3]-A[6*(k-1)+2]=u*(-6,0);
+    A[6*(k-1)+4]-A[6*(k-1)+3]=A[6*(k-1)+1]-A[6*(k-1)+2];
+    A[6*(k-1)+5]=(la[k]/(la[k]+la[k+1]))[A[6*(k-1)+1],A[6*(k-1)+4]];
+    A[6*(k-1)+6]-A[6*(k-1)+5]=A[6*(k-1)+2]-A[6*(k-1)+1];
+    trace polygone(A[6*(k-1)+1],A[6*(k-1)+2],A[6*(k-1)+3],A[6*(k-1)+4]);
+    trace segment(A[6*(k-1)+5],A[6*(k-1)+6]);
+    if Solution:
+    trace cotation(A[6*(k-1)+5],A[6*(k-1)+1],-3mm,-3mm,TEX("\Lg{"&decimal(la[k])&"}"));
+    else:
+    trace cotation(A[6*(k-1)+5],A[6*(k-1)+1],-3mm,-3mm,TEX("?\,\si{\centi\meter}"));
+    fi;
+    label(TEX("\Aire{"&decimal(la[k]*La[k])&"}"),iso(A[6*(k-1)+5],A[6*(k-1)+2]));
+    label(TEX("\Aire{"&decimal(la[k+1]*La[k])&"}"),iso(A[6*(k-1)+4],A[6*(k-1)+6]));
+    if Etape<2:
+    trace cotation(A[6*(k-1)+3],A[6*(k-1)+6],3mm,3mm,TEX("\Lg{"&decimal(la[k+1])&"}"));
+    fi;
+    for k=2 upto Etape:
+    La[k]=ceiling(3+uniformdeviate(7));
+    la[k+1]=ceiling(3+uniformdeviate(7));
+    A[6*(k-1)+1]=A[6*(k-1)];
+    A[6*(k-1)+2]-A[6*(k-1)+1]=u*(0,3);
+    A[6*(k-1)+3]-A[6*(k-1)+2]=u*(-6,0);
+    A[6*(k-1)+4]-A[6*(k-1)+3]=A[6*(k-1)+1]-A[6*(k-1)+2];
+    A[6*(k-1)+5]=A[6*(k-1)-3];%(la[k]/(la[k]+la[k+1]))[A[6*(k-1)+1],A[6*(k-1)+4]];
+    A[6*(k-1)+6]-A[6*(k-1)+5]=A[6*(k-1)+2]-A[6*(k-1)+1];
+    trace polygone(A[6*(k-1)+1],A[6*(k-1)+2],A[6*(k-1)+3],A[6*(k-1)+4]);
+    trace segment(A[6*(k-1)+5],A[6*(k-1)+6]);
+    if k=Etape:
+    trace cotation(A[6*(k-1)+3],A[6*(k-1)+6],3mm,3mm,TEX("\Lg{"&decimal(la[k+1])&"}"));
+    fi;
+    label(TEX("\Aire[cm]{"&decimal(la[k]*La[k])&"}"),iso(A[6*(k-1)+6],A[6*(k-1)]));
+    label(TEX("\Aire[cm]{"&decimal(la[k+1]*La[k])&"}"),iso(A[6*(k-1)+4],A[6*(k-1)+6]));
+    endfor;
+  \end{mplibcode}%
+  \fi%
+}%
+
+\def\MPEnigmeAireE{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    boolean Graines,Solution;
+    Graines:=\useKV[EnigmeAire]{Graines};
+    Solution:=\useKV[EnigmeAire]{Solution};
+    
+    if Graines:
+    randomseed:=\useKV[EnigmeAire]{Graine};
+    fi;
+    
+    u:=\useKV[EnigmeAire]{Echelle};
+    pair A[];
+    numeric la[],La[];
+    La1=ceiling(3+uniformdeviate(7));
+    La2=ceiling(3+uniformdeviate(7));
+    La3=ceiling(3+uniformdeviate(7));
+    la1=ceiling(4+uniformdeviate(5));
+    la2=ceiling(4+uniformdeviate(5));
+    la3=la1+la2+2;
+    A1=u*(7,1);
+    A11-A1=if la3>(La1+La2+La3):u*(0,10) else:u*(0,7) fi;
+    A2=(La1/(La1+La2+La3))[A1,A11];
+    A3=((La1+La2)/(La1+La2+La3))[A1,A11];
+    A8-A2=if la3>(La1+La2+La3):u*(-7,0) else:u*(-10,0) fi;
+    A6-A8=A11-A2;
+    A7-A8=A3-A2;
+    A4=(la2/la3)[A7,A3];
+    A5-A4=A6-A7;
+    A9=(la1/la3)[A2,A8];
+    A10-A9=A1-A2;
+    trace polygone(A1,A3,A4,A5,A6,A8,A9,A10);
+    trace segment(A7,A4);
+    trace segment(A2,A9);
+    label(TEX("\Aire[cm]{"&decimal(la1*La1)&"}"),iso(A1,A9));
+    label(TEX("\Aire[cm]{"&decimal(la3*La2)&"}"),iso(A2,A7));
+    label(TEX("\Aire[cm]{"&decimal(la2*La3)&"}"),iso(A4,A6));
+    trace cotationarc(A5,A4,5mm,4,1,TEX("\Lg[cm]{"&decimal(La3)&"}") rotated 90);
+    trace cotationarc(A9,A8,3mm,4,1,TEX("\Lg[cm]{"&decimal(la3-la1)&"}") rotated 180);
+    trace cotationarc(A4,A3,3mm,4,1,TEX("\Lg[cm]{"&decimal(la3-la2)&"}"));
+    if Solution:
+    trace cotationarc(A3,A1,5mm,3,1,TEX("\Lg{"&decimal(La1+La2)&"}") rotated 90);
+    else:
+    trace cotationarc(A3,A1,5mm,3,1,TEX("?") rotated 90);
+    fi;
+  \end{mplibcode}
+  \fi%
+}%
+
+\def\MPEnigmeAireF{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    boolean Graines,Solution;
+    Graines:=\useKV[EnigmeAire]{Graines};
+    Solution:=\useKV[EnigmeAire]{Solution};
+    
+    if Graines:
+    randomseed:=\useKV[EnigmeAire]{Graine};
+    fi;
+    
+    u:=\useKV[EnigmeAire]{Echelle};
+    pair A[];
+    numeric la[],La[];
+    la1=ceiling(2+uniformdeviate(4));
+    la2=ceiling(2+uniformdeviate(4));
+    la3=ceiling(2+uniformdeviate(4));
+    la4=ceiling(2+uniformdeviate(4));
+    La1=ceiling(8+uniformdeviate(4));
+    La2=ceiling(8+uniformdeviate(4));
+    La3=ceiling(8+uniformdeviate(4));
+    La4=ceiling(8+uniformdeviate(4));
+    A1=(0,0);
+    A2-A1=u*(0,-3.5);
+    A3-A2=u*(2.25,0);
+    A4-A1=A3-A2;
+    A5-A1=u*(6,0);
+    A6-A5=u*(0,2.5);
+    A7-A6=A1-A5;
+    A8-A7=u*(0,2);
+    A9-A8=u*(-2,0);
+    A10-A9=A1-A8;
+    A11-A1=u*(-4.5,0);
+    A12-A11=u*(0,-1.5);
+    A13-A12=A1-A11;
+    fill polygone(A1,A5,A6,A7) withcolor \useKV[EnigmeAire]{Couleur};
+    trace polygone(A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13);
+    trace segment(A7,A13);
+    trace segment(A10,A4);
+    if Solution:
+    label(TEX("\Aire{"&decimal(la2*La2)&"}"),iso(A1,A6));
+    else:
+    label(TEX("?\,\si{\square\centi\meter}"),iso(A1,A6));
+    fi;
+    label(TEX("\Aire[cm]{"&decimal(la1*La1)&"}"),iso(A2,A4));
+    label(TEX("\Aire[cm]{"&decimal(la3*La3)&"}"),iso(A10,A8));
+    label(TEX("\Aire[cm]{"&decimal(la4*La4)&"}"),iso(A12,A1));
+    trace cotationarc(A12,A11,5mm,4,1,TEX("\Lg[cm]{"&decimal(la4)&"}") rotated -90);
+    trace cotationarc(A5,A4,5mm,4,1,TEX("\Lg[cm]{"&decimal(La2-la1)&"}") rotated 180);
+    trace cotationarc(A8,A7,5mm,4,1,TEX("\Lg[cm]{"&decimal(La3-la2)&"}") rotated 90);
+    trace cotationarc(A11,A10,3mm,4,1,TEX("\Lg[cm]{"&decimal(La4-la3)&"}"));
+    trace cotationarc(A2,A13,5mm,3,1,TEX("\Lg[cm]{"&decimal(La1-la4)&"}") rotated -90);
+  \end{mplibcode}
+  \fi%
+}%
+
+\NewDocumentCommand\EnigmeAire{o}{%
+  \useKVdefault[EnigmeAire]%
+  \setKV[EnigmeAire]{#1}%
+  \IfStrEqCase{\useKV[EnigmeAire]{Modele}}{%
+    {A}{\MPEnigmeAireA}%
+    {B}{\MPEnigmeAireB}%
+    {C}{\MPEnigmeAireC}%
+    {D}{\MPEnigmeAireD}%
+    {E}{\MPEnigmeAireE}%
+    {F}{\MPEnigmeAireF}%
+  }%
+}%

@@ -1,0 +1,76 @@
+%%
+%% This is file `phy-bm-um.legacy.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% physics2-code.dtx  (with options: `bm-um.legacy')
+%% 
+%%   Copyright (C) 2023 by Zhang Tingxuan <alphaztx@163.com>
+%% 
+%%   This work may be distributed and/or modified under the
+%%   conditions of the LaTeX Project Public License, either
+%%   version 1.3c of this license or (at your option) any later
+%%   version. The latest version of this license is in:
+%% 
+%%     http://www.latex-project.org/lppl.txt
+%% 
+%%   and version 1.3 or later is part of all distributions of
+%%   LaTeX version 2005/12/01 or later.
+%% 
+%%   This work has the LPPL maintenance status `maintained'.
+%% 
+%%   The Current Maintainer of this work is Zhang Tingxuan.
+%% 
+%%   This work consists of the files physics2-code.dtx,
+%%             and the derived files physics2.ins,
+%%                                   physics2.sty,
+%%                                   phy-<module>.sty,
+%%                                   physics2-code.pdf,
+%%                               and README.md.
+%% 
+\ProvidesExplFile{phy-bm-um.legacy.sty}{2023/10/24}{}
+  {`bm-um.legacy' module of physics2}
+\AtBeginDocument
+  {
+    \cs_if_exist:cF { symbf }
+      {
+        \PackageError { physics2 }
+          {
+            The ~ `bm-um.legacy' ~ module ~ requires ~
+            `unicode-math' ~ package
+          }
+          {
+            Have ~ you ~ used ~ `unicode-math' ~
+            in ~ the ~ preamble?
+          }
+      }
+  }
+\DeclareDocumentCommand \bm { m }
+  {
+    \mode_if_math:TF
+      {
+        \tl_if_head_eq_catcode:nNTF { #1 } A
+          {
+            \symbfit { #1 }
+          }
+          {
+            \symbf { #1 }
+          }
+      }
+      {
+        \PackageError { physics2 }
+          {
+            The ~ \string\bm\space command ~ should ~ be ~
+            used ~ in ~ math ~ mode ~ only. \MessageBreak
+            This ~ is ~ an ~ error ~ from ~ `bm-um.legacy' ~ module
+          }
+          {
+            Check ~ if ~ any ~ `\string\bm' ~ is ~ out ~
+            of ~ math ~ mode.
+          }
+      }
+  }
+\endinput
+%%
+%% End of file `phy-bm-um.legacy.sty'.

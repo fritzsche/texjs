@@ -1,0 +1,246 @@
+%% cloze.tex
+%% Copyright 2015-2025 Josef Friedrich
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3c
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2008/05/04 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+%
+% The Current Maintainer of this work is Josef Friedrich.
+%
+% This work consists of the files cloze.lua, cloze.tex,
+% and cloze.sty.
+
+% \subsection{The file \tt{cloze.tex}}
+%
+% The cloze package uses following naming conventions: Internal / private
+% macros / commands / envirnoments are written in PascalCase, public
+% ones are written in lowercase. Earlier versions of this package used
+% @ characters for private macros. The lower level / private macros
+% are now defined in the plain Lua\TeX{} version of the package and
+% used to set cloze text in plain Lua\TeX{}.
+%
+%    \begin{macrocode}
+\directlua{
+  cloze = require('cloze')
+  cloze.register_functions()
+}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\input farbe.tex
+%    \end{macrocode}
+%
+% \subsubsection{Internal macros}
+%
+% \begin{macro}{\ClozeGetOption}
+% This macro is used in the documentation to show the default values
+% of some options.
+%    \begin{macrocode}
+\def\ClozeGetOption#1{%
+  \directlua{
+    tex.print(cloze.get_option('#1'))
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\ClozeStartMarker}
+% At the begining |\ClozeStartMarker| registers the required Lua
+% callbacks. Then it inserts a whatsit marker which marks the begin of a
+% gap.
+%    \begin{macrocode}
+\def\ClozeStartMarker#1#2{%
+  \strut\directlua{
+    cloze.initialize_cloze('#1', '\luaescapestring{#2}')
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\ClozeStopMarker}
+% \cmd{\ClozeStopMarker} inserts a whatsit marker that marks the end
+% of gap.
+%    \begin{macrocode}
+\def\ClozeStopMarker#1{%
+  \strut\directlua{
+    cloze.write_marker('#1', 'stop')
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\ClozeWrapWithFont}
+% \cmd{\ClozeWrapWithFont} wraps the text with the font definition.
+%    \begin{macrocode}
+\def\ClozeWrapWithFont#1{%
+  {%
+    \directlua{cloze.print_font()}\relax%
+    #1%
+  }%
+}%
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\ClozeMargin}
+% \cmd{\ClozeMargin} surrounds a text in a gap with two |kerns|.
+%    \begin{macrocode}
+\def\ClozeMargin#1{%
+  \directlua{cloze.write_margin_node()}%
+  #1%
+  \directlua{cloze.write_margin_node()}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection{Public plain \TeX{} macros}
+%
+% \begin{macro}{\clozeset}
+%    \begin{macrocode}
+\def\clozeset#1{%
+  \directlua
+  {
+    cloze.parse_global_options('\luaescapestring{\unexpanded{#1}}')
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \begin{macro}{\clozereset}
+%    \begin{macrocode}
+\def\clozereset{%
+  \directlua{cloze.reset()}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\clozeshow}
+%    \begin{macrocode}
+\def\clozeshow{%
+  \clozeset{show}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\clozehide}
+%    \begin{macrocode}
+\def\clozehide{%
+  \clozeset{hide}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\clozefont}
+%    \begin{macrocode}
+\def\clozefont{\it}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\clozesetfont}
+%    \begin{macrocode}
+\def\clozesetfont#1{%
+  \def\clozefont{%
+    #1%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\Cloze}
+% \cmd{\Cloze}\marg{cloze-type}\marg{kv-string}\marg{text}
+%    \begin{macrocode}
+\def\Cloze#1#2#3{%
+  \ClozeStartMarker{#1}{#2}%
+  \ClozeWrapWithFont{%
+    \ClozeMargin{#3}%
+  }%
+  \ClozeStopMarker{#1}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\ClozeLine}
+% This is the plain Lua\TeX-Version of the macro \cmd{\clozeline}.
+%    \begin{macrocode}
+\def\ClozeLine#1{%
+  \directlua{
+    cloze.parse_local_options('\luaescapestring{#1}')
+    cloze.write_line_nodes()
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\ClozeLinefil}
+% This is the plain Lua\TeX-Version of the macro \cmd{\clozelinefil}.
+%    \begin{macrocode}
+\def\ClozeLinefil#1{%
+  \strut%
+  \directlua{
+    cloze.parse_local_options('\luaescapestring{#1}')
+    cloze.write_linefil_nodes()
+  }%
+  \strut%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\ClozeFil}
+% This is the plain Lua\TeX-Version of the macro \cmd{\clozefil}.
+%    \begin{macrocode}
+\def\ClozeFil#1#2{%
+  \Cloze{basic}{#1}{#2}\ClozeLinefil{#1}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\ClozeStrike}
+%    \begin{macrocode}
+\def\ClozeStrike#1#2#3{%
+  \ClozeStartMarker{strike}{#1}%
+  \vbox{\hbox{\kern0pt\ClozeWrapWithFont{#3}}\hbox{#2}}%
+  \ClozeStopMarker{strike}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\ClozePar}
+% \cmd{\ClozePar}\marg{kv-string}\marg{text}
+%    \begin{macrocode}
+\def\ClozePar#1#2{%
+  \par%
+  \ClozeStartMarker{par}{#1}%
+  \ClozeWrapWithFont{#2}%
+  \ClozeStopMarker{par}%
+  \par%
+  \directlua{cloze.unregister_callback('par')}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\clozeparcapture}
+%    \begin{macrocode}
+\def\clozeparcapture#1\par {%
+  \ClozePar{}{#1}%
+}
+\let\clozeparcmd=\clozeparcapture
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\ClozeExtend}
+% TODO: Use node library to create kern nodes.
+%    \begin{macrocode}
+\def\ClozeExtend#1{%
+  \directlua
+  {
+    cloze.print_extension('\luaescapestring{#1}')
+  }%
+}
+%    \end{macrocode}
+% \end{macro}

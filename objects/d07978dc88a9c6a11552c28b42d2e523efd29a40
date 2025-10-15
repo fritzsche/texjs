@@ -1,0 +1,84 @@
+# Pg, Sybase, Oracle, Ingres, mSQL, ODBC,...
+#
+dbdriver		= mysql
+
+# Driver for ODBC, ignored for other databases
+#
+odbc_driver		= SQL Server
+
+# SID for Oracle users, ignored for other databases
+#
+oracle_sid		= ORASID
+
+# default tex- file extension
+#
+texex			= tex
+
+# file name extension to insert before the last '.'
+#
+stx				= _stx
+
+# When no output file is specified or output file without (relative) path is given, an output file
+# is generated in the current directory.
+# By setting 'def_out_is_in' to True (1), the output file is generated in the same directory
+# where the input file resides (this was the behaviour up until v2.0).
+# Refer to the documentation for more info.
+#
+def_out_is_in	= 0
+
+# If the commandline option --replacementfile or -r is given, by default the given replacement file
+# will be parsed and after that the default replacement file will be parsed as well.
+# If only the given replacement file should be parsed skipping the default file, set the value
+# below to 0.
+#   
+multi_rfile		= 1
+
+# Comment-sign used in the replace file(s). Leave empty to disable comments
+#
+rfile_comment	= ;
+
+# Indicator of a regular expression in the replace file. The rfile_regexploc setting indicates the
+# position of the regular expression and must be part of 'rfile_regexp'
+# Refer to the documentation for more info.
+#
+rfile_regexploc	= ...
+rfile_regexp	= re(...)
+
+# Command section. All SQLTeX commands start with <cmd_prefix> and are followed
+# by the actual command. Change this only if latex commands are used that conflict
+# with the defaults.
+#
+cmd_prefix		= sql
+sql_open		= db
+sql_field		= field
+sql_row			= row
+sql_params		= setparams
+sql_update		= update
+sql_start		= start
+sql_end			= end
+sql_use			= use
+sql_system		= system
+sql_if			= if
+sql_endif		= endif
+
+# Defines if the \sqlsystem{} command is allowed.
+# This is disabled by default, enable only if you are sure no SQLTeX files can be called that
+# might harm your system
+# 
+sqlsystem_allowed = 0
+
+# If the Term::ReadKey perl module is not installed, it is not possible to enter a password
+# and hide it from the console when. In that case SQLTeX will abort if a password is specified
+# as '?' in the LaTeX input file.
+# To allow entering passwords that are readable from at the console, set the following to 1.
+# NOTE: If you need to set this value to 1, you're strongly adviced to install the Term::ReadKey
+#       module instead:
+#       sudo cpan install Term::ReadKey
+#
+allow_readable_pwd = 0
+
+# The values below are used internally only. There's no need to change these,
+# unless there are conflicts. Refer to the documentation for more info.
+#
+repl_step		= OSTX
+alt_cmd_prefix	= processedsqlcommand

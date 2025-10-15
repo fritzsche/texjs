@@ -1,0 +1,42 @@
+%%
+%% This is file `fixltxhyph.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% fixltxhyph.dtx  (with options: `style')
+%%   ____________________________________________________
+%%   The FiXLtxHyph package
+%%   Copyright (C) 2011-2024 Claudio Beccari
+%%   All rights reserved
+%% 
+%%   License information appended
+%% 
+
+\ProvidesPackage{fixltxhyph}[2024/12/01 v.0.5
+  Small fix for hyphenating emphasised words]
+\NeedsTeXFormat{LaTeX2e}[2022/01/01]
+\newcommand\hz{\nobreak\hskip\z@skip}
+\IfPackageLoadedF{etoolbox}{\RequirePackage{etoolbox}}
+\letcs{\FLH@originalem}{em }
+\RenewDocumentCommand{\em }{m}{\FLH@originalem\hz}
+%% 
+%% Copyright 2011-2024 Claudio Beccari
+%% 
+%% Distributable under the LaTeX Project Public
+%% License, version 1.3c or higher (your choice).
+%% The latest version of this license is at:
+%% http://www.latex-project.org/lppl.txt
+%% 
+%% This work is "author-maintained"
+%% 
+%% This work consists of this file .dtx, a README file
+%% the derived file fixltxhyph.sty, and the English
+%% documentation fixltxhyph.pdf.
+%% 
+%% 
+%% By running pdflatex on fixltxhyph.dtx the user gets
+%% the .sty file, and the English documentation file in PDF format.
+%% 
+%%
+%% End of file `fixltxhyph.sty'.

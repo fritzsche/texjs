@@ -1,0 +1,299 @@
+%%%
+% Calisson
+%%%
+\def\filedateCalisson{2024/08/04}%
+\def\fileversionCalisson{0.1}%
+\message{-- \filedateCalisson\space v\fileversionCalisson}%
+%
+\setKVdefault[Calisson]{Taille=3,Solution=false,Rayon=5cm,Couleur=red,CouleurTrace=black}%
+
+\def\UpdatetoksCalissong#1\nil{\addtotok\tokcalissonlistetracesg{,"#1"}}%
+\def\UpdatetoksCalissongDepart#1\nil{\addtotok\tokcalissonlistetracesg{"#1"}}%
+\def\UpdatetoksCalissond#1\nil{\addtotok\tokcalissonlistetracesd{,"#1"}}%
+\def\UpdatetoksCalissondDepart#1\nil{\addtotok\tokcalissonlistetracesd{"#1"}}%
+
+\newtoks\tokcalissonlistetracesg
+\newtoks\tokcalissonlistetracesd
+
+\NewDocumentCommand\Calisson{o m}{%
+  \useKVdefault[Calisson]%
+  \setKV[Calisson]{#1}%
+  % Essai de cassage du code
+  \tokcalissonlistetracesg{}%
+  \tokcalissonlistetracesd{}%
+  %Partie Gauche -> ok
+  \StrLeft{0#2}{2}[\Depart]%
+  \StrGobbleLeft{0#2}{2}[\Reste]%
+  \expandafter\UpdatetoksCalissongDepart\Depart0\nil%
+  \xintFor* ##1 in {\xintSeq{1}{\fpeval{\useKV[Calisson]{Taille}-1}}}\do{%
+    \StrLeft{0\Reste}{3}[\Depart]%
+    \expandafter\UpdatetoksCalissong\Depart\nil%
+    \StrGobbleLeft{0\Reste}{3}[\Reste]%
+  }%
+  \StrLeft{00\Reste}{3}[\Depart]%
+  \StrGobbleLeft{00\Reste}{3}[\Reste]%
+  \expandafter\UpdatetoksCalissong\Depart\nil%
+  % fin premiere ligne
+  \xintFor* ##1 in {\xintSeq{1}{\fpeval{\useKV[Calisson]{Taille}-1}}}\do{%
+    \StrLeft{\Reste}{2}[\Depart]%
+    \expandafter\UpdatetoksCalissong\Depart0\nil%
+    \StrGobbleLeft{\Reste}{2}[\Reste]%
+    \xintFor* ##2 in {\xintSeq{1}{\fpeval{\useKV[Calisson]{Taille}-1}}}\do{%
+      \StrLeft{\Reste}{3}[\Depart]%
+      \expandafter\UpdatetoksCalissong\Depart\nil%
+      \StrGobbleLeft{\Reste}{3}[\Reste]%
+    }%
+    \StrLeft{00\Reste}{3}[\Depart]%
+    \expandafter\UpdatetoksCalissong\Depart\nil%
+    \StrGobbleLeft{00\Reste}{3}[\Reste]%
+  }%
+  % fin des lignes intermédiaires
+  \xintFor* ##1 in {\xintSeq{1}{\fpeval{\useKV[Calisson]{Taille}}}}\do{%
+    \StrLeft{\Reste}{2}[\Depart]%
+    \expandafter\UpdatetoksCalissong\Depart0\nil%
+    \StrGobbleLeft{\Reste}{2}[\Reste]
+    \xintifboolexpr{##1>\fpeval{\useKV[Calisson]{Taille}-1}}{}{%
+      \xintFor* ##2 in {\xintSeq{\fpeval{\useKV[Calisson]{Taille}-##1}}{1}}\do{%
+        \StrLeft{\Reste}{3}[\Depart]%
+        \expandafter\UpdatetoksCalissong\Depart\nil%
+        \StrGobbleLeft{\Reste}{3}[\Reste]%
+      }%
+    }%
+  }%
+  % Liste gauche : \the\tokcalissonlistetracesg%
+%  \par Pour la droite, Il reste \Reste
+  % Partie droite
+  \xintifboolexpr{\useKV[Calisson]{Taille}==2}{%
+    % 10
+    \StrLeft{0\Reste}{3}[\Depart]%
+    \expandafter\UpdatetoksCalissondDepart\Depart\nil%
+    \StrGobbleLeft{0\Reste}{3}[\Reste]%
+    % 11
+    \StrLeft{00\Reste}{3}[\Depart]%
+    \expandafter\UpdatetoksCalissond\Depart\nil%
+    \StrGobbleLeft{00\Reste}{3}[\Reste]%
+    % 12
+    \StrLeft{\Reste}{1}[\Depart]%
+    \expandafter\UpdatetoksCalissond\Depart\nil%
+    \StrGobbleLeft{\Reste}{1}[\Reste]%
+    % 13
+    \StrLeft{\Reste}{3}[\Depart]%
+    \expandafter\UpdatetoksCalissond\Depart\nil%
+    \StrGobbleLeft{\Reste}{3}[\Reste]%
+    % 14
+    \StrLeft{00\Reste}{3}[\Depart]%
+    \expandafter\UpdatetoksCalissond\Depart\nil%
+    \StrGobbleLeft{00\Reste}{3}[\Reste]%
+    % 15
+    \StrLeft{\Reste}{1}[\Depart]%
+    \expandafter\UpdatetoksCalissond\Depart0\nil%
+    \StrGobbleLeft{\Reste}{1}[\Reste]%
+    % 16
+    \StrLeft{\Reste}{3}[\Depart]%
+    \expandafter\UpdatetoksCalissond\Depart\nil%
+    \StrGobbleLeft{\Reste}{3}[\Reste]%
+    % 17
+    \StrLeft{\Reste}{1}[\Depart]%
+    \expandafter\UpdatetoksCalissond\Depart00\nil%
+%    \StrGobbleLeft{\Reste}{2}[\Reste]%
+  }{%
+    \StrLeft{0\Reste}{3}[\Depart]%
+    \expandafter\UpdatetoksCalissondDepart\Depart\nil%
+    \StrGobbleLeft{0\Reste}{3}[\Reste]%
+    \xintFor* ##1 in {\xintSeq{1}{\fpeval{\useKV[Calisson]{Taille}-2}}}\do{%
+      \StrLeft{0\Reste}{3}[\Depart]%
+      \expandafter\UpdatetoksCalissond\Depart\nil%
+      \StrGobbleLeft{0\Reste}{3}[\Reste]%
+    }%
+    \StrLeft{00\Reste}{3}[\Depart]%
+    \StrGobbleLeft{00\Reste}{3}[\Reste]%
+    \expandafter\UpdatetoksCalissond\Depart\nil%
+    % \par A la première ligne : \the\tokcalissonlistetracesd
+    % fin premiere ligne
+    \StrLeft{0\Reste}{3}[\Depart]%
+    \xintFor* ##1 in {\xintSeq{1}{\fpeval{\useKV[Calisson]{Taille}-1}}}\do{%
+      \StrLeft{\Reste}{1}[\Depart]%
+      \expandafter\UpdatetoksCalissond\Depart00\nil%
+      \StrGobbleLeft{\Reste}{1}[\Reste]%
+      \xintFor* ##2 in {\xintSeq{1}{\fpeval{\useKV[Calisson]{Taille}-1}}}\do{%
+        \StrLeft{\Reste}{3}[\Depart]%
+        \expandafter\UpdatetoksCalissond\Depart\nil%
+        \StrGobbleLeft{\Reste}{3}[\Reste]%
+      }%
+      \StrLeft{00\Reste}{3}[\Depart]%
+      \expandafter\UpdatetoksCalissond\Depart\nil%
+      \StrGobbleLeft{00\Reste}{3}[\Reste]%
+    }
+    %% fin des lignes intermédiaires
+    \xintFor* ##1 in {\xintSeq{1}{\fpeval{\useKV[Calisson]{Taille}}}}\do{%
+      \StrLeft{\Reste}{1}[\Depart]%
+      \expandafter\UpdatetoksCalissond\Depart00\nil%
+      \StrGobbleLeft{\Reste}{1}[\Reste]%
+      \xintifboolexpr{##1>\fpeval{\useKV[Calisson]{Taille}-1}}{}{%
+        \xintFor* ##2 in {\xintSeq{\fpeval{\useKV[Calisson]{Taille}-##1}}{1}}\do{%
+          \StrLeft{\Reste}{3}[\Depart]%
+          \expandafter\UpdatetoksCalissond\Depart\nil%
+          \StrGobbleLeft{\Reste}{3}[\Reste]%
+        }%
+      }%
+    }%
+  }%
+%  \par Liste droite :\the\tokcalissonlistetracesd\par
+  %\par Liste cp : \tokcalissonlistetracesd{"0ss",0f0","ftf","ssf","0ff","tt0","0sf","sfs"}\the\tokcalissonlistetracesd\par
+  \BuildCalisson{\the\tokcalissonlistetracesg}{\the\tokcalissonlistetracesd}%
+}%
+
+\def\BuildCalissonCode{%
+  boolean Solution;
+  Solution:=\useKV[Calisson]{Solution};
+  % 
+  color CouleurSolution,CouleurTrace;
+  CouleurSolution:=\useKV[Calisson]{Couleur};
+  CouleurTrace:=\useKV[Calisson]{CouleurTrace};
+  %
+  %
+  Rayon=\useKV[Calisson]{Rayon};
+  Taille=\useKV[Calisson]{Taille};
+  %
+  pair A,B,C,D,E,F,O;
+  O=(0,0);
+  path cc;
+  cc=cercles(O,Rayon);
+  D=pointarc(cc,30);
+  E=pointarc(cc,90);
+  F=pointarc(cc,150);
+  A=pointarc(cc,210);
+  B=pointarc(cc,270);
+  C=pointarc(cc,330);
+  path Gauche,Droit,Haut,Bas,TopGauche,BasDroit;
+  Gauche=F--A--B;
+  Droit=E--D--C;
+  Haut=F--E--D;
+  Bas=A--B--C;
+  TopGauche=E--F--A;
+  BasDroit=D--C--B;
+  %
+  pair Hor,Ver,Horn,Retenir;
+  Hor=(1/Taille)[E,F];
+  Ver=rotation(Hor,E,60);
+  Horn=rotation(Hor,E,120);
+  % On positionne les points
+  pair M[];
+  n=0;
+  % Partie Gauche -> ok
+  for k=0 upto Taille-1:
+  for l=0 upto Taille:
+  n:=n+1;
+  M[n]=E+k*(Ver-E)+l*(Hor-E);
+  %dotlabel.top(decimal(n),M[n]);
+  endfor;
+  endfor;
+  for k=Taille upto 2*Taille-1:
+  for l=0 upto (2*Taille-1-k):
+  n:=n+1;
+  M[n]=E+k*(Ver-E)+l*(Hor-E);
+  %dotlabel.top(decimal(n),M[n]);
+  endfor;
+  endfor;
+  % Partie Droite -> ok
+  for k=1 upto Taille:
+  n:=n+1;
+  M[n]=E+k*(Horn-E);
+%  dotlabel.top(decimal(n),M[n]);
+  endfor;
+  for k=1 upto Taille-1:
+  for l=0 upto Taille:
+  n:=n+1;
+  M[n]=E+k*(Ver-E)+l*(Horn-E);
+%  dotlabel.top(decimal(n),M[n]);
+  endfor;
+  endfor;
+  for k=Taille upto 2*Taille-1:
+  for l=0 upto (2*Taille-1-k):
+  n:=n+1;
+  M[n]=E+k*(Ver-E)+l*(Horn-E);
+  %dotlabel.top(decimal(n),M[n]);
+  endfor;
+  endfor;
+  drawoptions();
+  % 
+  %
+  string Retiens;
+  Retiens="";
+  %
+  pair Depla;
+  Depla:=Hor;
+  %
+  vardef LesTracesg(text t)=
+  drawoptions(withcolor CouleurTrace);
+  trace polygone(A,B,C,D,E,F) withpen pencircle scaled 2;
+  for k=1 upto 2*Taille-1:
+  trace (point(k*length Gauche/(2*Taille)) of Gauche)--(point(k*length Droit/(2*Taille)) of Droit) dashed evenly;
+  trace (point(k*length Haut/(2*Taille)) of Haut)--(point(k*length Bas/(2*Taille)) of Bas) dashed evenly;
+  trace (point(k*length TopGauche/(2*Taille)) of TopGauche)--(point(k*length BasDroit/(2*Taille)) of BasDroit) dashed evenly;
+  endfor;
+  drawoptions(withcolor CouleurTrace);
+  n:=0;
+  for p_=t:
+  n:=n+1;
+  for d=1 upto 3:
+  Retiens:=substring(d-1,d) of p_;
+  if d=1:Depla:=Hor
+  elseif d=2:Depla:=Ver
+  else : Depla:=Horn
+  fi;
+  if (Retiens="0") or (Retiens="f"):
+  elseif Retiens="t":
+  trace (chemin(Depla,E) shifted (M[n]-E)) withpen pencircle scaled 2 withcolor CouleurTrace;
+  elseif Retiens="s":
+  if Solution:
+  trace (chemin(Depla,E) shifted (M[n]-E)) withpen pencircle scaled 2 withcolor CouleurSolution;
+  fi;
+  fi;
+  endfor;
+  endfor;
+  enddef;
+  % 
+  vardef LesTracesd(text t)=
+  %if Taille=2:
+  %Hor:=(1/Taille)[E,F];
+  %Ver:=rotation(Hor,E,60);
+  %Horn:=rotation(Hor,E,120);
+  %fi;
+  for p_=t:
+  n:=n+1;
+  for d=1 upto 3:
+  Retiens:=substring(d-1,d) of p_;
+  if d=1:Depla:=Horn
+  elseif d=2:Depla:=Ver
+  else : Depla:=Hor
+  fi;
+%  fill ((fullcircle scaled 3mm) shifted M[n]);
+  if (Retiens="0") or (Retiens="f"):
+  elseif Retiens="t":
+  trace (chemin(Depla,E) shifted (M[n]-E)) withpen pencircle scaled 2 withcolor CouleurTrace;
+  elseif Retiens="s":
+  if Solution:
+  trace (chemin(Depla,E) shifted (M[n]-E)) withpen pencircle scaled 2 withcolor CouleurSolution;
+  fi;
+  fi;
+  endfor;
+  endfor;
+  enddef;
+}
+
+\NewDocumentCommand\BuildCalisson{m m}{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    \BuildCalissonCode
+    LesTracesg(#1);
+    LesTracesd(#2);
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={\BuildCalissonCode}]
+    LesTracesg(#1);
+    LesTracesd(#2);
+  \end{mpost}
+  \fi
+}%

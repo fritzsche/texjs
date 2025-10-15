@@ -1,0 +1,61 @@
+%Constantes
+u:=1cm;
+v:=(sqrt3)/2;
+pi:=3.141592654;
+e:=2.718281828;
+c:=57.29578; % conversion d'un radian en degres
+color rouge,vert,bleu,jaune,noir,blanc,orange,rose,violet,ciel,cielfonce,orangevif,gris,marron;
+rouge=(1,0,0);
+bleu=(0,0,1);
+noir=(0,0,0);
+blanc=(1,1,1);
+orange=(1,0.5,0);
+violet=blanc-vert;
+rose=(1,0.7,0.7);
+cielfonce=0.9*(0.25,1,1);
+ciel=bleu+vert;
+orangevif=(1,0.25,0.1);
+vert=(0,1,0);
+jaune=rouge+vert;
+gris=0.8*white;
+marron=(.545,.27,.075);
+%coloriage et lumière
+vardef Hsv(expr CC)=%CC couleur donnée en hsv d'après http://en.wikipedia.org/wiki/HSL_color_space
+  save $;
+  color $;
+  SSw:=floor(redpart(CC)/60);
+  SSh:=SSw mod 6;
+  SSf:=(redpart(CC)/60)-floor(SSw);
+  SSs:=greenpart((CC));
+  SSv:=bluepart((CC));
+  SSp:=SSv*(1-SSs);
+  SSq:=SSv*(1-SSf*SSs);
+  SSt:=SSv*(1-(1-SSf)*SSs);
+  if SSh=0: $=(SSv,SSt,SSp) elseif SSh=1:$=(SSq,SSv,SSp) elseif SSh=2:$=(SSp,SSv,SSt) elseif SSh=3:$=(SSp,SSq,SSv) elseif SSh=4:$=(SSt,SSp,SSv) elseif SSh=5:$=(SSv,SSp,SSq) fi;
+  $
+enddef;
+
+%Conversion RGB -> Html
+vardef Html(expr CC)=%CC donnée en string html
+  save $;
+  color $;
+  nrr:=hex(substring(0,2) of CC);
+  nvv:=hex(substring(2,4) of CC);
+  nbb:=hex(substring(4,6) of CC);
+  $=(nrr,nvv,nbb)/256;
+  $
+enddef;
+
+%Couleur vert Kawasaki
+color Evidence;
+Evidence=Html("00B51A");
+
+%Quelques couleurs pour le daltonisme
+color PfCdblue,PfCdcyan,PfCdgreen,PfCdyellow,PfCdred,PfCdpurple,PfCdgray;
+PfCdblue=Html("4477AA");
+PfCdcyan=Html("66CCEE");
+PfCdgreen=Html("228833");
+PfCdyellow=Html("CCBB44");
+PfCdred=Html("EE6677");
+PfCdpurple=Html("AA3377");
+PfCdgray=Html("BBBBBB");

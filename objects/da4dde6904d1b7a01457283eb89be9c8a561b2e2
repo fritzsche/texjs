@@ -1,0 +1,177 @@
+%%%
+% Tables Addition-Multiplication
+%%%
+\def\filedateTableOp{2024/08/04}%
+\def\fileversionTableOp{0.1}%
+\message{-- \filedateTableOp\space v\fileversionTableOp}%
+%
+\setKVdefault[Tables]{Addition=false,Soustraction=false,Multiplication,Seul=false,Debut=0,Fin=10,Couleur=white,Inverse=false}
+
+% pour m\'emoire
+\newcommand\TableMultiplicationComplete{%
+  \xdef\NbColTabMul{\fpeval{\useKV[Tables]{Fin}+1-\useKV[Tables]{Debut}}}%
+  \begin{tabular}{|>{\columncolor{gray!15}\centering\arraybackslash}p{1.5em}|*{\NbColTabMul}{>{\centering\arraybackslash}p{1.5em}|}}%
+    \hline
+    $\times$\xintFor* ##1 in {\xintSeq {\useKV[Tables]{Debut}}{\useKV[Tables]{Fin}}}\do{%
+    &\cellcolor{gray!15}\fpeval{##1}
+      }
+    \\
+    \hline
+    \xintFor* ##1 in {\xintSeq {0}{10}}\do{%
+    ##1\xintFor* ##2 in {\xintSeq {\useKV[Tables]{Debut}}{\useKV[Tables]{Fin}}}\do{%
+    &\fpeval{##2*##1}
+      }
+    \\
+    \hline
+    }
+  \end{tabular}%
+}
+%%%%
+
+\newcommand\TableMultiplicationCompleteColore{%
+  \xdef\NbColTabMul{\fpeval{\useKV[Tables]{Fin}+1-\useKV[Tables]{Debut}}}%
+  \begin{tabular}{|>{\columncolor{gray!15}\centering}p{15pt}|*{\NbColTabMul}{>{\centering\arraybackslash}p{15pt}|}}%
+    \hline
+    $\times$\xintFor* ##1 in {\xintSeq {\useKV[Tables]{Debut}}{\useKV[Tables]{Fin}}}\do{%
+    &\cellcolor{gray!15}\fpeval{##1}%
+      }
+    \\
+    \hline
+    \xintFor* ##1 in {\xintSeq {0}{10}}\do{%
+    ##1\xintFor* ##2 in {\xintSeq {\useKV[Tables]{Debut}}{\useKV[Tables]{Fin}}}\do{%
+    &\xintifboolexpr{##2<##1}{\cellcolor{\useKV[Tables]{Couleur}!\fpeval{##1*10}}}{\xintifboolexpr{##2>##1}{\cellcolor{\useKV[Tables]{Couleur}!\fpeval{##2*10}}}{}}\fpeval{##2*##1}%
+      }%
+    \\
+    \hline
+    }%
+  \end{tabular}%
+}%
+
+\newcommand\TableAdditionComplete{%
+  \xdef\NbColTabMul{\fpeval{\useKV[Tables]{Fin}+1-\useKV[Tables]{Debut}}}%
+  \begin{tabular}{|>{\columncolor{gray!15}\centering}p{15pt}|*{\NbColTabMul}{>{\centering\arraybackslash}p{15pt}|}}%
+    \hline
+    $+$\xintFor* ##1 in {\xintSeq {\useKV[Tables]{Debut}}{\useKV[Tables]{Fin}}}\do{%
+    &\cellcolor{gray!15}\fpeval{##1}
+      }
+    \\
+    \hline
+    \xintFor* ##1 in {\xintSeq {0}{10}}\do{%
+    ##1\xintFor* ##2 in {\xintSeq {\useKV[Tables]{Debut}}{\useKV[Tables]{Fin}}}\do{%
+    &\fpeval{##2+##1}
+      }
+    \\
+    \hline
+    }
+  \end{tabular}%
+}
+
+\newcommand\TableMultiplicationSeule[1]{%
+  \ensuremath{%
+    \begin{array}{ccccc}%
+      \xintFor* ##1 in {\xintSeq
+      {\useKV[Tables]{Debut}}{\useKV[Tables]{Fin}}}\do{
+      ##1&\times&#1&=&\fpeval{##1*#1}\\
+      }
+    \end{array}
+  }%
+}%
+
+\newcommand\TableAdditionSeule[1]{%
+  \ensuremath{%
+    \begin{array}{ccccc}
+      \xintFor* ##1 in {\xintSeq
+      {\useKV[Tables]{Debut}}{\useKV[Tables]{Fin}}}\do{
+      ##1&+&#1&=&\fpeval{##1+#1}\\
+      }
+    \end{array}
+  }%
+}%
+
+\newcommand\TableSoustractionSeule[1]{%
+  \ensuremath{%
+    \begin{array}{ccccc}
+      \xintFor* ##1 in {\xintSeq
+      {\fpeval{#1+\useKV[Tables]{Debut}}}{\fpeval{#1+\useKV[Tables]{Fin}}}}\do{
+      ##1&-&#1&=&\fpeval{##1-#1}\\
+      }
+    \end{array}
+  }%
+}%
+
+\NewDocumentCommand\PfCTableInverse{om}{%
+  % #1 paramètres
+  % #2 dizaine concernée
+  \useKVdefault[Tables]%
+  \setKV[Tables]{#1}%
+  \ifnum#2=0\relax%
+    \xdef\TIDepart{2}%
+  \else%
+    \xdef\TIDepart{\fpeval{#2*10}}%
+  \fi%
+  \xdef\TIFin{\fpeval{#2*10+9}}%
+  % On sauvegarde les nombres non premiers de la dizaine
+  \xdef\PfCRetiensNonPremiersInv{}%
+  \xintFor* ##1 in{\xintSeq{\TIDepart}{\TIFin}}\do{%
+    \TestPremier{##1}%
+    \ifboolKV[ClesEra]{Premier}{}{%
+      \xdef\PfCRetiensNonPremiersInv{\PfCRetiensNonPremiersInv##1,}%
+    }%
+  }%
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\ListeNombresRetenus{\PfCRetiensNonPremiersInv}%
+  \reademptyitems%
+  \xdef\PfCRetiensIntermediaire{}%
+  \xintFor* ##1 in{\xintSeq{1}{\ListeNombresRetenuslen}}\do{%
+    \xdef\PfCRetiensIntermediaire{\PfCRetiensIntermediaire,\ListeNombresRetenus[##1]}%
+    \xintFor* ##2 in{\xintSeq{2}{\fpeval{floor(sqrt(\ListeNombresRetenus[##1]))}}}\do{%
+      \modulo{\ListeNombresRetenus[##1]}{##2}%
+      \ifnum\remainder=0\relax%
+        \xdef\PfCRetiensIntermediaire{\PfCRetiensIntermediaire/##2}%
+      \fi%
+    }%
+  }%
+  \setsepchar[*]{,*/}\ignoreemptyitems%
+  \readlist*\ListeNombresRetenusInd{\PfCRetiensIntermediaire}%
+  \reademptyitems%
+  \ensuremath{%
+    \begin{array}[t]{ccrcl}%
+      \xintFor* ##1 in{\xintSeq{1}{\ListeNombresRetenusIndlen}}\do{%
+      \xintifForFirst{}{\\}%
+      \xintFor* ##2 in{\xintSeq{2}{\listlen\ListeNombresRetenusInd[##1]}}\do{%
+      \num{\ListeNombresRetenusInd[##1,1]}\uppercase{&}=\uppercase{&}\num{\ListeNombresRetenusInd[##1,##2]}\uppercase{&}\times\uppercase{&}\quotient{\ListeNombresRetenusInd[##1,1]}{\ListeNombresRetenusInd[##1,##2]}\num{\the\intquotient}\\%
+      }
+      }
+    \end{array}%
+  }%
+}%
+
+\newcommand\Tables[2][]{%
+  \useKVdefault[Tables]%
+  \setKV[Tables]{#1}%
+  \ifboolKV[Tables]{Seul}{%
+    \ifboolKV[Tables]{Inverse}{%
+        \PfCTableInverse[#1]{#2}%
+    }{%
+      \ifboolKV[Tables]{Soustraction}{%
+        \TableSoustractionSeule{#2}%
+      }{%
+        \ifboolKV[Tables]{Addition}{%
+          \TableAdditionSeule{#2}%
+        }{%
+          \TableMultiplicationSeule{#2}%
+        }%
+      }%
+    }%
+  }{%
+    \ifboolKV[Tables]{Soustraction}{%
+      La clé Soustraction n'est pas disponible ici.%
+    }{%
+      \ifboolKV[Tables]{Addition}{%
+        \TableAdditionComplete%
+      }{%
+        \TableMultiplicationCompleteColore%
+      }%
+    }%
+  }%
+}%

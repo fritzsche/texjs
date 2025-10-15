@@ -1,0 +1,57 @@
+%% farbe.tex
+%% Copyright 2025 Josef Friedrich
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3c
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2008/05/04 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+%
+% The Current Maintainer of this work is Josef Friedrich.
+%
+% This work consists of the files farbe.lua, farbe.tex,
+% and farbe.sty.
+
+\directlua
+{
+  if farbe == nil then
+    farbe = require('farbe')
+  end
+}
+
+\def\FarbePdfLiteral#1{\csname\string\color@#1\endcsname}
+
+\def\FarbeImport#1{%
+  \directlua
+  {
+    farbe.import_color('#1', '\FarbePdfLiteral{#1}')
+  }%
+}
+
+\def\FarbeColor#1
+{%
+  \directlua{farbe.Color('#1'):write_pdf_colorstack_node('push')}%
+}
+
+\def\FarbeColorEnd
+{%
+  \directlua{farbe.Color('000'):write_pdf_colorstack_node('pop')}%
+}
+
+\def\FarbeTextColor#1#2
+{%
+  \protect\leavevmode{%
+  \directlua{farbe.Color('#1'):write_pdf_colorstack_node('push')}%
+  #2%
+  \directlua{farbe.Color('#1'):write_pdf_colorstack_node('pop')}%
+  }
+}
+
+\def\FarbeBox#1
+{%
+  \directlua{farbe.Color('#1'):write_box()}%
+}

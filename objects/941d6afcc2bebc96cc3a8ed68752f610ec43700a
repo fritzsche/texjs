@@ -1,0 +1,114 @@
+%%%
+% Tectonic
+%%%
+\def\filedateTectonic{2025/05/28}%
+\def\fileversionTectonic{0.1a}%
+\message{-- \filedateTectonic\space v\fileversionTectonic}%
+%
+\setKVdefault[ClesTectonic]{CouleurCase=LightGray,TLargeur=5,THauteur=5,Solution=false,Largeur=25pt,CouleurSolution=black,Tailles=false,Aide=false,Taille={},Nombre={}}%
+\defKV[ClesTectonic]{%
+  Taille=\ifempty{#1}{}{\setKV[ClesTectonic]{Tailles}},%
+  Nombre=\ifempty{#1}{}{\setKV[ClesTectonic]{Aide}}%
+}%
+
+\newlength\PfCTectonic
+
+\NewDocumentCommand\Tectonic{o m}{%
+  \useKVdefault[ClesTectonic]%
+  \setKV[ClesTectonic]{#1}%
+  \ifboolKV[ClesTectonic]{Tailles}{%
+    \setKV[ClesTectonic]{THauteur=\useKV[ClesTectonic]{Taille}}%
+    \setKV[ClesTectonic]{TLargeur=\useKV[ClesTectonic]{Taille}}%
+  }{}%
+  \setlength{\PfCTectonic}{\useKV[ClesTectonic]{Largeur}+\tabcolsep}%
+  \setsepchar[*]{,*/}%
+  \readlist*\ListeCasesTectonic{#2}%
+  \savecomparemode%
+  \comparestrict%
+  \begin{NiceTabular}{*{\useKV[ClesTectonic]{TLargeur}}{m{\useKV[ClesTectonic]{Largeur}}}}%
+    \CodeBefore%
+    \xintFor* ##1 in {\xintSeq{2}{\fpeval{\useKV[ClesTectonic]{THauteur}}}}\do{%
+      \tikz\draw[gray] (##1-|1) -- (##1-|last);%
+    }%
+    \xintFor* ##1 in {\xintSeq{2}{\fpeval{\useKV[ClesTectonic]{TLargeur}}}}\do{%
+      \tikz\draw[gray] (1-|##1) -- (last-|##1);%
+    }%
+    \Body%
+    \xintFor* ##1 in {\xintSeq{0}{\fpeval{\useKV[ClesTectonic]{THauteur}-1}}}\do{%
+      \xintFor* ##2 in {\xintSeq{1}{\useKV[ClesTectonic]{TLargeur}}}\do{%
+        \rule{0pt}{\PfCTectonic}%
+        \StrCompare{\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},1]}{b}[\PfCTestb]%\PfCTestb
+        \StrCompare{\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},1]}{l}[\PfCTestl]%\PfCTestr
+        \StrCompare{\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},1]}{lb}[\PfCTestlb]%\PfCTestbr
+        \xintifboolexpr{\PfCTestb==0}{%
+          \Block[borders={bottom},line-width=2pt]{1-1}{%
+            \ifboolKV[ClesTectonic]{Solution}{%
+              \StrCompare{\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},2]}{\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},3]}[\PfCTestMeme]
+                \xintifboolexpr{\PfCTestMeme>0}{\color{\useKV[ClesTectonic]{CouleurSolution}}}{}%
+              \Large\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},3]%
+            }{%
+              \ifboolKV[ClesTectonic]{Aide}{%
+                \xintifboolexpr{\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},3]==\useKV[ClesTectonic]{Nombre}}{%
+                  \cellcolor{LightGray}\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},3]%
+                }{}%
+              }{}%
+            }%
+          }%
+        }{%
+          \xintifboolexpr{\PfCTestl==0}{%
+            \Block[borders={left},line-width=2pt]{1-1}{\ifboolKV[ClesTectonic]{Solution}{%
+                \StrCompare{\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},2]}{\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},3]}[\PfCTestMeme]
+                \xintifboolexpr{\PfCTestMeme>0}{\color{\useKV[ClesTectonic]{CouleurSolution}}}{}%
+                \Large\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},3]}{%
+                \ifboolKV[ClesTectonic]{Aide}{%
+                  \xintifboolexpr{\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},3]==\useKV[ClesTectonic]{Nombre}}{%
+                    \cellcolor{LightGray}\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},3]%
+                  }{}%
+                }{}%
+              }%
+            }%
+          }{%
+            \xintifboolexpr{\PfCTestlb==0}{%
+              \Block[borders={bottom,left},line-width=2pt]{1-1}{\ifboolKV[ClesTectonic]{Solution}{%
+                  \StrCompare{\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},2]}{\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},3]}[\PfCTestMeme]
+                  \xintifboolexpr{\PfCTestMeme>0}{\color{\useKV[ClesTectonic]{CouleurSolution}}}{}
+                  \Large\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},3]}{%
+                  \ifboolKV[ClesTectonic]{Aide}{%
+                    \xintifboolexpr{\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},3]==\useKV[ClesTectonic]{Nombre}}{%
+                      \cellcolor{LightGray}\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},3]%
+                    }{}%
+                  }{}%
+                }%
+              }%
+            }{%
+              \Block{1-1}{\ifboolKV[ClesTectonic]{Solution}{%
+                  \StrCompare{\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},2]}{\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},3]}[\PfCTestMeme]
+                  \xintifboolexpr{\PfCTestMeme>0}{\color{\useKV[ClesTectonic]{CouleurSolution}}}{}
+                  \Large\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},3]}{%
+                  \ifboolKV[ClesTectonic]{Aide}{%
+                    \xintifboolexpr{\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},3]==\useKV[ClesTectonic]{Nombre}}{%
+                      \cellcolor{LightGray}\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*##1+##2},3]%
+                    }{}%
+                  }{}%
+                }%
+              }%
+            }%
+          }%
+        }%
+        \xintifForLast{\\}{&}%
+      }%
+    }%
+    \CodeAfter%
+    \tikz\draw[line width=2pt] (1-|1) rectangle (last-|last);%
+    \xintFor* ##1 in {\xintSeq{1}{\fpeval{\useKV[ClesTectonic]{THauteur}}}}\do{%
+      \xintFor* ##2 in {\xintSeq{1}{\useKV[ClesTectonic]{TLargeur}}}\do{%
+        \ifboolKV[ClesTectonic]{Solution}{%
+          %\tikz\node[fill=white] at (\fpeval{##1+0.5} -|\fpeval{##2+0.5}) {\Large$\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*(##1-1)+##2},2]$};%
+        }{%
+          \tikz\node at (\fpeval{##1+0.5} -|\fpeval{##2+0.5}) {\Large$\ListeCasesTectonic[\fpeval{\useKV[ClesTectonic]{TLargeur}*(##1-1)+##2},2]$};%
+        }%
+      }%
+    }%
+  \end{NiceTabular}%
+  \restorecomparemode%
+}%

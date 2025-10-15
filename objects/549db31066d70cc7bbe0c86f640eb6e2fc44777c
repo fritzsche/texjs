@@ -1,0 +1,1356 @@
+%%%
+% Pavage
+%%%
+\def\filedatePavage{2025/05/26}%
+\def\fileversionPavage{0.1a}%
+\message{-- \filedatePavage\space v\fileversionPavage}%
+%
+\setKVdefault[Pavage]{%
+  Before=false,
+  Niveau=3,
+  Couleur=white,
+  Backgrounds=false,
+  Numerotation=false,
+  Depart=0,
+  Complete=false,
+  After=false,
+  Demo=false,
+  Regulier=false,
+  Cote=1,
+  Lignes=4,
+  Colonnes=4,
+  SemiRegulier=false,
+  Reseau=false,
+  Basei={u*(0.75,0)},
+  Basej={u*(0,0.5)},
+  Quadrilatere=false,
+  Escher=false,
+  Einstein=false,
+  Vampire=false,
+  Rayon=1,
+  Epaisseur=1,
+  Position=0.5,
+  Ecart=10,
+  Colore=false,
+  CouleurUn=white,
+  CouleurDeux=white,
+  CouleurTrois=white,
+  CouleurQuatre=white,
+  Motif={},
+  Traces={},
+  ArrierePlan={}
+}%
+\defKV[Pavage]{%
+  Motif=\ifempty{#1}{}{\setKV[Pavage]{Before}},%
+  Traces=\ifempty{#1}{}{\setKV[Pavage]{After}},%
+  ArrierePlan=\ifempty{#1}{}{\setKV[Pavage]{Backgrounds}},%
+  CouleurUn=\ifempty{#1}{}{\setKV[Pavage]{Colore}},%
+  CouleurDeux=\ifempty{#1}{}{\setKV[Pavage]{Colore}},%
+  CouleurTrois=\ifempty{#1}{}{\setKV[Pavage]{Colore}},%
+  CouleurQuatre=\ifempty{#1}{}{\setKV[Pavage]{Colore}}%
+}%
+%
+\def\MPPavageBase{%
+  boolean Before,Numerote,Complete,Backgrounds,After,Demo;
+  Before=\useKV[Pavage]{Before};
+  After=\useKV[Pavage]{After};
+  Numerote=\useKV[Pavage]{Numerotation};
+  Complete=\useKV[Pavage]{Complete};
+  Backgrounds=\useKV[Pavage]{Backgrounds};
+  Demo=\useKV[Pavage]{Demo};
+  color ColPavage,ColArrierePlan;
+  ColPavage=\useKV[Pavage]{Couleur};
+  ColArrierePlan=if Backgrounds:\useKV[Pavage]{ArrierePlan} else:ColPavage fi;
+  Niveau=\useKV[Pavage]{Niveau};
+  Depart=\useKV[Pavage]{Depart};
+  Epaisseur=\useKV[Pavage]{Epaisseur};
+  vardef pavages(expr chemin,tour,coul)=
+  if Backgrounds:
+  fill CadrePavage withcolor ColArrierePlan;
+  fi;
+  save Base;
+  picture Base;
+  pair A,B,C,D;
+  A=u*(0,0);
+  B=u*(1,0);
+  C=u*(1,1);
+  D=u*(0,1);
+  path especes;
+  especes=chemin--rotation(chemin,B,-90)--reverse(rotation(symetrie(chemin,B,C),B,-90))--rotation(chemin,B,90)--cycle;
+  if tour=0:
+    Base=image(
+      trace chemin;
+      );
+  elseif tour=1:
+    Base=image(
+      fill especes withcolor coul;
+      trace especes;
+      A:=A shifted(u*(0,-1));
+      B:=B shifted(u*(1,-1));
+      C:=C shifted(u*(1,0));
+      );
+  elseif tour>=2:
+    Base=pavages(chemin,tour-1,coul);
+    Base:=image(
+      trace Base;
+      trace symetrie(Base,B,C);
+      trace rotation(symetrie(Base,B,C),B,-90);
+      trace rotation(Base,B,90);
+      A:=A shifted(u*(0,-(2**(tour-1))));
+      B:=B shifted(u*(2**(tour-1),-(2**(tour-1))));
+      C:=C shifted(u*(2**(tour-1),0));
+      );
+  fi;
+  Base
+enddef;
+%
+vardef pavagescar(expr chemin,tour,coul)=
+  save BaseCar;
+  picture BaseCar;
+  pair A,B,C,D;
+  A=u*(0,0);
+  B=u*(1,0);
+  C=u*(1,1);
+  D=u*(0,1);
+  if tour=0:
+    BaseCar=image(
+      trace chemin;
+      trace A--B--C--D--cycle dashed dashpattern(on12bp off6bp on3bp off 6bp) withcolor gris;
+      );
+  elseif tour=1:
+    BaseCar=image(
+      trace chemin;
+      drawoptions(dashed evenly);
+      trace rotation(chemin,B,-90);
+      trace reverse(rotation(symetrie(chemin,B,C),B,-90));
+      trace rotation(chemin,B,90);
+      drawoptions();
+      A:=A shifted(u*(0,-1));
+      B:=B shifted(u*(1,-1));
+      C:=C shifted(u*(1,0));
+      trace A--B--C--D--cycle dashed dashpattern(on12bp off6bp on3bp off 6bp) withcolor gris;
+      trace iso(A,D)--iso(B,C) dashed dashpattern(on12bp off6bp on3bp off 6bp) withcolor gris;
+      trace iso(A,B)--iso(C,D) dashed dashpattern(on12bp off6bp on3bp off 6bp) withcolor gris;
+      );
+  elseif tour>=2:
+    BaseCar=image(
+      trace pavages(chemin,tour-1,coul);
+      trace symetrie(pavages(chemin,tour-1,coul),B,C);%coul+0.5blanc
+      trace rotation(symetrie(pavages(chemin,tour-1,coul),B,C),B,-90);
+      trace rotation(pavages(chemin,tour-1,coul),B,90);
+      A:=A shifted(u*(0,-(2**(tour-1))));
+      B:=B shifted(u*(2**(tour-1),-(2**(tour-1))));
+      C:=C shifted(u*(2**(tour-1),0));
+      );
+  fi;
+  BaseCar
+  enddef;
+  %
+  vardef CadrePavage=
+  u*(0,1)--u*(0,-(2**Niveau-1))--u*(2**Niveau,-(2**Niveau-1))--u*(2**(Niveau),1)--cycle
+  enddef;
+  %
+  vardef Numerotation=
+  n:=Depart;
+  pair B;
+  B=u*(1,0);
+  if Complete:
+  for k=0 upto 2**(Niveau)-2:
+  for l=0 upto (2**(Niveau-1))-1:
+  n:=n+1;
+  if (k mod 2)=0:
+  label(TEX(decimal(n)),B+u*(2l,-k));
+  else:
+  if l<(2**(Niveau-1))-1:
+  label(TEX(decimal(n)),B+u*(2l+1,-k));
+  else:
+  n:=n-1;
+  fi;
+  fi;
+  endfor;
+  endfor;
+  else:
+  for k=0 upto (2**(Niveau-1))-1:
+  for l=0 upto (2**(Niveau-1))-1:
+  n:=n+1;
+  label(TEX(decimal(n)),B+2u*(l,-k));
+  endfor;
+  endfor;
+  fi;
+  enddef;
+  %
+  vardef NumerotationPDF=
+  n:=Depart;
+  pair B;
+  B=u*(1,0);
+  if Complete:
+  for k=0 upto 2**(Niveau)-2:
+  for l=0 upto (2**(Niveau-1))-1:
+  n:=n+1;
+  if (k mod 2)=0:
+  label(TEX(decimal(n)),B+u*(2l,-k));
+  else:
+  if l<(2**(Niveau-1))-1:
+  label(LATEX(decimal(n)),B+u*(2l+1,-k));
+  fi;
+  fi;
+  endfor;
+  endfor;
+  else:
+  for k=0 upto (2**(Niveau-1))-1:
+  for l=0 upto (2**(Niveau-1))-1:
+  n:=n+1;
+  label(LATEX(decimal(n)),B+2u*(l,-k));
+  endfor;
+  endfor;
+  fi;
+  enddef;
+  %
+  vardef PlacePointSupport=
+  n:=Depart;
+  pair K[],L[],M[],N[];
+  K[0]=u*(0,0);
+  M[0]=u*(1,1);
+  if Complete:
+  for k=0 upto 2**(Niveau)-2:
+  for l=0 upto (2**(Niveau-1))-1:
+  n:=n+1;
+  if (k mod 2)=0:
+  K[n]:=K0+u*(2l,-k);
+  M[n]:=M0+u*(2l,-k);
+  else:
+  if l<(2**(Niveau-1))-1:
+  K[n]:=K0+u*(2l+1,-k);
+  M[n]:=M0+u*(2l+1,-k);
+  else:
+  n:=n-1;
+  fi;
+  fi;
+  endfor;
+  endfor;
+  else:
+  for k=0 upto (2**(Niveau-1))-1:
+  for l=0 upto (2**(Niveau-1))-1:
+  n:=n+1;
+  K[n]=K[0]+2u*(l,-k);
+  M[n]=M[0]+2u*(l,-k);
+  endfor;
+  endfor;
+  fi;
+  enddef;
+  vardef EffectuerTraces=
+  \useKV[Pavage]{Traces}
+  enddef;
+}%
+
+\def\MPReseauRegulier{%
+  boolean Before,Numerote,Backgrounds,After;
+  Before=\useKV[Pavage]{Before};
+  After=\useKV[Pavage]{After};
+  Numerote=\useKV[Pavage]{Numerotation};
+  Backgrounds=\useKV[Pavage]{Backgrounds};
+  color ColPavage,ColArrierePlan;
+  ColPavage=\useKV[Pavage]{Couleur};
+  ColArrierePlan=if Backgrounds:\useKV[Pavage]{ArrierePlan} else:ColPavage fi;
+  Cote=\useKV[Pavage]{Cote};
+  Lignes=\useKV[Pavage]{Lignes};
+  Colonnes=\useKV[Pavage]{Colonnes};
+  Niveau=\useKV[Pavage]{Niveau};
+  Depart=\useKV[Pavage]{Depart};
+  Epaisseur=\useKV[Pavage]{Epaisseur};
+  pair A[];
+  A1=(0,0);
+  A2-A1=u*Cote*(1,0);
+  vardef PavageRegulier(expr Niv)=
+  picture Retour;
+  if Niv=3:
+  A3=rotation(A2,A1,60);
+  path TriBase,CadrePavage;
+  TriBase=polygone(A1,A2,A3);
+  CadrePavage=polygone(A1,Cote*cm*(Colonnes,0),Cote*cm*(Colonnes,0.5*sqrt(3)*Lignes),Cote*cm*(0,0.5*sqrt(3)*Lignes));
+  Retour=image(
+  fill CadrePavage withcolor ColPavage;
+  for k=0 upto Lignes:
+  for l=-1 upto Colonnes+1:
+  if k mod 2=0:
+  trace TriBase shifted (Cote*cm*(l,0.5*sqrt(3)*k));
+  else:
+  trace TriBase shifted (Cote*cm*(l+0.5,0.5*sqrt(3)*k));
+  fi;
+  endfor;
+  endfor;
+  clip currentpicture to CadrePavage;
+  trace CadrePavage withpen pencircle scaled Epaisseur;
+  );
+  elseif Niv=4:
+  A3=rotation(A1,A2,-90);
+  A4-A3=A1-A2;
+  path QuadriBase,CadrePavage;
+  QuadriBase=polygone(A1,A2,A3,A4);
+  CadrePavage=polygone(A1,Cote*cm*(Colonnes,0),Cote*cm*(Colonnes,Lignes),Cote*cm*(0,Lignes));
+  Retour=image(
+  fill CadrePavage withcolor ColPavage;
+  for k=0 upto Lignes-1:
+  for l=0 upto Colonnes-1:
+  trace QuadriBase shifted (Cote*cm*(l,k));
+  endfor;
+  endfor;
+  clip currentpicture to CadrePavage;
+  trace CadrePavage withpen pencircle scaled Epaisseur;
+  );
+  elseif Niv=6:
+  A3=rotation(A1,A2,-120);
+  A4=rotation(A2,A3,-120);
+  A5=rotation(A3,A4,-120);
+  A6=rotation(A4,A5,-120);  
+  path HexaBase,CadrePavage;
+  HexaBase=polygone(A1,A2,A3,A4,A5,A6);
+  CadrePavage=polygone(Cote*cm*(1,0),Cote*cm*(3*Colonnes,0),Cote*cm*(3*Colonnes,sqrt(3)*(Lignes-1)),Cote*cm*(1,sqrt(3)*(Lignes-1)));
+  Retour=image(%
+  fill CadrePavage withcolor ColPavage;
+  for k=-1 upto 2*Lignes+1:
+  for l=-1 upto Colonnes+1:
+  if k mod 2=1:
+  trace HexaBase shifted (Cote*cm*(3*l,0.5*sqrt(3)*k));
+  else:
+  trace HexaBase shifted (Cote*cm*(1.5+3*l,sqrt(3)+0.5*sqrt(3)*k));
+  fi;
+  endfor;
+  endfor;
+  clip currentpicture to CadrePavage;
+  trace CadrePavage withpen pencircle scaled Epaisseur;
+  );
+  fi;
+  Retour
+  enddef;
+  % 
+  vardef PlacePointSupport=
+  n:=Depart;
+  pair B;pair C;pair vdepla;
+  pair Hexa[],Hexb[],Hexc[],Hexd[],Hexe[],Hexf[];
+  pair Cara[],Carb[],Carc[],Card[];
+  pair Tria[],Trib[],Tric[];
+  path Maille[];
+  if Niveau=3:
+    B=iso(A1,A2,A3);
+    C=symetrie(B,A2,A3);
+    for k=1 upto Lignes:
+      for l=1 upto 2*Colonnes-1:
+        n:=n+1;
+        if k mod 2=1:
+        nbv:=(k-1)*1.5;
+          if l mod 2=1:
+          vdepla:=(Cote*cm*((l-1) div 2),nbv*Cote*cm*sqrt(3)/3);
+          else:
+          vdepla:=(Cote*cm*((l-1) div 2),nbv*Cote*cm*sqrt(3)/3)+(C-B);
+          fi;
+          else:
+          nbv:=(k-1)*1.5+0.5;
+        if l mod 2=1:
+        vdepla:=(Cote*cm*((l-1) div 2),nbv*Cote*cm*sqrt(3)/3);
+        else:
+        vdepla:=(Cote*cm*((l-1) div 2),(nbv*Cote*cm*sqrt(3)/3))+(xpart(C-B),-ypart(C-B));
+        fi;
+        fi;
+        if (n mod 2)=0:
+        Tria[n]=rotation(A1,B,180) shifted vdepla;
+        Trib[n]=rotation(A2,B,180) shifted vdepla;
+        Tric[n]=rotation(A3,B,180) shifted vdepla;
+        else:
+        Tria[n]-A1=vdepla;
+        Trib[n]-A2=vdepla;
+        Tric[n]-A3=vdepla;
+        fi;
+        Maille[n]=polygone(Tria[n],Trib[n],Tric[n]);
+  endfor;
+  endfor;
+  elseif Niveau=4:
+  B=iso(A1,A2,A3,A4);
+  for k=1 upto Lignes:
+  for l=1 upto Colonnes:
+  n:=n+1;
+  vdepla:=Cote*cm*((l-1),(k-1));
+  Cara[n]-A1=vdepla;
+  Carb[n]-A2=vdepla;
+  Carc[n]-A3=vdepla;
+  Card[n]-A4=vdepla;
+  Maille[n]=polygone(Cara[n],Carb[n],Carc[n],Card[n]);
+  endfor;
+  endfor;
+  elseif Niveau=6:
+  B=iso(A1,A2,A3,A4,A5,A6);
+  C=symetrie(B,A3,A4);
+    for k=1 upto Lignes-1:
+      for l=1 upto 2*Colonnes-1:
+        n:=n+1;
+        nbv:=(k-1)*3;
+        if l mod 2=1:
+          vdepla:=(1.5*Cote*cm*(l-1)+1.5*Cote*cm,nbv*Cote*cm*sqrt(3)/3);
+        else:
+          vdepla:=(1.5*Cote*cm*(l-2)+1.5*Cote*cm,nbv*Cote*cm*sqrt(3)/3)+(C-B);
+        fi;
+        if k=Lignes-1:
+        if l mod 2=1:
+        Hexa[n]-A1=vdepla;
+        Hexb[n]-A2=vdepla;
+        Hexc[n]-A3=vdepla;
+        Hexd[n]-A4=vdepla;
+        Hexe[n]-A5=vdepla;
+        Hexf[n]-A6=vdepla;
+        else:
+        n:=n-1;
+        fi;
+        else:
+        Hexa[n]-A1=vdepla;
+        Hexb[n]-A2=vdepla;
+        Hexc[n]-A3=vdepla;
+        Hexd[n]-A4=vdepla;
+        Hexe[n]-A5=vdepla;
+        Hexf[n]-A6=vdepla;
+        fi;
+        Maille[n]:=polygone(Hexa[n],Hexb[n],Hexc[n],Hexd[n],Hexe[n],Hexf[n]);
+      endfor;
+    endfor;
+  fi;
+  enddef;
+  %
+  vardef Numerotation=
+  n:=Depart;
+  pair B;pair C;pair vdepla;
+  if Niveau=3:
+    B=iso(A1,A2,A3);
+    C=symetrie(B,A2,A3);
+    for k=1 upto Lignes:
+      for l=1 upto 2*Colonnes-1:
+        n:=n+1;
+        if k mod 2=1:
+        nbv:=(k-1)*1.5;
+          if l mod 2=1:
+          vdepla:=(Cote*cm*((l-1) div 2),nbv*Cote*cm*sqrt(3)/3);
+          else:
+          vdepla:=(Cote*cm*((l-1) div 2),nbv*Cote*cm*sqrt(3)/3)+(C-B);
+          fi;
+          else:
+          nbv:=(k-1)*1.5+0.5;
+        if l mod 2=1:
+        vdepla:=(Cote*cm*((l-1) div 2),nbv*Cote*cm*sqrt(3)/3);
+        else:
+        vdepla:=(Cote*cm*((l-1) div 2),(nbv*Cote*cm*sqrt(3)/3))+(xpart(C-B),-ypart(C-B));
+        fi;
+        fi;
+        label(TEX(decimal(n)),B shifted vdepla);
+    endfor;
+  endfor;
+  elseif Niveau=4:
+  B=iso(A1,A2,A3,A4);
+  for k=1 upto Lignes:
+  for l=1 upto Colonnes:
+  n:=n+1;
+  vdepla:=Cote*cm*((l-1),(k-1));
+  label(TEX(decimal(n)),B shifted vdepla);
+  endfor;
+  endfor;
+  elseif Niveau=6:
+  B=iso(A1,A2,A3,A4,A5,A6);
+  C=symetrie(B,A3,A4);
+    for k=1 upto Lignes-1:
+      for l=1 upto 2*Colonnes-1:
+        n:=n+1;
+        nbv:=(k-1)*3;
+        if l mod 2=1:
+          vdepla:=(1.5*Cote*cm*(l-1)+1.5*Cote*cm,nbv*Cote*cm*sqrt(3)/3);
+        else:
+          vdepla:=(1.5*Cote*cm*(l-2)+1.5*Cote*cm,nbv*Cote*cm*sqrt(3)/3)+(C-B);
+        fi;
+        if k=Lignes-1:
+        if l mod 2=1:
+        label(TEX(decimal(n)),B shifted vdepla);
+        else:
+        n:=n-1;
+        fi;
+        else:
+        label(TEX(decimal(n)),B shifted vdepla);
+        fi;
+      endfor;
+    endfor;
+  fi;
+  enddef;
+  %
+  vardef NumerotationPDF=
+  n:=Depart;
+  pair B;pair C;pair vdepla;
+  if Niveau=3:
+    B=iso(A1,A2,A3);
+    C=symetrie(B,A2,A3);
+    for k=1 upto Lignes:
+      for l=1 upto 2*Colonnes-1:
+        n:=n+1;
+        if k mod 2=1:
+        nbv:=(k-1)*1.5;
+          if l mod 2=1:
+          vdepla:=(Cote*cm*((l-1) div 2),nbv*Cote*cm*sqrt(3)/3);
+          else:
+          vdepla:=(Cote*cm*((l-1) div 2),nbv*Cote*cm*sqrt(3)/3)+(C-B);
+          fi;
+          else:
+          nbv:=(k-1)*1.5+0.5;
+        if l mod 2=1:
+        vdepla:=(Cote*cm*((l-1) div 2),nbv*Cote*cm*sqrt(3)/3);
+        else:
+        vdepla:=(Cote*cm*((l-1) div 2),(nbv*Cote*cm*sqrt(3)/3))+(xpart(C-B),-ypart(C-B));
+        fi;
+        fi;
+        label(LATEX(decimal(n)),B shifted vdepla);
+    endfor;
+  endfor;
+  elseif Niveau=4:
+  B=iso(A1,A2,A3,A4);
+  for k=1 upto Lignes:
+  for l=1 upto Colonnes:
+  n:=n+1;
+  vdepla:=Cote*cm*((l-1),(k-1));
+  label(LATEX(decimal(n)),B shifted vdepla);
+  endfor;
+  endfor;
+  elseif Niveau=6:
+  B=iso(A1,A2,A3,A4,A5,A6);
+  C=symetrie(B,A3,A4);
+    for k=1 upto Lignes-1:
+      for l=1 upto 2*Colonnes-1:
+        n:=n+1;
+        nbv:=(k-1)*3;
+        if l mod 2=1:
+          vdepla:=(1.5*Cote*cm*(l-1)+1.5*Cote*cm,nbv*Cote*cm*sqrt(3)/3);
+        else:
+          vdepla:=(1.5*Cote*cm*(l-2)+1.5*Cote*cm,nbv*Cote*cm*sqrt(3)/3)+(C-B);
+        fi;
+        if k=Lignes-1:
+        if l mod 2=1:
+        label(LATEX(decimal(n)),B shifted vdepla);
+        else:
+        n:=n-1;
+        fi;
+        else:
+        label(LATEX(decimal(n)),B shifted vdepla);
+        fi;
+      endfor;
+    endfor;
+  fi;
+  enddef;
+  vardef EffectuerTraces=
+  \useKV[Pavage]{Traces}
+  enddef;
+}%
+
+\def\MPReseauCode{%
+  boolean Before,Numerote,Backgrounds,After;
+  Before=\useKV[Pavage]{Before};
+  After=\useKV[Pavage]{After};
+  Numerote=\useKV[Pavage]{Numerotation};
+  Backgrounds=\useKV[Pavage]{Backgrounds};
+  color ColPavage,ColArrierePlan;
+  ColPavage=\useKV[Pavage]{Couleur};
+  ColArrierePlan=if Backgrounds:\useKV[Pavage]{ArrierePlan} else:ColPavage fi;
+  Cote=\useKV[Pavage]{Cote};
+  Lignes=\useKV[Pavage]{Lignes};
+  Colonnes=\useKV[Pavage]{Colonnes};
+  Niveau=\useKV[Pavage]{Niveau};
+  Depart=\useKV[Pavage]{Depart};
+  Epaisseur=\useKV[Pavage]{Epaisseur};
+  pair basei,basej;
+  basei=\useKV[Pavage]{Basei};
+  basej=\useKV[Pavage]{Basej};
+  vardef PavageReseau=
+  for k=0 upto Lignes-1:
+  for l=0 upto Colonnes -1:
+  trace Motif shifted (k*basei+l*basej);
+  endfor;
+  endfor;
+  enddef;
+  vardef Numerotation=
+  n:=Depart;
+  k:=0;
+  pair A[],B[];
+  A[0]=point(0) of Motif;
+  B[0]=A[0];
+  forever:
+  k:=k+1;
+  A[k]=point(k) of Motif;
+  B[0]:=B[0]+A[k];
+  exitif A[k]=A[0];
+  endfor;
+  B[0]:=B[0]/k;
+  for k=0 upto Lignes-1:
+  for l=0 upto Colonnes -1:
+  n:=n+1;
+  label(decimal(n),B[0] shifted(k*basei+l*basej));
+  endfor;
+  endfor;
+  enddef;
+  vardef PlacePointSupport=
+  pair M[][];
+  path Maille[];
+  n:=Depart;
+  k:=0;
+  pair A[],B[];
+  A[0]=point(0) of Motif;
+  forever:
+  k:=k+1;
+  A[k]=point(k) of Motif;
+  B[0]:=B[0]+A[k];
+  exitif A[k]=A[0];
+  endfor;
+  B[0]:=B[0]/k;
+  NbSommet:=k;
+  for k=0 upto Lignes-1:
+  for l=0 upto Colonnes -1:
+  n:=n+1;
+  for m=1 upto NbSommet:
+  M[n][m]=A[m] shifted (k*basei+l*basej);
+  endfor;
+  Maille[n]=polygone(M[n][1] for r=2 upto NbSommet:,M[n][r] endfor);
+  endfor;
+  endfor;
+  enddef;
+  vardef EffectuerTraces=
+  \useKV[Pavage]{Traces}
+  enddef;
+}%
+
+\def\MPPeriodiqueCode{%
+  boolean Before,Numerote,Backgrounds,After;
+  Before=\useKV[Pavage]{Before};
+  After=\useKV[Pavage]{After};
+  Numerote=\useKV[Pavage]{Numerotation};
+  Backgrounds=\useKV[Pavage]{Backgrounds};
+  color ColPavage,ColArrierePlan;
+  ColPavage=\useKV[Pavage]{Couleur};
+  ColArrierePlan=if Backgrounds:\useKV[Pavage]{ArrierePlan} else:ColPavage fi;
+  Cote=\useKV[Pavage]{Cote};
+  Lignes=\useKV[Pavage]{Lignes};
+  Colonnes=\useKV[Pavage]{Colonnes};
+  Niveau=\useKV[Pavage]{Niveau};
+  Depart=\useKV[Pavage]{Depart};
+  Epaisseur=\useKV[Pavage]{Epaisseur};
+  pair basei,basej;
+  vardef PavagePeriodique=
+  basei=iso(A1,A2)-iso(A1,A0);
+  basej=iso(A0,A3)-iso(A1,A0);
+  path CadrePavage;
+  pair Cpa[];
+  Cpa1=(0,ypart(-2*basej));
+  Cpa2=(xpart(2*Colonnes*basei),ypart(-2*basej));
+  Cpa3=(xpart(2*Colonnes*basei),ypart(2*Lignes*basej));
+  Cpa4=(0,ypart(2*Lignes*basej));
+  CadrePavage=Cpa1--Cpa2--Cpa3--Cpa4--cycle;
+  picture BlocContour,BlocPavage;
+  BlocContour=image(
+  for k=-Lignes upto Lignes+1:
+  for l=-1 upto Colonnes+1:
+  if ColPavage<>white:
+  fill Motif shifted (2*l*basei+2*k*basej) withcolor ColPavage;
+  fill symetrie(Motif,iso(A1,A2)) shifted (2*l*basei+2*k*basej) withcolor ColPavage;
+  fi;
+  trace Motif shifted (2*l*basei+2*k*basej);
+  trace symetrie(Motif,iso(A1,A2)) shifted (2*l*basei+2*k*basej);
+  endfor;
+  endfor;
+  drawoptions();
+  );
+  BlocPavage=image(
+  trace BlocContour;
+  clip currentpicture to CadrePavage;
+  trace CadrePavage withpen pencircle scaled Epaisseur;
+  );
+  BlocPavage
+  enddef;
+  vardef Numerotation=
+  n:=-1;
+  pair ISO;
+  for k=-Lignes upto Lignes+1:
+  for l=-1 upto Colonnes+1:
+  n:=n+2;
+  ISO:=B[0] shifted (2*l*basei+2*k*basej);
+  if (xpart(ISO)>xpart(Cpa1+u*(0.2,0))) and (xpart(ISO)<xpart(Cpa2-u*(0.2,0))) and (ypart(ISO)>ypart(Cpa1+u*(0.2,0))) and (ypart(ISO)<ypart(Cpa4-u*(0.2,0))):
+  label(TEX(decimal(n)),ISO);
+  else:
+  n:=n-2;
+  fi;
+  endfor;
+  endfor;
+  %2eme tour
+  n:=-1;
+  for k=-Lignes upto Lignes+1:
+  for l=-1 upto Colonnes+1:
+  n:=n+2;
+  ISO:=symetrie(B[0],iso(A1,A2)) shifted (2*l*basei+2*k*basej);
+  if (xpart(ISO)>xpart(Cpa1+u*(0.2,0))) and (xpart(ISO)<xpart(Cpa2-u*(0.2,0))) and (ypart(ISO)>ypart(Cpa1+u*(0,0.2))) and (ypart(ISO)<ypart(Cpa4-u*(0,0.2))):
+  label(TEX(decimal(n+1)),ISO);
+  else:
+  n:=n-2;
+  fi;
+  endfor;
+  endfor;
+  enddef;
+  vardef PlacePointSupport=
+  path Maille[];
+  pair QuadA[],QuadB[],QuadC[],QuadD[];
+  n:=-1;
+  pair ISO;
+  for k=-Lignes upto Lignes+1:
+  for l=-1 upto Colonnes+1:
+  n:=n+2;
+  ISO:=B[0] shifted (2*l*basei+2*k*basej);
+  if (xpart(ISO)>xpart(Cpa1+u*(0.2,0))) and (xpart(ISO)<xpart(Cpa2-u*(0.2,0))) and (ypart(ISO)>ypart(Cpa1+u*(0,0.2))) and (ypart(ISO)<ypart(Cpa4-u*(0,0.2))):
+  QuadA[n]=A0 shifted (2*l*basei+2*k*basej);
+  QuadB[n]=A1 shifted (2*l*basei+2*k*basej);
+  QuadC[n]=A2 shifted (2*l*basei+2*k*basej);
+  QuadD[n]=A3 shifted (2*l*basei+2*k*basej);
+  Maille[n]=polygone(QuadA[n],QuadB[n],QuadC[n],QuadD[n]);
+  else:
+  n:=n-2;
+  fi;
+  endfor;
+  endfor;
+  %2eme tour
+  n:=-1;
+  for k=-Lignes upto Lignes+1:
+  for l=-1 upto Colonnes+1:
+  n:=n+2;
+  ISO:=symetrie(B[0],iso(A1,A2)) shifted (2*l*basei+2*k*basej);
+  if (xpart(ISO)>xpart(Cpa1+u*(0.2,0))) and (xpart(ISO)<xpart(Cpa2-u*(0.2,0))) and (ypart(ISO)>ypart(Cpa1+u*(0,0.2))) and (ypart(ISO)<ypart(Cpa4-u*(0,0.2))):
+  QuadA[n+1]=symetrie(A0,iso(A1,A2)) shifted (2*l*basei+2*k*basej);
+  QuadB[n+1]=symetrie(A1,iso(A1,A2)) shifted (2*l*basei+2*k*basej);
+  QuadC[n+1]=symetrie(A2,iso(A1,A2)) shifted (2*l*basei+2*k*basej);
+  QuadD[n+1]=symetrie(A3,iso(A1,A2)) shifted (2*l*basei+2*k*basej);
+  Maille[n+1]=polygone(QuadA[n+1],QuadB[n+1],QuadC[n+1],QuadD[n+1]);
+  else:
+  n:=n-2;
+  fi;
+  endfor;
+  endfor;
+  enddef;
+  vardef EffectuerTraces=
+  \useKV[Pavage]{Traces}
+  enddef;
+}%
+
+\def\MPPavageEscherCode{%
+  boolean Before,Numerote,Backgrounds,After,Colore;
+  Before=\useKV[Pavage]{Before};
+  After=\useKV[Pavage]{After};
+  Numerote=\useKV[Pavage]{Numerotation};
+  Backgrounds=\useKV[Pavage]{Backgrounds};
+  Colore=\useKV[Pavage]{Colore};
+  color ColPavage,ColArrierePlan,CouleurUn,CouleurDeux,CouleurTrois,CouleurQuatre;
+  if Colore:
+  CouleurUn=\useKV[Pavage]{CouleurUn};
+  CouleurDeux=\useKV[Pavage]{CouleurDeux};
+  CouleurTrois=\useKV[Pavage]{CouleurTrois};
+  CouleurQuatre=\useKV[Pavage]{CouleurQuatre};
+  fi;
+  ColPavage=\useKV[Pavage]{Couleur};
+  ColArrierePlan=if Backgrounds:\useKV[Pavage]{ArrierePlan} else:ColPavage fi;
+  Cote=\useKV[Pavage]{Cote};
+  Rayon=\useKV[Pavage]{Rayon};
+  Lignes=\useKV[Pavage]{Lignes};
+  Colonnes=\useKV[Pavage]{Colonnes};
+  Niveau=\useKV[Pavage]{Niveau};
+  Depart=\useKV[Pavage]{Depart};
+  Ecart=\useKV[Pavage]{Ecart};
+  Position=\useKV[Pavage]{Position};
+  Epaisseur=\useKV[Pavage]{Epaisseur};
+  pair basei,basej;
+  picture Motif;
+  vardef PavageEscher=
+  path cc;
+  cc=cercles((0,0),u*Rayon);
+  if Niveau=3:
+  pair O[];
+  O1=pointarc(cc,0);
+  O3=pointarc(cc,120);
+  O5=pointarc(cc,240);
+  O2=Position[O3,O1]+Ecart*unitvector((O3-O1) rotated -90);
+  O4=rotation(O2,O3,-120);
+  O6=rotation(O4,O5,-120);
+  picture Motif;
+  Motif=image(
+  if Colore:
+  if known CouleurUn: fill polygone(O1,O2,O3,O4,O5,O6) withcolor CouleurUn fi;
+  if known CouleurDeux: fill rotation(polygone(O1,O2,O3,O4,O5,O6),O1,120) withcolor CouleurDeux fi;
+  if known CouleurTrois:fill rotation(polygone(O1,O2,O3,O4,O5,O6),O1,-120) withcolor CouleurTrois fi;
+  fi;
+  trace polygone(O1,O2,O3,O4,O5,O6);
+  trace rotation(polygone(O1,O2,O3,O4,O5,O6),O1,120);
+  trace rotation(polygone(O1,O2,O3,O4,O5,O6),O1,-120);
+  );
+  basei=(rotation(O2,O1,-120)-O4);
+  basej:=(rotation(O5,O1,-120)-O5);
+  elseif Niveau=4:
+  pair O[];
+  O1=pointarc(cc,0);
+  O3=pointarc(cc,90);
+  O5=pointarc(cc,180);
+  O7=pointarc(cc,270);
+  O2=Position[O3,O1]+Ecart*unitvector((O3-O1) rotated -90);
+  O4=rotation(O2,O3,-90);
+  O6=rotation(O4,O5,-90);
+  O8=rotation(O6,O7,-90);
+  picture Motif;
+  Motif=image(
+  if Colore:
+  if known CouleurUn: fill polygone(O1,O2,O3,O4,O5,O6,O7,O8) withcolor CouleurUn fi;
+  if known CouleurDeux: fill rotation(polygone(O1,O2,O3,O4,O5,O6,O7,O8),O1,90) withcolor CouleurDeux fi;
+  if known CouleurTrois:fill rotation(polygone(O1,O2,O3,O4,O5,O6,O7,O8),O1,180) withcolor CouleurTrois fi;
+  if known CouleurQuatre:fill rotation(polygone(O1,O2,O3,O4,O5,O6,O7,O8),O1,270) withcolor CouleurQuatre fi;
+  fi;
+  trace polygone(O1,O2,O3,O4,O5,O6,O7,O8);
+  trace rotation(polygone(O1,O2,O3,O4,O5,O6,O7,O8),O1,90);
+  trace rotation(polygone(O1,O2,O3,O4,O5,O6,O7,O8),O1,180);
+  trace rotation(polygone(O1,O2,O3,O4,O5,O6,O7,O8),O1,270);
+  );
+  basei=(rotation(O5,O1,180)-O5);
+  basej:=(rotation(O5,O1,-90)-O5);
+  elseif Niveau=6:
+  pair O[];
+  O1=pointarc(cc,0);
+  O3=pointarc(cc,60);
+  O5=pointarc(cc,120);
+  O7=pointarc(cc,180);
+  O9=pointarc(cc,240);
+  O11=pointarc(cc,300);
+  O2=Position[O3,O1]+Ecart*unitvector((O3-O1) rotated -90);
+  O4=rotation(O2,O3,-120);
+  O6=rotation(O4,O5,-120);
+  O8=rotation(O6,O7,-120);
+  O10=rotation(O8,O9,-120);
+  O12=rotation(O10,O11,-120);
+  picture Motif;
+  Motif=image(
+  if Colore:
+  if known CouleurUn: fill polygone(O1,O2,O3,O4,O5,O6,O7,O8,O9,O10,O11,O12) withcolor CouleurUn fi;
+  if known CouleurDeux: fill rotation(polygone(O1,O2,O3,O4,O5,O6,O7,O8,O9,O10,O11,O12),O1,120) withcolor CouleurDeux fi;
+  if known CouleurTrois: fill rotation(polygone(O1,O2,O3,O4,O5,O6,O7,O8,O9,O10,O11,O12),O1,-120) withcolor CouleurTrois fi;
+  fi;
+  trace polygone(O1,O2,O3,O4,O5,O6,O7,O8,O9,O10,O11,O12);
+  trace rotation(polygone(O1,O2,O3,O4,O5,O6,O7,O8,O9,O10,O11,O12),O1,120);
+  trace rotation(polygone(O1,O2,O3,O4,O5,O6,O7,O8,O9,O10,O11,O12),O1,-120);
+  );
+  basei=(rotation(O4,O1,-120)-O6);
+  basej:=(rotation(O9,O1,-120)-O9);
+  fi;
+  path CadrePavage;
+  pair Cpa[];
+  Cpa1=(0,ypart(-2*basej));
+  Cpa2=(xpart(2*Colonnes*basei),ypart(-2*basej));
+  Cpa3=(xpart(2*Colonnes*basei),ypart(2*Lignes*basej));
+  Cpa4=(0,ypart(2*Lignes*basej));
+  CadrePavage=Cpa1--Cpa2--Cpa3--Cpa4--cycle;
+  picture BlocContour,BlocPavage;
+  BlocContour=image(
+  for k=-2*Lignes upto 2*Lignes:
+  for l=-2*Colonnes upto 2*Colonnes:
+  trace Motif shifted (l*basei+k*basej);
+  endfor;
+  endfor;
+  );
+  BlocPavage=image(
+  trace BlocContour;
+  clip currentpicture to CadrePavage;
+  trace CadrePavage withpen pencircle scaled Epaisseur;
+  );
+  BlocPavage
+  enddef;
+  vardef BaryMotif(expr nimech)=
+  save Escherbary;
+  pair Escherbary,EB[],EBSom;
+  tour:=0;
+  EB[0]=point(0) of nimech;
+  EBSom=(0,0);
+  forever:
+  tour:=tour+1;
+  EB[tour]=point(tour) of nimech;
+  EBSom:=EBSom+EB[tour];
+  exitif EB[tour]=EB[0];
+  endfor;
+  Escherbary=EBSom/tour;
+  Escherbary
+  enddef;
+  % 
+  vardef Numerotation=
+  pair ISORetiens;
+  for k=1 upto TotalMaille:
+  ISORetiens:=BaryMotif(Maille[k]);
+  label(TEX(""&decimal(k)&""),ISORetiens);
+  endfor;
+  enddef;
+  %
+  vardef AssocierPoint(expr nbpt,ll,kk,aanngg)=
+  PointE[nbpt][1]=rotation(O1,O1,aanngg) shifted (ll*basei+kk*basej);
+  PointE[nbpt][2]=rotation(O2,O1,aanngg) shifted (ll*basei+kk*basej);
+  PointE[nbpt][3]=rotation(O3,O1,aanngg) shifted (ll*basei+kk*basej);
+  PointE[nbpt][4]=rotation(O4,O1,aanngg) shifted (ll*basei+kk*basej);
+  PointE[nbpt][5]=rotation(O5,O1,aanngg) shifted (ll*basei+kk*basej);
+  PointE[nbpt][6]=rotation(O6,O1,aanngg) shifted (ll*basei+kk*basej);
+  if Niveau>3:
+  PointE[nbpt][7]=rotation(O7,O1,aanngg) shifted (ll*basei+kk*basej);
+  PointE[nbpt][8]=rotation(O8,O1,aanngg) shifted (ll*basei+kk*basej);
+  fi;
+  if Niveau>4:
+  PointE[nbpt][9]=rotation(O9,O1,aanngg) shifted (ll*basei+kk*basej);
+  PointE[nbpt][10]=rotation(O10,O1,aanngg) shifted (ll*basei+kk*basej);
+  PointE[nbpt][11]=rotation(O11,O1,aanngg) shifted (ll*basei+kk*basej);
+  PointE[nbpt][12]=rotation(O12,O1,aanngg) shifted (ll*basei+kk*basej);
+  fi;
+  enddef;
+  vardef AssocierMaille(expr nbpt)=
+  Maille[nbpt]=if Niveau=3:
+  polygone(PointE[nbpt][1],PointE[nbpt][2],PointE[nbpt][3],PointE[nbpt][4],PointE[nbpt][5],PointE[nbpt][6])
+  elseif Niveau=4:
+  polygone(PointE[nbpt][1],PointE[nbpt][2],PointE[nbpt][3],PointE[nbpt][4],PointE[nbpt][5],PointE[nbpt][6],PointE[nbpt][7],PointE[nbpt][8])
+  elseif Niveau=6:
+  polygone(PointE[nbpt][1],PointE[nbpt][2],PointE[nbpt][3],PointE[nbpt][4],PointE[nbpt][5],PointE[nbpt][6],PointE[nbpt][7],PointE[nbpt][8],PointE[nbpt][9],PointE[nbpt][10],PointE[nbpt][11],PointE[nbpt][12])
+  fi;
+  enddef;
+  vardef PlacePointSupport=
+  pair PointE[][];
+  path Maille[];
+  pair ISO[];
+  if Niveau=3:
+  ISO1:=(0,0);
+  ISO2=rotation(ISO1,O1,120);
+  ISO3=rotation(ISO1,O1,-120);
+  basei=(rotation(O2,O1,-120)-O4);
+  basej:=(rotation(O5,O1,-120)-O5);
+  elseif Niveau=4:
+  ISO1=(0,0);
+  ISO2=rotation(ISO1,O1,90);
+  ISO3=rotation(ISO1,O1,180);
+  ISO4=rotation(ISO1,O1,270);
+  basei=(rotation(O5,O1,180)-O5);
+  basej:=(rotation(O5,O1,-90)-O5);
+  elseif Niveau=6:
+  ISO1=(0,0);
+  ISO2=rotation(ISO1,O1,120);
+  ISO3=rotation(ISO1,O1,-120);
+  basei=(rotation(O4,O1,-120)-O6);
+  basej:=(rotation(O9,O1,-120)-O9);
+  fi;
+  n:=0;
+  pair ISORetiens;
+  for k=-2*Lignes upto 2*Lignes:
+  for l=-2*Colonnes upto 2*Colonnes:
+  n:=n+1;
+  ISORetiens:=ISO1 shifted (l*basei+k*basej);
+  if (xpart(ISORetiens)>xpart(Cpa1+u*(0.2,0))) and (xpart(ISORetiens)<xpart(Cpa2-u*(0.2,0))) and (ypart(ISORetiens)>ypart(Cpa1+u*(0,0.2))) and (ypart(ISORetiens)<ypart(Cpa4-u*(0,0.2))):
+  AssocierPoint(n,l,k,0);
+  AssocierMaille(n);
+  else:
+  n:=n-1;
+  fi;
+  n:=n+1;
+  ISORetiens:=ISO2 shifted (l*basei+k*basej);
+  if (xpart(ISORetiens)>xpart(Cpa1+u*(0.2,0))) and (xpart(ISORetiens)<xpart(Cpa2-u*(0.2,0))) and (ypart(ISORetiens)>ypart(Cpa1+u*(0,0.2))) and (ypart(ISORetiens)<ypart(Cpa4-u*(0,0.2))):
+  if Niveau=4:
+  AssocierPoint(n,l,k,90);
+  else:
+  AssocierPoint(n,l,k,120);
+  fi;
+  AssocierMaille(n);
+  else:
+  n:=n-1;
+  fi;
+  n:=n+1;
+  ISORetiens:=ISO3 shifted (l*basei+k*basej);
+  if (xpart(ISORetiens)>xpart(Cpa1+u*(0.2,0))) and (xpart(ISORetiens)<xpart(Cpa2-u*(0.2,0))) and (ypart(ISORetiens)>ypart(Cpa1+u*(0,0.2))) and (ypart(ISORetiens)<ypart(Cpa4-u*(0,0.2))):
+  if Niveau=4:
+  AssocierPoint(n,l,k,180);
+  else:
+  AssocierPoint(n,l,k,-120);
+  fi;
+  AssocierMaille(n);
+  else:
+  n:=n-1;
+  fi;
+  if Niveau=4:
+  n:=n+1;
+  ISORetiens:=ISO4 shifted (l*basei+k*basej);
+  if (xpart(ISORetiens)>xpart(Cpa1+u*(0.2,0))) and (xpart(ISORetiens)<xpart(Cpa2-u*(0.2,0))) and (ypart(ISORetiens)>ypart(Cpa1+u*(0,0.2))) and (ypart(ISORetiens)<ypart(Cpa4-u*(0,0.2))):
+  AssocierPoint(n,l,k,270);
+  AssocierMaille(n);
+  else:
+  n:=n-1;
+  fi;
+  fi;
+  endfor;
+  endfor;
+  TotalMaille=n;
+  enddef;
+  %
+  vardef EffectuerTraces=
+  \useKV[Pavage]{Traces}
+  enddef;
+}%
+
+\def\MPPavageEscher{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}
+    \MPPavageEscherCode
+    picture Motif;
+    trace PavageEscher;
+    PlacePointSupport;
+    if After:
+    EffectuerTraces;
+    fi;
+    if Numerote:
+    Numerotation;
+    fi;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={\MPPavageEscherCode}]
+    picture Motif;
+    trace PavageEscher;
+    PlacePointSupport;
+    if After:
+    EffectuerTraces;
+    fi;
+    if Numerote:
+    Numerotation;
+    fi;
+  \end{mpost}
+  \fi%
+}%
+
+\def\MPPeriodique{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    \MPPeriodiqueCode
+    path Motif;
+    if Before:
+    Motif=\useKV[Pavage]{Motif};
+    else:
+    Motif=(0,0)--u*(1,-2)--u*(2,0.5)--u*(0.75,1)--cycle;
+    fi;
+    pair A[],B[];
+    A[0]=point(0) of Motif;
+    B[0]=A[0];
+    k:=0;
+    forever:
+    k:=k+1;
+    A[k]=point(k) of Motif;
+    B[0]:=B[0]+A[k];
+    exitif A[k]=A[0];
+    endfor;
+    B[0]:=B[0]/k;
+    trace PavagePeriodique;
+    PlacePointSupport;
+    if After:
+    EffectuerTraces;
+    fi;
+    if Numerote:
+    Numerotation;
+    fi;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[\MPPeriodiqueCode]
+    path Motif;
+    if Before:
+    Motif=\useKV[Pavage]{Motif};
+    else:
+    Motif=(0,0)--u*(1,-2)--u*(2,0.5)--u*(0.75,1)--cycle;
+    fi;
+    pair A[],B[];
+    A[0]=point(0) of Motif;
+    B[0]=A[0];
+    k:=0;
+    forever:
+    k:=k+1;
+    A[k]=point(k) of Motif;
+    B[0]:=B[0]+A[k];
+    exitif A[k]=A[0];
+    endfor;
+    B[0]:=B[0]/k;
+    trace PavagePeriodique;
+    PlacePointSupport;
+%    if Numerote:
+%    Numerotation;
+%    fi;
+    if After:
+    EffectuerTraces;
+    fi;
+  \end{mpost}
+  \fi
+}%
+
+\def\MPReseau{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    \MPReseauCode
+    path Motif;
+    if Before:
+    Motif=\useKV[Pavage]{Motif};
+    else:
+    Motif=u*(0,0)--u*(0.75,0)--u*(1,0.5)--u*(0.25,0.5)--cycle;
+    fi;
+    PavageReseau;
+    PlacePointSupport;
+    if After:
+    EffectuerTraces;
+    fi;
+    if Numerote:
+    Numerotation;
+    fi;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={\MPReseauCode}]
+    path Motif;
+    if Before:
+    Motif=\useKV[Pavage]{Motif};
+    else:
+    Motif=u*(0,0)--u*(0.75,0)--u*(1,0.5)--u*(0.25,0.5)--cycle;
+    fi;
+    PavageReseau;
+    PlacePointSupport;
+    if After:
+    EffectuerTraces;
+    fi;
+    if Numerote:
+    Numerotation;
+    fi;
+  \end{mpost}
+  \fi
+}%
+
+\def\MPRegulier{%
+  \ifluatex
+  \mplibforcehmode
+  \begin{mplibcode}
+    \MPReseauRegulier
+    trace PavageRegulier(Niveau);
+    PlacePointSupport;
+    if Numerote:
+    Numerotation;
+    fi;
+    if After:
+    EffectuerTraces;
+    fi;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={\MPReseauRegulier}]
+    trace PavageRegulier(Niveau);
+    PlacePointSupport;
+    if Numerote:
+    Numerotation;
+    fi;
+    if After:
+    EffectuerTraces;
+    fi;
+  \end{mpost}
+  \fi
+}%
+
+\def\MPPavage{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}%
+    \MPPavageBase
+    path Motif;
+    if Before:
+    Motif=\useKV[Pavage]{Motif};
+    else:
+    Motif=u*(0,0)..u*(0.25,.1)..u*(0.5,0.7)..u*(1,1);
+    fi;
+    if Demo:
+    trace pavagescar(Motif,0,ColPavage);
+    else:
+    trace pavages(Motif,Niveau,ColPavage);
+    fi;
+    PlacePointSupport;
+    if Numerote:
+    Numerotation;
+    fi;
+    if After:
+    EffectuerTraces;
+    fi;
+    if Demo=false:
+    trace CadrePavage withpen pencircle scaled Epaisseur;
+    fi;
+  \end{mplibcode}
+  \else
+  \begin{mpost}[mpsettings={\MPPavageBase}]
+    path Motif;
+    if Before:
+    Motif=\useKV[Pavage]{Motif};
+    else:
+    Motif=u*(0,0)..u*(0.25,.1)..u*(0.5,0.7)..u*(1,1);
+    fi;
+    trace pavages(Motif,Niveau,ColPavage);
+    PlacePointSupport;
+    if Numerote:
+    Numerotation;
+    fi;
+    if After:
+    EffectuerTraces;
+    fi;
+    trace CadrePavage withpen pencircle scaled Epaisseur;
+  \end{mpost}
+  \fi%
+}%
+
+\def\MPEinsteinHatCode{
+  boolean After;
+  After:=\useKV[Pavage]{After};
+  %
+  def TraceFill(expr o,coul)=
+  fill o withcolor coul;
+  trace o;% withpen pencircle scaled 2;
+  enddef;
+  %
+  def TraceHache(expr o,coul,ang)=
+  trace hachurage(o,ang,0.2,0) withcolor coul;
+  trace o;% withpen pencircle scaled 2;
+  enddef;
+  % 
+  vardef EffectuerTraces=
+  \useKV[Pavage]{Traces}
+  enddef;
+  %
+  path Hat;
+  pair O[],A[],B[],C[],D[],E[],F[];
+  Rayon=\useKV[Pavage]{Rayon}*u;
+  O1=u*(3,3);
+  O3=pointarc(cercles(O1,Rayon),300);
+  O2=rotation(O3,O1,-60);
+  O4=CentreCercleC(O1,O2,O3);
+  O5=symetrie(O1,iso(O2,O3));
+  Rayonbis=abs(O1-CentreCercleC(O1,O2,O3));
+  draw polygone(O1,O2,O3) withcolor 0.7white;
+  path cc[];
+  cc1=cercles(O1,Rayonbis);
+  cc2=cercles(O2,Rayonbis);
+  cc3=cercles(O3,Rayonbis);
+  drawoptions(dashed evenly withcolor 0.7white);
+  trace cc1;trace cc2;trace cc3;
+  drawoptions();
+  for k=1 upto 3:
+  A[k]=pointarc(cc[k],30+0);
+  B[k]=pointarc(cc[k],30+60);
+  C[k]=pointarc(cc[k],30+2*60);
+  D[k]=pointarc(cc[k],30+3*60);
+  E[k]=pointarc(cc[k],30+4*60);
+  F[k]=pointarc(cc[k],30+5*60);
+  endfor;
+  drawoptions(dashed evenly);
+  trace polygone(A1,B1,C1,D1,E1,F1);
+  trace polygone(A2,B2,C2,D2,E2,F2);
+  trace polygone(A3,B3,C3,D3,E3,F3);
+  drawoptions();
+  Hat=polygone(O1,iso(C1,D1),D1,iso(D1,E1),O2,iso(E2,F2),F2,iso(D3,E3),O3,iso(F3,A3),A3,B3,iso(B3,C3));
+  color Coul[];
+  Coul1=Cyan;%;
+  Coul2=0.5[Blue,white];
+  Coul3=Cornsilk;
+  Coul4=0.5[Crimson,white];
+  Coul5=0.5[Purple,white];
+  Coul6=LightGreen;
+  %
+  vardef TileGen(expr aHat,bHat,ech)=
+  pair H[];
+  H0=iso(F2,E2);
+  H1-H0=Rayonbis*(aHat/ech)*unitvector(E2-F2);
+  H2-H1=Rayonbis*(aHat/ech)*unitvector(D2-E2);
+  H3-H2=Rayonbis*(bHat/ech)*unitvector(O2-iso(E2,D2));
+  H4-H3=Rayonbis*(bHat/ech)*unitvector(iso(B2,C2)-O2);
+  H5-H4=Rayonbis*(aHat/ech)*unitvector(B2-C2);
+  H6-H5=Rayonbis*(aHat/ech)*unitvector(C1-D1);
+  H7-H6=Rayonbis*(bHat/ech)*unitvector(O1-iso(C1,D1));
+  H8-H7=Rayonbis*(bHat/ech)*unitvector(iso(E1,F1)-O1);
+  H9-H8=Rayonbis*(aHat/ech)*unitvector(F2-E2);
+  H10-H9=Rayonbis*(aHat/ech)*unitvector(A3-B3);
+  H11-H10=Rayonbis*(bHat/ech)*unitvector(O3-iso(A3,B3));
+  H12-H11=Rayonbis*(bHat/ech)*unitvector(iso(C3,D3)-O3);
+  H13-H12=Rayonbis*(aHat/ech)*unitvector(F2-A2);
+  H14=iso(H0,H1,H2,H3,H4,H5,H6,H7,H8,H9,H10,H11,H12,H13);
+  save $;
+  path $;
+  $=polygone(H0,H1,H2,H3,H4,H5,H6,H7,H8,H9,H10,H11,H12,H13);
+  $
+  enddef;
+%
+  vardef VampireGen(expr ech)=
+  pair Vp[];
+  Vp0=iso(F2,E2);
+  Vp1-Vp0=Rayonbis*(1/ech)*unitvector(E2-F2);
+  Vp2-Vp1=Rayonbis*(1/ech)*unitvector(D2-E2);
+  Vp3-Vp2=Rayonbis*(1/ech)*unitvector(O2-iso(E2,D2));
+  Vp4-Vp3=Rayonbis*(1/ech)*unitvector(iso(B2,C2)-O2);
+  Vp5-Vp4=Rayonbis*(1/ech)*unitvector(B2-C2);
+  Vp6-Vp5=Rayonbis*(1/ech)*unitvector(C1-D1);
+  Vp7-Vp6=Rayonbis*(1/ech)*unitvector(O1-iso(C1,D1));
+  Vp8-Vp7=Rayonbis*(1/ech)*unitvector(iso(E1,F1)-O1);
+  Vp9-Vp8=Rayonbis*(1/ech)*unitvector(F2-E2);
+  Vp10-Vp9=Rayonbis*(1/ech)*unitvector(A3-B3);
+  Vp11-Vp10=Rayonbis*(1/ech)*unitvector(O3-iso(A3,B3));
+  Vp12-Vp11=Rayonbis*(1/ech)*unitvector(iso(C3,D3)-O3);
+  Vp13-Vp12=Rayonbis*(1/ech)*unitvector(F2-A2);
+  Vp14=Vp0;
+  Vp15=iso(Vp0,Vp1,Vp2,Vp3,Vp4,Vp5,Vp6,Vp7,Vp8,Vp9,Vp10,Vp11,Vp12,Vp13);
+  save $;
+  path $;
+  $=polygone(Vp0,Vp1,Vp2,Vp3,Vp4,Vp5,Vp6,Vp7,Vp8,Vp9,Vp10,Vp11,Vp12,Vp13);
+  $
+  enddef;
+}
+
+\def\MPEinstein{%Pentoma : https://www.pentoma.de/the_hat/
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      \MPEinsteinHatCode
+      if After:
+      EffectuerTraces;
+      fi;
+    \end{mplibcode}
+  \else
+    \begin{mpost}[mpsettings={\MPEinsteinHatCode}
+      if After:
+      EffectuerTraces;
+      fi;
+    \end{mpost}
+  \fi
+}%
+
+\NewDocumentCommand\Pavage{o}{%
+  \useKVdefault[Pavage]%
+  \setKV[Pavage]{#1}%
+  \ifboolKV[Pavage]{Einstein}{%
+    \ifboolKV[Pavage]{Vampire}{}{%
+      \MPEinstein%
+     }%
+  }{% 
+    \ifboolKV[Pavage]{Regulier}{%
+      \MPRegulier%
+  }{%
+    \ifboolKV[Pavage]{SemiRegulier}{%
+      % 
+    }{%
+      \ifboolKV[Pavage]{Reseau}{%
+        \MPReseau%
+      }{%
+        \ifboolKV[Pavage]{Quadrilatere}{%
+          \MPPeriodique%
+        }{%
+          \ifboolKV[Pavage]{Escher}{%
+            \MPPavageEscher%
+          }{%
+            \MPPavage%
+          }%
+        }%
+      }%
+    }%
+  }%
+  }%
+}%

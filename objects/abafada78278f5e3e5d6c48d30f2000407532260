@@ -1,0 +1,133 @@
+%%%
+% Engrenages
+%%%
+\def\filedateEngrenages{2025/05/27}%
+\def\fileversionEngrenages{0.1a}%
+\message{-- \filedateEngrenages\space v\fileversionEngrenages}%
+%
+\newtoks\tokPfCEngrenages%
+\def\UpdatetoksEngrenages#1/#2\nil{\addtotok\tokPfCEngrenages{#1,#2,}}%
+
+\setKVdefault[Engrenages]{Couleur=LightSteelBlue,Unite=3mm,ListeCouleurs={?},Codes=false,Traces={}}%
+\defKV[Engrenages]{Traces=\ifempty{#1}{}{\setKV[Engrenages]{Codes}}}%
+
+\NewDocumentCommand\Engrenages{o m}{%
+  \newtoks\toklistecouleur%
+  \toklistecouleur{}%
+  \tokPfCEngrenages{}%
+  \useKVdefault[Engrenages]%
+  \setKV[Engrenages]{#1}%
+  \setsepchar[*]{,*/}%
+  \ignoreemptyitems
+  \readlist*\ListePfCEngrenages{#2}%
+  \setsepchar{,}%
+  \xdef\PfCFooEngrenages{}%
+  \foreachitem\compteur\in\ListePfCEngrenages{%
+    \xdef\PfCFooEngrenages{\PfCFooEngrenages \ListePfCEngrenages[\compteurcnt,1],\ListePfCEngrenages[\compteurcnt,2],}%
+  }%
+  \xdef\ListeAvantCouleurs{\useKV[Engrenages]{ListeCouleurs}}%
+  \readlist*\ListeCouleur{\ListeAvantCouleurs}%
+  \foreachitem\couleur\in\ListeCouleur{\expandafter\UpdateCoul\couleur\nil}%
+  \BuildEngrenages{\PfCFooEngrenages}{\the\toklistecouleur}%
+}%
+
+\def\BuildEngrenagesCode#1#2{%
+  u:=\useKV[Engrenages]{Unite};
+  CouleurEngrenage=\useKV[Engrenages]{Couleur};
+  %
+  boolean Codes;
+  Codes=\useKV[Engrenages]{Codes};
+%
+  vardef RecuperationCouleurs(text t)=
+  color Col[];
+  n:=0;
+  for p_=t:
+  n:=n+1;
+  if color p_:
+  Col[n]=p_;
+  else:
+  Col[n]=CouleurEngrenage;
+  fi;
+  endfor;
+  enddef;
+  %
+  vardef LectureDonnees(text t)=
+  n:=0;k=0;l=0;
+  for p_=t:
+  n:=n+1;
+  if (n mod 2)=0:
+  l:=l+1;
+  Zz[l]=p_;
+  else:
+  k:=k+1;
+  Mm[k]=p_;
+  fi;
+  endfor;
+  enddef;
+  %
+  RecuperationCouleurs(#2);
+  LectureDonnees(#1);
+  %
+  pair K[];
+  K[1]=(0,0);
+  picture EngrenageFinal;
+  EngrenageFinal=image(
+  if unknown Col[1]:
+  else:
+  CouleurEngrenage:=Col[1];
+  fi;
+  trace Engrenage(Mm[1],Zz[1],(0,0));
+  %
+  Signe=1;
+  %
+  for w=2 upto (n div 2):
+  if unknown Col[w]:
+  else:
+  CouleurEngrenage:=Col[w];
+  fi;
+  K[w]=K[w-1]+pointarc(cercles((0,0),u*Mm[w]*(Zz[w-1]+Zz[w])*0.5+0.04*u),0);
+  AngleRot[w]:=360/(2*Zz[w]);
+  if w=2:
+  trace rotation(Engrenage(Mm[w],Zz[w],K[w]),K[w],180-AngleRot[w]);
+  if (Zz[w] mod 2)=0:
+  Signe:=Signe*(-1);
+  fi;
+  else:
+  if (Zz[w] mod 2)=1:
+  if Signe=-1:
+  trace rotation(Engrenage(Mm[w],Zz[w],K[w]),K[w],180);
+  else:
+  trace rotation(Engrenage(Mm[w],Zz[w],K[w]),K[w],180-AngleRot[w]);
+  fi;
+  else:
+  Signe:=Signe*(-1);
+  if Signe=1:
+  trace rotation(Engrenage(Mm[w],Zz[w],K[w]),K[w],180);
+  else:
+  trace rotation(Engrenage(Mm[w],Zz[w],K[w]),K[w],180-AngleRot[w]);
+  fi;
+  fi;
+  fi;
+  endfor;
+  );
+}%
+
+\NewDocumentCommand\BuildEngrenages{mm}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \mplibnumbersystem{double}%
+    \begin{mplibcode}%
+      input PfCEngrenages;
+      \BuildEngrenagesCode{#1}{#2}
+      trace EngrenageFinal;
+      if Codes:
+      \useKV[Engrenages]{Traces};
+      fi;
+    \end{mplibcode}%
+    \mplibnumbersystem{scaled}%
+  \else%
+  \begin{mpost}[mpsettings={input PfCEngrenages;\BuildEngrenagesCode{#1}{#2}}]
+    trace EngrenageFinal;
+  \end{mpost}%
+  \fi%
+}%

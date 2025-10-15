@@ -1,0 +1,1907 @@
+% \iffalse     ---!!! FIRST META-COMMENT !!!---
+% 
+% 
+% This file is operator-code.dtx from version 1.3a
+% of the free and open-source LaTeX package "math-operator,"
+% released September 2025.
+% 
+% Running Plain TeX on math-operator-code.dtx will
+% produce the following files:
+% 
+%   (1) the package file math-operator.sty;
+% 
+%   (2) the derived files math-operator_heading.tex
+%       and math-operator-user-guide.tex, which are
+%       used for typesetting documentation;
+% 
+%     and
+% 
+%   (3) a number of other derived files.
+% 
+% Running LaTeX on math-operator-code.dtx will produce the
+% files listed above as well as the following:
+% 
+%   (4) the pdf documentation file math-operator-code.pdf;
+% 
+%     and
+% 
+%   (5) a number of other derived files.
+% 
+% To install operator on your computer, run this file
+% through Plain TeX or LaTeX and move math-operator.sty
+% to a directory searchable by TeX. See the associated
+% README.txt file for installation information.
+% 
+% 
+% \fi
+% \iffalse     ---!!! SECOND META-COMMENT !!!---
+% 
+% 
+% This file is from version 1.3a of the free and open-source
+% LaTeX package "math-operator," released September 2025.
+% 
+% Copyright 2025 Conrad Kosowsky
+% 
+% This file may be used, distributed, and modified under the
+% terms of the LaTeX Public Project License, version 1.3c or
+% any later version. The most recent version of this license
+% is available online at
+% 
+%            https://www.latex-project.org/lppl/
+% 
+% This Work has the LPPL status "maintained," and the current
+% maintainer is the package author, Conrad Kosowsky. He can 
+% be reached at kosowsky.latex@gmail.com. The Work consists 
+% of the following items:
+% 
+%   (1) the base file:
+%         math-operator-code.dtx
+% 
+%   (2) the package file:
+%         math-operator.sty
+% 
+%   (3) the pdf documentation files:
+%         math-operator-code.pdf
+%         math-operator-user-guide.pdf
+% 
+%   (4) the derived files:
+%         math-operator-user-guide.tex
+%         math-operator-heading.tex
+% 
+%   (5) all other files created by using LaTeX
+%       to produce the pdf files in point (3)
+%       above
+% 
+%     and
+% 
+%   (6) the associated README.txt file
+%
+% PLEASE KNOW THAT THIS FREE SOFTWARE IS PROVIDED WITHOUT
+% ANY WARRANTY. SPECIFICALLY, THE "NO WARRANTY" SECTION OF
+% THE LATEX PROJECT PUBLIC LICENSE STATES THE FOLLOWING:
+% 
+% THERE IS NO WARRANTY FOR THE WORK. EXCEPT WHEN OTHERWISE
+% STATED IN WRITING, THE COPYRIGHT HOLDER PROVIDES THE WORK
+% `AS IS’, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
+% OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+% PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE
+% OF THE WORK IS WITH YOU. SHOULD THE WORK PROVE DEFECTIVE,
+% YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR, OR
+% CORRECTION.
+% 
+% IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED
+% TO IN WRITING WILL THE COPYRIGHT HOLDER, OR ANY AUTHOR
+% NAMED IN THE COMPONENTS OF THE WORK, OR ANY OTHER PARTY
+% WHO MAY DISTRIBUTE AND/OR MODIFY THE WORK AS PERMITTED
+% ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL,
+% SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT
+% OF ANY USE OF THE WORK OR OUT OF INABILITY TO USE THE WORK
+% (INCLUDING, BUT NOT LIMITED TO, LOSS OF DATA, DATA BEING
+% RENDERED INACCURATE, OR LOSSES SUSTAINED BY ANYONE AS A
+% RESULT OF ANY FAILURE OF THE WORK TO OPERATE WITH ANY
+% OTHER PROGRAMS), EVEN IF THE COPYRIGHT HOLDER OR SAID
+% AUTHOR OR SAID OTHER PARTY HAS BEEN ADVISED OF THE
+% POSSIBILITY OF SUCH DAMAGES.
+% 
+% For more information, see the LaTeX Project Public License.
+% Derivative works based on this software may come with their
+% own license or terms of use, and the package author is not
+% responsible for any third-party software.
+% 
+% Happy TeXing!
+% 
+% 
+% \fi
+% \iffalse
+% 
+% The installation and driver files are incorporated into 
+% math-operator-code.dtx, so we do not need to generate them
+% separately. The <batchfile> and <driver> tags are for
+% reference.
+% 
+%<*batchfile>
+\begingroup
+\input docstrip.tex
+\keepsilent
+\askforoverwritefalse
+\preamble
+
+This file is from version 1.3a of the free and open-source
+LaTeX package "math-operator," released September 2025.
+
+Copyright 2025 Conrad Kosowsky
+
+This file may be used, distributed, and modified under the 
+terms of the LaTeX Public Project License, version 1.3c or
+any later version. The most recent version of this license
+is available online at
+
+          https://www.latex-project.org/lppl/
+
+This work has the LPPL status "maintained," and the current
+maintainer is the package author, Conrad Kosowsky. He can 
+be reached at kosowsky.latex@gmail.com.
+
+PLEASE KNOW THAT THIS FREE SOFTWARE IS PROVIDED WITHOUT
+ANY WARRANTY. SPECIFICALLY, THE "NO WARRANTY" SECTION OF
+THE LATEX PROJECT PUBLIC LICENSE STATES THE FOLLOWING:
+
+THERE IS NO WARRANTY FOR THE WORK. EXCEPT WHEN OTHERWISE
+STATED IN WRITING, THE COPYRIGHT HOLDER PROVIDES THE WORK
+`AS IS’, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
+OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE
+OF THE WORK IS WITH YOU. SHOULD THE WORK PROVE DEFECTIVE,
+YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR, OR
+CORRECTION.
+
+IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED
+TO IN WRITING WILL THE COPYRIGHT HOLDER, OR ANY AUTHOR
+NAMED IN THE COMPONENTS OF THE WORK, OR ANY OTHER PARTY
+WHO MAY DISTRIBUTE AND/OR MODIFY THE WORK AS PERMITTED
+ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL,
+SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT
+OF ANY USE OF THE WORK OR OUT OF INABILITY TO USE THE WORK
+(INCLUDING, BUT NOT LIMITED TO, LOSS OF DATA, DATA BEING
+RENDERED INACCURATE, OR LOSSES SUSTAINED BY ANYONE AS A
+RESULT OF ANY FAILURE OF THE WORK TO OPERATE WITH ANY
+OTHER PROGRAMS), EVEN IF THE COPYRIGHT HOLDER OR SAID
+AUTHOR OR SAID OTHER PARTY HAS BEEN ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGES.
+
+For more information, see the LaTeX Project Public License.
+Derivative works based on this software may come with their
+own license or terms of use, and the package author is not
+responsible for any third-party software.
+
+Happy TeXing!
+
+\endpreamble
+\generate{\file{math-operator.sty}{\from{math-operator-code.dtx}{code}}
+  \file{math-operator-user-guide.tex}{\from{math-operator-code.dtx}{user}}
+  \file{math-operator-heading.tex}{\from{math-operator-code.dtx}{heading}}}
+\catcode`\ =12\relax
+\immediate\write0{^^J%
+******************************************************^^J%
+* Step 1 of the math-operator installation complete! *^^J%
+******************************************************^^J^^J%
+******************************************************^^J%
+* To finish the installation, move math-operator.sty *^^J%
+*       to a directory searchable by TeX after       *^^J%
+*  after math-operator-code.dtx is done typesetting  *^^J%
+******************************************************^^J}
+\endgroup
+\ifx\LaTeX\undefined
+  \immediate\write0{Plain TeX format used; quitting now.}
+  \immediate\write0{To create math-operator-code.pdf, run^^J%
+    math-operator-code.dtx through LaTeX.^^J^^J}
+  \expandafter\end
+\fi
+%</batchfile>
+%<*driver>
+\makeatletter
+\documentclass[12pt,letterpaper,doc2,twoside]{ltxdoc}
+\edef\MacroFont{\unexpanded\expandafter{\MacroFont}%
+  \baselineskip=\the\baselineskip plus 0.4pt minus 0.4pt}
+\usepackage[margin=1in]{geometry}
+\usepackage[factor=700,stretch=14,step=1]{microtype}
+\usepackage{enumitem}
+\setlist{topsep=\smallskipamount,itemsep=\smallskipamount,
+  parsep=\z@,partopsep=\z@,beginpenalty=0,midpenalty=0,
+  endpenalty=0}
+\c@IndexColumns=2
+\c@topnumber\@ne
+\columnsep=20pt
+\MacroIndent=16pt
+\let\index@prologue\relax
+\EnableCrossrefs\CodelineIndex
+\begin{document}
+  \baselineskip=\the\baselineskip plus 0.4pt minus 0.4pt
+  \flushbottom
+  \def\documentname{Implementation}
+  \input math-operator-heading.tex
+  \c@CodelineNo=59\relax
+  \DocInput{math-operator-code.dtx}
+  \vfil\eject
+  
+  \immediate\closeout\@indexfile
+  \ifx\directlua\@undefined
+    \immediate\write18{makeindex -s gind.ist math-operator-code.idx}
+  \else
+    \directlua{os.execute("makeindex -s gind.ist math-operator-code.idx")}
+  \fi
+  
+  \section*{Index}
+  
+  \input math-operator-code.ind
+  
+\end{document}
+%</driver>
+%<*code>
+% \fi
+% 
+% \CheckSum{1633}
+% \init@checksum
+% 
+% \makeatother\CharacterTable
+%   {Upper-case   \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation     \!      Double quote   \"      Hash (number)   \#
+%   Dollar          \$      Percent        \%      Ampersand       \&
+%   Acute accent    \'      Left paren     \(      Right paren     \)
+%   Asterisk        \*      Plus           \+      Comma           \,
+%   Minus           \-      Point          \.      Solidus         \/
+%   Colon           \:      Semicolon      \;      Less than       \<
+%   Equals          \=      Greater than   \>      Question mark   \?
+%   Commercial at   \@      Left bracket   \[      Backslash       \\
+%   Right bracket   \]      Circumflex     \^      Underscore      \_
+%   Grave accent    \`      Left brace     \{      Vertical bar    \|
+%   Right brace     \}      Tilde          \~}
+% \makeatletter
+% 
+% 
+% \DoNotIndex{\-,\@firstoftwo,\@gobble,\@ifoperator,\@ifstar,
+%   \@namedef\@nameuse,\@ne,\@nil,\@nnil,\@operator@bbfalse,
+%   \@operator@bbtrue,\@operator@cfalse,\@operator@ctrue,
+%   \@operator@jfalse,\@operator@jtrue,\advance,\ifx,\else,\fi,
+%   \@operator@lfalse,\@operator@ltrue,\@operatorinfo,
+%   \@operator@pfalse,\@operator@ptrue,\limits,\nolimits,
+%   \@operator@sfalse,\@operator@strue,\number,\operator@font,
+%   \@operator@sffalse,\@operator@sftrue,\or,\ProvidesPackage,
+%   \@operator@tfalse,\@operator@ttrue,\@undefined,
+%   \@tempa,\@tempcnta,\@tempcntb,\@tempswatrue,\@tempswafalse,
+%   \begingroup,\endgroup,\bfdefault,\count@,\csname,\endcsname,
+%   \ifcat,\noexpand,\relax,\expandafter,\edef,\f@encoding,
+%   \f@family,\f@shape,\fam,\def,\gdef,\detokenize,\divide,\hbox,
+%   \hexnumber@,\if@operator@bb,\if@operator@c,\if@operator@j,
+%   \if@operator@l,\if@operator@p,\if@operator@s,\if@operator@sf,
+%   \if@operator@t,\if@tempswa,\ifcase,\ifin@,\ifmmode,
+%   \ifnum,\in@,\ifin@,\let,\m@ne,\mathbb,\mathchar,\mathop,
+%   \MessageBreak,\mathchoice,\multiply,\NeedsTeXFormat,\newcount,
+%   \newif,\noexpand,\relax,\space,\split@name,\string,\Umathchar,
+%   \wlog,\xdef,\z@,\the,\DeclareFixedFont,\@secondoftwo,
+%   \@namedef,\PackageError,\PackageWarning,\global,\ProcessOptions,
+%   \DeclareOption,\escapechar,\kern,\@onlypreamble,\DeclareMathText,
+%   \DeclareBoldMathOperator,\DeclareBoldMathText,\DeclareMathOperator,
+%   \@ifnextchar,\@operator@ofalse,\@operator@otrue,\if@operator@o,
+%   \@tempboxa,\@tempdima,\@tempdimb,\@tempdimc,
+%   \setbox,\unhbox,\hskip,\ht,\wd,\dp,\hfil,\mathrm,\mathbf,\vrule,
+%   \mathchardef,\mathchar,\Umathchardef,\Uchar,\@bfop@false,\@bfop@true,
+%   \if@bfop@,\iffontchar,\@undefined,\@operator@robust@def,
+%   \@operator@robust@gdef,\DeclareRobustCommand,\dimen@}
+% 
+% 
+% 
+% \noindent This file documents the code for the \textsf{math-operator} package. It is not a user guide! If you are looking for instructions on how to typeset math operators in your equations, please see |math-operator-user-guide.pdf|, which is included with the \textsf{math-operator} installation and is available on \textsc{ctan}. The first three sections of this file deal with package setup and the commands to define new operators, and the remaining sections document the operators defined in this package. Section~4 covers several blackboard-bold letters, and Section~5 discusses categories. Section~6 deals with Jacobi elliptic functions, and Section~7 defines matrix groups and linear algebra operations. Section~8 defines the command to produce an overline. Section~9 defines a number of common probability distributions. Section~10 deals with special functions, and Section~11 covers other standard operators. Finally, Section~12 defines trigonometric functions. Version history and code index appear at the end of the document.
+% 
+% 
+% 
+% 
+% \section{Setup}
+% 
+% \noindent We begin with package declaration. The first 59 lines of |operator.sty| are comments.
+%    \begin{macrocode}
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{math-operator}[2025/09/10 v. 1.3a]
+%    \end{macrocode}
+% Create booleans that we'll use for option processing. One boolean per category of operator.
+%    \begin{macrocode}
+\newif\if@operator@bb  % blackboard bold
+\newif\if@operator@c   % category theory
+\newif\if@operator@j   % Jacobi elliptic functions
+\newif\if@operator@l   % linear algebra
+\newif\if@operator@o   % overlining
+\newif\if@operator@p   % probability distributions
+\newif\if@operator@sf  % special functions
+\newif\if@operator@s   % standard operators
+\newif\if@operator@t   % trigonometry
+%    \end{macrocode}
+% Set all options to true by default.
+%    \begin{macrocode}
+\@operator@bbtrue
+\@operator@ctrue
+\@operator@jtrue
+\@operator@ltrue
+\@operator@otrue
+\@operator@ptrue
+\@operator@sftrue
+\@operator@strue
+\@operator@ttrue
+%    \end{macrocode}
+% Now declare and process options.
+%    \begin{macrocode}
+\DeclareOption{blackboard}{\@operator@bbtrue}
+\DeclareOption{category}{\@operator@ctrue}
+\DeclareOption{jacobi}{\@operator@jtrue}
+\DeclareOption{linear}{\@operator@ltrue}
+\DeclareOption{overbar}{\@operator@otrue}
+\DeclareOption{probability}{\@operator@ptrue}
+\DeclareOption{special}{\@operator@sftrue}
+\DeclareOption{standard}{\@operator@strue}
+\DeclareOption{trigonometry}{\@operator@ttrue}
+%    \end{macrocode}
+% The |no-| options prevent the package from defining certain operators.
+%    \begin{macrocode}
+\DeclareOption{no-blackboard}{\@operator@bbfalse}
+\DeclareOption{no-category}{\@operator@cfalse}
+\DeclareOption{no-jacobi}{\@operator@jfalse}
+\DeclareOption{no-linear}{\@operator@lfalse}
+\DeclareOption{no-overbar}{\@operator@ofalse}
+\DeclareOption{no-probability}{\@operator@pfalse}
+\DeclareOption{no-special}{\@operator@sffalse}
+\DeclareOption{no-standard}{\@operator@sfalse}
+\DeclareOption{no-trigonometry}{\@operator@tfalse}
+\ProcessOptions*
+%    \end{macrocode}
+% A couple bookkeeping things. The count |\operatordefmode| determines the package behavior when the user calls one of the declaration commands on a control sequence that is already defined (and not an operator). When |\operatordefmode| is negative, the package overwrites the definition. Otherwise, the package behaves as follows:
+% \begin{itemize}
+% \item 0: Silently ignore (message written on the |log| file)
+% \item 1 (default): issue a warning
+% \item 2 or greater: issue an error message
+% \end{itemize}
+% We implement this behavior later in |\make@newop@cmd|.
+%    \begin{macrocode}
+\def\@operatorinfo#1{\wlog{Package operator Info: #1}}
+\newcount\operatordefmode
+\operatordefmode\@ne
+%    \end{macrocode}
+% Boolean that is false in general and true whenever we are typesetting a bold operator.
+%    \begin{macrocode}
+\newif\if@bfop@
+\@bfop@false
+%    \end{macrocode}
+% Commands to define protected macros. We check whether |\protected| is defined to avoid dependence on $\varepsilon$-\TeX\ in the unlikely chance that someone is using \LaTeX\ without $\varepsilon$-\TeX.
+%    \begin{macrocode}
+\ifx\protected\@undefined
+  \let\@operator@robust@def\DeclareRobustCommand
+  \def\@operator@robust@gdef#1{%
+    \bgroup
+      \escapechar\m@ne
+      \xdef#1{\noexpand\protect
+        \expandafter\noexpand\csname\string#1 \endcsname}%
+      \expandafter
+    \egroup
+    \expandafter\gdef\csname\string#1 \endcsname}
+\else
+  \def\@operator@robust@def{\protected\def}
+  \def\@operator@robust@gdef{\protected\gdef}
+\fi
+%    \end{macrocode}
+% 
+% 
+% \section{Extra User-Level Commands}
+% 
+% Some math operators contain characters other than letters, and we define control sequences to access three expressions from the operator font:
+% \begin{itemize}
+%   \item |\@operatorhyphen| typesets a hyphen in the |\fam|
+%   \item |\@operatortw@| typesets 2 in the |\fam|
+%   \item |\@operatorm@ne| typesets $-1$ possibly in the |\fam|
+% \end{itemize}
+% Later in this section, we define user-level wrappers around these control sequences, and the user-level commands for squared and inverse operators format the expression as a superscript. I am assuming that the operator font contains the appropriate glyphs in the encoding slots for hyphen, |1|, and |2|, so we can define |\@operatorhyphen| and |\@operatortw@| as |\mathalpha| characters using |\mathchardef| or |\Umathchardef|. For the case where |\Umathchar| is undefined, we have to convert encoding slots for the hyphen an two numbers into hexadecimal. We use the same approach as |\set@mathchar| from the \LaTeX\ kernel. First is the math-mode hyphen.
+%    \begin{macrocode}
+\def\defaultinverse{-1}
+\ifx\Umathchar\@undefined
+  \begingroup
+    \@tempcntb=\number`\-\relax
+    \count@\@tempcntb
+    \divide\count@ by 16\relax
+    \@tempcnta\count@
+    \multiply\count@ by 16\relax
+    \advance\@tempcntb by -\count@
+    \global\mathchardef\@operatorhyphen
+      "70\hexnumber@\@tempcnta\hexnumber@\@tempcntb\relax
+%    \end{macrocode}
+% Next is 2.
+%    \begin{macrocode}
+    \@tempcntb=\number`2\relax
+    \count@\@tempcntb
+    \divide\count@ by 16\relax
+    \@tempcnta\count@
+    \multiply\count@ by 16\relax
+    \advance\@tempcntb by -\count@
+    \global\mathchardef\@operatortw@
+      "70\hexnumber@\@tempcnta\hexnumber@\@tempcntb\relax
+  \endgroup
+%    \end{macrocode}
+% For the inverse symbol, we just use |\defaultinverse|.
+%    \begin{macrocode}
+  \def\@operatorm@ne{\begingroup\fam\m@ne\defaultinverse\endgroup}
+%    \end{macrocode}
+% Things are simpler when we have access to Unicode.
+%    \begin{macrocode}
+\else
+  \Umathchardef\@operatorhyphen=+7+0+`\-\relax
+  \Umathchardef\@operatortw@=+7+0+`2\relax
+%    \end{macrocode}
+% The minus sign is tricky because it may change its location depending on the encoding. For $-1$, we first check if the |\fam| contains a glyph in slot |"2212|. If yes, we typeset $-1$ in the operator font, and if not, we forget about the operator font entirely and typeset |\defaultinverse| (which is $-1$ by default) with $|\fam|=-1$.
+%    \begin{macrocode}
+  \def\@operatorm@ne{%
+    \ifnum\fam>\m@ne
+      \mathchoice{%
+        \iffontchar\textfont\fam"2212\relax
+          \Umathchar+0+\fam"2212\relax  % minus sign
+          \Umathchar+0+\fam  "31\relax  % 1
+        \else
+          \begingroup\fam\m@ne\defaultinverse\endgroup
+        \fi}%
+        {\iffontchar\textfont\fam"2212\relax
+          \Umathchar+0+\fam"2212\relax  % minus sign
+          \Umathchar+0+\fam  "31\relax  % 1
+        \else
+          \begingroup\fam\m@ne\defaultinverse\endgroup
+        \fi}%
+        {\iffontchar\scriptfont\fam"2212\relax
+          \Umathchar+0+\fam"2212\relax  % minus sign
+          \Umathchar+0+\fam  "31\relax  % 1
+        \else
+          \begingroup\fam\m@ne\defaultinverse\endgroup
+        \fi}%
+        {\iffontchar\scriptscriptfont\fam"2212\relax
+          \Umathchar+0+\fam"2212\relax  % minus sign
+          \Umathchar+0+\fam  "31\relax  % 1
+        \else
+          \begingroup\fam\m@ne\defaultinverse\endgroup
+        \fi}%
+    \else
+      \defaultinverse
+    \fi}
+\fi
+%    \end{macrocode}
+% Now provide user-level access to those three control sequences. Each command has a starred version, which typesets the characters in bold if possible. The default, unstarred version can appear anywhere in an equation. The general idea behind both starred and unstarred versions is to first check whether |\if@bfop@| is true and then fill in values accordingly. When |\if@bfop@| is true, we can type a hyphen directly, and otherwise, we use |\@bfop@choices| or |\@operatorhyphen| depending on whether we want bold or medium weight.
+%    \begin{macrocode}
+\@operator@robust@def\operatorhyphen{\@ifstar
+  \@operatorhyphen@bf\@operatorhyphen@@}
+\def\@operatorhyphen@bf{%
+  \if@bfop@
+    -%
+  \else
+    \mathchoice{}{}{}{}
+    {\@init@bfopfont\@bfop@choices{-}}
+  \fi}
+\def\@operatorhyphen@@{%
+  \if@bfop@
+    -%
+  \else
+    {\operator@font\@operatorhyphen}
+  \fi}
+%    \end{macrocode}
+% Same thing for the power of 2. When |\if@bfop@| is true, we use a |\textsuperscript|, and when it is false, we expect to be in \textsc m mode and can use |^| directly.
+%    \begin{macrocode}
+\@operator@robust@def\operatorsquared{\@ifstar
+  \@operatorsquared@bf\@operatorsquared@@}
+\def\@operatorsquared@bf{%
+  \if@bfop@
+    \textsuperscript{2}%
+  \else
+    ^{\@init@bfopfont\@bfop@choices{2}}
+  \fi}
+\def\@operatorsquared@@{%
+  \if@bfop@
+    \textsuperscript{2}%
+  \else
+    ^{\operator@font\@operatortw@}
+  \fi}
+%    \end{macrocode}
+% And inverse operation. This control sequence is once again more complicated because of the issue with the minus sign. As in |\operatorsquared|, we use |\textsuperscript| and type out the $-1$ directly when |\if@bfop@| is true, and if that boolean is false, we use |^| and |\@bfop@choices| or |\@operatorm@ne|. Unlike with |\operatorsquared|, typing out $-1$ is involves checks to determine whether the font contains a minus sign in slot |"2212|. If yes, we type $-1$ with |\Uchar|, and if not, we use |\defaultinverse|.
+%    \begin{macrocode}
+\@operator@robust@def\operatorinverse{\@ifstar
+  \@operatorinverse@bf\@operatorinverse@@}
+\def\@operatorinverse@bf{%
+  \if@bfop@
+    \textsuperscript{%
+      \ifx\Uchar\@undefined
+        $\defaultinverse$%
+      \else
+        \iffontchar\font"2212\relax
+          \Uchar"2212\relax 1%
+        \else
+          $\defaultinverse$%
+        \fi
+      \fi}%
+  \else
+    ^{\@init@bfopfont\@bfop@choices{%
+      \ifx\Uchar\@undefined
+        $\defaultinverse$%
+      \else
+        \iffontchar\font"2212\relax
+          \Uchar"2212\relax 1%
+        \else
+          $\defaultinverse$%
+        \fi
+      \fi}}
+  \fi}
+\def\@operatorinverse@@{%
+  \if@bfop@
+    \textsuperscript{%
+      \ifx\Uchar\@undefined
+        $\defaultinverse$%
+      \else
+        \iffontchar\font"2212\relax
+          \Uchar"2212\relax 1%
+        \else
+          $\defaultinverse$%
+        \fi
+      \fi}%
+  \else
+    ^{\operator@font\@operatorm@ne}
+  \fi}
+%    \end{macrocode}
+% Finally, we make a new name for pilcrow symbol because \textsf{math-operator} may overwrite |\P|.
+%    \begin{macrocode}
+\@operator@robust@def\pilcrow{\ifmmode
+  \textparagraph\else\mathparagraph\fi}
+%    \end{macrocode}
+% 
+% \section{Defining New Operators}
+% 
+% 
+% We begin with the user-level operator declarations. Each of these commands expects the |#1| argument to be a single control sequence, and the |#2| argument should be the text of the operator. These macros all serve as wrappers around |\make@newop@cmd|, which does the work of defining the operator and expects two arguments. The first argument is the |#1| control sequence, and the second argument is code that defines |#1| as some expression involving |#2|. (We execute this code inside |\make@newop@cmd| if |#1| is a valid operator name.) In the first user-level command here, the control sequence should expand to |{\operator@font|\meta{text}|}|, which simply typesets |#2| in the operator font. More complicated cases use different definitions.
+%    \begin{macrocode}
+\ifx\protected\@undefined
+  \def\@tempa{\DeclareRobustCommand\DeclareMathText[2]}
+\else
+  \def\@tempa{\protected\def\DeclareMathText##1##2}
+\fi
+\@tempa{\make@newop@cmd{#1}
+    {\@operator@robust@def#1{{\operator@font #2}}}}
+%    \end{macrocode}
+% Bold is more complicated for reasons discussed later in this section. The definition of |#1| in this case has three parts. First, the |\mathchoice| ensures that we are in math mode without adding anything to the current math formula. Then |\@init@bfopfont| sets up the bold operator font, and |\@bfop@choices| typesets |#2| in boldface.
+%    \begin{macrocode}
+\ifx\protected\@undefined
+  \def\@tempa{\DeclareRobustCommand\DeclareBoldMathText[2]}
+\else
+  \def\@tempa{\protected\def\DeclareBoldMathText##1##2}
+\fi
+\@tempa{\make@newop@cmd{#1}
+    {\@operator@robust@def#1{\mathchoice{}{}{}{}\@init@bfopfont
+      {\@bfop@choices{#2}}}}}
+%    \end{macrocode}
+% For the two commands that make a proper operator, i.e.\ a |\mathop| subformula, we allow for a starred version. A star means the operator is typeset with |\limits|, so any superscripts or subscripts will be directly above or below the operator. No star (the default version) means the operator is typeset with |\nolimits|, and any superscripts and subscripts will appear normally.
+%    \begin{macrocode}
+\@operator@robust@def\DeclareMathOperator{\relax\@ifstar
+  \@operatorlim\@operatornolim}
+%    \end{macrocode}
+% Operator with bold text.
+%    \begin{macrocode}
+\@operator@robust@def\DeclareBoldMathOperator{\relax\@ifstar
+  \@bfoperatorlim\@bfoperatornolim}
+%    \end{macrocode}
+% Next are the four commands that actually call |\make@newop@cmd| inside the previous two control sequences. They are analogous to |\DeclareMathText| and |\DeclareBoldMathText| above, except now we specify |\mathop|. We include an empty |\kern| to ensure that the subformula contains more than a single character, and this forces the baseline of the operator to line up with the rest of the equation. If \TeX\ encounters an expression like |\mathop{|\meta{single char}|}|, it will vertically center the \meta{single char} in the middle of the equation because it thinks you're typesetting something like an integral or summation sign.
+%    \begin{macrocode}
+\def\@operatorlim#1#2{%
+  \make@newop@cmd{#1}
+    {\@operator@robust@def#1{\mathop{\operator@font\kern\z@#2}\limits}}}
+%    \end{macrocode}
+% Same thing with |\nolimits|.
+%    \begin{macrocode}
+\def\@operatornolim#1#2{%
+  \make@newop@cmd{#1}
+    {\@operator@robust@def#1{\mathop{\operator@font\kern\z@#2}\nolimits}}}
+%    \end{macrocode}
+% The bold operator works the same way as |\DeclareBoldMathText|: ensure we're in math mode (and raise an error if not), then call |\@init@bfopfont| and |\@bfop@choices| to typeset the operator.
+%    \begin{macrocode}
+\def\@bfoperatorlim#1#2{%
+  \make@newop@cmd{#1}
+    {\@operator@robust@def#1{\mathchoice{}{}{}{}\@init@bfopfont
+      \mathop{\@bfop@choices{#2}}\limits}}}
+%    \end{macrocode}
+% Same thing with |\nolimits|.
+%    \begin{macrocode}
+\def\@bfoperatornolim#1#2{%
+  \make@newop@cmd{#1}
+    {\@operator@robust@def#1{\mathchoice{}{}{}{}\@init@bfopfont
+      \mathop{\@bfop@choices{#2}}\nolimits}}}
+%    \end{macrocode}
+% We store the list of control sequences that code for operators in |\operator@list|. Initially the macro contains the operator control sequences from the \LaTeX\ kernel.
+%    \begin{macrocode}
+\def\operator@list{\log\lg\ln
+  \lim\limsup\liminf
+  \sin\arcsin\sinh
+  \cos\arccos\cosh
+  \tan\arctan\tanh
+  \cot\coth
+  \sec\csc
+  \max\min\sup\inf
+  \arg\ker\dim\hom\det
+  \exp
+  \Pr
+  \gcd\deg}
+%    \end{macrocode}
+% Command to add to the list of operators.
+%    \begin{macrocode}
+\def\addto@operator@list#1{\expandafter
+  \def\expandafter\operator@list\expandafter{\operator@list#1}}
+%    \end{macrocode}
+% The macro |\@ifoperator| accepts a single control sequence and checks whether it appears in |\operator@list|.
+%    \begin{macrocode}
+\def\@ifoperator#1{%
+  \expandafter\in@\expandafter#1\expandafter{\operator@list}%
+  \ifin@
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi}
+%    \end{macrocode}
+% Error and warning messages for |\make@newop@cmd|.
+%    \begin{macrocode}
+\def\OperatorBadNameError#1{%
+  \def\@tempa{#1}%
+  \@onelevel@sanitize\@tempa
+  \PackageError{math-operator}{Invalid name\MessageBreak
+    "\@tempa" for new operator}
+    {I was expecting the name of the new operator\MessageBreak
+    to be a single control sequence, but instead\MessageBreak
+    you typed "\@tempa."\MessageBreak
+    This doesn't work. To resolve this error,\MessageBreak
+    make sure the first argument of the operator\MessageBreak
+    declaration is a single control sequence.\MessageBreak}}
+\def\OperatorCSDefWarning#1{%
+  \PackageWarning{math-operator}{Control sequence\MessageBreak
+    \string#1\space is already defined. Your\MessageBreak
+    operator declaration was\MessageBreak ignored}}
+\def\OperatorCSDefError#1{%
+  \PackageError{math-operator}{Control sequence\MessageBreak
+    \string#1\space already defined. Your\MessageBreak
+    operator declaration was ignored}
+    {You tried to define the control sequence\MessageBreak
+    \string#1\space to be a new\MessageBreak
+    operator even though it already has a\MessageBreak
+    definition. I'm currently set to raise an\MessageBreak
+    error when that happens. To resolve the\MessageBreak
+    error, either pick a different control\MessageBreak
+    sequence or set \string\operatordefmode\space to a \MessageBreak
+    negative number to overwrite the definition.\MessageBreak}}
+%    \end{macrocode}
+% The |\make@newop@cmd| macro does the work of defining the new operator. It accepts two arguments: |#1| a control sequence and |#2| a statement defining |#1| to be something. The previous user-level |\Declare|\meta{stuff} macros provide the appropriate definitions, so we include |#2| by itself in two places. The main job of |\make@newop@cmd| is to check whether |#1| is a single control sequence and not already defined as something besides an operator.
+%    \begin{macrocode}
+\def\make@newop@cmd#1#2{%
+  \expandafter\ifx\expandafter\@nnil\@gobble#1\@nnil % is #1 one token?
+    \ifcat\relax\noexpand#1 % does #1 start with cs?
+%    \end{macrocode}
+% If |#1| is already an operator, we can redefine it no problem.
+%    \begin{macrocode}
+      \@ifoperator{#1}
+        {\@operatorinfo{Redefining \string#1\space operator.}
+          #2}  % <-- new definition happens here
+%    \end{macrocode}
+% If not, we first check whether |#1| is undefined. If yes, we define it and add it to |\operator@list|.
+%    \begin{macrocode}
+        {\ifx#1\@undefined
+          \@operatorinfo{Defining new operator \string#1.}
+          \addto@operator@list{#1}
+          #2   % <-- new definition happens here
+%    \end{macrocode}
+% Otherwise, we consult the value of |\operatordefmode|. When this count is negative, we redefine the control sequence and turn it into an operator.
+%    \begin{macrocode}
+        \else                           % if #1 is already defined...
+          \ifnum\operatordefmode<\z@    % case < 0: redefine
+            \@operatorinfo{Overwriting definition of \string#1.}
+            \addto@operator@list{#1}
+            #2 % <-- new definition happens here
+%    \end{macrocode}
+% If |\operatordefmode| is nonnegative, we do not redefine |#1| and instead do nothing, issue a warning, or issue an error depending on the count value.
+%    \begin{macrocode}
+          \else
+            \@operatorinfo{Leaving \string#1\space as is.}
+            \ifcase\operatordefmode     % case 0: do nothing
+            \or                         % case 1: warning 
+              \OperatorCSDefWarning{#1}
+            \else                       % case >= 2: error
+              \OperatorCSDefError{#1}
+            \fi
+          \fi
+        \fi}
+    \else
+      \OperatorBadNameError{#1}
+    \fi
+  \else
+    \OperatorBadNameError{#1}
+  \fi}
+%    \end{macrocode}
+% Bold text in math mode is complicated because \LaTeX\ doesn't provide direct access to a bold version of the operator font. My solution is to extract the operator font information from the \textsf{nfss} and then use that font family in boldface inside an |\hbox|. Doing so is an effective way to ensure that we are typesetting bold text, as opposed to bold math, in the operator font family. The other option would be to change the |\fam|, either with |\mathbf| or with a direct call to |\fam|, but that approach has two main drawbacks. First, |\mathbf| is intended to produce bold variable names, such as vectors in physics, not necessarily bold text, and the same may be true of other bold symbol fonts. In traditional \LaTeX, |\mathbf| does produce a bolded version of the operator font, but that may not be true in general. Second, it may not be obvious whether the \textsc{nfss} has even declared a bold version of the operator font as a symbol font, and I do not want to hack the \textsc{nfss} to determine this when we have an easier and more reliable alternative.
+% 
+% To implement this approach, we need three |\font| commands (which we call |\@bfoptf|, |\@bfopsf|, and |\@bfopssf|) that switch to the bold operator font in \textsc h mode at different sizes: one size for |\textstyle| and |\displaystyle|, one size for |\scriptstyle|, and one size for |\scriptscriptstyle|. We implicitly assume that the operator font family does not change after |\begin{document}| (but it can change in the preamble), but the user may freely enlarge or shrink the text. For these three |\font| commands, we store their sizes in |\operator@tf|, |\operator@sf|, and |\operator@ssf|, and if these macros do not match the size of the current |\textfont|, |\scriptfont|, or |\scriptscriptfont| respectively, we redefine all three |\font| commands at the correct size. The idea here is that we make new |\font| commands if the surrounding text size has changed since the user's most recent bold operator. Finally, we pick the right size in the current equation by putting the operator text inside |\mathchoice|.
+%    \begin{macrocode}
+\let\operator@tf\relax
+\let\operator@sf\relax
+\let\operator@ssf\relax
+%    \end{macrocode}
+% The macro |\@init@bfopfont| (re)defines the font-change commands. We start by checking whether the sizes of |\@bfoptf|, |\@bfopsf|, and |\@bfopssf| match |\tf@size|, |\sf@size|, and |\ssf@size|. If yes, this command does nothing, and if not, we need to redefine the three |\font| commands to have the correct font size.
+%    \begin{macrocode}
+\def\@init@bfopfont{%
+  \@tempswatrue        % reset sizes by default
+  \ifx\operator@tf\tf@size
+    \ifx\operator@sf\sf@size
+      \ifx\operator@ssf\ssf@size
+        \@tempswafalse % don't reset sizes if unnecessary
+      \fi
+    \fi
+  \fi
+%    \end{macrocode}
+% If we do need to change the font size, we switch to the operator font inside a group and get rid of the |\escapechar|, then do fun things.
+%    \begin{macrocode}
+  \if@tempswa
+    \begingroup
+      \operator@font
+      \escapechar\m@ne
+%    \end{macrocode}
+% The macro |\set@bf@@| accepts three arguments. The |##1| argument should is a control sequence, the |##2| argument is |\textfont|, |\scriptfont|, or |\scriptscriptfont|, and the |##3| argument is a font size (a number). This is the command that finds the operator font in the \textsc{nfss} and and converts it to bold, and it defines |##1| to be the |\font| command that produces this font.
+%    \begin{macrocode}
+      \def\set@bf@@##1##2##3{%
+        \edef\@tempa{\expandafter\string\the##2\fam}
+        \expandafter\split@name\@tempa\@nil
+        \DeclareFixedFont##1\f@encoding\f@family\bfdefault\f@shape##3}
+%    \end{macrocode}
+% Here is where we actually make the font-change commands. We call our ``text font'' |\@bfoptf|, our ``script font'' |\@bfopsf|, and our ``script script font'' |\@bfopssf|.
+%    \begin{macrocode}
+      \set@bf@@\@bfoptf\textfont\tf@size
+      \set@bf@@\@bfopsf\scriptfont\sf@size
+      \set@bf@@\@bfopssf\scriptscriptfont\ssf@size
+%    \end{macrocode}
+% Now save the sizes of the current font-change commands for the next bold operator.
+%    \begin{macrocode}
+      \global\let\operator@tf\tf@size
+      \global\let\operator@sf\sf@size
+      \global\let\operator@ssf\ssf@size
+    \endgroup
+  \fi}
+%    \end{macrocode}
+% The |\@bfop@choices| macro accepts a single argument, which should be the text of an operator to be typeset in bold. The |#1| argument goes inside an |\hbox| with a font-change command that depends on the current math style. To keep things working properly in the \textsc{nfss}, we also update the internal macros that store the font information. The macro |\operator@update@font| calls |\split@name| on the current |\font|. We need to set the |\escapechar| to $-1$ because |\split@name| does not expect the leading backslash from the current |\font|.
+%    \begin{macrocode}
+\def\operator@update@font{\begingroup
+    \escapechar\m@ne
+    \expandafter\expandafter\expandafter
+  \endgroup
+  \expandafter\expandafter\expandafter
+  \split@name\expandafter\string\the\font\@nil}
+%    \end{macrocode}
+% Now define |\@bfop@choices|. We initially set |\if@bfop@| to true. We don't have to reset it because |\@bfop@choices| always appears in a group, so this change is necessarily local.
+%    \begin{macrocode}
+\def\@bfop@choices#1{\@bfop@true
+  \mathchoice{\hbox{\@bfoptf\operator@update@font#1}}
+    {\hbox{\@bfoptf\operator@update@font#1}}
+    {\hbox{\@bfopsf\operator@update@font#1}}
+    {\hbox{\@bfopssf\operator@update@font#1}}}
+%    \end{macrocode}
+% Finally, we make the operator declaration commands preamble only. Is this necessary? Probably not, but operator declaration distinctly feels like something that should happen only in the preamble.
+%    \begin{macrocode}
+\@onlypreamble\DeclareMathText
+\@onlypreamble\DeclareBoldMathText
+\@onlypreamble\DeclareMathOperator
+\@onlypreamble\DeclareBoldMathOperator
+\@onlypreamble\@operatorlim
+\@onlypreamble\@operatornolim
+\@onlypreamble\@bfoperatorlim
+\@onlypreamble\@bfoperatornolim
+\@onlypreamble\make@newop@cmd
+%    \end{macrocode}
+% 
+% 
+% 
+% \section{Blackboard Bold}
+% 
+% Make the blackboard-bold letters. This package isn't designed to load fonts, so we're implementing each \texttt{\textbackslash}\meta{letter} assuming the user has or will at some point request a package that defines |\mathbb|. We leave each blackboard-board letter undefined until the first time it appears in math mode. If |\mathbb| is still undefined at that point, \textsf{math-operator} raises a |\NoBBError|, and otherwise it defines \texttt{\textbackslash}\meta{letter} to be |\mathbb{|\meta{letter}|}|. For a traditional \LaTeX\ approach that implements |\mathbb| as a new math alphabet, i.e.\ by changing the font of certain letters without changing their encoding slots, it would arguably be better to find the math family that corresponds to |\mathbb| and use |\mathchardef|. However, modern Unicode-based implementations may also change the encoding slot to something from the Letterlike Symbols or Math Alphanumeric Symbols blocks by locally setting new |\Umathcode|'s for Latin letters. Without examining the underlying code, it's impossible to know which form of |\mathbb| we're looking at, so \textsf{math-operator} sticks to calling |\mathbb| for maximum compatibility with other packages. If a package defines |\mathbb| to do something besides switch to blackboard bold, that will break the control sequences here.
+%    \begin{macrocode}
+\wlog{}
+\if@operator@bb
+  \@operatorinfo{Defining blackboard-bold letters.}
+  \def\NoBBError#1{\PackageError{math-operator}
+    {Missing \string\mathbb\space command}
+    {It looks like you're trying to make\MessageBreak
+    a blackbold-board "#1." However, I\MessageBreak
+    can't define blackboard-bold letters\MessageBreak
+    because I don't see a definition for\MessageBreak
+    \string\mathbb, which is what I would use to\MessageBreak
+    do it. To resolve this error message,\MessageBreak
+    try loading a package that provides\MessageBreak
+    blackboard-bold font support such as\MessageBreak
+    amssymb or mathfont.\MessageBreak}}
+%    \end{macrocode}
+% To keep the code simple, we use |\@makebbchar| for the actual definitions. Here |#1| is the letter we use.
+%    \begin{macrocode}
+  \def\@makebbchar#1{%
+    \@operatorinfo{Predefining 
+      \expandafter\string\csname #1\endcsname\space
+      for use later.}
+    \expandafter\@operator@robust@def\csname #1\endcsname{%
+      \ifx\mathbb\@undefined
+        \NoBBError{#1}%
+      \else
+        \@operatorinfo{Setting up \expandafter
+          \string\csname#1\endcsname\space for use.}%
+        \expandafter\@operator@robust@gdef\csname #1\endcsname{\mathbb{#1}}%
+        \@nameuse{#1}%
+      \fi}}
+  \@makebbchar{N}
+  \@makebbchar{Z}
+  \@makebbchar{Q}
+  \@makebbchar{R}
+  \@makebbchar{C}
+  \@makebbchar{F}
+%    \end{macrocode}
+% Defining |\H| and |\O| is more complicated because these commands already do something in text mode, and we want to preserve that definition. We take the usual approach of making them robust macros that expand differently in \textsc m mode versus \textsc h or \textsc v mode.
+%    \begin{macrocode}
+  \@operatorinfo{Predefining \string\H\space for use later.}
+  \@operatorinfo{Predefining \string\O\space for use later.}
+  \let\textH\H
+  \let\textO\O
+  \def\mathH{%
+    \ifx\mathbb\@undefined
+      \NoBBError{H}%
+    \else
+      \@operatorinfo{Setting up \string\H\space for use.}%
+      \gdef\mathH{\mathbb{H}}%
+      \mathH
+    \fi}
+  \def\mathO{%
+    \ifx\mathbb\@undefined
+      \NoBBError{O}%
+    \else
+      \@operatorinfo{Setting up \string\O\space for use.}%
+      \gdef\mathO{\mathbb{O}}%
+      \mathO
+    \fi}
+  \@operator@robust@def\O{\ifmmode\mathO\else\expandafter\textO\fi}
+  \@operator@robust@def\H{\ifmmode\mathH\else\expandafter\textH\fi}
+%    \end{macrocode}
+% For probability and expected value operators, we take a slightly different approach because we want these characters to show up as operators rather than |\mathord| atoms. We use |\@makebbop|, which is similar to |\@makebbchar|, except that it includes a |\mathop| specification.
+%    \begin{macrocode}
+  \def\@makebbop#1{%
+    \@operatorinfo{Predefining 
+      \expandafter\string\csname #1\endcsname\space
+      for use later.}
+    \expandafter\@operator@robust@def\csname#1\endcsname{%
+      \ifx\mathbb\@undefined
+        \NoBBError{#1}%
+      \else
+        \@operatorinfo{Setting up \expandafter
+          \string\csname#1\endcsname\space for use.}%
+        \expandafter\@operator@robust@gdef\csname#1\endcsname{%
+          \mathop{\kern\z@\mathbb{#1}}}%
+        \@nameuse{#1}%
+      \fi}}
+  \@makebbop{E}
+  \@makebbop{P}
+%    \end{macrocode}
+% And add all these letters to |\operator@list|.
+%    \begin{macrocode}
+  \addto@operator@list{\N\Z\Q\R\C\F\mathO\mathH\E\P}
+\else
+  \@operatorinfo{Skipping blackboard-bold letters.}
+\fi
+%    \end{macrocode}
+% 
+% \section{Categories}
+% 
+% A selection of categories. Serious category theorists will undoubtedly want to declare their own categories beyond these.
+%    \begin{macrocode}
+\if@operator@c
+  \wlog{}
+  \@operatorinfo{Defining category theory notation.}
+  \DeclareBoldMathText{\Ab}{Ab}
+  \DeclareBoldMathText{\Alg}{Alg}
+  \DeclareBoldMathText{\Bialg}{Bialg}
+  \DeclareBoldMathText{\Cat}{Cat}
+  \DeclareBoldMathText{\CGH}{CGH}
+  \DeclareBoldMathText{\CGWH}{CGWH}
+  \DeclareBoldMathText{\Coalg}{Coalg}
+  \DeclareBoldMathText{\Comod}{Comod}
+  \DeclareBoldMathText{\CRing}{CRing}
+  \DeclareBoldMathText{\Field}{Field}
+  \DeclareBoldMathText{\FinGrp}{FinGrp}
+  \DeclareBoldMathText{\FinHilb}{FinHilb}
+  \DeclareBoldMathText{\FinVect}{FinVect}
+  \DeclareBoldMathText{\FinSet}{FinSet}
+  \DeclareBoldMathText{\Frm}{Frm}
+  \DeclareBoldMathText{\Grp}{Grp}
+  \DeclareBoldMathText{\Haus}{Haus}
+  \DeclareBoldMathText{\HeytAlg}{HeytAlg}
+  \DeclareBoldMathText{\Hilb}{Hilb}
+  \DeclareBoldMathText{\HopfAlg}{HopfAlg}
+  \DeclareBoldMathText{\Lat}{Lat}
+  \DeclareBoldMathText{\LieAlg}{LieAlg}
+  \DeclareBoldMathText{\LieGrp}{LieGrp}
+  \DeclareBoldMathText{\Loc}{Loc}
+  \DeclareBoldMathText{\Man}{Man}
+  \DeclareBoldMathText{\Mat}{Mat}
+  \DeclareBoldMathText{\Met}{Met}
+  \DeclareBoldMathText{\Mod}{Mod}
+  \DeclareBoldMathText{\Mon}{Mon}
+  \DeclareBoldMathText{\Ord}{Ord}
+  \DeclareBoldMathText{\Pos}{Pos}
+  \DeclareBoldMathText{\Rel}{Rel}
+  \DeclareBoldMathText{\Ring}{Ring}
+  \DeclareBoldMathText{\Set}{Set}
+  \DeclareBoldMathText{\Top}{Top}
+  \DeclareBoldMathText{\Topos}{Topos}
+  \DeclareBoldMathText{\Vect}{Vect}
+  \DeclareMathOperator{\cocone}{cocone}
+  \DeclareMathOperator*{\colim}{colim}
+  \DeclareMathOperator{\cone}{cone}
+  \DeclareMathOperator{\Ho}{Ho}
+  \DeclareMathOperator{\Hom}{Hom}
+  \DeclareMathOperator{\Ob}{Ob}
+  \DeclareMathOperator{\PSh}{PSh}
+  \DeclareMathOperator{\Sh}{Sh}
+  \@operatorinfo{Defining new operator \string\op.}
+  \addto@operator@list{\op}
+  \@operator@robust@def\op{^{\operator@font op}}
+\else
+  \@operatorinfo{Skipping category theory notation.}
+\fi
+%    \end{macrocode}
+% 
+% 
+% \section{Jacobi Elliptic Functions}
+% 
+% Pretty straightforward. The standard classes define |\sc| as a legacy (deprecated) command to access small caps, and we overwrite that definition. I do not feel bad about overwriting deprecated commands.
+%    \begin{macrocode}
+\if@operator@j
+  \wlog{}
+  \@operatorinfo{Defining Jacobi elliptic functions.}
+  \DeclareMathOperator{\cd}{cd}
+  \DeclareMathOperator{\cn}{cn}
+  \DeclareMathOperator{\cs}{cs}
+  \DeclareMathOperator{\dc}{dc}
+  \DeclareMathOperator{\dn}{dn}
+  \DeclareMathOperator{\ds}{ds}
+  \DeclareMathOperator{\nc}{nc}
+  \DeclareMathOperator{\nd}{nd}
+  \DeclareMathOperator{\ns}{ns}
+  \let\sc\@undefined
+  \DeclareMathOperator{\sc}{sc}
+  \DeclareMathOperator{\sd}{sd}
+  \DeclareMathOperator{\sn}{sn}
+\else
+  \@operatorinfo{Skipping Jacobi elliptic functions.}
+\fi
+%    \end{macrocode}
+% 
+% \section{Linear Algebra}
+% 
+% Some standard functions and operators from linear algebra. For the matrix groups defined here, we use |\DeclareMathText| rather than |\DeclareMathOperator| because these groups should be |\mathord| subformulas, not |\mathop|. We say |\spanop| instead of |\span| because |\span| is already defined. (It's a \TeX\ primitive dealing with tabular entries. Please do not redefine |\span|.)
+%    \begin{macrocode}
+\if@operator@l
+  \wlog{}
+  \@operatorinfo{Defining operators from linear algebra.}
+  \DeclareMathOperator{\adj}{adj}
+  \DeclareMathOperator{\Cl}{Cl}
+  \DeclareMathOperator{\codim}{codim}
+  \DeclareMathOperator{\coker}{coker}
+  \DeclareMathText{\GL}{GL}
+  \DeclareMathOperator{\nullity}{nullity}
+  \DeclareMathText{\Orthogonal}{O}
+  \DeclareMathOperator{\Pin}{Pin}
+  \DeclareMathOperator{\proj}{proj}
+  \DeclareMathOperator{\rank}{rank}
+  \DeclareMathText{\SL}{SL}
+  \DeclareMathText{\SO}{SO}
+  \DeclareMathText{\SU}{SU}
+  \DeclareMathOperator{\Sp}{Sp}
+  \DeclareMathOperator*{\spanop}{span}
+  \DeclareMathOperator{\Spin}{Spin}
+  \DeclareMathOperator{\tr}{tr}
+  \@operatorinfo{Defining new operator \string\T.}
+  \addto@operator@list{\T}
+  \@operator@robust@def\T{^{\operator@font T}}
+  \DeclareMathText{\Unitary}{U}
+\else
+  \@operatorinfo{Skipping operators from linear algebra.}
+\fi
+%    \end{macrocode}
+% 
+% 
+% \section{Overlining}
+% 
+% In this section, we define the |\overbar| command, which produces an overline whose length lies somewhere between |\bar| and |\overline|. The user-level command is a short wrapper around the internal command |\@overb@r|. First, we define |\overbaroffset|, which will determine the placement of the overline over the argument of |\overbar|. As is standard in \TeX, we store |\overbaroffset| as a count, which we identify with a scale factor because we divide it by 1000 when we use its value in |\@overb@r|.
+%    \begin{macrocode}
+\if@operator@o
+  \wlog{}
+  \@operatorinfo{Defining \string\overbar.}
+  \newcount\overbaroffset
+  \overbaroffset=800\relax
+%    \end{macrocode}
+% Version 1.0 of this package called the count |\operatorbaroffset| instead of |\overbaroffset|. We provide access to the old name for backwards compatibility.
+%    \begin{macrocode}
+  \let\operatorbaroffset\overbaroffset
+%    \end{macrocode}
+% Now for the user-level command. We start by checking whether we are in math mode. If the user follows |\overbar| with an asterisk, we use 500 as the placement value, and otherwise, we take the value of |\overbaroffset|. If the user does not specify an optional argument, we use the default value of 0.8.
+%    \begin{macrocode}
+  \@operator@robust@def\overbar{\mathchoice{}{}{}{}%
+    \@ifstar
+      {\@ifnextchar[%
+        {\@overb@r{500}}
+        {\@overb@r{500}[0.8]}}
+      {\@ifnextchar[%
+        {\@overb@r{\overbaroffset}}
+        {\@overb@r{\overbaroffset}[0.8]}}}
+%    \end{macrocode}
+% Now we come to the macro that does the actual work of making the overline. The command |\@overb@r| accepts three arguments: |#1| is the scale argument that determines the horizontal placement of the overline; |#2| is a decimal that determines the size of the overline; and |#3| is the subformula to be overlined. Note that |#1| is only specified internally, and the user controls |#1| indirectly through |\overbaroffset|. Just to be safe, we put the contents of |\@overb@r| inside a group since we're making liberal use of scratch registers. The general idea is that inside a |\mathchoice|, we put the subformula in an |\hbox| in the correct style and then manually position the overline using the box dimensions and the |#1| and |#2| arguments.
+%    \begin{macrocode}
+  \def\@overb@r#1[#2]#3{\begingroup
+    \mathchoice
+      {\setbox\@tempboxa\hbox{$\displaystyle#3\m@th$}
+        \@tempdima\wd\@tempboxa
+        \@tempdimb\ht\@tempboxa
+        \@tempdimc\dp\@tempboxa
+%    \end{macrocode}
+% We will use |\dimen@| to store the glue that we insert to the left of the |\overline| command. We start with the width of |\@tempboxa|, shrink by the width of the overbar, and then take a fraction of the remaining space based on |#1| (which is typically |\overbaroffset|). Then we subtract the width of |\@tempboxa| because we are inserting this glue right after |\unhbox|ing |\@tempboxa|.
+%    \begin{macrocode}
+        \dimen@\@tempdima
+        \advance\dimen@ by -#2\@tempdima
+        \divide\dimen@ by 1000
+        \multiply\dimen@ by #1
+        \advance\dimen@ by -\@tempdima
+%    \end{macrocode}
+% Inside another |\hbox|, we typeset |\@tempboxa| and manually convert it into an |\rlap|. Then we add |\hskip|, the overline, and an |\hfil|. In total, this |\hbox| will have the same width as the original subformula. We do all of this inside a second |\hbox| because we want \TeX\ to treat everything as a single subformula and also to prevent extra interatom space in the unlikely event that |\Umathordordspacing| is nonzero. (Please do not set |\Umathordordspacing| to something nonzero.)
+%    \begin{macrocode}
+        \hbox to \@tempdima{\unhbox\@tempboxa\hskip\dimen@
+%    \end{macrocode}
+% Now make a math expression that contains just an overline of the correct width above a zero-width |\vrule|, which ensures that the overline occurs at the correct height.
+%    \begin{macrocode}
+          $\overline{%
+            \vrule width \z@ height \@tempdimb depth \@tempdimc
+            \hskip#2\@tempdima}\m@th$%
+          \hfil}}
+%    \end{macrocode}
+% Same thing with |\textstyle|.
+%    \begin{macrocode}
+      {\setbox\@tempboxa\hbox{$\textstyle#3\m@th$}
+        \@tempdima\wd\@tempboxa
+        \@tempdimb\ht\@tempboxa
+        \@tempdimc\dp\@tempboxa
+        \dimen@\@tempdima
+        \advance\dimen@ by -#2\@tempdima
+        \divide\dimen@ by 1000
+        \multiply\dimen@ by #1
+        \advance\dimen@ by -\@tempdima
+        \hbox to \@tempdima{\unhbox\@tempboxa\hskip\dimen@
+          $\overline{%
+            \vrule width \z@ height \@tempdimb depth \@tempdimc
+            \hskip#2\@tempdima}\m@th$%
+          \hfil}}
+%    \end{macrocode}
+% And |\scriptstyle|.
+%    \begin{macrocode}
+      {\setbox\@tempboxa\hbox{$\scriptstyle#3\m@th$}
+        \@tempdima\wd\@tempboxa
+        \@tempdimb\ht\@tempboxa
+        \@tempdimc\dp\@tempboxa
+        \advance\dimen@ by -#2\@tempdima
+        \divide\dimen@ by 1000
+        \multiply\dimen@ by #1
+        \advance\dimen@ by -\@tempdima
+        \hbox to \@tempdima{\unhbox\@tempboxa\hskip\dimen@
+          $\overline{%
+            \vrule width \z@ height \@tempdimb depth \@tempdimc
+            \hskip#2\@tempdima}\m@th$%
+          \hfil}}
+%    \end{macrocode}
+% And finally |\scriptscriptstyle|.
+%    \begin{macrocode}
+      {\setbox\@tempboxa\hbox{$\scriptscriptstyle#3\m@th$}
+        \@tempdima\wd\@tempboxa
+        \@tempdimb\ht\@tempboxa
+        \@tempdimc\dp\@tempboxa
+        \advance\dimen@ by -#2\@tempdima
+        \divide\dimen@ by 1000
+        \multiply\dimen@ by #1
+        \advance\dimen@ by -\@tempdima
+        \hbox to \@tempdima{\unhbox\@tempboxa\hskip\dimen@
+          $\overline{%
+            \vrule width \z@ height \@tempdimb depth \@tempdimc
+            \hskip#2\@tempdima}\m@th$%
+          \hfil}}
+    \endgroup}
+\else
+  \@operatorinfo{Skipping \string\overbar.}
+\fi
+%    \end{macrocode}
+% 
+% 
+% \section{Probability Distributions}
+% 
+% A selection of common probability distributions. We say |\Betaop| and |\Gammaop| instead of |\Beta| and |\Gamma| because they are or may be defined to be capital Greek letters.
+%    \begin{macrocode}
+\if@operator@p
+  \wlog{}
+  \@operatorinfo{Defining probability distributions.}
+  \DeclareMathOperator{\Bernoulli}{Bernoulli}
+  \DeclareMathOperator{\Betaop}{Beta}
+  \DeclareMathOperator{\Binomial}{Binomial}
+  \DeclareMathOperator{\Boltzmann}{Boltzmann}
+  \DeclareMathOperator{\Burr}{Burr}
+  \DeclareMathOperator{\Categorical}{Categorical}
+  \DeclareMathOperator{\Cauchy}{Cauchy}
+  \DeclareMathOperator{\chiop}{\chi}
+  \@operator@robust@def\ChiSq{\chiop^{\operator@font\@operatortw@}}
+  \DeclareMathOperator{\Dagum}{Dagum}
+  \DeclareMathOperator{\Exponential}{Exponential}
+  \DeclareMathOperator{\Erlang}{Erlang}
+  \DeclareMathOperator{\Gammaop}{Gamma}
+  \DeclareMathOperator{\Gompertz}{Gompertz}
+  \@operator@robust@def\InvChiSq{%
+    \mathop{\operator@font
+      Inv\@operatorhyphen\chiop}%
+      \nolimits^{\operator@font\@operatortw@}}
+  \DeclareMathOperator{\InvGamma}
+    {Inv\@operatorhyphen Gamma}
+  \DeclareMathOperator{\Kolmogorov}{Kolmogorov}
+  \DeclareMathOperator{\LogLogistic}{Log\@operatorhyphen Logistic}
+  \DeclareMathOperator{\LogNormal}{Log\@operatorhyphen Normal}
+  \DeclareMathOperator{\Logistic}{Logistic}
+  \DeclareMathOperator{\Lomax}{Lomax}
+  \DeclareMathOperator{\MaxwellBoltzmann}
+    {Maxwell\@operatorhyphen Boltzmann}
+  \DeclareMathOperator{\Multinomial}{Multinomial}
+  \DeclareMathOperator{\NegBinomial}{Neg\@operatorhyphen Binomial}
+%    \end{macrocode}
+% We can't use |\N| for calligraphic $\mathcal N$ because we're already using it for natural numbers. Alas, we will settle for |\Normal|. This one is also more complicated because of the |*|-ed version of the command.
+%    \begin{macrocode}
+  \@operatorinfo{Defining new operator \string\Normal.}
+  \addto@operator@list{\Normal}
+  \def\operator@N{\mathop{\kern\z@\mathcal{N}}\nolimits}
+  \def\operator@normal{\mathop{\operator@font Normal}\nolimits}
+  \@operator@robust@def\Normal{%
+    \mathchoice{}{}{}{}
+    \@ifstar\operator@normal\operator@N}
+  \DeclareMathOperator{\Pareto}{Pareto}
+  \DeclareMathOperator{\Poisson}{Poisson}
+  \DeclareMathOperator{\Weibull}{Weibull}
+  \DeclareMathOperator{\Zipf}{Zipf}
+\else
+  \@operatorinfo{Skipping probability distributions.}
+\fi
+%    \end{macrocode}
+% 
+% 
+% 
+% \section{Special Functions}
+% 
+% Some common special functions.
+%    \begin{macrocode}
+\if@operator@sf
+  \wlog{}
+  \@operatorinfo{Defining special functions.}
+  \DeclareMathOperator{\Ai}{Ai}
+  \DeclareMathOperator{\Bi}{Bi}
+  \DeclareMathOperator{\Ci}{Ci}
+  \DeclareMathOperator{\ci}{ci}
+  \DeclareMathOperator{\Chiop}{Chi}
+  \DeclareMathOperator{\Ei}{Ei}
+  \DeclareMathOperator{\erf}{erf}
+  \@operator@robust@def\erfinv{\erf^{\operator@font\@operatorm@ne}}
+  \DeclareMathOperator{\erfc}{erfc}
+  \@operator@robust@def\erfcinv{\erfc^{\operator@font\@operatorm@ne}}
+  \DeclareMathOperator{\Li}{Li}
+  \DeclareMathOperator{\li}{li}
+  \DeclareMathOperator{\Log}{Log}
+  \DeclareMathOperator{\sgn}{sgn}
+  \DeclareMathOperator{\Si}{Si}
+  \DeclareMathOperator{\si}{si}
+  \DeclareMathOperator{\Shi}{Shi}
+%    \end{macrocode}
+% Inverse error function.
+%    \begin{macrocode}
+\else
+  \@operatorinfo{Skipping special functions.}
+\fi
+%    \end{macrocode}
+% 
+% \section{Standard Operators}
+% 
+% Some other standard (or standardish) functions and operations. Much more pure mathy than the special functions from the previous section. We say |\divop| instead of |\div| because |\div| is already defined.
+%    \begin{macrocode}
+\if@operator@s
+  \wlog{}
+  \@operatorinfo{Defining standard operators.}
+  \DeclareMathOperator*{\argmax}{arg\,max}
+  \DeclareMathOperator*{\argmin}{arg\,min}
+  \DeclareMathOperator{\Aut}{Aut}
+  \@operatorinfo{Defining new operator \string\c.}
+  \addto@operator@list{\mathc}
+  \let\textc\c
+  \def\mathc{^{\operator@font c}}
+  \@operator@robust@def\c{\ifmmode\mathc\else\expandafter\textc\fi}
+  \DeclareMathOperator{\cf}{cf}
+  \DeclareMathOperator{\cl}{cl}
+  \DeclareMathOperator{\conv}{conv}
+  \DeclareMathOperator{\corr}{corr}
+  \DeclareMathOperator{\cov}{cov}
+  \DeclareMathOperator{\curl}{curl}
+  \DeclareMathOperator{\divop}{div}
+  \DeclareMathOperator{\Ext}{Ext}
+  \DeclareMathOperator{\Gal}{Gal}
+  \DeclareMathOperator{\grad}{grad}
+  \DeclareMathOperator{\Hess}{\mathcal{H}}
+  \DeclareMathOperator{\id}{id}
+  \DeclareMathOperator{\img}{img}
+  \DeclareMathOperator{\Info}{\mathcal{I}}
+  \DeclareMathOperator{\interior}{int}
+  \DeclareMathOperator*{\lcm}{lcm}
+  \DeclareMathOperator{\Proj}{Proj}
+  \DeclareMathOperator{\Res}{Res}
+  \DeclareMathOperator{\Spec}{Spec}
+  \DeclareMathOperator{\st}{st}
+  \DeclareMathOperator{\supp}{supp}
+  \DeclareMathOperator{\Tor}{Tor}
+  \DeclareMathOperator{\Var}{Var}
+  \addto@operator@list{\varIm\varRe\Im\Re}
+  \@operatorinfo{Defining \string\varIm\space operator from \string\Im.}
+  \@operatorinfo{Defining \string\varRe\space operator from \string\Re.}
+  \let\varIm\Im
+  \let\varRe\Re
+  \DeclareMathOperator{\Im}{Im}
+  \DeclareMathOperator{\Re}{Re}
+\else
+  \@operatorinfo{Skipping standard operators.}
+\fi
+%    \end{macrocode}
+% 
+% \section{Trigonometry}
+% 
+% Finally, time for some trigonometry. We start by defining hyperbolic cosecant and secant.
+%    \begin{macrocode}
+\if@operator@t
+  \wlog{}
+  \@operatorinfo{Defining trigonometric functions.}
+  \DeclareMathOperator{\csch}{csch}
+  \DeclareMathOperator{\sech}{sech}
+%    \end{macrocode}
+% Round out the ``arc'' versions of standard trigonometric functions, then provide ``arc'' and ``ar'' versions of hyperbolic trigonometric functions.
+%    \begin{macrocode}
+  \DeclareMathOperator{\arccsc}{arccsc}
+  \DeclareMathOperator{\arcsec}{arcsec}
+  \DeclareMathOperator{\arccot}{arccot}
+  \DeclareMathOperator{\arcsinh}{arcsinh}
+  \DeclareMathOperator{\arccosh}{arccosh}
+  \DeclareMathOperator{\arctanh}{arctanh}
+  \DeclareMathOperator{\arccsch}{arccsch}
+  \DeclareMathOperator{\arcsech}{arcsech}
+  \DeclareMathOperator{\arccoth}{arccoth}
+  \DeclareMathOperator{\arsinh}{arsinh}
+  \DeclareMathOperator{\arcosh}{arcosh}
+  \DeclareMathOperator{\artanh}{artanh}
+  \DeclareMathOperator{\arcsch}{arcsch}
+  \DeclareMathOperator{\arsech}{arsech}
+  \DeclareMathOperator{\arcoth}{arcoth}
+%    \end{macrocode}
+% Inverse functions with $-1$ superscript.
+%    \begin{macrocode}
+  \@operator@robust@def\sininv{\sin^{\operator@font\@operatorm@ne}}
+  \@operator@robust@def\cosinv{\cos^{\operator@font\@operatorm@ne}}
+  \@operator@robust@def\taninv{\tan^{\operator@font\@operatorm@ne}}
+  \@operator@robust@def\cscinv{\csc^{\operator@font\@operatorm@ne}}
+  \@operator@robust@def\secinv{\sec^{\operator@font\@operatorm@ne}}
+  \@operator@robust@def\cotinv{\cot^{\operator@font\@operatorm@ne}}
+%    \end{macrocode}
+% And for hyperbolic trigonometric functions.
+%    \begin{macrocode}
+  \@operator@robust@def\sinhinv{\sinh^{\operator@font\@operatorm@ne}}
+  \@operator@robust@def\coshinv{\cosh^{\operator@font\@operatorm@ne}}
+  \@operator@robust@def\tanhinv{\tanh^{\operator@font\@operatorm@ne}}
+  \@operator@robust@def\cschinv{\csch^{\operator@font\@operatorm@ne}}
+  \@operator@robust@def\sechinv{\sech^{\operator@font\@operatorm@ne}}
+  \@operator@robust@def\cothinv{\coth^{\operator@font\@operatorm@ne}}
+\else
+  \@operatorinfo{Skipping trigonometric functions.}
+\fi
+\wlog{}
+%    \end{macrocode}
+% Done!
+% 
+% \vfill\eject
+% 
+% \section*{Version History}
+% 
+% % New features and updates with each version. Versions are chronological, and features are listed in no particular order.
+% 
+% \begin{multicols*}{2}
+% \raggedright\parskip\z@\parindent\z@\leftskip1em\obeylines
+% \setbox0\hbox{\hskip 1pt.\hskip 1pt}
+% \def\version#1#2{\bigskip\hbox to \hsize{\textbf{#1} \cleaders\copy0\hfill\ #2}\par}
+% \def\item{---\kern0.2ex\relax}
+% 
+% \version{1.0}{February 2025}
+% \item initial release
+% 
+% \version{1.1}{March 2025}
+% \item bug fix in package declaration
+% \item bug fix for operators with superscripts
+% \item added |\operatorsquared| and |\operatorinverse|
+% \item added |\Hess| and |\Info|
+% \item changed |\operatorbaroffset| to |\overbaroffset|
+% 
+% \version{1.2}{July 2025}
+% \item bug fix for |\operatorhyphen|
+% \item changed |\Chi| to |\Chiop|
+% \item removed dependence on $\varepsilon$-\TeX
+% 
+% \version{1.2a}{July 2025}
+% \item bug fix for non-unicode engines
+% 
+% \version{1.3}{August 2025}
+% \item added about 30 control sequences to various classes of operators, mostly in category theory
+% \item removed a stray |\detokenize|
+% 
+% \version{1.3a}{September 2025}
+% \item bug fix for |\F|
+% 
+% \end{multicols*}
+% 
+% 
+% 
+% 
+% 
+% \iffalse
+%</code>
+%<*user>
+% 
+\documentclass[12pt,twoside]{article}
+\makeatletter
+\usepackage[margin=72.27pt]{geometry}
+\usepackage[factor=700,stretch=14,shrink=14,step=1]{microtype}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\setlist{topsep=\smallskipamount,itemsep=\z@,
+  parsep=0pt,partopsep=0pt}
+\usepackage[colorlinks=true,allcolors=blue,implicit=false]{hyperref}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{shortvrb}
+\MakeShortVerb{|}
+\def\meta#1{$\langle${\rmfamily\itshape #1}$\rangle$}
+
+\c@topnumber=1
+\c@bottomnumber=1
+
+\def\showop#1#2#3{\noindent
+  \hbox to 1.625in{\texttt{\string#1}\hfil}\hbox to 1.625in{#2\hfil}\hbox to 3.25in{#3\hfil}%
+  \par}
+\topsep=\smallskipamount
+
+\begin{document}
+
+\def\documentname{User Guide}
+\newdimen\MacroIndent
+\input math-operator-heading.tex
+\def\section#1#2{\@@section*{#1}\vskip-\medskipamount#2\par\bigskip}
+
+
+
+\noindent \LaTeX\ users will no doubt be familiar with the control sequences that produce special functions and operators such as |\sin|, |\cos|, or |\sup|. However, the \LaTeX\ kernel defines only about 30 such commands, and many less common but still widely used special functions remain undefined as a result. The \textsf{math-operator} package addresses this situation by defining control sequences for some hundred and fifty special functions and operators, divided into nine groups, and the package also provides an interface to define even more. The first pages of this user guide describe how to use the package, and the rest of the document lists the control sequences in each group. For documentation of the package code, please see |math-operator_code.pdf|, which is included with the \textsf{math-operator} installation and is available on \textsc{ctan}. I encourage users who are interested in this package to also consult the \textsf{amsopn} and \textsf{moremath} packages as they may be more useful for you.\footnote{\LaTeX3 Project and American Mathematical Society, ``amsopn---Typeset mathematical operator names,'' \href{https://ctan.org/pkg/amsopn}{\texttt{https://ctan.org/pkg/amsopn}}; Marcel Ilg, ``moremath---Additional commands for typesetting maths,'' \href{https://ctan.org/pkg/moremath}{\texttt{https://ctan.org/pkg/moremath}}.} Users who are looking specifically for operators in quantum mechanics should consult the \textsf{linop} and \textsf{phfqit} packages.\footnote{Johannes Weytjens, ``linop---Typeset linear operators as they appear in quantum theory or linear algebra,'' \href{https://ctan.org/pkg/linop}{\texttt{https://ctan.org/pkg/linop}}; Philippe Faist, ``phfqit---Macros for typesetting Quantum Information Theory,'' \href{https://ctan.org/pkg/phfqit}{\texttt{https://ctan.org/pkg/phfqit}}.}
+
+
+
+
+Users can load \textsf{math-operator} with the standard |\usepackage| syntax, and for each operator group, the package defines either all or no control sequences from that group during loading. Each operator group corresponds to two optional package arguments---one argument means define the control sequences of that group, and the other argument means avoid doing so. Table~1 lists the nine operator groups and their corresponding arguments. For every group, the package argument to define control sequences is a shortened version of the group name, and the package argument to avoid doing so is the same keyword prefaced by |no-|. By default, \textsf{math-operator} defines all control sequences that appear later in this document.
+
+
+
+\begin{figure}[tb]
+\centerline{\bfseries\strut Table 1: Optional Arguments for \textsf{math-operator}}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lll}\toprule
+Group & To define commands (default) & To avoid defining commands\\\midrule
+Blackboard bold & |blackboard| & |no-blackboard|\\
+Category theory & |category| & |no-category|\\
+Jacobi elliptic functions & |jacobi| & |no-jacobi|\\
+Linear algebra & |linear| & |no-linear|\\
+The command \vrb\overbar & |overbar| & |no-overbar|\\
+Probability distributions & |probability| & |no-probability|\\
+Special functions & |special| & |no-special|\\
+Standard math operators & |standard| & |no-standard|\\
+Trigonometric functions & |trigonometry| & |no-trigonometry|\\\bottomrule
+\end{tabular*}
+\end{figure}
+
+
+
+\begin{figure}[t]
+\centerline{\bfseries\strut Table 2: Commands to Define New Operators}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lll}\toprule
+& Medium weight & Bold weight\\\midrule
+Treated as \vrb\mathord & |\DeclareMathText| & |\DeclareBoldMathText|\\
+Treated as \vrb\mathop & |\DeclareMathOperator| & |\DeclareBoldMathOperator|\\\bottomrule
+\end{tabular*}
+\end{figure}
+
+
+Users who want to create their own operators or redefine the commands in this package should use one of the four control sequences in Table~2. The entries in Table~2 should appear only in the document preamble, and their syntax is identical and looks like
+\begin{trivlist}
+\item\ttfamily\hskip2em |\DeclareMathOperator|\meta{optional |*|}|{|%
+  \meta{control sequence}|}{|\meta{operator text}|}|
+\end{trivlist}
+When you use one of these macros, \textsf{math-operator} defines the \meta{control sequence} to produce \meta{operator text} in math mode. The optional asterisk controls the placement of superscripts and subscripts. Without an asterisk (the default version of the command), any superscripts and subscripts will render normally, but with an asterisk, they will appear above and below the operator. For example, to make a control sequence |\erf| for the error function, the |sty| file for \textsf{math-operator} contains
+\begin{trivlist}
+\item \ttfamily \hskip 2em |\DeclareMathOperator{\erf}{erf}|
+\end{trivlist}
+The syntax and implementation of these macros is very similar to the \textsf{amsopn} package.
+
+The entries of Table~2 differ in the appearance of the resulting operator. The commands in the first column produce operators with medium text, and the commands in the second column produce operators with bold text. The difference between the rows is more subtle and boils down to the automatic spacing before and after the operator.\footnote{\TeX's eight classes of math subformulas are beyond the scope of this user guide, but in summary, the horizontal position of different characters in an equation depends on their math classes. See Donald Knuth, \textit{The \TeX book} (Addison Wesley, 1986), 170; David Salomon, \textit{The Advanced \TeX book} (Springer, 1995), 256–258.} The macros from the first row instruct \TeX\ to treat the operator like an ordinary variable, so they are most appropriate for sets and categories. The macros from the second row instruct \TeX\ to horizontally position the operator like a summation or integral sign, and they are appropriate for functions and probability distributions. But if you are not fastidious, for most uses of this package other than category theory, you will probably be fine to just use |\DeclareMathOperator|.
+
+The macros in Table~2 will happily redefine any operator commands, but they will not overwrite other control sequences unless you specifically tell them to do so. The count variable |\operatordefmode| controls the package behavior in this regard as follows:
+\begin{itemize}
+\item Negative: redefine the control sequence
+\item 0: silently ignore (message written in the |log| file)
+\item 1: issue a warning and do not redefine
+\item 2 or greater: raise an error
+\end{itemize}
+By default, \textsf{math-operator} sets |\operatordefmode| to 1, so you will see a warning on the terminal or console if you try to convert a control sequence that is already defined into a math operator. However, if you really want to redefine a control sequence to be a math operator, you can say
+\begin{trivlist}
+\item \hskip 2em\ttfamily |\operatordefmode=-1|
+\end{trivlist}
+before calling a command from Table~2.
+
+
+One operator group warrants additional explanation. The package argument |overbar| corresponds to the single control sequence |\overbar|, which adds a horizontal line above a math subformula. The line will be wider than |\bar| but narrower than |\overline|, and the syntax is
+\begin{trivlist}
+\item\hskip2em\ttfamily |\overbar|\meta{optional $*$}|[|\meta{optional decimal}|]{|\meta{math}|}|
+\end{trivlist}
+The \meta{decimal} should be between 0 and 1, and it controls the width of the overline. Specifically, |\overbar| typesets \meta{math}, creates a horizontal line that is \meta{decimal} times the width of the math subformula, and places the line above the typeset subformula. By default, \meta{decimal} is 0.8. With an asterisk, |\overbar| positions the overline halfway over the subformula. For example, the code
+\begin{trivlist}
+\item \hskip 2em\ttfamily |\overbar*[0.9]{xyz}|
+\end{trivlist}
+will put an overline above $xyz$ that is 90\% the length of $xyz$ and position it exactly halfway between the start of the $x$ and the end of the $z$.
+
+
+
+When |\overbar| does not have an asterisk (the default version of the command), the count variable |\overbaroffset| controls the horizontal placement of the line.\footnote{Version 1.0 of this package used \vrb\operatorbaroffset\ instead of \vrb\overbaroffset. To preserve backwards compatibility, \vrb\operatorbaroffset\ still works for this purpose. But please don't use \vrb\operatorbaroffset\ because I may take it out in a few years.} As is standard in \TeX, this variable should take values between 0 and 1000, and \textsf{math-operator} divides |\overbaroffset| by 1000 to form a fraction. It then places the overline that fraction of the way across the top of the subformula. The default value is 800. For example, saying
+\begin{trivlist}
+\item \hskip 2em\ttfamily |\overbaroffset=0|
+\end{trivlist}
+will make all following |\overbar| lines appear completely on the left side of the subformula, and an asterisk is equivalent to setting |\overbaroffset| to 500.
+
+%\begin{figure}[t]
+%\centerline{\bfseries\strut Table 3: Macros for Non-Letter Expressions}
+%\centering
+%\begin{tabular}{lc}\toprule
+%Command & Produces \\\midrule
+%|\operatorhyphen| & - \\
+%|\operatorsquared| & $^2$ \\
+%|\operatorinverse| & $^{-1}$\\\bottomrule
+%\end{tabular}
+%\end{figure}
+
+Some operator names contain characters that are not letters, and \textsf{math-operator} provides three control sequences for non-letter characters: |\operatorhyphen| produces a hyphen, |\operatorsquared| produces a superscript 2, and |\operatorinverse| produces a superscript $-1$. If you use a Unicode font for the operator font, \textsf{math-operator} typesets these symbols in the operator font, and inside the bold commands from Table~2, they will be bold. Additionally, each command has a starred version that forces the characters to be bold no matter where they appear in an equation. If you do not use a Unicode font, the hyphen and the squared symbol will work the same way, but |\operatorinverse| instead typesets the contents of |\defaultinverse|, which is normally $-1$, without using the operator font and without using boldface in the starred version of the command.\footnote{This complication arises because the minus sign lives in different places depending on the encoding. In Unicode, the minus sign is U+2212, but that is not true for other font encodings in \TeX.} If you are in this situation and are unsatisfied with the formatting of your $-1$ expressions, I encourage you to redefine |\defaultinverse| to be more to your liking with |\def| or |\renewcommand|.
+
+A word about superscripts: I implemented the commands from Table~2 in a way that \TeX\ treats operator names as subformulas. This means that any super or subscripts will always appear after or above or below the operator, even if you end the operator name with a super or subscript. For example, if you define an inverse projection map as
+\begin{trivlist}
+\item \hskip 2em |\DeclareMathOperator{\projinv}{proj\operatorinverse}|
+\end{trivlist}
+in your document preamble and then attach a subscript as in
+\begin{trivlist}
+\item\hskip2em |\projinv_x|
+\end{trivlist}
+you will see $\mathop{\operator@font proj^{-1}}_x$ instead of $\mathop{\operator@font proj}^{-1}_x$. If your operator name ends with a super or subscript, I recommend putting everything before the final super or subscript into the appropriate command from Table~2 and then defining a separate macro using |\def| or |\newcommand|. For example, it is better to define an inverse projection map as
+\begin{trivlist}
+\item\hskip2em |\def\projinv{\proj\operatorinv}|
+\end{trivlist}
+rather than using |\DeclareMathOperator|. I took this approach in designing \textsf{math-operator}, so to redefine operators from this package that end in superscripts, you should use |\def| or |\renewcommand| instead of a control sequence from Table~2.
+
+Finally, because it may redefine |\P|, \textsf{math-operator} defines |\pilcrow| to typeset the \P\ symbol in text and math modes.
+
+
+\bigskip
+
+\centerline{***}
+
+\vskip-\bigskipamount
+\vskip-\medskipamount
+\vskip\z@
+
+\section{Blackboard Bold}{Note: to use the blackboard-bold commands listed here, you must load a package that defines \vrb\mathbb\space such as \textsf{amssymb} or \textsf{mathfont}, and if you do not do so before using these control sequences, you'll get an error. I am assuming that \vrb\mathbb\space provides access to blackboard-bold letters.}
+
+
+
+\showop\N{$\mathbb N$}{Natural numbers}
+\showop\Z{$\mathbb Z$}{Integers}
+\showop\Q{$\mathbb Q$}{Rational numbers}
+\showop\R{$\mathbb R$}{Real numbers}
+\showop\C{$\mathbb C$}{Complex numbers}
+\showop\H{$\mathbb H$}{Quaternions (or half-plane)\footnotemark}\footnotetext{In math mode only. Outside of equations, \vrb\H\ will still behave normally. If you want to change the \vrb\H\ operator somehow, you should redefine \vrb\mathH, not \vrb\H.}
+\showop\O{$\mathbb O$}{Octonions\footnotemark}\footnotetext{In math mode only. Outside of equations, \vrb\O\ will still behave normally. If you want to change the \vrb\O\ operator somehow, you should redefine \vrb\mathO, not \vrb\O.}
+\showop\F{$\mathbb F$}{Arbitrary field}
+\showop\P{$\mathbb P$}{Probability}
+\showop\E{$\mathbb E$}{Expectation}
+
+\section{Categories}{In version 1.3, I doubled the number of control sequences in \textsf{math-operator} for category theory, so this list is fairly substantial. That being said, it by no means exhaustive, and serious category theorists who use this package will likely need to define more categories using \vrb\DeclareBoldMathText.}
+
+
+
+\showop{\Ab}{\textbf{Ab}}{Category of abelian groups}
+\showop{\Alg}{\textbf{Alg}}{Category of algebras}
+\showop{\Bialg}{\textbf{Bialg}}{Category of bialgebras}
+\showop{\Cat}{\textbf{Cat}}{Category of small categories}
+\showop{\CGH}{\textbf{CGH}}{Compactly generated Hausdorff spaces}
+\showop{\CGWH}{\textbf{CGWH}}{Compactly generated weak Hausdorff spaces}
+\showop{\Coalg}{\textbf{Coalg}}{Category of coalgebras}
+\showop{\Comod}{\textbf{Comod}}{Category of comodules}
+\showop{\CRing}{\textbf{CRing}}{Category of commutative rings}
+\showop{\Field}{\textbf{Field}}{Category of fields}
+\showop{\FinGrp}{\textbf{FinGrp}}{Category of finite groups}
+\showop{\FinHilb}{\textbf{FinHilb}}{Category of finite-dimensional Hilbert spaces}
+\showop{\FinVect}{\textbf{FinVect}}{Category of finite-dimensional vector spaces}
+\showop{\FinSet}{\textbf{FinSet}}{Category of finite sets}
+\showop{\Frm}{\textbf{Frm}}{Category of frames}
+\showop{\Grp}{\textbf{Grp}}{Category of groups}
+\showop{\Haus}{\textbf{Haus}}{Category of Hausdorff spaces}
+\showop{\HeytAlg}{\textbf{HeytAlg}}{Category of Heyting algebras}
+\showop{\Hilb}{\textbf{Hilb}}{Category of Hilbert spaces}
+\showop{\HopfAlg}{\textbf{HopfAlg}}{Category of Hopf algebras}
+\showop{\Lat}{\textbf{Lat}}{Category of latices}
+\showop{\LieAlg}{\textbf{LieAlg}}{Category of Lie algebras}
+\showop{\LieGrp}{\textbf{LieGrp}}{Category of Lie groups}
+\showop{\Loc}{\textbf{Loc}}{Category of locales}
+\showop{\Man}{\textbf{Man}}{Category of manifolds}
+\showop{\Mat}{\textbf{Mat}}{Category of matrices}
+\showop{\Met}{\textbf{Met}}{Category of metric spaces}
+\showop{\Mod}{\textbf{Mod}}{Category of modules}
+\showop{\Mon}{\textbf{Mon}}{Category of monoids}
+\showop{\Ord}{\textbf{Ord}}{Category of preordered sets}
+\showop{\Pos}{\textbf{Pos}}{Category of posets}
+\showop{\Rel}{\textbf{Rel}}{Category of sets and binary relations}
+\showop{\Ring}{\textbf{Ring}}{Category of rings}
+\showop{\Set}{\textbf{Set}}{Category of sets}
+\showop{\Top}{\textbf{Top}}{Category of topological spaces}
+\showop{\Topos}{\textbf{Topos}}{Category of toposes}
+\showop{\Vect}{\textbf{Vect}}{Category of vector spaces}
+\showop{\cocone}{cocone}{Cocone}
+\showop{\colim}{colim}{Colimit}
+\showop{\cone}{cone}{Cone}
+\showop{\Ho}{Ho}{Homotopy category}
+\showop{\Hom}{Hom}{Collection of morphisms}
+\showop{\Ob}{Ob}{Collection of objects}
+\showop{\op}{$^{\operator@font op}$}{Opposite category}
+\showop{\PSh}{PSh}{Presheaf category}
+\showop{\Sh}{Sh}{Sheaf category}
+
+
+
+
+\section{Jacobi Elliptic Functions}{Pretty straightforward. If you load \textsf{math-operator} with |jacobi|, you won't be able to use \vrb\sc\ to change to a small-caps font. (But you shouldn't use \vrb\sc\ anyway because it's deprecated. Please use \vrb\textsc\ instead.)}
+
+
+\showop{\cd}{cd}{}
+\showop{\cn}{cn}{}
+\showop{\cs}{cs}{}
+\showop{\dc}{dc}{}
+\showop{\dn}{dn}{}
+\showop{\ds}{ds}{}
+\showop{\nc}{nc}{}
+\showop{\nd}{nd}{}
+\showop{\ns}{ns}{}
+\showop{\sc}{sc}{}
+\showop{\sd}{sd}{}
+\showop{\sn}{sn}{}
+
+\section{Linear Algebra}{Some matrix groups and operations.}
+
+
+
+\showop{\adj}{adj}{Adjugate matrix}
+\showop{\Cl}{Cl}{Clifford algebra}
+\showop{\codim}{codim}{Codimension}
+\showop{\coker}{coker}{Cokernel}
+\showop{\GL}{GL}{General linear group}
+\showop{\nullity}{nullity}{Nullity}
+\showop{\Orthogonal}{O}{Orthogonal group}
+\showop{\Pin}{Pin}{Pin group}
+\showop{\proj}{proj}{Projection (onto a vector)}
+\showop{\rank}{rank}{Rank}
+\showop{\SL}{SL}{Special linear group}
+\showop{\SO}{SO}{Special orthogonal group}
+\showop{\SU}{SU}{Special unitary group}
+\showop{\Sp}{Sp}{Symplectic group}
+\showop{\spanop}{span}{Span}
+\showop{\Spin}{Spin}{Spin group}
+\showop{\tr}{tr}{Trace}
+\showop{\T}{$^{\operator@font T}$}{Transpose}
+\showop{\Unitary}{U}{Unitary group}
+
+
+\section{Overlining}{Loading \textsf{math-operator} with the |overbar| option tells the package to define \vrb\overbar. Below are two examples of this macro with \vrb\bar\space and \vrb\overline\space for comparison.}
+
+
+\def\showbars#1#2#3#4{%
+  \noindent
+    \hb@xt@ 0.25\textwidth{#1\hfil}%
+    \hb@xt@ 0.25\textwidth{#2\hfil}%
+    \hb@xt@ 0.25\textwidth{#3\hfil}%
+    \hb@xt@ 0.25\textwidth{#4\hfil}\par}
+
+\showbars{\texttt{\string\bar\ a}}{$\bar a$}
+  {\texttt{\string\bar\ X}}{$\bar X$}
+
+\showbars{\texttt{\string\overbar\ a}}
+  {\setbox\@tempboxa\hbox{%
+    \setbox\@tempboxa\hbox{$a$}%
+    \@tempdima\wd\@tempboxa
+    \@tempdimb\ht\@tempboxa
+    \hb@xt@\z@{\box\@tempboxa\hss}%
+    \hskip 0.16\@tempdima
+    $\overline{\vrule height \@tempdimb width \z@ depth \z@
+      \hskip 0.8\@tempdima}\m@th$}%
+    \box\@tempboxa}
+  {\texttt{\string\overbar\ X}}
+  {\setbox\@tempboxa\hbox{%
+    \setbox\@tempboxa\hbox{$X$}%
+    \@tempdima\wd\@tempboxa
+    \@tempdimb\ht\@tempboxa
+    \rlap{\box\@tempboxa}%
+    \hskip 0.16\@tempdima
+    $\overline{\vrule height \@tempdimb width \z@ depth \z@
+      \hskip 0.8\@tempdima}\m@th$}%
+    \box\@tempboxa}
+
+\showbars{\texttt{\string\overline\ a}}{$\overline a$}
+  {\texttt{\string\overline\ X}}{$\overline X$}
+
+
+\section{Probability Distributions}{A selection of the most common probability distributions. For the normal distribution, if you type \vrb\Normal\ without the asterisk, you will see $\mathcal N$, and if you include the asterisk after \vrb\Normal, then \textsf{math-operator} will write out ``Normal.''}
+
+
+
+\showop{\Bernoulli}{Bernoulli}{}
+\showop{\Betaop}{Beta}{}
+\showop{\Binomial}{Binomial}{}
+\showop{\Boltzmann}{Boltzmann}{}
+\showop{\Burr}{Burr}{}
+\showop{\Categorical}{Categorical}{}
+\showop{\Cauchy}{Cauchy}{}
+\showop{\ChiSq}{$\chi^2$}{Chi-squared}
+\showop{\Dagum}{Dagum}{}
+\showop{\Exponential}{Exponential}{}
+\showop{\Erlang}{Erlang}{}
+\showop{\Gammaop}{Gamma}{}
+\showop{\Gompertz}{Gompertz}{}
+\showop{\InvChiSq}{Inv-$\chi^2$}{Inverse chi-squared}
+\showop{\InvGamma}{Inv-Gamma}{Inverse gamma}
+\showop{\Kolmogorov}{Kolmogorov}{}
+\showop{\LogLogistic}{Log-Logistic}{}
+\showop{\LogNormal}{Log-Normal}{}
+\showop{\Logistic}{Logistic}{}
+\showop{\Lomax}{Lomax}{}
+\showop{\MaxwellBoltzmann}{Maxwell-Boltzmann}{}
+\showop{\Multinomial}{Multinomial}{}
+\showop{\NegBinomial}{Neg-Binomial}{Negative binomial}
+\showop{\Normal\meta{optional $*$}}{$\mathcal N$ or Normal}{}
+\showop{\Pareto}{Pareto}{}
+\showop{\Poisson}{Poisson}{}
+\showop{\Weibull}{Weibull}{}
+\showop{\Zipf}{Zipf}{}
+
+\section{Special Functions}{Common special functions from applied math.}
+
+
+
+\showop{\Ai}{Ai}{Airy function of the first kind}
+\showop{\Bi}{Bi}{Airy function of the second kind}
+\showop{\Ci}{Ci}{Cosine integral function}
+\showop{\ci}{ci}{Cosine integral function (variant)}
+\showop{\Chiop}{Chi}{Hyperbolic cosine integral function}
+\showop{\Ei}{Ei}{Exponential integral function}
+\showop{\erf}{erf}{Error function}
+\showop{\erfinv}{erf$^{-1}$}{Inverse error function}
+\showop{\erfc}{erfc}{Complementary error function}
+\showop{\erfcinv}{erfc$^{-1}$}{Inverse complementary error function}
+\showop{\Li}{Li}{Polylogarithm function}
+\showop{\li}{li}{Logarithmic integral function}
+\showop{\Log}{Log}{Logarithm (principal value)}
+\showop{\sgn}{sgn}{Sign function}
+\showop{\Si}{Si}{Sine integral function}
+\showop{\si}{si}{Sine integral function (variant)}
+\showop{\Shi}{Shi}{Hyperbolic sine integral function}
+
+
+\section{Standard Operators}{Common mathematical operations. More pure mathy than the special functions.}
+
+
+
+\showop{\argmax}{arg$\,$max}{Arguments of the maxima}
+\showop{\argmin}{arg$\,$min}{Arguments of the minima}
+\showop{\Aut}{Aut}{Automorphism group}
+\showop{\c}{$^{\begingroup\operator@font c\endgroup}$}{Complement\footnotemark}\footnotetext{In math mode only. Outside of equations, \vrb\c\ will still behave normally. If you want to change the \vrb\c\ operator somehow, you should redefine \vrb\mathc, not \vrb\c.}
+\showop{\cf}{cf}{Cofinality}
+\showop{\cl}{cl}{Closure}
+\showop{\conv}{conv}{Convex hull}
+\showop{\corr}{corr}{Correlation}
+\showop{\cov}{cov}{Covariance}
+\showop{\curl}{curl}{Curl}
+\showop{\divop}{div}{Divergence}
+\showop{\Ext}{Ext}{Ext (extension) functor}
+\showop{\Gal}{Gal}{Galois group}
+\showop{\grad}{grad}{Gradient}
+\showop{\Hess}{$\mathcal{H}$}{Hessian}
+\showop{\id}{id}{Identity}
+\showop{\Im}{Im}{Imaginary part}
+\showop{\varIm}{$\Im$}{Imaginary part\footnotemark}\footnotetext{In the \LaTeX\ kernel, \texttt{\string\Im} produces $\Im$, but I decided to change that since Im is more standard than $\Im$.}
+\showop{\img}{img}{Image}
+\showop{\Info}{$\mathcal{I}$}{Fisher Information}
+\showop{\interior}{int}{Interior}
+\showop{\lcm}{lcm}{Least common multiple}
+\showop{\Proj}{Proj}{Projective spectrum}
+\showop{\Re}{Re}{Real part}
+\showop{\varRe}{$\Re$}{Real part\footnotemark}\footnotetext{In the \LaTeX\ kernel, \texttt{\string\Re} produces $\Re$, but I decided to change that since Re is more standard than $\Re$.}
+\showop{\Res}{Res}{Residue}
+\showop{\Spec}{Spec}{Spectrum}
+\showop{\st}{st}{Standard part (shadow) of a hyperreal number}
+\showop{\supp}{supp}{Support}
+\showop{\Tor}{Tor}{Tor (torsion) functor}
+\showop{\Var}{Var}{Variance}
+
+
+
+\section{Trigonometry}{All inverse, hyperbolic, and inverse hyperbolic trigonometric functions that are not in the \LaTeX\ kernel.}
+
+
+
+\showop{\csch}{csch}{Hyperbolic cosecant}
+\showop{\sech}{sech}{Hyperbolic secant}
+\showop{\arccsc}{arccsc}{Inverse cosecant}
+\showop{\arcsec}{arcsec}{Inverse secant}
+\showop{\arccot}{arccot}{Inverse cotangent}
+\showop{\arcsinh}{arcsinh}{Inverse hyperbolic sine}
+\showop{\arccosh}{arccosh}{Inverse hyperbolic cosine}
+\showop{\arctanh}{arctanh}{Inverse hyperbolic tangent}
+\showop{\arccsch}{arccsch}{Inverse hyperbolic cosecant}
+\showop{\arcsech}{arcsech}{Inverse hyperbolic secant}
+\showop{\arccoth}{arccoth}{Inverse hyperbolic tangent}
+\showop{\arsinh}{arsinh}{Inverse hyperbolic sine}
+\showop{\arcosh}{arcosh}{Inverse hyperbolic cosine}
+\showop{\artanh}{artanh}{Inverse hyperbolic tangent}
+\showop{\arcsch}{arcsch}{Inverse hyperbolic cosecant}
+\showop{\arsech}{arsech}{Inverse hyperbolic secant}
+\showop{\arcoth}{arcoth}{Inverse hyperbolic cotangent}
+\showop{\sininv}{sin$^{-1}$}{Inverse sine}
+\showop{\cosinv}{cos$^{-1}$}{Inverse cosine}
+\showop{\taninv}{tan$^{-1}$}{Inverse tangent}
+\showop{\cscinv}{csc$^{-1}$}{Inverse cosecant}
+\showop{\secinv}{sec$^{-1}$}{Inverse secant}
+\showop{\cotinv}{cot$^{-1}$}{Inverse cotangent}
+\showop{\sinhinv}{sinh$^{-1}$}{Inverse hyperbolic sine}
+\showop{\coshinv}{cosh$^{-1}$}{Inverse hyperbolic cosine}
+\showop{\tanhinv}{tanh$^{-1}$}{Inverse hyperbolic tangent}
+\showop{\cschinv}{csch$^{-1}$}{Inverse hyperbolic cosecant}
+\showop{\sechinv}{sech$^{-1}$}{Inverse hyperbolic secant}
+\showop{\cothinv}{coth$^{-1}$}{Inverse hyperbolic cotangent}
+
+
+
+
+
+\end{document}
+% 
+%</user>
+%<*heading>
+% 
+
+\csname count@\endcsname\catcode`\@
+\makeatletter
+
+% package date and edition
+\def\packagedate{September 2025}
+\def\packageversion{1.3a}
+
+% header and footer commands
+\let\@@section\section
+\def\section{\relax
+  \vskip0.8in\penalty\z@\kern\z@\vskip-0.8in\vskip\z@
+  \@ifstar\star@sect\no@star@sect}
+\def\star@sect#1{\@@section*{#1}\section@name{#1}}
+\def\no@star@sect#1{\@@section{#1}\section@name{#1}}
+\def\section@name#1{\expandafter
+  \def\csname section@\thesection\endcsname{#1}}
+\def\sectionname{\csname section@\thesection\endcsname}
+
+\def\clap#1{\hb@xt@\z@{\hss#1\hss}}
+\def\@oddhead{\ifnum\count0>1\relax
+  \rlap{}\hfil\clap{\itshape\sectionname}\hfil
+  \llap{\the\count0}\fi}
+\def\@evenhead{\ifnum\count0>1\relax
+  \rlap{\the\count0}\hfil\clap{\itshape\sectionname}\hfil
+  \llap{}\fi}
+\def\@oddfoot{\hfil\ifnum\count0=1\relax1\fi\hfil}
+\let\@evenfoot\@empty
+
+% penalties
+\pretolerance=20
+\hyphenpenalty=10
+\exhyphenpenalty=5
+\brokenpenalty=0
+\clubpenalty=5
+\widowpenalty=5
+\finalhyphendemerits=300
+\doublehyphendemerits=500
+
+\flushbottom
+
+% general macros
+\def\topfraction{1}
+\def\bottomfraction{1}
+\let\code\@undefined
+\newenvironment{code}
+  {\strut\vadjust\bgroup\vskip 5pt plus 1pt minus 3pt\relax
+    \parindent\z@\leftskip2em\relax
+    \noindent\strut\ignorespaces}
+  {\strut\par\vskip 5pt plus 1pt minus 3pt\relax
+    \egroup\hfill\break\strut\ignorespacesafterend}
+\def\vrb#1{\expandafter\texttt\expandafter{\string#1}}
+\def\XeTeX{X\kern-0.1em
+  \raise-0.5ex\hbox{\rotatebox[origin=c]{180}{E}}\kern-0.15em
+  \TeX}
+\def\XeLaTeX{X\kern-0.1em
+  \raise-0.5ex\hbox{\rotatebox[origin=c]{180}{E}}\kern-0.15em
+  \LaTeX}
+\parskip=0pt
+
+
+% title information
+{\large
+  \let\thefootnote\relax
+  \footnotetext{Acknowledgements: Thanks to Andrew Baker for pointing out a bug in a previous version of \textsf{math-operator} and suggesting additional control sequences for the package.}
+  \parindent=0pt\relax
+  \leftskip=0pt plus 1fill\relax
+  \rightskip=0pt plus 1fill\relax
+{\strut\Large Package \textsf{math-operator} v.\ \packageversion\ \documentname\par
+{\strut Conrad Kosowsky}\par
+{\strut\packagedate}\par
+{\strut\ttfamily kosowsky.latex@gmail.com}\par}
+
+\bigskip
+
+{\small
+\leftskip=0.5in\relax
+\rightskip=0.5in\relax
+\hyphenpenalty=500
+
+% abstract
+\centerline{\bfseries Overview\strut}
+\noindent The \textsf{math-operator} package defines control sequences for roughly one hundred and fifty math operators, including special functions, probability distributions, pure mathematical constructions, and a variant of |\overline|. The package also provides an interface for users to define new math operators similar to the \textsf{amsopn} package. New operators can be medium or bold weight, and they may be declared as |\mathord| or |\mathop| subformulas.\par}
+
+\bigskip\bigskip\nointerlineskip
+\centerline{\vrule height 0.5pt width 2.5in}\bigskip\bigskip}
+\nointerlineskip
+
+
+\catcode`\@\count@
+
+
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+%</heading>
+% \fi
+% 
+% 
+% \check@checksum
+% 
+% \endinput

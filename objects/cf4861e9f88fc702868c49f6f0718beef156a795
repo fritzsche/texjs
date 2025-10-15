@@ -1,0 +1,60 @@
+%%%
+% Mots croisés
+%%%
+\def\filedateMotsCroises{2024/08/04}%
+\def\fileversionMotsCroises{0.1}%
+\message{-- \filedateMotsCroises\space v\fileversionMotsCroises}%
+%
+\setKVdefault[ClesCroises]{Lignes=6,Colonnes=8,Solution=false,Croises=false,Couleur=gray,Largeur=1em}
+
+\newcounter{PfCLettreHorizontal}
+
+\newcommand\MotsCroises[2][]{%
+  \useKVdefault[ClesCroises]%
+  \setKV[ClesCroises]{#1}%
+  \setcounter{PfCLettreHorizontal}{0}%
+  \setsepchar[*]{§*,*/}%
+  \readlist*\ListeCasesCroises{#2}%
+  \begin{NiceTabular}{*{\fpeval{\useKV[ClesCroises]{Colonnes}}}{p{\useKV[ClesCroises]{Largeur}}}}[first-row,first-col]%
+    \xintFor* ##1 in {\xintSeq{1}{\fpeval{\useKV[ClesCroises]{Colonnes}}}}\do{%
+      &\ifboolKV[ClesCroises]{Croises}{\stepcounter{PfCLettreHorizontal}\footnotesize\Alph{PfCLettreHorizontal}}{}
+    }\\
+    \xintFor* ##1 in {\xintSeq{1}{\fpeval{\useKV[ClesCroises]{Lignes}}}}\do{%
+      \ifboolKV[ClesCroises]{Croises}{\footnotesize##1}{}\xintFor* ##2 in {\xintSeq{1}{\fpeval{\useKV[ClesCroises]{Colonnes}}}}\do{%
+        &\IfStrEq{\ListeCasesCroises[##1,##2,1]}{!}{%
+        }{%
+          \IfStrEq{\ListeCasesCroises[##1,##2,1]}{*}{%
+            \Block[draw,fill=black]{}{\PfCTBstrut}}{%
+            \IfStrEq{\ListeCasesCroises[##1,##2,1]}{+}{%
+              \Block[draw,fill=\useKV[ClesCroises]{Couleur}]{}{%
+                \PfCTBstrut\ifboolKV[ClesCroises]{Solution}{%
+                  \ListeCasesCroises[##1,##2,2]%
+                }{}%
+              }
+            }{%
+              \Block[draw]{}{\PfCTBstrut\ifboolKV[ClesCroises]{Solution}{%
+                  \ListeCasesCroises[##1,##2,2]}{}%
+              }%
+            }%
+          }%
+        }%
+      }\\
+    }%
+    \CodeAfter
+    \xintFor* ##1 in {\xintSeq{1}{\fpeval{\useKV[ClesCroises]{Lignes}}}}\do{%
+      \xintFor* ##2 in {\xintSeq{1}{\fpeval{\useKV[ClesCroises]{Colonnes}}}}\do{%
+        \IfStrEq{\ListeCasesCroises[##1,##2,1]}{!}{%
+        }{%
+          \IfStrEq{\ListeCasesCroises[##1,##2,1]}{*}{%
+          }{%
+            \IfStrEq{\ListeCasesCroises[##1,##2,1]}{+}{%
+            }{%
+              \xintifboolexpr{\fpeval{\ListeCasesCroises[##1,##2,1]}>0}{\tikz\node[transform canvas={xshift=1mm,yshift=-1mm}] at (\fpeval{##1}-|\fpeval{##2}){\tiny\ListeCasesCroises[##1,##2,1]};}{}%
+            }%
+          }%
+        }%
+      }%
+    }%
+  \end{NiceTabular}%
+  \setsepchar{,}%
+}%

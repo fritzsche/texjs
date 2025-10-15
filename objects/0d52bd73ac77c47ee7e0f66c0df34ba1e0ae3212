@@ -1,0 +1,105 @@
+%%% Copyright (C) 2015-2024 Vincent Goulet
+%%%
+%%% Ce fichier fait partie du projet
+%%% «Rédaction avec LaTeX»
+%%% https://gitlab.com/vigou3/formation-latex-ul
+%%%
+%%% Cette création est mise à disposition sous licence
+%%% Attribution-Partage dans les mêmes conditions 4.0
+%%% International de Creative Commons.
+%%% https://creativecommons.org/licenses/by-sa/4.0/
+
+\section{Tableaux}
+
+\begin{frame}
+  \frametitle{De la conception de beaux tableaux}
+
+  Lequel de ces deux tableaux est le plus facile à consulter?
+  \begin{center}
+  \hfill
+  \begin{tabular}{|>{$}c<{$}|>{$}r<{$}|>{$}r<{$}|}
+    \hline\hline
+    i &
+    \multicolumn{1}{c|}{$v$} &
+    \multicolumn{1}{c|}{$b_i$} \\
+    \hline
+    0 & \nombre{91492} &  60 \\
+    \hline
+    1 &  \nombre{1524} &  60 \\
+    \hline
+    2 &            25  &  24 \\
+    \hline
+    3 &             1  & 365 \\
+    \hline\hline
+  \end{tabular}
+  \hfill
+  \begin{tabular}{>{$}c<{$}>{$}r<{$}>{$}r<{$}}
+    \toprule
+    i &
+    \multicolumn{1}{c}{$v$} &
+    \multicolumn{1}{c}{$b_i$} \\
+    \midrule
+    0 & \nombre{91492} &  60 \\
+    1 &  \nombre{1524} &  60 \\
+    2 &            25  &  24 \\
+    3 &             1  & 365 \\
+    \bottomrule
+  \end{tabular}
+  \hspace*{\fill}
+  \end{center}
+
+  \pause
+  Deux règles d'or:
+  \begin{enumerate}
+  \item \alert{jamais} de filets verticaux
+  \item pas de filets doubles
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]
+  \frametitle{Paquetage essentiel}
+
+  \begin{itemize}
+  \item Vous voulez utiliser le paquetage \pkg{booktabs}
+\begin{lstlisting}
+\usepackage{booktabs}
+\end{lstlisting}
+  \item Fonctionnalités intégrées dans la classe \class{memoir}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]
+  \frametitle{Exemple de tableau}
+
+  \begin{center}
+    \begin{tabular}{lcrr}
+      \toprule
+      Produit & Quantité & Prix unitaire (\$) & Prix (\$) \\
+      \midrule
+      Vis à bois    & 2 & 9,90 & 19,80 \\
+      Clous vrillés & 5 & 4,35 & 21,75 \\
+      \midrule
+      TOTAL         & 7 &      & 41,55 \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+\begin{lstlisting}
+\begin{tabular}{lcrr}
+  \toprule
+  Produit & Quantité & Prix unitaire (\$) & Prix (\$) \\
+  \midrule
+  Vis à bois    & 2 & 9,90 & 19,80 \\
+  Clous vrillés & 5 & 4,35 & 21,75 \\
+  \midrule
+  TOTAL         & 7 &      & 41,55 \\
+  \bottomrule
+\end{tabular}
+\end{lstlisting}
+\end{frame}
+
+%%% Local Variables:
+%%% TeX-master: "formation-latex-ul-diapos"
+%%% TeX-engine: xetex
+%%% coding: utf-8
+%%% End:

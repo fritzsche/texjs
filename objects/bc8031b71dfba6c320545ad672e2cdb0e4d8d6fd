@@ -1,0 +1,366 @@
+% \iffalse meta-comment
+%
+% File: ltx-talk.dtx Copyright (C) 2023-2025 Joseph Wright
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+% This file is part of the "ltx-talk bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% The released version of this bundle is available from CTAN.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/josephwright/ltx-talk
+%
+% for those people who are interested.
+%
+% -----------------------------------------------------------------------
+%
+%<*driver>
+\documentclass{l3doc}
+% Additional commands needed in this source
+\NewDocumentCommand\email{m}{\href{mailto:#1}{\nolinkurl{#1}}}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% ^^A As we are dealing with a class, this has to be done manually
+% \def\filedate{2025-10-10}
+% \def\fileversion{v0.2.3}
+%
+% \title{^^A
+%   \pkg{ltx-talk} -- Overall set up^^A
+%   \thanks{This file describes \fileversion,
+%     last revised \filedate.}^^A
+% }
+%
+% \author{^^A
+%  Joseph Wright^^A
+%  \thanks{^^A
+%    E-mail: \email{joseph@texdev.net}^^A
+%   }^^A
+% }
+%
+% \date{Released \filedate}
+%
+% \maketitle
+%
+% \begin{documentation}
+%
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{ltx-talk} implementation}
+%
+% Start the \pkg{DocStrip} guards.
+%    \begin{macrocode}
+%<*class>
+%    \end{macrocode}
+%
+% Identify the internal prefix.
+%    \begin{macrocode}
+%<@@=talk>
+%    \end{macrocode}
+%
+% \subsection{Set up}
+%
+% Identify the package and give the over all version information.
+%    \begin{macrocode}
+\ProvidesExplClass {ltx-talk} {2025-10-10} {0.2.3}
+  {A class for typesetting presentations}
+%    \end{macrocode}
+%
+% Get the right type of message.
+%    \begin{macrocode}
+\prop_gput:Nnn \g_msg_module_name_prop { talk } { ltx-talk }
+\prop_gput:Nnn \g_msg_module_type_prop { talk } { Class }
+%    \end{macrocode}
+%
+% Require the latest \LaTeX{} structures.
+%    \begin{macrocode}
+\IfFormatAtLeastF{2025-11-01}
+  {
+    \msg_new:nnnn { ltx-talk } { kernel-too-old }
+      { The~ltx-talk~class~requires~LaTeX~2025-11-01~or~later. }
+      {
+        You~have~tried~to~use~the~ltx-talk~class~with~a~LaTeX~kernel~release~
+        prior~to~2025-11-01;~the~required~functionality~is~missing. \\ \\
+        At~present,~you~may~need~to~use~the~development~release~of~LaTeX,~
+        invoked~using~"lualatex-dev"~or~"pdflatex-dev".
+      }
+    \msg_fatal:nn { ltx-talk } { kernel-too-old }
+  }
+\NeedsDocumentMetadata
+%    \end{macrocode}
+%
+% \subsection{Additions for \pkg{expl3}}
+%
+% Like \cs{vcoffin_set:Nnn}, so should be an easy enough addition.
+%    \begin{macrocode}
+\cs_gset_protected:Npn \vbox_set_to_wd:Nnn #1#2#3
+  {
+    \tex_setbox:D #1 \tex_vbox:D
+      {
+        \tex_hsize:D \__box_dim_eval:n {#2}
+        \color_group_begin: #3 \par \color_group_end:
+      }
+    \box_dp:N #1 \__box_dim_eval:n {#2}
+  }
+\cs_gset_protected:Npn \vbox_set_to_wd:Nnw #1#2
+  {
+    \cs_set_protected:Npn \__box_set_to_wd:
+      { \box_wd:N #1 \__box_dim_eval:n {#2} }
+    \tex_setbox:D #1 \tex_vbox:D
+      \c_group_begin_token
+        \tex_hsize:D \__box_dim_eval:n {#2}
+        \group_insert_after:N \__box_set_to_wd:
+        \color_group_begin:
+  }
+%    \end{macrocode}
+%
+% Some things from \pkg{xbox} that would be useful.
+%    \begin{macrocode}
+\cs_gset_protected:Npn \rule:nnn #1#2#3
+  {
+    \tex_vrule:D
+      height \dim_eval:n {#2} \exp_stop_f:
+      depth  \dim_eval:n {#3} \exp_stop_f:
+      width  \dim_eval:n {#1} \exp_stop_f:
+      \scan_stop:
+  }
+%    \end{macrocode}
+%
+% \subsection{Extra variants}
+%
+%    \begin{macrocode}
+\cs_generate_variant:Nn \clist_set:Nn { cv }
+\cs_generate_variant:Nn \hook_gput_code:nnn { nne }
+\exp_args_generate:n { nVv }
+\cs_generate_variant:Nn \color_select:n { V }
+\cs_generate_variant:Nn \dim_compare:nNnTF { v }
+\cs_generate_variant:Nn \dim_compare_p:nNn { vNv }
+\cs_generate_variant:Nn \dim_max:nn { v }
+\cs_generate_variant:Nn \str_replace_all:Nnn { NnV }
+\cs_generate_variant:Nn \text_purify:n { v }
+\cs_generate_variant:Nn \vbox_to_ht:nn { v }
+%    \end{macrocode}
+%
+% \subsection{Scratch space}
+%
+% \begin{macro}{\@@_tmp:w}
+%   For one-off processing.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_tmp:w { }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{variable}{\l_@@_tmp_box}
+%    \begin{macrocode}
+\box_new:N \l_@@_tmp_box
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\l_@@_tmp_tl}
+%    \begin{macrocode}
+\tl_new:N \l_@@_tmp_tl
+%    \end{macrocode}
+% \end{variable}
+%
+% \subsection{Option handling}
+%
+% \begin{variable}
+%   {
+%     \l_@@_aspect_ratio_str ,
+%     \l_@@_fontsize_dim     ,
+%     \l_@@_frame_title_bool ,
+%     \l_@@_mode_str
+%   }
+%    \begin{macrocode}
+\keys_define:nn { talk }
+  {
+    aspect-ratio .str_set:N =
+      \l_@@_aspect_ratio_str ,
+    font-size .dim_set:N =
+      \l_@@_fontsize_dim ,
+    frame-title-arg .bool_set:N =
+      \l_@@_frame_title_bool ,
+    handout .code:n = 
+      { \str_set:Nn \l_@@_mode_str { handout } } ,
+    handout .value_forbidden:n = true ,
+    mode .choices:nn =
+      { handout , projector }
+      { \str_set:NV \l_@@_mode_str \l_keys_choice_tl }
+  }
+%    \end{macrocode}
+% \end{variable}
+%
+% Scope for options.
+%    \begin{macrocode}
+\keys_define:nn { talk }
+  {
+    aspect-ratio    .usage:n = load ,
+    font-size       .usage:n = load ,
+    frame-title-arg .usage:n = load ,
+    mode            .usage:n = load
+  }
+%    \end{macrocode}
+%
+% Initial values.
+%    \begin{macrocode}
+\keys_set:nn { talk }
+  {
+    aspect-ratio    = 16:9      ,
+    font-size       = 11pt      ,
+    frame-title-arg = false     ,
+    mode            = projector
+  }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\ProcessKeyOptions [ talk ]
+%    \end{macrocode}
+%
+% \subsection{Setting up}
+%
+%  Load the font size setup if available, otherwise fall back on scaling.
+%    \begin{macrocode}
+\file_if_exist_input:nF { size \dim_to_decimal:n \l_@@_fontsize_dim .clo }
+  {
+    \file_input:n { size10.clo }
+    \RequirePackage { relsize }
+    \hook_gput_code:nne { begindocument } { talk }
+      { \exp_not:N \relsize { \fp_eval:n { \l_@@_fontsize_dim / 10pt } } }
+  }
+%    \end{macrocode}
+%
+% \begin{variable}
+%   {
+%     \c_@@_paper_height_dim  ,
+%     \c_@@_paper_width_dim
+%   }
+%   As \pkg{geometry} is being used to set the paper size with no previous
+%   value, we have to use the optional argument rather than waiting to
+%   apply \cs{geometry}.
+%    \begin{macrocode}
+\dim_const:Nn \c_@@_paper_height_dim { 100mm }
+\use:e
+  {
+    \cs_set_protected:Npn \exp_not:N \@@_tmp:w
+      #1 \tl_to_str:n { : } #2 \tl_to_str:n { : } #3 \exp_not:N \q_stop
+      {
+        \dim_const:Nn \exp_not:N \c_@@_paper_width_dim
+          {
+            \exp_not:N \fp_to_dim:n
+              { (#1 / #2) * \exp_not:N \c_@@_paper_height_dim }
+          }
+      }
+    \exp_not:N \@@_tmp:w \l_@@_aspect_ratio_str
+      \tl_to_str:n { : } 100 \exp_not:N \q_stop
+  }
+\use:e
+  {
+    \exp_not:N \RequirePackage
+      [
+        papersize =
+          {
+            \dim_use:N \c_@@_paper_width_dim  ,
+            \dim_use:N \c_@@_paper_height_dim
+          } ,
+        tmargin    = 10mm ,
+        bmargin    =  8mm ,
+        lmargin    = 10mm ,
+        rmargin    = 10mm ,
+        headheight = 10mm ,
+        headsep    =  2mm ,
+        footskip   =  6mm
+      ]
+      { geometry }
+  }
+%    \end{macrocode}
+% \end{variable}
+%
+% Turn off justification
+%    \begin{macrocode}
+\raggedright
+%    \end{macrocode}
+%
+% \subsection{Math support}
+%
+% We always require \pkg{amsmath}: this is forced anyway by \pkg{unicode-math}
+% for Lua\TeX{}.
+%    \begin{macrocode}
+\RequirePackage { amsmath }
+%    \end{macrocode}
+%
+% \subsection{Font selection}
+%
+% The aim here is to minimize change from the standard font setup but at the
+% same time provide a sans-serif default. Since \cls{beamer} was released,
+% better sans-serif math mode fonts have become available. For OpenType engines,
+% requiring \pkg{unicode-math} is the most sensible approach. The New Computer
+% Modern font provides a reasonable initial set of glyphs. It comes with a
+% wrapper package, but that does various other things: if the user wants these,
+% they can choose to load themselves. For 8-bit engines, switching the text
+% font to be sans-serif is easy. For math mode, the \pkg{sansmathfonts} package
+% does a good job: here, using the package rather than  adjusting directly is
+% the sensible option.
+%    \begin{macrocode}
+\sys_if_engine_opentype:TF
+  {
+    \RequirePackage { unicode-math }
+    \setsansfont { NewCMSans10-Regular.otf }
+    \setmathfont { NewCMSansMath-Regular.otf }
+  }
+  {
+    \RequirePackage { sansmathfonts }
+    \RequirePackage [ nomath ] { lmodern }
+  }
+\cs_set_eq:NN \rmdefault \sfdefault
+%    \end{macrocode}
+%
+% \subsection{Hyperlinks}
+%
+% \begin{variable}{\thepage}
+%   We define \cs{thepage} here: this is checked for by \pkg{hyperref} so has
+%   to come early.
+%    \begin{macrocode}
+\cs_new:Npn \thepage { \@arabic \c@page }
+%    \end{macrocode}
+% \end{variable}
+%
+% A requirement.
+%    \begin{macrocode}
+\RequirePackage { hyperref }
+\hypersetup { hidelinks }
+%    \end{macrocode}
+%
+% \subsection{Tagging}
+%
+% We need to extend the standard tagging model to work with slides and so on.
+%    \begin{macrocode}
+\tagpdfsetup
+  {
+    role / user-NS = ltx-talk        ,
+    role / new-tag = frame / Sect    ,
+    role / new-tag = frametitle / H4
+  }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%</class>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \PrintIndex

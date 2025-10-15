@@ -1,0 +1,151 @@
+%%%
+% CAN
+%
+\def\filedateLignesB{2025/03/07}%
+\def\fileversionLignesB{0.1}%
+\message{-- \filedateLignesB\space v\fileversionLignesB}%
+%
+\newtoks\toklistechemin
+\def\UpdatetoksBrisees#1\nil{\addtotok\toklistechemin{"#1",}}%
+%
+\setKVdefault[LigneBrisee]{Longueur=2,Angle=60,Solution=false,Multiple=1}%
+%
+\NewDocumentCommand\LigneBrisee{omo}{%
+  \toklistechemin{}%
+  \useKVdefault[LigneBrisee]%
+  \setKV[LigneBrisee]{#1}%
+  \setsepchar{+}\ignoreemptyitems%
+  \readlist*\PfMListeChemin{#2}%
+  \reademptyitems%
+  \foreachitem\compteur\in\PfMListeChemin{%
+    \expandafter\UpdatetoksBrisees\compteur\nil
+  }%
+  \MelangeListe{1,2,3,4,5}{5}%
+  \IfValueT{#3}{%
+    \setKV[LigneBrisee]{Multiple=#3}
+  }%
+  \MPLigneBrisee{\the\toklistechemin}{\faa}%
+}%
+
+\NewDocumentCommand\MPLigneBrisee{mm}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      marque_s:=marque_s/3;
+      Rayon=\useKV[LigneBrisee]{Longueur}*1cm;
+      typetrace:="mainlevee";
+      boolean Distinct,Solution;
+      Solution=\useKV[LigneBrisee]{Solution};
+      Multiple=\useKV[LigneBrisee]{Multiple};
+      pair A[];
+      A0=(0,0);
+      nblignes=0;
+      nblettres=0;
+      nbl:=0;
+      nblav:=0;
+      numeric Code[];
+      string LettreAv[],Lettre[];
+      vardef RecupLettres(text t)=
+        % Nombre de lettres
+        nblav:=0;
+        for p_=t:
+          if (substring(1,2) of p_)="*":
+          for k=1 upto scantokens(substring(0,1) of p_):
+            nblav:=nblav+1;
+            LettreAv[nblav]=substring(2,length p_) of p_;
+          endfor;
+          fi;
+        endfor;
+        if nblav>0:  
+          Lettre1:=LettreAv[1];
+          NbLetTotal[1]:=1;
+          nblettres:=1;
+          for k=2 upto nblav:
+            Distinct:=true;
+            for l=1 upto nblettres:
+              if LettreAv[k]=Lettre[l]:
+                Distinct:=false;
+                NbLetTotal[l]:=NbLetTotal[l]+1;
+              fi;
+            endfor;
+            if Distinct:
+              nblettres:=nblettres+1;
+              Lettre[nblettres]=LettreAv[k];
+              NbLetTotal[nblettres]=1;
+            fi;
+          endfor;
+        fi;
+      enddef;
+      %
+      % Construire les codages
+      vardef TypeCodage(text t)=
+        nbcodage:=0;
+        for p_=t:
+          nbcodage:=nbcodage+1;
+          CodageRetenu[nbcodage]=p_;
+        endfor;
+      enddef;
+      %
+      vardef Construis(text t)=
+      nbl:=0;
+      for p_=t:
+        if (substring(1,2) of p_)<>"*":
+          nblignes:=nblignes+1;
+          if (nblignes mod 2)=1:
+            A[nblignes]=pointarc(cercles(A[nblignes-1],Rayon),60+uniformdeviate(10));
+            label.lrt(TEX(p_),iso(A[nblignes-1],A[nblignes]));
+          else:
+            A[nblignes]=pointarc(cercles(A[nblignes-1],Rayon),290+uniformdeviate(10));
+            label.urt(TEX(p_),iso(A[nblignes-1],A[nblignes]));
+          fi;
+          trace chemin(A[nblignes-1],A[nblignes]);
+        else:
+          yy:=scantokens(substring(0,1) of p_);
+          for k=1 upto yy:
+            nbl:=nbl+1;
+            nblignes:=nblignes+1;
+            for l=1 upto nblettres:
+              if LettreAv[nbl]=Lettre[l]:
+                nbretenu:=l;
+              fi;
+            endfor;
+            if (nblignes mod 2)=1:
+              A[nblignes]=pointarc(cercles(A[nblignes-1],Rayon),60+uniformdeviate(10));
+              if Solution:
+                label.lrt(TEX("$"&Lettre[nbretenu]&"$"),iso(A[nblignes-1],A[nblignes]));
+              fi;
+            else:
+              A[nblignes]=pointarc(cercles(A[nblignes-1],Rayon),290+uniformdeviate(10));
+              if Solution:
+                label.urt(TEX("$"&Lettre[nbretenu]&"$"),iso(A[nblignes-1],A[nblignes]));
+              fi;
+            fi;
+            trace chemin(A[nblignes-1],A[nblignes]);
+            if NbLetTotal[nbretenu]>1:
+              trace Codelongueur(A[nblignes-1],A[nblignes],CodageRetenu[nbretenu]);
+            fi;
+          endfor;
+        fi;
+        endfor;
+        enddef;
+        RecupLettres(#1);
+        TypeCodage(#2);
+        Construis(#1);
+        if Multiple>1:
+        picture RetiensPicture;
+        RetiensPicture:=currentpicture;
+        currentpicture:=nullpicture;
+        path cc,cd;
+        bboxmargin:=3pt;
+        cc=bbox RetiensPicture;
+        fill cc withcolor 0.9white;
+        trace cc;
+        trace RetiensPicture;
+        cd=(unitsquare xscaled 1cm yscaled 5mm) shifted (urcorner cc+u*(0.5,-0.25));
+        label(TEX("$\times"&decimal(Multiple)&"$"),center cd);
+        drawarrow (center cd -- center RetiensPicture) cutbefore cd cutafter cc;
+        trace cd;
+        fi;
+    \end{mplibcode}
+  \fi
+}%

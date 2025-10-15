@@ -1,0 +1,1905 @@
+%%%
+% Aire simple
+%%%
+\def\filedateAireSimple{2025/05/28}%
+\def\fileversionAireSimple{0.1a}%
+\message{-- \filedateAireSimple\space v\fileversionAireSimple}%
+%
+\NewDocumentCommand\BuildAireSimple{mmmm}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      % Unites
+      PasQuad=\useKV[ClesAireSimple]{PasQuad};
+      %
+      path BriqueBase;
+      BriqueBase=unitsquare scaled PasQuad;
+      %
+      boolean Impossible[][];
+      %
+      vardef RetrouvePolygone=
+        for l=0 upto LargQuad:
+          Impossible[0][l]:=false;
+          Impossible[HautQuad+1][l]:=false;
+        endfor;
+        for k=0 upto HautQuad:
+          Impossible[k][0]:=false;
+          Impossible[k][LargQuad+1]:=false;
+        endfor;
+        peri=0;
+        for k=1 upto HautQuad:
+          for l=1 upto LargQuad:
+            if Impossible[k][l]=true:
+              if Impossible[k-1][l]=false:
+                draw subpath(0,1) of (BriqueBase shifted (PasQuad*(l-1,k-1))) withpen pencircle scaled 2;
+                peri:=peri+1;
+              fi;
+              if Impossible[k][l-1]=false:
+                draw subpath(3,4) of (BriqueBase shifted (PasQuad*(l-1,k-1))) withpen pencircle scaled 2;
+                peri:=peri+1;
+              fi;
+              if Impossible[k+1][l]=false:
+                draw subpath(2,3) of (BriqueBase shifted (PasQuad*(l-1,k-1))) withpen pencircle scaled 2;
+                peri:=peri+1;
+              fi;
+              if Impossible[k][l+1]=false:
+                draw subpath(1,2) of (BriqueBase shifted (PasQuad*(l-1,k-1))) withpen pencircle scaled 2;
+                peri:=peri+1;
+              fi;
+            fi;  
+          endfor;
+        endfor;
+      enddef;
+      
+      vardef InitialisationZone=
+        for k=-1 upto HautQuad+1:
+          for l=-1 upto LargQuad+1:
+            Impossible[k][l]=true;
+          endfor;
+        endfor;
+        for k=1 upto HautQuad:
+          for l=1 upto LargQuad:
+            Impossible[k][l]:=false;
+          endfor;
+        endfor;
+      enddef;
+      %
+      vardef RAZZone=
+        pair PileChemin[];
+        indiceChemin:=0;
+      enddef;
+      % 
+      def PushChemin(expr tt)=
+        if indiceChemin<1:
+          PileChemin[1]:=tt;
+          indiceChemin:=1;
+        else:
+          PileChemin[indiceChemin+1]:=tt;
+          indiceChemin:=indiceChemin+1;
+        fi;
+      enddef;
+      %
+      def PopChemin=
+        tentative:=tentative+1;
+        currentpicture:=nullpicture;
+        HautQuad:=HautQuad+1;
+        LargQuad:=LargQuad+1;
+        RAZZone;
+        for k=-1 upto HautQuad+1:
+          for l=-1 upto LargQuad+1:
+            Impossible[k][l]:=true;
+          endfor;
+        endfor;
+        for k=1 upto HautQuad:
+          for l=1 upto LargQuad:
+            Impossible[k][l]:=false;
+          endfor;
+        endfor;
+        % Redemarrage
+        nbcaseschoisies:=1;
+        PushChemin((ChoixLigneD,ChoixColonneD));
+        fill (BriqueBase shifted (PasQuad*(ChoixColonneD-1,ChoixLigneD-1))) withcolor CouleurAire;
+        Impossible[ChoixLigneD][ChoixColonneD]:=true;
+        VoisinDispo(ChoixLigneD,ChoixColonneD);
+      enddef;
+      %
+      %Pile des cases voisines de la case parcourue
+      pair PileVoisin[];
+      numeric indiceVoisin;
+      indiceVoisin=0;
+      % 
+      vardef RAZPileVoisin=
+        indiceVoisin:=0;
+      enddef;
+      %
+      def PushVoisin(expr tt)=
+        if indiceVoisin<1:
+          PileVoisin[1]:=tt;
+          indiceVoisin:=1;
+        else:
+          PileVoisin[indiceVoisin+1]:=tt;
+          indiceVoisin:=indiceVoisin+1;
+        fi;
+      enddef;
+      % 
+      vardef VoisinDispo(expr la,lo)=
+        RAZPileVoisin;
+        numeric nbvoisin;
+        nbvoisin=0;
+        % haut
+        if Impossible[la+1][lo]=false:
+          nbvoisin:=nbvoisin+1;
+          PushVoisin((la+1,lo));
+        fi;
+        % bas
+        if Trou:
+          if Impossible[la-1][lo]=false:
+            nbvoisin:=nbvoisin+1;
+            PushVoisin((la-1,lo));
+          fi;
+        fi;
+        % 
+        if Impossible[la][lo+1]=false:
+          nbvoisin:=nbvoisin+1;
+          PushVoisin((la,lo+1));
+        fi;
+        if Impossible[la][lo-1]=false:
+          nbvoisin:=nbvoisin+1;
+          PushVoisin((la,lo-1));
+        fi;
+      enddef;
+      %
+      color CouleurAire;%
+      CouleurAire=\useKV[ClesAireSimple]{CouleurAire};
+      %
+      boolean Trou,Triangle,AireTriangle,Graines,SIS,SansAire,SansLongueur;
+      SIS=\useKV[ClesAireSimple]{SIS};
+      Graines=\useKV[ClesAireSimple]{Graines};
+      if Graines:
+        randomseed:=\useKV[ClesAireSimple]{Graine};
+      fi;
+      Trou=\useKV[ClesAireSimple]{Trou};
+      SansAire=\useKV[ClesAireSimple]{SansAire};
+      SansLongueur=\useKV[ClesAireSimple]{SansLongueur};
+      Triangle=\useKV[ClesAireSimple]{Triangle};
+      AireTriangle=\useKV[ClesAireSimple]{AireTriangle};
+      HautQuad=\useKV[ClesAireSimple]{HautQuad};
+      LargQuad=\useKV[ClesAireSimple]{LargQuad};
+      Tentatives=\useKV[ClesAireSimple]{Tentatives};
+      pair A,B,C,D,U[];
+      A=(0,0);
+      B-A=PasQuad*(LargQuad,0);
+      C-B=PasQuad*(0,HautQuad);
+      D-C=A-B;
+      % Le nombres total de cases à colorier
+      NbTotalCasesAColorier=((#1*#3*#4)/#2);
+      %
+      InitialisationZone;
+      RAZZone;
+      %
+      ChoixLigneD=1;
+      ChoixColonneD=floor(LargQuad/2);
+      %
+      tentative:=1;
+      PushChemin((ChoixLigneD,ChoixColonneD));
+      nbcaseschoisies=1;
+      fill (BriqueBase shifted (PasQuad*(ChoixColonneD-1,ChoixLigneD-1))) withcolor CouleurAire withtransparency(1,0.35);
+      Impossible[ChoixLigneD][ChoixColonneD]:=true;
+      VoisinDispo(ChoixLigneD,ChoixColonneD);
+      % Le "parcours"
+      forever: exitif (nbcaseschoisies>NbTotalCasesAColorier-1) or (tentative>Tentatives);
+        nb:=ceiling(uniformdeviate(nbvoisin));
+        if nb>0:
+          Impossible[xpart(PileVoisin[nb])][ypart(PileVoisin[nb])]:=true;
+          PushChemin((xpart(PileVoisin[nb]),ypart(PileVoisin[nb])));
+          nbcaseschoisies:=nbcaseschoisies+1;
+          fill (BriqueBase shifted (PasQuad*(ypart(PileVoisin[nb])-1,xpart(PileVoisin[nb])-1))) withcolor CouleurAire withtransparency(1,0.35);
+          VoisinDispo(xpart(PileChemin[indiceChemin]),ypart(PileChemin[indiceChemin]));
+        else:
+          PopChemin;
+        fi;
+      endfor;
+      % Tracage
+      if tentative>Tentatives:
+        currentpicture:=nullpicture;
+        picture MiseEnGarde;
+        MiseEnGarde=image(
+          label(TEX("\begin{minipage}{0.5\linewidth}
+            La construction automatique a échouée. Relancez en augmentant le nombre de tentatives ou en augmentant les dimensions du quadrillage (Hauteur,Largeur)
+          \end{minipage}"),(0,0));
+        );
+        draw (((llcorner MiseEnGarde)--(lrcorner MiseEnGarde)--(urcorner MiseEnGarde)--(ulcorner MiseEnGarde)--cycle) scaled 1.1) withpen pensquare scaled 2;
+        draw MiseEnGarde;
+      else:
+        % Le quadrillage
+        A:=llcorner currentpicture+PasQuad*(-1,-1);
+        B:=lrcorner currentpicture+PasQuad*(1,-1);
+        C:=urcorner currentpicture+PasQuad*(1,1);
+        D:=ulcorner currentpicture+PasQuad*(-1,1);
+        picture Toto;
+        Toto=currentpicture;
+        currentpicture:=nullpicture;
+        k=0;
+        drawoptions(withcolor 0.8white);
+        forever:exitif xpart(A+k*(PasQuad,0))>xpart(B);
+          trace (A--D) shifted(PasQuad*(k,0));
+          k:=k+1;
+        endfor;
+        for l=0 upto #3:
+          trace (A--D) shifted(PasQuad*(k+l,0));
+        endfor;
+        k:=0;
+        forever:exitif ypart(A+k*(0,PasQuad))>ypart(D);
+          trace (A--(B+PasQuad*(#3+1)*(1,0))) shifted(PasQuad*(0,k));
+          k:=k+1;
+        endfor;
+        if Triangle:
+          k:=1;
+          forever:exitif ypart(A+k*(0,PasQuad))>ypart(D);
+            l:=0;
+            forever:exitif xpart(A+l*(PasQuad,0))>xpart(B+PasQuad*(1,0));
+              trace ((point 1 of BriqueBase)--(point 3 of BriqueBase)) shifted (A+(PasQuad*(l,k-1)));
+              l:=l+1;
+            endfor;
+            k:=k+1;
+          endfor;
+        fi;
+        drawoptions();
+        if Trou=false:
+          if SansLongueur=false:
+          trace segment(B+PasQuad*(0,1),B+PasQuad*(1,1));
+          marque_s:=marque_s/3;
+          trace marquesegment(B+PasQuad*(0,1),B+PasQuad*(1,1));
+          if SIS:
+            label.top(TEX("\useKV[ClesAireSimple]{SIl}"),B+PasQuad*(0.5,1));
+          else:
+            label.bot(TEX("1 u.$\ell$."),B+PasQuad*(0.5,1));
+            fi;
+            fi;
+        fi;
+        if SansAire=false:
+          if AireTriangle:
+            fill polygone(B+PasQuad*(0,2),B+PasQuad*(1,2),B+PasQuad*(0,3)) withcolor PfCdblue;
+            trace polygone(B+PasQuad*(0,2),B+PasQuad*(1,2),B+PasQuad*(0,3));
+          else:
+            fill polygone(B+PasQuad*(0,2),B+PasQuad*(#3,2),B+PasQuad*(#3,2+#4),B+PasQuad*(0,2+#4)) withcolor PfCdblue;
+            trace polygone(B+PasQuad*(0,2),B+PasQuad*(#3,2),B+PasQuad*(#3,2+#4),B+PasQuad*(0,2+#4));
+          fi;
+          if SIS:
+            label.top(TEX("\useKV[ClesAireSimple]{SI}"),B+PasQuad*(0.5*#3,2+#4));
+          else:
+             label.top(TEX("1 u.a."),B+PasQuad*(0.5*#3,2+#4));
+         fi;
+       fi;
+        trace Toto;
+        RetrouvePolygone;
+        if Trou=false:
+          write decimal(peri) to "PfCPerimetre.tex";
+          write EOF to "PfCPerimetre.tex";
+        fi;
+      fi;
+    \end{mplibcode}
+  \fi%
+}%
+
+\NewDocumentCommand\BuildAireSimpleRec{mmmm}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      % Unites
+      PasQuad=\useKV[ClesAireSimple]{PasQuad};
+      PasQuadx=\useKV[ClesAireSimple]{PasQuadx};
+      PasQuady=\useKV[ClesAireSimple]{PasQuady};
+      %
+      path BriqueBase;
+      BriqueBase=unitsquare xscaled PasQuadx yscaled PasQuady;
+      %
+      boolean Impossible[][];
+      %
+      vardef RetrouvePolygone=
+        for l=0 upto LargQuad:
+          Impossible[0][l]:=false;
+          Impossible[HautQuad+1][l]:=false;
+        endfor;
+        for k=0 upto HautQuad:
+          Impossible[k][0]:=false;
+          Impossible[k][LargQuad+1]:=false;
+        endfor;
+        periu=0;
+        periv=0;
+        for k=1 upto HautQuad:
+          for l=1 upto LargQuad:
+            if Impossible[k][l]=true:
+              if Impossible[k-1][l]=false:
+                draw subpath(0,1) of (BriqueBase shifted ((PasQuadx*(l-1),PasQuady*(k-1)))) withpen pencircle scaled 2;
+                periu:=periu+1;
+              fi;
+              if Impossible[k][l-1]=false:
+                draw subpath(3,4) of (BriqueBase shifted ((PasQuadx*(l-1),PasQuady*(k-1)))) withpen pencircle scaled 2;
+                periv:=periv+1;
+              fi;
+              if Impossible[k+1][l]=false:
+                draw subpath(2,3) of (BriqueBase shifted ((PasQuadx*(l-1),PasQuady*(k-1)))) withpen pencircle scaled 2;
+                periu:=periu+1;
+              fi;
+              if Impossible[k][l+1]=false:
+                draw subpath(1,2) of (BriqueBase shifted ((PasQuadx*(l-1),PasQuady*(k-1)))) withpen pencircle scaled 2;
+                periv:=periv+1;
+              fi;
+            fi;  
+          endfor;
+        endfor;
+      enddef;
+      
+      vardef InitialisationZone=
+        for k=-1 upto HautQuad+1:
+          for l=-1 upto LargQuad+1:
+            Impossible[k][l]=true;
+          endfor;
+        endfor;
+        for k=1 upto HautQuad:
+          for l=1 upto LargQuad:
+            Impossible[k][l]:=false;
+          endfor;
+        endfor;
+      enddef;
+      %
+      vardef RAZZone=
+        pair PileChemin[];
+        indiceChemin:=0;
+      enddef;
+      % 
+      def PushChemin(expr tt)=
+        if indiceChemin<1:
+          PileChemin[1]:=tt;
+          indiceChemin:=1;
+        else:
+          PileChemin[indiceChemin+1]:=tt;
+          indiceChemin:=indiceChemin+1;
+        fi;
+      enddef;
+      %
+      def PopChemin=
+        tentative:=tentative+1;
+        currentpicture:=nullpicture;
+        HautQuad:=HautQuad+1;
+        LargQuad:=LargQuad+1;
+        RAZZone;
+        for k=-1 upto HautQuad+1:
+          for l=-1 upto LargQuad+1:
+            Impossible[k][l]:=true;
+          endfor;
+        endfor;
+        for k=1 upto HautQuad:
+          for l=1 upto LargQuad:
+            Impossible[k][l]:=false;
+          endfor;
+        endfor;
+        % Redemarrage
+        nbcaseschoisies:=1;
+        PushChemin((ChoixLigneD,ChoixColonneD));
+        fill ((unitsquare xscaled PasQuadx ysaled PasQuady) shifted ((PasQuadx*(ChoixColonneD-1),PasQuady*(ChoixLigneD-1)))) withcolor CouleurAire withtransparency(1,0.35);
+        Impossible[ChoixLigneD][ChoixColonneD]:=true;
+        VoisinDispo(ChoixLigneD,ChoixColonneD);
+      enddef;
+      %
+      %Pile des cases voisines de la case parcourue
+      pair PileVoisin[];
+      numeric indiceVoisin;
+      indiceVoisin=0;
+      % 
+      vardef RAZPileVoisin=
+        indiceVoisin:=0;
+      enddef;
+      %
+      def PushVoisin(expr tt)=
+        if indiceVoisin<1:
+          PileVoisin[1]:=tt;
+          indiceVoisin:=1;
+        else:
+          PileVoisin[indiceVoisin+1]:=tt;
+          indiceVoisin:=indiceVoisin+1;
+        fi;
+      enddef;
+      % 
+      vardef VoisinDispo(expr la,lo)=
+        RAZPileVoisin;
+        numeric nbvoisin;
+        nbvoisin=0;
+        % haut
+        if Impossible[la+1][lo]=false:
+          nbvoisin:=nbvoisin+1;
+          PushVoisin((la+1,lo));
+        fi;
+        % bas
+        if Trou:
+          if Impossible[la-1][lo]=false:
+            nbvoisin:=nbvoisin+1;
+            PushVoisin((la-1,lo));
+          fi;
+        fi;
+        % 
+        if Impossible[la][lo+1]=false:
+          nbvoisin:=nbvoisin+1;
+          PushVoisin((la,lo+1));
+        fi;
+        if Impossible[la][lo-1]=false:
+          nbvoisin:=nbvoisin+1;
+          PushVoisin((la,lo-1));
+        fi;
+      enddef;
+      %
+      color CouleurAire;%,CouleurUniteAire;
+      CouleurAire=\useKV[ClesAireSimple]{CouleurAire};
+      %
+      boolean Trou,Triangle,AireTriangle,Graines,SIS,SansAire,SansLongueur;
+      SIS=\useKV[ClesAireSimple]{SIS};
+      Graines=\useKV[ClesAireSimple]{Graines};
+      SansAire=\useKV[ClesAireSimple]{SansAire};
+      SansLongueur=\useKV[ClesAireSimple]{SansLongueur};
+      if Graines:
+        randomseed:=\useKV[ClesAireSimple]{Graine};
+      fi;
+      Trou=\useKV[ClesAireSimple]{Trou};
+      Triangle=\useKV[ClesAireSimple]{Triangle};
+      AireTriangle=\useKV[ClesAireSimple]{AireTriangle};
+      HautQuad=\useKV[ClesAireSimple]{HautQuad};
+      LargQuad=\useKV[ClesAireSimple]{LargQuad};
+      Tentatives=\useKV[ClesAireSimple]{Tentatives};
+      pair A,B,C,D,U[];
+      A=(0,0);
+      B-A=PasQuadx*(LargQuad,0);
+      C-B=PasQuady*(0,HautQuad);
+      D-C=A-B;
+      % Le nombres total de cases à colorier
+      NbTotalCasesAColorier=((#1*#3*#4)/#2);
+      %NbTotalCasesRestantes=HautQuad*LargQuad;
+      %
+      InitialisationZone;
+      RAZZone;
+      %
+      ChoixLigneD=1;%ceiling(uniformdeviate(HautQuad-1));
+      ChoixColonneD=floor(LargQuad/2);%ceiling(uniformdeviate(LargQuad-#3-1));
+      %
+      tentative:=1;
+      PushChemin((ChoixLigneD,ChoixColonneD));
+      nbcaseschoisies=1;
+      fill (BriqueBase shifted ((PasQuadx*(ChoixColonneD-1),PasQuady*(ChoixLigneD-1)))) withcolor CouleurAire withtransparency(1,0.35);
+      Impossible[ChoixLigneD][ChoixColonneD]:=true;
+      VoisinDispo(ChoixLigneD,ChoixColonneD);
+      % Le "parcours"
+      forever: exitif (nbcaseschoisies>NbTotalCasesAColorier-1) or (tentative>Tentatives);
+        nb:=ceiling(uniformdeviate(nbvoisin));
+        if nb>0:
+          Impossible[xpart(PileVoisin[nb])][ypart(PileVoisin[nb])]:=true;
+          PushChemin((xpart(PileVoisin[nb]),ypart(PileVoisin[nb])));
+          nbcaseschoisies:=nbcaseschoisies+1;
+          fill (BriqueBase shifted ((PasQuadx*(ypart(PileVoisin[nb])-1),PasQuady*(xpart(PileVoisin[nb])-1)))) withcolor CouleurAire withtransparency(1,0.35);
+          VoisinDispo(xpart(PileChemin[indiceChemin]),ypart(PileChemin[indiceChemin]));
+        else:
+          PopChemin;
+        fi;
+      endfor;
+      % Tracage
+      if tentative>Tentatives:
+        currentpicture:=nullpicture;
+        picture MiseEnGarde;
+        MiseEnGarde=image(
+          label(TEX("\begin{minipage}{0.5\linewidth}
+            La construction automatique a échouée. Relancez en augmentant le nombre de tentatives ou en augmentant les dimensions du quadrillage (Hauteur,Largeur)
+          \end{minipage}"),(0,0));
+        );
+        draw (((llcorner MiseEnGarde)--(lrcorner MiseEnGarde)--(urcorner MiseEnGarde)--(ulcorner MiseEnGarde)--cycle) scaled 1.1) withpen pensquare scaled 2;
+        draw MiseEnGarde;
+      else:
+        % Le quadrillage
+        A:=llcorner currentpicture+(-PasQuadx,-PasQuady);
+        B:=lrcorner currentpicture+(PasQuadx,-PasQuady);
+        C:=urcorner currentpicture+(PasQuadx,PasQuady);
+        D:=ulcorner currentpicture+(-PasQuadx,PasQuady);
+        k=0;
+        drawoptions(withcolor 0.8white);
+        forever:exitif xpart(A+k*(PasQuadx,0))>xpart(B);
+          trace (A--D) shifted(PasQuadx*(k,0));
+          k:=k+1;
+        endfor;
+        for l=0 upto #3:
+          trace (A--D) shifted(PasQuadx*(k+l,0));
+        endfor;
+        k:=0;
+        forever:exitif ypart(A+k*(0,PasQuady))>ypart(D);
+          trace (A--(B+PasQuadx*(#3+1)*(1,0))) shifted(PasQuady*(0,k));
+          k:=k+1;
+        endfor;
+        if Triangle:
+          k:=1;
+          forever:exitif ypart(A+k*(0,PasQuady))>ypart(D);
+            l:=0;
+            forever:exitif xpart(A+l*(PasQuadx,0))>xpart(B+PasQuadx*(1,0));
+              trace ((point 1 of BriqueBase)--(point 3 of BriqueBase)) shifted (A+((PasQuadx*l,PasQuady*(k-1))));
+              l:=l+1;
+            endfor;
+            k:=k+1;
+          endfor;
+        fi;
+        drawoptions();
+        if Trou=false:
+         if SansLongueur=false:
+          trace segment(B+PasQuady*(0,1),B+(PasQuadx,PasQuady));
+          trace segment(B+(PasQuadx,2*PasQuady),B+(PasQuadx,PasQuady));
+          marque_s:=marque_s/3;
+          trace marquesegment(B+PasQuady*(0,1),B+(PasQuadx,PasQuady));
+          trace marquesegment(B+(PasQuadx,2*PasQuady),B+(PasQuadx,PasQuady));
+          if SIS:
+            label.top(TEX("\useKV[ClesAireSimple]{SIl}"),B+(0.5*PasQuadx,PasQuady));
+          else:
+           label.bot(TEX("1 u.$\ell$."),B+(PasQuadx*0.5,PasQuady));
+           label.rt(TEX("1 u.$v$."),B+(PasQuadx,PasQuady*1.5));
+           fi;
+         fi;
+        fi;
+        if SansAire=false:  
+        if AireTriangle:
+          fill polygone(B+PasQuady*(0,3),B+(PasQuadx,3*PasQuady),B+PasQuady*(0,4)) withcolor PfCdblue;
+          trace polygone(B+PasQuady*(0,3),B+(PasQuadx,3*PasQuady),B+PasQuady*(0,4));
+        else:
+          fill polygone(B+PasQuady*(0,3),B+(PasQuadx*#3,PasQuady*3),B+(PasQuadx*#3,PasQuady*(3+#4)),B+PasQuady*(0,3+#4)) withcolor PfCdblue;
+          trace polygone(B+PasQuady*(0,3),B+(PasQuadx*#3,PasQuady*3),B+(PasQuadx*#3,PasQuady*(3+#4)),B+PasQuady*(0,3+#4));
+        fi;
+        if SIS:
+          label.top(TEX("\useKV[ClesAireSimple]{SI}"),B+(PasQuadx*0.5*#3,PasQuady*(3+#4)));
+        else:
+          label.top(TEX("1 u.a."),B+(PasQuadx*0.5*#3,PasQuady*(3+#4)));
+        fi;
+        fi;  
+        RetrouvePolygone;
+        if Trou=false:
+          write decimal(periu) to "PfCPerimetre.tex";
+          write decimal(periv) to "PfCPerimetre.tex";
+          write EOF to "PfCPerimetre.tex";
+        fi;
+      fi;
+    \end{mplibcode}
+  \fi%
+}%
+
+\NewDocumentCommand\BuildAireSimpleTri{mmmm}{%
+    \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      vardef RetrouvePolygone=
+      periu=0;
+      periv=0;
+      for k=1 upto HautQuad:
+        for l=1 upto 2*LargQuad:
+          if Impossible[k][l]=true:
+            if (l mod 2)=0:
+              if k=1:
+                periu:=periu+1;
+                trace subpath(0,1) of (Case2 shifted(5mm*(l div 2,k))) withpen pencircle scaled 2;
+              fi;
+              % même ligne, colonne avant
+              if Impossible[k][l-1]=false:
+                periv:=periv+1;
+                trace subpath(2,3) of (Case2 shifted(5mm*(l div 2,k))) withpen pencircle scaled 2;
+              fi;
+              % même ligne, colonne après
+              if Impossible[k][l+1]=false:
+                periu:=periu+1;
+                trace subpath(1,2) of (Case2 shifted(5mm*(l div 2,k))) withpen pencircle scaled 2;
+              fi;
+              % ligne précédente, colonne précédente
+              if Impossible[k-1][l-1]=false:
+                periu:=periu+1;
+                trace subpath(0,1) of (Case2 shifted(5mm*(l div 2,k))) withpen pencircle scaled 2;      
+              fi;
+            else:
+              if l=1:
+                periu:=periu+1;
+                trace subpath(2,3) of (Case1 shifted(5mm*((l+1) div 2,k))) withpen pencircle scaled 2;
+              fi;
+              if k=HautQuad:
+                periu:=periu+1;
+                trace subpath(1,2) of (Case1 shifted(5mm*((l+1) div 2,k))) withpen pencircle scaled 2;
+              fi;
+              if Impossible[k][l-1]=false:
+                periu:=periu+1;
+                trace subpath(2,3) of (Case1 shifted(5mm*((l+1) div 2,k))) withpen pencircle scaled 2;
+              fi;
+              % même ligne, colonne après
+              if Impossible[k][l+1]=false:
+                periv:=periv+1;
+                trace subpath(0,1) of (Case1 shifted(5mm*((l+1) div 2,k))) withpen pencircle scaled 2;
+              fi;
+              % ligne suivante, colonne suivante
+              if Impossible[k+1][l+1]=false:
+                periu:=periu+1;
+                 trace subpath(1,2) of (Case1 shifted(5mm*((l+1) div 2,k))) withpen pencircle scaled 2;
+               fi;
+            fi;
+          fi;
+        endfor;
+      endfor;
+      enddef;
+      %
+      pair Centre[];
+      path Case[];
+      Case2=polygone(point 0 of (unitsquare scaled 5mm),point 1 of (unitsquare scaled 5mm),point 2 of (unitsquare scaled 5mm));
+      Centre2=iso(point 0 of (unitsquare scaled 5mm),point 1 of (unitsquare scaled 5mm),point 2 of (unitsquare scaled 5mm));
+      Case1=polygone(point 0 of (unitsquare scaled 5mm),point 2 of (unitsquare scaled 5mm),point 3 of (unitsquare scaled 5mm));
+      Centre1=iso(point 0 of (unitsquare scaled 5mm),point 2 of (unitsquare scaled 5mm),point 3 of (unitsquare scaled 5mm));
+      boolean Impossible[][];
+      pair M[][];
+      %
+      vardef InitialisationZone=
+      for k=0 upto HautQuad+1:
+        for l=0 upto LargQuad+1:
+          Impossible[k][2*l-1]=true;
+          Impossible[k][2*l]=true;
+        endfor;
+        endfor;
+      for k=1 upto HautQuad:
+      for l=1 upto LargQuad:
+          Impossible[k][2*l-1]:=false;
+          Impossible[k][2*l]:=false;
+      endfor;
+      endfor;
+      drawoptions();
+      enddef;
+      %
+      vardef RAZZone=
+      pair PileChemin[];
+      indiceChemin:=0;
+      enddef;
+      % 
+      def PushChemin(expr tt)=
+      if indiceChemin<1:
+      PileChemin[1]:=tt;
+      indiceChemin:=1;
+      else:
+      PileChemin[indiceChemin+1]:=tt;
+      indiceChemin:=indiceChemin+1;
+      fi;
+      enddef;
+      %
+      def PopChemin=
+        tentative:=tentative+1;
+        currentpicture:=nullpicture;
+        RAZZone;
+        HautQuad:=HautQuad+1;
+        LargQuad:=LargQuad+1;
+        for k=0 upto HautQuad+1:
+          for l=0 upto LargQuad+1:
+            Impossible[k][2*l]:=true;
+            Impossible[k][2*l-1]:=true;
+          endfor;
+        endfor;
+        for k=1 upto HautQuad:
+          for l=1 upto LargQuad:
+            Impossible[k][2*l]:=false;
+            Impossible[k][2*l-1]:=false;
+          endfor;
+        endfor;
+        % Redemarrage
+        ChoixLigneD:=floor(HautQuad/2);
+        ChoixColonneDe:=floor(LargQuad/2);
+        PushChemin((ChoixLigneD,ChoixColonneDe));
+        nbcaseschoisies:=1;
+        fill if (ChoixColonneDe mod 2)=0:
+          Case2 shifted (5mm*((ChoixColonneDe div 2),ChoixLigneD))
+         else:
+           Case1 shifted (5mm*((ChoixColonneDe div 2)+1,ChoixLigneD))
+         fi withcolor CouleurAire;
+         Impossible[ChoixLigneD][ChoixColonneDe]:=true;
+         VoisinDispo(ChoixLigneD,ChoixColonneDe);
+      enddef;
+      %
+      %Pile des cases voisines de la case parcourue
+      pair PileVoisin[];
+      numeric indiceVoisin;
+      indiceVoisin=0;
+      % 
+      vardef RAZPileVoisin=
+        indiceVoisin:=0;
+      enddef;
+      %
+      def PushVoisin(expr tt)=
+        if indiceVoisin<1:
+          PileVoisin[1]:=tt;
+          indiceVoisin:=1;
+        else:
+          PileVoisin[indiceVoisin+1]:=tt;
+          indiceVoisin:=indiceVoisin+1;
+        fi;
+      enddef;
+      %
+      vardef VoisinDispo(expr la,lo)=
+      RAZPileVoisin;
+      numeric nbvoisin;
+      nbvoisin=0;
+      pair Svoisin[];
+      if (lo mod 2)=0:
+      % même ligne, colonne avant
+      if Impossible[la][lo-1]=false:
+          nbvoisin:=nbvoisin+1;
+          PushVoisin((la,lo-1));
+          Svoisin[nbvoisin]=Centre1 shifted(5mm*(lo div 2,la));
+        fi;
+        % même ligne, colonne après
+        if Impossible[la][lo+1]=false:
+          nbvoisin:=nbvoisin+1;
+          PushVoisin((la,lo+1));
+          Svoisin[nbvoisin]=Centre1 shifted(5mm*((lo div 2)+1,la));
+        fi;
+        % ligne précédente, colonne précédente
+        if Impossible[la-1][lo-1]=false:
+          nbvoisin:=nbvoisin+1;
+          PushVoisin((la-1,lo-1));
+          Svoisin[nbvoisin]=Centre1 shifted(5mm*(lo div 2,la-1));
+        fi;
+      else:
+        % même ligne, colonne avant
+        if Impossible[la][lo-1]=false:
+          nbvoisin:=nbvoisin+1;
+          PushVoisin((la,lo-1));
+          Svoisin[nbvoisin]=Centre2 shifted(5mm*(((lo-2) div 2)+1,la));
+        fi;
+        % même ligne, colonne après
+        if Impossible[la][lo+1]=false:
+          nbvoisin:=nbvoisin+1;
+          PushVoisin((la,lo+1));
+          Svoisin[nbvoisin]=Centre2 shifted(5mm*((lo div 2)+1,la));
+        fi;
+        % ligne suivante, colonne suivante
+        if Impossible[la+1][lo+1]=false:
+          nbvoisin:=nbvoisin+1;
+          PushVoisin((la+1,lo+1));
+          Svoisin[nbvoisin]=Centre2 shifted(5mm*((lo div 2)+1,la+1));
+        fi;
+      fi;
+      enddef;
+      %
+      color CouleurAire;
+      CouleurAire=\useKV[ClesAireSimple]{CouleurAire};
+      %
+      boolean Trou,Triangle,AireTriangle,Graines,AireCarre,SIS,SansAire,SansLongueur;
+      SIS=\useKV[ClesAireSimple]{SIS};
+      Graines=\useKV[ClesAireSimple]{Graines};
+      SansAire=\useKV[ClesAireSimple]{SansAire};
+      SansLongueur=\useKV[ClesAireSimple]{SansLongueur};
+      if Graines:
+      randomseed:=\useKV[ClesAireSimple]{Graine};
+      fi;
+      AireCarre=\useKV[ClesAireSimple]{AireCarre};
+      Trou=\useKV[ClesAireSimple]{Trou};
+      Triangle=\useKV[ClesAireSimple]{Triangle};
+      AireTriangle=\useKV[ClesAireSimple]{AireTriangle};
+      PasQuad=\useKV[ClesAireSimple]{PasQuad};
+      HautQuad=\useKV[ClesAireSimple]{HautQuad};
+      LargQuad=\useKV[ClesAireSimple]{LargQuad};
+      Tentatives=\useKV[ClesAireSimple]{Tentatives};
+      pair A,B,C,D,U[];
+      A=(0,0);
+      B-A=PasQuad*(LargQuad,0);
+      C-B=PasQuad*(0,HautQuad);
+      D-C=A-B;
+      % Le nombres total de cases à colorier
+      NbTotalCasesAColorier=((#1*#3*#4)/#2);
+      %
+      InitialisationZone;
+      RAZZone;
+      %
+      ChoixLigneD=floor(HautQuad/2);%
+      ChoixColonneDe=floor(LargQuad/2);%
+      %
+      tentative:=1;
+      PushChemin((ChoixLigneD,ChoixColonneDe));
+      nbcaseschoisies=1;
+      fill if (ChoixColonneDe mod 2)=0:
+      Case2 shifted (5mm*((ChoixColonneDe div 2),ChoixLigneD))
+      else:
+      Case1 shifted (5mm*((ChoixColonneDe div 2)+1,ChoixLigneD))
+      fi withcolor CouleurAire;
+      Impossible[ChoixLigneD][ChoixColonneDe]:=true;
+      VoisinDispo(ChoixLigneD,ChoixColonneDe);
+      % Le "parcours"
+      forever: exitif (nbcaseschoisies>NbTotalCasesAColorier-1) or (tentative>Tentatives);
+      nb:=ceiling(uniformdeviate(nbvoisin));
+      if nb>0:
+      Impossible[xpart(PileVoisin[nb])][ypart(PileVoisin[nb])]:=true;
+      drawoptions(withcolor green);
+      drawoptions();
+      PushChemin((xpart(PileVoisin[nb]),ypart(PileVoisin[nb])));
+      nbcaseschoisies:=nbcaseschoisies+1;
+      fill (if ((nbcaseschoisies+ChoixColonneDe) mod 2)=0:
+      Case1 shifted (Svoisin[nb]-Centre1)
+      else:
+      Case2 shifted (Svoisin[nb]-Centre2)
+      fi
+      ) withcolor CouleurAire;
+      VoisinDispo(xpart(PileChemin[indiceChemin]),ypart(PileChemin[indiceChemin]));
+      else:
+      PopChemin;
+      fi;
+      endfor;
+      % Tracage
+      if tentative>Tentatives:
+        picture MiseEnGarde;
+        MiseEnGarde=image(
+          label(TEX("\begin{minipage}{0.5\linewidth}
+            La construction automatique a échouée. Relancez en augmentant le nombre de tentatives ou en augmentant les dimensions du quadrillage (Hauteur,Largeur)
+          \end{minipage}"),(0,0));
+          );
+        draw (((llcorner MiseEnGarde)--(lrcorner MiseEnGarde)--(urcorner MiseEnGarde)--(ulcorner MiseEnGarde)--cycle) scaled 1.1) withpen pensquare scaled 2;
+        draw MiseEnGarde;
+      else:
+        % Le quadrillage
+        A:=llcorner currentpicture+5mm*(-1,-1);
+        B:=lrcorner currentpicture+5mm*(1,-1);
+        C:=urcorner currentpicture+5mm*(1,1);
+        D:=ulcorner currentpicture+5mm*(-1,1);
+        %k=0;
+        drawoptions(withcolor 0.8white);
+        k:=1;
+        ecartquadri=if SIS=false: 10mm else:5mm fi;
+        forever:exitif ypart(A+k*(0,5mm))>ypart(D);
+          l:=0;
+          forever:exitif xpart(A+l*(5mm,0))>xpart(B+ecartquadri*(1,0));
+            trace Case1 shifted (A+(5mm*(l,k-1)));
+            trace Case2 shifted (A+(5mm*(l,k-1)));
+            l:=l+1;
+          endfor;
+          k:=k+1;
+        endfor;
+        drawoptions();
+        if SansAire=false:
+        if AireCarre:
+          fill polygone(B+5mm*(0,2),B+5mm*(#3,2),B+5mm*(#3,2+#4),B+5mm*(0,2+#4)) withcolor PfCdblue;
+          trace polygone(B+5mm*(0,2),B+5mm*(#3,2),B+5mm*(#3,2+#4),B+5mm*(0,2+#4));
+        else:
+          fill polygone(B+5mm*(0,2),B+5mm*(1,2),B+5mm*(1,3)) withcolor PfCdblue;
+          trace polygone(B+5mm*(0,2),B+5mm*(1,2),B+5mm*(1,3));
+          fi;
+        fi;
+        if SIS:
+          if SansAire=false:
+          label.top(TEX("\useKV[ClesAireSimple]{SI}"),B+5mm*(0.5*#3,2+#4));
+          fi;
+        else:
+          if SansAire=false:
+          label.top(TEX("1 u.a."),B+5mm*(0.5*#3,2+#4));
+          fi;
+          if SansLongueur=false:
+          trace segment(B+5mm*(0,1),B+5mm*(1,1));
+          trace segment(B+5mm*(2,1),B+5mm*(3,2));
+          marque_s:=marque_s/3;
+          trace marquesegment(B+5mm*(0,1),B+5mm*(1,1));
+          trace marquesegment(B+5mm*(2,1),B+5mm*(3,2));
+          label.bot(TEX("1 u."),B+5mm*(0.5,1));
+          label.ulft(TEX("1 v."),B+5mm*(2.5,1.5));
+          fi;
+        fi;
+        RetrouvePolygone;
+        write decimal(periu) to "PfCPerimetre.tex";
+        write decimal(periv) to "PfCPerimetre.tex";
+        write EOF to "PfCPerimetre.tex";
+      fi;
+    \end{mplibcode}
+  \fi
+}%
+
+%%%%%%%%%%%%%%%%%%%%%% Avec des triangles isocèles.
+\NewDocumentCommand\BuildAireSimpleTriIso{mmmm}{%
+    \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      vardef RetrouvePolygone=
+      periu=0;
+      periv=0;
+      for l=1 upto 2*LargQuad:
+      Impossible[0][l]:=false;
+      Impossible[HautQuad+1][l]:=false;
+      endfor;
+      for k=0 upto HautQuad:
+      Impossible[k][0]:=false;
+      endfor;
+      for k=1 upto HautQuad:
+        for l=1 upto 2*LargQuad:
+          if Impossible[k][l]=true:
+            if k mod 2=0:
+              if l mod 2=0:%case2 les pairs, case 1 les impairs
+               if Impossible[k-1][l]=false:
+                 % label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),5mm*(l div 2+0.5,k));
+                 periu:=periu+1;
+                 trace (subpath(0,1) of Case2) shifted(5mm*(l div 2,k)) withpen pencircle scaled 2;
+               fi;
+               %if Impossible[k+1][l]=false:
+                 %label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),5mm*(l div 2+0.5,k));
+                 %trace (subpath(0,1) of Case2) shifted(5mm*(l div 2,k));
+                 % rien à tracer car on est sur la pointe de Case2
+               %fi;
+               if Impossible[k][l-1]=false:
+                 % label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),5mm*(l div 2+0.5,k));
+                 periv:=periv+1;
+                 trace (subpath(2,3) of Case2) shifted(5mm*(l div 2,k)) withpen pencircle scaled 2;
+               fi;
+               if Impossible[k][l+1]=false:
+                 % label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),5mm*(l div 2+0.5,k));
+                 periv:=periv+1;
+                 trace (subpath(1,2) of Case2) shifted(5mm*(l div 2,k)) withpen pencircle scaled 2;
+               fi;
+              else:
+                if Impossible[k-1][l]=false:
+                 % label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),5mm*(l div 2+0.5,k));
+                 % trace (subpath(0,1) of Case1) shifted(5mm*(l div 2,k));
+                % rien à tracer car on est sur la pointe de Case1
+               fi;
+               if Impossible[k+1][l]=false:
+                 %label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),5mm*(l div 2+0.5,k));
+                 periu:=periu+1;
+                 trace (subpath(2,3) of Case1) shifted(5mm*(l div 2+0.5,k)) withpen pencircle scaled 2;
+                 % rien à tracer car on est sur la pointe de Case2
+               fi;
+               if Impossible[k][l-1]=false:
+                 periv:=periv+1;
+                 %label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),5mm*(l div 2+0.5,k));
+                 trace (subpath(0,1) of Case1) shifted(5mm*(l div 2+0.5,k)) withpen pencircle scaled 2;
+               fi;
+               if Impossible[k][l+1]=false:
+                 periv:=periv+1;
+                 %label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),5mm*(l div 2+0.5,k));
+                 trace (subpath(1,2) of Case1) shifted(5mm*(l div 2+0.5,k)) withpen pencircle scaled 2;
+               fi;
+              fi;
+            else:
+              if l mod 2=0:%case1 les pairs, case 2 les impairs
+                if Impossible[k-1][l]=false:
+                  % label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),5mm*(l div 2+0.5,k));
+                  % trace (subpath(0,1) of Case1) shifted(5mm*(l div 2,k));
+                  % ne rien tracer car on est sur la pointe du Case1
+                fi;
+                if Impossible[k+1][l]=false:
+                  % label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),5mm*(l div 2+0.5,k));
+                  periu:=periu+1;
+                  trace (subpath(2,3) of Case1) shifted(5mm*(l div 2,k)) withpen pencircle scaled 2;
+                fi;
+                if Impossible[k][l-1]=false:
+                  % label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),5mm*(l div 2+0.5,k));
+                  periv:=periv+1;
+                  trace (subpath(0,1) of Case1) shifted(5mm*(l div 2,k)) withpen pencircle scaled 2;
+                fi;
+                if Impossible[k][l+1]=false:
+                  periv:=periv+1;
+                  % label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),5mm*(l div 2+0.5,k));
+                  trace (subpath(1,2) of Case1) shifted(5mm*(l div 2,k)) withpen pencircle scaled 2;
+                fi;
+              else:
+                if Impossible[k-1][l]=false:
+                  % label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),5mm*(l div 2+1,k));
+                  periu:=periu+1;
+                   trace (subpath(0,1) of Case2) shifted(5mm*(l div 2+0.5,k)) withpen pencircle scaled 2;
+                fi;
+                if Impossible[k+1][l]=false:
+                %label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),5mm*(l div 2+0.5,k));
+                %trace (subpath(2,3) of Case2) shifted(5mm*(l div 2+0.5,k)) withpen pencircle scaled 2 withcolor white;
+                % ne rien tracer car on est sur la pointe du Case2
+               fi;
+               if Impossible[k][l-1]=false:
+                 % label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),5mm*(l div 2+1,k));
+                 periv:=periv+1;
+                 trace (subpath(2,3) of Case2) shifted(5mm*(l div 2+0.5,k)) withpen pencircle scaled 2;
+               fi;
+               if Impossible[k][l+1]=false:
+                 periv:=periv+1;
+                 %label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),5mm*(l div 2+1,k));
+                 trace (subpath(1,2) of Case2) shifted(5mm*(l div 2+0.5,k)) withpen pencircle scaled 2;
+               fi;
+              fi;
+          % 
+            fi;
+          fi;
+        endfor;
+      endfor;
+      enddef;
+      %
+      pair Centre[];
+      path Case[];
+      Case2=polygone(point 0 of (unitsquare scaled 5mm),point 1 of (unitsquare scaled 5mm),1/2[point 2 of (unitsquare scaled 5mm),point 3 of (unitsquare scaled 5mm)]);
+      Centre2=iso(point 0 of (unitsquare scaled 5mm),point 1 of (unitsquare scaled 5mm),1/2[point 2 of (unitsquare scaled 5mm),point 3 of (unitsquare scaled 5mm)]);
+      Case1=polygone(point 3 of (unitsquare scaled 5mm),1/2[point 0 of (unitsquare scaled 5mm),point 1 of (unitsquare scaled 5mm)],point 2 of (unitsquare scaled 5mm));
+      Centre1=iso(point 3 of (unitsquare scaled 5mm),1/2[point 0 of (unitsquare scaled 5mm),point 1 of (unitsquare scaled 5mm)],point 2 of (unitsquare scaled 5mm));
+      %      
+      boolean Impossible[][];
+      pair M[][];
+      picture RetiensFondQuad,RetiensZone;
+      % 
+      vardef InitialisationZone=
+      for k=-1 upto HautQuad+5:
+        for l=-1 upto LargQuad+5:
+          Impossible[k][2*l+1]=true;
+          Impossible[k][2*l]=true;
+          if k mod 2=0:
+            trace Case2 shifted(5mm*(l,k));
+            trace Case1 shifted(5mm*(l+0.5,k));
+          else:
+            trace Case1 shifted(5mm*(l,k));
+            trace Case2 shifted(5mm*(l+0.5,k));
+          fi;
+        endfor;
+        endfor;
+      for k=1 upto HautQuad:
+        for l=1 upto LargQuad:
+          Impossible[k][2*l-1]:=false;
+          Impossible[k][2*l]:=false;
+        endfor;
+      endfor;
+      RetiensFondQuad=currentpicture;
+      currentpicture:=nullpicture;
+      enddef;
+      %
+      vardef RAZZone=
+      pair PileChemin[];
+      indiceChemin:=0;
+      enddef;
+      % 
+      def PushChemin(expr tt)=
+      if indiceChemin<1:
+      PileChemin[1]:=tt;
+      indiceChemin:=1;
+      else:
+      PileChemin[indiceChemin+1]:=tt;
+      indiceChemin:=indiceChemin+1;
+      fi;
+      enddef;
+      %
+      def PopChemin=
+        tentative:=tentative+1;
+        currentpicture:=nullpicture;
+        RAZZone;
+        HautQuad:=HautQuad+1;
+        LargQuad:=LargQuad+1;
+        for k=-1 upto HautQuad+5:
+          for l=-1 upto LargQuad+5:
+            Impossible[k][2*l+1]:=true;
+            Impossible[k][2*l]:=true;
+            if k mod 2=0:
+            trace Case2 shifted(5mm*(l,k));
+            trace Case1 shifted(5mm*(l+0.5,k));
+          else:
+            trace Case1 shifted(5mm*(l,k));
+            trace Case2 shifted(5mm*(l+0.5,k));
+          fi;
+          endfor;
+        endfor;
+        for k=1 upto HautQuad:
+          for l=1 upto LargQuad:
+            Impossible[k][2*l]:=false;
+            Impossible[k][2*l-1]:=false;
+          endfor;
+        endfor;
+        RetiensFondQuad:=currentpicture;
+        currentpicture:=nullpicture;  
+        % Redemarrage
+        ChoixLigneD:=floor(HautQuad/2)+1;
+        ChoixColonneDe:=floor(LargQuad/2);
+        colonnemax:=ChoixColonneDe;
+        colonnemin:=ChoixColonneDe;
+        lignemax:=ChoixLigneD;
+        lignemin:=ChoixLigneD;
+        PushChemin((ChoixLigneD,ChoixColonneDe));
+        nbcaseschoisies:=1;
+        fill if (ChoixColonneDe mod 2)=0:
+          if (ChoixLigneD mod 2)=0: Case2 shifted (5mm*((ChoixColonneDe div 2),ChoixLigneD)) else: Case1 shifted (5mm*((ChoixColonneDe div 2),ChoixLigneD)) fi
+         else:
+         if (ChoixLigneD mod 2)=0:Case1 shifted (5mm*((ChoixColonneDe div 2)+0.5,ChoixLigneD)) else: Case2 shifted (5mm*((ChoixColonneDe div 2)+0.5,ChoixLigneD))fi  
+         fi withcolor CouleurAire;
+         Impossible[ChoixLigneD][ChoixColonneDe]:=true;
+         VoisinDispo(ChoixLigneD,ChoixColonneDe);
+      enddef;
+      %
+      %Pile des cases voisines de la case parcourue
+      pair PileVoisin[];
+      numeric indiceVoisin;
+      indiceVoisin=0;
+      % 
+      vardef RAZPileVoisin=
+        indiceVoisin:=0;
+      enddef;
+      %
+      def PushVoisin(expr tt)=
+        if indiceVoisin<1:
+          PileVoisin[1]:=tt;
+          indiceVoisin:=1;
+        else:
+          PileVoisin[indiceVoisin+1]:=tt;
+          indiceVoisin:=indiceVoisin+1;
+        fi;
+      enddef;
+      %
+      vardef VoisinDispo(expr la,lo)=
+      RAZPileVoisin;
+      numeric nbvoisin;
+      nbvoisin=0;
+      pair Svoisin[];
+      numeric IndiceCase[];
+      if (lo mod 2)=0:
+        % même ligne, colonne avant
+        if Impossible[la][lo-1]=false:
+          nbvoisin:=nbvoisin+1;
+          PushVoisin((la,lo-1));
+          Svoisin[nbvoisin]=if (la mod 2)=0:Centre1 else:Centre2 fi shifted(5mm*((lo div 2)-0.5,la));
+          if (la mod 2)=0:IndiceCase[nbvoisin]:=1 else:IndiceCase[nbvoisin]:=2 fi;
+        fi;
+        % même ligne, colonne après
+        if Impossible[la][lo+1]=false:
+          nbvoisin:=nbvoisin+1;
+          PushVoisin((la,lo+1));
+          Svoisin[nbvoisin]=if (la mod 2)=0:Centre1 else:Centre2 fi shifted(5mm*((lo div 2)+0.5,la));
+          if (la mod 2)=0:IndiceCase[nbvoisin]:=1 else:IndiceCase[nbvoisin]:=2 fi;
+        fi;
+        % ligne précédente, colonne précédente
+        if (la mod 2)=0:
+          if Impossible[la-1][lo]=false:
+            nbvoisin:=nbvoisin+1;
+            PushVoisin((la-1,lo));
+            Svoisin[nbvoisin]=if (la mod 2)=0:Centre1 else:Centre2 fi shifted(5mm*((lo div 2),la-1));
+            if (la mod 2)=0:IndiceCase[nbvoisin]:=1 else:IndiceCase[nbvoisin]:=2 fi;
+          fi;
+        else:
+          if Impossible[la+1][lo]=false:
+            nbvoisin:=nbvoisin+1;
+            PushVoisin((la+1,lo));
+            Svoisin[nbvoisin]=if (la mod 2)=0:Centre1 else:Centre2 fi shifted(5mm*((lo div 2),la+1));
+            if (la mod 2)=0:IndiceCase[nbvoisin]:=1 else:IndiceCase[nbvoisin]:=2 fi;
+          fi;
+        fi;
+%        drawoptions(withcolor blue);
+%        if unknown Svoisin[1]:else:dotlabel("",Svoisin[1]);fi;
+%        if unknown Svoisin[2]:else:dotlabel("",Svoisin[2]);fi;
+%        if unknown Svoisin[3]:else:dotlabel("",Svoisin[3]);fi;
+%        drawoptions();  
+      else:
+        % même ligne, colonne avant
+        if Impossible[la][lo-1]=false:
+          nbvoisin:=nbvoisin+1;
+          PushVoisin((la,lo-1));
+          Svoisin[nbvoisin]=if (la mod 2)=0:Centre2 else:Centre1 fi shifted(5mm*((lo div 2),la));
+          if (la mod 2)=0:IndiceCase[nbvoisin]:=2 else:IndiceCase[nbvoisin]:=1 fi;
+        fi;
+        % même ligne, colonne après
+        if Impossible[la][lo+1]=false:
+          nbvoisin:=nbvoisin+1;
+          PushVoisin((la,lo+1));
+          Svoisin[nbvoisin]=if (la mod 2)=0:Centre2 else:Centre1 fi shifted(5mm*(((lo+2) div 2),la));
+          if (la mod 2)=0:IndiceCase[nbvoisin]:=2 else:IndiceCase[nbvoisin]:=1 fi;
+        fi;
+        % ligne suivante ou précédente :), colonne suivante
+        if (la mod 2)=0:
+          if Impossible[la+1][lo]=false:
+            nbvoisin:=nbvoisin+1;
+            PushVoisin((la+1,lo));
+            Svoisin[nbvoisin]=if (la mod 2)=0:Centre2 else:Centre1 fi shifted(5mm*((lo div 2)+0.5,la+1));
+            if (la mod 2)=0:IndiceCase[nbvoisin]:=2 else:IndiceCase[nbvoisin]:=1 fi;
+          fi;
+        else:
+          if Impossible[la-1][lo]=false:
+            nbvoisin:=nbvoisin+1;
+            PushVoisin((la-1,lo));
+            Svoisin[nbvoisin]=if (la mod 2)=0:Centre2 else:Centre1 fi shifted(5mm*((lo div 2)+0.5,la-1));
+            if (la mod 2)=0:IndiceCase[nbvoisin]:=2 else:IndiceCase[nbvoisin]:=1 fi;
+          fi;
+        fi;
+%        drawoptions(withcolor red);
+%      if unknown Svoisin[1]:else:dotlabel("",Svoisin[1]);fi;
+%      if unknown Svoisin[2]:else:dotlabel("",Svoisin[2]);fi;
+%      if unknown Svoisin[3]:else:dotlabel("",Svoisin[3]);fi;
+%      drawoptions();  
+      fi;
+      enddef;
+      %
+      color CouleurAire;
+      CouleurAire=\useKV[ClesAireSimple]{CouleurAire};
+      %
+      boolean Trou,Triangle,AireTriangle,Graines,AireCarre,SIS,SansAire,SansLongueur;
+      SIS=\useKV[ClesAireSimple]{SIS};
+      Graines=\useKV[ClesAireSimple]{Graines};
+      SansAire=\useKV[ClesAireSimple]{SansAire};
+      SansLongueur=\useKV[ClesAireSimple]{SansLongueur};
+      if Graines:
+      randomseed:=\useKV[ClesAireSimple]{Graine};
+      fi;
+      AireCarre=\useKV[ClesAireSimple]{AireCarre};
+      Trou=\useKV[ClesAireSimple]{Trou};
+      Triangle=\useKV[ClesAireSimple]{Triangle};
+      AireTriangle=\useKV[ClesAireSimple]{AireTriangle};
+      PasQuad=\useKV[ClesAireSimple]{PasQuad};
+      HautQuad=\useKV[ClesAireSimple]{HautQuad};
+      LargQuad=\useKV[ClesAireSimple]{LargQuad};
+      Tentatives=\useKV[ClesAireSimple]{Tentatives};
+      pair A,B,C,D,E,U[];
+      A=(0,0);
+      B-A=PasQuad*(LargQuad,0);
+      C-B=PasQuad*(0,HautQuad);
+      D-C=A-B;
+      % Le nombres total de cases à colorier
+      NbTotalCasesAColorier=((#1*#3*#4)/#2);
+      %
+      InitialisationZone;
+      RAZZone;
+      %
+      ChoixLigneD=floor(HautQuad/2);%
+      ChoixColonneDe=floor(LargQuad/2);%
+      colonnemax=ChoixColonneDe;
+      colonnemin=ChoixColonneDe;
+      lignemax=ChoixLigneD;
+      lignemin=ChoixLigneD;
+      %
+      tentative:=1;
+      PushChemin((ChoixLigneD,ChoixColonneDe));
+      nbcaseschoisies=1;
+      fill if (ChoixColonneDe mod 2)=0:
+        if (ChoixLigneD mod 2)=0: Case2 shifted (5mm*((ChoixColonneDe div 2),ChoixLigneD)) else: Case1 shifted (5mm*((ChoixColonneDe div 2),ChoixLigneD)) fi
+      else:
+        if (ChoixLigneD mod 2)=0:Case1 shifted (5mm*((ChoixColonneDe div 2)+0.5,ChoixLigneD)) else: Case2 shifted (5mm*((ChoixColonneDe div 2)+0.5,ChoixLigneD))fi 
+      fi withcolor CouleurAire;
+      Impossible[ChoixLigneD][ChoixColonneDe]:=true;
+      VoisinDispo(ChoixLigneD,ChoixColonneDe);
+      % Le "parcours"
+      forever: exitif (nbcaseschoisies>NbTotalCasesAColorier-1) or (tentative>Tentatives);
+      nb:=ceiling(uniformdeviate(nbvoisin));
+      if nb>0:
+      Impossible[xpart(PileVoisin[nb])][ypart(PileVoisin[nb])]:=true;
+      drawoptions(withcolor green);
+      drawoptions();
+      PushChemin((xpart(PileVoisin[nb]),ypart(PileVoisin[nb])));
+      if ypart(PileChemin[indiceChemin])>colonnemax:
+      colonnemax:=ypart(PileChemin[indiceChemin]);
+      lignemax:=xpart(PileChemin[indiceChemin]);
+      fi;
+      if ypart(PileChemin[indiceChemin])<colonnemin:
+      colonnemin:=ypart(PileChemin[indiceChemin]);
+      fi;
+      if xpart(PileChemin[indiceChemin])<lignemin:
+      lignemin:=xpart(PileChemin[indiceChemin]);
+      fi;
+      nbcaseschoisies:=nbcaseschoisies+1;
+      fill Case[IndiceCase[nb]] shifted (Svoisin[nb]-Centre[IndiceCase[nb]]) withcolor CouleurAire;
+      VoisinDispo(xpart(PileChemin[indiceChemin]),ypart(PileChemin[indiceChemin]));
+      else:
+      PopChemin;
+      fi;
+      endfor;
+      % Tracage
+      vardef Affichage=
+      if tentative>Tentatives:
+        currentpicture:=nullpicture;
+        picture MiseEnGarde;
+        MiseEnGarde=image(
+          label(TEX("\begin{minipage}{0.5\linewidth}
+            La construction automatique a échouée. Relancez en augmentant le nombre de tentatives ou en augmentant les dimensions du quadrillage (Hauteur,Largeur)
+          \end{minipage}"),(0,0));
+          );
+        draw (((llcorner MiseEnGarde)--(lrcorner MiseEnGarde)--(urcorner MiseEnGarde)--(ulcorner MiseEnGarde)--cycle) scaled 1.1) withpen pensquare scaled 2;
+        draw MiseEnGarde;
+        label.llft(TEX(decimal(tentative)&"-"&decimal(HautQuad)&"-"&decimal(LargQuad)&"-"&decimal(NbTotalCasesAColorier)),llcorner MiseEnGarde);  
+      else:
+      % Le quadrillage
+      picture AffiUnites;
+      AffiUnites=image(
+      marque_s:=marque_s/3;
+      if (colonnemax mod 2)=0:
+        if (lignemax mod 2)=0:
+          if SansAire=false:
+          fill Case2 shifted (5mm*((colonnemax div 2)+2,lignemax)) withcolor NavyBlue;
+          trace Case2 shifted (5mm*((colonnemax div 2)+2,lignemax));
+          labeloffset:=labeloffset*3;
+          label.top(TEX("1 u.a"),(center Case2) shifted (5mm*((colonnemax div 2)+2,lignemax)));
+          labeloffset:=labeloffset/3;
+          fi;
+          if SansLongueur=false:
+          trace segment((0,0),(5mm,0)) shifted (5mm*((colonnemax div 2)+4,lignemax)) withpen pencircle scaled 1.025;
+          trace marquesegment((0,0),(5mm,0)) shifted (5mm*((colonnemax div 2)+4,lignemax)) withpen pencircle scaled 1.025;
+          label.bot(TEX("$u$"),(2.5mm,0) shifted (5mm*((colonnemax div 2)+4,lignemax)));
+          % v
+          trace segment((0,0),(2.5mm,5mm)) shifted (5mm*((colonnemax div 2)+6,lignemax)) withpen pencircle scaled 1.025;
+          trace marquesegment((0,0),(2.5mm,5mm)) shifted (5mm*((colonnemax div 2)+6,lignemax)) withpen pencircle scaled 1.025;
+          label.lrt(TEX("$v$"),(1.25mm,2.5mm) shifted (5mm*((colonnemax div 2)+6,lignemax)));
+          fi;
+        else:
+          if SansAire=false:
+          fill Case1 shifted (5mm*((colonnemax div 2)+2,lignemax)) withcolor NavyBlue;
+          trace Case1 shifted (5mm*((colonnemax div 2)+2,lignemax));
+          labeloffset:=labeloffset*3;
+          label.top(TEX("1 u.a"),(center Case1) shifted (5mm*((colonnemax div 2)+2,lignemax)));
+          labeloffset:=labeloffset/3;
+          fi;
+          if SansLongueur=false:
+          trace segment((0,0),(5mm,0)) shifted (5mm*((colonnemax div 2)+3.5,lignemax)) withpen pencircle scaled 1.025;
+          trace marquesegment((0,0),(5mm,0)) shifted (5mm*((colonnemax div 2)+3.5,lignemax)) withpen pencircle scaled 1.025;
+          label.bot(TEX("$u$"),(2.5mm,0) shifted (5mm*((colonnemax div 2)+3.5,lignemax)));
+          % v
+          trace segment((0,0),(2.5mm,5mm)) shifted (5mm*((colonnemax div 2)+5.5,lignemax)) withpen pencircle scaled 1.025;
+          trace marquesegment((0,0),(2.5mm,5mm)) shifted (5mm*((colonnemax div 2)+5.5,lignemax)) withpen pencircle scaled 1.025;
+          label.lrt(TEX("$v$"),(1.25mm,2.5mm) shifted (5mm*((colonnemax div 2)+5.5,lignemax)));
+          fi;
+        fi;
+      else:
+        if (lignemax mod 2)=0:
+          if SansAire=false:
+          fill Case1 shifted (5mm*((colonnemax div 2)+2+0.5,lignemax)) withcolor NavyBlue;
+          trace Case1 shifted (5mm*((colonnemax div 2)+2+0.5,lignemax));
+          labeloffset:=labeloffset*3;
+          label.top(TEX("1 u.a"),(center Case1) shifted (5mm*((colonnemax div 2)+2+0.5,lignemax)));
+          labeloffset:=labeloffset/3;
+          fi;
+          if SansLongueur=false:
+          trace segment((0,0),(5mm,0)) shifted (5mm*((colonnemax div 2)+4,lignemax)) withpen pencircle scaled 1.025;
+          trace marquesegment((0,0),(5mm,0)) shifted (5mm*((colonnemax div 2)+4,lignemax)) withpen pencircle scaled 1.025;
+          label.bot(TEX("$u$"),(2.5mm,0) shifted (5mm*((colonnemax div 2)+4,lignemax)));
+          % v
+          trace segment((0,0),(2.5mm,5mm)) shifted (5mm*((colonnemax div 2)+6,lignemax)) withpen pencircle scaled 1.025;
+          trace marquesegment((0,0),(2.5mm,5mm)) shifted (5mm*((colonnemax div 2)+6,lignemax)) withpen pencircle scaled 1.025;
+          label.lrt(TEX("$v$"),(1.25mm,2.5mm) shifted (5mm*((colonnemax div 2)+6,lignemax)));
+          fi;
+        else:
+          if SansAire=false:
+          fill Case2 shifted (5mm*((colonnemax div 2)+2+0.5,lignemax)) withcolor NavyBlue;
+          trace Case2 shifted (5mm*((colonnemax div 2)+2+0.5,lignemax));
+          labeloffset:=labeloffset*3;
+          label.top(TEX("1 u.a"),(center Case2) shifted (5mm*((colonnemax div 2)+2+0.5,lignemax)));
+          labeloffset:=labeloffset/3;
+          fi;
+          if SansLongueur=false:
+          trace segment((0,0),(5mm,0)) shifted (5mm*((colonnemax div 2)+4+0.5,lignemax)) withpen pencircle scaled 1.025;
+          trace marquesegment((0,0),(5mm,0)) shifted (5mm*((colonnemax div 2)+4+0.5,lignemax)) withpen pencircle scaled 1.025;
+          label.bot(TEX("$u$"),(2.5mm,0) shifted (5mm*((colonnemax div 2)+4+0.5,lignemax)));
+          % v
+          trace segment((0,0),(2.5mm,5mm)) shifted (5mm*((colonnemax div 2)+4+2.5,lignemax)) withpen pencircle scaled 1.025;
+          trace marquesegment((0,0),(2.5mm,5mm)) shifted (5mm*((colonnemax div 2)+4+2.5,lignemax)) withpen pencircle scaled 1.025;
+          label.lrt(TEX("$v$"),(1.25mm,2.5mm) shifted (5mm*((colonnemax div 2)+4+2.5,lignemax)));
+          fi;
+        fi;
+        fi;
+        );
+        trace AffiUnites;
+        A:=llcorner currentpicture+5mm*(-1,-1);
+        B:=lrcorner currentpicture+5mm*(1,-1);
+        C:=urcorner currentpicture+5mm*(1,1);
+        D:=ulcorner currentpicture+5mm*(-1,1);
+        RetiensZone=currentpicture;
+        currentpicture:=nullpicture;
+        trace RetiensZone;
+        trace RetiensFondQuad withcolor 0.8white;
+        trace AffiUnites;
+        clip currentpicture to polygone(A,B,C,D);
+        trace polygone(A,B,C,D);
+        RetrouvePolygone;
+        write decimal(periu) to "PfCPerimetre.tex";
+        write decimal(periv) to "PfCPerimetre.tex";
+        write EOF to "PfCPerimetre.tex";
+        fi;
+        enddef;
+        Affichage;
+    \end{mplibcode}
+  \fi
+}%
+
+%%%%%%%%%%%%%%%%%%%%%% Avec des triangles équilatéraux
+\NewDocumentCommand\BuildAireSimpleTriEqui{mmmm}{%
+    \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      % Unités
+      PasQuad=\useKV[ClesAireSimple]{PasQuad};
+      %
+      echelleequi:=0.5*sqrt(3);
+      %
+      vardef RetrouvePolygone=
+      periu=0;
+      periv=0;
+      for l=1 upto 2*LargQuad:
+      Impossible[0][l]:=false;
+      Impossible[HautQuad+1][l]:=false;
+      endfor;
+      for k=0 upto HautQuad:
+      Impossible[k][0]:=false;
+      endfor;
+      for k=1 upto HautQuad:
+        for l=1 upto 2*LargQuad:
+          if Impossible[k][l]=true:
+            if k mod 2=0:
+              if l mod 2=0:%case2 les pairs, case 1 les impairs
+               if Impossible[k-1][l]=false:
+                 % label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),PasQuad*(l div 2+0.5,k));
+                 periu:=periu+1;
+                 trace (subpath(0,1) of Case2) shifted(PasQuad*(l div 2,echelleequi*k)) withpen pencircle scaled 2;
+               fi;
+               %if Impossible[k+1][l]=false:
+                 %label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),PasQuad*(l div 2+0.5,k));
+                 %trace (subpath(0,1) of Case2) shifted(PasQuad*(l div 2,k));
+                 % rien à tracer car on est sur la pointe de Case2
+               %fi;
+               if Impossible[k][l-1]=false:
+                 % label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),PasQuad*(l div 2+0.5,k));
+                 periv:=periv+1;
+                 trace (subpath(2,3) of Case2) shifted(PasQuad*(l div 2,echelleequi*k)) withpen pencircle scaled 2;
+               fi;
+               if Impossible[k][l+1]=false:
+                 % label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),PasQuad*(l div 2+0.5,k));
+                 periv:=periv+1;
+                 trace (subpath(1,2) of Case2) shifted(PasQuad*(l div 2,echelleequi*k)) withpen pencircle scaled 2;
+               fi;
+              else:
+                if Impossible[k-1][l]=false:
+                 % label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),PasQuad*(l div 2+0.5,k));
+                 % trace (subpath(0,1) of Case1) shifted(PasQuad*(l div 2,k));
+                % rien à tracer car on est sur la pointe de Case1
+               fi;
+               if Impossible[k+1][l]=false:
+                 %label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),PasQuad*(l div 2+0.5,k));
+                 periu:=periu+1;
+                 trace (subpath(2,3) of Case1) shifted(PasQuad*(l div 2+0.5,echelleequi*k)) withpen pencircle scaled 2;
+                 % rien à tracer car on est sur la pointe de Case2
+               fi;
+               if Impossible[k][l-1]=false:
+                 periv:=periv+1;
+                 %label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),PasQuad*(l div 2+0.5,k));
+                 trace (subpath(0,1) of Case1) shifted(PasQuad*(l div 2+0.5,echelleequi*k)) withpen pencircle scaled 2;
+               fi;
+               if Impossible[k][l+1]=false:
+                 periv:=periv+1;
+                 %label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),PasQuad*(l div 2+0.5,k));
+                 trace (subpath(1,2) of Case1) shifted(PasQuad*(l div 2+0.5,echelleequi*k)) withpen pencircle scaled 2;
+               fi;
+              fi;
+            else:
+              if l mod 2=0:%case1 les pairs, case 2 les impairs
+                if Impossible[k-1][l]=false:
+                  % label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),PasQuad*(l div 2+0.5,k));
+                  % trace (subpath(0,1) of Case1) shifted(PasQuad*(l div 2,k));
+                  % ne rien tracer car on est sur la pointe du Case1
+                fi;
+                if Impossible[k+1][l]=false:
+                  % label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),PasQuad*(l div 2+0.5,k));
+                  periu:=periu+1;
+                  trace (subpath(2,3) of Case1) shifted(PasQuad*(l div 2,echelleequi*k)) withpen pencircle scaled 2;
+                fi;
+                if Impossible[k][l-1]=false:
+                  % label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),PasQuad*(l div 2+0.5,k));
+                  periv:=periv+1;
+                  trace (subpath(0,1) of Case1) shifted(PasQuad*(l div 2,echelleequi*k)) withpen pencircle scaled 2;
+                fi;
+                if Impossible[k][l+1]=false:
+                  periv:=periv+1;
+                  % label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),PasQuad*(l div 2+0.5,k));
+                  trace (subpath(1,2) of Case1) shifted(PasQuad*(l div 2,echelleequi*k)) withpen pencircle scaled 2;
+                fi;
+              else:
+                if Impossible[k-1][l]=false:
+                  % label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),PasQuad*(l div 2+1,k));
+                  periu:=periu+1;
+                   trace (subpath(0,1) of Case2) shifted(PasQuad*(l div 2+0.5,echelleequi*k)) withpen pencircle scaled 2;
+                fi;
+                if Impossible[k+1][l]=false:
+                %label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),PasQuad*(l div 2+0.5,k));
+                %trace (subpath(2,3) of Case2) shifted(PasQuad*(l div 2+0.5,k)) withpen pencircle scaled 2 withcolor white;
+                % ne rien tracer car on est sur la pointe du Case2
+               fi;
+               if Impossible[k][l-1]=false:
+                 % label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),PasQuad*(l div 2+1,k));
+                 periv:=periv+1;
+                 trace (subpath(2,3) of Case2) shifted(PasQuad*(l div 2+0.5,echelleequi*k)) withpen pencircle scaled 2;
+               fi;
+               if Impossible[k][l+1]=false:
+                 periv:=periv+1;
+                 %label(TEX("\tiny"&decimal(k)&"--"&decimal(l)),PasQuad*(l div 2+1,k));
+                 trace (subpath(1,2) of Case2) shifted(PasQuad*(l div 2+0.5,echelleequi*k)) withpen pencircle scaled 2;
+               fi;
+              fi;
+            fi;
+          fi;
+        endfor;
+      endfor;
+      enddef;
+      %
+      pair Centre[];
+      path Case[];
+      Case2=polygone(point 0 of (unitsquare scaled PasQuad),point 1 of (unitsquare scaled PasQuad),rotation(point 1 of (unitsquare scaled PasQuad),point 0 of (unitsquare scaled PasQuad),60));
+      Centre2=iso(point 0 of (unitsquare scaled PasQuad),point 1 of (unitsquare scaled PasQuad),rotation(point 1 of (unitsquare scaled PasQuad),point 2 of (unitsquare scaled PasQuad),60));
+      Case1=polygone(point 3 of (unitsquare scaled PasQuad),rotation(point 2 of (unitsquare scaled PasQuad),point 3 of (unitsquare scaled PasQuad),-60),point 2 of (unitsquare scaled PasQuad)) shifted(PasQuad*(0,echelleequi-1));
+      Centre1=iso(point 3 of (unitsquare scaled PasQuad),rotation(point 2 of (unitsquare scaled PasQuad),point 3 of (unitsquare scaled PasQuad),-60),point 2 of (unitsquare scaled PasQuad)) shifted(PasQuad*(0,echelleequi-1));
+      %      
+      boolean Impossible[][];
+      pair M[][];
+      picture RetiensFondQuad,RetiensZone;
+      % 
+      vardef InitialisationZone=
+      for k=-1 upto HautQuad+5:
+        for l=-1 upto LargQuad+5:
+          Impossible[k][2*l+1]=true;
+          Impossible[k][2*l]=true;
+          if k mod 2=0:
+            trace Case2 shifted(PasQuad*(l,echelleequi*k));
+            trace Case1 shifted(PasQuad*(l+0.5,echelleequi*k));
+          else:
+            trace Case1 shifted(PasQuad*(l,echelleequi*k));
+            trace Case2 shifted(PasQuad*(l+0.5,echelleequi*k));
+          fi;
+        endfor;
+        endfor;
+      for k=1 upto HautQuad:
+        for l=1 upto LargQuad:
+          Impossible[k][2*l-1]:=false;
+          Impossible[k][2*l]:=false;
+        endfor;
+      endfor;
+      RetiensFondQuad=currentpicture;
+      currentpicture:=nullpicture;
+      enddef;
+      %
+      vardef RAZZone=
+      pair PileChemin[];
+      indiceChemin:=0;
+      enddef;
+      % 
+      def PushChemin(expr tt)=
+      if indiceChemin<1:
+      PileChemin[1]:=tt;
+      indiceChemin:=1;
+      else:
+      PileChemin[indiceChemin+1]:=tt;
+      indiceChemin:=indiceChemin+1;
+      fi;
+      enddef;
+      %
+      def PopChemin=
+        tentative:=tentative+1;
+        currentpicture:=nullpicture;
+        RAZZone;
+        HautQuad:=HautQuad+1;
+        LargQuad:=LargQuad+1;
+        for k=-1 upto HautQuad+5:
+          for l=-1 upto LargQuad+5:
+            Impossible[k][2*l+1]:=true;
+            Impossible[k][2*l]:=true;
+            if k mod 2=0:
+            trace Case2 shifted(PasQuad*(l,echelleequi*k));
+            trace Case1 shifted(PasQuad*(l+0.5,echelleequi*k));
+          else:
+            trace Case1 shifted(PasQuad*(l,echelleequi*k));
+            trace Case2 shifted(PasQuad*(l+0.5,echelleequi*k));
+          fi;
+          endfor;
+        endfor;
+        for k=1 upto HautQuad:
+          for l=1 upto LargQuad:
+            Impossible[k][2*l]:=false;
+            Impossible[k][2*l-1]:=false;
+          endfor;
+        endfor;
+        RetiensFondQuad:=currentpicture;
+        currentpicture:=nullpicture;  
+        % Redemarrage
+        ChoixLigneD:=floor(HautQuad/2)+1;
+        ChoixColonneDe:=floor(LargQuad/2);
+        colonnemax:=ChoixColonneDe;
+        colonnemin:=ChoixColonneDe;
+        lignemax:=ChoixLigneD;
+        lignemin:=ChoixLigneD;
+        PushChemin((ChoixLigneD,ChoixColonneDe));
+        nbcaseschoisies:=1;
+        fill if (ChoixColonneDe mod 2)=0:
+          if (ChoixLigneD mod 2)=0: Case2 shifted (PasQuad*((ChoixColonneDe div 2),echelleequi*ChoixLigneD)) else: Case1 shifted (PasQuad*((ChoixColonneDe div 2),echelleequi*ChoixLigneD)) fi
+         else:
+         if (ChoixLigneD mod 2)=0:Case1 shifted (PasQuad*((ChoixColonneDe div 2)+0.5,echelleequi*ChoixLigneD)) else: Case2 shifted (PasQuad*((ChoixColonneDe div 2)+0.5,echelleequi*ChoixLigneD))fi  
+         fi withcolor CouleurAire;
+         Impossible[ChoixLigneD][ChoixColonneDe]:=true;
+         VoisinDispo(ChoixLigneD,ChoixColonneDe);
+      enddef;
+      %
+      %Pile des cases voisines de la case parcourue
+      pair PileVoisin[];
+      numeric indiceVoisin;
+      indiceVoisin=0;
+      % 
+      vardef RAZPileVoisin=
+        indiceVoisin:=0;
+      enddef;
+      %
+      def PushVoisin(expr tt)=
+        if indiceVoisin<1:
+          PileVoisin[1]:=tt;
+          indiceVoisin:=1;
+        else:
+          PileVoisin[indiceVoisin+1]:=tt;
+          indiceVoisin:=indiceVoisin+1;
+        fi;
+      enddef;
+      %
+      vardef VoisinDispo(expr la,lo)=
+      RAZPileVoisin;
+      numeric nbvoisin;
+      nbvoisin=0;
+      pair Svoisin[];
+      numeric IndiceCase[];
+      if (lo mod 2)=0:
+        % même ligne, colonne avant
+        if Impossible[la][lo-1]=false:
+          nbvoisin:=nbvoisin+1;
+          PushVoisin((la,lo-1));
+          Svoisin[nbvoisin]=if (la mod 2)=0:Centre1 else:Centre2 fi shifted(PasQuad*((lo div 2)-0.5,echelleequi*la));
+          if (la mod 2)=0:IndiceCase[nbvoisin]:=1 else:IndiceCase[nbvoisin]:=2 fi;
+        fi;
+        % même ligne, colonne après
+        if Impossible[la][lo+1]=false:
+          nbvoisin:=nbvoisin+1;
+          PushVoisin((la,lo+1));
+          Svoisin[nbvoisin]=if (la mod 2)=0:Centre1 else:Centre2 fi shifted(PasQuad*((lo div 2)+0.5,echelleequi*la));
+          if (la mod 2)=0:IndiceCase[nbvoisin]:=1 else:IndiceCase[nbvoisin]:=2 fi;
+        fi;
+        % ligne précédente, colonne précédente
+        if (la mod 2)=0:
+          if Impossible[la-1][lo]=false:
+            nbvoisin:=nbvoisin+1;
+            PushVoisin((la-1,lo));
+            Svoisin[nbvoisin]=if (la mod 2)=0:Centre1 else:Centre2 fi shifted(PasQuad*((lo div 2),echelleequi*(la-1)));
+            if (la mod 2)=0:IndiceCase[nbvoisin]:=1 else:IndiceCase[nbvoisin]:=2 fi;
+          fi;
+        else:
+          if Impossible[la+1][lo]=false:
+            nbvoisin:=nbvoisin+1;
+            PushVoisin((la+1,lo));
+            Svoisin[nbvoisin]=if (la mod 2)=0:Centre1 else:Centre2 fi shifted(PasQuad*((lo div 2),echelleequi*(la+1)));
+            if (la mod 2)=0:IndiceCase[nbvoisin]:=1 else:IndiceCase[nbvoisin]:=2 fi;
+          fi;
+        fi;
+%        drawoptions(withcolor blue);
+%        if unknown Svoisin[1]:else:dotlabel("",Svoisin[1]);fi;
+%        if unknown Svoisin[2]:else:dotlabel("",Svoisin[2]);fi;
+%        if unknown Svoisin[3]:else:dotlabel("",Svoisin[3]);fi;
+%        drawoptions();  
+      else:
+        % même ligne, colonne avant
+        if Impossible[la][lo-1]=false:
+          nbvoisin:=nbvoisin+1;
+          PushVoisin((la,lo-1));
+          Svoisin[nbvoisin]=if (la mod 2)=0:Centre2 else:Centre1 fi shifted(PasQuad*((lo div 2),echelleequi*la));
+          if (la mod 2)=0:IndiceCase[nbvoisin]:=2 else:IndiceCase[nbvoisin]:=1 fi;
+        fi;
+        % même ligne, colonne après
+        if Impossible[la][lo+1]=false:
+          nbvoisin:=nbvoisin+1;
+          PushVoisin((la,lo+1));
+          Svoisin[nbvoisin]=if (la mod 2)=0:Centre2 else:Centre1 fi shifted(PasQuad*(((lo+2) div 2),echelleequi*la));
+          if (la mod 2)=0:IndiceCase[nbvoisin]:=2 else:IndiceCase[nbvoisin]:=1 fi;
+        fi;
+        % ligne suivante ou précédente :), colonne suivante
+        if (la mod 2)=0:
+          if Impossible[la+1][lo]=false:
+            nbvoisin:=nbvoisin+1;
+            PushVoisin((la+1,lo));
+            Svoisin[nbvoisin]=if (la mod 2)=0:Centre2 else:Centre1 fi shifted(PasQuad*((lo div 2)+0.5,echelleequi*(la+1)));
+            if (la mod 2)=0:IndiceCase[nbvoisin]:=2 else:IndiceCase[nbvoisin]:=1 fi;
+          fi;
+        else:
+          if Impossible[la-1][lo]=false:
+            nbvoisin:=nbvoisin+1;
+            PushVoisin((la-1,lo));
+            Svoisin[nbvoisin]=if (la mod 2)=0:Centre2 else:Centre1 fi shifted(PasQuad*((lo div 2)+0.5,echelleequi*(la-1)));
+            if (la mod 2)=0:IndiceCase[nbvoisin]:=2 else:IndiceCase[nbvoisin]:=1 fi;
+          fi;
+        fi;
+%        drawoptions(withcolor red);
+%      if unknown Svoisin[1]:else:dotlabel("",Svoisin[1]);fi;
+%      if unknown Svoisin[2]:else:dotlabel("",Svoisin[2]);fi;
+%      if unknown Svoisin[3]:else:dotlabel("",Svoisin[3]);fi;
+%      drawoptions();  
+      fi;
+      enddef;
+      %
+      color CouleurAire;
+      CouleurAire=\useKV[ClesAireSimple]{CouleurAire};
+      %
+      boolean Trou,Triangle,AireTriangle,Graines,AireCarre,SIS,SansAire,SansLongueur;
+      SIS=\useKV[ClesAireSimple]{SIS};
+      Graines=\useKV[ClesAireSimple]{Graines};
+      SansAire=\useKV[ClesAireSimple]{SansAire};
+      SansLongueur=\useKV[ClesAireSimple]{SansLongueur};
+      if Graines:
+      randomseed:=\useKV[ClesAireSimple]{Graine};
+      fi;
+      AireCarre=\useKV[ClesAireSimple]{AireCarre};
+      Trou=\useKV[ClesAireSimple]{Trou};
+      Triangle=\useKV[ClesAireSimple]{Triangle};
+      AireTriangle=\useKV[ClesAireSimple]{AireTriangle};
+      HautQuad=\useKV[ClesAireSimple]{HautQuad};
+      LargQuad=\useKV[ClesAireSimple]{LargQuad};
+      Tentatives=\useKV[ClesAireSimple]{Tentatives};
+      pair A,B,C,D,E,U[];
+      A=(0,0);
+      B-A=PasQuad*(LargQuad,0);
+      C-B=PasQuad*(0,echelleequi*HautQuad);
+      D-C=A-B;
+      % Le nombres total de cases à colorier
+      NbTotalCasesAColorier=((#1*#3*#4)/#2);
+      %
+      InitialisationZone;
+      RAZZone;
+      %
+      ChoixLigneD=floor(HautQuad/2);%
+      ChoixColonneDe=floor(LargQuad/2);%
+      colonnemax=ChoixColonneDe;
+      colonnemin=ChoixColonneDe;
+      lignemax=ChoixLigneD;
+      lignemin=ChoixLigneD;
+      %
+      tentative:=1;
+      PushChemin((ChoixLigneD,ChoixColonneDe));
+      nbcaseschoisies=1;
+      fill if (ChoixColonneDe mod 2)=0:
+        if (ChoixLigneD mod 2)=0: Case2 shifted (PasQuad*((ChoixColonneDe div 2),echelleequi*ChoixLigneD)) else: Case1 shifted (PasQuad*((ChoixColonneDe div 2),echelleequi*ChoixLigneD)) fi
+      else:
+        if (ChoixLigneD mod 2)=0:Case1 shifted (PasQuad*((ChoixColonneDe div 2)+0.5,echelleequi*ChoixLigneD)) else: Case2 shifted (PasQuad*((ChoixColonneDe div 2)+0.5,echelleequi*ChoixLigneD))fi 
+      fi withcolor CouleurAire;
+      Impossible[ChoixLigneD][ChoixColonneDe]:=true;
+      VoisinDispo(ChoixLigneD,ChoixColonneDe);
+      % Le "parcours"
+      forever: exitif (nbcaseschoisies>NbTotalCasesAColorier-1) or (tentative>Tentatives);
+      nb:=ceiling(uniformdeviate(nbvoisin));
+      if nb>0:
+      Impossible[xpart(PileVoisin[nb])][ypart(PileVoisin[nb])]:=true;
+      drawoptions(withcolor green);
+      drawoptions();
+      PushChemin((xpart(PileVoisin[nb]),ypart(PileVoisin[nb])));
+      if ypart(PileChemin[indiceChemin])>colonnemax:
+      colonnemax:=ypart(PileChemin[indiceChemin]);
+      lignemax:=xpart(PileChemin[indiceChemin]);
+      fi;
+      if ypart(PileChemin[indiceChemin])<colonnemin:
+      colonnemin:=ypart(PileChemin[indiceChemin]);
+      fi;
+      if xpart(PileChemin[indiceChemin])<lignemin:
+      lignemin:=xpart(PileChemin[indiceChemin]);
+      fi;
+      nbcaseschoisies:=nbcaseschoisies+1;
+      fill Case[IndiceCase[nb]] shifted (Svoisin[nb]-Centre[IndiceCase[nb]]) withcolor CouleurAire;
+      VoisinDispo(xpart(PileChemin[indiceChemin]),ypart(PileChemin[indiceChemin]));
+      else:
+      PopChemin;
+      fi;
+      endfor;
+      % Tracage
+      vardef Affichage=
+      if tentative>Tentatives:
+        currentpicture:=nullpicture;
+        picture MiseEnGarde;
+        MiseEnGarde=image(
+          label(TEX("\begin{minipage}{0.5\linewidth}
+            La construction automatique a échouée. Relancez en augmentant le nombre de tentatives ou en augmentant les dimensions du quadrillage (Hauteur,Largeur)
+          \end{minipage}"),(0,0));
+          );
+        draw (((llcorner MiseEnGarde)--(lrcorner MiseEnGarde)--(urcorner MiseEnGarde)--(ulcorner MiseEnGarde)--cycle) scaled 1.1) withpen pensquare scaled 2;
+        draw MiseEnGarde;
+        label.llft(TEX(decimal(tentative)&"-"&decimal(HautQuad)&"-"&decimal(LargQuad)&"-"&decimal(NbTotalCasesAColorier)),llcorner MiseEnGarde);  
+      else:
+      % Le quadrillage
+      picture AffiUnites;
+      AffiUnites=image(
+      marque_s:=marque_s/3;
+      if (colonnemax mod 2)=0:
+        if (lignemax mod 2)=0:
+          if SansAire=false:
+          fill Case2 shifted (PasQuad*((colonnemax div 2)+2,echelleequi*lignemax)) withcolor NavyBlue;
+          trace Case2 shifted (PasQuad*((colonnemax div 2)+2,echelleequi*lignemax));
+          %labeloffset:=labeloffset*3;
+          label.bot(TEX("1 u.a"),1/2[point(0) of Case2,point(1) of Case2] shifted (PasQuad*((colonnemax div 2)+2,echelleequi*lignemax)));
+          % labeloffset:=labeloffset/3;
+          fi;
+          if SansLongueur=false:
+          trace Case2 shifted (PasQuad*((colonnemax div 2)+4,echelleequi*lignemax));
+          marque_s:=marque_s/3;
+          trace Codelongueur(point 0 of Case2,point 1 of Case2,point 1 of Case2,point 2 of Case2,point 2 of Case2,point 3 of Case2,2) shifted (PasQuad*((colonnemax div 2)+4,echelleequi*lignemax));
+          marque_s:=marque_s*3;
+          label.bot(TEX("u.$\ell$"),(0.5*PasQuad,0) shifted (PasQuad*((colonnemax div 2)+4,echelleequi*lignemax)));
+          fi;
+        else:
+          if SansAire=false:
+          fill Case1 shifted (PasQuad*((colonnemax div 2)+2,echelleequi*lignemax)) withcolor NavyBlue;
+          trace Case1 shifted (PasQuad*((colonnemax div 2)+2,echelleequi*lignemax));
+          %labeloffset:=labeloffset*3;
+          label.top(TEX("1 u.a"),1/2[point(2) of Case1,point(0) of Case1] shifted (PasQuad*((colonnemax div 2)+2,echelleequi*lignemax)));
+          % labeloffset:=labeloffset/3;
+          fi;
+          if SansLongueur=false:
+          trace Case2 shifted (PasQuad*((colonnemax div 2)+3.5,echelleequi*lignemax));
+          marque_s:=marque_s/3;
+          trace Codelongueur(point 0 of Case2,point 1 of Case2,point 1 of Case2,point 2 of Case2,point 2 of Case2,point 3 of Case2,2) shifted (PasQuad*((colonnemax div 2)+3.5,echelleequi*lignemax));
+          marque_s:=marque_s*3;
+          label.bot(TEX("u.$\ell$"),(0.5*PasQuad,0) shifted (PasQuad*((colonnemax div 2)+3.5,echelleequi*lignemax)));
+          fi;
+        fi;
+      else:
+        if (lignemax mod 2)=0:
+          if SansAire=false:
+          fill Case1 shifted (PasQuad*((colonnemax div 2)+2+0.5,echelleequi*lignemax)) withcolor NavyBlue;
+          trace Case1 shifted (PasQuad*((colonnemax div 2)+2+0.5,echelleequi*lignemax));
+%          labeloffset:=labeloffset*3;
+          label.top(TEX("1 u.a"),1/2[point(0) of Case1,point(2) of Case1] shifted (PasQuad*((colonnemax div 2)+2+0.5,echelleequi*lignemax)));
+          % labeloffset:=labeloffset/3;
+          fi;
+          if SansLongueur=false:
+          trace Case2 shifted (PasQuad*((colonnemax div 2)+4,echelleequi*lignemax));
+          marque_s:=marque_s/3;
+          trace Codelongueur(point 0 of Case2,point 1 of Case2,point 1 of Case2,point 2 of Case2,point 2 of Case2,point 3 of Case2,2) shifted (PasQuad*((colonnemax div 2)+4,echelleequi*lignemax));
+          marque_s:=marque_s*3;
+          label.bot(TEX("u.$\ell$"),(0.5*PasQuad,0) shifted (PasQuad*((colonnemax div 2)+4,echelleequi*lignemax)));
+          fi;
+        else:
+          if SansAire=false:
+          fill Case2 shifted (PasQuad*((colonnemax div 2)+2+0.5,echelleequi*lignemax)) withcolor NavyBlue;
+          trace Case2 shifted (PasQuad*((colonnemax div 2)+2+0.5,echelleequi*lignemax));
+          % labeloffset:=labeloffset*3;
+          label.bot(TEX("1 u.a"),1/2[point(0) of Case2,point(1) of Case2] shifted (PasQuad*((colonnemax div 2)+2+0.5,echelleequi*lignemax)));
+          % labeloffset:=labeloffset/3;
+          fi;
+          if SansLongueur=false:
+          trace Case2 shifted (PasQuad*((colonnemax div 2)+4.5,echelleequi*lignemax));
+          marque_s:=marque_s/3;
+          trace Codelongueur(point 0 of Case2,point 1 of Case2,point 1 of Case2,point 2 of Case2,point 2 of Case2,point 3 of Case2,2) shifted (PasQuad*((colonnemax div 2)+4.5,echelleequi*lignemax));
+          marque_s:=marque_s*3;
+          label.bot(TEX("u.$\ell$"),(0.5*PasQuad,0) shifted (PasQuad*((colonnemax div 2)+4+0.5,echelleequi*lignemax)));
+          fi;
+        fi;
+        fi;
+        );
+        trace AffiUnites;
+        A:=llcorner currentpicture+PasQuad*(-1,-1*echelleequi);
+        B:=lrcorner currentpicture+PasQuad*(1,-1*echelleequi);
+        C:=urcorner currentpicture+PasQuad*(1,1*echelleequi);
+        D:=ulcorner currentpicture+PasQuad*(-1,1*echelleequi);
+        RetiensZone=currentpicture;
+        currentpicture:=nullpicture;
+        trace RetiensZone;
+        trace RetiensFondQuad withcolor 0.8white;
+        trace AffiUnites;
+        clip currentpicture to polygone(A,B,C,D);
+        trace polygone(A,B,C,D);
+        RetrouvePolygone;
+        write decimal(periu+periv) to "PfCPerimetre.tex";
+        write EOF to "PfCPerimetre.tex";
+        fi;
+        enddef;
+        Affichage;
+    \end{mplibcode}
+  \fi
+}%
+
+\setKVdefault[ClesAireSimple]{Trou=false,UniteAire=1x1,HautQuad=15,LargQuad=15,CouleurAire=LightSteelBlue,SansLegende=false,SansAire=false,SansLongueur=false,PasQuad=5mm,Tentatives=10,Triangle=false,AireTriangle=false,PolyRec=false,PolyTri=false,PolyTriIso=false,PolyTriEqui=false,Graines=false,AireCarre=false,SIS=false,PasQuadx=8mm,PasQuady=6mm,Graine={},SI={},SIl={}}%
+\defKV[ClesAireSimple]{%
+  Graine=\ifempty{#1}{}{\setKV[ClesAireSimple]{Graines}},%
+  SI=\ifempty{#1}{}{\setKV[ClesAireSimple]{SIS}},%
+  SIl=\ifempty{#1}{}{\setKV[ClesAireSimple]{SIS}}%
+}%
+
+\NewDocumentCommand\AireSimple{om}{%
+  \useKVdefault[ClesAireSimple]%
+  \setKV[ClesAireSimple]{#1}%
+  \StrCut{\useKV[ClesAireSimple]{UniteAire}}{x}\PfCAirex\PfCAirey%
+  \ifboolKV[ClesAireSimple]{PolyRec}{%
+    \BuildAireSimpleRec{#2}{1}{\PfCAirex}{\PfCAirey}%
+  }{%
+    \ifboolKV[ClesAireSimple]{PolyTriEqui}{%
+      \BuildAireSimpleTriEqui{#2}{1}{\PfCAirex}{\PfCAirey}%
+    }{%
+      \ifboolKV[ClesAireSimple]{PolyTriIso}{%
+        \BuildAireSimpleTriIso{#2}{1}{\PfCAirex}{\PfCAirey}%
+      }{%
+        \ifboolKV[ClesAireSimple]{PolyTri}{%
+          \BuildAireSimpleTri{#2}{1}{\PfCAirex}{\PfCAirey}%
+        }{%
+          \BuildAireSimple{#2}{1}{\PfCAirex}{\PfCAirey}%
+        }%
+      }%
+    }%
+  }%
+}%

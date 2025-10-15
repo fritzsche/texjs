@@ -1,0 +1,140 @@
+%%%
+% Criteres de divisibilite
+%%%
+\def\filedateCritere{2025/07/13}%
+\def\fileversionCritere{0.1a}%
+\message{-- \filedateCritere\space v\fileversionCritere}%
+%
+\setKVdefault[Critere]{Div=2,Remarque=false,All=false,RemarqueAll=false}
+
+\makeatletter
+\NewDocumentCommand\Critere{om}{%
+  \useKVdefault[Critere]%
+  \setKV[Critere]{#1}%
+  \edef\PfC@ListeARetenirCriteres{}%
+  \ifboolKV[Critere]{All}{%
+      \begin{itemize}
+      \item \PfC@CritereDeux{#2}%
+      \item \PfC@CritereTrois{#2}
+      \item \PfC@CritereQuatre{#2}
+      \item \PfC@CritereCinq{#2}
+      \item \PfC@CritereNeuf{#2}
+      \item \PfC@CritereDix{#2}
+      \end{itemize}
+    \ifx\bla\PfC@ListeARetenirCriteres\bla%
+    \else
+      \setsepchar{,}\ignoreemptyitems%
+      \readlist*\PfC@AfficheDivCriteres{\PfC@ListeARetenirCriteres}%
+      \reademptyitems%
+      \edef\PfC@NumListe{}%
+      En appliquant les critères de divisibilité connus, \num{#2} est donc divisible par \num{\PfC@AfficheDivCriteres[1]}%
+      \xintifboolexpr{\PfC@AfficheDivCritereslen>1}{\xintFor* ##1 in{\xintSeq{2}{\PfC@AfficheDivCritereslen}}\do{%
+          \xintifForLast{ et }{ ; }\num{\PfC@AfficheDivCriteres[##1]}%
+        }%
+      }{}.%
+      \ifboolKV[Critere]{RemarqueAll}{\\\textbf{Remarque} : La liste des diviseurs de \num{#2} est \ListeDiviseur{#2}.}{}%
+    \fi%
+  }{%
+    \edef\PfC@ListeDesCriteresATesterAv{\useKV[Critere]{Div}}%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\PfC@ListeDesCriteresATester{\PfC@ListeDesCriteresATesterAv}%
+    \reademptyitems%
+    \foreachitem\PfC@DivTest\in\PfC@ListeDesCriteresATester{%
+      \IfStrEqCase{\PfC@DivTest}{%
+        {2}{\PfC@CritereDeux{#2}}%
+        {3}{\PfC@CritereTrois{#2}}%
+        {4}{\PfC@CritereQuatre{#2}}%
+        {5}{\PfC@CritereCinq{#2}}%
+        {9}{\PfC@CritereNeuf{#2}}%
+        {10}{\PfC@CritereDix{#2}}%
+      }\par%
+    }% 
+  }%
+}%
+
+\NewDocumentCommand\PfC@CritereDeux{m}{%
+  \StrRight{#1}{1}[\PfC@CriDeuxUnite]%
+  Le chiffre des unités de \num{#1} est \num{\PfC@CriDeuxUnite}. Donc \num{#1} %
+  \modulo{\PfC@CriDeuxUnite}{2}%
+  \ifnum\remainder=0\relax%
+  est divisible par 2.%
+  \ifboolKV[Critere]{Remarque}{\\\textbf{Remarque} : $\num{#1}=\num{\fpeval{#1/2}}\times2$.}{}%
+  \edef\PfC@ListeARetenirCriteres{\PfC@ListeARetenirCriteres,2}%
+  \else%
+  n'est pas divisible par 2.%
+  \fi%
+}%
+
+\NewDocumentCommand\PfC@CritereTrois{m}{%
+  La somme des chiffres de \num{#1} est \PfCSommeChiffres{#1}. Comme \num{\PfCSMSomme} %
+  \modulo{\PfCSMSomme}{3}%
+  \ifnum\remainder=0\relax%
+  est divisible par 3, alors \num{#1} est aussi divisible par 3.%
+  \ifboolKV[Critere]{Remarque}{\\\textbf{Remarque} : $\num{#1}=\num{\fpeval{#1/3}}\times3$.}{}%
+  \edef\PfC@ListeARetenirCriteres{\PfC@ListeARetenirCriteres,3}%
+  \else%
+  n'est pas divisible par 3, alors \num{#1} n'est pas divisible par 3.%
+  \fi%
+}%
+
+\NewDocumentCommand\PfC@CritereQuatre{m}{%
+  \ifnum#1<100%
+    \quotient{#1}{4}%
+    \modulo{#1}{4}%
+    \ifnum\remainder=0\relax
+      Comme $\num{#1}=\num{\the\intquotient}\times4$ alors \num{#1} est divisible par 4.
+      \edef\PfC@ListeARetenirCriteres{\PfC@ListeARetenirCriteres,4}%
+    \else
+      Comme $\num{#1}=\num{\the\intquotient}\times4+\num{\the\remainder}$ alors \num{#1} n'est pas divisible par 4.
+    \fi
+  \else
+    \StrRight{#1}{2}[\PfC@CriQuatreUnite]%
+    \num{#1} se termine par \num{\PfC@CriQuatreUnite}. %
+    \modulo{\PfC@CriQuatreUnite}{4}%
+    \ifnum\remainder=0\relax%
+      Comme \num{\PfC@CriQuatreUnite} est divisible par 4, alors \num{#1} est divisible par 4.%
+      \ifboolKV[Critere]{Remarque}{\\\textbf{Remarque} : $\num{#1}=\num{\fpeval{#1/4}}\times4$.}{}%
+      \edef\PfC@ListeARetenirCriteres{\PfC@ListeARetenirCriteres,4}%
+    \else%
+      Comme \num{\PfC@CriQuatreUnite} n'est pas divisible par 4, alors \num{#1} n'est pas divisible par 4.%
+    \fi%
+ \fi
+}%
+
+\NewDocumentCommand\PfC@CritereCinq{m}{%
+  \StrRight{#1}{1}[\PfC@CriCinqUnite]%
+  Le chiffre des unités de \num{#1} est \num{\PfC@CriCinqUnite}. Donc \num{#1} %
+  \modulo{\PfC@CriCinqUnite}{5}%
+  \ifnum\remainder=0\relax%
+  est divisible par 5.%
+  \ifboolKV[Critere]{Remarque}{\\\textbf{Remarque} : $\num{#1}=\num{\fpeval{#1/5}}\times5$.}{}%
+    \edef\PfC@ListeARetenirCriteres{\PfC@ListeARetenirCriteres,5}%
+  \else%
+  n'est pas divisible par 5.%
+  \fi%
+}%
+
+\NewDocumentCommand\PfC@CritereNeuf{m}{%
+  La somme des chiffres de \num{#1} est \PfCSommeChiffres{#1}. Comme \num{\PfCSMSomme} %
+  \modulo{\PfCSMSomme}{9}%
+  \ifnum\remainder=0\relax%
+  est divisible par 9, alors \num{#1} est aussi divisible par 9.%
+  \ifboolKV[Critere]{Remarque}{\\\textbf{Remarque} : $\num{#1}=\num{\fpeval{#1/9}}\times9$.}{}%
+  \edef\PfC@ListeARetenirCriteres{\PfC@ListeARetenirCriteres,9}%
+  \else%
+  n'est pas divisible par 9, alors \num{#1} n'est pas divisible par 9.%
+  \fi%
+}%
+
+\NewDocumentCommand\PfC@CritereDix{m}{%
+  \StrRight{#1}{1}[\PfC@CriDixUnite]%
+  Le chiffre des unités de \num{#1} est \num{\PfC@CriDixUnite}. Donc \num{#1} %
+  \ifnum\PfC@CriDixUnite=0\relax
+  est divisible par 10.%
+  \ifboolKV[Critere]{Remarque}{\\\textbf{Remarque} : $\num{#1}=\num{\fpeval{#1/10}}\times10$.}{}%
+  \edef\PfC@ListeARetenirCriteres{\PfC@ListeARetenirCriteres,10}%
+  \else%
+  n'est pas divisible par 10.%
+  \fi%
+}%
+\makeatother

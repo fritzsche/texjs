@@ -1,0 +1,170 @@
+%%%
+% Représenter un entier dans une base
+%%%
+\def\filedateRepEntier{2024/08/04}%
+\def\fileversionRepEntier{0.1}%
+\message{-- \filedateRepEntier\space v\fileversionRepEntier}%
+%
+\setKVdefault[ClesRBase]{Base=10,Echelle=1,Unite=false,Compact=false,Impression=false,ListeCouleurs={Tomato,LightSteelBlue,LightGreen,Cornsilk}}%
+
+\newcommand\RepresenterEntier[2][]{%
+  \useKVdefault[ClesRBase]%
+  \setKV[ClesRBase]{#1}%
+  \ifboolKV[ClesRBase]{Unite}{%
+    \begin{Geometrie}[TypeTrace="Espace",CoinBG={u*(-10,-10)}]%,CoinHD={u*(30,10)}]
+      Base=\useKV[ClesRBase]{Base};
+      Echelle=\useKV[ClesRBase]{Echelle};
+      Initialisation(5,30,15,50*Echelle);
+      color A,B,C,D,E,F,G,H;
+      pointilles:="non";
+      trace Pave(A,B,C,D,E,F,G,H)(0.1,0.1,0.1);
+    \end{Geometrie}
+  }{%
+    % On décompose le nombre
+    \xintifboolexpr{#2>\fpeval{\useKV[ClesRBase]{Base}**4-1}}{Le nombre est trop grand pour être représenté.}{%
+      \xdef\PfCRetiensDecomp{}%
+      \xdef\PfCResteConversion{#2}%
+%      \#2 vaut #2 et $Base+1$ vaut \fpeval{\useKV[ClesRBase]{Base}-1}\\
+      \whiledo{\PfCResteConversion>\fpeval{\useKV[ClesRBase]{Base}-1}}{%
+        \quotient{\PfCResteConversion}{\useKV[ClesRBase]{Base}}
+%        Le quotient de \PfCResteConversion{} par \useKV[ClesRBase]{Base} est \the\intquotient\\
+        \modulo{\PfCResteConversion}{\useKV[ClesRBase]{Base}}
+%        Le reste de \PfCResteConversion{} par \useKV[ClesRBase]{Base} est \the\remainder\\
+        \xdef\PfCRetiensDecomp{\the\remainder,\PfCRetiensDecomp}
+%        Je retiens le reste : \the\remainder\\
+        \xdef\PfCResteConversion{\the\intquotient}
+%        Je recommence avec \PfCResteConversion\\
+      }%
+%       Je retiens le dernier reste (ou quotient) :
+      \xdef\PfCRetiensDecomp{\PfCResteConversion,\PfCRetiensDecomp}%
+    }%
+%    On obtient la décomposition de #2 sous la forme \PfCRetiensDecomp\\
+    % transformation en liste
+    \setsepchar{,}\ignoreemptyitems
+    \readlist*\ListeDesChiffres{\PfCRetiensDecomp}%
+    \xdef\LongueurNombreEntier{\ListeDesChiffreslen}%
+    \xdef\ListeAvantCouleurs{\useKV[ClesRBase]{ListeCouleurs}}%
+    \readlist*\ListeCouleurEntier{\ListeAvantCouleurs}%
+    \xintifboolexpr{\LongueurNombreEntier==4}{%
+      \xdef\NombreMilliers{\ListeDesChiffres[1]}%
+      \xdef\NombreCentaines{\ListeDesChiffres[2]}%
+      \xdef\NombreDizaines{\ListeDesChiffres[3]}%
+      \xdef\NombreUnites{\ListeDesChiffres[4]}%
+    }{%
+      \xintifboolexpr{\LongueurNombreEntier==3}{%
+        \xdef\NombreMilliers{0}%
+        \xdef\NombreCentaines{\ListeDesChiffres[1]}%
+        \xdef\NombreDizaines{\ListeDesChiffres[2]}%
+        \xdef\NombreUnites{\ListeDesChiffres[3]}%
+      }{%
+        \xintifboolexpr{\LongueurNombreEntier==2}{%
+          \xdef\NombreMilliers{0}%
+          \xdef\NombreCentaines{0}%
+          \xdef\NombreDizaines{\ListeDesChiffres[1]}%
+          \xdef\NombreUnites{\ListeDesChiffres[2]}%
+        }{%
+          \xdef\NombreMilliers{0}%
+          \xdef\NombreCentaines{0}%
+          \xdef\NombreDizaines{0}%
+          \xdef\NombreUnites{\ListeDesChiffres[1]}%
+        }%
+      }%
+    }%
+    \begin{Geometrie}[TypeTrace="Espace",CoinBG={u*(-10,-10)},CoinHD={u*(20,20)}]
+      Echelle=\useKV[ClesRBase]{Echelle};
+      NM=\NombreMilliers;
+      NC=\NombreCentaines;
+      ND=\NombreDizaines;
+      NU=\NombreUnites;
+      Base=\useKV[ClesRBase]{Base};
+      color ColorEntier[];
+      ColorEntier1=\ListeCouleurEntier[1];
+      ColorEntier2=\ListeCouleurEntier[2];
+      ColorEntier3=\ListeCouleurEntier[3];
+      ColorEntier4=\ListeCouleurEntier[4];
+      boolean Compact,Print;
+      Compact=\useKV[ClesRBase]{Compact};
+      Print=\useKV[ClesRBase]{Impression};
+      Initialisation(5,30,20,50*Echelle);
+      color A,B,C,D,E,F,G,H;
+      picture TypePave[];
+      TypePave0=image(
+      trace Pave(A,B,C,D,E,F,G,H)(1,1,1);
+      currentpicture:=nullpicture;
+      remplis polygone(A,B,C,H,E,F) withcolor if Print : blanc else: ColorEntier1 fi;
+      for k=0 upto Base:
+      trace chemin((k/Base)[A,B],(k/Base)[F,G],(k/Base)[E,H]);
+      endfor;
+      for k=0 upto Base:
+      trace chemin((k/Base)[B,C],(k/Base)[G,H],(k/Base)[F,E]);
+      endfor;
+      for k=0 upto Base:
+      trace chemin((k/Base)[A,F],(k/Base)[B,G],(k/Base)[C,H]);
+      endfor;
+      );
+      color A,B,C,D,E,F,G,H;
+      TypePave1=image(
+      trace Pave(A,B,C,D,E,F,G,H)(1/Base,1,1);
+      currentpicture:=nullpicture;
+      remplis polygone(A,B,C,H,E,F) withcolor if Print : blanc else: ColorEntier2 fi;
+      trace chemin(C,H,E);
+      for k=0 upto Base:
+      trace chemin((k/Base)[A,B],(k/Base)[F,G],(k/Base)[E,H]);
+      endfor;
+      for k=0 upto Base:
+      trace chemin((k/Base)[A,F],(k/Base)[B,G],(k/Base)[C,H]);
+      endfor;
+      );
+      color A,B,C,D,E,F,G,H;
+      TypePave2=image(
+      trace Pave(A,B,C,D,E,F,G,H)(1/Base,1/Base,1);
+      currentpicture:=nullpicture;
+      remplis polygone(A,B,C,H,E,F) withcolor if Print : blanc else: ColorEntier3 fi;
+      trace chemin(C,H,E);
+      trace chemin(A,F,E);
+      trace chemin(B,G,F);
+      for k=0 upto Base:
+      trace chemin((k/Base)[A,F],(k/Base)[B,G],(k/Base)[C,H]);
+      endfor;
+      );
+      color A,B,C,D,E,F,G,H;
+      TypePave3=image(
+      trace Pave(A,B,C,D,E,F,G,H)(1/Base,1/Base,1/Base);
+      currentpicture:=nullpicture;
+      remplis polygone(A,B,C,H,E,F) withcolor if Print : blanc else: ColorEntier4 fi;
+      trace chemin(C,H,E);
+      trace chemin(A,F,E);
+      trace chemin(A,B,C);
+      trace chemin(F,G,H);
+      trace chemin(B,G);
+      );
+      if Compact:
+      for k=0 upto (NM-1):
+      trace TypePave0 shifted ((Projette((k/Base,0,0))-Projette((0,0,0))));
+      endfor;
+      for k=0 upto (NC-1):
+      trace TypePave1 shifted ((Projette((k/Base,1+1/Base,0))-Projette((0,0,0))));
+      endfor;
+      for k=0 upto (ND-1):
+      trace TypePave2 shifted ((Projette((k/Base,2+2/Base,0))-Projette((0,0,0))));
+      endfor;
+      for k=0 upto (NU-1):
+      trace TypePave3 shifted ((Projette((k/Base,2+4/Base,0))-Projette((0,0,0))));
+      endfor;
+      else:
+      for k=0 upto (NM-1):
+      trace TypePave0 shifted ((Projette((0,(1+1/Base)*(k-1),0))-Projette((0,0,0))));
+      endfor;
+      for k=0 upto (NC-1):
+      trace TypePave1 shifted ((Projette((0,(1+1/Base)*NM+(1+1/Base)*(k-1),0))-Projette((0,0,0))));
+      endfor;
+      for k=0 upto (ND-1):
+      trace TypePave2 shifted ((Projette((0,(1+1/Base)*NM+(1+1/Base)*(NC-1)+(2/Base)+(2/Base)*(k-1),0))-Projette((0,0,0))));
+      endfor;
+      for k=0 upto (\NombreUnites-1):
+      trace TypePave3 shifted ((Projette((0,(1+1/Base)*NM+(1+1/Base)*(NC-1)+(2/Base)+(2/Base)*(ND-1),(2/Base)*(k)))-Projette((0,0,0))));
+      endfor;
+      fi;
+    \end{Geometrie}
+  }%
+}%

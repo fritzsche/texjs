@@ -1,0 +1,118 @@
+%%%
+% Bande numérique
+%%%
+\def\filedateBandeNumerique{2025/05/26}%
+\def\fileversionBandeNumerique{0.1d}%
+\message{-- \filedateBandeNumerique\space v\fileversionBandeNumerique}%
+%
+\setKVdefault[BandeNum]{Elements={1,1,10},Largeur=\mpdim{2em},Hauteur=\mpdim{1.5em},Invisibles={0},Cibles=false,CouleurCible=LightGray,Logos=false,Solution=false,Codes=false,Dys=false,CouleurSolution={},Cible={},Logo={},Traces={}}%
+\defKV[BandeNum]{CouleurSolution=\ifempty{#1}{\setKV[BandeNum]{Solution=false}}{\setKV[BandeNum]{Solution}}}%
+\defKV[BandeNum]{Cible=\ifempty{#1}{\setKV[BandeNum]{Cibles=false}}{\setKV[BandeNum]{Cibles}}}%
+\defKV[BandeNum]{Logo=\ifempty{#1}{\setKV[BandeNum]{Logos=false}}{\setKV[BandeNum]{Logos}}}%
+\defKV[BandeNum]{Traces=\ifempty{#1}{\setKV[BandeNum]{Codes=false}}{\setKV[BandeNum]{Codes}}}%
+%\defKV[BandeNum]{Cible=\setKV[BandeNum]{Cibles}}%
+%\defKV[BandeNum]{Logo=\setKV[BandeNum]{Logos}}%
+%\defKV[BandeNum]{CouleurSolution=\setKV[BandeNum]{Solution}}%
+%\defKV[BandeNum]{Traces=\setKV[BandeNum]{Codes}}%
+
+\NewDocumentCommand\BandeNumerique{o}{%
+  \useKVdefault[BandeNum]%
+  \setKV[BandeNum]{#1}%
+  \ifPfCPfMScratchDys\relax\setKV[BandeNum]{Dys}\fi%
+  \xdef\PfCBandeNumElementsAv{\useKV[BandeNum]{Elements}}%
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\ListeBandeNumElmts{\PfCBandeNumElementsAv}%
+  \reademptyitems%
+  \ifboolKV[BandeNum]{Cibles}{\xdef\PfCBandeNumCible{\useKV[BandeNum]{Cible}}}{\xdef\PfCBandeNumCible{-1}}%
+  \xdef\PfCRetiensListeInvisible{\useKV[BandeNum]{Invisibles}}%
+  \PfCBandeNum{\PfCRetiensListeInvisible}%
+}%
+
+\NewDocumentCommand\PfCBandeNum{m}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      Depart=\ListeBandeNumElmts[1];
+      Pas=\ListeBandeNumElmts[2];
+      Longueur=\ListeBandeNumElmts[3];
+      LargeurCase=\useKV[BandeNum]{Largeur};
+      HauteurCase=\useKV[BandeNum]{Hauteur};
+      color CouleurCible,CouleurSolution;
+      CouleurCible=\useKV[BandeNum]{CouleurCible};
+      boolean Cibles,Logos,Solution,Codes,Dys;
+      Cibles=\useKV[BandeNum]{Cibles};
+      Logos=\useKV[BandeNum]{Logos};
+      Codes=\useKV[BandeNum]{Codes};
+      Solution=\useKV[BandeNum]{Solution};
+      Dys=\useKV[BandeNum]{Dys};
+      if Dys:
+      LargeurCase:=1.25*LargeurCase;
+      HauteurCase:=1.25*HauteurCase;
+      fi;
+      if Solution:
+      CouleurSolution=\useKV[BandeNum]{CouleurSolution};
+      fi;
+      if Cibles:
+      Cible=\PfCBandeNumCible;
+      fi;
+      vardef AffichageBande(text t)=
+        path case[];
+        case[0]=(unitsquare xscaled LargeurCase yscaled HauteurCase) shifted (0*(LargeurCase,0));
+        for k=1 upto Longueur:
+          case[k]=(unitsquare xscaled LargeurCase yscaled HauteurCase) shifted (k*(LargeurCase,0));
+          label(TEX(decimal(Depart+(k-1)*Pas)),center case[k]);
+        endfor;
+        if Cibles:
+          if Logos:
+            fill case[Cible] withcolor white;
+            if Solution:
+              drawoptions(withcolor CouleurSolution);
+              label(TEX(decimal(Depart+(Cible-1)*Pas)),center case[Cible]);
+              drawoptions();
+            else:
+              label(TEX(\useKV[BandeNum]{Logo}),center case[Cible]);
+            fi;
+          else:
+            fill case[Cible] withcolor CouleurCible;
+            if Solution:
+              drawoptions(withcolor CouleurSolution);
+              label(TEX(decimal(Depart+(Cible-1)*Pas)),center case[Cible]);
+              drawoptions();
+            fi;
+          fi;
+          for p_=t:
+            if p_>0:
+            fill case[p_] withcolor white;
+              if Solution:
+                drawoptions(withcolor CouleurSolution);
+                label(TEX(decimal(Depart+(p_-1)*Pas)),center case[p_]);
+                drawoptions();
+              fi;
+            fi;
+          endfor;
+        else:
+          for p_=t:
+            if p_>0:
+              fill case[p_] withcolor white;
+              if Solution:
+                drawoptions(withcolor CouleurSolution);
+                label(TEX(decimal(Depart+(p_-1)*Pas)),center case[p_]);
+                drawoptions();
+              else:
+              label.bot(TEX("$\ldots$"),center case[p_]);
+              fi;
+            fi;
+          endfor;
+        fi;
+        for k=1 upto Longueur:
+          trace case[k] withpen pencircle scaled 1.05;
+        endfor;
+      enddef;
+
+      AffichageBande(#1);
+      if Codes:
+      \useKV[BandeNum]{Traces};
+      fi;
+    \end{mplibcode}
+  \fi
+}%

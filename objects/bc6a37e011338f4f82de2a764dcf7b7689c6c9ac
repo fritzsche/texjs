@@ -1,0 +1,309 @@
+%%%
+% Equations
+%%%
+\def\filedateEquation{2025/05/26}%
+\def\fileversionEquation{0.1c}%
+\message{-- \filedateEquation\space v\fileversionEquation}%
+%
+\setKVdefault[ClesEquation]{Ecart=0.5,Fleches=false,FlecheDiv=false,Laurent=false,Decomposition=false,Terme=false,Composition=false,Symbole=false,ModeleBarre=false,Balance=false,Decimal=false,Entier=false,Lettre=x,Solution=false,LettreSol=true,Bloc=false,Simplification=false,CouleurTerme=black,CouleurCompo=black,CouleurSous=red,CouleurSymbole=orange,Verification=false,Part=false,Nombre=0,Egalite=false,Produit=false,Facteurs=false,Carre=false,Exact=false,Pose=false,Equivalence=false,Ajout=false,HauteurBrique=0.5,Etape=10,Depart=0,Vide=false,Ajouts={}}
+\defKV[ClesEquation]{Ajouts=\ifempty{#1}{}{\setKV[ClesEquation]{Ajout}}}%
+\newcommand\rightcomment[4]{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \draw[Cfleches,-stealth]
+    ($({pic cs:#3}|-{pic cs:#1})+(\useKV[ClesEquation]{Ecart},0)$)
+    .. controls +(0.2,-0.05) and +(0.2,0.1) ..
+    node[right,align=left]{#4}
+    ($({pic cs:#3}|-{pic cs:#2})+(\useKV[ClesEquation]{Ecart},0.1)$);
+  \end{tikzpicture}%
+}%
+
+\newcommand\leftcomment[4]{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \draw[Cfleches,-stealth]
+    ($({pic cs:#3}|-{pic cs:#1})-(\useKV[ClesEquation]{Ecart},0)$)
+    .. controls +(-0.2,-0.05) and +(-0.2,0.1) ..
+    node[left,align=right]{#4}
+    ($({pic cs:#3}|-{pic cs:#2})-(\useKV[ClesEquation]{Ecart},-0.1)$);
+  \end{tikzpicture}%
+}%
+
+\newcommand\Rightcomment[4]{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \draw[Cfleches,-stealth]
+    ($({pic cs:#3}|-{pic cs:#1})+(\useKV[ClesEquation]{Ecart},0)$)
+    .. controls +(0.2,-0.05) and +(0.2,0.1) ..
+    node[right,align=left]{#4}
+    ($({pic cs:#3}|-{pic cs:#2})+(\useKV[ClesEquation]{Ecart},0.1)$);
+  \end{tikzpicture}%
+}%
+\newcommand\Leftcomment[4]{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \draw[Cfleches,-stealth]
+    ($({pic cs:#3}|-{pic cs:#1})-(\useKV[ClesEquation]{Ecart},0)$)
+    .. controls +(-0.2,-0.05) and +(-0.2,0.1) ..
+    node[left,align=right]{#4}
+    ($({pic cs:#3}|-{pic cs:#2})-(\useKV[ClesEquation]{Ecart},-0.1)$);
+  \end{tikzpicture}%
+}%
+
+% Pour "oublier" les tikzmarks. En cas de plusieurs utilisations de la macro \ResolEquation
+\newcounter{Nbequa}
+\setcounter{Nbequa}{0}
+
+%CT
+\newdimen\fdashwidth\fdashwidth  = 0.8pt % \'epaisseur traits
+\newdimen\fdashlength\fdashlength = 0.5mm % longueur des pointill\'es et s\'eparation entre pointill\'es
+\newdimen\fdashsep\fdashsep    = 3pt % s\'eparateur entre contenu et traits
+
+\def\fdash#1{%
+  \leavevmode\begingroup%
+  \setbox0\hbox{#1}%
+  \def\hdash{\vrule height\fdashwidth width\fdashlength\relax}%
+  \def\vdash{\hrule height\fdashlength width\fdashwidth\relax}%
+  \def\dashblank{\kern\fdashlength}%
+  \ifdim\fdashsep>0pt%
+  \setbox0\hbox{\vrule width0pt height\dimexpr\ht0+\fdashsep depth\dimexpr\dp0+\fdashsep\kern\fdashsep\unhbox0 \kern\fdashsep}%
+  \fi%
+  \edef\hdash{\hbox to\the\wd0{\noexpand\color{Csymbole}\hdash\kern.5\fdashlength\xleaders\hbox{\hdash\dashblank}\hfil\hdash}}%
+  \edef\vdash{\vbox to\the\dimexpr\ht0+\dp0+2\fdashwidth{\noexpand\color{Csymbole}\vdash\kern.5\fdashlength\xleaders\vbox{\vdash\dashblank}\vfil\vdash}}%
+  \hbox{%
+    \vdash%
+    \vtop{\vbox{\offinterlineskip\hdash\hbox{\unhbox0 }\hdash}}%
+    \vdash}%
+  \endgroup%
+}%
+% fin CT
+\def\Fdash#1{\raisebox{-2\fdashsep+\fdashwidth}{\fdash{#1}}}%
+
+%Une simplification de a/b est possible ou non ?
+\newboolean{Simplification}
+
+\newcommand\SSimpliTest[2]{%
+  % Test d'une simplification possible ou pas de #1/#2
+  \newcount\numerateur\newcount\denominateur\newcount\valabsnum\newcount\valabsdeno%
+  \numerateur=\number#1
+  \denominateur=\number#2
+  \ifnum\number#1<0
+  \valabsnum=\numexpr0-\number#1
+  \else
+  \valabsnum=\number#1
+  \fi
+  \ifnum\number#2<0
+  \valabsdeno=\numexpr0-\number#2
+  \else
+  \valabsdeno=\number#2
+  \fi
+  \ifnum\the\valabsnum=0
+    \setboolean{Simplification}{true}
+  \else
+    \PGCD{\the\valabsnum}{\the\valabsdeno}
+    \ifnum\pgcd>1
+      \setboolean{Simplification}{true}
+    \else
+      \ifnum\the\numerateur<0
+        \ifnum\the\denominateur<0
+          \setboolean{Simplification}{true}
+        \else
+          \ifnum\valabsdeno=1\relax
+            \setboolean{Simplification}{true}
+          \else
+          \setboolean{Simplification}{false}
+          \fi
+        \fi
+      \else
+        \ifnum\valabsdeno=1\relax
+          \setboolean{Simplification}{true}
+        \else
+          \setboolean{Simplification}{false}
+        \fi
+      \fi
+    \fi
+  \fi
+}
+
+\definecolor{Cfleches}{RGB}{100,100,100}%
+
+\newcommand\AffichageEqua[4]{%
+  \def\LETTRE{\useKV[ClesEquation]{Lettre}}%
+  \ensuremath{%
+    % partie du x
+    \xintifboolexpr{#1==0}{}{\xintifboolexpr{#1==1}{}{\xintifboolexpr{#1==-1}{-}{\num{#1}}}\LETTRE}%
+    % partie du nombre
+    \xintifboolexpr{#2==0}{\xintifboolexpr{#1==0}{0}{}}{\xintifboolexpr{#2>0}{\xintifboolexpr{#1==0}{}{+}\num{#2}}{\num{#2}}}%
+    % egal
+    =
+    % partie du x
+    \xintifboolexpr{#3==0}{}{\xintifboolexpr{#3==1}{}{\xintifboolexpr{#3==-1}{-}{\num{#3}}}\LETTRE}%
+    % partie du nombre
+    \xintifboolexpr{#4==0}{%
+      \xintifboolexpr{#3==0}{0}{}
+    }{%
+      \xintifboolexpr{#4>0}{\xintifboolexpr{#3==0}{}{+}\num{#4}}{\num{#4}}%
+    }
+  }%
+}%
+
+\newcommand\EcrireSolutionEquation[4]{%
+  L'équation \AffichageEqua{#1}{#2}{#3}{#4} a une unique solution : \opdiv*{\Coeffb}{\Coeffa}{solution}{resteequa}\opcmp{resteequa}{0}$\ifboolKV[ClesEquation]{LettreSol}{\useKV[ClesEquation]{Lettre}=}{}\displaystyle\ifopeq\opexport{solution}{\solution}\num{\solution}\else\ifboolKV[ClesEquation]{Entier}{\SSimplifie{\Coeffb}{\Coeffa}}{\frac{\num{\Coeffb}}{\num{\Coeffa}}}\fi$.
+}%
+
+\input{PfCEquationSoustraction2}%
+\input{PfCEquationTerme1}%
+\input{PfCEquationComposition2}%
+\input{PfCEquationPose1}%
+\input{PfCEquationSymbole1}%
+\input{PfCEquationLaurent1}%
+\input{PfCEquationModeleBarre}%
+\input{PfCEquationBalance}%
+
+\newcommand\ResolEquation[5][]{%
+  \useKVdefault[ClesEquation]%
+  \setKV[ClesEquation]{#1}%
+  %%%
+  \ifboolKV[ClesEquation]{Ajout}{%
+    \xdef\PfMRetiensAjouts{\useKV[ClesEquation]{Ajouts}}%
+    \setsepchar[*]{,*/}\ignoreemptyitems%
+    \greadlist*\ListeEquaAjout{\PfMRetiensAjouts}%
+    \reademptyitems%
+  }{}%
+  %%%
+  \colorlet{Cterme}{\useKV[ClesEquation]{CouleurTerme}}%
+  \colorlet{Ccompo}{\useKV[ClesEquation]{CouleurCompo}}%
+  \colorlet{Csymbole}{\useKV[ClesEquation]{CouleurSymbole}}%
+  \colorlet{Cdecomp}{\useKV[ClesEquation]{CouleurSous}}%
+  \ifboolKV[ClesEquation]{Carre}{%
+    \ResolEquationCarre[#1]{#2}%
+  }{%
+    \ifboolKV[ClesEquation]{Produit}{%
+      \ResolEquationProduit[#1]{#2}{#3}{#4}{#5}%
+    }{%
+      \ifboolKV[ClesEquation]{Verification}{%
+        \Verification[#1]{#2}{#3}{#4}{#5}%
+      }{%
+        \ifboolKV[ClesEquation]{Balance}{%
+          \ResolEquationBalance[#1]{#2}{#3}{#4}{#5}%
+        }{%
+          \ifboolKV[ClesEquation]{ModeleBarre}{%
+            \ResolEquationMBarre[#1]{#2}{#3}{#4}{#5}%
+          }{%
+            \ifboolKV[ClesEquation]{Symbole}{%
+              \ResolEquationSymbole[#1]{#2}{#3}{#4}{#5}%
+            }{%
+              \ifboolKV[ClesEquation]{Laurent}{%
+                \ResolEquationLaurent[#1]{#2}{#3}{#4}{#5}%
+              }{%
+                \ifboolKV[ClesEquation]{Terme}{%
+                  \ResolEquationTerme[#1]{#2}{#3}{#4}{#5}%
+                }{\ifboolKV[ClesEquation]{Composition}{%
+                    \ResolEquationComposition[#1]{#2}{#3}{#4}{#5}%
+                  }{\ifboolKV[ClesEquation]{Pose}{%
+                      \ResolEquationL[#1]{#2}{#3}{#4}{#5}%
+                    }{%
+                      \ResolEquationSoustraction[#1]{#2}{#3}{#4}{#5}%
+                    }%
+                  }%
+                }%
+              }%
+            }%
+          }%
+        }%
+      }%
+    }%
+  }%
+}%
+
+\newcommand\ResolEquationCarre[2][]{%
+  \setKV[ClesEquation]{#1}%
+  \xintifboolexpr{#2<0}{%
+    Comme $\num{#2}$ est n\'egatif, alors l'\'equation $\useKV[ClesEquation]{Lettre}^2=\num{#2}$ n'a aucune solution.%
+  }{\xintifboolexpr{#2==0}{%
+      L'\'equation $\useKV[ClesEquation]{Lettre}^2=0$ a une unique solution : $\useKV[ClesEquation]{Lettre}=0$.%
+    }{%
+      Comme \num{#2} est positif, alors l'\'equation $\useKV[ClesEquation]{Lettre}^2=\num{#2}$ a deux solutions :%
+      \begin{align*}
+        \useKV[ClesEquation]{Lettre}&=\sqrt{\num{#2}}&&\text{et}&\useKV[ClesEquation]{Lettre}&=-\sqrt{\num{#2}}%\\
+        \ifboolKV[ClesEquation]{Exact}{\\%
+        \useKV[ClesEquation]{Lettre}&=\num{\fpeval{sqrt(#2)}}&&\text{et}&\useKV[ClesEquation]{Lettre}&=-\num{\fpeval{sqrt(#2)}}}{}%
+      \end{align*}
+    }%
+  }%
+}%
+
+\newcommand\ResolEquationProduit[5][]{%
+  \setKV[ClesEquation]{#1}%
+  \ifboolKV[ClesEquation]{Equivalence}{}{C'est un produit nul donc \ifboolKV[ClesEquation]{Facteurs}{l'un au
+      moins des facteurs est nul}{} :}%
+  \ifboolKV[ClesEquation]{Equivalence}{%
+      \[\Distri{#2}{#3}{#4}{#5}=0\]
+    \begin{align*}%
+      &\makebox[0pt]{$\Longleftrightarrow$}&\xintifboolexpr{#3==0}{\xintifboolexpr{#2==1}{}{\num{#2}}\useKV[ClesEquation]{Lettre}}{\xintifboolexpr{#2==1}{}{\num{#2}}\useKV[ClesEquation]{Lettre}\xintifboolexpr{#3>0}{+\num{#3}}{-\num{\fpeval{0-#3}}}}&=0&\quad&\makebox[0pt]{ou}\quad&\xintifboolexpr{#5==0}{\xintifboolexpr{#4==1}{}{\num{#4}}\useKV[ClesEquation]{Lettre}}{\xintifboolexpr{#4==1}{}{\num{#4}}\useKV[ClesEquation]{Lettre}\xintifboolexpr{#5>0}{+\num{#5}}{-\num{\fpeval{0-#5}}}}&=0\\
+      &\makebox[0pt]{$\Longleftrightarrow$}&\xintifboolexpr{#3==0}{\xdef\Coeffa{1}\xdef\Coeffb{\fpeval{0-#3}}\xintifboolexpr{#2==1}{&}{\useKV[ClesEquation]{Lettre}&=0}}{\xdef\Coeffa{#2}\xdef\Coeffb{\fpeval{0-#3}}\xintifboolexpr{\Coeffa==1}{}{\num{\Coeffa}}\useKV[ClesEquation]{Lettre}&=\num{\Coeffb}}&&&\xintifboolexpr{#5==0}{\xdef\Coeffc{1}\xdef\Coeffd{\fpeval{0-#5}}\xintifboolexpr{#4==1}{&}{\useKV[ClesEquation]{Lettre}&=0}}{\xdef\Coeffc{#4}\xdef\Coeffd{\fpeval{0-#5}}\xintifboolexpr{\Coeffc==1}{}{\num{\Coeffc}}\useKV[ClesEquation]{Lettre}&=\num{\Coeffd}}%\\
+      \xintifboolexpr{\Coeffa==1 'and' \Coeffc==1}{}{\\%\ifnum\cmtd>1
+      &\makebox[0pt]{$\Longleftrightarrow$}&\xintifboolexpr{\Coeffa==1}{&}{\useKV[ClesEquation]{Lettre}&=\frac{\num{\Coeffb}}{\num{\Coeffa}}}\xintifboolexpr{\Coeffc==1}{}{&&&\useKV[ClesEquation]{Lettre}&=\frac{\num{\Coeffd}}{\num{\Coeffc}}}
+      % accolade%\\
+      %%%% 
+      \ifboolKV[ClesEquation]{Entier}{%
+      \xdef\TSimp{}%
+      \SSimpliTest{\Coeffb}{\Coeffa}\ifthenelse{\boolean{Simplification}}{\xintifboolexpr{#3==0}{\xdef\TSimp{0}}{\xdef\TSimp{1}}}{\xdef\TSimp{0}}
+      \SSimpliTest{\Coeffd}{\Coeffc}\ifthenelse{\boolean{Simplification}}{\xintifboolexpr{#5==0}{}{\xdef\TSimp{\fpeval{\TSimp+1}}}}{}
+      \xintifboolexpr{\TSimp==0}{}{\\
+      \ifboolKV[ClesEquation]{Simplification}{%
+      &\makebox[0pt]{$\Longleftrightarrow$}&\SSimpliTest{\Coeffb}{\Coeffa}\xintifboolexpr{\Coeffa==1}{&}{\ifthenelse{\boolean{Simplification}}{\useKV[ClesEquation]{Lettre}&=\SSimplifie{\Coeffb}{\Coeffa}}{&}%\\
+      }
+      }{}
+      &&&\ifboolKV[ClesEquation]{Simplification}{%
+      \SSimpliTest{\Coeffd}{\Coeffc}%
+          \xintifboolexpr{\Coeffc==1}{}{\ifthenelse{\boolean{Simplification}}{\useKV[ClesEquation]{Lettre}&=\SSimplifie{\Coeffd}{\Coeffc}}{}%\\
+      }
+      }{}
+      }
+      }{}
+      }
+    \end{align*}
+  }{%
+    \begin{align*}
+      \Affichage[Lettre={\useKV[ClesEquation]{Lettre}}]{0}{#2}{#3}&=0&&\text{ou}&\Affichage[Lettre={\useKV[ClesEquation]{Lettre}}]{0}{#4}{#5}&=0\\
+      \xintifboolexpr{#3==0}{\xdef\Coeffa{1}\xdef\Coeffb{\fpeval{0-#3}}\xintifboolexpr{#2==1}{&}{\useKV[ClesEquation]{Lettre}&=0}}{\xdef\Coeffa{#2}\xdef\Coeffb{\fpeval{0-#3}}\Affichage[Lettre={\useKV[ClesEquation]{Lettre}}]{0}{\Coeffa}{0}&=\num{\Coeffb}}&&&\xintifboolexpr{#5==0}{\xdef\Coeffc{1}\xdef\Coeffd{\fpeval{0-#5}}\xintifboolexpr{#4==1}{&}{\useKV[ClesEquation]{Lettre}&=0}}{\xdef\Coeffc{#4}\xdef\Coeffd{\fpeval{0-#5}}\Affichage[Lettre={\useKV[ClesEquation]{Lettre}}]{0}{\Coeffc}{0}&=\num{\Coeffd}}%\\
+      \xintifboolexpr{\Coeffa==1 'and' \Coeffc==1}{}{\\%\ifnum\cmtd>1
+      \xintifboolexpr{\Coeffa==1}{&}{\useKV[ClesEquation]{Lettre}&=\xintifboolexpr{\Coeffa==-1}{\num{\fpeval{-\Coeffb}}}{\frac{\num{\Coeffb}}{\num{\Coeffa}}}}\xintifboolexpr{\Coeffc==1}{}{&&&\useKV[ClesEquation]{Lettre}&=\xintifboolexpr{\Coeffc==-1}{\num{\fpeval{-\Coeffd}}}{\frac{\num{\Coeffd}}{\num{\Coeffc}}}}
+       %accolade%\\
+      %%%%   
+      \ifboolKV[ClesEquation]{Entier}{%
+      \xdef\TSimp{}
+      \SSimpliTest{\Coeffb}{\Coeffa}\ifthenelse{\boolean{Simplification}}{\xintifboolexpr{#3==0}{\xdef\TSimp{0}}{\xdef\TSimp{1}}}{\xdef\TSimp{0}}
+      \SSimpliTest{\Coeffd}{\Coeffc}\ifthenelse{\boolean{Simplification}}{\xintifboolexpr{#5==0}{}{\xdef\TSimp{\fpeval{\TSimp+1}}}}{}
+      \xintifboolexpr{\TSimp==0}{}{\\
+      \ifboolKV[ClesEquation]{Simplification}{%
+      \SSimpliTest{\Coeffb}{\Coeffa}
+      \xintifboolexpr{\Coeffa==1 'or' \Coeffa==-1}{&}{\ifthenelse{\boolean{Simplification}}{\useKV[ClesEquation]{Lettre}&=\SSimplifie{\Coeffb}{\Coeffa}}{&}%\\
+      }
+      }{}
+      &&&\ifboolKV[ClesEquation]{Simplification}{%
+      \SSimpliTest{\Coeffd}{\Coeffc}%
+          \xintifboolexpr{\Coeffc==1 'or' \Coeffc==-1}{}{\ifthenelse{\boolean{Simplification}}{\useKV[ClesEquation]{Lettre}&=\SSimplifie{\Coeffd}{\Coeffc}}{}%\\
+      }
+      }{}
+      }
+      }{}
+      }
+    \end{align*}
+  }%
+  \ifboolKV[ClesEquation]{Solution}{L'\'equation $\Affichage[Lettre={\useKV[ClesEquation]{Lettre}}]{0}{#2}{#3}=\Affichage[Lettre={\useKV[ClesEquation]{Lettre}}]{0}{#4}{#5}$ a deux solutions : \opdiv*{\Coeffb}{\Coeffa}{solution}{resteequa}\opcmp{resteequa}{0}$\ifboolKV[ClesEquation]{LettreSol}{\useKV[ClesEquation]{Lettre}=}{}\displaystyle\ifopeq\opexport{solution}{\solution}\num{\solution}\else\ifboolKV[ClesEquation]{Entier}{\SSimplifie{\Coeffb}{\Coeffa}}{\frac{\num{\Coeffb}}{\num{\Coeffa}}}\fi$ et \opdiv*{\Coeffd}{\Coeffc}{solution}{resteequa}\opcmp{resteequa}{0}$\ifboolKV[ClesEquation]{LettreSol}{\useKV[ClesEquation]{Lettre}=}{}\displaystyle\ifopeq\opexport{solution}{\solution}\num{\solution}\else\ifboolKV[ClesEquation]{Entier}{\SSimplifie{\Coeffd}{\Coeffc}}{\frac{\num{\Coeffd}}{\num{\Coeffc}}}\fi$.
+  }{}%
+}
+
+\newcommand\Verification[5][]{%
+  \setKV[ClesEquation]{#1}%
+  \xdef\ValeurTest{\useKV[ClesEquation]{Nombre}}%
+  Testons la valeur $\ifboolKV[ClesEquation]{LettreSol}{\useKV[ClesEquation]{Lettre}=}{}\num{\ValeurTest}$ :%
+  \begin{align*}
+    \ifboolKV[ClesEquation]{Part}{\text{d'une part :}&&\text{d'autre part :}\\}{}%
+    \xintifboolexpr{#2==0}{\num{#3}}{\num{#2}\times\xintifboolexpr{\ValeurTest<0}{(\num{\ValeurTest})}{\num{\ValeurTest}}\xintifboolexpr{#3==0}{}{\xintifboolexpr{#3>0}{+\num{#3}}{\num{#3}}}}&&\xintifboolexpr{#4==0}{\num{#5}}{\num{#4}\times\xintifboolexpr{\ValeurTest<0}{(\num{\ValeurTest})}{\num{\ValeurTest}}\xintifboolexpr{#5==0}{}{\xintifboolexpr{#5>0}{+\num{#5}}{\num{#5}}}}\\
+    \xintifboolexpr{#2==0}{}{\num{\fpeval{#2*\useKV[ClesEquation]{Nombre}}}\xintifboolexpr{#3==0}{}{\xintifboolexpr{#3>0}{+\num{#3}}{\num{#3}}}}&&\xintifboolexpr{#4==0}{}{\num{\fpeval{#4*\useKV[ClesEquation]{Nombre}}}\xintifboolexpr{#5==0}{}{\xintifboolexpr{#5>0}{+\num{#5}}{\num{#5}}}}\\
+    \xintifboolexpr{#2==0}{}{\num{\fpeval{#2*\useKV[ClesEquation]{Nombre}+#3}}}&&\xintifboolexpr{#4==0}{}{\num{\fpeval{#4*\useKV[ClesEquation]{Nombre}+#5}}}
+  \end{align*}
+  \xdef\Testa{\fpeval{#2*\useKV[ClesEquation]{Nombre}+#3}}\xdef\Testb{\fpeval{#4*\useKV[ClesEquation]{Nombre}+#5}}%
+  \ifboolKV[ClesEquation]{Egalite}{%
+    Comme \xintifboolexpr{\Testa==\Testb}{$\num{\Testa}=\num{\Testb}$}{$\num{\Testa}\not=\num{\Testb}$}, alors l'\'egalit\'e $\Affichage[Lettre=\useKV[ClesEquation]{Lettre}]{0}{#2}{#3}=\Affichage[Lettre=\useKV[ClesEquation]{Lettre}]{0}{#4}{#5}$ \xintifboolexpr{\Testa==\Testb}{ est v\'erifi\'ee }{ n'est pas v\'erifi\'ee } pour $\ifboolKV[ClesEquation]{LettreSol}{\useKV[ClesEquation]{Lettre}=}{}\num{\useKV[ClesEquation]{Nombre}}$.%
+    }{\xintifboolexpr{\Testa==\Testb}{Comme $\num{\Testa}=\num{\Testb}$, alors $\ifboolKV[ClesEquation]{LettreSol}{\useKV[ClesEquation]{Lettre}=}{}\num{\useKV[ClesEquation]{Nombre}}$ est bien }{Comme $\num{\Testa}\not=\num{\Testb}$, alors $\ifboolKV[ClesEquation]{LettreSol}{\useKV[ClesEquation]{Lettre}=}{}\num{\useKV[ClesEquation]{Nombre}}$ n'est pas }une solution de l'\'equation $\Affichage[Lettre=\useKV[ClesEquation]{Lettre}]{0}{#2}{#3}=\Affichage[Lettre=\useKV[ClesEquation]{Lettre}]{0}{#4}{#5}$.}%
+}%

@@ -1,0 +1,546 @@
+%%%
+% Arbre de calculs
+%%%
+\def\filedateArbreC{2025/05/26}%
+\def\fileversionArbreC{0.1a}%
+\message{-- \filedateArbreC\space v\fileversionArbreC}%
+\newtoks\toklistearbre%
+\newtoks\toklistearbrefractions%
+\newtoks\toklistearbreexpressions%
+
+\def\UpdatetoksArbreCalcul#1\nil{\IfDecimal{#1}{\addtotok\toklistearbre{#1,}}{\addtotok\toklistearbre{"#1",}}}%
+\def\UpdatetoksArbreFractions#1\nil{\addtotok\toklistearbrefractions{"#1",}}%
+\def\UpdatetoksArbreExpressions#1\nil{\addtotok\toklistearbreexpressions{"#1",}}%
+
+\setKVdefault[ArbreCalcul]{Correction=false,Couleur=LightSteelBlue,Substitue=7,Litteral=false,Largeur=8mm,LargeurC=8mm,Ecart=1.5cm,Hauteur=10mm,Lettre="x",CouleurDepart=LightGreen,Fractions=false,Nombres={},Expressions={},Etape=infinity,Fraction={}}%
+\defKV[ArbreCalcul]{Fraction=\ifempty{#1}{}{\setKV[ArbreCalcul]{Fractions}}}%
+
+\NewDocumentCommand\ArbreCalcul{om}{%
+  \useKVdefault[ArbreCalcul]%
+  \setKV[ArbreCalcul]{#1}%
+  \toklistearbre{}%
+  \toklistearbrefractions{}%
+  \toklistearbreexpressions{}%
+  \infixtoRPN{#2}%
+  \setsepchar{ }\ignoreemptyitems%
+  \readlist*\ListeNombres{\RPN}%
+  \reademptyitems%
+  \foreachitem\compteur\in\ListeNombres{\expandafter\UpdatetoksArbreCalcul\compteur\nil}%
+  \ifboolKV[ArbreCalcul]{Fractions}{%
+    \xdef\Foo{\useKV[ArbreCalcul]{Nombres}}%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeFractions{\Foo}%
+    \reademptyitems
+    \foreachitem\compteur\in\ListeFractions{\expandafter\UpdatetoksArbreFractions\compteur\nil}%
+    \BuildArbreCalculFraction{\the\toklistearbre}{\the\toklistearbrefractions}%
+  }{%
+     \ifboolKV[ArbreCalcul]{Litteral}{
+    \xdef\Foo{\useKV[ArbreCalcul]{Nombres}}%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\ListeFractions{\Foo}%
+    \reademptyitems
+    \foreachitem\compteur\in\ListeFractions{\expandafter\UpdatetoksArbreFractions\compteur\nil}%
+      \xdef\Foo{\useKV[ArbreCalcul]{Expressions}}%
+      \setsepchar{,}\ignoreemptyitems%
+      \readlist*\ListeExpressions{\Foo}%
+      \reademptyitems
+      \foreachitem\compteur\in\ListeExpressions{\expandafter\UpdatetoksArbreExpressions\compteur\nil}%
+%      listarbre : \the\toklistearbre%
+%
+%      listfracions : \the\toklistearbrefractions
+%
+%      listexpressions : \the\toklistearbreexpressions
+      \BuildArbreCalculLitteral{\the\toklistearbre}{\the\toklistearbrefractions}{\the\toklistearbreexpressions}%
+    }{%
+      \BuildArbreCalcul{\the\toklistearbre}%
+    }%
+  }%
+}%
+
+\NewDocumentCommand\BuildArbreCalcul{m}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      boolean Correction,Litteral,Allume[];
+      Correction=\useKV[ArbreCalcul]{Correction};
+      Litteral=\useKV[ArbreCalcul]{Litteral};
+      
+      NombreSubstitue=\useKV[ArbreCalcul]{Substitue};
+
+      etape=0;
+      Etape=\useKV[ArbreCalcul]{Etape};
+      
+      color Evidence,CoulDepart;
+      Evidence=\useKV[ArbreCalcul]{Couleur};
+      CoulDepart=\useKV[ArbreCalcul]{CouleurDepart};
+      
+      pair pointprec;
+
+      path base[];
+      base1=unitsquare xscaled \useKV[ArbreCalcul]{Largeur} yscaled 5mm;
+      base2=fullcircle scaled 5mm;
+      base3=unitsquare xscaled \useKV[ArbreCalcul]{LargeurC} yscaled 5mm;
+      
+      vardef BlocCalcul(expr Ba,Bb,op,cha,chb)=%
+      % Ba point gauche
+      % Bb point droite
+      % op opération à afficher
+      etape:=etape+1;
+      save $;
+      picture $;
+      path cc[];
+      pair Bc;
+      Bc=(0.5*(xpart(Ba)+xpart(Bb)),if ypart(Bb)<ypart(Ba):ypart(Bb) else:ypart(Ba) fi -0.75u);
+      pointprec:=Bc+u*(0,-0.75);
+      $=image(
+      if Allume[numeropoint-1]=true:
+      cc1=base3 shifted (Ba-center base3);
+      else:
+      cc1=base1 shifted (Ba-center base1);
+      fi;
+      if Allume[numeropoint]=true:
+      cc2=base3 shifted (Bb-center base3);
+      else:
+      cc2=base1 shifted (Bb-center base1);
+      fi;
+      
+      cc3=(fullcircle scaled 5mm) shifted Bc;
+      cc4=base3 shifted (pointprec-center base3);
+      if op="mul":
+      label(TEX("$\times$"),Bc);
+      ValeurPile[numeropoint-1]:=cha*chb;
+      elseif op="add":
+      label(TEX("$+$"),Bc);
+      ValeurPile[numeropoint-1]:=cha+chb;
+      elseif op="sub":
+      label(TEX("$\_$"),Bc);
+      ValeurPile[numeropoint-1]:=cha-chb;
+      elseif op="div":
+      label(TEX("$\div$"),Bc);
+      ValeurPile[numeropoint-1]:=cha/chb;
+      fi;
+      if Correction:
+      if etape<Etape+1:
+      fill cc4 withcolor Evidence;
+      label(TEX("\num{"&decimal(ValeurPile[numeropoint-1])&"}"),pointprec);
+      fi;
+      fi;
+      for l=1 upto 4:
+      trace cc[l];
+      endfor;
+      draw (Ba--Bc) cutbefore cc1 cutafter cc3;
+      draw (Bb--Bc) cutbefore cc2 cutafter cc3;
+      draw (Bc--pointprec) cutbefore cc3 cutafter cc4;
+      );
+      $
+      enddef;
+
+      numeric Valeurs[];
+      numeric Valeursa[];
+      
+      string Operations[];
+
+      numeric numeropoint;
+      numeropoint=0;
+
+      numeric ValeurPile[];
+      
+      vardef RecupDonnees(text t)=
+      n:=0;
+      for p_=t:
+      n:=n+1;
+      if numeric p_:
+      Valeurs[n]=p_;
+      Operations[n]="";
+      else:
+      Valeurs[n]=infinity;
+      Operations[n]=p_;
+      fi;
+      endfor;
+      n:=n+1;
+      Operations[n]="stop";
+      nbtotal=n;
+      for k=1 upto nbtotal:
+      ValeurPile[k]=0;
+      endfor;
+      enddef;
+
+      pair A[];
+      ecart=\useKV[ArbreCalcul]{Ecart};
+
+      RecupDonnees(#1);
+
+      A[0]=(0,0);
+      k=0;
+      nbetape:=0;
+      
+      for p_=#1:
+      k:=k+1;
+      if numeric p_:
+      numeropoint:=numeropoint+1;
+      if unknown A[numeropoint]:A[numeropoint]-A[numeropoint-1]=ecart*(1,0);Allume[numeropoint]=false; else:
+      A[numeropoint]:=A[numeropoint-1]+ecart*(1,0); Allume[numeropoint]:=false;
+      fi;
+      if Valeurs[k]=0:Valeursa[k]:=NombreSubstitue else: Valeursa[k]=Valeurs[k] fi;
+      if Operations[k+1]="neg":
+      if Valeurs[k]=0:fill (base1 shifted (A[numeropoint]-center base1)) withcolor CoulDepart; if Litteral:
+      label(TEX("$\useKV[ArbreCalcul]{Lettre}$"),A[numeropoint]);
+      else:
+      label(TEX("\num{"&decimal(-Valeursa[k])&"}"),A[numeropoint]);
+      fi;
+      else:
+      label(TEX("\num{"&decimal(-Valeursa[k])&"}"),A[numeropoint]);
+      fi;      
+      ValeurPile[numeropoint]:=-Valeursa[k];
+      else:
+      if Valeurs[k]=0:fill (base1 shifted (A[numeropoint]-center base1)) withcolor CoulDepart;if Litteral:
+      label(TEX("$\useKV[ArbreCalcul]{Lettre}$"),A[numeropoint]);
+      else:
+      label(TEX("\num{"&decimal(Valeursa[k])&"}"),A[numeropoint]);
+      fi;
+      else:
+      label(TEX("\num{"&decimal(Valeursa[k])&"}"),A[numeropoint]);
+      fi;
+      ValeurPile[numeropoint]:=Valeursa[k];
+      fi;      
+      elseif string p_:
+      if p_<>"neg":
+      trace BlocCalcul(A[numeropoint-1],A[numeropoint],Operations[k],ValeurPile[numeropoint-1],ValeurPile[numeropoint]);
+      A[numeropoint-1]:=pointprec;
+      Allume[numeropoint-1]:=true;
+      numeropoint:=numeropoint-1;
+      fi;
+      fi;
+      endfor;
+    \end{mplibcode}
+  \fi
+}%
+
+\NewDocumentCommand\BuildArbreCalculFraction{mm}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      boolean Correction,Allume[];
+      Correction=\useKV[ArbreCalcul]{Correction};
+      
+      string Fraction;
+      Fraction=\useKV[ArbreCalcul]{Fraction};
+      
+      color Evidence,CoulDepart;
+      Evidence=\useKV[ArbreCalcul]{Couleur};
+      CoulDepart=\useKV[ArbreCalcul]{CouleurDepart};
+      
+      pair pointprec;
+
+      path base[];
+      base1=unitsquare xscaled \useKV[ArbreCalcul]{Largeur} yscaled \useKV[ArbreCalcul]{Hauteur};
+      base2=fullcircle scaled 5mm;
+      base3=unitsquare xscaled \useKV[ArbreCalcul]{LargeurC} yscaled \useKV[ArbreCalcul]{Hauteur};
+      
+      vardef BlocCalcul(expr Ba,Bb,op,cha,chb)=%
+      % Ba point gauche
+      % Bb point droite
+      % op opération à afficher
+      etape:=etape+1;
+      save $;
+      picture $;
+      path cc[];
+      pair Bc;
+      Bc=(0.5*(xpart(Ba)+xpart(Bb)),if ypart(Bb)<ypart(Ba):ypart(Bb) else:ypart(Ba) fi -0.75u);
+      pointprec:=Bc+u*(0,-1.25);
+      $=image(
+      if Allume[numeropoint-1]=true:
+      cc1=base3 shifted (Ba-center base3);
+      else:
+      cc1=base1 shifted (Ba-center base1);
+      fi;
+      if Allume[numeropoint]=true:
+      cc2=base3 shifted (Bb-center base3);
+      else:
+      cc2=base1 shifted (Bb-center base1);
+      fi;
+      cc3=(fullcircle scaled 5mm) shifted Bc;
+      cc4=base3 shifted (pointprec-center base3);
+      if op="mul":
+      label(TEX("$\times$\MulFraction[Seul][3]{"&cha&"}{"&chb&"}[\ResultatMul]"),Bc);
+      ValeurPile[numeropoint-1]:="\ResultatMul";
+      elseif op="add":
+      label(TEX("$+$\AddFraction[Seul][3]{"&cha&"}{"&chb&"}[\ResultatAdd]"),Bc);
+      ValeurPile[numeropoint-1]:="\ResultatAdd";
+      elseif op="sub":
+      label(TEX("$\_$\SousFraction[Seul][3]{"&cha&"}{"&chb&"}[\ResultatSous]"),Bc);
+      ValeurPile[numeropoint-1]:="\ResultatSous";
+      elseif op="div":
+      label(TEX("$\div$\DivFraction[Seul][3]{"&cha&"}{"&chb&"}[\ResultatDiv]"),Bc);
+      ValeurPile[numeropoint-1]:="\ResultatDiv";
+      fi;
+      if Correction:
+      if etape<Etape+1:
+      fill cc4 withcolor Evidence;
+      label(TEX("$\displaystyle\tofrac{"&ValeurPile[numeropoint-1]&"}$"),pointprec);
+      fi;
+      fi;
+      for l=1 upto 4:
+      trace cc[l];
+      endfor;
+      draw (Ba--Bc) cutbefore cc1 cutafter cc3;
+      draw (Bb--Bc) cutbefore cc2 cutafter cc3;
+      draw (Bc--pointprec) cutbefore cc3 cutafter cc4;
+      );
+      $
+      enddef;
+
+      numeric Valeurs[];
+      string Valeursa[];
+      
+      string Operations[];
+
+      numeric numeropoint;
+      numeropoint=0;
+
+      string ValeurPile[];
+      
+      vardef RecupDonnees(text t)=
+      n:=0;
+      for p_=t:
+      n:=n+1;
+      if numeric p_:
+      Valeurs[n]=p_;
+      Operations[n]="";
+      else:
+      Valeurs[n]=infinity;
+      Operations[n]=p_;
+      fi;
+      endfor;
+      n:=n+1;
+      Operations[n]="stop";
+      nbtotal=n;
+      for k=1 upto nbtotal:
+      ValeurPile[k]="0";
+      endfor;
+      enddef;
+
+      vardef RecupFractions(text t)=
+      n:=0;
+      for p_=t:
+      n:=n+1;
+      Valeursa[n]=p_;
+      endfor;
+      enddef;
+
+      pair A[];
+      ecart=\useKV[ArbreCalcul]{Ecart};
+
+      RecupDonnees(#1);
+      RecupFractions(#2);
+
+      etape=0;
+      Etape=\useKV[ArbreCalcul]{Etape};
+      
+      A[0]=(0,0);
+      k=0;
+      nbetape:=0;
+      
+      for p_=#1:
+      k:=k+1;
+      if numeric p_:
+      numeropoint:=numeropoint+1;
+      if unknown A[numeropoint]:A[numeropoint]-A[numeropoint-1]=ecart*(1,0);Allume[numeropoint]=false; else:
+      A[numeropoint]:=A[numeropoint-1]+ecart*(1,0); Allume[numeropoint]:=false;
+      fi;
+      if Valeurs[k]=0:Valeursa[Valeurs[k]]:=\useKV[ArbreCalcul]{Fraction} fi;
+      if Operations[k+1]="neg":
+      if Valeurs[k]=0:fill (base1 shifted (A[numeropoint]-center base1)) withcolor CoulDepart;
+      label(TEX("$\displaystyle\tofrac{"&-Valeursa[Valeurs[k]]&"}$"),A[numeropoint]);
+      else:
+      label(TEX("$\displaystyle\tofrac{"&-Valeursa[Valeurs[k]]&"}$"),A[numeropoint]);
+      fi;      
+      ValeurPile[numeropoint]:=decimal(-Valeursa[Valeurs[k]]);
+      else:
+      if Valeurs[k]=0:fill (base1 shifted (A[numeropoint]-center base1)) withcolor CoulDepart;
+      label(TEX("$\displaystyle\tofrac{"&Valeursa[Valeurs[k]]&"}$"),A[numeropoint]);
+        else:
+      label(TEX("$\displaystyle\tofrac{"&Valeursa[Valeurs[k]]&"}$"),A[numeropoint]);
+      fi;
+      ValeurPile[numeropoint]:=Valeursa[Valeurs[k]];
+      fi;      
+      elseif string p_:
+      if p_<>"neg":
+      trace BlocCalcul(A[numeropoint-1],A[numeropoint],Operations[k],ValeurPile[numeropoint-1],ValeurPile[numeropoint]);
+      A[numeropoint-1]:=pointprec;
+      Allume[numeropoint-1]:=true;
+      numeropoint:=numeropoint-1;
+      fi;
+      fi;
+      endfor;
+    \end{mplibcode}
+  \fi
+}%
+
+\NewDocumentCommand\BuildArbreCalculLitteral{mmm}{%
+  \ifluatex
+    \mplibforcehmode
+    \begin{mplibcode}
+      boolean Correction,Allume[];
+      Correction=\useKV[ArbreCalcul]{Correction};
+      
+      color Evidence,CoulDepart;
+      Evidence=\useKV[ArbreCalcul]{Couleur};
+      CoulDepart=\useKV[ArbreCalcul]{CouleurDepart};
+      
+      pair pointprec;
+
+      path base[];
+      base1=unitsquare xscaled \useKV[ArbreCalcul]{Largeur} yscaled \useKV[ArbreCalcul]{Hauteur};
+      base2=fullcircle scaled 5mm;
+      base3=unitsquare xscaled \useKV[ArbreCalcul]{LargeurC} yscaled \useKV[ArbreCalcul]{Hauteur};
+      
+      vardef BlocCalcul(expr Ba,Bb,op,cha,chb)=%
+      % Ba point gauche
+      % Bb point droite
+      % op opération à afficher
+      etape:=etape+1;
+      save $;
+      picture $;
+      path cc[];
+      pair Bc;
+      Bc=(0.5*(xpart(Ba)+xpart(Bb)),if ypart(Bb)<ypart(Ba):ypart(Bb) else:ypart(Ba) fi -0.75u);
+      pointprec:=Bc+u*(0,-1.25);
+      $=image(
+      if Allume[numeropoint-1]=true:
+      cc1=base3 shifted (Ba-center base3);
+      else:
+      cc1=base1 shifted (Ba-center base1);
+      fi;
+      if Allume[numeropoint]=true:
+      cc2=base3 shifted (Bb-center base3);
+      else:
+      cc2=base1 shifted (Bb-center base1);
+      fi;
+      cc3=(fullcircle scaled 5mm) shifted Bc;
+      cc4=base3 shifted (pointprec-center base3);
+      if op="mul":
+      label(TEX("$\times$"),Bc);
+      ValeurPile[numeropoint-1]:="";
+      elseif op="add":
+      label(TEX("$+$"),Bc);
+      ValeurPile[numeropoint-1]:="";
+      elseif op="sub":
+      label(TEX("$\_$"),Bc);
+      ValeurPile[numeropoint-1]:="";
+      elseif op="div":
+      label(TEX("$\div$"),Bc);
+      ValeurPile[numeropoint-1]:="";
+      fi;
+      if Correction:
+      if etape<Etape+1:
+      fill cc4 withcolor Evidence;
+      label(TEX("$"&Valeursc[etape]&"$"),pointprec);
+      fi;
+      fi;
+      for l=1 upto 4:
+      trace cc[l];
+      endfor;
+      draw (Ba--Bc) cutbefore cc1 cutafter cc3;
+      draw (Bb--Bc) cutbefore cc2 cutafter cc3;
+      draw (Bc--pointprec) cutbefore cc3 cutafter cc4;
+      );
+      $
+      enddef;
+
+      numeric Valeurs[];
+      string Valeursa[];
+      string Valeursc[];
+      
+      string Operations[];
+
+      numeric numeropoint;
+      numeropoint=0;
+
+      string ValeurPile[];
+      
+      vardef RecupDonnees(text t)=
+      n:=0;
+      for p_=t:
+      n:=n+1;
+      if numeric p_:
+      Valeurs[n]=p_;
+      Operations[n]="";
+      else:
+      Valeurs[n]=infinity;
+      Operations[n]=p_;
+      fi;
+      endfor;
+      n:=n+1;
+      Operations[n]="stop";
+      nbtotal=n;
+      for k=1 upto nbtotal:
+      ValeurPile[k]="0";
+      endfor;
+      enddef;
+
+      vardef RecupFractions(text t)=
+      n:=0;
+      for p_=t:
+      n:=n+1;
+      Valeursa[n]=p_;
+      endfor;
+      enddef;
+
+      vardef RecupCorrections(text t)=
+      n:=0;
+      for p_=t:
+      n:=n+1;
+      Valeursc[n]=p_;
+      endfor;
+      enddef;
+
+      pair A[];
+      ecart=\useKV[ArbreCalcul]{Ecart};
+
+      RecupDonnees(#1);
+      RecupFractions(#2);
+      RecupCorrections(#3);
+
+      etape=0;
+      Etape=\useKV[ArbreCalcul]{Etape};
+      
+      A[0]=(0,0);
+      k=0;
+      nbetape:=0;
+      
+      for p_=#1:
+      k:=k+1;
+      if numeric p_:
+      numeropoint:=numeropoint+1;
+      if unknown A[numeropoint]:A[numeropoint]-A[numeropoint-1]=ecart*(1,0);Allume[numeropoint]=false; else:
+      A[numeropoint]:=A[numeropoint-1]+ecart*(1,0); Allume[numeropoint]:=false;
+      fi;
+      if Valeurs[k]=0:Valeursa[Valeurs[k]]:=\useKV[ArbreCalcul]{Lettre} fi;
+      if Operations[k+1]="neg":
+      if Valeurs[k]=0:fill (base1 shifted (A[numeropoint]-center base1)) withcolor CoulDepart;
+      label(TEX("$"&-Valeursa[Valeurs[k]]&"$"),A[numeropoint]);
+      else:
+      label(TEX("$"&-Valeursa[Valeurs[k]]&"$"),A[numeropoint]);
+      fi;      
+      ValeurPile[numeropoint]:=decimal(-Valeursa[Valeurs[k]]);
+      else:
+      if Valeurs[k]=0:fill (base1 shifted (A[numeropoint]-center base1)) withcolor CoulDepart;
+      label(TEX("$"&Valeursa[Valeurs[k]]&"$"),A[numeropoint]);
+        else:
+      label(TEX("$"&Valeursa[Valeurs[k]]&"$"),A[numeropoint]);
+      fi;
+      ValeurPile[numeropoint]:=Valeursa[Valeurs[k]];
+      fi;      
+      elseif string p_:
+      if p_<>"neg":
+      trace BlocCalcul(A[numeropoint-1],A[numeropoint],Operations[k],ValeurPile[numeropoint-1],ValeurPile[numeropoint]);
+      A[numeropoint-1]:=pointprec;
+      Allume[numeropoint-1]:=true;
+      numeropoint:=numeropoint-1;
+      fi;
+      fi;
+      endfor;
+    \end{mplibcode}
+  \fi
+}%

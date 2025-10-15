@@ -1,0 +1,72 @@
+%%
+%% This is file `struktex.drv',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% struktex.dtx  (with options: `driver')
+%% 
+%% Copyright (C) 1989-2025 by Jobst Hoffmann.  All rights reserved.
+%% 
+%% IMPORTANT COPYRIGHT NOTICE:
+%% 
+%% No other permissions to copy or distribute this file in any form
+%% are granted and in particular NO PERMISSION to modify its contents.
+%% 
+%% You are NOT ALLOWED to change this file.
+%% 
+%% Please address error reports and any problems in case of UNCHANGED versions
+%% to
+%%         j.hoffmann_(at)_fh-aachen.de
+                                % set the default formatting language:
+\expandafter\ifx\csname primarylanguage\endcsname\relax
+    \def\primarylanguage{ngerman}
+    \def\secondarylanguage{english}
+\fi
+
+\documentclass[a4paper, \secondarylanguage,     % select the language
+        \primarylanguage]{ltxdoc}
+
+\PassOptionsToPackage{obeyspaces}{url} % must be done before any package is
+                                % loaded
+
+\usepackage{babel}              % for switching the documentation language
+\usepackage{moreverb}           % for formatting the documentation of the driver
+\usepackage{strukdoc}           % the style-file for formatting this
+                                % documentation
+
+\usepackage[pict2e, % <---------- to produce finer results
+                                % visible under xdvi, alternatives are
+                                % curves or emlines2 (visible only under
+                                % ghostscript), leave out if not
+                                % available
+    verification,
+    outer, % <------------------- to set the position of the \ifthenelse
+                                % flags to the outer edges
+    debug,
+    ]
+    {struktex}
+
+\OnlyDescription    % add comment char to include the implementation details
+
+\MakeShortVerb{\|}    % |\foo| acts like \verb+\foo+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% to avoid underfull ... messages while formatting two/three columns
+\hbadness=10000 \vbadness=10000
+
+\typeout{\string\primarylanguage: \primarylanguage, \string\language: \the\language}
+\def\languageNGerman{\the\csname l@ngerman\endcsname} % depends on language.dat,
+                                % there may be changes from release to
+                                % release
+
+\begin{document}
+\makeatletter
+\@ifundefined{selectlanguageEnglish}{}{\selectlanguage{english}}
+\makeatother
+\DocInput{struktex.dtx}
+\end{document}
+
+\endinput
+%%
+%% End of file `struktex.drv'.

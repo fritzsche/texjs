@@ -1,0 +1,370 @@
+%%%
+% Papiers
+%%%
+\def\filedatePapiers{2025/05/26}%
+\def\fileversionPapiers{0.1a}%
+\message{-- \filedatePapiers\space v\fileversionPapiers}%
+%
+\setKVdefault[Papiers]{Cinq=true,Seyes=false,Echelle=8,Isometrique=false,IsometriquePointe=false,Millimetre=false,Triangle=false,Largeur=5,Hauteur=4,Couleur=black,Grille=-1,GrillePointe=-1,PageEntiere=false,ZoneTexte=false,Baseline=false,CodeAfter=false,Traces={}}%
+\defKV[Papiers]{Traces=\ifempty{#1}{}{\setKV[Papiers]{CodeAfter}}}
+
+%\def\MPBaseLineSkip#1#2#3{%à retravailler : ne fonctionne pas :(
+%  %
+%  \ifluatex
+%  \mplibforcehmode
+%  \begin{mplibcode}
+%    path horizon,verticon;
+%    horizon=(0,0)--(#1*cm,0);
+%    %verticon=(0,0)--(0,#2*cm);
+%    drawoptions(withcolor #3);
+%    %for k=0 step 0.5 until #1:
+%    %draw verticon shifted((k*cm,0));
+%    %endfor;
+%    for k=(#2-(\mpdim{1.6ex}/1cm)) step (-\mpdim{\baselineskip}/1cm) until 0:
+%    draw horizon shifted((0,k*cm));
+%    endfor;
+%    drawoptions(withcolor blue);
+%    for k=#2 step (-\mpdim{\baselineskip}/1cm) until 0:
+%    draw horizon shifted((0,k*cm));
+%    endfor;
+%  \end{mplibcode}
+%  \fi
+%}
+
+\def\MPGrilleCode{%
+  PapierLargeur=\PapierLargeur;
+  PapierHauteur=\PapierHauteur;
+  PapierGrille=\PapierGrille;
+  PapierGrillePointe=\PapierGrillePointe;
+  color PapierCouleur;
+  PapierCouleur=\useKV[Papiers]{Couleur};
+  %
+  path horizon,verticon;
+  horizon=(0,0)--(PapierLargeur*cm,0);
+  verticon=(0,0)--(0,PapierHauteur*cm);
+  vardef Papier=
+  picture Papiers;
+  Papiers=image(
+  drawoptions(withcolor PapierCouleur);
+  if PapierGrillePointe>0:
+  for k=0 step (PapierGrillePointe*100) until (PapierLargeur*100):
+  for l=0 step (PapierGrillePointe*100) until (PapierHauteur*100):
+  fill (cercles((0,0),1pt) shifted(((k/100)*cm,(l/100)*cm)));
+  endfor;
+  endfor;
+  else:
+  for k=0 step (PapierGrille*100) until (PapierLargeur*100):
+  draw verticon shifted(((k/100)*cm,0));
+  endfor;
+  for k=0 step (PapierGrille*100) until (PapierHauteur*100):
+  draw horizon shifted((0,(k/100)*cm));
+  endfor;
+  fi;
+  );
+  Papiers
+  enddef;
+}%
+
+\def\MPGrille{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}%
+    \MPGrilleCode
+    trace Papier;
+  \end{mplibcode}%
+  \else%
+  \begin{mpost}[mpsettings={\MPGrilleCode}]
+    trace Papier;
+  \end{mpost}%
+  \fi%
+}%
+
+\def\MPCinq{%
+  \xdef\PapierGrille{0.5}%
+  \MPGrille
+}%
+
+\def\MPSeyesCode{%
+  PapierLargeur=\PapierLargeur;
+  PapierHauteur=\PapierHauteur;
+  color PapierCouleur;
+  PapierCouleur=\useKV[Papiers]{Couleur};
+  u:=\useKV[Papiers]{Echelle};
+  path horizon,verticon;
+  horizon=(0,0)--(PapierLargeur*cm,0);
+  verticon=(0,0)--(0,PapierHauteur*cm);
+  vardef Seyes=
+  picture PapierSeyes;
+  PapierSeyes=image(
+  drawoptions(withcolor PapierCouleur);
+  for k=0 step u until (PapierLargeur*10):
+  draw verticon shifted(((k/10)*cm,0));
+  endfor;
+  for k=0 step (u/4) until (PapierHauteur*10):
+  draw horizon shifted((0,(k/10)*cm)) withpen pencircle scaled 0.5;
+  endfor;
+  for k=0 step u until (PapierHauteur*10):
+  draw horizon shifted((0,(k/10)*cm)) withpen pencircle scaled 1.25;
+  endfor;
+  );
+  PapierSeyes
+  enddef;
+}
+
+\def\MPSeyes{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}%
+    \MPSeyesCode
+    trace Seyes;
+  \end{mplibcode}%
+  \else%
+  \begin{mpost}[mpsettings={\MPSeyesCode}]%
+    trace Seyes;
+  \end{mpost}
+  \fi%
+}%
+
+\def\MPMillimetreCode{%
+  PapierLargeur=\PapierLargeur;
+  PapierHauteur=\PapierHauteur;
+  color PapierCouleur;
+  PapierCouleur=\useKV[Papiers]{Couleur};
+  path horizon,verticon;
+  horizon=(0,0)--(PapierLargeur*cm,0);
+  verticon=(0,0)--(0,PapierHauteur*cm);
+  vardef MPMilli=
+  picture MPMillimetre;
+  MPMillimetre=image(
+  drawoptions(withcolor PapierCouleur);
+  for k=0 step 1 until (PapierLargeur*10):
+  draw verticon shifted(((k/10)*cm,0)) withpen pencircle scaled 0.2;
+  endfor;
+  for k=0 step 5 until (PapierLargeur*10):
+  draw verticon shifted(((k/10)*cm,0)) withpen pencircle scaled 0.5;
+  endfor;
+  for k=0 step 1 until (PapierLargeur):
+  draw verticon shifted((k*cm,0)) withpen pencircle scaled 1.25;
+  endfor;
+  for k=0 step 1 until (PapierHauteur*10):
+  draw horizon shifted((0,(k/10)*cm)) withpen pencircle scaled 0.2;
+  endfor;
+  for k=0 step 5 until (PapierHauteur*10):
+  draw horizon shifted((0,(k/10)*cm)) withpen pencircle scaled 0.5;
+  endfor;
+  for k=0 step 1 until (PapierHauteur):
+  draw horizon shifted((0,k*cm)) withpen pencircle scaled 1.25;
+  endfor;
+  );
+  MPMillimetre
+  enddef;
+}
+
+\def\MPMillimetre{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}%
+    \MPMillimetreCode
+    trace MPMilli;
+  \end{mplibcode}%
+  \else%
+  \begin{mpost}[mpsettings={\MPMillimetreCode}]
+    trace MPMilli;
+  \end{mpost}%
+  \fi%
+}%
+
+\def\MPIsometriqueCode{%
+  PapierLargeur=\PapierLargeur;
+  PapierHauteur=\PapierHauteur;
+  color PapierCouleur;
+  PapierCouleur=\useKV[Papiers]{Couleur};
+  path diagon,antidiagon;
+  diagon=(0,0)--PapierHauteur*cm*(sqrt(3),1);
+  antidiagon=(0,0)--PapierHauteur*cm*(-sqrt(3),1);
+  vardef MPIso=
+  picture MPIsom;
+  MPIsom=image(
+  drawoptions(withcolor PapierCouleur);
+  for k=0 upto 2*(PapierLargeur+PapierHauteur):
+  draw antidiagon shifted((k*cm,0));
+  endfor;
+  for k=-(2*ceiling(PapierLargeur+PapierHauteur)) upto (2*ceiling(PapierLargeur+PapierHauteur)):
+  draw diagon shifted((k*cm,0));
+  endfor;
+  clip currentpicture to polygone((0,0),(PapierLargeur*cm,0),(PapierLargeur*cm,PapierHauteur*cm),(0,PapierHauteur*cm));
+  );
+  MPIsom
+  enddef;
+}
+
+\def\MPIsometrique{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}%
+    \MPIsometriqueCode
+    trace MPIso;
+  \end{mplibcode}%
+  \else%
+  \begin{mpost}[mpsettings={\MPIsometriqueCode}]
+    trace MPIso;
+  \end{mpost}%
+  \fi%
+}%
+
+\def\MPIsometriquePointeCode{%
+  PapierLargeur=\PapierLargeur;
+  PapierHauteur=\PapierHauteur;
+  color PapierCouleur;
+  PapierCouleur=\useKV[Papiers]{Couleur};
+  pair diagon,antidiagon;
+  diagon=(1pt,1pt);
+  antidiagon=(1pt+0.5cm,1pt+0.5*(sqrt(3)*1cm/3));
+  vardef TraceIsoPointe=
+  picture PapierIsoPointe;
+  PapierIsoPointe=image(
+  drawoptions(withcolor PapierCouleur);
+  for k=0 step (sqrt(3)/3) until (PapierHauteur):
+  for l=0 step 1 until (PapierLargeur):
+  fill (cercles(diagon,1pt) shifted((l*cm,k*cm)));
+  fill (cercles(antidiagon,1pt) shifted((l*cm,k*cm)));
+  endfor;
+  endfor;
+  clip currentpicture to polygone((0,0),(PapierLargeur*cm+2pt,0),(PapierLargeur*cm+2pt,PapierHauteur*cm+1pt),(0,PapierHauteur*cm+1pt));
+  );
+  PapierIsoPointe
+  enddef;
+}
+    
+\def\MPIsometriquePointe{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}%
+    \MPIsometriquePointeCode
+    trace TraceIsoPointe;
+  \end{mplibcode}%
+  \else%
+  \begin{mpost}[mpsettings={\MPIsometriquePointeCode}]
+    trace TraceIsoPointe;
+  \end{mpost}%
+  \fi%
+}%
+
+\def\MPTriangulaireCode{%
+  PapierLargeur=\PapierLargeur;
+  PapierHauteur=\PapierHauteur;
+  color PapierCouleur;
+  PapierCouleur=\useKV[Papiers]{Couleur};
+  path horizon,diagon,antidiagon;
+  horizon=(0,0)--(PapierLargeur*cm,0);
+  diagon=(0,0)--PapierHauteur*cm*(sqrt(3)/3,1);
+  antidiagon=(0,0)--PapierHauteur*cm*(-sqrt(3)/3,1);
+  vardef PapierTri=
+  picture PapierTriangle;
+  PapierTriangle=image(
+  drawoptions(withcolor PapierCouleur);
+  for k=0 upto 2*ceiling(PapierLargeur):
+  draw diagon shifted((k*cm,0));
+  draw antidiagon shifted((k*cm,0));
+  endfor;
+  for k=sqrt(3) step (sqrt(3)) until (PapierHauteur):
+  draw diagon shifted((0,k*cm));
+  endfor;
+  for k=0 step (sqrt(3)/2) until (PapierHauteur):
+  draw horizon shifted((0,k*cm));
+  endfor;
+  clip currentpicture to polygone((0,0),(PapierLargeur*cm,0),(PapierLargeur*cm,PapierHauteur*cm),(0,PapierHauteur*cm));
+  );
+  PapierTriangle
+  enddef;
+}
+
+\def\MPTriangulaire{%
+  \ifluatex%
+  \mplibforcehmode%
+  \begin{mplibcode}%
+    \MPTriangulaireCode
+    trace PapierTri;
+  \end{mplibcode}%
+  \else%
+  \begin{mpost}[mpsettings={\MPTriangulaireCode}]
+    trace PapierTri;
+  \end{mpost}%
+  \fi%
+}%
+
+\RequirePackage{ifoddpage}
+
+\newlength{\PapierLeftCurrent}
+
+\def\PfCPapierTest{%
+  \xintifboolexpr{\useKV[Papiers]{GrillePointe}>0 || \useKV[Papiers]{Grille}>0}{%
+    \MPGrille%
+  }{\ifboolKV[Papiers]{Baseline}{%
+      \MPBaseLineSkip{\PapierLargeur}{\PapierHauteur}{\PapierCouleur}%
+    }{%
+      \ifboolKV[Papiers]{IsometriquePointe}{%
+        \MPIsometriquePointe%
+      }{%
+        \ifboolKV[Papiers]{Triangle}{%
+          \MPTriangulaire%
+        }{\ifboolKV[Papiers]{Millimetre}{%
+            \MPMillimetre%
+          }{\ifboolKV[Papiers]{Isometrique}{%
+              \MPIsometrique%
+            }{\ifboolKV[Papiers]{Seyes}{%
+                \MPSeyes%
+              }{\MPCinq%
+              }%
+            }%
+          }%
+        }%
+      }%
+    }%
+  }%
+}%
+
+\newcommand\Papiers[1][]{%
+  \useKVdefault[Papiers]%
+  \setKV[Papiers]{#1}%
+  \xdef\PapierLargeur{\useKV[Papiers]{Largeur}}%
+  \xdef\PapierHauteur{\useKV[Papiers]{Hauteur}}%
+  \xdef\PapierCouleur{\useKV[Papiers]{Couleur}}%
+  \xdef\PapierGrille{\useKV[Papiers]{Grille}}%
+  \xdef\PapierGrillePointe{\useKV[Papiers]{GrillePointe}}%
+  \ifboolKV[Papiers]{ZoneTexte}{%
+    \checkoddpage\ifoddpage%
+    \setlength{\PapierLeftCurrent}{\oddsidemargin}%
+    \else%
+    \setlength{\PapierLeftCurrent}{\evensidemargin}%
+    \fi%
+    \xdef\PapierLeft{\the\dimexpr1in+\PapierLeftCurrent}%
+    \xdef\PapierBottom{\fpeval{\paperheight-\textheight-\voffset-\headheight-\topmargin-\headsep-1in}}%
+    \xdef\PapierHauteur{\fpeval{\textheight/1cm}}%
+    \xdef\PapierLargeur{\fpeval{\textwidth/1cm}}%
+    \begin{tikzpicture}[remember picture,overlay]%
+      \node[anchor=south west,inner sep=0pt,transform canvas={xshift=\PapierLeft,yshift=\PapierBottom}] at (current page.south west) {%
+        \PfCPapierTest%
+      };%
+    \end{tikzpicture}%
+  }{%
+    \ifboolKV[Papiers]{PageEntiere}{%
+      \checkoddpage\ifoddpage%
+      \setlength{\PapierLeftCurrent}{\oddsidemargin}%
+      \else%
+      \setlength{\PapierLeftCurrent}{\evensidemargin}%
+      \fi%
+      \xdef\PapierLeft{\the\dimexpr1in+\PapierLeftCurrent}%
+      \xdef\PapierBottom{\fpeval{\paperheight-\textheight-\voffset-\headheight-\topmargin-\headsep-1in}}%
+      \xdef\PapierHauteur{\fpeval{\paperheight/1cm}}%
+      \xdef\PapierLargeur{\fpeval{\paperwidth/1cm}}%
+      \begin{tikzpicture}[remember picture,overlay]%
+        \node[anchor=south west,inner sep=0pt] at (current page.south west) {%
+          \PfCPapierTest%
+        };%
+      \end{tikzpicture}%
+    }{%
+      \PfCPapierTest
+    }%
+  }%
+}%

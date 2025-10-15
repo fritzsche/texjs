@@ -1,0 +1,303 @@
+% Licence    : Released under the LaTeX Project Public License v1.3c
+% or later, see http://www.latex-project.org/lppl.txtf
+\newtoks\TestEquaMBarreH%
+\newtoks\TestEquaMBarreB%
+
+\def\UpdateToksBarreH#1\nil{\addtotok\TestEquaMBarreH{#1}}%
+\def\UpdateToksBarreB#1\nil{\addtotok\TestEquaMBarreB{#1}}%
+
+\newcommand\EquaBaseMBarre[5][]{%type ax=d ou b=cx
+  \useKVdefault[ClesEquation]%
+  \setKV[ClesEquation]{#1}%
+  \ifnum\fpeval{#2}=0\relax
+    \ifnum\fpeval{#4}=0\relax
+      \textbf{??}%% il manque un paramètre
+    \else
+      \xintifboolexpr{\fpeval{#4}==0}{%
+        \xintifboolexpr{\fpeval{#3}==0}{%
+          L'équation $0\times\useKV[ClesEquation]{Lettre}=0$ a une infinité de solutions.}{L'équation $0\times\useKV[ClesEquation]{Lettre}=\num{\fpeval{#3}}$ n'a aucune solution.}%
+      }{%\else
+        \xintifboolexpr{\fpeval{#3}==0}{L'équation $0=\num{\fpeval{#4}}\times\useKV[ClesEquation]{Lettre}$ a une unique solution : $\useKV[ClesEquation]{Lettre}=0$.}{%\else
+          \TestEquaMBarreB{white}%
+          \TestEquaMBarreH{}%
+          \xintFor* ##1 in{\xintSeq{1}{\fpeval{#4}}}\do{%
+            \expandafter\UpdateToksBarreB{,1}\nil%
+            \expandafter\UpdateToksBarreB{,"$\useKV[ClesEquation]{Lettre}$"}\nil%
+          }%
+          \expandafter\UpdateToksBarreH{white,#4,"\num{\fpeval{#3}}"}\nil%
+          %          % Le tok H est \the\TestEquaMBarreH.%
+          %          % \\Le tok B est \the\TestEquaMBarreB.%
+          \PfCMPDessineModelBarreNonHomogene{\the\TestEquaMBarreH}{\the\TestEquaMBarreB}{}%
+          \ifnum\fpeval{#4}=1\relax
+          \else
+            \bigskip%
+          
+            \PfCMPDessineModelBarreNonHomogene{white,1,"$\num{\fpeval{#3}}/\num{\fpeval{#4}}$"}{white,1,"$\useKV[ClesEquation]{Lettre}$"}{}%
+            \SSimpliTest{\fpeval{#3}}{\fpeval{#4}}%
+            \ifthenelse{\boolean{Simplification}}{\bigskip%
+              
+              \PfCMPDessineModelBarreNonHomogene{white,1,"\PGCD{\fpeval{#3}}{\fpeval{#4}}\ifnum\fpeval{abs(\pgcd)}=\fpeval{#4}\relax{}\num{\fpeval{#3/#4}}\else\num{\fpeval{#3/\pgcd}}/\num{\fpeval{#4/\pgcd}}\fi"}{white,1,"$\useKV[ClesEquation]{Lettre}$"}{}%
+            }{}%
+          \fi
+        }%
+      }%
+    \fi%
+  \else%
+    % si non, on est dans le cas ax=d
+    \xintifboolexpr{\fpeval{#2}==0}{%
+      \xintifboolexpr{\fpeval{#5}==0}{%
+        L'équation $0\times\useKV[ClesEquation]{Lettre}=0$ a une infinité de solutions.}{L'équation $0\times\useKV[ClesEquation]{Lettre}=\num{\fpeval{#5}}$ n'a aucune solution.}%
+    }{%\else
+      \xintifboolexpr{\fpeval{#5}==0}{L'équation $\num{\fpeval{#2}}\times\useKV[ClesEquation]{Lettre}=0$ a une unique solution : $\useKV[ClesEquation]{Lettre}=0$.}{%\else
+        % \begin{center}
+        \TestEquaMBarreH{white}%
+        \TestEquaMBarreB{}%
+        \xintFor* ##1 in{\xintSeq{1}{\fpeval{#2}}}\do{%
+          \expandafter\UpdateToksBarreH{,1}\nil%
+          \expandafter\UpdateToksBarreH{,"$\useKV[ClesEquation]{Lettre}$"}\nil%
+        }%
+        \expandafter\UpdateToksBarreB{white,#2,"\num{\fpeval{#5}}"}\nil%
+        % Le tok H est \the\TestEquaMBarreH.%
+        % \\Le tok B est \the\TestEquaMBarreB.%
+        \PfCMPDessineModelBarreNonHomogene{\the\TestEquaMBarreH}{\the\TestEquaMBarreB}{}%
+        \ifnum\fpeval{#2}=1\relax%
+        \else
+          \bigskip%
+          
+          \PfCMPDessineModelBarreNonHomogene{white,1,"$\useKV[ClesEquation]{Lettre}$"}{white,1,"$\num{\fpeval{#5}}/\num{\fpeval{#2}}$"}{}%
+          \SSimpliTest{\fpeval{#5}}{\fpeval{#2}}%
+          \ifthenelse{\boolean{Simplification}}{\bigskip
+            
+            \PfCMPDessineModelBarreNonHomogene{white,1,"$\useKV[ClesEquation]{Lettre}$"}{white,1,"\PGCD{\fpeval{#5}}{\fpeval{#2}}\ifnum\fpeval{abs(\pgcd)}=\fpeval{#2}\relax{}\num{\fpeval{#5/#2}}\else\num{\fpeval{#5/\pgcd}}/\num{\fpeval{#2/\pgcd}}\fi"}{}%
+          }{}%
+        \fi
+      }%
+    }%
+  \fi%
+}%
+
+\newcommand\EquaDeuxMBarre[5][]{%type ax+b=d ou b=cx+d$
+  \useKVdefault[ClesEquation]%
+  \setKV[ClesEquation]{#1}%
+  \setKV[ClesEquation]{Fleches=false,FlecheDiv=false,Terme=false,Decomposition=false}
+  \ifnum\fpeval{#2}=0\relax%On échange en faisant attention à ne pas boucler : c doit être non vide
+    % cas b=cx+d
+    \xintifboolexpr{\fpeval{#4}==0}{%
+      \xintifboolexpr{\fpeval{#3}==\fpeval{#5}}{%b=d
+        L'équation $\num{\fpeval{#3}}=\num{\fpeval{#5}}$ a une infinité de solutions.%
+      }{%b<>d
+        L'équation $\num{\fpeval{#3}}=\num{\fpeval{#5}}$ n'a aucune solution.%
+      }%
+    }{%ELSE
+      \xintifboolexpr{\fpeval{#3}==0}{%ax+b=d
+        \EquaBaseMBarre[#1]{0}{\fpeval{-#5}}{\fpeval{#4}}{0}%
+      }{%ax+b=d$ Ici
+        % \begin{center}
+        \TestEquaMBarreB{white}%
+        \TestEquaMBarreH{}%
+        \xintFor* ##1 in{\xintSeq{1}{#4}}\do{%
+          \expandafter\UpdateToksBarreB{,1}\nil%
+          \expandafter\UpdateToksBarreB{,"$\useKV[ClesEquation]{Lettre}$"}\nil%
+        }%
+        \expandafter\UpdateToksBarreB{,white,2.5,"\num{\fpeval{#5}}"}\nil%
+        \expandafter\UpdateToksBarreH{white,#4+2.5,"\num{\fpeval{#3}}"}\nil%
+        % Le tok H est \the\TestEquaMBarreH.%
+        % \\Le tok B est \the\TestEquaMBarreB.%
+        \PfCMPDessineModelBarreNonHomogene{\the\TestEquaMBarreH}{\the\TestEquaMBarreB}{}%
+        
+        \bigskip%
+        
+        \PfCMPDessineModelBarreNonHomogene{white,#4,"\num{\fpeval{#3-#5}}",white,2.5,"\num{\fpeval{#5}}"}{\the\TestEquaMBarreB}{#4}%
+        
+        \bigskip
+        
+        \EquaBaseMBarre[#1]{0}{(#3-(#5))}{#4}{0}%
+      }%
+    }%
+  \else%cas ax+b=d
+    \xintifboolexpr{\fpeval{#2}==0}{%
+      \xintifboolexpr{\fpeval{#3}==\fpeval{#5}}{%b=d
+        L'équation $\num{\fpeval{#3}}=\num{\fpeval{#5}}$ a une infinité de solutions.%
+      }{%b<>d
+        L'équation $\num{\fpeval{#3}}=\num{\fpeval{#5}}$ n'a aucune solution.%
+      }%
+    }{%ELSE
+      \xintifboolexpr{\fpeval{#3}==0}{%ax+b=d
+        \EquaBaseMBarre[#1]{#2}{0}{0}{#5}%
+      }{%ax+b=d$ Ici
+%        % \begin{center}
+        \TestEquaMBarreH{white}%
+        \TestEquaMBarreB{}%
+        \xintFor* ##1 in{\xintSeq{1}{\fpeval{#2}}}\do{%
+          \expandafter\UpdateToksBarreH{,1}\nil%
+          \expandafter\UpdateToksBarreH{,"$\useKV[ClesEquation]{Lettre}$"}\nil%
+        }%
+        \expandafter\UpdateToksBarreH{,white,2.5,"\num{\fpeval{#3}}"}\nil%
+        \expandafter\UpdateToksBarreB{white,#2+2.5,"\num{\fpeval{#5}}"}\nil%
+%        % Le tok H est \the\TestEquaMBarreH.%
+%        % \\Le tok B est \the\TestEquaMBarreB.%
+        \PfCMPDessineModelBarreNonHomogene{\the\TestEquaMBarreH}{\the\TestEquaMBarreB}{}%
+        
+        \bigskip%
+        
+        \PfCMPDessineModelBarreNonHomogene{\the\TestEquaMBarreH}{white,#2,"\num{\fpeval{#5-#3}}",white,2.5,"\num{\fpeval{#3}}"}{#2}%
+%        
+        \bigskip
+        
+       \EquaBaseMBarre[#1]{#2}{0}{0}{(#5-(#3))}%
+      }%
+    }%
+  \fi%
+}%
+
+\newcommand\EquaTroisMBarre[5][]{%ax+b=cx ou ax=cx+d
+  \useKVdefault[ClesEquation]%
+  \setKV[ClesEquation]{#1}%
+  \ifnum\fpeval{#3}=0\relax%on inverse en faisant attention à la boucle #3<->#5
+    \ifnum\fpeval{#5}=0\relax%
+      %% paramètre oublié
+    \else
+      \EquaTroisMBarre[#1]{#4}{#5}{#2}{0}%
+    \fi
+  \else
+    \xintifboolexpr{\fpeval{#2}==0}{%b=cx
+      \EquaBaseMBarre[#1]{#4}{0}{0}{#3}
+    }{%
+      \xintifboolexpr{\fpeval{#4}==0}{%ax+b=0
+        \EquaDeuxMBarre[#1]{#2}{#3}{0}{0}
+      }{%ax+b=cx
+        \xintifboolexpr{\fpeval{#2}==\fpeval{#4}}{%
+          \xintifboolexpr{\fpeval{#3}==0}{%ax=ax
+            L'équation $\xintifboolexpr{#2==1}{}{\num{#2}}\useKV[ClesEquation]{Lettre}=\xintifboolexpr{#4==1}{}{\num{#4}}\useKV[ClesEquation]{Lettre}$ a une infinité de solutions.%
+          }{%ax+b=ax
+            L'équation $\xintifboolexpr{#2==1}{}{\num{#2}}\useKV[ClesEquation]{Lettre}\xintifboolexpr{#3>0}{+\num{#3}}{-\num{\fpeval{0-#3}}}=\xintifboolexpr{#4==1}{}{\num{#4}}\useKV[ClesEquation]{Lettre}$ n'a aucune solution.%
+          }
+        }{%% Cas délicat
+          \xintifboolexpr{\fpeval{#2}>\fpeval{#4}}{%ax+b=cx avec a>c
+            \TestEquaMBarreH{white}%
+            \TestEquaMBarreB{white}%
+            \xintFor* ##1 in{\xintSeq{1}{\fpeval{#2}}}\do{%
+              \expandafter\UpdateToksBarreH{,1}\nil%
+              \expandafter\UpdateToksBarreH{,"$\useKV[ClesEquation]{Lettre}$"}\nil%
+            }%
+            \expandafter\UpdateToksBarreH{,white,2.5,"\num{\fpeval{#3}}"}\nil%
+            \xintFor* ##1 in{\xintSeq{1}{\fpeval{#4}}}\do{%
+              \expandafter\UpdateToksBarreB{,1}\nil%
+              \expandafter\UpdateToksBarreB{,"$\useKV[ClesEquation]{Lettre}$"}\nil%
+            }%
+            \expandafter\UpdateToksBarreB{,white,#2-#4+2.5,"0"}\nil%
+            \PfCMPDessineModelBarreNonHomogene{\the\TestEquaMBarreH}{\the\TestEquaMBarreB}{}%
+            
+            \PfCMPDessineModelBarreNonHomogene{\the\TestEquaMBarreH}{\the\TestEquaMBarreB}{#4}%      
+          
+            \EquaDeuxMBarre[#1]{(#2-#4)}{#3}{0}{0}
+          }{%ax+b=cx avec a<c              % Autre cas délicat
+            \TestEquaMBarreH{white}%
+            \TestEquaMBarreB{white}%
+            \xintFor* ##1 in{\xintSeq{1}{\fpeval{#2}}}\do{%
+              \expandafter\UpdateToksBarreH{,1}\nil%
+              \expandafter\UpdateToksBarreH{,"$\useKV[ClesEquation]{Lettre}$"}\nil%
+            }%
+            \expandafter\UpdateToksBarreH{,white,#4-#2,"\num{\fpeval{#3}}"}\nil%
+            \xintFor* ##1 in{\xintSeq{1}{\fpeval{#4}}}\do{%
+              \expandafter\UpdateToksBarreB{,1}\nil%
+              \expandafter\UpdateToksBarreB{,"$\useKV[ClesEquation]{Lettre}$"}\nil%
+            }%
+%            \expandafter\UpdateToksBarreB{,white,#2-#4+2.5,"0"}\nil%
+            \PfCMPDessineModelBarreNonHomogene{\the\TestEquaMBarreH}{\the\TestEquaMBarreB}{}%
+            
+            \PfCMPDessineModelBarreNonHomogene{\the\TestEquaMBarreH}{\the\TestEquaMBarreB}{#2}%
+            
+            \EquaDeuxMBarre[#1]{0}{#3}{(#4-#2)}{0}
+          }%
+        }%
+      }%
+    }%
+  \fi
+}%
+
+\newcommand\ResolEquationMBarre[5][]{%
+  \useKVdefault[ClesEquation]%
+  \useKVdefault[ClesModeleBarre]%
+  \setKV[ClesEquation]{#1}%
+  \setKV[ClesModeleBarre]{#1}%
+  \setKV[ClesEquation]{Fleches=false,FlecheDiv=false,Terme=false,Decomposition=false}
+  \xintifboolexpr{#2==0}{%
+    \xintifboolexpr{#4==0}{%
+      \xintifboolexpr{#3==#5}{%b=d
+        L'équation $\num{\fpeval{#3}}=\num{\fpeval{#5}}$ a une infinité de solutions.}%
+      {%b<>d
+        L'équation $\num{\fpeval{#3}}=\num{\fpeval{#5}}$ n'a aucune solution.%
+      }%
+    }%
+    {%0x+b=cx+d$
+      \EquaDeuxMBarre[#1]{#4}{#5}{#2}{#3}%
+    }%
+  }{%
+    \xintifboolexpr{#4==0}{%ax+b=0x+d
+      \EquaDeuxMBarre[#1]{#2}{#3}{0}{#5}%
+    }
+    {%ax+b=cx+d$
+      \xintifboolexpr{#3==0}{%
+        \xintifboolexpr{#5==0}{%ax=cx
+          \EquaTroisMBarre[#1]{#2}{0}{#4}{0}%
+        }%
+        {%ax=cx+d
+          \EquaTroisMBarre[#1]{#4}{#5}{#2}{0}%
+        }%
+      }%
+      {\xintifboolexpr{#5==0}{%ax+b=cx
+          \EquaTroisMBarre[#1]{#2}{#3}{#4}{0}%
+        }%
+        {%ax+b=cx+d -- ici
+          \xintifboolexpr{#2==#4}{%
+            \xintifboolexpr{#3==#5}{%b=d
+                            L'équation $\xintifboolexpr{#2==1}{}{\num{#2}}\useKV[ClesEquation]{Lettre}\xintifboolexpr{#3>0}{+\num{#3}}{-\num{\fpeval{0-#3}}}=\xintifboolexpr{#4==1}{}{\num{#4}}\useKV[ClesEquation]{Lettre}\xintifboolexpr{#5>0}{+\num{#5}}{-\num{\fpeval{0-#5}}}$ a une infinité de solutions.}%
+            {%b<>d
+              L'équation $\xintifboolexpr{#2==1}{}{\num{#2}}\useKV[ClesEquation]{Lettre}\xintifboolexpr{#3>0}{+\num{#3}}{-\num{\fpeval{0-#3}}}=\xintifboolexpr{#4==1}{}{\num{#4}}\useKV[ClesEquation]{Lettre}\xintifboolexpr{#5>0}{+\num{#5}}{-\num{\fpeval{0-#5}}}$ n'a aucune solution.%
+            }%
+          }{%
+            %% Cas délicat
+            \xintifboolexpr{#2>#4}{%ax+b=cx+d avec a>c
+              \TestEquaMBarreH{white}%
+              \TestEquaMBarreB{white}%
+              \xintFor* ##1 in{\xintSeq{1}{\fpeval{#2}}}\do{%
+                \expandafter\UpdateToksBarreH{,1}\nil%
+                \expandafter\UpdateToksBarreH{,"$\useKV[ClesEquation]{Lettre}$"}\nil%
+              }%
+              \expandafter\UpdateToksBarreH{,white,2.5,"\num{\fpeval{#3}}"}\nil%
+              \xintFor* ##1 in{\xintSeq{1}{\fpeval{#4}}}\do{%
+                \expandafter\UpdateToksBarreB{,1}\nil%
+                \expandafter\UpdateToksBarreB{,"$\useKV[ClesEquation]{Lettre}$"}\nil%
+              }%
+              \expandafter\UpdateToksBarreB{,white,#2-#4+2.5,"\num{\fpeval{#5}}"}\nil%
+              \PfCMPDessineModelBarreNonHomogene{\the\TestEquaMBarreH}{\the\TestEquaMBarreB}{}%
+            
+              \PfCMPDessineModelBarreNonHomogene{\the\TestEquaMBarreH}{\the\TestEquaMBarreB}{#4}%      
+          
+              \EquaDeuxMBarre[#1]{(#2-(#4))}{#3}{0}{#5}
+            }{%ax+b=cx+d avec a<c              % Autre cas délicat
+              \TestEquaMBarreH{white}%
+              \TestEquaMBarreB{white}%
+              \xintFor* ##1 in{\xintSeq{1}{\fpeval{#4}}}\do{%
+                \expandafter\UpdateToksBarreB{,1}\nil%
+                \expandafter\UpdateToksBarreB{,"$\useKV[ClesEquation]{Lettre}$"}\nil%
+              }%
+              \expandafter\UpdateToksBarreB{,white,2.5,"\num{\fpeval{#5}}"}\nil%
+              \xintFor* ##1 in{\xintSeq{1}{\fpeval{#2}}}\do{%
+                \expandafter\UpdateToksBarreH{,1}\nil%
+                \expandafter\UpdateToksBarreH{,"$\useKV[ClesEquation]{Lettre}$"}\nil%
+              }%
+              \expandafter\UpdateToksBarreH{,white,#4-#2+2.5,"\num{\fpeval{#3}}"}\nil%
+              \PfCMPDessineModelBarreNonHomogene{\the\TestEquaMBarreH}{\the\TestEquaMBarreB}{}%
+            
+              \PfCMPDessineModelBarreNonHomogene{\the\TestEquaMBarreH}{\the\TestEquaMBarreB}{#2}%
+          
+              \EquaDeuxMBarre[#1]{0}{#3}{(#4-(#2))}{#5}
+            }%
+          }%
+        }%
+      }%
+    }%
+  }%
+}%

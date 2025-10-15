@@ -1,0 +1,269 @@
+%%%
+% Cibles
+%%%
+\def\filedateCible{2025/05/28}%
+\def\fileversionCible{0.1b}%
+\message{-- \filedateCible\space v\fileversionCible}%
+%
+\newtoks\toklisteciblea%
+\newtoks\toklistecibleb%
+\def\UpdatetoksCibleA#1\nil{\addtotok\toklisteciblea{"#1",}}%
+\def\UpdatetoksCibleB#1/#2\nil{\addtotok\toklistecibleb{#1,#2,}}%
+
+\setKVdefault[Cible]{RayonBase=5mm,Ecart=5mm,Flechettes=false,RayonF=2.5cm,Impression=false,Tir=false,Unique=false,Tirs={}}%
+\defKV[Cible]{Tirs=\ifempty{#1}{}{\setKV[Cible]{Tir}}}%
+
+\NewDocumentCommand\Cible{om}{%
+  \useKVdefault[Cible]%
+  \setKV[Cible]{#1}%
+  \toklisteciblea{}%
+  \toklistecibleb{}%
+  \xdef\PfCNombreZone{0}%
+  \ifboolKV[Cible]{Flechettes}{}{%
+    \setsepchar{,}%
+    \readlist*\PfCListeCible{#2}%
+    \foreachitem\compteur\in\PfCListeCible{\expandafter\UpdatetoksCibleA\compteur\nil}%
+    \xdef\PfCNombreZone{\PfCListeCiblelen}%
+  }%
+  \ifboolKV[Cible]{Tir}{%
+      \xdef\PfCListeCibleTirsAv{\useKV[Cible]{Tirs}}
+      \setsepchar[*]{,*/}%
+      \readlist*\PfCListeCibleTirs{\PfCListeCibleTirsAv}
+      \foreachitem\compteur\in\PfCListeCibleTirs{\expandafter\UpdatetoksCibleB\compteur\nil}%
+  }{}
+  \BuildCible{\the\toklisteciblea}{\the\toklistecibleb}%
+}%
+
+\NewDocumentCommand\BuildCible{mm}{%
+  \ifluatex%
+    \mplibforcehmode%
+    \begin{mplibcode}
+      Rayon=\useKV[Cible]{RayonBase};
+      Ecart=\useKV[Cible]{Ecart};
+      boolean Flechettes,Impression,Tir,Unique;
+      Flechettes=\useKV[Cible]{Flechettes};
+      Impression=\useKV[Cible]{Impression};
+      Tir=\useKV[Cible]{Tir};
+      Unique=\useKV[Cible]{Unique};
+      NombreCercles=\PfCNombreZone;
+      
+      vardef affichage(text t)=
+      pair O;
+      O=u*(5,5);
+      for k=NombreCercles downto 1:
+      if (k mod 2)=0:
+      fill cercles(O,Rayon+(k-1)*Ecart) withcolor 0.7white;
+      else:
+      fill cercles(O,Rayon+(k-1)*Ecart) withcolor white;
+      fi;
+      endfor;
+      for k=1 upto NombreCercles:
+      trace cercles(O,Rayon+(k-1)*Ecart);
+      endfor;
+      n:=0;
+      for p_=t:
+      n:=n+1;
+      if n=NombreCercles:
+      label(TEX(p_),O);
+      else:
+      label(TEX(p_),O+Rayon*(0,1)+(NombreCercles-0.5-n)*(0,Ecart));
+      if Unique=false:
+      label(TEX(p_),O-Rayon*(0,1)-(NombreCercles-0.5-n)*(0,Ecart));
+      fi;
+      fi;
+      endfor;
+      enddef;
+
+      vardef affichageflechettes=
+      pair O;
+      O=u*(5,5);
+      RayonBase=\useKV[Cible]{RayonF};
+      RayonA=(170/(0.5*451))*RayonBase;
+      RayonI=0.5*(RayonBase+RayonA);
+      RayonAa=(162/(0.5*451))*RayonBase;
+      RayonB=(107/(0.5*451))*RayonBase;
+      RayonBb=(99/(0.5*451))*RayonBase;
+      RayonC=(32/(0.5*451))*RayonBase;
+      RayonD=(12.7/(0.5*451))*RayonBase;
+      path cbase,ca,caa,cb,cbb,cc,cd;
+      cbase=cercles(O,RayonBase);
+      ca=cercles(O,RayonA);
+      caa=cercles(O,RayonAa);
+      cb=cercles(O,RayonB);
+      cbb=cercles(O,RayonBb);
+      cc=cercles(O,RayonC);
+      cd=cercles(O,RayonD);
+      fill cbase;
+      pair A[],Aa[],B[],Bb[],C[],D[],E[];
+      for k=1 upto 21:
+      A[k]=pointarc(ca,9+(k-1)*18);
+      Aa[k]=pointarc(caa,9+(k-1)*18);
+      B[k]=pointarc(cb,9+(k-1)*18);
+      Bb[k]=pointarc(cbb,9+(k-1)*18);
+      C[k]=pointarc(cc,9+(k-1)*18);
+      D[k]=pointarc(cd,9+(k-1)*18);
+      E[k]=pointarc(cercles(O,RayonI),(k-1)*18);
+      endfor;
+      for k=2 step 2 until 20:
+      fill O--A[k]--arccercle(A[k],A[k+1],O)--cycle withcolor white;
+      endfor;
+      for k=1 upto 20:
+      if (k mod 2)=1:
+      fill Aa[k]--A[k]--arccercle(A[k],A[k+1],O)--reverse(arccercle(Aa[k],Aa[k+1],O))--cycle withcolor if Impression:0.4white else: Crimson fi;
+      fill Bb[k]--B[k]--arccercle(B[k],B[k+1],O)--reverse(arccercle(Bb[k],Bb[k+1],O))--cycle withcolor if Impression:0.4white else: Crimson fi;
+      else:
+      fill Aa[k]--A[k]--arccercle(A[k],A[k+1],O)--reverse(arccercle(Aa[k],Aa[k+1],O))--cycle withcolor if Impression:0.8white else: LightGreen fi;
+      fill Bb[k]--B[k]--arccercle(B[k],B[k+1],O)--reverse(arccercle(Bb[k],Bb[k+1],O))--cycle withcolor if Impression:0.8white else: LightGreen fi;
+      fi;
+      endfor;
+      fill cc withcolor if Impression:0.8white else: LightGreen fi;
+      fill cd withcolor if Impression:0.4white else: Crimson fi;
+      trace ca withcolor white;
+      trace caa withcolor white;
+      trace cb withcolor white;
+      trace cbb withcolor white;
+      trace cc withcolor white;
+      trace cd withcolor white;
+      enddef;
+
+      vardef affichagetexteflechettes(text t)=
+      drawoptions(withcolor white);
+      n:=0;
+      for p_=t:
+      n:=n+1;
+      label(TEX("\bfseries "&p_),E[n]);
+      endfor;
+      enddef;
+
+      vardef affichagetir(text t)=
+      numeric numerozone[];
+      numeric nbtirszone[];
+      n:=0;
+      for p_=t:
+      n:=n+1;
+      if (n mod 2)=1:
+      nbtirszone[(n div 2)+1]=p_;
+      else:
+      numerozone[(n div 2)]=p_;
+      fi;
+      endfor;
+      n:=n div 2;
+      for k=1 upto n:
+      for l=1 upto nbtirszone[k]:
+      if numerozone[k]=1:
+      fill rotation((fullcircle scaled 1mm) shifted (O+(0.6+uniformdeviate(0.2))*(Rayon,0)),O,l*25+(-5+uniformdeviate(10)));
+      else:
+      fill rotation((fullcircle scaled 1mm) shifted (O+Rayon*(1,0)+(0.6+uniformdeviate(0.2))*((numerozone[k]-1)*Ecart,0)),O,l*50+(-5+uniformdeviate(10)));
+      fi;
+      endfor;
+      endfor;
+      enddef;
+      
+      if Flechettes:
+      affichageflechettes;
+      affichagetexteflechettes("6","13","4","18","1","20","5","12","9","14","11","8","16","7","19","3","17","2","15","10");
+      else:
+      affichage(#1);
+      if Tir:
+      affichagetir(#2);
+      fi;
+      fi;
+    \end{mplibcode}
+  \else%
+    \begin{mpost}[mpsettings={Rayon=\useKV[Cible]{RayonBase};Ecart=\useKV[Cible]{Ecart};boolean Flechettes,Impression;Flechettes=\useKV[Cible]{Flechettes};Impression=\useKV[Cible]{Impression};NombreCercles=\PfCNombreZone;}]
+      vardef affichage(text t)=
+      pair O;
+      O=u*(5,5);
+      for k=NombreCercles downto 1:
+      if (k mod 2)=0:
+      fill cercles(O,Rayon+(k-1)*Ecart) withcolor 0.7white;
+      else:
+      fill cercles(O,Rayon+(k-1)*Ecart) withcolor white;
+      fi;
+      endfor;
+      for k=1 upto NombreCercles:
+      trace cercles(O,Rayon+(k-1)*Ecart);
+      endfor;
+      n:=0;
+      for p_=t:
+      n:=n+1;
+      if n=NombreCercles:
+      label(LATEX(p_),O);
+      else:
+      label(LATEX(p_),O+(NombreCercles+0.5-n)*(0,Ecart));
+      label(LATEX(p_),O-(NombreCercles+0.5-n)*(0,Ecart));
+      fi;
+      endfor;
+      enddef;
+
+      vardef affichageflechettes=
+      pair O;
+      O=u*(5,5);
+      RayonBase=\useKV[Cible]{RayonF};
+      RayonA=(170/(0.5*451))*RayonBase;
+      RayonI=0.5*(RayonBase+RayonA);
+      RayonAa=(162/(0.5*451))*RayonBase;
+      RayonB=(107/(0.5*451))*RayonBase;
+      RayonBb=(99/(0.5*451))*RayonBase;
+      RayonC=(32/(0.5*451))*RayonBase;
+      RayonD=(12.7/(0.5*451))*RayonBase;
+      path cbase,ca,caa,cb,cbb,cc,cd;
+      cbase=cercles(O,RayonBase);
+      ca=cercles(O,RayonA);
+      caa=cercles(O,RayonAa);
+      cb=cercles(O,RayonB);
+      cbb=cercles(O,RayonBb);
+      cc=cercles(O,RayonC);
+      cd=cercles(O,RayonD);
+      fill cbase;
+      pair A[],Aa[],B[],Bb[],C[],D[],E[];
+      for k=1 upto 21:
+      A[k]=pointarc(ca,9+(k-1)*18);
+      Aa[k]=pointarc(caa,9+(k-1)*18);
+      B[k]=pointarc(cb,9+(k-1)*18);
+      Bb[k]=pointarc(cbb,9+(k-1)*18);
+      C[k]=pointarc(cc,9+(k-1)*18);
+      D[k]=pointarc(cd,9+(k-1)*18);
+      E[k]=pointarc(cercles(O,RayonI),(k-1)*18);
+      endfor;
+      for k=2 step 2 until 20:
+      fill O--A[k]--arccercle(A[k],A[k+1],O)--cycle withcolor white;
+      endfor;
+      for k=1 upto 20:
+      if (k mod 2)=1:
+      fill Aa[k]--A[k]--arccercle(A[k],A[k+1],O)--reverse(arccercle(Aa[k],Aa[k+1],O))--cycle withcolor if Impression:0.4white else: Crimson fi;
+      fill Bb[k]--B[k]--arccercle(B[k],B[k+1],O)--reverse(arccercle(Bb[k],Bb[k+1],O))--cycle withcolor if Impression:0.4white else: Crimson fi;
+      else:
+      fill Aa[k]--A[k]--arccercle(A[k],A[k+1],O)--reverse(arccercle(Aa[k],Aa[k+1],O))--cycle withcolor if Impression:0.8white else: LightGreen fi;
+      fill Bb[k]--B[k]--arccercle(B[k],B[k+1],O)--reverse(arccercle(Bb[k],Bb[k+1],O))--cycle withcolor if Impression:0.8white else: LightGreen fi;
+      fi;
+      endfor;
+      fill cc withcolor if Impression:0.8white else: LightGreen fi;
+      fill cd withcolor if Impression:0.4white else: Crimson fi;
+      trace ca withcolor white;
+      trace caa withcolor white;
+      trace cb withcolor white;
+      trace cbb withcolor white;
+      trace cc withcolor white;
+      trace cd withcolor white;
+      enddef;
+
+      vardef affichagetexteflechettes(text t)=
+      drawoptions(withcolor white);
+      n:=0;
+      for p_=t:
+      n:=n+1;
+      % label(LATEX("\noexpand\bfseries "&p_),E[n]);
+      label(LATEX(p_),E[n]);
+      endfor;
+      enddef;
+      
+      if Flechettes:
+      affichageflechettes;
+      affichagetexteflechettes("6","13","4","18","1","20","5","12","9","14","11","8","16","7","19","3","17","2","15","10");
+      else:
+      affichage(#1);
+      fi;
+    \end{mpost}
+  \fi%
+}%

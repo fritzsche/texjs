@@ -1,0 +1,57 @@
+%%%
+% Systèmes images
+%%%
+\def\filedateSystemeImage{2025/07/27}%
+\def\fileversionSystemeImage{0.1}%
+\message{-- \filedateSystemeImage\space v\fileversionSystemeImage}%
+%
+\setKVdefault[SystemeImage]{Images={A,B,C},Solutions=false,Solution={},Inconnues={A,B,C}}
+
+\makeatletter
+\NewDocumentCommand\SystemeImage{om}{%
+  \useKVdefault[SystemeImage]%
+  \setKV[SystemeImage]{#1}%
+  \ifemptyKV[SystemeImage]{Solution}{}{\setKV[SystemeImage]{Solutions}}%
+  \edef\PfM@PrepaImages{\useKV[SystemeImage]{Images}}%
+  \edef\PfM@PrepaInconnues{\useKV[SystemeImage]{Inconnues}}%
+  \setsepchar{,}\ignoreemptyitems%
+  \readlist*\PfM@ListeImages{\PfM@PrepaImages}%
+  \readlist*\PfM@ListeInconnues{\PfM@PrepaInconnues}%
+  \setsepchar{§}\ignoreemptyitems%
+  \readlist*\PfM@ListeEqua{#2}%
+  \reademptyitems%
+%  Equa : $\showitems\PfM@ListeEqua[]$\par
+%  Inconnues : \showitems\PfM@ListeInconnues[]\par
+%  Images : \showitems\PfM@ListeImages[]\par
+  \ifboolKV[SystemeImage]{Solutions}{%
+    \edef\PfM@PrepaSolutions{\useKV[SystemeImage]{Solution}}%
+    \setsepchar{,}\ignoreemptyitems%
+    \readlist*\PfM@ListeSolutions{\PfM@PrepaSolutions}%
+    \reademptyitems%
+    \begin{align*}
+      \xintFor* ##1 in{\xintSeq{1}{\PfM@ListeEqualen}}\do{%
+      &\edef\PfM@Test{\PfM@ListeEqua[##1]}%
+        \xintFor* ##2 in{\xintSeq{1}{\PfM@ListeImageslen}}\do{%
+        \expandarg%
+        \edef\PfM@Titi{\PfM@ListeInconnues[##2]}%
+        \StrSubstitute{\PfM@Test}{\PfM@Titi}{\mathcolor{Evidence}{\PfM@ListeSolutions[##2]}}[\PfM@Test]%
+        }%
+        \PfM@Test\xintifboolexpr{##1==\PfM@ListeEqualen}{}{\\}
+      }%
+    \end{align*}
+  }{%
+    \begin{align*}
+      \xintFor* ##1 in{\xintSeq{1}{\PfM@ListeEqualen}}\do{%
+      &\edef\PfM@Test{\PfM@ListeEqua[##1]}%
+        \xintFor* ##2 in{\xintSeq{1}{\PfM@ListeImageslen}}\do{%
+        \expandarg%
+        \edef\PfM@Titi{\PfM@ListeInconnues[##2]}%
+        %
+        \StrSubstitute{\PfM@Test}{\PfM@Titi}{\raisebox{-0.25\height}{\text{\PfM@ListeImages[##2]}}}[\PfM@Test]%
+        }\PfM@Test\xintifboolexpr{##1==\PfM@ListeEqualen}{}{\\}
+      }%
+    \end{align*}
+  }%
+}%
+\makeatother
+%
