@@ -210,11 +210,10 @@ build_native() {
 build_emscripten_final() {
     cd ${EMSCRIPTEN_WEB2C_PATH%}   
     rm pdftex
-
+#   -s KEEP_RUNTIME_METHODS=['FS','FS_createDataFile']
     TEXFS_LIB_PATH=${SCRIPT_PATH}
-
     emmake make pdftex CC=emcc CXX=emcc \
-    CXXFLAGS="-O3 -s EXPORTED_RUNTIME_METHODS='[\"FS\",\"ENV\",\"callMain\",\"TEXFS\"]' -s MODULARIZE=1 -s EXPORT_ES6=1 -s ALLOW_MEMORY_GROWTH -s INVOKE_RUN=0 -s MAXIMUM_MEMORY=2GB --js-library ${TEXFS_LIB_PATH}/library_texfs.js" \
+    CXXFLAGS="--closure 0  -s FORCE_FILESYSTEM=1 -Oz  -s EXPORTED_RUNTIME_METHODS='[\"FS\",\"ENV\",\"callMain\",\"TEXFS\"]' -s MODULARIZE=1 -s EXPORT_ES6=1 -s ALLOW_MEMORY_GROWTH -s INVOKE_RUN=0 -s MAXIMUM_MEMORY=2GB --js-library ${TEXFS_LIB_PATH}/library_texfs.js" \
     -o tangle -o tie -o web2c -o pdftex-pool.c
     cp pdftex ${SCRIPT_PATH%}/pdftex.js
     cp pdftex.wasm ${SCRIPT_PATH%}

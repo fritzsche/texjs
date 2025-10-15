@@ -1,3 +1,42 @@
+/* const dropZone = document.getElementById('dropZone');
+
+// 1. Prevent default behavior for 'dragover' and 'dragleave'
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    }, false);
+});
+
+// Optional: Add visual feedback
+dropZone.addEventListener('dragenter', () => dropZone.style.backgroundColor = '#f0f0f0');
+dropZone.addEventListener('dragleave', () => dropZone.style.backgroundColor = 'white');
+
+
+// 2. Handle the 'drop' event
+dropZone.addEventListener('drop', (e) => {
+    dropZone.style.backgroundColor = 'white'; // Reset background
+
+    // The files are in the dataTransfer object
+    const files = e.dataTransfer.files;
+
+    for (const file of files) {
+        console.log(`Dropped File: ${file.name}`);
+        // Now use the FileReader, just like with the <input type="file">
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            // Process file data (e.g., read ArrayBuffer for a ZIP)
+        };
+        reader.readAsArrayBuffer(file);
+        console.log("File: ",file.name)
+    }
+});
+
+
+*/
+
+
+
 
 const appendText = (element, text) => {
   const newDIV = document.createElement('div')
