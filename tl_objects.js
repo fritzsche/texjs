@@ -8,6 +8,15 @@ const SOURCE_DIR = './texlive'
 const TARGET_DIR = './objects' // Target directory for custom objects
 // ---------------------
 
+// ======================================================================
+// 1. Constant Definition for Size Limit
+// Define the maximum allowed size for any generated object file/blob.
+// Value is 30 MB, converted into bytes (30 * 1024 * 1024).
+// ======================================================================
+const MAX_BLOB_SIZE_MB = 30;
+const MAX_BLOB_SIZE_BYTES = MAX_BLOB_SIZE_MB * 1024 * 1024;
+
+
 /**
  * Writes a buffer as an uncompressed file to the target directory.
  * The file name is the SHA-1 hash of the content.
@@ -15,6 +24,15 @@ const TARGET_DIR = './objects' // Target directory for custom objects
  * @returns {Promise<string>} - The 40-character SHA-1 hash of the content.
  */
 async function writeObject(content) {
+    const contentSize = content.length;
+
+    // --- Core Size Check (New Logic) ---
+    if (contentSize > MAX_BLOB_SIZE_BYTES) {
+        const sizeMB = (contentSize / (1024 * 1024)).toFixed(2);
+        const limitMB = MAX_BLOB_SIZE_MB;
+        throw new Error(`FATAL: Blob size (${sizeMB} MB) exceeds the maximum allowed limit of ${limitMB} MB. Object write aborted.`);
+    }
+
     // 1. Calculate SHA-1 Hash (Hash is based on the content)
     const hash = crypto.createHash('sha1').update(content).digest('hex')
 
@@ -60,6 +78,7 @@ async function processBlob(filePath) {
     const stat = await fs.stat(filePath)
 
     // 1. Write Blob data (data is the pure file content)
+    // This is where the size limit check now happens inside writeObject.
     const hash = await writeObject(data)
 
     // ADDED: Output message for each blob generated
@@ -148,7 +167,10 @@ async function main() {
 
     } catch (error) {
         console.error('\nERROR DURING PROCESSING:', error.message)
-        console.error('Ensure that the source directory (./texlive) exists and contains data.')
+        // If the error message is our custom one, it's a blob size issue, otherwise it's file access.
+        if (!error.message.includes('Blob size')) {
+            console.error('Ensure that the source directory (./texlive) exists and contains data.')
+        }
     }
 }
 
